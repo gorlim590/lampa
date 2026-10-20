@@ -7,6 +7,7 @@
  *    приховані перлини, топ непереглянутого, свіжі та варті уваги
  *  - синхронізація переглянутих фільмів з Trakt у Вибране -> "Переглянуті" (ліміт 2500)
  *  - позначка на картках: затемнення + зелена риска + бейдж "Trakt"
+ *  - рядки "Зараз дивляться": фільми / серіали / мультфільми / аніме (trending + popular)
  *
  * Код навмисно написаний у ES5 (без async/arrow), щоб працювало на старих Smart TV.
  */
@@ -19,7 +20,8 @@
   // ───────────── НАЛАШТУВАННЯ (можна міняти тут) ─────────────
   var MAX_WATCHED = 2500;          // максимум фільмів, що кладуться у Вибране
   var AUTO_SYNC_HOURS = 12;        // як часто авто-синхронізувати
-  var WATCHED_CACHE_HOURS = 6;     // як довго тримати список переглянутих для фільтрів
+  var WATCHED_CACHE_HOURS = 24;    // максимальний вік кешу переглянутих (навіть якщо Trakt не повідомив про зміни)
+  var WATCH_RECHECK_SEC = 90;      // як часто (не частіше) питати Trakt, чи змінились переглянуті (/sync/last_activities)
   var ROW_CACHE_MIN = 10;          // кеш рядків у хвилинах
   var DEFAULT_EXCLUDE = 'reality,talk-show,news,game-show,soap,sporting-event,special-interest';
   var MARK_TYPES = ['look', 'viewed', 'scheduled', 'continued', 'thrown'];
@@ -31,10 +33,28 @@
     { slug: 'science-fiction', uk: 'Фантастика', en: 'Sci-Fi', minRating: 6.8, minVotes: 1000, index: 9 }
   ];
 
+  // Рядки "Зараз дивляться" (Trakt trending + добір з popular). Окремо для кожної категорії.
+  // Мультфільми = жанр animation без anime. Аніме = жанр anime (фільми + серіали).
+  var TREND_ROWS = [
+    { key: 'movies', uk: 'Зараз дивляться: фільми', en: 'Watching now: movies', index: 1,
+      loads: [{ p: '/movies', hint: 'movie' }], skip: ['animation', 'anime'] },
+    { key: 'shows', uk: 'Зараз дивляться: серіали', en: 'Watching now: TV shows', index: 2,
+      loads: [{ p: '/shows', hint: 'show' }], skip: ['animation', 'anime'] },
+    { key: 'cartoons', uk: 'Зараз дивляться: мультфільми', en: 'Watching now: cartoons', index: 3,
+      loads: [{ p: '/movies', hint: 'movie', genre: 'animation' }, { p: '/shows', hint: 'show', genre: 'animation' }],
+      genre: 'animation', skip: ['anime'] },
+    { key: 'anime', uk: 'Зараз дивляться: аніме', en: 'Watching now: anime', index: 4,
+      loads: [{ p: '/movies', hint: 'movie', genre: 'anime' }, { p: '/shows', hint: 'show', genre: 'anime' }],
+      genre: 'anime', skip: [] }
+  ];
+
   var api = null;
   var watchedMovies = {};
   var watchedShows = {};
   var watchedPromise = null;
+  var watchedStamp = '';
+  var hydrated = false;
+  var lastCheck = 0;
   var ROWS = {};
   var syncing = false;
 
@@ -63,6 +83,7 @@
       hideWatched: bool('trakt_plus_hide_watched', true),
       mark: bool('trakt_plus_mark', true),
       autosync: bool('trakt_plus_autosync', true),
+      trendHide: bool('trakt_plus_trend_hide_watched', false),
       minRating: parseFloat(field('trakt_plus_min_rating', '6.5')) || 0,
       minVotes: parseInt(field('trakt_plus_min_votes', '500'), 10) || 0,
       recType: String(field('trakt_plus_rec_type', 'movies')),
@@ -118,6 +139,7 @@
       card_type: isShow ? 'tv' : 'movie',
       type: isShow ? 'tv' : 'movie',
       _votes: Number(m.votes || 0),
+      _watchers: Number(entry.watchers || 0),
       _genres: Array.isArray(m.genres) ? m.genres : [],
       _year: Number(m.year || 0)
     };
@@ -173,30 +195,58 @@
   function persistWatched() {
     try {
       Lampa.Storage.set('trakt_plus_watched_cache', {
-        t: Date.now(), m: Object.keys(watchedMovies), s: Object.keys(watchedShows)
+        t: Date.now(), stamp: watchedStamp, m: Object.keys(watchedMovies), s: Object.keys(watchedShows)
       });
     } catch (e) {}
   }
 
-  function loadWatched(force) {
-    if (watchedPromise && !force) return watchedPromise;
-    var cached = Lampa.Storage.get('trakt_plus_watched_cache');
-    if (cached && cached.t) {
-      watchedMovies = arrToSet(cached.m);
-      watchedShows = arrToSet(cached.s);
+  // підтягуємо збережений кеш (позначки одразу є після запуску, ще до запитів у Trakt)
+  function hydrateWatched() {
+    if (hydrated) return;
+    hydrated = true;
+    var c = Lampa.Storage.get('trakt_plus_watched_cache');
+    if (c && c.t) {
+      watchedMovies = arrToSet(c.m);
+      watchedShows = arrToSet(c.s);
+      watchedStamp = c.stamp || '';
     }
-    var fresh = cached && cached.t && (Date.now() - cached.t) < WATCHED_CACHE_HOURS * 3600000;
-    if (!force && fresh) { watchedPromise = Promise.resolve(); return watchedPromise; }
-    if (!token()) return Promise.resolve();
-    watchedPromise = Promise.all([
-      api.get('/sync/watched/movies').catch(function () { return null; }),
-      api.get('/sync/watched/shows?extended=noseasons').catch(function () { return null; })
-    ]).then(function (r) {
-      if (Array.isArray(r[0])) watchedMovies = collectIds(r[0], 'movie');
-      if (Array.isArray(r[1])) watchedShows = collectIds(r[1], 'show');
-      if (Array.isArray(r[0]) || Array.isArray(r[1])) persistWatched();
-      else watchedPromise = null; // спробуємо ще раз наступного разу
-    });
+  }
+
+  function activityStamp(a) {
+    if (!a) return null;
+    return String((a.movies && a.movies.watched_at) || '') + '|' + String((a.episodes && a.episodes.watched_at) || '');
+  }
+
+  // Кеш позначок: якщо фільм є в кеші — позначка стоїть одразу.
+  // Щоб бути певними, що кеш збігається з Trakt, дешево питаємо /sync/last_activities:
+  // змінилось — перезавантажуємо весь список переглянутих (додані І видалені фільми).
+  function refreshWatched(force) {
+    var cached = Lampa.Storage.get('trakt_plus_watched_cache') || {};
+    var tooOld = !cached.t || (Date.now() - cached.t) > WATCHED_CACHE_HOURS * 3600000;
+    return api.get('/sync/last_activities').then(function (a) { return activityStamp(a); }, function () { return null; })
+      .then(function (stamp) {
+        var same = stamp !== null && stamp === (cached.stamp || '');
+        if (!force && !tooOld && (same || stamp === null)) return false; // кеш актуальний
+        return Promise.all([
+          api.get('/sync/watched/movies').catch(function () { return null; }),
+          api.get('/sync/watched/shows?extended=noseasons').catch(function () { return null; })
+        ]).then(function (r) {
+          var ok = false;
+          if (Array.isArray(r[0])) { watchedMovies = collectIds(r[0], 'movie'); ok = true; }
+          if (Array.isArray(r[1])) { watchedShows = collectIds(r[1], 'show'); ok = true; }
+          if (ok) { if (stamp !== null) watchedStamp = stamp; persistWatched(); }
+          return ok;
+        });
+      });
+  }
+
+  function loadWatched(force) {
+    hydrateWatched();
+    if (!token()) return Promise.resolve(false);
+    var now = Date.now();
+    if (!force && watchedPromise && (now - lastCheck) < WATCH_RECHECK_SEC * 1000) return watchedPromise;
+    lastCheck = now;
+    watchedPromise = refreshWatched(force).catch(function () { return false; });
     return watchedPromise;
   }
 
@@ -208,7 +258,11 @@
   function passes(c, o) {
     o = o || {};
     var g = cfg();
-    if (g.hideWatched && isWatched(c)) return false;
+    var hide = o.hideWatched != null ? o.hideWatched : g.hideWatched;
+    if (hide && isWatched(c)) return false;
+    if (o.notGenres) {
+      for (var n = 0; n < o.notGenres.length; n++) if (c._genres.indexOf(o.notGenres[n]) > -1) return false;
+    }
     var minR = o.minRating != null ? o.minRating : g.minRating;
     var minV = o.minVotes != null ? o.minVotes : g.minVotes;
     if (c.vote_average < minR) return false;
@@ -401,8 +455,44 @@
     });
   }
 
+  function trendingLoader(t) {
+    return function () {
+      var jobs = [];
+      t.loads.forEach(function (l) {
+        var ex = l.genre ? { genres: l.genre } : {};
+        jobs.push(fetchCards([feed(l.p + '/trending', ex)], l.hint));
+        jobs.push(fetchCards([feed(l.p + '/popular', ex)], l.hint));
+      });
+      return Promise.all([loadWatched(), Promise.all(jobs)]).then(function (r) {
+        var trend = [], pop = [];
+        r[1].forEach(function (a, i) { if (i % 2 === 0) trend = trend.concat(a); else pop = pop.concat(a); });
+        trend.sort(function (a, b) { return b._watchers - a._watchers; });   // найбільше глядачів зараз — зверху
+        pop.sort(function (a, b) { return b._votes - a._votes; });           // далі — просто популярне
+        var seen = {}, cards = [];
+        var hide = cfg().trendHide;
+        trend.concat(pop).forEach(function (c) {
+          var key = c.method + c.id;
+          if (seen[key]) return;
+          if (!passes(c, { minRating: 0, minVotes: 0, hideWatched: hide, genre: t.genre, notGenres: t.skip })) return;
+          seen[key] = 1;
+          cards.push(c);
+        });
+        return { cards: cards, title: tr(t.uk, t.en) };
+      });
+    };
+  }
+
   function registerRows() {
     if (!Lampa.ContentRows || typeof Lampa.ContentRows.add !== 'function') return;
+
+    TREND_ROWS.forEach(function (t) {
+      registerRow({
+        name: 'TraktPlusTrend_' + t.key,
+        settingsTitle: 'TraktTV+: ' + tr(t.uk, t.en),
+        index: t.index,
+        load: trendingLoader(t)
+      });
+    });
 
     GENRE_ROWS.forEach(function (g) {
       registerRow({
@@ -586,15 +676,21 @@
 
   function decorate(node, data) {
     if (!node || !node.classList || !data) return;
-    if (!cfg().mark) return;
-    if (!isMovieData(data) || !data.id || !watchedMovies[data.id]) return;
-    node.classList.add('trakt-plus-watched');
+    var on = !!(cfg().mark && isMovieData(data) && data.id && watchedMovies[data.id]);
     var view = node.querySelector ? node.querySelector('.card__view') : null;
-    if (view && !view.querySelector('.trakt-plus-badge')) {
-      var b = document.createElement('div');
-      b.className = 'trakt-plus-badge';
-      b.textContent = '\u2713 Trakt';
-      view.appendChild(b);
+    if (on) {
+      node.classList.add('trakt-plus-watched');
+      if (view && !view.querySelector('.trakt-plus-badge')) {
+        var b = document.createElement('div');
+        b.className = 'trakt-plus-badge';
+        b.textContent = '\u2713 Trakt';
+        view.appendChild(b);
+      }
+    } else if (node.classList.contains('trakt-plus-watched')) {
+      // фільм більше не в переглянутих на Trakt (або позначки вимкнені) — знімаємо мітку
+      node.classList.remove('trakt-plus-watched');
+      var old = view ? view.querySelector('.trakt-plus-badge') : null;
+      if (old && old.parentNode) old.parentNode.removeChild(old);
     }
   }
 
@@ -623,7 +719,11 @@
     try {
       new MutationObserver(function () {
         clearTimeout(timer);
-        timer = setTimeout(decorateAll, 300);
+        timer = setTimeout(function () {
+          decorateAll();
+          // звірка з Trakt (не частіше ніж раз на WATCH_RECHECK_SEC); якщо список змінився — оновлюємо позначки
+          loadWatched().then(function (changed) { if (changed) decorateAll(); });
+        }, 300);
       }).observe(document.body, { childList: true, subtree: true });
     } catch (e) {}
   }
@@ -671,9 +771,12 @@
       values: { '0': tr('Без фільтра', 'No filter'), '100': '100', '500': '500', '1000': '1000', '3000': '3000' } },
       tr('Мінімум голосів', 'Minimum votes'),
       tr('Відсікає маловідомі фільми з випадковим рейтингом', 'Cuts obscure titles with unreliable ratings'));
-    add({ name: 'trakt_plus_exclude_genres', type: 'input', 'default': DEFAULT_EXCLUDE, placeholder: DEFAULT_EXCLUDE },
+    add({ name: 'trakt_plus_exclude_genres', type: 'input', values: '', 'default': DEFAULT_EXCLUDE, placeholder: DEFAULT_EXCLUDE },
       tr('Виключені жанри (slug через кому)', 'Excluded genres (comma-separated slugs)'),
       'reality, talk-show, news, game-show, soap, ...');
+    add({ name: 'trakt_plus_trend_hide_watched', type: 'trigger', 'default': false },
+      tr('Ховати переглянуте у "Зараз дивляться"', 'Hide watched in "Watching now"'),
+      tr('Вимкнено: переглянуті лишаються, але з позначкою Trakt', 'Off: watched items stay, marked with Trakt badge'));
     add({ name: 'trakt_plus_mark', type: 'trigger', 'default': true },
       tr('Позначати переглянуті з Trakt', 'Mark Trakt-watched cards'),
       tr('Затемнення + зелена риска + бейдж Trakt', 'Dimmed + green line + Trakt badge'));
@@ -690,8 +793,13 @@
       function () {
         Lampa.Storage.set('trakt_plus_watched_cache', null);
         watchedPromise = null;
+        watchedMovies = {};
+        watchedShows = {};
+        watchedStamp = '';
+        lastCheck = 0;
         recCache = { t: 0, key: '', list: null };
         Object.keys(ROWS).forEach(function (k) { ROWS[k]._c = null; });
+        loadWatched(true).then(decorateAll);
         notify(tr('Кеш скинуто', 'Cache cleared'));
       });
   }
@@ -705,13 +813,14 @@
       if (tries < 60) setTimeout(boot, 500);
       return;
     }
+    try { hydrateWatched(); } catch (e) {}
     try { injectStyle(); } catch (e) {}
     try { initSettings(); } catch (e) {}
     try { patchRecommendations(); } catch (e) {}
     try { registerView(); } catch (e) {}
     try { registerRows(); } catch (e) {}
     try { hookDecorations(); } catch (e) {}
-    loadWatched().then(decorateAll);
+    loadWatched().then(function () { decorateAll(); });
     scheduleAutoSync();
   }
 
