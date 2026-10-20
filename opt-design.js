@@ -2,7 +2,7 @@
  * YDesign (оптимізована збірка для ТВ-приставок)
  * Оригінальний плагін: yarikrazor-star/lmp (ydes.js). Це змінена копія для особистого використання.
  *
- * Що змінено:
+ * Що змінено (v2: додано необов'язкову перевірку UA через парсер торентів, виправлено кеш «немає UA»):
  *  - режим продуктивності (Авто / Економний / Повні ефекти): на ТВ без blur та важких фільтрів;
  *  - черга мережевих запитів (макс. 4 одночасно, найновіші картки першими);
  *  - один запис кешу замість сотень ключів у localStorage, з відкладеним збереженням;
@@ -69,6 +69,7 @@
         ydesign_card_gap: '0.8',
         ydesign_lazy_load: false,
         ydesign_perf_mode: 'auto',
+        ydesign_ua_torrents: false,
 
         ydesign_badge_shape: 'pill',
         ydesign_glass_pill_bg: true,
@@ -953,29 +954,125 @@
         return '16+';
     }
 
+    var UA_NEG_TTL = 12 * 60 * 60 * 1000; // «немає UA» перевіряємо знову через 12 годин (раніше — 7 діб)
+
     function checkUaVoiceover(tmdbId, type) {
         return new Promise(function (resolve) {
             var cacheKey = 'ua_' + tmdbId;
             var cached = ApiCache.get(cacheKey);
-            if (cached !== null) return resolve(cached);
+            if (cached === true) return resolve(true);
+            if (cached && typeof cached === 'object' && cached.n && (Date.now() - cached.n < UA_NEG_TTL)) return resolve(false);
 
             var isSerial = (type === 'tv' || type === 'tv_series') ? 1 : 0;
             var url = 'https://wh.lme.isroot.in/?tmdb_id=' + encodeURIComponent(tmdbId) + '&serial=' + isSerial + '&silent=true';
 
             qajax({
                 url: url,
-                timeout: 3500,
+                timeout: 5000,
                 success: function (r) {
                     var hasUa = (r === true || (r && (r.success === true || r.status === 'success' || r.ok === true || (typeof r === 'object' && Object.keys(r).length > 0 && !r.error))));
-                    ApiCache.set(cacheKey, hasUa);
+                    ApiCache.set(cacheKey, hasUa ? true : { n: Date.now() });
                     resolve(hasUa);
                 },
                 error: function () {
-                    ApiCache.set(cacheKey, false);
+                    // збій мережі/таймаут не кешуємо — інакше плашка не з'являлась би тиждень
                     resolve(false);
                 }
             });
         });
+    }
+
+    // =========================================================================
+    // 6.2. ДОДАТКОВА ПЕРЕВІРКА UA ЧЕРЕЗ ПАРСЕР ТОРЕНТІВ (Jackett / Prowlarr / JacRed → Толока тощо)
+    // Працює лише якщо в Lampa налаштований парсер; запускається, коли картка потрапила у фокус.
+    // =========================================================================
+    var UA_TORR_POS_TTL = 7 * 24 * 60 * 60 * 1000;
+    var UA_TORR_NEG_TTL = 24 * 60 * 60 * 1000;
+    var TorrentUaChain = Promise.resolve();
+
+    function torrentUaEnabled() {
+        try {
+            if (!getSet('ydesign_ua_torrents')) return false;
+            if (!window.Lampa || !Lampa.Parser || typeof Lampa.Parser.get !== 'function' || !Lampa.Storage) return false;
+            if (typeof Lampa.Storage.field !== 'function' || !Lampa.Storage.field('parser_use')) return false;
+            var t = Lampa.Storage.field('parser_torrent_type');
+            if (t === 'jackett') return !!(Lampa.Storage.field('jackett_url') || Lampa.Storage.field('jackett_url_two'));
+            if (t === 'prowlarr') return !!(Lampa.Storage.field('prowlarr_url') || Lampa.Storage.field('prowlarr_url_two'));
+            return false;
+        } catch (e) { return false; }
+    }
+
+    function torrentUaCached(tmdbId, type) {
+        var rec = ApiCache.get('uat_' + type + '_' + tmdbId);
+        if (!rec || typeof rec !== 'object' || !rec.t) return null;
+        var age = Date.now() - rec.t;
+        if (rec.r && age < UA_TORR_POS_TTL) return true;
+        if (!rec.r && age < UA_TORR_NEG_TTL) return false;
+        return null;
+    }
+
+    function normTitle(s) {
+        return String(s || '').toLowerCase().replace(/ё/g, 'е').replace(/[^a-z0-9а-яіїєґ]+/g, '');
+    }
+
+    // Чи є в назві релізу українська озвучка (а не лише субтитри)
+    function titleHasUaVoice(title) {
+        var t = String(title || '');
+        t = t.replace(/(?:sub(?:s|titles)?|субтитр[а-яі]*|суб)\s*[:=\-]?\s*[^\]\)\|]*/ig, ' ');
+        return /(?:^|[^a-z])(?:ukr|ua)(?:[^a-z]|$)|укр|ukrainian/i.test(t);
+    }
+
+    function runTorrentUaCheck(data, type) {
+        return new Promise(function (resolve) {
+            var isTv = (type === 'tv' || type === 'tv_series');
+            var orig = data.original_title || data.original_name || data.title || data.name || '';
+            var local = data.title || data.name || orig;
+            var year = parseInt(String(data.release_date || data.first_air_date || '').slice(0, 4), 10) || 0;
+            var movie = {
+                id: data.id, title: local, original_title: orig, genres: [],
+                release_date: data.release_date || '', first_air_date: data.first_air_date || ''
+            };
+            if (isTv) { movie.original_name = orig; movie.number_of_seasons = 1; }
+
+            var done = false;
+            function finish(v) { if (done) return; done = true; resolve(v); }
+            setTimeout(function () { finish(null); }, 25000); // таймаут: не кешуємо
+
+            var nOrig = normTitle(orig), nLocal = normTitle(local);
+            try {
+                Lampa.Parser.get({ search: orig || local, movie: movie, page: 1 }, function (res) {
+                    var list = (res && res.Results) || [];
+                    for (var i = 0; i < list.length; i++) {
+                        var it = list[i], title = it.Title || it.title || '';
+                        if (!(parseInt(it.Seeders, 10) > 0)) continue;
+                        var nt = normTitle(title);
+                        var nameOk = (nOrig.length >= 3 && nt.indexOf(nOrig) !== -1) || (nLocal.length >= 3 && nt.indexOf(nLocal) !== -1);
+                        if (!nameOk) continue;
+                        if (year && !isTv) {
+                            var ys = (title.match(/(?:19|20)\d{2}/g) || []).map(Number);
+                            var yearOk = false;
+                            for (var k = 0; k < ys.length; k++) if (Math.abs(ys[k] - year) <= 1) yearOk = true;
+                            if (!yearOk) continue;
+                        }
+                        if (titleHasUaVoice(title)) return finish(true);
+                    }
+                    finish(false);
+                }, function () { finish(null); });
+            } catch (e) { finish(null); }
+        });
+    }
+
+    function checkTorrentsUa(data, type) {
+        // по одному запиту за раз: пошук у парсері важкий
+        TorrentUaChain = TorrentUaChain.then(function () {
+            var cached = torrentUaCached(data.id, type);
+            if (cached !== null) return cached;
+            return runTorrentUaCheck(data, type).then(function (r) {
+                if (r === true || r === false) ApiCache.set('uat_' + type + '_' + data.id, { r: r, t: Date.now() });
+                return r === true;
+            });
+        }).catch(function () { return false; });
+        return TorrentUaChain;
     }
 
     function fetchExternalRatings(tmdbId, type) {
@@ -1457,15 +1554,40 @@
                 badgesWrap.innerHTML = bh;
                 if (bh !== '') infoWrap.appendChild(badgesWrap);
 
-                checkUaVoiceover(data.id, type).then(function (hasUa) {
-                    if (hasUa) {
-                        var uaBadge = document.createElement('span');
-                        uaBadge.className = 'ydesign-badge ydesign-badge-ua';
-                        uaBadge.innerText = 'UA';
-                        badgesWrap.appendChild(uaBadge);
-                        scheduleOverflowFix(contentLayer);
-                        if (badgesWrap.parentNode !== infoWrap) infoWrap.insertBefore(badgesWrap, infoWrap.firstChild);
+                function addUaBadge(source) {
+                    if (badgesWrap.querySelector('.ydesign-badge-ua')) return;
+                    var uaBadge = document.createElement('span');
+                    uaBadge.className = 'ydesign-badge ydesign-badge-ua';
+                    uaBadge.innerText = 'UA';
+                    if (source) uaBadge.title = source;
+                    badgesWrap.appendChild(uaBadge);
+                    scheduleOverflowFix(contentLayer);
+                    if (badgesWrap.parentNode !== infoWrap) infoWrap.insertBefore(badgesWrap, infoWrap.firstChild);
+                }
+
+                // Додаткова перевірка через торент-парсер: лише коли картка у фокусі (не для всього ряду одразу)
+                function armTorrentUa() {
+                    if (!torrentUaEnabled() || !window.$) return;
+                    var cached = torrentUaCached(data.id, type);
+                    if (cached === true) { addUaBadge('Є в торентах'); return; }
+                    if (cached === false) return;
+                    var timer = null, started = false;
+                    function start() {
+                        if (started) return;
+                        started = true;
+                        window.$(el).off('hover:focus.ydua hover:blur.ydua');
+                        checkTorrentsUa(data, type).then(function (found) { if (found) addUaBadge('Є в торентах'); });
                     }
+                    window.$(el).on('hover:focus.ydua', function () {
+                        clearTimeout(timer);
+                        timer = setTimeout(start, 900);
+                    }).on('hover:blur.ydua', function () { clearTimeout(timer); });
+                    if (el.classList.contains('focus')) timer = setTimeout(start, 900);
+                }
+
+                checkUaVoiceover(data.id, type).then(function (hasUa) {
+                    if (hasUa) addUaBadge();
+                    else armTorrentUa();
                 });
 
                 var genresWrap = null;
@@ -2424,6 +2546,7 @@
         // ПІДКАТЕГОРІЯ 1: СІТКА ТА ТИПИ КАРТОК (ydesign_grid)
         // -------------------------------------------------------------
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_lazy_load', type: 'trigger', default: DefaultSettings.ydesign_lazy_load }, field: { name: 'Ліниве завантаження', description: 'Завантажувати додаткові дані (лого, рейтинги) тільки при появі картки на екрані' } });
+        Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_ua_torrents', type: 'trigger', default: DefaultSettings.ydesign_ua_torrents }, field: { name: 'UA-плашка за торентами', description: 'Додатково шукати українську озвучку через парсер Lampa (Jackett/Prowlarr/JacRed з Толокою тощо). Перевіряється, коли картка у фокусі. Потрібен налаштований парсер' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_perf_mode', type: 'select', values: { 'auto': 'Авто (на ТВ — економний)', 'lite': 'Економний (без blur, для ТВ)', 'fx': 'Повні ефекти (blur, тіні, блиск)' }, default: DefaultSettings.ydesign_perf_mode }, field: { name: 'Режим продуктивності', description: 'Економний режим прибирає blur і важкі фільтри — скролінг стає плавнішим на приставках і ТВ' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_card_type_main', type: 'select', values: { 'vertical': 'Вертикальні (9:16)', 'horizontal': 'Горизонтальні (16:11)' }, default: DefaultSettings.ydesign_card_type_main }, field: { name: 'Тип карток (Головна)' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_card_type_other', type: 'select', values: { 'vertical': 'Вертикальні (9:16)', 'horizontal': 'Горизонтальні (16:11)' }, default: DefaultSettings.ydesign_card_type_other }, field: { name: 'Тип карток (Інші сторінки)' } });
