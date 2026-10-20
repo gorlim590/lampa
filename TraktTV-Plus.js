@@ -27,26 +27,26 @@
   var MARK_TYPES = ['look', 'viewed', 'scheduled', 'continued', 'thrown'];
 
   var TREND_ROWS = [
-    { key: 'movies', uk: 'Зараз дивляться: фільми', en: 'Watching now: movies', index: 1,
+    { key: 'movies', uk: 'Зараз дивляться: фільми', en: 'Watching now: movies', index: 3,
       loads: [{ p: '/movies', hint: 'movie' }], skip: ['animation', 'anime'] },
-    { key: 'shows', uk: 'Зараз дивляться: серіали', en: 'Watching now: TV shows', index: 2,
+    { key: 'shows', uk: 'Зараз дивляться: серіали', en: 'Watching now: TV shows', index: 4,
       loads: [{ p: '/shows', hint: 'show' }], skip: ['animation', 'anime'] },
-    { key: 'cartoons', uk: 'Зараз дивляться: мультфільми', en: 'Watching now: cartoons', index: 3,
+    { key: 'cartoons', uk: 'Зараз дивляться: мультфільми', en: 'Watching now: cartoons', index: 5,
       loads: [{ p: '/movies', hint: 'movie', genre: 'animation' }, { p: '/shows', hint: 'show', genre: 'animation' }],
       genre: 'animation', skip: ['anime'] },
-    { key: 'anime', uk: 'Зараз дивляться: аніме', en: 'Watching now: anime', index: 4,
+    { key: 'anime', uk: 'Зараз дивляться: аніме', en: 'Watching now: anime', index: 6,
       loads: [{ p: '/movies', hint: 'movie', genre: 'anime' }, { p: '/shows', hint: 'show', genre: 'anime' }],
       genre: 'anime', skip: [] }
   ];
 
   // Жанрові рядки (фільми). Додавайте свої за зразком.
   var GENRE_ROWS = [
-    { slug: 'horror', uk: 'Жахи, які ти ще не бачив', en: "Horror you haven't seen", minRating: 6.0, minVotes: 500, index: 8 },
-    { slug: 'thriller', uk: 'Трилери', en: 'Thrillers', minRating: 6.8, minVotes: 1000, index: 9 },
-    { slug: 'science-fiction', uk: 'Фантастика', en: 'Sci-Fi', minRating: 6.8, minVotes: 1000, index: 10 },
-    { slug: 'comedy', uk: 'Комедії, які ти ще не бачив', en: "Comedies you haven't seen", minRating: 6.8, minVotes: 1500, index: 14 },
-    { slug: 'mystery', uk: 'Детективи та містика', en: 'Mystery', minRating: 6.8, minVotes: 800, index: 15 },
-    { slug: 'documentary', uk: 'Документальні', en: 'Documentaries', minRating: 7.0, minVotes: 300, index: 16 }
+    { slug: 'horror', uk: 'Жахи, які ти ще не бачив', en: "Horror you haven't seen", minRating: 6.0, minVotes: 500, index: 10 },
+    { slug: 'thriller', uk: 'Трилери', en: 'Thrillers', minRating: 6.8, minVotes: 1000, index: 11 },
+    { slug: 'science-fiction', uk: 'Фантастика', en: 'Sci-Fi', minRating: 6.8, minVotes: 1000, index: 12 },
+    { slug: 'comedy', uk: 'Комедії, які ти ще не бачив', en: "Comedies you haven't seen", minRating: 6.8, minVotes: 1500, index: 16 },
+    { slug: 'mystery', uk: 'Детективи та містика', en: 'Mystery', minRating: 6.8, minVotes: 800, index: 17 },
+    { slug: 'documentary', uk: 'Документальні', en: 'Documentaries', minRating: 7.0, minVotes: 300, index: 18 }
   ];
 
   var api = null;
@@ -109,7 +109,7 @@
   }
   function cfgSig() {
     var g = cfg();
-    return [g.hideWatched, g.hideShows, g.trendHide, g.minRating, g.minVotes, g.exclude.join(), Object.keys(watchedMovies).length, Object.keys(watchedShows).length].join('|');
+    return [g.hideWatched, g.hideShows, g.trendHide, g.minRating, g.minVotes, g.exclude.join(), watchedVer].join('|');
   }
 
   function whenApi() {
@@ -185,6 +185,7 @@
       method: isShow ? 'tv' : 'movie',
       card_type: isShow ? 'tv' : 'movie',
       type: isShow ? 'tv' : 'movie',
+      media_type: isShow ? 'tv' : 'movie',
       _votes: Number(m.votes || 0),
       _watchers: Number(entry.watchers || entry.watcher_count || 0),
       _genres: Array.isArray(m.genres) ? m.genres : [],
@@ -220,6 +221,18 @@
     return o;
   }
 
+  var watchedVer = 0; // лічильник змін множин (дешевий підпис для кешу рядків)
+
+  // повідомляємо інші плагіни (YDesign) про зміну списку переглянутих
+  function emitWatched() {
+    try {
+      var ev;
+      if (typeof window.CustomEvent === 'function') ev = new CustomEvent('traktplus:watched');
+      else { ev = document.createEvent('Event'); ev.initEvent('traktplus:watched', true, true); }
+      document.dispatchEvent(ev);
+    } catch (e) {}
+  }
+
   function persistWatched() {
     try {
       Lampa.Storage.set('trakt_plus_watched_cache', {
@@ -236,6 +249,7 @@
       watchedMovies = arrToSet(c.m);
       watchedShows = arrToSet(c.s);
       watchedStamp = c.stamp || '';
+      watchedVer++;
     }
   }
 
@@ -264,7 +278,12 @@
         var same = stamp !== null && stamp === (cached.stamp || '');
         if (!force && !tooOld && (same || stamp === null)) return false;
         return Promise.all([
-          getRetry('/sync/watched/movies').catch(function () { return null; }),
+          getRetry('/sync/watched/movies').then(function (arr) {
+            arr = Array.isArray(arr) ? arr : null;
+            // рівно 100 схоже на обрізаний список — добираємо з посторінкової історії
+            if (arr && arr.length === 100) return pagedHistory(false).then(function (h) { return mergeWatched(arr, h); });
+            return arr;
+          }).catch(function () { return null; }),
           getRetry('/sync/watched/shows?extended=noseasons').catch(function () { return null; })
         ]).then(function (r) {
           var okM = Array.isArray(r[0]), okS = Array.isArray(r[1]);
@@ -273,7 +292,9 @@
           if (okM || okS) {
             // штамп зберігаємо лише коли обидва запити успішні — інакше повторимо наступного разу
             watchedStamp = (okM && okS && stamp !== null) ? stamp : '';
+            watchedVer++;
             persistWatched();
+            emitWatched();
           }
           return okM || okS;
         });
@@ -469,7 +490,7 @@
 
     // Бо ти дивився
     var because = {
-      name: 'TraktPlusBecause', uk: 'Бо ти дивився…', en: 'Because you watched…', index: 5, chunks: 1,
+      name: 'TraktPlusBecause', uk: 'Бо ти дивився…', en: 'Because you watched…', index: 7, chunks: 1,
       opts: { minRating: 6.0, minVotes: 300 },
       titleFn: function () {
         return because._pick ? tr('Бо ти дивився: ', 'Because you watched: ') + because._pick.title : tr('Бо ти дивився…', 'Because you watched…');
@@ -492,7 +513,7 @@
     };
     defs.push(because);
 
-    defs.push({ name: 'TraktPlusGems', uk: 'Приховані перлини', en: 'Hidden gems', index: 6, chunks: 3,
+    defs.push({ name: 'TraktPlusGems', uk: 'Приховані перлини', en: 'Hidden gems', index: 8, chunks: 3,
       opts: { minRating: 7.2, minVotes: 300, maxVotes: 15000 },
       urls: function (ch) {
         var s = [{ u: feed('/movies/popular', { page: ch + 1 }), hint: 'movie' }];
@@ -500,11 +521,11 @@
         return s;
       } });
 
-    defs.push({ name: 'TraktPlusTop', uk: 'Топ, який ти ще не бачив', en: 'Top rated you have not seen', index: 7, chunks: 3,
+    defs.push({ name: 'TraktPlusTop', uk: 'Топ, який ти ще не бачив', en: 'Top rated you have not seen', index: 9, chunks: 3,
       opts: { minRating: 7.5, minVotes: 3000 },
       urls: function (ch) { return [{ u: feed('/movies/popular', { page: ch }), hint: 'movie' }]; } });
 
-    defs.push({ name: 'TraktPlusFresh', uk: 'Свіже й варте уваги', en: 'Fresh & worth watching', index: 11, chunks: 2,
+    defs.push({ name: 'TraktPlusFresh', uk: 'Свіже й варте уваги', en: 'Fresh & worth watching', index: 13, chunks: 2,
       opts: { minRating: 6.5, minVotes: 300 },
       urls: function (ch) {
         var yy = (y - 1) + '-' + y;
@@ -514,19 +535,19 @@
         ];
       } });
 
-    defs.push({ name: 'TraktPlusAnticipated', uk: 'Очікувані прем’єри', en: 'Most anticipated', index: 12, chunks: 1, keepOrder: true,
+    defs.push({ name: 'TraktPlusAnticipated', uk: 'Очікувані прем’єри', en: 'Most anticipated', index: 14, chunks: 1, keepOrder: true,
       opts: { minRating: 0, minVotes: 0 },
       urls: function (ch) { return [{ u: feed('/movies/anticipated', { page: ch }), hint: 'movie' }]; } });
 
-    defs.push({ name: 'TraktPlusWeekly', uk: 'Найпопулярніше цього тижня', en: 'Most watched this week', index: 13, chunks: 1, keepOrder: true,
+    defs.push({ name: 'TraktPlusWeekly', uk: 'Найпопулярніше цього тижня', en: 'Most watched this week', index: 15, chunks: 1, keepOrder: true,
       opts: { minRating: 0, minVotes: 0, hideWatched: false },
       urls: function (ch) { return [{ u: feed('/movies/watched/weekly', { page: ch }), hint: 'movie' }]; } });
 
-    defs.push({ name: 'TraktPlusClassics', uk: 'Класика, яку варто побачити', en: 'Classics worth watching', index: 17, chunks: 2,
+    defs.push({ name: 'TraktPlusClassics', uk: 'Класика, яку варто побачити', en: 'Classics worth watching', index: 19, chunks: 2,
       opts: { minRating: 7.6, minVotes: 2000 },
       urls: function (ch) { return [{ u: feed('/movies/popular', { years: '1930-1999', page: ch }), hint: 'movie' }]; } });
 
-    defs.push({ name: 'TraktPlusTopShows', uk: 'Серіали, які ти ще не бачив', en: 'Shows you have not seen', index: 18, chunks: 2,
+    defs.push({ name: 'TraktPlusTopShows', uk: 'Серіали, які ти ще не бачив', en: 'Shows you have not seen', index: 20, chunks: 2,
       opts: { minRating: 7.8, minVotes: 2000 },
       urls: function (ch) {
         var s = [{ u: feed('/shows/popular', { page: ch }), hint: 'show' }];
@@ -534,7 +555,7 @@
         return s;
       } });
 
-    defs.push({ name: 'TraktPlusNewShows', uk: 'Нові серіали', en: 'New TV shows', index: 19, chunks: 2,
+    defs.push({ name: 'TraktPlusNewShows', uk: 'Нові серіали', en: 'New TV shows', index: 21, chunks: 2,
       opts: { minRating: 6.8, minVotes: 200, notGenres: ['animation', 'anime'] },
       urls: function (ch) {
         var yy = (y - 1) + '-' + y;
@@ -742,7 +763,7 @@
             component: 'full', source: 'tmdb', id: x.i, ids: { tmdb: x.i },
             title: x.t, original_title: x.t, release_date: x.y ? String(x.y) : '',
             poster: poster, img: poster, image: poster, background_image: poster,
-            vote_average: 0, method: 'movie', card_type: 'movie', type: 'movie', _lib: true
+            vote_average: 0, method: 'movie', card_type: 'movie', type: 'movie', media_type: 'movie', _lib: true
           };
         });
       }
@@ -865,7 +886,7 @@
       poster: poster, img: poster,
       background_image: fan, image: fan,
       vote_average: 0,
-      method: 'movie', type: 'movie', card_type: 'movie', source: 'tmdb'
+      method: 'movie', type: 'movie', card_type: 'movie', media_type: 'movie', source: 'tmdb'
     };
   }
 
@@ -963,7 +984,9 @@
       var raw = res.list;
       if (raw.length) {
         watchedMovies = collectIds(raw, 'movie');
+        watchedVer++;
         persistWatched();
+        emitWatched();
       }
       var libCount = raw.length ? saveLibrary(raw) : (Lampa.Storage.get('trakt_plus_library') || []).length;
 
@@ -1062,7 +1085,8 @@
   function decorate(node, data, g) {
     if (!node || !node.classList || !data) return;
     g = g || cfg();
-    var on = !!(g.mark && !data._lib && isMarked(data, g));
+    var yd = !!window.YDesignLoaded; // YDesign сам малює «Переглянуто» через window.TraktPlus.isWatched
+    var on = !!(!yd && g.mark && !data._lib && isMarked(data, g));
     var view = node.querySelector ? node.querySelector('.card__view') : null;
     if (on) {
       node.classList.add('trakt-plus-watched');
@@ -1080,6 +1104,7 @@
   }
 
   function decorateAll() {
+    if (window.YDesignLoaded && !document.querySelector('.trakt-plus-watched')) return; // нічого знімати й малювати
     try {
       var g = cfg();
       var nodes = document.querySelectorAll('.card');
@@ -1101,7 +1126,18 @@
     });
     var timer = null;
     try {
-      new MutationObserver(function () {
+      new MutationObserver(function (muts) {
+        // реагуємо лише коли з'явились нові картки (YDesign постійно дописує у DOM — не скануємо на кожну дрібницю)
+        var hasCard = false;
+        for (var i = 0; i < muts.length && !hasCard; i++) {
+          var add = muts[i].addedNodes;
+          for (var j = 0; j < add.length; j++) {
+            var n = add[j];
+            if (n.nodeType !== 1) continue;
+            if ((n.classList && n.classList.contains('card')) || (n.querySelector && n.querySelector('.card'))) { hasCard = true; break; }
+          }
+        }
+        if (!hasCard) return;
         clearTimeout(timer);
         timer = setTimeout(function () {
           decorateAll();
@@ -1215,6 +1251,7 @@
         watchedMovies = {};
         watchedShows = {};
         watchedStamp = '';
+        watchedVer++;
         lastCheck = 0;
         recCache = { t: 0, key: '', list: null };
         clearRowCaches();
@@ -1252,6 +1289,15 @@
     setTimeout(check, 1500);
     setTimeout(check, 4000);
   }
+
+  // Міст для інших плагінів (YDesign): чи фільм переглянутий на Trakt. Доступний одразу, ще до boot().
+  window.TraktPlus = window.TraktPlus || {};
+  window.TraktPlus.isWatched = function (d) {
+    try { hydrateWatched(); var id = d && (d.id || (d.ids && d.ids.tmdb)); return !!(id && watchedMovies[id]); } catch (e) { return false; }
+  };
+  window.TraktPlus.isWatchedShow = function (d) {
+    try { hydrateWatched(); var id = d && (d.id || (d.ids && d.ids.tmdb)); return !!(id && watchedShows[id]); } catch (e) { return false; }
+  };
 
   // Рядки реєструємо ОДРАЗУ (до готовності додатку), щоб головна їх одразу підхопила
   try { registerRows(); } catch (e) {}
