@@ -2,9 +2,6 @@
  * YDesign (оптимізована збірка для ТВ-приставок)
  * Оригінальний плагін: yarikrazor-star/lmp (ydes.js). Це змінена копія для особистого використання.
  *
- * v3.3: сумісність із Trakt+ (єдина позначка «Переглянуто» + чіп Trakt, постери Trakt-карток, без подвійного затемнення),
- *       нові стилі карток (Скло / Неон / Кінотеатр / М'який), ефекти фокуса (підйом / світіння), анімація появи карток,
- *       скелетон-завантаження, пресети одним натиском, debounce застосування CSS, обмеження кешу кольорів, preconnect до TMDB.
  * v3.2: рядки «Продовжити перегляд» і «Виходять цього тижня», смужка прогресу, «Далі SxEy», кільце сезону, «Продовження», теми, усі фільми з Історії = переглянуто, кеш позначок.
  * v3.1: «Переглянуто» тепер реально затемнює картку (фільм ≥90% або ≥50% з Історії; серіал — якщо переглянуто останню серію), «Скоро» лише для серіалів/аніме з новою серією в найближчі 14 днів.
  * v3: позначки «Новинка/Скоро», «Переглянуто» та фон екрана під колір постера (налаштування в розділі YDesign).
@@ -85,10 +82,6 @@
         ydesign_row_continue: true,
         ydesign_row_week: true,
         ydesign_theme: 'default',
-        ydesign_style: 'classic',
-        ydesign_focus_fx: 'scale',
-        ydesign_card_anim: true,
-        ydesign_trakt_chip: true,
 
         ydesign_badge_shape: 'pill',
         ydesign_glass_pill_bg: true,
@@ -831,7 +824,6 @@
     // 5. ДОМІНАНТНИЙ КОЛІР
     // =========================================================================
     var ProminentColorStore = {};
-    var PCCount = 0;
     var sharedCanvas = null;
     var sharedCtx = null;
 
@@ -841,7 +833,6 @@
 
         if (ProminentColorStore[url]) return ProminentColorStore[url];
 
-        if (++PCCount > 300) { ProminentColorStore = {}; PCCount = 0; } // не даємо мапі рости безкінечно
         ProminentColorStore[url] = new Promise(function (resolve) {
             var cachedColor = ApiCache.get('col_' + path);
             if (cachedColor) return resolve(cachedColor);
@@ -1606,20 +1597,8 @@
      * Серіал / аніме:  переглянута ОСТАННЯ вийшла серія (прогрес ≥ 90%).
      *   Позначка «Переглянуто» враховується лише для завершених серіалів.
      */
-    // Міст до плагіна Trakt+ (window.TraktPlus.isWatched) — єдина позначка «Переглянуто» без дублювання
-    function traktWatched(d) {
-        try { return !!(d && window.TraktPlus && typeof window.TraktPlus.isWatched === 'function' && window.TraktPlus.isWatched(d)); }
-        catch (e) { return false; }
-    }
-    // власний (повний URL) постер картки, якщо немає TMDB-шляху — наприклад, картки Trakt+
-    function ownImg(d) {
-        var u = d && (d.poster || d.img || d.image || '');
-        return (typeof u === 'string' && u.indexOf('http') === 0) ? u : '';
-    }
-
     function isWatched(data, type, ext, inHistory) {
         try {
-            if (data && data._lib) return false; // папка «Trakt: Переглянуті» — там усе переглянуте, не затемнюємо
             if (!window.Lampa || !Lampa.Utils || typeof Lampa.Utils.hash !== 'function' ||
                 !Lampa.Timeline || typeof Lampa.Timeline.view !== 'function') return false;
 
@@ -1630,7 +1609,6 @@
             if (type !== 'tv') {
                 if (data.ydesign_row === 'cont') return false;
                 if (fav.viewed) return true;
-                if (traktWatched(data)) return true;
                 var hist = !!(fav.history || inHistory || inHistoryList(data));
                 if (hist && getSet('ydesign_history_watched')) return true;
                 var p = moviePercent(data);
@@ -1827,8 +1805,6 @@
             view.appendChild(chk);
         }
         if (el.classList.contains('ydesign-is-watched') !== mk.watched) el.classList.toggle('ydesign-is-watched', mk.watched);
-        var fromTrakt = !!(mk.watched && type !== 'tv' && traktWatched(data));
-        if (el.classList.contains('ydesign-from-trakt') !== fromTrakt) el.classList.toggle('ydesign-from-trakt', fromTrakt);
     }
 
     // Оновлення позначок на видимих картках після змін у таймлайні/історії (порціями, без фризів)
@@ -2117,7 +2093,7 @@
 
             var applyBg = function (path) {
                 if (!path) return;
-                var fullUrl = String(path).indexOf('http') === 0 ? String(path) : ('https://image.tmdb.org/t/p/' + bgQuality + path);
+                var fullUrl = 'https://image.tmdb.org/t/p/' + bgQuality + path;
                 if (el._ydesign_bg_applied === fullUrl) return;
                 el._ydesign_bg_applied = fullUrl;
 
@@ -2152,9 +2128,9 @@
                 refreshMarks();
                 var bgToLoad = null;
                 if (extData) {
-                    bgToLoad = isHorz ? (extData.clean_backdrop || data.backdrop_path || data.poster_path || ownImg(data)) : (extData.clean_poster || data.poster_path || data.backdrop_path || ownImg(data));
+                    bgToLoad = isHorz ? (extData.clean_backdrop || data.backdrop_path || data.poster_path) : (extData.clean_poster || data.poster_path || data.backdrop_path);
                 } else {
-                    bgToLoad = isHorz ? (data.backdrop_path || data.poster_path || ownImg(data)) : (data.poster_path || data.backdrop_path || ownImg(data));
+                    bgToLoad = isHorz ? (data.backdrop_path || data.poster_path) : (data.poster_path || data.backdrop_path);
                 }
 
                 if (bgToLoad) applyBg(bgToLoad);
@@ -2440,62 +2416,11 @@
         ''
     ].join('\n');
 
-    var YD_PLUS_CSS = [
-        "/* ===== YDesign v3.3: стилі карток, ефекти фокуса, анімації ===== */",
-        "@keyframes ydCardIn { from { opacity: 0; translate: 0 .6em; } to { opacity: 1; translate: 0 0; } }",
-        "@keyframes ydSkel { to { transform: translateX(100%); } }",
-        "body.ydesign-active:not(.ydesign-anim-off) .ydesign-card.ydesign-ready { animation: ydCardIn .45s ease-out both; }",
-        "body.ydesign-fx.ydesign-active:not(.ydesign-anim-off) .ydesign-card:not(.ydesign-ready) .card__view::before {",
-        "    content: \"\"; position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 1; pointer-events: none;",
-        "    background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,.08) 50%, transparent 80%);",
-        "    transform: translateX(-100%); animation: ydSkel 1.3s ease-in-out 4;",
-        "}",
-        "@media (prefers-reduced-motion: reduce) {",
-        "    .ydesign-card.ydesign-ready { animation: none !important; }",
-        "    .ydesign-card:not(.ydesign-ready) .card__view::before { display: none !important; }",
-        "}",
-        "",
-        "/* рамка фокуса + «ореол» через змінну --yd-halo (задається у фокус-ефектах і стилях, лише в режимі ефектів) */",
-        ".ydesign-active .ydesign-card.focus .card__view {",
-        "    box-shadow: 0 0 0 var(--yd-rw, 4px) var(--yd-ring, #fff), var(--yd-halo, 0 0 0 0 rgba(0,0,0,0)) !important;",
-        "}",
-        "body.ydesign-active:not(.is--touch).ydesign-focus-lift .ydesign-card.focus { transform: translateY(-.35em) scale(1.06) translateZ(0) !important; }",
-        "body.ydesign-fx.ydesign-active:not(.is--touch).ydesign-focus-lift .ydesign-card.focus { --yd-halo: 0 1em 1.8em -.5em rgba(0,0,0,.8); }",
-        "body.ydesign-fx.ydesign-active:not(.is--touch).ydesign-focus-glow .ydesign-card.focus { --yd-halo: 0 0 1.5em var(--yd-glow, rgba(255,255,255,.4)); }",
-        "body.ydesign-active:not(.is--touch).ydesign-focus-none .ydesign-card.focus { transform: none !important; will-change: auto; }",
-        "",
-        "/* стилі карток */",
-        "body.ydesign-style-glass { --yd-r: 1.2em; --yd-rw: 2px; --yd-ring: rgba(255,255,255,.9); }",
-        "body.ydesign-fx.ydesign-style-glass .ydesign-content-layer {",
-        "    backdrop-filter: blur(10px) saturate(1.25) !important; -webkit-backdrop-filter: blur(10px) saturate(1.25) !important;",
-        "    background: linear-gradient(to top, rgba(12,14,24,.62), rgba(12,14,24,.12)) !important;",
-        "}",
-        "body:not(.ydesign-fx).ydesign-style-glass .ydesign-content-layer { background: linear-gradient(to top, rgba(12,14,24,.82), transparent) !important; }",
-        "",
-        "body.ydesign-style-neon { --yd-r: .5em; --yd-rw: 3px; --yd-ring: #00e5ff; --yd-acc: #00e5ff; }",
-        "body.ydesign-fx.ydesign-style-neon .ydesign-card.focus { --yd-halo: 0 0 1.3em rgba(0,229,255,.55); }",
-        "",
-        "body.ydesign-style-cinema { --yd-r: .25em; --yd-rw: 2px; --yd-ring: #f5c542; --yd-acc: #f5c542; }",
-        "body.ydesign-style-cinema .ydesign-text-title { letter-spacing: .06em; text-transform: uppercase; }",
-        "body.ydesign-fx.ydesign-style-cinema .ydesign-card.focus { --yd-halo: 0 0 1.2em rgba(245,197,66,.45); }",
-        "",
-        "body.ydesign-style-soft { --yd-r: 1.6em; --yd-rw: 2px; --yd-ring: rgba(255,255,255,.6); }",
-        "body.ydesign-fx.ydesign-style-soft .ydesign-card.focus { --yd-halo: 0 .8em 1.6em -.4em rgba(0,0,0,.6); }",
-        "",
-        "/* чіп «Trakt» біля зеленої галочки (фільм позначено переглянутим на Trakt) */",
-        ".ydesign-from-trakt.ydesign-is-watched .ydesign-watched-check::after {",
-        "    content: \"Trakt\"; position: absolute; right: 0; top: 118%; padding: .18em .55em; border-radius: 2em;",
-        "    background: #ed1c24; color: #fff; font-size: .55em; font-weight: 800; letter-spacing: .04em; line-height: 1.1;",
-        "    box-shadow: 0 2px 6px rgba(0,0,0,.4);",
-        "}",
-        "body.ydesign-trakt-chip-off .ydesign-watched-check::after { display: none !important; }"
-    ].join('\n');
-
     function ydPostCss(css) {
         // Важкі декларації прибираємо з базового CSS; у режимі ефектів вони повертаються правилами з YD_EXTRA_CSS
         css = css.replace(/(?:-webkit-)?backdrop-filter\s*:[^;]*;/g, '');
         css = css.replace(/filter\s*:\s*drop-shadow\([^;]*;/g, '');
-        return css + '\n' + YD_EXTRA_CSS + '\n' + YD_MARKS_CSS + '\n' + YD_PLUS_CSS;
+        return css + '\n' + YD_EXTRA_CSS + '\n' + YD_MARKS_CSS;
     }
 
     function injectCSS() {
@@ -3116,14 +3041,7 @@
         return 'center';
     }
 
-    // кілька змін налаштувань підряд (пресет, два listener-и) → одне перерахування CSS
-    var ApplyT = null;
     function applyDynamicCSS() {
-        clearTimeout(ApplyT);
-        ApplyT = setTimeout(applyDynamicCSSNow, 60);
-    }
-
-    function applyDynamicCSSNow() {
         try {
             SettingsMemo = {};
             LiteCache.t = 0;
@@ -3136,12 +3054,6 @@
             document.body.classList.toggle('ydesign-seq-off', !getSet('ydesign_collection_mark'));
             ['default', 'netflix', 'minimal', 'warm', 'oled'].forEach(function (th) { document.body.classList.remove('ydesign-theme-' + th); });
             document.body.classList.add('ydesign-theme-' + (getSet('ydesign_theme') || 'default'));
-            ['classic', 'glass', 'neon', 'cinema', 'soft'].forEach(function (st) { document.body.classList.remove('ydesign-style-' + st); });
-            document.body.classList.add('ydesign-style-' + (getSet('ydesign_style') || 'classic'));
-            ['scale', 'lift', 'glow', 'none'].forEach(function (fx) { document.body.classList.remove('ydesign-focus-' + fx); });
-            document.body.classList.add('ydesign-focus-' + (getSet('ydesign_focus_fx') || 'scale'));
-            document.body.classList.toggle('ydesign-anim-off', !getSet('ydesign_card_anim'));
-            document.body.classList.toggle('ydesign-trakt-chip-off', !getSet('ydesign_trakt_chip'));
             bumpMarks();
             document.body.classList.toggle('ydesign-series-active', getSet('ydesign_series_redesign'));
             document.body.classList.toggle('ydesign-series-glass-pill', getSet('ydesign_series_glass_pill'));
@@ -3296,92 +3208,6 @@
     // =========================================================================
     // 11. МЕНЮ НАЛАШТУВАНЬ (YDesign)
     // =========================================================================
-
-    // =========================================================================
-    // 11.1. ПРЕСЕТИ ТА РОЗДІЛ «СТИЛІ»
-    // =========================================================================
-    function addPreconnect() {
-        try {
-            if (document.getElementById('ydesign-preconnect')) return;
-            var l = document.createElement('link');
-            l.id = 'ydesign-preconnect'; l.rel = 'preconnect'; l.href = 'https://image.tmdb.org'; l.crossOrigin = 'anonymous';
-            document.head.appendChild(l);
-        } catch (e) {}
-    }
-
-    var YD_PRESET_KEYS = ['ydesign_card_type_main', 'ydesign_card_type_other', 'ydesign_theme', 'ydesign_style', 'ydesign_focus_fx',
-        'ydesign_ambient', 'ydesign_card_anim', 'ydesign_glass_pill_bg', 'ydesign_v_show_genres', 'ydesign_h_show_genres',
-        'ydesign_v_show_slogan', 'ydesign_h_show_slogan', 'ydesign_v_show_add_title', 'ydesign_h_show_add_title', 'ydesign_h_show_desc'];
-
-    var YD_PRESETS = [
-        { id: 'default', name: '♻️ Стандартний вигляд', desc: 'Повертає стиль, тему, фокус і показ елементів до початкових',
-          set: {} },
-        { id: 'cinema', name: '🎞️ Кінотеатр', desc: 'Горизонтальні картки на головній, золота рамка, підйом при фокусі, опис під карткою',
-          set: { ydesign_card_type_main: 'horizontal', ydesign_card_type_other: 'vertical', ydesign_theme: 'default', ydesign_style: 'cinema',
-                 ydesign_focus_fx: 'lift', ydesign_ambient: true, ydesign_h_show_desc: true } },
-        { id: 'glass', name: '🧊 Скло', desc: 'Матова панель з інформацією, великі заокруглення, світіння кольором постера',
-          set: { ydesign_style: 'glass', ydesign_focus_fx: 'glow', ydesign_glass_pill_bg: true, ydesign_ambient: true } },
-        { id: 'neon', name: '🌃 Неон', desc: 'OLED-фон, бірюзова рамка зі світінням',
-          set: { ydesign_theme: 'oled', ydesign_style: 'neon', ydesign_focus_fx: 'glow', ydesign_ambient: true } },
-        { id: 'netflix', name: '🍿 Netflix', desc: 'Червоний акцент, горизонтальні картки, підйом при фокусі',
-          set: { ydesign_theme: 'netflix', ydesign_style: 'classic', ydesign_focus_fx: 'lift', ydesign_card_type_main: 'horizontal' } },
-        { id: 'posters', name: '🖼️ Лише постери', desc: 'Вертикальні картки без слогану, жанрів і додаткової назви — максимум постера',
-          set: { ydesign_card_type_main: 'vertical', ydesign_card_type_other: 'vertical', ydesign_style: 'soft', ydesign_focus_fx: 'scale',
-                 ydesign_v_show_genres: false, ydesign_v_show_slogan: false, ydesign_v_show_add_title: false } },
-        { id: 'minimal', name: '⚪ Мінімалізм', desc: 'Мінімалістична тема, без фону-ambient, без слоганів, жанрів і опису',
-          set: { ydesign_theme: 'minimal', ydesign_style: 'classic', ydesign_focus_fx: 'scale', ydesign_ambient: false,
-                 ydesign_v_show_genres: false, ydesign_h_show_genres: false, ydesign_v_show_slogan: false, ydesign_h_show_slogan: false,
-                 ydesign_v_show_add_title: false, ydesign_h_show_add_title: false, ydesign_h_show_desc: false } }
-    ];
-
-    function applyPreset(id) {
-        var preset = null;
-        for (var i = 0; i < YD_PRESETS.length; i++) if (YD_PRESETS[i].id === id) preset = YD_PRESETS[i];
-        if (!preset || !window.Lampa || !Lampa.Storage) return;
-        YD_PRESET_KEYS.forEach(function (k) {
-            var v = preset.set.hasOwnProperty(k) ? preset.set[k] : DefaultSettings[k];
-            try { Lampa.Storage.set(k, v); } catch (e) {}
-        });
-        SettingsMemo = {};
-        applyDynamicCSS();
-        // перебудова карток порціями, щоб не підвісити інтерфейс
-        var list = document.querySelectorAll('.ydesign-card'), n = 0;
-        (function step() {
-            var end = Math.min(n + 8, list.length);
-            for (; n < end; n++) {
-                var c = list[n];
-                if (c._ydesign_data) { try { buildCardCustomDOM(c, c._ydesign_data); } catch (e) {} }
-            }
-            if (n < list.length) requestAnimationFrame(step);
-        })();
-        try { Lampa.Noty.show('Пресет застосовано: ' + preset.name); } catch (e) {}
-        try { if (Lampa.Settings && Lampa.Settings.update) Lampa.Settings.update(); } catch (e) {}
-    }
-
-    function createStyleSettings() {
-        var C = 'ydesign_styles';
-        Lampa.SettingsApi.addParam({ component: C, param: { type: 'title' }, field: { name: 'Вигляд карток' } });
-        Lampa.SettingsApi.addParam({ component: C,
-            param: { name: 'ydesign_style', type: 'select', values: { classic: 'Класичний', glass: 'Скло (матова панель)', neon: 'Неон (бірюзове світіння)', cinema: 'Кінотеатр (золота рамка)', soft: 'М\u2019який (великі заокруглення)' }, default: DefaultSettings.ydesign_style },
-            field: { name: 'Стиль карток', description: 'Заокруглення, колір рамки та акценту. Накладається поверх «Теми оформлення»' } });
-        Lampa.SettingsApi.addParam({ component: C,
-            param: { name: 'ydesign_focus_fx', type: 'select', values: { scale: 'Збільшення (стандарт)', lift: 'Підйом + тінь', glow: 'Світіння кольором постера', none: 'Без руху (лише рамка)' }, default: DefaultSettings.ydesign_focus_fx },
-            field: { name: 'Ефект фокуса', description: 'Тінь і світіння працюють лише в режимі «Повні ефекти»; на слабких ТВ обирайте «Без руху»' } });
-        Lampa.SettingsApi.addParam({ component: C,
-            param: { name: 'ydesign_card_anim', type: 'trigger', default: DefaultSettings.ydesign_card_anim },
-            field: { name: 'Анімація появи карток', description: 'М\u2019яке виринання картки та мерехтіння-скелетон, поки вантажаться дані' } });
-        Lampa.SettingsApi.addParam({ component: C,
-            param: { name: 'ydesign_trakt_chip', type: 'trigger', default: DefaultSettings.ydesign_trakt_chip },
-            field: { name: 'Чіп «Trakt» на переглянутих', description: 'Біля галочки показує, що фільм позначено переглянутим на Trakt (потрібен плагін Trakt+)' } });
-        Lampa.SettingsApi.addParam({ component: C, param: { type: 'title' }, field: { name: 'Пресети — один натиск змінює набір налаштувань' } });
-        YD_PRESETS.forEach(function (pr) {
-            Lampa.SettingsApi.addParam({ component: C,
-                param: { name: 'ydesign_preset_' + pr.id, type: 'button' },
-                field: { name: pr.name, description: pr.desc },
-                onChange: function () { applyPreset(pr.id); } });
-        });
-    }
-
     function createSettings() {
         if (!window.Lampa || !Lampa.SettingsApi) return;
 
@@ -3408,7 +3234,7 @@
         var aligns = { 'left': 'Ліворуч', 'center': 'По центру', 'right': 'Праворуч' };
         var shapes = { 'pill': 'Пігулка (Сучасний Pill Capsule)', 'rounded': 'Прямокутний скруглений (4px)', 'square': 'Прямокутний (2px)' };
 
-        var sectionKeys = ['ydesign_styles', 'ydesign_grid', 'ydesign_vertical', 'ydesign_horizontal', 'ydesign_notch', 'ydesign_badges_style', 'ydesign_fonts', 'ydesign_texts', 'ydesign_series', 'ydesign_perf'];
+        var sectionKeys = ['ydesign_grid', 'ydesign_vertical', 'ydesign_horizontal', 'ydesign_notch', 'ydesign_badges_style', 'ydesign_fonts', 'ydesign_texts', 'ydesign_series', 'ydesign_perf'];
         sectionKeys.forEach(function (compKey) {
             Lampa.Template.add('settings_' + compKey, '<div></div>');
         });
@@ -3436,7 +3262,6 @@
         });
 
         var subSections = [
-            { id: 'ydesign_styles', name: '🎨 Стилі, ефекти та Пресети', desc: 'Скло / Неон / Кінотеатр, ефект фокуса, анімації, готові пресети дизайну одним натиском' },
             { id: 'ydesign_grid', name: '🎬 Відображення карток та Сітка', desc: 'Формат карток на головній/інших сторінках, кількість колонок та ліниве завантаження' },
             { id: 'ydesign_vertical', name: '📱 Вертикальні картки', desc: 'Окремі налаштування розмірів, логотипу, слогану, бейджів, відступів та вирівнювання' },
             { id: 'ydesign_horizontal', name: '💻 Горизонтальні картки', desc: 'Окремі налаштування розмірів, логотипу, опису під карткою, бейджів, відступів та вирівнювання' },
@@ -3464,7 +3289,6 @@
         });
 
         // -------------------------------------------------------------
-        createStyleSettings();
         // ПІДКАТЕГОРІЯ 1: СІТКА ТА ТИПИ КАРТОК (ydesign_grid)
         // -------------------------------------------------------------
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_lazy_load', type: 'trigger', default: DefaultSettings.ydesign_lazy_load }, field: { name: 'Ліниве завантаження', description: 'Завантажувати додаткові дані (лого, рейтинги) тільки при появі картки на екрані' } });
@@ -3792,7 +3616,6 @@
             field: { name: 'Очистити кеш плагіну', description: 'Видаляє кеш зображень, рейтингів та перевірок озвучки' },
             onChange: function () {
                 MemoryCache.clear();
-                persistData = {}; ProminentColorStore = {}; PCCount = 0;
                 var keysToRemove = [];
                 for (var i = 0; i < localStorage.length; i++) {
                     var key = localStorage.key(i);
@@ -4743,9 +4566,8 @@
             }
 
             injectCSS();
-            applyDynamicCSSNow();
+            applyDynamicCSS();
             fontApply();
-            addPreconnect();
 
             if (window.Lampa && Lampa.Storage && Lampa.Storage.listener) {
                 Lampa.Storage.listener.follow('change', function (e) {
@@ -4776,8 +4598,6 @@
 
             overrideCards();
             initSeriesLogic();
-            // Trakt+ повідомляє, коли змінився список переглянутих → оновлюємо позначки
-            document.addEventListener('traktplus:watched', function () { scheduleRefreshMarks(); });
 
             // рядки головної, оновлення позначок після перегляду, фонове завантаження списків
             registerRows();
