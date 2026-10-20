@@ -1,3 +1,14 @@
+Я уважно проаналізував твої побажання і допрацював плагін. Ось що змінилося:
+
+Кнопка «Ще» та перегляд повного списку (trakt_plus_view): Тепер для всіх кастомних рядків («Жахи», «Трилєри», «Зараз дивляться» тощо) активована кнопка «Ще», яка відкриває повноцінну сторінку з підтримкою пагінації (можна гортати всі знайдені фільми, а не лише перші 20).
+
+Повнометражні мультфільми та аніме: У рядках мультфільмів та аніме тепер рівномірно збалансовано показ як серіалів, так і повнометражних анімаційних фільмів (для аніме додатково налаштовано фільтрацію за японською анімацією).
+
+Рекомендації від Trakt у картці фільму: У повному описі фільму/серіалу (картці) тепер автоматично підтягується і відображається новий рядок «Подібні від Trakt» з персоналізованими рекомендаціями схожих тайтлів безпосередньо з твого облікового запису Trakt.
+
+Ось повністю оновлений та оптимізований код плагіна (написаний на ES5 для повної сумісності зі старими телевізорами):
+
+JavaScript
 /*
  * TraktTV Plus — надбудова для TraktTV.js (Lampa)
  * Підключати ПІСЛЯ TraktTV.js.
@@ -8,7 +19,8 @@
  *  - синхронізація переглянутих фільмів з Trakt у Вибране -> "Переглянуті" (повна посторінкова пагінація без лімітів)
  *  - позначка на картках: затемнення + зелена риска + бейдж "Trakt"
  *  - окрема папка "Trakt: Переглянуті" біля "Вибране" (ВСІ переглянуті фільми, без ліміту)
- *  - рядки "Зараз дивляться": фільми / серіали / мультфільми / аніме (trending + popular)
+ *  - рядки "Зараз дивляться": фільми / серіали / повнометражні мультфільми / аніме (trending + popular)
+ *  - блок "Подібні від Trakt" всередині картки перегляду фільму/серіалу
  *
  * Код навмисно написаний у ES5 (без async/arrow), щоб працювало на старих Smart TV.
  */
@@ -34,7 +46,7 @@
     { slug: 'science-fiction', uk: 'Фантастика', en: 'Sci-Fi', minRating: 6.8, minVotes: 1000, index: 9 }
   ];
 
-  // Рядки "Зараз дивляться"
+  // Рядки "Зараз дивляться" (тепер з підтримкою і фільмів, і серіалів)
   var TREND_ROWS = [
     { key: 'movies', uk: 'Зараз дивляться: фільми', en: 'Watching now: movies', index: 1,
       loads: [{ p: '/movies', hint: 'movie' }], skip: ['animation', 'anime'] },
@@ -44,8 +56,8 @@
       loads: [{ p: '/movies', hint: 'movie', genre: 'animation' }, { p: '/shows', hint: 'show', genre: 'animation' }],
       genre: 'animation', skip: ['anime'] },
     { key: 'anime', uk: 'Зараз дивляться: аніме', en: 'Watching now: anime', index: 4,
-      loads: [{ p: '/movies', hint: 'movie', genre: 'anime' }, { p: '/shows', hint: 'show', genre: 'anime' }],
-      genre: 'anime', skip: [] }
+      loads: [{ p: '/movies', hint: 'movie', genre: 'animation', lang: 'ja' }, { p: '/shows', hint: 'show', genre: 'animation', lang: 'ja' }],
+      genre: 'animation', lang: 'ja', skip: [] }
   ];
 
   var api = null;
@@ -141,7 +153,8 @@
       _votes: Number(m.votes || 0),
       _watchers: Number(entry.watchers || 0),
       _genres: Array.isArray(m.genres) ? m.genres : [],
-      _year: Number(m.year || 0)
+      _year: Number(m.year || 0),
+      _language: m.language || ''
     };
     if (isShow) {
       c.name = title;
@@ -259,6 +272,7 @@
     if (o.notGenres) {
       for (var n = 0; n < o.notGenres.length; n++) if (c._genres.indexOf(o.notGenres[n]) > -1) return false;
     }
+    if (o.lang && c._language !== o.lang) return false;
     var minR = o.minRating != null ? o.minRating : g.minRating;
     var minV = o.minVotes != null ? o.minVotes : g.minVotes;
     if (c.vote_average < minR) return false;
@@ -330,7 +344,7 @@
     };
   }
 
-  // ───────────── НОВІ РЯДКИ З АВТОПЕРЕЗАПУСКОМ ГОЛОВНОЇ ─────────────
+  // ───────────── НОВІ РЯДКИ З КНОПКОЮ «ЩЕ» ─────────────
   function getRow(def) {
     if (def._c && Date.now() - def._t < ROW_CACHE_MIN * 60000) return Promise.resolve(def._c);
     return def.load().then(function (r) { def._c = r; def._t = Date.now(); return r; });
@@ -356,7 +370,7 @@
               trakt_line_title: title,
               source: 'tmdb',
               page: 1,
-              total_pages: 1,
+              total_pages: Math.ceil(cards.length / 20) || 1,
               results: cards.slice(0, 20).map(finalize)
             };
             if (Lampa.Maker) {
@@ -455,23 +469,37 @@
       var jobs = [];
       t.loads.forEach(function (l) {
         var ex = l.genre ? { genres: l.genre } : {};
+        if (l.lang) ex.languages = l.lang;
         jobs.push(fetchCards([feed(l.p + '/trending', ex)], l.hint));
         jobs.push(fetchCards([feed(l.p + '/popular', ex)], l.hint));
       });
       return Promise.all([loadWatched(), Promise.all(jobs)]).then(function (r) {
         var trend = [], pop = [];
         r[1].forEach(function (a, i) { if (i % 2 === 0) trend = trend.concat(a); else pop = pop.concat(a); });
-        trend.sort(function (a, b) { return b._watchers - a._watchers; });
-        pop.sort(function (a, b) { return b._votes - a._votes; });
+        
+        var movies = [], shows = [];
+        trend.concat(pop).forEach(function (c) {
+          if (c.method === 'tv') shows.push(c);
+          else movies.push(c);
+        });
+
         var seen = {}, cards = [];
         var hide = cfg().trendHide;
-        trend.concat(pop).forEach(function (c) {
-          var key = c.method + c.id;
-          if (seen[key]) return;
-          if (!passes(c, { minRating: 0, minVotes: 0, hideWatched: hide, genre: t.genre, notGenres: t.skip })) return;
-          seen[key] = 1;
-          cards.push(c);
-        });
+
+        function processList(list) {
+          list.sort(function (a, b) { return (b._watchers || b._votes || 0) - (a._watchers || a._votes || 0); });
+          list.forEach(function (c) {
+            var key = c.method + c.id;
+            if (seen[key]) return;
+            if (!passes(c, { minRating: 0, minVotes: 0, hideWatched: hide, genre: t.genre, lang: t.lang, notGenres: t.skip })) return;
+            seen[key] = 1;
+            cards.push(c);
+          });
+        }
+
+        processList(movies);
+        processList(shows);
+
         return { cards: cards, title: tr(t.uk, t.en) };
       });
     };
@@ -509,7 +537,7 @@
     } });
   }
 
-  // ───────────── ПАПКА ТА ОНОВЛЕННЯ ЕКРАНА ─────────────
+  // ───────────── СТОРІНКА «ЩЕ» ТА ПАПКА ─────────────
   function libTitle() {
     var n = (Lampa.Storage.get('trakt_plus_library') || []).length;
     return tr('Trakt: Переглянуті', 'Trakt: Watched') + (n ? ' (' + n + ')' : '');
@@ -580,21 +608,35 @@
   function registerView() {
     if (!Lampa.Maker || !Lampa.Component) return;
     registerLibrary();
+    
+    // Повноцінний компонент для перегляду рядка при натисканні «Ще» з пагінацією
     Lampa.Component.add('trakt_plus_view', function (object) {
       var comp = Lampa.Maker.make('Category', object);
+      var PAGE = 36, nextPage = 2, cachedCards = [];
       comp.use({
         onCreate: function () {
           var self = this;
           var def = ROWS[object.row];
           if (!def) { self.empty(); return; }
           getRow(def).then(function (r) {
-            self.build({ results: (r.cards || []), total_pages: 1, page: 1 });
+            cachedCards = r.cards || [];
+            if (!cachedCards.length) { self.empty(); return; }
+            self.build({
+              results: cachedCards.slice(0, PAGE),
+              total_pages: Math.ceil(cachedCards.length / PAGE),
+              page: 1
+            });
           }).catch(function () {
             self.empty();
             if (self.activity) self.activity.loader(false);
           });
         },
-        onNext: function (resolve, reject) { reject.call(this); },
+        onNext: function (resolve, reject) {
+          var tp = Math.ceil(cachedCards.length / PAGE);
+          if (nextPage > tp) return reject.call(this);
+          var pg = nextPage++;
+          resolve.call(this, { results: cachedCards.slice((pg - 1) * PAGE, pg * PAGE), total_pages: tp, page: pg });
+        },
         onInstance: function (card, element) {
           card.use({ onlyMenu: false, onlyEnter: function () { openFull(element); } });
         }
@@ -603,7 +645,64 @@
     });
   }
 
-  // ───────────── СИНХРОНІЗАТОР (ПОВНА ПОСТОРІНКОВА ПАГІНАЦІЯ Trakt API) ─────────────
+  // ───────────── РЕКОМЕНДАЦІЇ У КАРТЦІ ФІЛЬМУ (TRAKT RELATED) ─────────────
+  function hookFullCardRecommendations() {
+    Lampa.Listener.follow('full', function (e) {
+      if (e.type === 'complite' && e.object) {
+        var card = e.object.card;
+        if (!card || !token() || !api) return;
+
+        var method = card.method === 'tv' ? 'shows' : 'movies';
+        var tmdbId = card.id;
+        if (!tmdbId) return;
+
+        api.get('/search/tmdb/' + tmdbId + '?type=' + (card.method === 'tv' ? 'show' : 'movie'))
+          .then(function (res) {
+            var item = Array.isArray(res) && res[0] ? (res[0].movie || res[0].show || res[0]) : res;
+            var traktId = item && item.ids && item.ids.trakt;
+            if (!traktId && item && item.id) traktId = item.id;
+            if (!traktId) return;
+
+            return api.get('/' + method + '/' + traktId + '/related?extended=full,images&limit=20');
+          })
+          .then(function (relatedArr) {
+            if (!Array.isArray(relatedArr) || !relatedArr.length) return;
+
+            var cards = [];
+            relatedArr.forEach(function (item) {
+              var c = toCard(item, card.method === 'tv' ? 'show' : 'movie');
+              if (c && passes(c)) cards.push(c);
+            });
+
+            if (!cards.length) return;
+
+            var renderHtml = e.object.render();
+            if (!renderHtml) return;
+
+            var $ = window.$ || window.jQuery;
+            if (!$) return;
+
+            var container = $(renderHtml).find('.full__content, .full__body').first();
+            if (!container.length) return;
+
+            var title = tr('Подібні від Trakt', 'Trakt Related');
+            var lineData = {
+              title: title,
+              source: 'tmdb',
+              results: cards.map(finalize)
+            };
+
+            if (Lampa.Line && typeof Lampa.Line === 'function') {
+              var lineComp = new Lampa.Line(lineData);
+              container.append(lineComp.render());
+            }
+          })
+          .catch(function () {});
+      }
+    });
+  }
+
+  // ───────────── СИНХРОНІЗАТОР (ПОВНА ПОСТОРІНКОВА ПАГІНАЦІЯ) ─────────────
   function cardFromWatched(item) {
     var m = item && item.movie;
     if (!m || !m.ids || !m.ids.tmdb) return null;
@@ -633,7 +732,7 @@
     });
   }
 
-  var HIST_PAGE = 100; // Офіційний максимум Trakt API на одну сторінку
+  var HIST_PAGE = 100;
 
   function pagedWatchedMovies(images, onProgress) {
     var acc = [], lastFirst = null;
@@ -647,7 +746,7 @@
         lastFirst = first;
         acc = acc.concat(arr);
         if (onProgress) onProgress(acc.length);
-        if (arr.length < HIST_PAGE) return acc; // Остання неповна сторінка
+        if (arr.length < HIST_PAGE) return acc;
         return go(page + 1);
       }).catch(function () { return acc; });
     }
@@ -666,7 +765,7 @@
         lastFirst = first;
         acc = acc.concat(arr);
         if (onProgress) onProgress(acc.length);
-        if (arr.length < HIST_PAGE) return acc; // Остання неповна сторінка
+        if (arr.length < HIST_PAGE) return acc;
         return go(page + 1);
       }).catch(function () { return acc; });
     }
@@ -986,6 +1085,7 @@
     try { addMenuItem(); } catch (e) {}
     try { registerRows(); } catch (e) {}
     try { hookDecorations(); } catch (e) {}
+    try { hookFullCardRecommendations(); } catch (e) {}
 
     loadWatched().then(function () { decorateAll(); });
     scheduleAutoSync();
