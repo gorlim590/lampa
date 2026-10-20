@@ -2,6 +2,7 @@
  * YDesign (оптимізована збірка для ТВ-приставок)
  * Оригінальний плагін: yarikrazor-star/lmp (ydes.js). Це змінена копія для особистого використання.
  *
+ * v3: позначки «Новинка/Скоро», «Переглянуто» та фон екрана під колір постера (налаштування в розділі YDesign).
  * Що змінено (v2: додано необов'язкову перевірку UA через парсер торентів, виправлено кеш «немає UA»):
  *  - режим продуктивності (Авто / Економний / Повні ефекти): на ТВ без blur та важких фільтрів;
  *  - черга мережевих запитів (макс. 4 одночасно, найновіші картки першими);
@@ -70,6 +71,9 @@
         ydesign_lazy_load: false,
         ydesign_perf_mode: 'auto',
         ydesign_ua_torrents: false,
+        ydesign_ribbons: true,
+        ydesign_watched_mark: true,
+        ydesign_ambient: true,
 
         ydesign_badge_shape: 'pill',
         ydesign_glass_pill_bg: true,
@@ -1358,6 +1362,179 @@
     // =========================================================================
     // 9. СТВОРЕННЯ КАРТОК ФІЛЬМІВ
     // =========================================================================
+    // =========================================================================
+    // 6.3. ФОКУС, ПОЗНАЧКИ («Новинка» / «Скоро», «Переглянуто») ТА ФОН ПІД КОЛІР ПОСТЕРА
+    // =========================================================================
+    var FocusState = { el: null, installed: false };
+
+    // Lampa кидає на елемент нативну подію hover:focus (без bubbling) — ловимо її в фазі capture на document
+    function installFocusHooks() {
+        if (FocusState.installed) return;
+        FocusState.installed = true;
+        document.addEventListener('hover:focus', function (e) {
+            var t = e.target;
+            FocusState.el = t;
+            var card = null;
+            if (t && t.classList) card = t.classList.contains('ydesign-card') ? t : (t.closest ? t.closest('.ydesign-card') : null);
+            if (card) {
+                if (card._ydesign_updateMarks) card._ydesign_updateMarks();
+                ambientFocus(card);
+                if (card._ydesign_onFocus) card._ydesign_onFocus();
+            } else {
+                ambientLater();
+            }
+        }, true);
+    }
+
+    var UA_MONTHS = ['січ', 'лют', 'бер', 'кві', 'тра', 'чер', 'лип', 'сер', 'вер', 'жов', 'лис', 'гру'];
+    var NEW_DAYS = 14;
+    var SOON_MAX_DAYS = 365;
+
+    function releaseInfo(data) {
+        var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(data.release_date || data.first_air_date || ''));
+        if (!m) return null;
+        var d = new Date(+m[1], +m[2] - 1, +m[3]);
+        var now = new Date();
+        var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        var diff = Math.round((today.getTime() - d.getTime()) / 86400000);
+        if (diff < 0) {
+            if (-diff > SOON_MAX_DAYS) return null;
+            var label = d.getDate() + ' ' + UA_MONTHS[d.getMonth()];
+            if (d.getFullYear() !== today.getFullYear()) label += ' ' + d.getFullYear();
+            return { kind: 'soon', text: 'Скоро · ' + label };
+        }
+        if (diff <= NEW_DAYS) return { kind: 'new', text: 'Новинка' };
+        return null;
+    }
+
+    // «Переглянуто»: позначка у Lampa АБО (для фільмів) прогрес перегляду ≥ 90%
+    function isWatched(data, type) {
+        try {
+            if (window.Lampa && Lampa.Favorite && typeof Lampa.Favorite.check === 'function') {
+                var f = Lampa.Favorite.check(data);
+                if (f && f.viewed) return true;
+            }
+            if (type !== 'tv' && data.original_title && window.Lampa && Lampa.Timeline && typeof Lampa.Timeline.watched === 'function') {
+                var p = Lampa.Timeline.watched(data);
+                if (typeof p === 'number' && p >= 90) return true;
+            }
+        } catch (e) {}
+        return false;
+    }
+
+    var CHECK_SVG = '<svg viewBox="0 0 24 24" width="100%" height="100%"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+    function updateCardMarks(el, data, type) {
+        var view = el.querySelector ? el.querySelector('.card__view') : null;
+        if (!view) return;
+
+        // стрічка «Новинка» / «Скоро · 24 лис»
+        var ribbon = view.querySelector('.ydesign-ribbon');
+        var info = releaseInfo(data);
+        if (info) {
+            if (!ribbon) {
+                ribbon = document.createElement('div');
+                view.appendChild(ribbon);
+            }
+            var cls = 'ydesign-ribbon ydesign-ribbon-' + info.kind;
+            if (ribbon.className !== cls) ribbon.className = cls;
+            if (ribbon.textContent !== info.text) ribbon.textContent = info.text;
+        } else if (ribbon && ribbon.parentNode) {
+            ribbon.parentNode.removeChild(ribbon);
+        }
+
+        // «Переглянуто»: затемнення постера + галочка (елементи створюємо лише коли справді потрібні)
+        var watched = isWatched(data, type);
+        if (watched && !view.querySelector('.ydesign-watched-dim')) {
+            var dim = document.createElement('div');
+            dim.className = 'ydesign-watched-dim';
+            var gl = view.querySelector('.ydesign-gradient-layer');
+            if (gl) view.insertBefore(dim, gl); else view.appendChild(dim);
+            var chk = document.createElement('div');
+            chk.className = 'ydesign-watched-check';
+            chk.innerHTML = CHECK_SVG;
+            view.appendChild(chk);
+        }
+        el.classList.toggle('ydesign-is-watched', watched);
+    }
+
+    // ---- Ambient: фон усього екрана під колір постера у фокусі (без blur, лише градієнти) ----
+    var Ambient = { wrap: null, layers: [], front: 1, z: 1, key: '', timer: null, retry: 0 };
+
+    function ambientEnsure() {
+        if (Ambient.wrap) return true;
+        if (!document.body) return false;
+        var w = document.createElement('div');
+        w.id = 'ydesign-ambient';
+        w.innerHTML = '<div class="ydesign-amb-layer"></div><div class="ydesign-amb-layer"></div>';
+        var bg = document.querySelector('.background');
+        if (bg && bg.parentNode) bg.parentNode.insertBefore(w, bg.nextSibling);
+        else document.body.insertBefore(w, document.body.firstChild);
+        Ambient.wrap = w;
+        Ambient.layers = [w.children[0], w.children[1]];
+        return true;
+    }
+
+    function ambientGradient(color) {
+        var m = /rgba?\(\s*(\d+)[^\d]+(\d+)[^\d]+(\d+)/.exec(color || '');
+        if (!m) return null;
+        var r = +m[1], g = +m[2], b = +m[3];
+        var lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        var k = lum > 120 ? 120 / lum : 1; // надто світлі кольори приглушуємо, щоб білий текст лишався читабельним
+        r = Math.round(r * k); g = Math.round(g * k); b = Math.round(b * k);
+        function sh(f, a) {
+            return 'rgba(' + Math.min(255, Math.round(r * f)) + ',' + Math.min(255, Math.round(g * f)) + ',' + Math.min(255, Math.round(b * f)) + ',' + a + ')';
+        }
+        return {
+            key: r + ',' + g + ',' + b,
+            css: 'radial-gradient(120% 80% at 18% 0%, ' + sh(1.15, 0.9) + ' 0%, ' + sh(1, 0) + ' 72%), ' +
+                 'linear-gradient(180deg, ' + sh(0.62, 0.94) + ' 0%, ' + sh(0.34, 0.97) + ' 100%)'
+        };
+    }
+
+    function ambientShow(color) {
+        if (!getSet('ydesign_ambient')) return;
+        var c = ambientGradient(color);
+        if (!c || !ambientEnsure()) return;
+        Ambient.wrap.classList.add('on');
+        if (Ambient.key === c.key) return;
+        Ambient.key = c.key;
+        // нова кольорова плівка вище за стару і плавно проявляється (лише opacity — дешево для GPU)
+        var next = 1 - Ambient.front;
+        var layer = Ambient.layers[next];
+        layer.style.transition = 'none';
+        layer.style.opacity = '0';
+        layer.style.backgroundImage = c.css;
+        layer.style.zIndex = String(++Ambient.z);
+        void layer.offsetWidth;
+        layer.style.transition = '';
+        layer.style.opacity = '1';
+        Ambient.front = next;
+    }
+
+    function ambientHide() {
+        Ambient.key = '';
+        if (Ambient.wrap) Ambient.wrap.classList.remove('on');
+    }
+
+    function ambientFocus(card) {
+        if (!getSet('ydesign_ambient')) return;
+        clearTimeout(Ambient.timer);
+        Ambient.retry = 0;
+        function tick() {
+            if (FocusState.el !== card) return; // фокус уже пішов далі
+            var col = card._ydesign_color;
+            if (col) { ambientShow(col); return; }
+            if (++Ambient.retry < 8) Ambient.timer = setTimeout(tick, 250); // колір ще рахується
+        }
+        Ambient.timer = setTimeout(tick, 160);
+    }
+
+    function ambientLater() {
+        clearTimeout(Ambient.timer);
+        Ambient.timer = setTimeout(ambientHide, 350);
+    }
+
     function logoQuality() {
         var q = String(getSet('ydesign_logo_quality') || 'w500');
         if (isLite() && (q === 'w500' || q === 'w780' || q === 'w1280' || q === 'original')) return 'w300';
@@ -1413,7 +1590,9 @@
 
         el._ydesign_updateNotch = function () {
             updateCardNotch(el, data, el._ydesign_extData);
+            updateCardMarks(el, data, type);
         };
+        el._ydesign_updateMarks = function () { updateCardMarks(el, data, type); };
 
         var buildExtendedCard = function () {
             var view = el.querySelector('.card__view');
@@ -1428,6 +1607,7 @@
             view.appendChild(gradientLayer);
             view.appendChild(contentLayer);
             updateCardNotch(el, data, el._ydesign_extData);
+            updateCardMarks(el, data, type);
 
             var bgQuality = isHorz ? getSet('ydesign_backdrop_quality') : getSet('ydesign_poster_quality');
 
@@ -1441,6 +1621,8 @@
                     if (color) {
                         view.style.backgroundColor = color;
                         el.style.setProperty('--yd-glow', color);
+                        el._ydesign_color = color;
+                        if (FocusState.el === el) ambientFocus(el);
                         var rgba95 = color.replace('rgb', 'rgba').replace(')', ', 0.95)');
                         gradientLayer.style.background = 'linear-gradient(to top, ' + color + ' 0%, ' + rgba95 + ' 45%, transparent 100%)';
                         contentLayer.style.background = 'linear-gradient(to top, ' + color + ' 10%, transparent 100%)';
@@ -1567,22 +1749,23 @@
 
                 // Додаткова перевірка через торент-парсер: лише коли картка у фокусі (не для всього ряду одразу)
                 function armTorrentUa() {
-                    if (!torrentUaEnabled() || !window.$) return;
+                    if (!torrentUaEnabled()) return;
                     var cached = torrentUaCached(data.id, type);
                     if (cached === true) { addUaBadge('Є в торентах'); return; }
                     if (cached === false) return;
                     var timer = null, started = false;
-                    function start() {
+                    el._ydesign_onFocus = function () {
                         if (started) return;
-                        started = true;
-                        window.$(el).off('hover:focus.ydua hover:blur.ydua');
-                        checkTorrentsUa(data, type).then(function (found) { if (found) addUaBadge('Є в торентах'); });
-                    }
-                    window.$(el).on('hover:focus.ydua', function () {
                         clearTimeout(timer);
-                        timer = setTimeout(start, 900);
-                    }).on('hover:blur.ydua', function () { clearTimeout(timer); });
-                    if (el.classList.contains('focus')) timer = setTimeout(start, 900);
+                        timer = setTimeout(function () {
+                            // картку вже проскочили — не запускаємо важкий пошук
+                            if (started || FocusState.el !== el) return;
+                            started = true;
+                            el._ydesign_onFocus = null;
+                            checkTorrentsUa(data, type).then(function (found) { if (found) addUaBadge('Є в торентах'); });
+                        }, 900);
+                    };
+                    if (FocusState.el === el) el._ydesign_onFocus();
                 }
 
                 checkUaVoiceover(data.id, type).then(function (hasUa) {
@@ -1678,11 +1861,13 @@
     // =========================================================================
     var YD_EXTRA_CSS = "\n/* ===== YDesign: оптимізації та ефекти ===== */\n/* рейтинги: фільтр лише якщо задано насиченість != 100% */\n.ydesign-active .ydesign-rating img { filter: none !important; }\nbody.ydesign-sat-on .ydesign-rating img { filter: saturate(var(--ydesign-ratings-saturate, 100%)) !important; }\n\n/* картка: без постійних composited-шарів, ізоляція верстки */\n.ydesign-active .ydesign-card {\n    contain: layout;\n    transform: none;\n    backface-visibility: visible;\n    transition: transform .2s cubic-bezier(.2,.8,.2,1);\n}\n.ydesign-active .ydesign-card.focus { transform: scale(1.045); will-change: transform; }\n.ydesign-active .ydesign-card .card__view { transition: none !important; }\n\n/* плавна поява контенту після завантаження даних */\n.ydesign-active .ydesign-content-layer,\n.ydesign-active .ydesign-desc-under { opacity: 0; transition: opacity .4s ease-out; }\n.ydesign-active .ydesign-card.ydesign-ready .ydesign-content-layer,\n.ydesign-active .ydesign-card.ydesign-ready .ydesign-desc-under { opacity: 1; }\n\n/* підсвітка кольором постера під карткою у фокусі */\n.ydesign-active .ydesign-card.focus::after {\n    content: ''; position: absolute; left: -7%; right: -7%; top: -5%; bottom: -5%;\n    background: radial-gradient(closest-side, var(--yd-glow, transparent) 0%, transparent 100%);\n    opacity: 0; z-index: -1; pointer-events: none;\n    animation: ydGlow .35s ease-out .05s forwards;\n}\n@keyframes ydGlow { to { opacity: .6; } }\nbody.is--touch .ydesign-active .ydesign-card.focus::after { display: none; }\n\n/* ефекти для потужних пристроїв */\nbody.ydesign-fx.ydesign-glass-pill .ydesign-badge,\nbody.ydesign-fx.ydesign-glass-pill .ydesign-genre-badge,\nbody.ydesign-fx.ydesign-glass-pill .ydesign-rating,\nbody.ydesign-fx.ydesign-notch-bg .ydesign-card-notch,\nbody.ydesign-fx.ydesign-series-glass-pill .ydesign-series-pill {\n    backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important;\n}\nbody.ydesign-fx .ydesign-series-active .online-prestige.online-prestige--full .online-prestige__timeline {\n    backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important;\n}\nbody.ydesign-fx .ydesign-logo-container img { filter: drop-shadow(0 2px 6px rgba(0,0,0,0.85)); }\nbody.ydesign-fx .ydesign-card.focus .ydesign-content-layer::after {\n    content: ''; position: absolute; top: 0; left: 0; width: 55%; height: 100%;\n    background: linear-gradient(100deg, transparent 0%, rgba(255,255,255,.14) 50%, transparent 100%);\n    transform: translateX(-130%) skewX(-12deg);\n    animation: ydShine .9s ease-out .12s 1 both; pointer-events: none;\n}\n@keyframes ydShine { to { transform: translateX(280%) skewX(-12deg); } }\n\n/* економний режим: трохи світліші «скляні» плашки замість blur */\nbody:not(.ydesign-fx).ydesign-glass-pill .ydesign-badge,\nbody:not(.ydesign-fx).ydesign-glass-pill .ydesign-genre-badge,\nbody:not(.ydesign-fx).ydesign-glass-pill .ydesign-rating { background: rgba(255,255,255,0.16) !important; }\nbody:not(.ydesign-fx).ydesign-notch-bg .ydesign-card-notch { background: rgba(30,30,40,0.55) !important; }\nbody:not(.ydesign-fx).ydesign-series-glass-pill .ydesign-series-pill { background: rgba(255,255,255,0.18) !important; }\n";
 
+    var YD_MARKS_CSS = "\n/* ===== YDesign: \u043f\u043e\u0437\u043d\u0430\u0447\u043a\u0438 \u0442\u0430 ambient ===== */\n.ydesign-ribbon { position: absolute; top: 2.4em; left: .6em; z-index: 24; padding: .32em .8em; border-radius: 2em;\n  font-size: .72em; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; line-height: 1.1; color: #fff;\n  white-space: nowrap; pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,.35); }\n.ydesign-ribbon-new { background: linear-gradient(135deg, #ff5f6d, #ff9966); }\n.ydesign-ribbon-soon { background: linear-gradient(135deg, #5b7cfa, #9b59ff); }\nbody.ydesign-ribbons-off .ydesign-ribbon { display: none !important; }\n\n.ydesign-watched-dim { position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: rgba(6,8,16,.5);\n  opacity: 0; transition: opacity .35s ease; pointer-events: none; }\n.ydesign-watched-check { position: absolute; top: .7em; right: .7em; z-index: 26; width: 2.1em; height: 2.1em; font-size: .8em;\n  box-sizing: border-box; padding: .34em; border-radius: 50%; background: linear-gradient(135deg, #34d27b, #1fa85a);\n  box-shadow: 0 2px 10px rgba(0,0,0,.45); opacity: 0; transform: scale(.6);\n  transition: opacity .3s ease, transform .3s cubic-bezier(.2,1.4,.4,1); pointer-events: none; }\n.ydesign-is-watched .ydesign-watched-dim { opacity: 1; }\n.ydesign-is-watched .ydesign-watched-check { opacity: 1; transform: scale(1); }\n.ydesign-is-watched.focus .ydesign-watched-dim { opacity: .55; }\nbody.ydesign-watched-off .ydesign-watched-dim, body.ydesign-watched-off .ydesign-watched-check { display: none !important; }\n\n#ydesign-ambient { position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 1; pointer-events: none;\n  opacity: 0; transition: opacity .6s ease; }\n#ydesign-ambient.on { opacity: 1; }\n#ydesign-ambient .ydesign-amb-layer { position: absolute; left: 0; top: 0; right: 0; bottom: 0; opacity: 0; transition: opacity .7s ease; }\nbody.ydesign-ambient-off #ydesign-ambient { display: none !important; }\n";
+
     function ydPostCss(css) {
         // Важкі декларації прибираємо з базового CSS; у режимі ефектів вони повертаються правилами з YD_EXTRA_CSS
         css = css.replace(/(?:-webkit-)?backdrop-filter\s*:[^;]*;/g, '');
         css = css.replace(/filter\s*:\s*drop-shadow\([^;]*;/g, '');
-        return css + '\n' + YD_EXTRA_CSS;
+        return css + '\n' + YD_EXTRA_CSS + '\n' + YD_MARKS_CSS;
     }
 
     function injectCSS() {
@@ -2309,6 +2494,9 @@
             LiteCache.t = 0;
             document.body.classList.add('ydesign-active');
             document.body.classList.toggle('ydesign-fx', !isLite());
+            document.body.classList.toggle('ydesign-ribbons-off', !getSet('ydesign_ribbons'));
+            document.body.classList.toggle('ydesign-watched-off', !getSet('ydesign_watched_mark'));
+            document.body.classList.toggle('ydesign-ambient-off', !getSet('ydesign_ambient'));
             document.body.classList.toggle('ydesign-series-active', getSet('ydesign_series_redesign'));
             document.body.classList.toggle('ydesign-series-glass-pill', getSet('ydesign_series_glass_pill'));
             document.body.classList.toggle('ydesign-series-border-badges', getSet('ydesign_series_border_badges'));
@@ -2547,6 +2735,9 @@
         // -------------------------------------------------------------
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_lazy_load', type: 'trigger', default: DefaultSettings.ydesign_lazy_load }, field: { name: 'Ліниве завантаження', description: 'Завантажувати додаткові дані (лого, рейтинги) тільки при появі картки на екрані' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_ua_torrents', type: 'trigger', default: DefaultSettings.ydesign_ua_torrents }, field: { name: 'UA-плашка за торентами', description: 'Додатково шукати українську озвучку через парсер Lampa (Jackett/Prowlarr/JacRed з Толокою тощо). Перевіряється, коли картка у фокусі. Потрібен налаштований парсер' } });
+        Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_ribbons', type: 'trigger', default: DefaultSettings.ydesign_ribbons }, field: { name: 'Позначки «Новинка» / «Скоро»', description: 'Новинка — вийшло менше ніж 14 днів тому; Скоро — із датою виходу' } });
+        Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_watched_mark', type: 'trigger', default: DefaultSettings.ydesign_watched_mark }, field: { name: 'Позначка «Переглянуто»', description: 'Постер тьмяніє й отримує галочку (для фільмів — від 90% перегляду або за відміткою Lampa)' } });
+        Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_ambient', type: 'trigger', default: DefaultSettings.ydesign_ambient }, field: { name: 'Фон під колір постера', description: 'Фон усього екрана плавно змінюється під колір картки у фокусі (без blur)' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_perf_mode', type: 'select', values: { 'auto': 'Авто (на ТВ — економний)', 'lite': 'Економний (без blur, для ТВ)', 'fx': 'Повні ефекти (blur, тіні, блиск)' }, default: DefaultSettings.ydesign_perf_mode }, field: { name: 'Режим продуктивності', description: 'Економний режим прибирає blur і важкі фільтри — скролінг стає плавнішим на приставках і ТВ' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_card_type_main', type: 'select', values: { 'vertical': 'Вертикальні (9:16)', 'horizontal': 'Горизонтальні (16:11)' }, default: DefaultSettings.ydesign_card_type_main }, field: { name: 'Тип карток (Головна)' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_card_type_other', type: 'select', values: { 'vertical': 'Вертикальні (9:16)', 'horizontal': 'Горизонтальні (16:11)' }, default: DefaultSettings.ydesign_card_type_other }, field: { name: 'Тип карток (Інші сторінки)' } });
@@ -2926,6 +3117,7 @@
     // 12. ПЕРЕХОПЛЕННЯ ТА РЕНДЕРИНГ КАРТОК
     // =========================================================================
     function overrideCards() {
+        installFocusHooks();
         try {
             var CardMaker = Lampa.Maker.map('Card');
             if (!CardMaker || !CardMaker.Card) return;
