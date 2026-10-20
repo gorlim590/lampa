@@ -7,6 +7,7 @@
  *    приховані перлини, топ непереглянутого, свіжі та варті уваги
  *  - синхронізація переглянутих фільмів з Trakt у Вибране -> "Переглянуті" (ліміт 2500)
  *  - позначка на картках: затемнення + зелена риска + бейдж "Trakt"
+ *  - окрема папка "Trakt: Переглянуті" біля "Вибране" (ВСІ переглянуті фільми, без ліміту)
  *  - рядки "Зараз дивляться": фільми / серіали / мультфільми / аніме (trending + popular)
  *
  * Код навмисно написаний у ES5 (без async/arrow), щоб працювало на старих Smart TV.
@@ -228,11 +229,11 @@
         var same = stamp !== null && stamp === (cached.stamp || '');
         if (!force && !tooOld && (same || stamp === null)) return false; // кеш актуальний
         return Promise.all([
-          api.get('/sync/watched/movies').catch(function () { return null; }),
+          fetchAllMerged({ images: false }).catch(function () { return null; }),
           api.get('/sync/watched/shows?extended=noseasons').catch(function () { return null; })
         ]).then(function (r) {
           var ok = false;
-          if (Array.isArray(r[0])) { watchedMovies = collectIds(r[0], 'movie'); ok = true; }
+          if (r[0] && r[0].list) { watchedMovies = collectIds(r[0].list, 'movie'); ok = true; }
           if (Array.isArray(r[1])) { watchedShows = collectIds(r[1], 'show'); ok = true; }
           if (ok) { if (stamp !== null) watchedStamp = stamp; persistWatched(); }
           return ok;
@@ -514,9 +515,79 @@
     } });
   }
 
+  // ───────────── ПАПКА "Trakt: Переглянуті" ─────────────
+  function libTitle() {
+    var n = (Lampa.Storage.get('trakt_plus_library') || []).length;
+    return tr('Trakt: Переглянуті', 'Trakt: Watched') + (n ? ' (' + n + ')' : '');
+  }
+
+  function openLibrary() {
+    Lampa.Activity.push({ url: '', title: libTitle(), component: 'trakt_plus_library', page: 1 });
+  }
+
+  function registerLibrary() {
+    Lampa.Component.add('trakt_plus_library', function (object) {
+      var comp = Lampa.Maker.make('Category', object);
+      var PAGE = 60, nextPage = 2, lib = [];
+      function pageCards(p) {
+        return lib.slice((p - 1) * PAGE, p * PAGE).map(function (x) {
+          var poster = x.p ? 'https://' + x.p : '';
+          return {
+            component: 'full', source: 'tmdb', id: x.i, ids: { tmdb: x.i },
+            title: x.t, original_title: x.t, release_date: x.y ? String(x.y) : '',
+            poster: poster, img: poster, image: poster, background_image: poster,
+            vote_average: 0, method: 'movie', card_type: 'movie', type: 'movie', _lib: true
+          };
+        });
+      }
+      comp.use({
+        onCreate: function () {
+          var self = this;
+          lib = Lampa.Storage.get('trakt_plus_library') || [];
+          if (!lib.length) {
+            self.empty();
+            notify(tr('Папка порожня. Зробіть імпорт: Налаштування → Trakt+', 'Folder is empty. Run import: Settings → Trakt+'));
+            return;
+          }
+          self.build({ results: pageCards(1), total_pages: Math.ceil(lib.length / PAGE), page: 1 });
+        },
+        onNext: function (resolve, reject) {
+          var tp = Math.ceil(lib.length / PAGE);
+          if (nextPage > tp) return reject.call(this);
+          var pg = nextPage++;
+          resolve.call(this, { results: pageCards(pg), total_pages: tp, page: pg });
+        },
+        onInstance: function (card, element) {
+          card.use({ onlyMenu: false, onlyEnter: function () { openFull(element); } });
+        }
+      });
+      return comp;
+    });
+  }
+
+  // пункт у лівому меню одразу під "Вибране"
+  var menuTries = 0;
+  function addMenuItem() {
+    var $ = window.$ || window.jQuery;
+    if (!$) return;
+    var list = $('.menu .menu__list').eq(0);
+    if (!list.length) {
+      if (++menuTries < 40) setTimeout(addMenuItem, 500);
+      return;
+    }
+    if ($('.menu [data-action="trakt_plus_library"]').length) return;
+    var ico = '<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>';
+    var li = $('<li class="menu__item selector" data-action="trakt_plus_library"><div class="menu__ico">' + ico +
+      '</div><div class="menu__text">' + tr('Trakt: Переглянуті', 'Trakt: Watched') + '</div></li>');
+    li.on('hover:enter', openLibrary);
+    var fav = list.find('[data-action="favorite"]').first();
+    if (fav.length) fav.after(li); else list.append(li);
+  }
+
   // сторінка "Показати все" для наших рядків
   function registerView() {
     if (!Lampa.Maker || !Lampa.Component) return;
+    registerLibrary();
     Lampa.Component.add('trakt_plus_view', function (object) {
       var comp = Lampa.Maker.make('Category', object);
       comp.use({
@@ -560,16 +631,88 @@
     };
   }
 
-  function fetchWatchedFull(attempt) {
-    return api.get('/sync/watched/movies?extended=images').catch(function (e) {
+  // запит з повтором
+  function getRetry(path, attempt) {
+    attempt = attempt || 0;
+    return api.get(path).catch(function (e) {
       if (attempt < 2) {
-        return new Promise(function (r) { setTimeout(r, 1500); }).then(function () { return fetchWatchedFull(attempt + 1); });
+        return new Promise(function (r) { setTimeout(r, 1500); }).then(function () { return getRetry(path, attempt + 1); });
       }
       throw e;
     });
   }
 
-  function syncWatched(manual) {
+  // Історія переглядів посторінково. Йдемо, поки сторінки не закінчаться
+  // (навіть якщо сервер/обгортка раптом обрізає сторінку до 100 — це не заважає).
+  var HIST_PAGE = 1000, HIST_PAGE_CAP = 200;
+  function pagedHistory(images, onProgress) {
+    var acc = [], lastFirst = null;
+    function go(page) {
+      var q = '/sync/history/movies?page=' + page + '&limit=' + HIST_PAGE + (images ? '&extended=images' : '');
+      return getRetry(q).then(function (arr) {
+        arr = Array.isArray(arr) ? arr : [];
+        if (!arr.length || page > HIST_PAGE_CAP) return acc;
+        var first = arr[0] && arr[0].id;
+        if (first !== undefined && first === lastFirst) return acc; // сторінка не змінилась — стоп
+        lastFirst = first;
+        acc = acc.concat(arr);
+        if (onProgress) onProgress(acc.length);
+        return go(page + 1);
+      });
+    }
+    return go(1);
+  }
+
+  function mergeWatched(a, hist) {
+    var map = {}, out = [];
+    function put(it, ts) {
+      var m = it && it.movie;
+      if (!m || !m.ids || !m.ids.tmdb) return;
+      var k = m.ids.tmdb;
+      if (map[k]) {
+        if (ts && String(ts) > String(map[k].last_watched_at || '')) map[k].last_watched_at = ts;
+        if (!img(map[k].movie, 'poster') && img(m, 'poster')) map[k].movie = m;
+        return;
+      }
+      map[k] = { movie: m, last_watched_at: ts || '' };
+      out.push(map[k]);
+    }
+    a.forEach(function (it) { put(it, it.last_watched_at); });
+    hist.forEach(function (it) { put(it, it.watched_at); });
+    return out;
+  }
+
+  // Повний список переглянутих фільмів: /sync/watched/movies + (якщо щось підозріле або примусово) історія з пагінацією.
+  // opts: { full, images, progress }  →  { list, a, h }
+  function fetchAllMerged(opts) {
+    opts = opts || {};
+    var path = '/sync/watched/movies' + (opts.images ? '?extended=images' : '');
+    return getRetry(path).then(function (a) {
+      a = Array.isArray(a) ? a : [];
+      var needHist = opts.full || a.length === 100; // рівно 100 = схоже на обрізаний список
+      if (!needHist) return { list: mergeWatched(a, []), a: a.length, h: 0 };
+      return pagedHistory(!!opts.images, opts.progress).catch(function () { return []; }).then(function (h) {
+        return { list: mergeWatched(a, h), a: a.length, h: h.length };
+      });
+    });
+  }
+
+  // окрема "папка": компактний список ВСІХ переглянутих (не залежить від ліміту Вибраного)
+  function saveLibrary(list) {
+    var lib = list.map(function (it) {
+      var m = it.movie;
+      return { i: m.ids.tmdb, t: m.title || '', y: m.year || 0,
+        p: img(m, 'poster').replace(/^https?:\/\//, ''), w: String(it.last_watched_at || '') };
+    });
+    lib.sort(function (x, y) { return y.w.localeCompare(x.w); });
+    try {
+      Lampa.Storage.set('trakt_plus_library', lib);
+      Lampa.Storage.set('trakt_plus_library_t', Date.now());
+      return lib.length;
+    } catch (e) { return 0; }
+  }
+
+  function syncWatched(manual, full) {
     if (syncing) { if (manual) notify(tr('Синхронізація вже триває', 'Sync already running')); return Promise.resolve(); }
     if (!token()) { if (manual) notify(tr('Спочатку увійдіть у Trakt.TV', 'Login to Trakt.TV first')); return Promise.resolve(); }
     if (!Lampa.Favorite) { if (manual) notify(tr('Вибране недоступне', 'Favorites unavailable')); return Promise.resolve(); }
@@ -581,12 +724,18 @@
     }
     function stopLoading() { if (manual && Lampa.Loading) Lampa.Loading.stop(); }
 
-    return fetchWatchedFull(0).then(function (raw) {
-      raw = Array.isArray(raw) ? raw : [];
-      // всі переглянуті йдуть у фільтри (без ліміту), у Вибране — максимум MAX_WATCHED
+    return fetchAllMerged({
+      full: !!full, images: true,
+      progress: function (n) {
+        if (manual && Lampa.Loading && Lampa.Loading.setText) Lampa.Loading.setText(tr('Історія Trakt: ', 'Trakt history: ') + n);
+      }
+    }).then(function (res) {
+      var raw = res.list;
+      // всі переглянуті йдуть у фільтри/позначки/папку (без ліміту), у Вибране → "Переглянуті" — максимум MAX_WATCHED
       var allIds = collectIds(raw, 'movie');
       watchedMovies = allIds;
       persistWatched();
+      var libCount = saveLibrary(raw);
 
       raw.sort(function (a, b) {
         return String(b.last_watched_at || '').localeCompare(String(a.last_watched_at || ''));
@@ -650,7 +799,11 @@
         stopLoading();
         syncing = false;
         decorateAll();
-        notify(tr('Trakt → Переглянуті: додано ', 'Trakt → Viewed: added ') + stats.added +
+        var inFav = -1;
+        try { inFav = (Lampa.Favorite.get({ type: 'viewed' }) || []).length; } catch (e) {}
+        notify(tr('Trakt: отримано ', 'Trakt: received ') + res.a + (res.h ? ' (+' + res.h + tr(' з історії', ' from history') + ')' : '') +
+          tr(', у папці ', ', in folder ') + libCount + (inFav >= 0 ? tr(', у Вибраному ', ', in Favorites ') + inFav : '') + '. ' +
+          tr('Вибране: додано ', 'Favorites: added ') + stats.added +
           tr(', пропущено ', ', skipped ') + stats.skipped +
           tr(', прибрано ', ', removed ') + stats.removed);
       });
@@ -676,7 +829,7 @@
 
   function decorate(node, data) {
     if (!node || !node.classList || !data) return;
-    var on = !!(cfg().mark && isMovieData(data) && data.id && watchedMovies[data.id]);
+    var on = !!(cfg().mark && !data._lib && isMovieData(data) && data.id && watchedMovies[data.id]);
     var view = node.querySelector ? node.querySelector('.card__view') : null;
     if (on) {
       node.classList.add('trakt-plus-watched');
@@ -787,6 +940,14 @@
       tr('Синхронізувати переглянуті з Trakt зараз', 'Sync watched from Trakt now'),
       tr('Вибране → Переглянуті (до ' + MAX_WATCHED + ' фільмів)', 'Favorites → Viewed (up to ' + MAX_WATCHED + ' movies)'),
       function () { syncWatched(true); });
+    add({ name: 'trakt_plus_full_import', type: 'button' },
+      tr('Повний імпорт з Trakt (примусово)', 'Full import from Trakt (force)'),
+      tr('Тягне ВСІ переглянуті фільми (+ посторінкова історія), оновлює позначки й папку', 'Pulls ALL watched movies (+ paged history), refreshes marks and folder'),
+      function () { syncWatched(true, true); });
+    add({ name: 'trakt_plus_open_library', type: 'button' },
+      tr('Відкрити папку "Trakt: Переглянуті"', 'Open "Trakt: Watched" folder'),
+      '',
+      function () { openLibrary(); });
     add({ name: 'trakt_plus_reset_cache', type: 'button' },
       tr('Скинути кеш Trakt+', 'Reset Trakt+ cache'),
       '',
@@ -818,6 +979,7 @@
     try { initSettings(); } catch (e) {}
     try { patchRecommendations(); } catch (e) {}
     try { registerView(); } catch (e) {}
+    try { addMenuItem(); } catch (e) {}
     try { registerRows(); } catch (e) {}
     try { hookDecorations(); } catch (e) {}
     loadWatched().then(function () { decorateAll(); });
