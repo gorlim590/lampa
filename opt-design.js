@@ -2,6 +2,7 @@
  * YDesign (оптимізована збірка для ТВ-приставок)
  * Оригінальний плагін: yarikrazor-star/lmp (ydes.js). Це змінена копія для особистого використання.
  *
+ * v3.1: «Переглянуто» тепер реально затемнює картку (фільм ≥90% або ≥50% з Історії; серіал — якщо переглянуто останню серію), «Скоро» лише для серіалів/аніме з новою серією в найближчі 14 днів.
  * v3: позначки «Новинка/Скоро», «Переглянуто» та фон екрана під колір постера (налаштування в розділі YDesign).
  * Що змінено (v2: додано необов'язкову перевірку UA через парсер торентів, виправлено кеш «немає UA»):
  *  - режим продуктивності (Авто / Економний / Повні ефекти): на ТВ без blur та важких фільтрів;
@@ -1167,9 +1168,10 @@
         var sloganLang = getSet('ydesign_slogan_lang');
         var descLang = getSet('ydesign_desc_lang');
 
-        var cacheKey = 'ext_' + type + '_' + id + '_' + langPref + '_' + sloganLang + '_' + descLang + '_v5';
+        var cacheKey = 'ext_' + type + '_' + id + '_' + langPref + '_' + sloganLang + '_' + descLang + '_v6';
         var cached = ApiCache.get(cacheKey);
-        if (cached) return Promise.resolve(cached);
+        // дані серіалів (остання/наступна серія) швидко старіють — оновлюємо раз на 12 годин
+        if (cached && !(type === 'tv' && (!cached.fetched || Date.now() - cached.fetched > 43200000))) return Promise.resolve(cached);
 
         return new Promise(function (resolve) {
             var langQuery = (sloganLang === 'uk' || sloganLang === 'uk_en' || descLang === 'uk' || descLang === 'uk_en' || langPref === 'uk' || langPref === 'uk_en') ? 'uk-UA' : 'en-US';
@@ -1233,6 +1235,10 @@
                             seasons: data.number_of_seasons,
                             episodes: data.number_of_episodes,
                             tmdb_rating: data.vote_average,
+                            fetched: Date.now(),
+                            ended: data.status === 'Ended' || data.status === 'Canceled',
+                            last_ep: data.last_episode_to_air ? { season: data.last_episode_to_air.season_number, episode: data.last_episode_to_air.episode_number, date: data.last_episode_to_air.air_date || '' } : null,
+                            next_ep: data.next_episode_to_air ? { season: data.next_episode_to_air.season_number, episode: data.next_episode_to_air.episode_number, date: data.next_episode_to_air.air_date || '' } : null,
                             se_str: se_str,
                             title_uk: data.title || data.name || '',
                             title_en: enData ? (enData.title || enData.name) : ''
@@ -1387,50 +1393,113 @@
     }
 
     var UA_MONTHS = ['січ', 'лют', 'бер', 'кві', 'тра', 'чер', 'лип', 'сер', 'вер', 'жов', 'лис', 'гру'];
-    var NEW_DAYS = 14;
-    var SOON_MAX_DAYS = 365;
+    var NEW_DAYS = 14;          // «Новинка»: вийшло не раніше ніж 14 днів тому
+    var SOON_DAYS = 14;         // «Скоро»: нова серія/прем'єра серіалу в найближчі 14 днів
+    var WATCHED_MOVIE = 90;     // фільм вважається переглянутим від 90%
+    var WATCHED_HISTORY = 50;   // фільм з «Історії перегляду» — від 50%
+    var WATCHED_EPISODE = 90;   // остання серія вважається переглянутою від 90%
 
-    function releaseInfo(data) {
-        var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(data.release_date || data.first_air_date || ''));
-        if (!m) return null;
-        var d = new Date(+m[1], +m[2] - 1, +m[3]);
+    function parseYmd(s) {
+        var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s || ''));
+        return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+    }
+
+    // скільки днів від сьогодні до дати (>0 — у майбутньому)
+    function daysFromToday(d) {
         var now = new Date();
         var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        var diff = Math.round((today.getTime() - d.getTime()) / 86400000);
-        if (diff < 0) {
-            if (-diff > SOON_MAX_DAYS) return null;
-            var label = d.getDate() + ' ' + UA_MONTHS[d.getMonth()];
-            if (d.getFullYear() !== today.getFullYear()) label += ' ' + d.getFullYear();
-            return { kind: 'soon', text: 'Скоро · ' + label };
+        return Math.round((d.getTime() - today.getTime()) / 86400000);
+    }
+
+    function soonLabel(d, left) {
+        if (left === 0) return 'Сьогодні';
+        if (left === 1) return 'Завтра';
+        return d.getDate() + ' ' + UA_MONTHS[d.getMonth()];
+    }
+
+    // «Скоро» — ТІЛЬКИ для серіалів/аніме з запланованою серією в найближчі 14 днів.
+    // «Новинка» — для будь-якого тайтлу, що вийшов за останні 14 днів.
+    function releaseInfo(data, type, ext) {
+        var first = parseYmd(data.first_air_date || data.release_date);
+
+        if (type === 'tv') {
+            var next = ext && ext.next_ep ? parseYmd(ext.next_ep.date) : null;
+            if (next) {
+                var left = daysFromToday(next);
+                if (left >= 0 && left <= SOON_DAYS) return { kind: 'soon', text: 'Скоро · ' + soonLabel(next, left) };
+            }
+            if (first) {
+                var leftPremiere = daysFromToday(first); // прем'єра самого серіалу теж вважається «новою серією»
+                if (leftPremiere >= 0 && leftPremiere <= SOON_DAYS) return { kind: 'soon', text: 'Скоро · ' + soonLabel(first, leftPremiere) };
+            }
         }
-        if (diff <= NEW_DAYS) return { kind: 'new', text: 'Новинка' };
+
+        if (first) {
+            var ago = -daysFromToday(first);
+            if (ago >= 0 && ago <= NEW_DAYS) return { kind: 'new', text: 'Новинка' };
+        }
         return null;
     }
 
-    // «Переглянуто»: позначка у Lampa АБО (для фільмів) прогрес перегляду ≥ 90%
-    function isWatched(data, type) {
+    // ---- «Переглянуто» ----
+    function tlPercent(hash) {
         try {
-            if (window.Lampa && Lampa.Favorite && typeof Lampa.Favorite.check === 'function') {
-                var f = Lampa.Favorite.check(data);
-                if (f && f.viewed) return true;
+            var v = Lampa.Timeline.view(hash);
+            var p = v ? parseFloat(v.percent) : 0;
+            return isNaN(p) ? 0 : p;
+        } catch (e) { return 0; }
+    }
+
+    // такий самий хеш серії, як у Lampa (онлайн-плагіни та таймлайн)
+    function episodeHash(title, season, episode) {
+        return Lampa.Utils.hash([season, season > 10 ? ':' : '', episode, title].join(''));
+    }
+
+    /*
+     * Фільм:  позначка «Переглянуто» в Lampa  АБО  прогрес ≥ 90%  АБО  (є в «Історії» і прогрес ≥ 50%)
+     * Серіал / аніме:  переглянута ОСТАННЯ вийшла серія (прогрес ≥ 90%).
+     *   Якщо ж стоїть позначка «Переглянуто», вона враховується лише для завершених серіалів,
+     *   бо в серіалі, що виходить, могла з'явитися нова серія.
+     */
+    function isWatched(data, type, ext) {
+        try {
+            if (!window.Lampa || !Lampa.Utils || typeof Lampa.Utils.hash !== 'function' ||
+                !Lampa.Timeline || typeof Lampa.Timeline.view !== 'function') return false;
+
+            var fav = {};
+            try { fav = (Lampa.Favorite && Lampa.Favorite.check(data)) || {}; } catch (e1) {}
+            var title = data.original_title || data.original_name || data.title || data.name || '';
+
+            if (type !== 'tv') {
+                if (fav.viewed) return true;
+                if (!title) return false;
+                var p = tlPercent(Lampa.Utils.hash(title));
+                if (p >= WATCHED_MOVIE) return true;
+                return !!fav.history && p >= WATCHED_HISTORY;
             }
-            if (type !== 'tv' && data.original_title && window.Lampa && Lampa.Timeline && typeof Lampa.Timeline.watched === 'function') {
-                var p = Lampa.Timeline.watched(data);
-                if (typeof p === 'number' && p >= 90) return true;
+
+            if (!ext) return false;                 // дані серіалу ще вантажаться — не мигаємо позначкою
+            if (ext.failed) return !!fav.viewed;    // TMDB недоступний — лишаємо тільки позначку Lampa
+            if (!title) return false;
+
+            var last = ext.last_ep;
+            if (last && last.season !== undefined && last.episode !== undefined) {
+                if (tlPercent(episodeHash(title, last.season, last.episode)) >= WATCHED_EPISODE) return true;
             }
+            return !!(fav.viewed && ext.ended);
         } catch (e) {}
         return false;
     }
 
     var CHECK_SVG = '<svg viewBox="0 0 24 24" width="100%" height="100%"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-    function updateCardMarks(el, data, type) {
+    function updateCardMarks(el, data, type, ext) {
         var view = el.querySelector ? el.querySelector('.card__view') : null;
         if (!view) return;
 
-        // стрічка «Новинка» / «Скоро · 24 лис»
+        // стрічка «Новинка» / «Скоро · Завтра»
         var ribbon = view.querySelector('.ydesign-ribbon');
-        var info = releaseInfo(data);
+        var info = releaseInfo(data, type, ext);
         if (info) {
             if (!ribbon) {
                 ribbon = document.createElement('div');
@@ -1443,19 +1512,18 @@
             ribbon.parentNode.removeChild(ribbon);
         }
 
-        // «Переглянуто»: затемнення постера + галочка (елементи створюємо лише коли справді потрібні)
-        var watched = isWatched(data, type);
+        // «Переглянуто»: затемнення всієї картки + зелена галочка
+        var watched = isWatched(data, type, ext);
         if (watched && !view.querySelector('.ydesign-watched-dim')) {
             var dim = document.createElement('div');
             dim.className = 'ydesign-watched-dim';
-            var gl = view.querySelector('.ydesign-gradient-layer');
-            if (gl) view.insertBefore(dim, gl); else view.appendChild(dim);
+            view.appendChild(dim);
             var chk = document.createElement('div');
             chk.className = 'ydesign-watched-check';
             chk.innerHTML = CHECK_SVG;
             view.appendChild(chk);
         }
-        el.classList.toggle('ydesign-is-watched', watched);
+        if (el.classList.contains('ydesign-is-watched') !== watched) el.classList.toggle('ydesign-is-watched', watched);
     }
 
     // ---- Ambient: фон усього екрана під колір постера у фокусі (без blur, лише градієнти) ----
@@ -1588,11 +1656,14 @@
 
         var prefix = isHorz ? 'ydesign_h_' : 'ydesign_v_';
 
+        var refreshMarks = function () {
+            updateCardMarks(el, data, type, el._ydesign_extData || (el._ydesign_extFailed ? { failed: true } : null));
+        };
         el._ydesign_updateNotch = function () {
             updateCardNotch(el, data, el._ydesign_extData);
-            updateCardMarks(el, data, type);
+            refreshMarks();
         };
-        el._ydesign_updateMarks = function () { updateCardMarks(el, data, type); };
+        el._ydesign_updateMarks = refreshMarks;
 
         var buildExtendedCard = function () {
             var view = el.querySelector('.card__view');
@@ -1607,7 +1678,7 @@
             view.appendChild(gradientLayer);
             view.appendChild(contentLayer);
             updateCardNotch(el, data, el._ydesign_extData);
-            updateCardMarks(el, data, type);
+            refreshMarks();
 
             var bgQuality = isHorz ? getSet('ydesign_backdrop_quality') : getSet('ydesign_poster_quality');
 
@@ -1642,7 +1713,10 @@
                 if (extData) {
                     el._ydesign_extData = extData;
                     updateCardNotch(el, data, extData);
+                } else {
+                    el._ydesign_extFailed = true;
                 }
+                refreshMarks();
                 var bgToLoad = null;
                 if (extData) {
                     bgToLoad = isHorz ? (extData.clean_backdrop || data.backdrop_path || data.poster_path) : (extData.clean_poster || data.poster_path || data.backdrop_path);
@@ -1861,7 +1935,35 @@
     // =========================================================================
     var YD_EXTRA_CSS = "\n/* ===== YDesign: оптимізації та ефекти ===== */\n/* рейтинги: фільтр лише якщо задано насиченість != 100% */\n.ydesign-active .ydesign-rating img { filter: none !important; }\nbody.ydesign-sat-on .ydesign-rating img { filter: saturate(var(--ydesign-ratings-saturate, 100%)) !important; }\n\n/* картка: без постійних composited-шарів, ізоляція верстки */\n.ydesign-active .ydesign-card {\n    contain: layout;\n    transform: none;\n    backface-visibility: visible;\n    transition: transform .2s cubic-bezier(.2,.8,.2,1);\n}\n.ydesign-active .ydesign-card.focus { transform: scale(1.045); will-change: transform; }\n.ydesign-active .ydesign-card .card__view { transition: none !important; }\n\n/* плавна поява контенту після завантаження даних */\n.ydesign-active .ydesign-content-layer,\n.ydesign-active .ydesign-desc-under { opacity: 0; transition: opacity .4s ease-out; }\n.ydesign-active .ydesign-card.ydesign-ready .ydesign-content-layer,\n.ydesign-active .ydesign-card.ydesign-ready .ydesign-desc-under { opacity: 1; }\n\n/* підсвітка кольором постера під карткою у фокусі */\n.ydesign-active .ydesign-card.focus::after {\n    content: ''; position: absolute; left: -7%; right: -7%; top: -5%; bottom: -5%;\n    background: radial-gradient(closest-side, var(--yd-glow, transparent) 0%, transparent 100%);\n    opacity: 0; z-index: -1; pointer-events: none;\n    animation: ydGlow .35s ease-out .05s forwards;\n}\n@keyframes ydGlow { to { opacity: .6; } }\nbody.is--touch .ydesign-active .ydesign-card.focus::after { display: none; }\n\n/* ефекти для потужних пристроїв */\nbody.ydesign-fx.ydesign-glass-pill .ydesign-badge,\nbody.ydesign-fx.ydesign-glass-pill .ydesign-genre-badge,\nbody.ydesign-fx.ydesign-glass-pill .ydesign-rating,\nbody.ydesign-fx.ydesign-notch-bg .ydesign-card-notch,\nbody.ydesign-fx.ydesign-series-glass-pill .ydesign-series-pill {\n    backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important;\n}\nbody.ydesign-fx .ydesign-series-active .online-prestige.online-prestige--full .online-prestige__timeline {\n    backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important;\n}\nbody.ydesign-fx .ydesign-logo-container img { filter: drop-shadow(0 2px 6px rgba(0,0,0,0.85)); }\nbody.ydesign-fx .ydesign-card.focus .ydesign-content-layer::after {\n    content: ''; position: absolute; top: 0; left: 0; width: 55%; height: 100%;\n    background: linear-gradient(100deg, transparent 0%, rgba(255,255,255,.14) 50%, transparent 100%);\n    transform: translateX(-130%) skewX(-12deg);\n    animation: ydShine .9s ease-out .12s 1 both; pointer-events: none;\n}\n@keyframes ydShine { to { transform: translateX(280%) skewX(-12deg); } }\n\n/* економний режим: трохи світліші «скляні» плашки замість blur */\nbody:not(.ydesign-fx).ydesign-glass-pill .ydesign-badge,\nbody:not(.ydesign-fx).ydesign-glass-pill .ydesign-genre-badge,\nbody:not(.ydesign-fx).ydesign-glass-pill .ydesign-rating { background: rgba(255,255,255,0.16) !important; }\nbody:not(.ydesign-fx).ydesign-notch-bg .ydesign-card-notch { background: rgba(30,30,40,0.55) !important; }\nbody:not(.ydesign-fx).ydesign-series-glass-pill .ydesign-series-pill { background: rgba(255,255,255,0.18) !important; }\n";
 
-    var YD_MARKS_CSS = "\n/* ===== YDesign: \u043f\u043e\u0437\u043d\u0430\u0447\u043a\u0438 \u0442\u0430 ambient ===== */\n.ydesign-ribbon { position: absolute; top: 2.4em; left: .6em; z-index: 24; padding: .32em .8em; border-radius: 2em;\n  font-size: .72em; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; line-height: 1.1; color: #fff;\n  white-space: nowrap; pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,.35); }\n.ydesign-ribbon-new { background: linear-gradient(135deg, #ff5f6d, #ff9966); }\n.ydesign-ribbon-soon { background: linear-gradient(135deg, #5b7cfa, #9b59ff); }\nbody.ydesign-ribbons-off .ydesign-ribbon { display: none !important; }\n\n.ydesign-watched-dim { position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: rgba(6,8,16,.5);\n  opacity: 0; transition: opacity .35s ease; pointer-events: none; }\n.ydesign-watched-check { position: absolute; top: .7em; right: .7em; z-index: 26; width: 2.1em; height: 2.1em; font-size: .8em;\n  box-sizing: border-box; padding: .34em; border-radius: 50%; background: linear-gradient(135deg, #34d27b, #1fa85a);\n  box-shadow: 0 2px 10px rgba(0,0,0,.45); opacity: 0; transform: scale(.6);\n  transition: opacity .3s ease, transform .3s cubic-bezier(.2,1.4,.4,1); pointer-events: none; }\n.ydesign-is-watched .ydesign-watched-dim { opacity: 1; }\n.ydesign-is-watched .ydesign-watched-check { opacity: 1; transform: scale(1); }\n.ydesign-is-watched.focus .ydesign-watched-dim { opacity: .55; }\nbody.ydesign-watched-off .ydesign-watched-dim, body.ydesign-watched-off .ydesign-watched-check { display: none !important; }\n\n#ydesign-ambient { position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 1; pointer-events: none;\n  opacity: 0; transition: opacity .6s ease; }\n#ydesign-ambient.on { opacity: 1; }\n#ydesign-ambient .ydesign-amb-layer { position: absolute; left: 0; top: 0; right: 0; bottom: 0; opacity: 0; transition: opacity .7s ease; }\nbody.ydesign-ambient-off #ydesign-ambient { display: none !important; }\n";
+    var YD_MARKS_CSS = [
+        '/* ===== YDesign: позначки та ambient ===== */',
+        '.ydesign-ribbon { position: absolute; top: 2.4em; left: .6em; z-index: 24; padding: .32em .8em; border-radius: 2em;',
+        '  font-size: .72em; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; line-height: 1.1; color: #fff;',
+        '  white-space: nowrap; pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,.35); animation: ydRibbonIn .35s ease-out both; }',
+        '.ydesign-ribbon-new { background: linear-gradient(135deg, #ff5f6d, #ff9966); }',
+        '.ydesign-ribbon-soon { background: linear-gradient(135deg, #5b7cfa, #9b59ff); }',
+        '@keyframes ydRibbonIn { from { opacity: 0; transform: translateY(-.4em); } to { opacity: 1; transform: none; } }',
+        'body.ydesign-ribbons-off .ydesign-ribbon { display: none !important; }',
+
+        /* затемнення лежить ВИЩЕ за постер, градієнт і текст (z-index 5), інакше постер перекриває його */
+        '.ydesign-watched-dim { position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 5; background: rgba(6,8,16,.58);',
+        '  opacity: 0; transition: opacity .45s ease; pointer-events: none; }',
+        '.ydesign-watched-check { position: absolute; top: .7em; right: .7em; z-index: 26; width: 2.1em; height: 2.1em; font-size: .8em;',
+        '  box-sizing: border-box; padding: .34em; border-radius: 50%; background: linear-gradient(135deg, #34d27b, #1fa85a);',
+        '  box-shadow: 0 2px 10px rgba(0,0,0,.45); opacity: 0; transform: scale(.6);',
+        '  transition: opacity .35s ease, transform .35s cubic-bezier(.2,1.4,.4,1); pointer-events: none; }',
+        '.ydesign-is-watched .ydesign-watched-dim { opacity: 1; }',
+        '.ydesign-is-watched .ydesign-watched-check { opacity: 1; transform: scale(1); }',
+        '.ydesign-is-watched.focus .ydesign-watched-dim { opacity: .42; }',
+        'body.ydesign-watched-off .ydesign-watched-dim, body.ydesign-watched-off .ydesign-watched-check { display: none !important; }',
+
+        '#ydesign-ambient { position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 1; pointer-events: none;',
+        '  opacity: 0; transition: opacity .6s ease; }',
+        '#ydesign-ambient.on { opacity: 1; }',
+        '#ydesign-ambient .ydesign-amb-layer { position: absolute; left: 0; top: 0; right: 0; bottom: 0; opacity: 0; transition: opacity .7s ease; }',
+        'body.ydesign-ambient-off #ydesign-ambient { display: none !important; }',
+        ''
+    ].join('\n');
 
     function ydPostCss(css) {
         // Важкі декларації прибираємо з базового CSS; у режимі ефектів вони повертаються правилами з YD_EXTRA_CSS
