@@ -5,7 +5,7 @@
  *  - розумні рекомендації (без переглянутих, фільтр за рейтингом/голосами/жанрами)
  *  - нові рядки на головній одразу при старті: жахи, трилери, фантастика, "бо ти дивився X",
  *    приховані перлини, топ непереглянутого, свіжі та варті уваги
- *  - синхронізація переглянутих фільмів з Trakt у Вибране -> "Переглянуті" (без лімітів)
+ *  - синхронізація переглянутих фільмів з Trakt у Вибране -> "Переглянуті" (повна посторінкова пагінація без лімітів)
  *  - позначка на картках: затемнення + зелена риска + бейдж "Trakt"
  *  - окрема папка "Trakt: Переглянуті" біля "Вибране" (ВСІ переглянуті фільми, без ліміту)
  *  - рядки "Зараз дивляться": фільми / серіали / мультфільми / аніме (trending + popular)
@@ -19,7 +19,7 @@
   window.trakt_plus_ready = true;
 
   // ───────────── НАЛАШТУВАННЯ (можна міняти тут) ─────────────
-  var MAX_WATCHED = 50000;         // Безлімітний максимум фільмів у Вибраному
+  var MAX_WATCHED = 50000;         // Максимум фільмів у Вибраному
   var AUTO_SYNC_HOURS = 12;        // як часто авто-синхронізувати
   var WATCHED_CACHE_HOURS = 24;    // максимальний вік кешу переглянутих
   var WATCH_RECHECK_SEC = 90;      // як часто питати Trakt, чи змінились переглянуті
@@ -603,7 +603,7 @@
     });
   }
 
-  // ───────────── СИНХРОНІЗАТОР (ПОВНИЙ БЕЗЛІМІТ) ─────────────
+  // ───────────── СИНХРОНІЗАТОР (ПОВНА ПОСТОРІНКОВА ПАГІНАЦІЯ Trakt API) ─────────────
   function cardFromWatched(item) {
     var m = item && item.movie;
     if (!m || !m.ids || !m.ids.tmdb) return null;
@@ -633,20 +633,40 @@
     });
   }
 
-  var HIST_PAGE = 250;
+  var HIST_PAGE = 100; // Офіційний максимум Trakt API на одну сторінку
+
+  function pagedWatchedMovies(images, onProgress) {
+    var acc = [], lastFirst = null;
+    function go(page) {
+      var q = '/sync/watched/movies?page=' + page + '&limit=' + HIST_PAGE + (images ? '&extended=images' : '');
+      return getRetry(q).then(function (arr) {
+        arr = Array.isArray(arr) ? arr : [];
+        if (!arr.length) return acc;
+        var first = arr[0] && arr[0].movie && arr[0].movie.ids && arr[0].movie.ids.trakt;
+        if (first !== undefined && first === lastFirst) return acc;
+        lastFirst = first;
+        acc = acc.concat(arr);
+        if (onProgress) onProgress(acc.length);
+        if (arr.length < HIST_PAGE) return acc; // Остання неповна сторінка
+        return go(page + 1);
+      }).catch(function () { return acc; });
+    }
+    return go(1);
+  }
+
   function pagedHistory(images, onProgress) {
     var acc = [], lastFirst = null;
     function go(page) {
       var q = '/sync/history/movies?page=' + page + '&limit=' + HIST_PAGE + (images ? '&extended=images' : '');
       return getRetry(q).then(function (arr) {
         arr = Array.isArray(arr) ? arr : [];
-        if (!arr.length) return acc; // Жодних обмежень сторінок, крутимо поки є дані
+        if (!arr.length) return acc;
         var first = arr[0] && (arr[0].id || (arr[0].movie && arr[0].movie.ids && arr[0].movie.ids.trakt));
         if (first !== undefined && first === lastFirst) return acc;
         lastFirst = first;
         acc = acc.concat(arr);
         if (onProgress) onProgress(acc.length);
-        if (arr.length < HIST_PAGE) return acc;
+        if (arr.length < HIST_PAGE) return acc; // Остання неповна сторінка
         return go(page + 1);
       }).catch(function () { return acc; });
     }
@@ -674,12 +694,13 @@
 
   function fetchAllMerged(opts) {
     opts = opts || {};
-    var path = '/sync/watched/movies?limit=1000' + (opts.images ? '&extended=images' : '');
-    return getRetry(path).then(function (a) {
-      a = Array.isArray(a) ? a : [];
-      return pagedHistory(!!opts.images, opts.progress).catch(function () { return []; }).then(function (h) {
-        return { list: mergeWatched(a, h), a: a.length, h: h.length };
-      });
+    return Promise.all([
+      pagedWatchedMovies(opts.images, opts.progress).catch(function () { return []; }),
+      pagedHistory(opts.images, opts.progress).catch(function () { return []; })
+    ]).then(function (res) {
+      var w = res[0];
+      var h = res[1];
+      return { list: mergeWatched(w, h), a: w.length, h: h.length };
     });
   }
 
