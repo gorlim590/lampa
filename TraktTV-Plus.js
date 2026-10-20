@@ -5,7 +5,7 @@
  *  - розумні рекомендації (без переглянутих, фільтр за рейтингом/голосами/жанрами)
  *  - нові рядки на головній одразу при старті: жахи, трилери, фантастика, "бо ти дивився X",
  *    приховані перлини, топ непереглянутого, свіжі та варті уваги
- *  - синхронізація переглянутих фільмів з Trakt у Вибране -> "Переглянуті" (без ліміту в 100 фільмів)
+ *  - синхронізація переглянутих фільмів з Trakt у Вибране -> "Переглянуті" (без лімітів)
  *  - позначка на картках: затемнення + зелена риска + бейдж "Trakt"
  *  - окрема папка "Trakt: Переглянуті" біля "Вибране" (ВСІ переглянуті фільми, без ліміту)
  *  - рядки "Зараз дивляться": фільми / серіали / мультфільми / аніме (trending + popular)
@@ -19,7 +19,7 @@
   window.trakt_plus_ready = true;
 
   // ───────────── НАЛАШТУВАННЯ (можна міняти тут) ─────────────
-  var MAX_WATCHED = 2500;          // максимум фільмів, що кладуться у Вибране
+  var MAX_WATCHED = 50000;         // Безлімітний максимум фільмів у Вибраному
   var AUTO_SYNC_HOURS = 12;        // як часто авто-синхронізувати
   var WATCHED_CACHE_HOURS = 24;    // максимальний вік кешу переглянутих
   var WATCH_RECHECK_SEC = 90;      // як часто питати Trakt, чи змінились переглянуті
@@ -603,7 +603,7 @@
     });
   }
 
-  // ───────────── ВИПРАВЛЕНИЙ СИНХРОНІЗАТОР (БЕЗ ЛІМІТУ 100) ─────────────
+  // ───────────── СИНХРОНІЗАТОР (ПОВНИЙ БЕЗЛІМІТ) ─────────────
   function cardFromWatched(item) {
     var m = item && item.movie;
     if (!m || !m.ids || !m.ids.tmdb) return null;
@@ -633,21 +633,20 @@
     });
   }
 
-  // Посторінковий збір всієї історії без обмеження в 100 фільмів
-  var HIST_PAGE = 250, HIST_PAGE_CAP = 100;
+  var HIST_PAGE = 250;
   function pagedHistory(images, onProgress) {
     var acc = [], lastFirst = null;
     function go(page) {
       var q = '/sync/history/movies?page=' + page + '&limit=' + HIST_PAGE + (images ? '&extended=images' : '');
       return getRetry(q).then(function (arr) {
         arr = Array.isArray(arr) ? arr : [];
-        if (!arr.length || page > HIST_PAGE_CAP) return acc;
+        if (!arr.length) return acc; // Жодних обмежень сторінок, крутимо поки є дані
         var first = arr[0] && (arr[0].id || (arr[0].movie && arr[0].movie.ids && arr[0].movie.ids.trakt));
         if (first !== undefined && first === lastFirst) return acc;
         lastFirst = first;
         acc = acc.concat(arr);
         if (onProgress) onProgress(acc.length);
-        if (arr.length < HIST_PAGE) return acc; // це була остання неповна сторінка
+        if (arr.length < HIST_PAGE) return acc;
         return go(page + 1);
       }).catch(function () { return acc; });
     }
@@ -675,11 +674,9 @@
 
   function fetchAllMerged(opts) {
     opts = opts || {};
-    // Запитуємо з максимальним лімітом (до 1000 на сторінку)
     var path = '/sync/watched/movies?limit=1000' + (opts.images ? '&extended=images' : '');
     return getRetry(path).then(function (a) {
       a = Array.isArray(a) ? a : [];
-      // Завжди підтягуємо історію, щоб уникнути ліміту в 100 та зібрати ВСІ фільми
       return pagedHistory(!!opts.images, opts.progress).catch(function () { return []; }).then(function (h) {
         return { list: mergeWatched(a, h), a: a.length, h: h.length };
       });
@@ -728,7 +725,7 @@
         return String(b.last_watched_at || '').localeCompare(String(a.last_watched_at || ''));
       });
       var cards = [];
-      raw.slice(0, MAX_WATCHED * 2).forEach(function (it) {
+      raw.forEach(function (it) {
         if (cards.length >= MAX_WATCHED) return;
         var c = cardFromWatched(it);
         if (c) cards.push(c);
@@ -811,12 +808,15 @@
 
   // ───────────── ПОЗНАЧКИ НА КАРТКАХ ─────────────
   function isMovieData(d) {
-    return d && !(d.method === 'tv' || d.type === 'tv' || d.card_type === 'tv' || d.name || d.first_air_date || d.original_name);
+    if (!d) return false;
+    if (d.method === 'tv' || d.type === 'tv' || d.card_type === 'tv' || d.first_air_date) return false;
+    return true;
   }
 
   function decorate(node, data) {
     if (!node || !node.classList || !data) return;
-    var on = !!(cfg().mark && !data._lib && isMovieData(data) && data.id && watchedMovies[data.id]);
+    var cardId = data.id || (data.ids && data.ids.tmdb);
+    var on = !!(cfg().mark && !data._lib && isMovieData(data) && cardId && watchedMovies[cardId]);
     var view = node.querySelector ? node.querySelector('.card__view') : null;
     if (on) {
       node.classList.add('trakt-plus-watched');
@@ -969,7 +969,6 @@
     loadWatched().then(function () { decorateAll(); });
     scheduleAutoSync();
 
-    // Автоматичне підвантаження рядків одразу при вході на головну сторінку
     setTimeout(function () {
       try {
         if (Lampa.Activity && Lampa.Activity.active() && Lampa.Activity.active().component === 'main') {
