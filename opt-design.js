@@ -1163,6 +1163,40 @@
         });
     }
 
+    function ymdToday() {
+        var d = new Date();
+        return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+    }
+
+    // Перша серія з датою виходу від сьогодні: поточний сезон, а якщо там немає — наступний
+    function findUpcomingEpisode(tvId, season, seasonsList, cb) {
+        var today = ymdToday();
+        var hasNext = false;
+        (seasonsList || []).forEach(function (x) { if (x.season_number === season + 1) hasNext = true; });
+
+        function load(sn, onDone) {
+            qajax({
+                url: 'https://api.themoviedb.org/3/tv/' + tvId + '/season/' + sn + '?api_key=' + CONFIG.tmdbKey() + '&language=en-US',
+                timeout: 4500,
+                success: function (r) {
+                    var eps = (r && r.episodes) || [];
+                    for (var i = 0; i < eps.length; i++) {
+                        if (eps[i].air_date && eps[i].air_date >= today) {
+                            return onDone({ season: sn, episode: eps[i].episode_number, date: eps[i].air_date });
+                        }
+                    }
+                    onDone(null);
+                },
+                error: function () { onDone(null); }
+            });
+        }
+
+        load(season, function (ep) {
+            if (ep || !hasNext) return cb(ep);
+            load(season + 1, cb);
+        });
+    }
+
     function fetchExtendedData(id, type) {
         var langPref = getSet('ydesign_lang');
         var sloganLang = getSet('ydesign_slogan_lang');
@@ -1285,8 +1319,20 @@
 
                         result.age = parseAgeRating(result.age);
 
-                        ApiCache.set(cacheKey, result);
-                        resolve(result);
+                        var finish = function () {
+                            ApiCache.set(cacheKey, result);
+                            resolve(result);
+                        };
+
+                        // TMDB часто не заповнює next_episode_to_air — шукаємо майбутню серію в даних сезону
+                        if (type === 'tv' && !result.ended && !result.next_ep && result.last_ep) {
+                            findUpcomingEpisode(id, result.last_ep.season, data.seasons, function (ep) {
+                                if (ep) result.next_ep = ep;
+                                finish();
+                            });
+                        } else {
+                            finish();
+                        }
                     }
 
                     if (needEn) {
@@ -1426,7 +1472,12 @@
             var next = ext && ext.next_ep ? parseYmd(ext.next_ep.date) : null;
             if (next) {
                 var left = daysFromToday(next);
-                if (left >= 0 && left <= SOON_DAYS) return { kind: 'soon', text: 'Скоро · ' + soonLabel(next, left) };
+                if (left >= 0 && left <= SOON_DAYS) {
+                var isPremiere = ext.next_ep.season === 1 && ext.next_ep.episode === 1;
+                return isPremiere
+                    ? { kind: 'soon', text: 'Скоро · ' + soonLabel(next, left) }
+                    : { kind: 'episode', text: 'Нова серія · ' + soonLabel(next, left) };
+            }
             }
             if (first) {
                 var leftPremiere = daysFromToday(first); // прем'єра самого серіалу теж вважається «новою серією»
@@ -1450,6 +1501,26 @@
         } catch (e) { return 0; }
     }
 
+    // Відсоток перегляду фільму: перевіряємо хеш за кількома назвами + власну функцію Lampa
+    function moviePercent(data) {
+        var best = 0, seen = {};
+        var names = [data.original_title, data.original_name, data.title, data.name];
+        for (var i = 0; i < names.length; i++) {
+            var n = names[i];
+            if (!n || seen[n]) continue;
+            seen[n] = true;
+            try { best = Math.max(best, tlPercent(Lampa.Utils.hash(n))); } catch (e) {}
+        }
+        try {
+            if (typeof Lampa.Timeline.watched === 'function') {
+                var w = Lampa.Timeline.watched(data, true);
+                var wp = (w && typeof w === 'object') ? parseFloat(w.percent) : (typeof w === 'number' ? w : 0);
+                if (!isNaN(wp)) best = Math.max(best, wp);
+            }
+        } catch (e2) {}
+        return best;
+    }
+
     // такий самий хеш серії, як у Lampa (онлайн-плагіни та таймлайн)
     function episodeHash(title, season, episode) {
         return Lampa.Utils.hash([season, season > 10 ? ':' : '', episode, title].join(''));
@@ -1461,7 +1532,7 @@
      *   Якщо ж стоїть позначка «Переглянуто», вона враховується лише для завершених серіалів,
      *   бо в серіалі, що виходить, могла з'явитися нова серія.
      */
-    function isWatched(data, type, ext) {
+    function isWatched(data, type, ext, inHistory) {
         try {
             if (!window.Lampa || !Lampa.Utils || typeof Lampa.Utils.hash !== 'function' ||
                 !Lampa.Timeline || typeof Lampa.Timeline.view !== 'function') return false;
@@ -1472,10 +1543,9 @@
 
             if (type !== 'tv') {
                 if (fav.viewed) return true;
-                if (!title) return false;
-                var p = tlPercent(Lampa.Utils.hash(title));
+                var p = moviePercent(data);
                 if (p >= WATCHED_MOVIE) return true;
-                return !!fav.history && p >= WATCHED_HISTORY;
+                return !!(fav.history || inHistory) && p >= WATCHED_HISTORY;
             }
 
             if (!ext) return false;                 // дані серіалу ще вантажаться — не мигаємо позначкою
@@ -1494,6 +1564,7 @@
     var CHECK_SVG = '<svg viewBox="0 0 24 24" width="100%" height="100%"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
     function updateCardMarks(el, data, type, ext) {
+        var inHist = !!el._ydesign_inHistory;
         var view = el.querySelector ? el.querySelector('.card__view') : null;
         if (!view) return;
 
@@ -1513,10 +1584,12 @@
         }
 
         // «Переглянуто»: затемнення всієї картки + зелена галочка
-        var watched = isWatched(data, type, ext);
+        var watched = isWatched(data, type, ext, inHist);
         if (watched && !view.querySelector('.ydesign-watched-dim')) {
             var dim = document.createElement('div');
             dim.className = 'ydesign-watched-dim';
+            // дублюємо ключові стилі inline, щоб затемнення працювало незалежно від CSS
+            dim.style.cssText = 'position:absolute;left:0;top:0;right:0;bottom:0;z-index:5;pointer-events:none;background:rgba(6,8,16,.62);';
             view.appendChild(dim);
             var chk = document.createElement('div');
             chk.className = 'ydesign-watched-check';
@@ -1942,6 +2015,7 @@
         '  white-space: nowrap; pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,.35); animation: ydRibbonIn .35s ease-out both; }',
         '.ydesign-ribbon-new { background: linear-gradient(135deg, #ff5f6d, #ff9966); }',
         '.ydesign-ribbon-soon { background: linear-gradient(135deg, #5b7cfa, #9b59ff); }',
+        '.ydesign-ribbon-episode { background: linear-gradient(135deg, #00b8a9, #2dd4bf); color: #06201d; }',
         '@keyframes ydRibbonIn { from { opacity: 0; transform: translateY(-.4em); } to { opacity: 1; transform: none; } }',
         'body.ydesign-ribbons-off .ydesign-ribbon { display: none !important; }',
 
@@ -1954,7 +2028,7 @@
         '  transition: opacity .35s ease, transform .35s cubic-bezier(.2,1.4,.4,1); pointer-events: none; }',
         '.ydesign-is-watched .ydesign-watched-dim { opacity: 1; }',
         '.ydesign-is-watched .ydesign-watched-check { opacity: 1; transform: scale(1); }',
-        '.ydesign-is-watched.focus .ydesign-watched-dim { opacity: .42; }',
+        '.ydesign-is-watched.focus .ydesign-watched-dim { opacity: .5; }',
         'body.ydesign-watched-off .ydesign-watched-dim, body.ydesign-watched-off .ydesign-watched-check { display: none !important; }',
 
         '#ydesign-ambient { position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 1; pointer-events: none;',
@@ -3286,6 +3360,10 @@
 
                         var activeComp = (Lampa.Activity && Lampa.Activity.active()) ? Lampa.Activity.active().component : 'main';
                         cardEl._ydesign_isMain = (activeComp === 'main');
+                        try {
+                            var act = Lampa.Activity.active() || {};
+                            cardEl._ydesign_inHistory = (act.component === 'favorite' && (act.type === 'history' || (act.params && act.params.type === 'history')));
+                        } catch (eH) {}
 
                         buildCardCustomDOM(cardEl, this.data);
                     }
