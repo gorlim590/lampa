@@ -9,7 +9,7 @@
  *  - позначка на картках: затемнення + зелена риска + бейдж "Trakt"
  *  - окрема папка "Trakt: Переглянуті" біля "Вибране" (ВСІ переглянуті фільми, без ліміту)
  *  - рядки "Зараз дивляться": фільми / серіали / повнометражні мультфільми / аніме (trending + popular)
- *  - блок "Подібні від Trakt" всередині картки перегляду фільму/серіалу
+ *  - блок "Подібні від Trakt" всередині картки перегляду фільму/серіалу з підтримкою дублювання
  *
  * Код навмисно написаний у ES5 (без async/arrow), щоб працювало на старих Smart TV.
  */
@@ -35,7 +35,7 @@
     { slug: 'science-fiction', uk: 'Фантастика', en: 'Sci-Fi', minRating: 6.8, minVotes: 1000, index: 9 }
   ];
 
-  // Рядки "Зараз дивляться" (тепер з підтримкою і фільмів, і серіалів)
+  // Рядки "Зараз дивляться"
   var TREND_ROWS = [
     { key: 'movies', uk: 'Зараз дивляться: фільми', en: 'Watching now: movies', index: 1,
       loads: [{ p: '/movies', hint: 'movie' }], skip: ['animation', 'anime'] },
@@ -598,17 +598,17 @@
     if (!Lampa.Maker || !Lampa.Component) return;
     registerLibrary();
     
-    // Повноцінний компонент для перегляду рядка при натисканні «Ще» з пагінацією
+    // Виправлений компонент для перегляду повного рядка при натисканні «Ще» з робочою пагінацією
     Lampa.Component.add('trakt_plus_view', function (object) {
       var comp = Lampa.Maker.make('Category', object);
-      var PAGE = 36, nextPage = 2, cachedCards = [];
+      var PAGE = 36, cachedCards = [];
       comp.use({
         onCreate: function () {
           var self = this;
           var def = ROWS[object.row];
           if (!def) { self.empty(); return; }
           getRow(def).then(function (r) {
-            cachedCards = r.cards || [];
+            cachedCards = (r.cards || []).map(finalize);
             if (!cachedCards.length) { self.empty(); return; }
             self.build({
               results: cachedCards.slice(0, PAGE),
@@ -620,11 +620,14 @@
             if (self.activity) self.activity.loader(false);
           });
         },
-        onNext: function (resolve, reject) {
+        onNext: function (resolve, reject, page) {
           var tp = Math.ceil(cachedCards.length / PAGE);
-          if (nextPage > tp) return reject.call(this);
-          var pg = nextPage++;
-          resolve.call(this, { results: cachedCards.slice((pg - 1) * PAGE, pg * PAGE), total_pages: tp, page: pg });
+          if (page > tp) return reject.call(this);
+          resolve.call(this, {
+            results: cachedCards.slice((page - 1) * PAGE, page * PAGE),
+            total_pages: tp,
+            page: page
+          });
         },
         onInstance: function (card, element) {
           card.use({ onlyMenu: false, onlyEnter: function () { openFull(element); } });
@@ -648,10 +651,8 @@
         api.get('/search/tmdb/' + tmdbId + '?type=' + (card.method === 'tv' ? 'show' : 'movie'))
           .then(function (res) {
             var item = Array.isArray(res) && res[0] ? (res[0].movie || res[0].show || res[0]) : res;
-            var traktId = item && item.ids && item.ids.trakt;
-            if (!traktId && item && item.id) traktId = item.id;
-            if (!traktId) return;
-
+            var traktId = item && item.ids && (item.ids.trakt || item.ids.slug);
+            if (!traktId) return Promise.reject('No trakt id found');
             return api.get('/' + method + '/' + traktId + '/related?extended=full,images&limit=20');
           })
           .then(function (relatedArr) {
@@ -671,8 +672,10 @@
             var $ = window.$ || window.jQuery;
             if (!$) return;
 
-            var container = $(renderHtml).find('.full__content, .full__body').first();
+            var container = $(renderHtml).find('.full__body, .full__content').first();
             if (!container.length) return;
+
+            if (container.find('.trakt-related-line').length) return;
 
             var title = tr('Подібні від Trakt', 'Trakt Related');
             var lineData = {
@@ -683,7 +686,9 @@
 
             if (Lampa.Line && typeof Lampa.Line === 'function') {
               var lineComp = new Lampa.Line(lineData);
-              container.append(lineComp.render());
+              var lineNode = lineComp.render();
+              $(lineNode).addClass('trakt-related-line');
+              container.append(lineNode);
             }
           })
           .catch(function () {});
