@@ -1,6 +1,50 @@
 (function(){
     'use strict';
     // Вибір збірки за версією застосунку: app_digital >= 300 → v3, інакше v2.
+    // Розширення подій картки (раніше завантажувалось окремим файлом listener-extensions.js).
+    // Захищено глобальним прапорцем window.lampa_listener_extensions від повторного запуску.
+    function ensureListenerExtensions(done) {
+        ((function () {
+            'use strict';
+        
+            function start() {
+                if (window.lampa_listener_extensions) {
+                    return;
+                }
+        
+                window.lampa_listener_extensions = true;
+        
+                Object.defineProperty(window.Lampa.Card.prototype, 'build', {
+                    get: function () {
+                        return this._build;
+                    },
+                    set: function (value) {
+                        this._build = function () {
+                            value.apply(this);
+        
+                            Lampa.Listener.send('card', {
+                                type: 'build',
+                                object: this
+                            });
+                        }.bind(this);
+                    }
+                });
+            }
+        
+            if (window.appready) {
+                start();
+            } else {
+                Lampa.Listener.follow('app', function (event) {
+                    if (event.type === 'ready') 
+                    {
+                        start();
+                    }
+                });
+            }
+        })());
+        if (done) done();
+    }
+
     function start() {
         if (Lampa.Manifest.app_digital >= 300) {
 (function () {
@@ -1844,7 +1888,7 @@
         HOST = Lampa.Storage.get('custom_favorite_host', '') || HOST;
         new SyncService().start();
 
-        Lampa.Utils.putScript(['https://gorlim590.github.io/lampa/third-party/levende/listener-extensions.js'], function () {
+        ensureListenerExtensions(function () {
             Lampa.Listener.follow('card', function (event) {
                 if (event.type !== 'build') {
                     return;

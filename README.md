@@ -33,6 +33,9 @@
 - ui/design-optimized.js
 - ui/poster-status.js
 - ui/tv-status.js
+- ui/buttons-plus.js
+- ui/menu-hide.js
+- ui/series-progress-fix.js
 - ui/cardify.js
 
 ### Filters
@@ -60,6 +63,8 @@
 - providers/tracks-probe.js
 - providers/ts-tracks.js
 - providers/bandera-online.js
+- providers/parsers.js
+- providers/tryzub-tv.js
 
 ### Community
 - community/community-watches.js
@@ -68,6 +73,7 @@
 - community/imdb-trailers.js
 - community/new-category.js
 - community/lparty.js
+- community/vinyl.js
 
 ## Рекомендований порядок і сумісність UI
 
@@ -94,15 +100,15 @@
 
 ## Де лежить код плагінів
 
-Код плагінів перенесено з third-party/ у файли відповідних категорій (ui/, filters/, media/, providers/, community/). Файли в цих папках — це самі плагіни, а не завантажувачі, тому оновлювати код треба саме там.
+Увесь код плагінів лежить у файлах відповідних категорій (ui/, filters/, media/, providers/, community/, trakt/, localization/). Окремої папки third-party/ більше немає, а файли в категоріях — це самі плагіни, а не завантажувачі. Оновлювати код треба саме там.
 
 Сумісні точки входу для старих налаштувань (одна реалізація, другий файл лише підтягує її):
 
 - info/seasons-info.js → media/seasons-info.js. З коду прибрано перевірку «скрипт завантажено з адреси з ko31k», бо після перенесення вона вимкнула б плагін.
 - filters/content-hider.js → filters/hide-content.js. Глобальний guard захищає від повторної ініціалізації, але достатньо підключити один із двох.
 
-media/custom-favorites.js і media/profiles-plus.js містять обидві збірки (для Lampa з app_digital >= 300 і старіших) і вибирають потрібну під час запуску.
+media/custom-favorites.js і media/profiles-plus.js містять обидві збірки (для Lampa з app_digital >= 300 і старіших) і вибирають потрібну під час запуску. Розширення подій картки (listener-extensions) вбудоване в media/custom-favorites.js.
 
-## Папка third-party/
+plugins.json у корені — список плагінів із адресами на файли в категоріях. Автори та ліцензії — у NOTICE.md та licenses/.
 
-Це вихідні копії від авторів, з яких код було перенесено. Вони залишені для історії та порівняння з оригіналами; плагіни з функціональних папок від них більше не залежать. Винятки: media/custom-favorites.js (збірка v2) під час роботи підвантажує third-party/levende/listener-extensions.js, а плагіни без відповідного файлу в категоріях (Parsers, buttons+, interface+, ihide, series-progress-fix, TryzubTV, vinyl, music) існують лише в third-party/.
+> Старі URL виду `.../lampa/third-party/...` більше не працюють. Якщо Lampa на якомусь пристрої ще підключає плагіни за такими адресами, замінюй їх на шляхи з plugins.json.

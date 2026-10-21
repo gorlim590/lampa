@@ -11,32 +11,32 @@
     "name": "Візуалізація завантаження ТС"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/levende/balancer-sanitizer.js",
+    "url": "https://gorlim590.github.io/lampa/filters/search-sanitizer.js",
     "status": 1,
     "name": "Правильний фільтр у пошуку"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/dikomillo/ihide.js",
+    "url": "https://gorlim590.github.io/lampa/ui/menu-hide.js",
     "status": 1,
     "name": "Приховання інтерфейсу"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/igorek1986/status.js",
+    "url": "https://gorlim590.github.io/lampa/ui/poster-status.js",
     "status": 1,
     "name": "Статус серіалу у постерах"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/ko31k/interface+.js",
+    "url": "https://gorlim590.github.io/lampa/ui/interface-plus.js",
     "status": 1,
     "name": "Інтерфейс+"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/syvyj/studios.js",
+    "url": "https://gorlim590.github.io/lampa/media/studio-picks.js",
     "status": 1,
     "name": "Добірки студій"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/mylampa1/source_sort.js",
+    "url": "https://gorlim590.github.io/lampa/filters/source-sort.js",
     "status": 1,
     "name": "Сортування онлайн джерел"
   },
@@ -46,27 +46,27 @@
     "name": "Онлайн тестовий"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/ipavlin98/cardify.js",
+    "url": "https://gorlim590.github.io/lampa/ui/cardify.js",
     "status": 1,
     "name": "Дизайн картки"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/ipavlin98/series-progress-fix.js",
+    "url": "https://gorlim590.github.io/lampa/ui/series-progress-fix.js",
     "status": 1,
     "name": "Фікс прогресу"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/lampame/hikka.js",
+    "url": "https://gorlim590.github.io/lampa/community/hikka.js",
     "status": 1,
     "name": "Хікка"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/ko31k/Parsers.js",
+    "url": "https://gorlim590.github.io/lampa/providers/parsers.js",
     "status": 1,
     "name": "Парсери"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/lampame/bo.js",
+    "url": "https://gorlim590.github.io/lampa/providers/bandera-online.js",
     "status": 1,
     "name": "Bandera"
   },
@@ -82,7 +82,7 @@
     "author": "@lampa"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/lampame/cw.js",
+    "url": "https://gorlim590.github.io/lampa/community/community-watches.js",
     "status": 1,
     "name": "CommunityWatches"
   },
@@ -92,7 +92,7 @@
     "name": "LGBT"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/bodya-elven/hide_content.js",
+    "url": "https://gorlim590.github.io/lampa/filters/hide-content.js",
     "status": 1,
     "name": "Hide Content"
   },
@@ -102,97 +102,97 @@
     "name": "UA Comments"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/lampame/tracks.js",
+    "url": "https://gorlim590.github.io/lampa/providers/tracks-probe.js",
     "status": 1,
     "name": "Tracks Probe"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/levende/anti-dmca.js",
+    "url": "https://gorlim590.github.io/lampa/filters/anti-dmca.js",
     "status": 1,
     "name": "Anti DMCA"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/levende/lampac-src-filter.js",
+    "url": "https://gorlim590.github.io/lampa/filters/lampac-source-filter.js",
     "status": 1,
     "name": "Lampac Source Filter"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/lampame/timdb.js",
+    "url": "https://gorlim590.github.io/lampa/community/imdb-trailers.js",
     "status": 1,
     "name": "IMDB Trailers"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/lampame/n.js",
+    "url": "https://gorlim590.github.io/lampa/community/nightingale.js",
     "status": 1,
     "name": "Nightingale"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/levende/tv-status-color.js",
+    "url": "https://gorlim590.github.io/lampa/ui/tv-status.js",
     "status": 1,
     "name": "TV Status"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/ko31k/Networks.js",
+    "url": "https://gorlim590.github.io/lampa/providers/tmdb-networks.js",
     "status": 1,
     "name": "Networks"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/cevamnelampaplagin/avgrating.js",
+    "url": "https://gorlim590.github.io/lampa/media/average-rating.js",
     "status": 1,
     "name": "AVG Rating"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/ko31k/cardify+.js",
+    "url": "https://gorlim590.github.io/lampa/ui/cardify-plus.js",
     "status": 1,
     "name": "Cardify+"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/ko31k/buttons+.js",
+    "url": "https://gorlim590.github.io/lampa/ui/buttons-plus.js",
     "status": 1,
     "name": "Buttons+"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/lampame/newcategory.js",
+    "url": "https://gorlim590.github.io/lampa/community/new-category.js",
     "status": 1,
     "name": "New Category"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/levende/custom-favs.js",
+    "url": "https://gorlim590.github.io/lampa/media/custom-favorites.js",
     "status": 1,
     "name": "Custom Favs"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/levende/profiles.js",
+    "url": "https://gorlim590.github.io/lampa/media/profiles-plus.js",
     "status": 1,
     "name": "Profiles+"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/ko31k/SeasonsInfo.js",
+    "url": "https://gorlim590.github.io/lampa/media/seasons-info.js",
     "status": 1,
     "name": "SeassonsInfo"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/lampame/trakttv.js",
+    "url": "https://gorlim590.github.io/lampa/trakt/trakt.js",
     "status": 1,
     "name": "TraktTV"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/levende/trash-filter.js",
+    "url": "https://gorlim590.github.io/lampa/filters/trash-filter.js",
     "status": 1,
     "name": "Trash Filter"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/yarikrazor-star/ytranslate.js",
+    "url": "https://gorlim590.github.io/lampa/localization/translate.js",
     "status": 1,
     "name": "Ytranslate"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/lampame/tstracks.js",
+    "url": "https://gorlim590.github.io/lampa/providers/ts-tracks.js",
     "status": 1,
     "name": "TSTracks"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/lampame/ttv.js",
+    "url": "https://gorlim590.github.io/lampa/providers/tryzub-tv.js",
     "status": 0,
     "name": "TV"
   },
@@ -205,13 +205,13 @@
     "status": 1
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/nrsua/lparty.js",
+    "url": "https://gorlim590.github.io/lampa/community/lparty.js",
     "status": 0,
     "name": "LParty",
     "author": "@nrsua, @levende"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/third-party/lampame/music.js",
+    "url": "https://gorlim590.github.io/lampa/community/vinyl.js",
     "status": 0,
     "name": "Vinyl",
     "author": "@lme_chat"

@@ -20,12 +20,6 @@ jobs:
         with:
           path: main-checkout
           fetch-depth: 0
-      - name: Checkout third-party branch
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ github.repository }}
-          ref: third-party
-          path: main-checkout/third-party-branch
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
