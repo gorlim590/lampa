@@ -2803,7 +2803,7 @@
             "body.ydesign-glass-pill .ydesign-rating {",
             "    background: rgba(255, 255, 255, 0.1) !important;",
             "    backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important; box-shadow: none !important;",
-            "}"
+            "}",
             "",
             "/* UA завжди має синьо-жовтий фон, зокрема у скляному стилі */",
             "body.ydesign-active .ydesign-glass-pill .ydesign-badge-ua,",
