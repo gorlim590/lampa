@@ -319,6 +319,35 @@
         return false;
     }
 
+    // Резервні назви жанрів для карток, якщо TMDB detail-запит не повернув genres.
+    function fallbackGenres(data, type) {
+        if (!data) return [];
+        var source = Array.isArray(data.genres) ? data.genres : [];
+        if (source.length) {
+            return source.map(function (g) {
+                if (g && typeof g === 'object') return { id: g.id, name: g.name || '' };
+                return { name: String(g || '') };
+            }).filter(function (g) { return !!g.name; });
+        }
+
+        var ids = Array.isArray(data.genre_ids) ? data.genre_ids : [];
+        var movieGenres = {
+            28: 'Бойовик', 12: 'Пригоди', 16: 'Анімація', 35: 'Комедія', 80: 'Кримінал',
+            99: 'Документальний', 18: 'Драма', 10751: 'Сімейний', 14: 'Фентезі', 36: 'Історичний',
+            27: 'Жахи', 10402: 'Музика', 9648: 'Детектив', 10749: 'Мелодрама', 878: 'Фантастика',
+            10770: 'Телефільм', 53: 'Трилер', 10752: 'Військовий', 37: 'Вестерн'
+        };
+        var tvGenres = {
+            10759: 'Бойовик і пригоди', 16: 'Анімація', 35: 'Комедія', 80: 'Кримінал',
+            99: 'Документальний', 18: 'Драма', 10751: 'Сімейний', 10762: 'Дитячий',
+            9648: 'Детектив', 10763: 'Новини', 10764: 'Реаліті-шоу', 10765: 'Фантастика і фентезі',
+            10766: 'Мильна опера', 10767: 'Ток-шоу', 10768: 'Війна і політика', 37: 'Вестерн'
+        };
+        var dictionary = type === 'tv' ? tvGenres : movieGenres;
+        return ids.map(function (id) { return { id: id, name: dictionary[id] || '' }; })
+            .filter(function (g) { return !!g.name; });
+    }
+
     function isTvMedia(movie, cardEl, extData) {
         if (!movie && !cardEl && !extData) return false;
 
@@ -2144,10 +2173,31 @@
 
             fetchExtendedData(data.id, type).then(function (extData) {
                 if (extData) {
+                    // Якщо детальна відповідь не містить опису/жанрів, використовуємо дані картки.
+                    if (!extData.overview) extData.overview = data.overview || data.description || '';
+                    if (!Array.isArray(extData.genres) || !extData.genres.length) extData.genres = fallbackGenres(data, type);
                     el._ydesign_extData = extData;
                     updateCardNotch(el, data, extData);
                 } else {
+                    // Не відмовляємося від усієї картки через помилку додаткового запиту TMDB.
                     el._ydesign_extFailed = true;
+                    extData = {
+                        overview: data.overview || data.description || '',
+                        tagline: data.tagline || '',
+                        genres: fallbackGenres(data, type),
+                        title_uk: data.title || data.name || '',
+                        title_en: data.original_title || data.original_name || '',
+                        seasons: data.number_of_seasons || 0,
+                        episodes: data.number_of_episodes || 0,
+                        tmdb_rating: data.vote_average,
+                        clean_poster: null,
+                        clean_backdrop: null,
+                        logo: null,
+                        logo_lang: null,
+                        age: null,
+                        se_str: ''
+                    };
+                    el._ydesign_extData = extData;
                 }
                 refreshMarks();
                 var bgToLoad = null;
@@ -2158,7 +2208,6 @@
                 }
 
                 if (bgToLoad) applyBg(bgToLoad);
-                if (!extData) { el.classList.add('ydesign-ready'); return; }
 
                 var logoContainer = document.createElement('div');
                 logoContainer.className = 'ydesign-logo-container';
@@ -2284,15 +2333,17 @@
                 if (getSet(prefix + 'show_genres', 'ydesign_show_genres')) {
                     genresWrap = document.createElement('div');
                     genresWrap.className = 'ydesign-genres';
-                    if (extData.genres && extData.genres.length) {
-                        extData.genres.forEach(function (g) {
+                    var genreList = (extData && Array.isArray(extData.genres) && extData.genres.length)
+                        ? extData.genres : fallbackGenres(data, type);
+                    if (genreList.length) {
+                        genreList.forEach(function (g) {
+                            var genreName = g && (g.name || g);
+                            if (!genreName) return;
                             var gb = document.createElement('span');
                             gb.className = 'ydesign-genre-badge';
-                            gb.innerText = g.name || g;
+                            gb.innerText = genreName;
                             genresWrap.appendChild(gb);
                         });
-                    } else {
-                        genresWrap.innerText = ' ';
                     }
                 }
 
@@ -2344,10 +2395,15 @@
                 }
 
                 if (isHorz && getSet('ydesign_h_show_desc', 'ydesign_show_desc_horz')) {
-                    var desc = document.createElement('div');
-                    desc.className = 'ydesign-desc-under';
-                    desc.innerText = extData.overview ? extData.overview : ' ';
-                    el.appendChild(desc);
+                    var overviewText = (extData && (extData.overview || extData.description))
+                        || (data && (data.overview || data.description))
+                        || '';
+                    if (overviewText) {
+                        var desc = document.createElement('div');
+                        desc.className = 'ydesign-desc-under';
+                        desc.innerText = overviewText;
+                        el.appendChild(desc);
+                    }
                 }
 
                 scheduleOverflowFix(contentLayer);
