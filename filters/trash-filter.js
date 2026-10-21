@@ -50,7 +50,7 @@
             var clone = Lampa.Arrays.clone(results);
 
             for (var i = 0; i < this.filters.length; i++) {
-                clone = this.filters[i](results);
+                clone = this.filters[i](clone);
             }
 
             return clone;

@@ -442,7 +442,8 @@
                 if (hit) return cb(hit);
             }
             var userApiKey = String(Lampa.Storage.get('interface_mod_new_tmdb_api_key') || '').trim();
-            var defaultApiKey = '1ad1fd4b4938e876aa6c96d0cded9395';
+            var defaultApiKey = '';
+            try { defaultApiKey = (Lampa.TMDB && Lampa.TMDB.key && Lampa.TMDB.key()) || ''; } catch (e) { defaultApiKey = ''; }
             var activeApiKey = userApiKey || defaultApiKey;
             var onSuccess = function (title) {
                 if (title && key) cacheSet(key, title);

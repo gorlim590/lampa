@@ -31,9 +31,9 @@
         cacheTime: 7 * 24 * 60 * 60 * 1000,
         tmdbKey: function () {
             try {
-                return (window.Lampa && Lampa.TMDB && Lampa.TMDB.key) ? Lampa.TMDB.key() : '4ef0d7355d9ffb5151e987764708ce96';
+                return (window.Lampa && Lampa.TMDB && Lampa.TMDB.key) ? (Lampa.TMDB.key() || '') : '';
             } catch (e) {
-                return '4ef0d7355d9ffb5151e987764708ce96';
+                return '';
             }
         }
     };
