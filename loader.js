@@ -29,6 +29,7 @@
     'trakt/trakt-plus.js',
     'ui/interface-plus.js',
     'ui/design-optimized.js',
+    'media/average-rating.js',
     'ui/cardify-plus.js',
     'localization/translate.js'
   ];
