@@ -353,12 +353,16 @@
 
         if (extData) {
             if (extData.seasons || extData.se_str || extData.number_of_seasons) return true;
-            if (extData.type === 'tv' || extData.media_type === 'tv') return true;
+            if (extData.type === 'tv' || extData.type === 'tv_series' || extData.type === 'show' ||
+                extData.type === 'anime' || extData.media_type === 'tv' || extData.media_type === 'show' ||
+                extData.media_type === 'anime') return true;
             if (extData.type === 'movie' || extData.media_type === 'movie') return false;
         }
 
         if (movie) {
-            if (movie.media_type === 'tv' || movie.type === 'tv' || movie.type === 'tv_series') return true;
+            if (movie.media_type === 'tv' || movie.type === 'tv' || movie.type === 'tv_series' ||
+                movie.type === 'show' || movie.type === 'anime' || movie.media_type === 'show' ||
+                movie.media_type === 'anime' || movie.card_type === 'anime') return true;
             if (movie.media_type === 'movie' || movie.type === 'movie') return false;
             if (movie.number_of_seasons !== undefined && movie.number_of_seasons !== null && movie.number_of_seasons > 0) return true;
             if (movie.seasons && movie.seasons.length > 0) return true;
