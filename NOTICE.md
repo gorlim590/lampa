@@ -6,7 +6,7 @@
 | --- | --- |
 | ko31k (MIT, див. licenses/ko31k-LICENSE) | ui/cardify-plus.js, ui/buttons-plus.js, ui/interface-plus.js (база), providers/tmdb-networks.js, providers/parsers.js, media/seasons-info.js |
 | lampame | trakt/trakt.js, trakt/community-watches.js, community/community-watches.js, community/nightingale.js, community/new-category.js, community/imdb-trailers.js, community/vinyl.js, providers/bandera-online.js, providers/tryzub-tv.js, providers/tracks-probe.js, providers/ts-tracks.js |
-| levende | filters/anti-dmca.js, filters/lampac-source-filter.js, filters/search-sanitizer.js, filters/trash-filter.js, media/custom-favorites.js, media/profiles-plus.js, ui/tv-status.js |
+| levende | filters/anti-dmca.js, filters/lampac-source-filter.js, filters/search-sanitizer.js, filters/trash-filter.js, media/custom-favorites.js, ui/tv-status.js |
 | bodya-elven | filters/hide-content.js |
 | dikomillo | ui/menu-hide.js |
 | ipavlin98 | ui/cardify.js, ui/series-progress-fix.js |

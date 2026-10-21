@@ -53,7 +53,6 @@
 - media/average-rating.js
 - media/custom-favorites.js
 - media/studio-picks.js
-- media/profiles-plus.js
 
 ### Trakt / Providers
 - trakt/trakt.js
@@ -107,7 +106,7 @@
 - info/seasons-info.js → media/seasons-info.js. З коду прибрано перевірку «скрипт завантажено з адреси з ko31k», бо після перенесення вона вимкнула б плагін.
 - filters/content-hider.js → filters/hide-content.js. Глобальний guard захищає від повторної ініціалізації, але достатньо підключити один із двох.
 
-media/custom-favorites.js і media/profiles-plus.js містять обидві збірки (для Lampa з app_digital >= 300 і старіших) і вибирають потрібну під час запуску. Розширення подій картки (listener-extensions) вбудоване в media/custom-favorites.js.
+media/custom-favorites.js містить обидві збірки (для Lampa з app_digital >= 300 і старіших) і вибирають потрібну під час запуску. Розширення подій картки (listener-extensions) вбудоване в media/custom-favorites.js.
 
 plugins.json у корені — список плагінів із адресами на файли в категоріях. Автори та ліцензії — у NOTICE.md та licenses/.
 
