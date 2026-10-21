@@ -1,0 +1,37 @@
+name: Repository checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: JavaScript syntax and links
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main / pull request
+        uses: actions/checkout@v4
+        with:
+          path: main-checkout
+      - name: Checkout third-party branch
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: third-party
+          path: main-checkout/third-party-branch
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check whitespace errors
+        working-directory: main-checkout
+        run: git diff --check ${{ github.event.before || 'HEAD^' }} ${{ github.sha }} || git diff --check
+      - name: Check JavaScript syntax and first-party links
+        working-directory: main-checkout
+        run: node scripts/check-repository.mjs
