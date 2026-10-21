@@ -1667,6 +1667,8 @@
                 return hist && p >= WATCHED_HISTORY;
             }
 
+            // Trakt має пріоритет і не залежить від завантаження додаткових даних TMDB.
+            if (traktWatched(data)) return true;
             if (!ext) return false;                 // дані серіалу ще вантажаться — не мигаємо позначкою
             if (ext.failed) return !!fav.viewed;    // TMDB недоступний — лишаємо тільки позначку Lampa
             if (!title) return false;
@@ -1856,7 +1858,7 @@
             view.appendChild(chk);
         }
         if (el.classList.contains('ydesign-is-watched') !== mk.watched) el.classList.toggle('ydesign-is-watched', mk.watched);
-        var fromTrakt = !!(mk.watched && type !== 'tv' && traktWatched(data));
+        var fromTrakt = !!(mk.watched && traktWatched(data));
         if (el.classList.contains('ydesign-from-trakt') !== fromTrakt) el.classList.toggle('ydesign-from-trakt', fromTrakt);
     }
 
@@ -2724,10 +2726,10 @@
             ".ydesign-vertical .ydesign-ratings,",
             ".ydesign-vertical .ydesign-genres {",
             "    display: flex !important; flex-wrap: wrap !important; align-content: flex-start !important; align-items: center !important;",
-            "    column-gap: var(--ydesign-badges-gap, 0.15em) !important; row-gap: 50em !important;",
+            "    column-gap: var(--ydesign-badges-gap, 0.15em) !important; row-gap: var(--ydesign-v-badge-rows-gap, 0.3em) !important;",
             "    justify-content: var(--ydesign-align-badges, center) !important; width: 100% !important; ",
-            "    height: 2.15em !important; max-height: 2.15em !important; min-height: 2.15em !important; line-height: 2.15em !important;",
-            "    padding: 2px 0 !important; box-sizing: border-box !important; margin: 0 !important; overflow: hidden !important; clip-path: none !important;",
+            "    height: auto !important; max-height: none !important; min-height: 0 !important; line-height: normal !important;",
+            "    padding: 2px 0 !important; box-sizing: border-box !important; margin: 0 !important; overflow: visible !important; clip-path: none !important;",
             "}",
             "",
             "/* ВІДСТУПИ ЖАНРІВ (РУЧНИЙ РЕЖИМ) */",
