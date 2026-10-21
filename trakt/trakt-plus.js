@@ -950,6 +950,44 @@
     };
   }
 
+  function cardFromWatchedShow(item) {
+    var m = item && item.show;
+    if (!m || !m.ids || !m.ids.tmdb) return null;
+    var poster = img(m, 'poster');
+    var fan = img(m, 'fanart') || poster;
+    var title = m.title || m.name || '';
+    var date = m.first_aired ? String(m.first_aired).slice(0, 10) : (m.year ? String(m.year) : '');
+    return {
+      id: m.ids.tmdb,
+      ids: { tmdb: m.ids.tmdb, trakt: m.ids.trakt, imdb: m.ids.imdb },
+      title: title,
+      name: title,
+      original_title: m.title || title,
+      original_name: m.title || title,
+      release_date: date,
+      first_air_date: date,
+      poster: poster, img: poster,
+      background_image: fan, image: fan,
+      vote_average: 0,
+      method: 'tv', type: 'tv', card_type: 'tv', media_type: 'tv', source: 'tmdb'
+    };
+  }
+
+  function syncedKey(card) {
+    return (cardKind(card) === 'show' ? 'tv:' : 'movie:') + String(card.id || (card.ids && card.ids.tmdb) || '');
+  }
+
+  function syncedSet(list) {
+    var out = {};
+    (list || []).forEach(function (value) {
+      var key = String(value);
+      // Сумісність зі старим кешем, де зберігалися лише числові ID фільмів.
+      if (key.indexOf(':') < 0) key = 'movie:' + key;
+      out[key] = 1;
+    });
+    return out;
+  }
+
   var HIST_PAGE = 100;
 
   function pagedWatchedMovies(images) {
@@ -1051,6 +1089,7 @@
         persistWatched();
         emitWatched();
       }
+      // Папка «Trakt: Переглянуті» наразі залишається списком фільмів.
       var libCount = raw.length ? saveLibrary(raw) : (Lampa.Storage.get('trakt_plus_library') || []).length;
 
       raw.sort(function (a, b) {
@@ -1062,26 +1101,39 @@
         var c = cardFromWatched(it);
         if (c) cards.push(c);
       });
+      if (Array.isArray(res.shows)) {
+        res.shows.slice().sort(function (a, b) {
+          return String(b.last_watched_at || '').localeCompare(String(a.last_watched_at || ''));
+        }).forEach(function (it) {
+          if (cards.length >= MAX_WATCHED) return;
+          var c = cardFromWatchedShow(it);
+          if (c) cards.push(c);
+        });
+      }
 
       var capSet = {};
-      cards.forEach(function (c) { capSet[c.id] = 1; });
-      var prev = arrToSet(Lampa.Storage.get('trakt_plus_synced') || []);
+      cards.forEach(function (c) { capSet[syncedKey(c)] = 1; });
+      var prev = syncedSet(Lampa.Storage.get('trakt_plus_synced') || []);
       var mine = {};
       var stats = { added: 0, skipped: 0, removed: 0 };
       var i = 0;
 
       return new Promise(function (resolve) {
         function finish() {
-          if (!cancelled && raw.length) {
-            Object.keys(prev).forEach(function (id) {
-              if (!capSet[id] && !mine[id]) {
-                try { Lampa.Favorite.remove('viewed', { id: Number(id) }); stats.removed++; } catch (e) {}
+          // Не видаляємо раніше синхронізовані елементи, якщо Trakt не повернув список серіалів.
+          if (!cancelled && raw.length && Array.isArray(res.shows)) {
+            Object.keys(prev).forEach(function (key) {
+              if (!capSet[key] && !mine[key]) {
+                var parts = key.split(':');
+                var kind = parts[0] === 'tv' ? 'tv' : 'movie';
+                var id = parts.slice(1).join(':');
+                try { Lampa.Favorite.remove('viewed', { id: Number(id), method: kind, type: kind }); stats.removed++; } catch (e) {}
               }
             });
           } else {
-            Object.keys(prev).forEach(function (id) { mine[id] = 1; });
+            Object.keys(prev).forEach(function (key) { mine[key] = 1; });
           }
-          Lampa.Storage.set('trakt_plus_synced', Object.keys(mine).map(Number));
+          Lampa.Storage.set('trakt_plus_synced', Object.keys(mine));
           Lampa.Storage.set('trakt_plus_last_sync', Date.now());
           resolve();
         }
@@ -1090,10 +1142,11 @@
           var end = Math.min(i + 25, cards.length);
           for (; i < end; i++) {
             var c = cards[i];
+            var key = syncedKey(c);
             var st = {};
             try { st = Lampa.Favorite.check(c) || {}; } catch (e) {}
             if (st.viewed) {
-              if (prev[c.id]) mine[c.id] = 1;
+              if (prev[key]) mine[key] = 1;
               stats.skipped++;
               continue;
             }
@@ -1101,7 +1154,7 @@
             if (conflict) { stats.skipped++; continue; }
             try {
               Lampa.Favorite.add('viewed', c);
-              mine[c.id] = 1;
+              mine[key] = 1;
               stats.added++;
             } catch (e) { stats.skipped++; }
           }
@@ -1116,7 +1169,10 @@
         syncing = false;
         clearRowCaches();
         decorateAll();
-        notify(tr('Trakt: отримано ', 'Trakt: received ') + res.a + (res.h ? ' (+' + res.h + tr(' з історії', ' from history') + ')' : '') +
+        var showCount = Array.isArray(res.shows) ? res.shows.length : null;
+        notify(tr('Trakt: фільмів ', 'Trakt: movies ') + raw.length +
+          (res.h ? ' (+' + res.h + tr(' з історії', ' from history') + ')' : '') +
+          (showCount === null ? tr(', серіали не отримані', ', shows were not fetched') : tr(', серіалів ', ', shows ') + showCount) +
           tr(', у папці ', ', in folder ') + libCount + '. ' +
           tr('Вибране: додано ', 'Favorites: added ') + stats.added +
           tr(', пропущено ', ', skipped ') + stats.skipped +
