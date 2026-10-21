@@ -1,0 +1,10 @@
+{
+  "name": "lampa-ai-bridge-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Authenticated diagnostic bridge for a Lampa plugin",
+  "scripts": {
+    "check": "node --check ai-bridge/server.js && node --check ai/diagnostics.js"
+  },
+  "engines": { "node": ">=20" }
+}
