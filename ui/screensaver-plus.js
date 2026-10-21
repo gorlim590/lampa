@@ -392,27 +392,27 @@
   function loadAlerts() {
     if (!root) return Promise.resolve();
     if (!ALERTS_API_TOKEN || ALERTS_API_TOKEN === 'ADD_TOKEN_HERE') {
-      // Віджет показує карту сірими областями, поки токен не налаштований.
       alertsByOblast = {};
       updateAlertMapColors();
       return Promise.resolve();
     }
-    return http(ALERTS_API_URL, true).then(function () {
-      // Повторний запит з Authorization робимо окремо, оскільки http() має простий інтерфейс.
-      return new Promise(function (resolve, reject) {
-        var x = new XMLHttpRequest();
-        x.open('GET', ALERTS_API_URL, true);
-        x.timeout = 12000;
-        x.setRequestHeader('Authorization', 'Bearer ' + ALERTS_API_TOKEN);
-        x.onload = function () {
-          if (x.status < 200 || x.status >= 300) return reject(new Error('alerts HTTP ' + x.status));
-          try { alertsByOblast = readAlertRows(JSON.parse(x.responseText)); alertsLastOk = Date.now(); updateAlertMapColors(); resolve(); }
-          catch (e) { reject(e); }
-        };
-        x.onerror = function () { reject(new Error('alerts network/CORS')); };
-        x.ontimeout = function () { reject(new Error('alerts timeout')); };
-        x.send();
-      });
+    return new Promise(function (resolve, reject) {
+      var x = new XMLHttpRequest();
+      x.open('GET', ALERTS_API_URL, true);
+      x.timeout = 12000;
+      x.setRequestHeader('Authorization', 'Bearer ' + ALERTS_API_TOKEN);
+      x.onload = function () {
+        if (x.status < 200 || x.status >= 300) return reject(new Error('alerts HTTP ' + x.status));
+        try {
+          alertsByOblast = readAlertRows(JSON.parse(x.responseText));
+          alertsLastOk = Date.now();
+          updateAlertMapColors();
+          resolve();
+        } catch (e) { reject(e); }
+      };
+      x.onerror = function () { reject(new Error('alerts network/CORS')); };
+      x.ontimeout = function () { reject(new Error('alerts timeout')); };
+      try { x.send(); } catch (e) { reject(e); }
     }).catch(function () {
       // Залишаємо останні відомі кольори, не показуємо хибний стан «усе спокійно».
     });
