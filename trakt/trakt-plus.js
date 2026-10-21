@@ -28,6 +28,9 @@
   var CACHE_VER = 4;      // v4: примусово оновлюємо кеш після виправлення синхронізації серіалів
   var TOP_INDEX = 0;      // з якої позиції починаються рядки Trakt на головній (0 = самий верх)
   var QUEUE_MAX = 3;      // скільки запитів до Trakt одночасно (щоб не ловити 429)
+  var FULL_FIRST = 600;   // перший екран «Ще»: великий список без збільшення рядів головної
+  var FULL_PAGE = 200;    // унікальних карток у наступній порції
+  var FULL_SCAN = 12;     // межа пошуку після фільтрації в одному запиті UI
 
   var TREND_ROWS = [
     { key: 'movies', uk: 'Зараз дивляться: фільми', en: 'Watching now: movies', index: 3,
@@ -177,8 +180,16 @@
       else { qActive--; j.rej(e); qPump(); }
     });
   }
-  function qget(u) {
-    return new Promise(function (res, rej) { qWait.push({ u: u, res: res, rej: rej }); qPump(); });
+  function qget(u, foreground) {
+    return new Promise(function (res, rej) {
+      var job = { u: u, res: res, rej: rej, foreground: !!foreground };
+      if (foreground) {
+        var pos = 0;
+        while (pos < qWait.length && qWait[pos].foreground) pos++;
+        qWait.splice(pos, 0, job);
+      } else qWait.push(job);
+      qPump();
+    });
   }
 
   // ───────────── КАРТКИ ─────────────
@@ -434,13 +445,13 @@
     return uniq(interleave(lists));
   }
 
-  function loadChunk(def, ch) {
+  function loadChunk(def, ch, foreground) {
     return whenApi().then(function () {
       return def.prepare ? def.prepare(ch) : null;
     }).then(function () {
-      var specs = def.urls(ch) || [];
+      var specs = (foreground && def.fullUrls ? def.fullUrls(ch) : def.urls(ch)) || [];
       return Promise.all([loadWatched(), Promise.all(specs.map(function (s) {
-        return qget(s.u).then(function (a) { return Array.isArray(a) ? { arr: a } : { arr: [], err: true }; },
+        return qget(s.u, foreground).then(function (a) { return Array.isArray(a) ? { arr: a } : { arr: [], err: true }; },
           function () { return { arr: [], err: true }; })
           .then(function (x) {
             return { spec: s, err: !!x.err, raw: x.arr.length, cards: x.arr.map(function (e) { return toCard(e, s.hint); }).filter(Boolean) };
@@ -449,7 +460,10 @@
     }).then(function (r) {
       var raw = 0, errs = 0;
       r[1].forEach(function (g) { raw += g.raw; if (g.err) errs++; });
-      return { cards: (def.combine || combineDefault)(r[1], def), raw: raw, errs: errs };
+      return {
+        cards: (def.combine || combineDefault)(r[1], def), raw: raw, errs: errs,
+        moreSources: !!(foreground && def.fullHasMore && def.fullHasMore(ch))
+      };
     });
   }
 
@@ -498,6 +512,8 @@
     TREND_ROWS.forEach(function (t) {
       defs.push({
         name: 'TraktPlusTrend_' + t.key, uk: t.uk, en: t.en, index: t.index, chunks: 2,
+        fullUk: { movies: 'Фільми Trakt — великий каталог', shows: 'Серіали Trakt — великий каталог', cartoons: 'Мультфільми Trakt — великий каталог', anime: 'Аніме Trakt — великий каталог' }[t.key],
+        fullEn: { movies: 'Trakt movies — extended catalogue', shows: 'Trakt shows — extended catalogue', cartoons: 'Trakt animation — extended catalogue', anime: 'Trakt anime — extended catalogue' }[t.key],
         opts: function () { return { minRating: 0, minVotes: 0, hideWatched: cfg().trendHide, genre: t.genre, notGenres: t.skip }; },
         combine: combineTrend,
         urls: function (ch) {
@@ -509,6 +525,26 @@
             s.push({ u: feed(l.p + '/popular', ex), hint: l.hint, k: k, tag: 'pop' });
           });
           return s;
+        },
+        // Public popularity endpoints end after a few pages. Partition the
+        // expanded catalogue by decade, preserving this row's media/genre filters.
+        fullUrls: function (ch) {
+          var cursor = Math.max(0, ch - 3);
+          var decade = Math.floor(y / 10) * 10 - Math.floor(cursor / 5) * 10;
+          if (decade < 1890) return [];
+          var page = cursor % 5 + 1, specs = [];
+          t.loads.forEach(function (l, k) {
+            ['/popular', '/watched/all', '/favorited/all'].forEach(function (endpoint) {
+              var extra = { page: page, years: decade + '-' + Math.min(y, decade + 9) };
+              if (l.genre) extra.genres = l.genre;
+              specs.push({ u: feed(l.p + endpoint, extra), hint: l.hint, k: k, tag: 'pop' });
+            });
+          });
+          return specs;
+        },
+        fullHasMore: function (ch) {
+          var nextCursor = Math.max(0, ch - 2);
+          return Math.floor(y / 10) * 10 - Math.floor(nextCursor / 5) * 10 >= 1890;
         }
       });
     });
@@ -655,6 +691,7 @@
   }
 
   function openMore(def, title) {
+    if (def.fullUk) title = tr(def.fullUk, def.fullEn);
     Lampa.Activity.push({ url: '', title: title, component: 'trakt_plus_view', row: def.name, page: 1 });
   }
 
@@ -671,7 +708,15 @@
       total_pages: 1,
       results: r.cards.slice(0, g.rowLimit).map(finalize)
     };
-    if (g.more && Lampa.Maker) line.onMore = function () { openMore(def, title); };
+    if (g.more) {
+      var onMore = function () { openMore(def, title); };
+      // New Line.More checks total_pages, while legacy InteractionLine checks more.
+      // This signals the expandable row; the full view computes its own pagination.
+      line.more = true;
+      line.total_pages = 2;
+      line.onMore = onMore;
+      if (Lampa.Maker) line.params = { emit: { onlyMore: onMore } };
+    }
     return line;
   }
 
@@ -874,58 +919,79 @@
     if (fav.length) fav.after(li); else list.append(li);
   }
 
+  function createFullPager(def, initial) {
+    var seen = {}, pending = [], chunk = initial.nextChunk || 2;
+    var done = !!initial.exhausted;
+    function append(cards) {
+      (cards || []).forEach(function (card) {
+        var key = card.method + ':' + card.id;
+        if (seen[key]) return;
+        seen[key] = true;
+        pending.push(card);
+      });
+    }
+    append(initial.cards);
+    return {
+      hasMore: function () { return pending.length > 0 || !done; },
+      take: function (limit) {
+        var tries = 0;
+        function step() {
+          if (done || pending.length >= limit || tries++ >= FULL_SCAN) {
+            return Promise.resolve(pending.splice(0, limit));
+          }
+          return loadChunk(def, chunk, true).then(function (r) {
+            append(r.cards);
+            // Partial/error responses must be retried at the same source page.
+            if (r.errs) return pending.splice(0, limit);
+            chunk++;
+            if (!r.raw && !r.moreSources) done = true;
+            return step();
+          }, function () { return pending.splice(0, limit); });
+        }
+        return step();
+      }
+    };
+  }
+
   function registerView() {
     if (!Lampa.Maker || !Lampa.Component) return;
     registerLibrary();
     Lampa.Component.add('trakt_plus_view', function (object) {
       var comp = Lampa.Maker.make('Category', object);
       var def = ROWS[object.row];
-      var shown = {}, next = 2, chunk = 2, done = false;
-
-      function gather() {
-        var out = [], tries = 0;
-        function step() {
-          if (done || tries >= 8 || out.length >= 20) return Promise.resolve(out);
-          tries++;
-          var ch = chunk++;
-          return loadChunk(def, ch).then(function (r) {
-            if (!r.raw && !r.errs) done = true;
-            r.cards.forEach(function (c) {
-              var k = c.method + c.id;
-              if (shown[k]) return;
-              shown[k] = 1;
-              out.push(c);
-            });
-            if (r.errs && !r.raw) return out;
-            return step();
-          }, function () { done = true; return out; });
-        }
-        return step();
-      }
+      var pager = null, next = 2;
 
       comp.use({
         onCreate: function () {
           var self = this;
           if (!def) { self.empty(); return; }
           getRow(def).then(function (r) {
-            var cards = r.cards || [];
-            if (!cards.length) { self.empty(); return; }
-            cards.forEach(function (c) { shown[c.method + c.id] = 1; });
-            chunk = r.nextChunk || 2;
-            done = !!r.exhausted;
-            try {
-              self.build({ results: cards, total_pages: done ? 1 : 2, page: 1 });
-            } catch (err) { self.empty(); }
+            pager = createFullPager(def, r);
+            return pager.take(FULL_FIRST).then(function (cards) {
+              if (self.destroyed) return;
+              if (!cards.length) { self.empty(); return; }
+              try {
+                self.build({ results: cards, total_pages: pager.hasMore() ? 2 : 1, page: 1 });
+              } catch (err) { self.empty(); }
+            });
           }, function () { self.empty(); });
         },
         onNext: function (resolve, reject) {
           var self = this;
-          if (!def || done) return reject.call(self);
-          gather().then(function (res) {
-            if (!res.length) return reject.call(self);
+          if (!def || !pager || !pager.hasMore()) return reject.call(self);
+          pager.take(FULL_PAGE).then(function (res) {
+            if (self.destroyed) return;
+            if (!res.length) {
+              self.object.page = next - 1;
+              if (!pager.hasMore()) self.total_pages = next - 1;
+              return reject.call(self);
+            }
             var pg = next++;
-            resolve.call(self, { results: res, total_pages: done ? pg : pg + 1, page: pg });
-          }, function () { reject.call(self); });
+            // Lampa Category.Next ignores new_data.total_pages: update the instance too.
+            self.total_pages = pager.hasMore() ? pg + 1 : pg;
+            self.object.page = pg;
+            resolve.call(self, { results: res, total_pages: self.total_pages, page: pg });
+          }, function () { self.object.page = next - 1; reject.call(self); });
         },
         onInstance: function (card, element) {
           card.use({ onlyMenu: false, onlyEnter: function () { openFull(element); } });
@@ -1465,3 +1531,4 @@
   if (window.appready) boot();
   else Lampa.Listener.follow('app', function (e) { if (e.type === 'ready') boot(); });
 })();
+

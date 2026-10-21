@@ -1038,7 +1038,7 @@
 
     // =========================================================================
     // 6.2. ДОДАТКОВА ПЕРЕВІРКА UA ЧЕРЕЗ ПАРСЕР ТОРЕНТІВ (Jackett / Prowlarr / JacRed → Толока тощо)
-    // Працює лише якщо в Lampa налаштований парсер; запускається, коли картка потрапила у фокус.
+    // Працює лише з налаштованим парсером; видимі картки перевіряються послідовно без фокусу.
     // =========================================================================
     var UA_TORR_POS_TTL = 7 * 24 * 60 * 60 * 1000;
     var UA_TORR_NEG_TTL = 24 * 60 * 60 * 1000;
@@ -2309,27 +2309,19 @@
                     if (badgesWrap.parentNode !== infoWrap) infoWrap.insertBefore(badgesWrap, infoWrap.firstChild);
                 }
 
-                // Додаткова перевірка через торент-парсер: лише коли картка у фокусі (не для всього ряду одразу)
+                // buildExtendedCard is already visibility-gated by LazyLoader.
+                // Check visible cards in the existing serial queue, without waiting for focus.
                 function armTorrentUa() {
                     if (!torrentUaEnabled()) return;
                     var cached = torrentUaCached(data.id, type);
                     if (cached === true) { addUaBadge('Є в торентах'); return; }
                     if (cached === false) return;
-                    var timer = null, started = false;
-                    el._ydesign_onFocus = function () {
-                        if (started) return;
-                        clearTimeout(timer);
-                        timer = setTimeout(function () {
-                            // картку вже проскочили — не запускаємо важкий пошук
-                            if (started || FocusState.el !== el) return;
-                            started = true;
-                            el._ydesign_onFocus = null;
-                            checkTorrentsUa(data, type).then(function (found) { if (found) addUaBadge('Є в торентах'); });
-                        }, 900);
-                    };
-                    if (FocusState.el === el) el._ydesign_onFocus();
+                    checkTorrentsUa(data, type).then(function (found) {
+                        if (found && el.isConnected) addUaBadge('Є в торентах');
+                    });
                 }
 
+                if (torrentUaCached(data.id, type) === true) addUaBadge('Є в торентах');
                 checkUaVoiceover(data.id, type).then(function (hasUa) {
                     if (hasUa) addUaBadge();
                     else armTorrentUa();
@@ -2430,7 +2422,7 @@
     // =========================================================================
     // 10. CSS СТИЛІ
     // =========================================================================
-    var YD_EXTRA_CSS = "\n/* ===== YDesign: оптимізації та ефекти ===== */\n/* рейтинги: фільтр лише якщо задано насиченість != 100% */\n.ydesign-active .ydesign-rating img { filter: none !important; }\nbody.ydesign-sat-on .ydesign-rating img { filter: saturate(var(--ydesign-ratings-saturate, 100%)) !important; }\n\n/* картка: без постійних composited-шарів, ізоляція верстки */\n.ydesign-active .ydesign-card {\n    contain: layout;\n    transform: none;\n    backface-visibility: visible;\n    transition: transform .2s cubic-bezier(.2,.8,.2,1);\n}\n.ydesign-active .ydesign-card.focus { transform: scale(1.045); will-change: transform; }\n.ydesign-active .ydesign-card .card__view { transition: none !important; }\n\n/* плавна поява контенту після завантаження даних */\n.ydesign-active .ydesign-content-layer,\n.ydesign-active .ydesign-desc-under { opacity: 0; transition: opacity .4s ease-out; }\n.ydesign-active .ydesign-card.ydesign-ready .ydesign-content-layer,\n.ydesign-active .ydesign-card.ydesign-ready .ydesign-desc-under { opacity: 1; }\n\n/* підсвітка кольором постера під карткою у фокусі */\n.ydesign-active .ydesign-card.focus::after {\n    content: ''; position: absolute; left: -7%; right: -7%; top: -5%; bottom: -5%;\n    background: radial-gradient(closest-side, var(--yd-glow, transparent) 0%, transparent 100%);\n    opacity: 0; z-index: -1; pointer-events: none;\n    animation: ydGlow .35s ease-out .05s forwards;\n}\n@keyframes ydGlow { to { opacity: .6; } }\nbody.is--touch .ydesign-active .ydesign-card.focus::after { display: none; }\n\n/* ефекти для потужних пристроїв */\nbody.ydesign-fx.ydesign-glass-pill .ydesign-badge,\nbody.ydesign-fx.ydesign-glass-pill .ydesign-genre-badge,\nbody.ydesign-fx.ydesign-glass-pill .ydesign-rating,\nbody.ydesign-fx.ydesign-notch-bg .ydesign-card-notch,\nbody.ydesign-fx.ydesign-series-glass-pill .ydesign-series-pill {\n    backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important;\n}\nbody.ydesign-fx .ydesign-series-active .online-prestige.online-prestige--full .online-prestige__timeline {\n    backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important;\n}\nbody.ydesign-fx .ydesign-logo-container img { filter: drop-shadow(0 2px 6px rgba(0,0,0,0.85)); }\nbody.ydesign-fx .ydesign-card.focus .ydesign-content-layer::after {\n    content: ''; position: absolute; top: 0; left: 0; width: 55%; height: 100%;\n    background: linear-gradient(100deg, transparent 0%, rgba(255,255,255,.14) 50%, transparent 100%);\n    transform: translateX(-130%) skewX(-12deg);\n    animation: ydShine .9s ease-out .12s 1 both; pointer-events: none;\n}\n@keyframes ydShine { to { transform: translateX(280%) skewX(-12deg); } }\n\n/* економний режим: трохи світліші «скляні» плашки замість blur */\nbody:not(.ydesign-fx).ydesign-glass-pill .ydesign-badge,\nbody:not(.ydesign-fx).ydesign-glass-pill .ydesign-genre-badge,\nbody:not(.ydesign-fx).ydesign-glass-pill .ydesign-rating { background: rgba(255,255,255,0.16) !important; }\nbody:not(.ydesign-fx).ydesign-notch-bg .ydesign-card-notch { background: rgba(30,30,40,0.55) !important; }\nbody:not(.ydesign-fx).ydesign-series-glass-pill .ydesign-series-pill { background: rgba(255,255,255,0.18) !important; }\n";
+    var YD_EXTRA_CSS = "\n/* ===== YDesign: оптимізації та ефекти ===== */\n/* рейтинги: фільтр лише якщо задано насиченість != 100% */\n.ydesign-active .ydesign-rating img { filter: none !important; }\nbody.ydesign-sat-on .ydesign-rating img { filter: saturate(var(--ydesign-ratings-saturate, 100%)) !important; }\n\n/* картка: без постійних composited-шарів, ізоляція верстки */\n.ydesign-active .ydesign-card {\n    contain: layout;\n    transform: none;\n    backface-visibility: visible;\n    transition: transform .2s cubic-bezier(.2,.8,.2,1);\n}\n.ydesign-active .ydesign-card.focus { transform: scale(1.045); will-change: transform; }\n.ydesign-active .ydesign-card .card__view { transition: none !important; }\n\n/* плавна поява контенту після завантаження даних */\n.ydesign-active .ydesign-content-layer,\n.ydesign-active .ydesign-desc-under { opacity: 0; transition: opacity .4s ease-out; }\n.ydesign-active .ydesign-card.ydesign-ready .ydesign-content-layer,\n.ydesign-active .ydesign-card.ydesign-ready .ydesign-desc-under { opacity: 1; }\n\n/* підсвітка кольором постера під карткою у фокусі */\n.ydesign-active .ydesign-card.focus::after {\n    content: ''; position: absolute; left: -7%; right: -7%; top: -5%; bottom: -5%;\n    background: radial-gradient(closest-side, var(--yd-glow, transparent) 0%, transparent 100%);\n    opacity: 0; z-index: -1; pointer-events: none;\n    animation: ydGlow .35s ease-out .05s forwards;\n}\n@keyframes ydGlow { to { opacity: .6; } }\nbody.is--touch .ydesign-active .ydesign-card.focus::after { display: none; }\n\n/* ефекти для потужних пристроїв */\nbody.ydesign-fx.ydesign-glass-pill .ydesign-badge,\nbody.ydesign-fx.ydesign-glass-pill .ydesign-genre-badge,\nbody.ydesign-fx.ydesign-glass-pill .ydesign-rating,\nbody.ydesign-fx.ydesign-notch-bg .ydesign-card-notch,\nbody.ydesign-fx.ydesign-series-glass-pill .ydesign-series-pill {\n    backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important;\n}\nbody.ydesign-fx .ydesign-series-active .online-prestige.online-prestige--full .online-prestige__timeline {\n    backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important;\n}\nbody.ydesign-fx .ydesign-logo-container img { filter: drop-shadow(0 2px 6px rgba(0,0,0,0.85)); }\nbody.ydesign-fx .ydesign-card.focus .ydesign-content-layer::after {\n    content: ''; position: absolute; top: 0; left: 0; width: 55%; height: 100%;\n    background: linear-gradient(100deg, transparent 0%, rgba(255,255,255,.14) 50%, transparent 100%);\n    transform: translateX(-130%) skewX(-12deg);\n    animation: ydShine .9s ease-out .12s 1 both; pointer-events: none;\n}\n@keyframes ydShine { to { transform: translateX(280%) skewX(-12deg); } }\n\n/* економний режим: трохи світліші «скляні» плашки замість blur */\nbody:not(.ydesign-fx).ydesign-glass-pill .ydesign-badge:not(.ydesign-badge-ua),\nbody:not(.ydesign-fx).ydesign-glass-pill .ydesign-genre-badge,\nbody:not(.ydesign-fx).ydesign-glass-pill .ydesign-rating { background: rgba(255,255,255,0.16) !important; }\nbody:not(.ydesign-fx).ydesign-notch-bg .ydesign-card-notch { background: rgba(30,30,40,0.55) !important; }\nbody:not(.ydesign-fx).ydesign-series-glass-pill .ydesign-series-pill { background: rgba(255,255,255,0.18) !important; }\n";
 
     var YD_MARKS_CSS = [
         '/* ===== YDesign: позначки та ambient ===== */',
@@ -3486,7 +3478,7 @@
         // ПІДКАТЕГОРІЯ 1: СІТКА ТА ТИПИ КАРТОК (ydesign_grid)
         // -------------------------------------------------------------
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_lazy_load', type: 'trigger', default: DefaultSettings.ydesign_lazy_load }, field: { name: 'Ліниве завантаження', description: 'Завантажувати додаткові дані (лого, рейтинги) тільки при появі картки на екрані' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_ua_torrents', type: 'trigger', default: DefaultSettings.ydesign_ua_torrents }, field: { name: 'UA-плашка за торентами', description: 'Додатково шукати українську озвучку через парсер Lampa (Jackett/Prowlarr/JacRed з Толокою тощо). Перевіряється, коли картка у фокусі. Потрібен налаштований парсер' } });
+        Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_ua_torrents', type: 'trigger', default: DefaultSettings.ydesign_ua_torrents }, field: { name: 'UA-плашка за торентами', description: 'Додатково шукати українську озвучку через парсер Lampa (Jackett/Prowlarr/JacRed з Толокою тощо). Видимі картки перевіряються у фоні без наведення. Потрібен налаштований парсер' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_ribbons', type: 'trigger', default: DefaultSettings.ydesign_ribbons }, field: { name: 'Позначки «Новинка» / «Скоро»', description: 'Новинка — вийшло менше ніж 14 днів тому; Нова серія — серіал/аніме з серією в найближчі 14 днів; Скоро — прем’єра серіалу' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_watched_mark', type: 'trigger', default: DefaultSettings.ydesign_watched_mark }, field: { name: 'Позначка «Переглянуто»', description: 'Постер тьмяніє й отримує галочку (фільм з Історії, від 90% перегляду або за відміткою Lampa; серіал — якщо переглянуто останню серію)' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_ambient', type: 'trigger', default: DefaultSettings.ydesign_ambient }, field: { name: 'Фон під колір постера', description: 'Фон усього екрана плавно змінюється під колір картки у фокусі (без blur)' } });
@@ -4841,3 +4833,4 @@
     }
 
 })();
+
