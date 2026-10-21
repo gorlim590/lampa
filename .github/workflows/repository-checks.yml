@@ -19,6 +19,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: main-checkout
+          fetch-depth: 0
       - name: Checkout third-party branch
         uses: actions/checkout@v4
         with:
@@ -31,7 +32,7 @@ jobs:
           node-version: 20
       - name: Check whitespace errors
         working-directory: main-checkout
-        run: git diff --check ${{ github.event.before || 'HEAD^' }} ${{ github.sha }} || git diff --check
+        run: git diff --check HEAD^ HEAD
       - name: Check JavaScript syntax and first-party links
         working-directory: main-checkout
         run: node scripts/check-repository.mjs
