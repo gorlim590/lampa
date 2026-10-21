@@ -25,7 +25,7 @@
   var WATCH_RECHECK_SEC = 90;
   var DEFAULT_EXCLUDE = 'reality,talk-show,news,game-show,soap,sporting-event,special-interest';
   var MARK_TYPES = ['look', 'viewed', 'scheduled', 'continued', 'thrown'];
-  var CACHE_VER = 3;      // змінюється, коли треба примусово перезавантажити список переглянутого
+  var CACHE_VER = 4;      // v4: примусово оновлюємо кеш після виправлення синхронізації серіалів
   var TOP_INDEX = 0;      // з якої позиції починаються рядки Trakt на головній (0 = самий верх)
   var QUEUE_MAX = 3;      // скільки запитів до Trakt одночасно (щоб не ловити 429)
 
