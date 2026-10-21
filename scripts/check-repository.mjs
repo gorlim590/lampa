@@ -84,6 +84,8 @@ for (const file of textFiles) {
   const content = fs.readFileSync(file, 'utf8');
   for (const match of content.matchAll(urlPattern)) {
     const raw = match[0].replace(/[.,;:!?]+$/, '');
+    // Ignore illustrative URLs such as http://…/file.mp4 in documentation/comments.
+    if (raw.includes('…') || raw.includes('...')) continue;
     let parsed;
     try {
       parsed = new URL(raw);
