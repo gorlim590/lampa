@@ -350,8 +350,10 @@
 
   function isWatched(c) {
     var g = cfg();
-    if (c.method === 'tv') return g.hideShows && !!watchedShows[c.id];
-    return !!watchedMovies[c.id];
+    var id = tmdbId(c);
+    if (!id) return false;
+    if (cardKind(c) === 'show') return g.hideShows && !!watchedShows[id];
+    return !!watchedMovies[id];
   }
 
   // ───────────── ФІЛЬТРИ ТА РАНЖУВАННЯ ─────────────
@@ -634,8 +636,17 @@
 
   function cardKind(d) {
     if (!d) return 'movie';
-    if (d.method === 'tv' || d.type === 'tv' || d.card_type === 'tv' || d.first_air_date || d.number_of_seasons || (d.name && !d.title)) return 'show';
+    var kind = String(d.method || d.type || d.card_type || d.media_type || '').toLowerCase();
+    if (kind === 'tv' || kind === 'show' || kind === 'anime' ||
+        d.first_air_date || d.number_of_seasons || d.original_name ||
+        (d.name && !d.title)) return 'show';
     return 'movie';
+  }
+
+  function tmdbId(d) {
+    var id = d && (d.id || (d.ids && d.ids.tmdb));
+    if (id === undefined || id === null || id === '') return '';
+    return String(id);
   }
 
   function openMore(def, title) {
@@ -1349,14 +1360,20 @@
   window.TraktPlus.isWatched = function (d) {
     try {
       hydrateWatched();
-      var id = d && (d.id || (d.ids && d.ids.tmdb));
-      if (!id) return false;
-      if (cardKind(d) === 'show') return !!(cfg().markShows && watchedShows[id]);
-      return !!watchedMovies[id];
+      var id = tmdbId(d);
+      if (!id || !d || d._lib) return false;
+      var g = cfg();
+      if (cardKind(d) === 'show') return !!(g.mark && g.markShows && watchedShows[id]);
+      return !!(g.mark && watchedMovies[id]);
     } catch (e) { return false; }
   };
   window.TraktPlus.isWatchedShow = function (d) {
-    try { hydrateWatched(); var id = d && (d.id || (d.ids && d.ids.tmdb)); return !!(id && watchedShows[id]); } catch (e) { return false; }
+    try {
+      hydrateWatched();
+      var id = tmdbId(d);
+      var g = cfg();
+      return !!(id && d && !d._lib && g.mark && g.markShows && watchedShows[id]);
+    } catch (e) { return false; }
   };
 
   // Рядки реєструємо ОДРАЗУ (до готовності додатку), щоб головна їх одразу підхопила
