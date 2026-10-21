@@ -636,9 +636,14 @@
 
   function cardKind(d) {
     if (!d) return 'movie';
-    var kind = String(d.method || d.type || d.card_type || d.media_type || '').toLowerCase();
-    if (kind === 'tv' || kind === 'show' || kind === 'anime' ||
-        d.first_air_date || d.number_of_seasons || d.original_name ||
+    // Не перевіряємо лише перше поле: у Lampa method може бути "movie",
+    // а type/card_type/media_type — "tv" або "anime".
+    var kinds = [d.method, d.type, d.card_type, d.media_type];
+    for (var i = 0; i < kinds.length; i++) {
+      var kind = String(kinds[i] || '').toLowerCase();
+      if (kind === 'tv' || kind === 'show' || kind === 'anime' || kind === 'tv_series') return 'show';
+    }
+    if (d.first_air_date || d.number_of_seasons || d.original_name ||
         (d.name && !d.title)) return 'show';
     return 'movie';
   }
