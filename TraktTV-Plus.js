@@ -25,6 +25,9 @@
   var WATCH_RECHECK_SEC = 90;
   var DEFAULT_EXCLUDE = 'reality,talk-show,news,game-show,soap,sporting-event,special-interest';
   var MARK_TYPES = ['look', 'viewed', 'scheduled', 'continued', 'thrown'];
+  var CACHE_VER = 3;      // змінюється, коли треба примусово перезавантажити список переглянутого
+  var TOP_INDEX = 0;      // з якої позиції починаються рядки Trakt на головній (0 = самий верх)
+  var QUEUE_MAX = 3;      // скільки запитів до Trakt одночасно (щоб не ловити 429)
 
   var TREND_ROWS = [
     { key: 'movies', uk: 'Зараз дивляться: фільми', en: 'Watching now: movies', index: 3,
@@ -155,6 +158,29 @@
     return o;
   }
 
+  // ───────────── ЧЕРГА ЗАПИТІВ (обмеження паралельності + повтор при збої) ─────────────
+  var qActive = 0, qWait = [];
+  function qPump() {
+    while (qActive < QUEUE_MAX && qWait.length) {
+      var j = qWait.shift();
+      qActive++;
+      qRun(j, 0);
+    }
+  }
+  function qRun(j, att) {
+    var out;
+    try { out = api.get(j.u); } catch (e) { out = Promise.reject(e); }
+    Promise.resolve(out).then(function (a) {
+      qActive--; j.res(a); qPump();
+    }, function (e) {
+      if (att < 2) setTimeout(function () { qRun(j, att + 1); }, 1500 * (att + 1));
+      else { qActive--; j.rej(e); qPump(); }
+    });
+  }
+  function qget(u) {
+    return new Promise(function (res, rej) { qWait.push({ u: u, res: res, rej: rej }); qPump(); });
+  }
+
   // ───────────── КАРТКИ ─────────────
   function toCard(entry, hint) {
     if (!entry || typeof entry !== 'object') return null;
@@ -236,7 +262,7 @@
   function persistWatched() {
     try {
       Lampa.Storage.set('trakt_plus_watched_cache', {
-        t: Date.now(), stamp: watchedStamp, m: Object.keys(watchedMovies), s: Object.keys(watchedShows)
+        v: CACHE_VER, t: Date.now(), stamp: watchedStamp, m: Object.keys(watchedMovies), s: Object.keys(watchedShows)
       });
     } catch (e) {}
   }
@@ -268,11 +294,22 @@
     });
   }
 
+  // Серіали, які мають хоч одну переглянуту серію. Якщо 'noseasons' не підтримується — пробуємо без нього.
+  function fetchShows() {
+    return getRetry('/sync/watched/shows?extended=noseasons').then(function (arr) {
+      if (Array.isArray(arr)) return arr;
+      throw new Error('bad');
+    }).catch(function () {
+      return getRetry('/sync/watched/shows').then(function (arr) { return Array.isArray(arr) ? arr : null; })
+        .catch(function () { return null; });
+    });
+  }
+
   // Швидке оновлення множин «переглянуто» (без картинок, без історії)
   function refreshWatched(force) {
     var cached = Lampa.Storage.get('trakt_plus_watched_cache') || {};
     var cachedEmpty = !(cached.m && cached.m.length) && !(cached.s && cached.s.length);
-    var tooOld = !cached.t || cachedEmpty || (Date.now() - cached.t) > WATCHED_CACHE_HOURS * 3600000;
+    var tooOld = !cached.t || cachedEmpty || cached.v !== CACHE_VER || (Date.now() - cached.t) > WATCHED_CACHE_HOURS * 3600000;
     return api.get('/sync/last_activities').then(function (a) { return activityStamp(a); }, function () { return null; })
       .then(function (stamp) {
         var same = stamp !== null && stamp === (cached.stamp || '');
@@ -284,7 +321,7 @@
             if (arr && arr.length === 100) return pagedHistory(false).then(function (h) { return mergeWatched(arr, h); });
             return arr;
           }).catch(function () { return null; }),
-          getRetry('/sync/watched/shows?extended=noseasons').catch(function () { return null; })
+          fetchShows()
         ]).then(function (r) {
           var okM = Array.isArray(r[0]), okS = Array.isArray(r[1]);
           if (okM) watchedMovies = collectIds(r[0], 'movie');
@@ -401,15 +438,16 @@
     }).then(function () {
       var specs = def.urls(ch) || [];
       return Promise.all([loadWatched(), Promise.all(specs.map(function (s) {
-        return api.get(s.u).then(function (a) { return Array.isArray(a) ? a : []; }, function () { return []; })
-          .then(function (arr) {
-            return { spec: s, raw: arr.length, cards: arr.map(function (e) { return toCard(e, s.hint); }).filter(Boolean) };
+        return qget(s.u).then(function (a) { return Array.isArray(a) ? { arr: a } : { arr: [], err: true }; },
+          function () { return { arr: [], err: true }; })
+          .then(function (x) {
+            return { spec: s, err: !!x.err, raw: x.arr.length, cards: x.arr.map(function (e) { return toCard(e, s.hint); }).filter(Boolean) };
           });
       }))]);
     }).then(function (r) {
-      var raw = 0;
-      r[1].forEach(function (g) { raw += g.raw; });
-      return { cards: (def.combine || combineDefault)(r[1], def), raw: raw };
+      var raw = 0, errs = 0;
+      r[1].forEach(function (g) { raw += g.raw; if (g.err) errs++; });
+      return { cards: (def.combine || combineDefault)(r[1], def), raw: raw, errs: errs };
     });
   }
 
@@ -424,12 +462,13 @@
     for (i = 1; i <= n; i++) jobs.push(loadChunk(def, i));
     def._psig = sig;
     var p = Promise.all(jobs).then(function (res) {
-      var cards = [], raw = 0;
-      res.forEach(function (r) { cards = cards.concat(r.cards); raw += r.raw; });
+      var cards = [], raw = 0, errs = 0;
+      res.forEach(function (r) { cards = cards.concat(r.cards); raw += r.raw; errs += r.errs || 0; });
       cards = uniq(cards);
-      var out = { cards: cards, title: defTitle(def), nextChunk: n + 1, exhausted: !raw };
-      def._c = out; def._t = Date.now(); def._sig = sig;
       if (def._p === p) def._p = null;
+      if (errs && !cards.length) throw new Error('trakt request failed');
+      var out = { cards: cards, title: defTitle(def), nextChunk: n + 1, exhausted: !raw && !errs };
+      if (!errs) { def._c = out; def._t = Date.now(); def._sig = sig; } // збійні/часткові результати не кешуємо
       return out;
     }, function (e) {
       if (def._p === p) def._p = null;
@@ -631,10 +670,17 @@
         rowCalled = true;
         if (!cfg().enable || !token()) return;
         return function (call) {
-          getRow(def).then(function (r) {
-            if (!r.cards || r.cards.length < 4) return call();
-            call(lineFor(def, r));
-          }).catch(function () { call(); });
+          function attempt(n) {
+            getRow(def, n > 0).then(function (r) {
+              if (!r.cards || r.cards.length < 4) return call();
+              call(lineFor(def, r));
+            }).catch(function () {
+              // тимчасовий збій (ліміт запитів / мережа) — пробуємо ще раз, а не лишаємо рядок порожнім
+              if (n < 3) setTimeout(function () { attempt(n + 1); }, 2500 * (n + 1));
+              else call();
+            });
+          }
+          attempt(0);
         };
       }
     });
@@ -642,7 +688,9 @@
 
   function registerRows() {
     if (!Lampa.ContentRows || typeof Lampa.ContentRows.add !== 'function') return;
-    buildDefs().forEach(registerRow);
+    var defs = buildDefs();
+    defs.sort(function (a, b) { return a.index - b.index; });
+    defs.forEach(function (d, i) { d.index = TOP_INDEX + i; registerRow(d); }); // Trakt-рядки — з самого верху
 
     // Блок «Подібні (Trakt)» у картці (якщо ця збірка Lampa підтримує рядки в full)
     Lampa.ContentRows.add({
@@ -825,13 +873,14 @@
           tries++;
           var ch = chunk++;
           return loadChunk(def, ch).then(function (r) {
-            if (!r.raw) done = true;
+            if (!r.raw && !r.errs) done = true;
             r.cards.forEach(function (c) {
               var k = c.method + c.id;
               if (shown[k]) return;
               shown[k] = 1;
               out.push(c);
             });
+            if (r.errs && !r.raw) return out;
             return step();
           }, function () { done = true; return out; });
         }
@@ -981,9 +1030,12 @@
         }
       });
     }).then(function (res) {
+      return fetchShows().then(function (sh) { res.shows = sh; return res; });
+    }).then(function (res) {
       var raw = res.list;
-      if (raw.length) {
-        watchedMovies = collectIds(raw, 'movie');
+      if (raw.length) watchedMovies = collectIds(raw, 'movie');
+      if (Array.isArray(res.shows)) watchedShows = collectIds(res.shows, 'show');
+      if (raw.length || Array.isArray(res.shows)) {
         watchedVer++;
         persistWatched();
         emitWatched();
@@ -1288,12 +1340,20 @@
     }
     setTimeout(check, 1500);
     setTimeout(check, 4000);
+    setTimeout(check, 8000);
+    setTimeout(check, 15000);
   }
 
   // Міст для інших плагінів (YDesign): чи фільм переглянутий на Trakt. Доступний одразу, ще до boot().
   window.TraktPlus = window.TraktPlus || {};
   window.TraktPlus.isWatched = function (d) {
-    try { hydrateWatched(); var id = d && (d.id || (d.ids && d.ids.tmdb)); return !!(id && watchedMovies[id]); } catch (e) { return false; }
+    try {
+      hydrateWatched();
+      var id = d && (d.id || (d.ids && d.ids.tmdb));
+      if (!id) return false;
+      if (cardKind(d) === 'show') return !!(cfg().markShows && watchedShows[id]);
+      return !!watchedMovies[id];
+    } catch (e) { return false; }
   };
   window.TraktPlus.isWatchedShow = function (d) {
     try { hydrateWatched(); var id = d && (d.id || (d.ids && d.ids.tmdb)); return !!(id && watchedShows[id]); } catch (e) { return false; }
