@@ -1531,4 +1531,3 @@
   if (window.appready) boot();
   else Lampa.Listener.follow('app', function (e) { if (e.type === 'ready') boot(); });
 })();
-

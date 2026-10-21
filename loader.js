@@ -93,4 +93,3 @@
     Lampa.Listener.follow('app', function (e) { if (e.type === 'ready') run(); });
   }
 })();
-
