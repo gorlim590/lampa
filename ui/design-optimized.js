@@ -2379,9 +2379,11 @@
                         if (genresWrap) contentLayer.appendChild(genresWrap);
                     }
                 } else {
-                    if (genresWrap) infoWrap.appendChild(genresWrap);
+                    // Вертикальна картка: жанри мають бути окремим блоком,
+                    // а не всередині контейнера рейтингу/бейджів, який може обрізати вміст.
                     infoWrap.appendChild(ratingsWrap);
                     contentLayer.appendChild(infoWrap);
+                    if (genresWrap && genresWrap.children.length) contentLayer.appendChild(genresWrap);
                 }
 
                 var oldSlogan = contentLayer.querySelector('.ydesign-slogan');
