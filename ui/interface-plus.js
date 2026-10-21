@@ -3127,3 +3127,98 @@
         else Lampa.Listener.follow('app', function (e) { if (e.type === 'ready') boot(); });
     })();
 })();
+
+// Compact torrent results: preserve native filters, actions and seeder colours.
+(function () {
+    'use strict';
+    function startTorrentLayout() {
+        if (document.getElementById('ifx-torrent-layout-v2')) return;
+        function enabled() {
+            var value = Lampa.Storage.get('interface_mod_new_torrent_layout', true);
+            return value !== false && value !== 'false';
+        }
+        document.body.classList.toggle('ifx-torrent-layout', enabled());
+        var style = document.createElement('style');
+        style.id = 'ifx-torrent-layout-v2';
+        style.textContent = [
+            'body.ifx-torrent-layout .torrent-item{position:relative;padding:1em 1.15em!important;margin:.7em .3em!important;border:1px solid rgba(170,195,225,.2);border-radius:.95em!important;background:linear-gradient(135deg,rgba(33,44,61,.96),rgba(19,26,38,.96))!important;box-shadow:0 5px 18px rgba(0,0,0,.14);box-sizing:border-box}',
+            'body.ifx-torrent-layout .torrent-item__title{font-size:1.05em!important;line-height:1.5!important;font-weight:600;overflow-wrap:anywhere;white-space:normal!important;margin-bottom:.65em}',
+            'body.ifx-torrent-layout .torrent-item__details{display:flex!important;flex-wrap:wrap;align-items:center;gap:.5em!important;opacity:1!important}',
+            'body.ifx-torrent-layout .torrent-item__details>div{margin:0!important;min-width:0;max-width:100%;box-sizing:border-box;overflow-wrap:anywhere;padding:.28em .6em;border-radius:.45em;background:rgba(255,255,255,.055);font-size:.85em;line-height:1.55}',
+            'body.ifx-torrent-layout .torrent-item__tracker{order:0;font-weight:700}',
+            'body.ifx-torrent-layout .torrent-item__seeds{order:1}',
+            'body.ifx-torrent-layout .torrent-item__grabs{order:2}',
+            'body.ifx-torrent-layout .torrent-item__bitrate{order:3}',
+            'body.ifx-torrent-layout .torrent-item__date{order:4;color:#b7c3d5}',
+            'body.ifx-torrent-layout .torrent-item__details>.torrent-item__size{order:5;margin-left:auto!important;font-weight:700;color:#f4f7ff;background:rgba(105,155,235,.15)}',
+            'body.ifx-torrent-layout .torrent-item.focus{outline:2px solid #89b7ff!important;outline-offset:2px;background:linear-gradient(135deg,rgba(49,67,95,.98),rgba(27,38,57,.98))!important;transform:none!important}',
+            'body.ifx-torrent-layout .torrent-item.ifx-seeds-none .torrent-item__seeds{color:#ff929c}',
+            'body.ifx-torrent-layout .torrent-item__ffprobe,.ifx-torrent-layout .torrent-item__badges{margin-bottom:.55em}',
+            '@media(max-width:700px){body.ifx-torrent-layout .torrent-item{padding:.8em!important}body.ifx-torrent-layout .torrent-item__details>.torrent-item__size{margin-left:0!important}body.ifx-torrent-layout .torrent-item__title{font-size:.95em!important}}'
+        ].join('\n');
+        document.head.appendChild(style);
+        Lampa.SettingsApi.addParam({
+            component: 'interface_mod_new',
+            param: { name: 'interface_mod_new_torrent_layout', type: 'trigger', default: true },
+            field: { name: 'Охайний список торентів', description: 'Окремі рядки релізів, читабельні характеристики та виразний фокус' },
+            onChange: function () { document.body.classList.toggle('ifx-torrent-layout', enabled()); }
+        });
+        Lampa.Listener.follow('torrent', function (event) {
+            if (!event || event.type !== 'render' || !event.item || !event.element) return;
+            var item = event.item[0] || event.item;
+            item.classList.toggle('ifx-seeds-none', Number(event.element.Seeders) === 0);
+        });
+    }
+    if (window.appready) startTorrentLayout();
+    else Lampa.Listener.follow('app', function (event) { if (event.type === 'ready') startTorrentLayout(); });
+})();
+
+
+// Torrent workspace: restyle native Explorer and controls, retaining their controllers.
+(function () {
+    'use strict';
+    function startWorkspace() {
+        if (document.getElementById('ifx-torrent-workspace-v1')) return;
+        var style = document.createElement('style');
+        style.id = 'ifx-torrent-workspace-v1';
+        style.textContent = "body.ifx-torrent-layout .explorer.ifx-torrent-page{display:grid!important;grid-template-columns:19em minmax(0,1fr);gap:1.4em;padding:1em 1.35em 0!important;box-sizing:border-box;background:radial-gradient(ellipse at 0 0,rgba(44,87,127,.22),transparent 58%),linear-gradient(135deg,#101b2b,#080f1a)!important;border-radius:1.2em 1.2em 0 0;isolation:isolate}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer__left{width:auto!important;min-width:0;max-width:none!important;padding:0!important;margin:0!important}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer__card{padding:0!important;margin:0!important}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer-card{padding:1.15em!important;border:1px solid rgba(157,191,226,.16);border-radius:1.1em;background:linear-gradient(155deg,rgba(34,53,78,.85),rgba(15,26,44,.9));box-shadow:0 18px 55px rgba(0,0,0,.22)}\nbody.ifx-torrent-layout .ifx-torrent-page .ifx-film-kicker{color:#91b7e2;font-size:.65em;font-weight:700;letter-spacing:.16em;text-transform:uppercase;margin-bottom:1.2em}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer-card__head{display:grid!important;grid-template-columns:9em minmax(0,1fr);gap:1em;align-items:center;margin:0 0 1.3em!important}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer-card__head-left{width:auto!important;flex:none!important;padding:0!important}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer-card__head-img{width:9em!important;height:13.5em!important;border-radius:.8em!important;overflow:hidden;box-shadow:0 12px 35px rgba(0,0,0,.45);background:#0b1422;margin:0!important}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer-card__head-img img{width:100%!important;height:100%!important;object-fit:cover;border-radius:inherit}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer-card__head-body{min-width:0;padding:0!important}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer-card__head-create{font-size:.7em!important;line-height:1.65;color:#a8b9cf;margin-bottom:1em}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer-card__head-rate{display:inline-flex;gap:.35em;align-items:center;font-size:1.55em!important;color:#ffe4a0;margin:0 0 .6em!important;font-weight:800}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer-card__head-rate svg{width:.75em;height:.75em;color:#e9bd64}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer-card__head-age{display:table;font-size:.65em;padding:.4em .65em;border:1px solid rgba(169,191,225,.25);border-radius:.5em;color:#b8cbe0}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer-card__title{font-size:1.45em!important;line-height:1.2!important;letter-spacing:-.025em;font-weight:800!important;margin:0 0 .65em!important;overflow-wrap:anywhere;color:#f5f8ff}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer-card__genres{font-size:.72em!important;line-height:1.55;color:#97c3ef;margin:0 0 1.15em!important}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer-card__descr{font-size:.74em!important;line-height:1.7!important;color:#b1bed0;margin:0!important;border-top:1px solid rgba(160,187,222,.12);padding-top:1em}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer__files{min-width:0;width:auto!important;padding:0!important;display:flex;flex-direction:column}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer__files-head{flex:none;padding:1.1em!important;margin:0 .3em .65em!important;border:1px solid rgba(165,193,230,.16);border-radius:1.1em;background:linear-gradient(120deg,rgba(34,52,78,.92),rgba(18,32,53,.94));box-shadow:0 10px 30px rgba(0,0,0,.16)}\nbody.ifx-torrent-layout .ifx-torrent-page .ifx-toolbar-heading{display:flex;align-items:baseline;justify-content:space-between;gap:1em;margin:0 0 .9em;pointer-events:none}\nbody.ifx-torrent-layout .ifx-torrent-page .ifx-toolbar-heading strong{font-size:1.1em;font-weight:750;color:#edf4ff;letter-spacing:-.02em}\nbody.ifx-torrent-layout .ifx-torrent-page .ifx-toolbar-heading span{font-size:.65em;color:#91a6c0}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer__files-head>div:not(.ifx-toolbar-heading){display:flex!important;align-items:stretch;gap:.55em;flex-wrap:wrap}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer__files-head .simple-button{display:flex!important;align-items:center;justify-content:center;gap:.5em;min-height:3.1em;min-width:0;max-width:100%;box-sizing:border-box;margin:0!important;padding:.65em .9em!important;background:rgba(132,163,210,.07)!important;border:1px solid rgba(160,189,230,.16)!important;border-radius:.65em!important;font-size:.8em!important;color:#d9e6f7;line-height:1.35;white-space:normal!important;box-shadow:none!important}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer__files-head .simple-button svg{flex:none;width:1.15em!important;height:1.15em!important;opacity:.85}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer__files-head .simple-button>div:not(.hide){margin:0!important;min-width:0;max-width:100%;overflow-wrap:anywhere;font-size:.88em;background:rgba(0,0,0,.18);border-radius:.3em;padding:.3em .5em}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer__files-head .filter--search{flex:1 1 14em;justify-content:flex-start}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer__files-head .filter--sort{flex:1 1 11em}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer__files-head .filter--parser{flex:0 1 auto}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer__files-head .filter--filter{background:rgba(91,148,238,.14)!important;border-color:rgba(111,171,255,.4)!important;color:#c8e0ff}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer__files-head .simple-button.focus,body.ifx-torrent-layout .ifx-torrent-page .explorer-card__head-img.focus{outline:2px solid #9bc7ff!important;outline-offset:2px;background:#314f77!important;color:#fff!important;transform:none!important}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer__files-body{min-height:0;min-width:0;flex:1}\nbody.ifx-torrent-layout .ifx-torrent-page .torrent-list{padding:.3em .3em 1.5em!important;box-sizing:border-box}\nbody.ifx-torrent-layout .ifx-torrent-page .watched-history{font-size:.75em!important;min-height:0;padding:.75em 1em!important;margin:.15em .3em .85em!important;border:1px dashed rgba(147,178,215,.23)!important;border-radius:.75em!important;background:rgba(127,160,205,.035)!important;color:#9eafc7;box-shadow:none!important}\nbody.ifx-torrent-layout .ifx-torrent-page .watched-history.focus{outline:2px solid #9bc7ff!important;outline-offset:1px;color:#edf5ff}\nbody.ifx-torrent-layout.ifx-torrent-active .selectbox__content{border:1px solid rgba(155,190,235,.25);border-radius:1.1em;background:linear-gradient(145deg,#1b2c44,#101b2b);box-shadow:0 24px 80px rgba(0,0,0,.5)}\nbody.ifx-torrent-layout.ifx-torrent-active .selectbox-item{border-radius:.6em}\n@media(max-width:1100px){body.ifx-torrent-layout .explorer.ifx-torrent-page{grid-template-columns:15em minmax(0,1fr);gap:.8em;padding:.7em!important}body.ifx-torrent-layout .ifx-torrent-page .explorer-card__head{grid-template-columns:7em minmax(0,1fr);gap:.75em}body.ifx-torrent-layout .ifx-torrent-page .explorer-card__head-img{width:7em!important;height:10.5em!important}body.ifx-torrent-layout .ifx-torrent-page .ifx-toolbar-heading span{display:none}}\n@media(max-width:700px){body.ifx-torrent-layout .explorer.ifx-torrent-page{display:block!important;padding:.45em!important;border-radius:.9em}body.ifx-torrent-layout .ifx-torrent-page .explorer__left{display:none!important}body.ifx-torrent-layout .ifx-torrent-page .explorer__files{height:100%;width:100%!important}body.ifx-torrent-layout .ifx-torrent-page .explorer__files-head{padding:.85em!important;margin:0 .3em .55em!important}body.ifx-torrent-layout .ifx-torrent-page .explorer__files-head .simple-button{font-size:1em!important;flex:1 1 42%;min-height:3.4em;padding:.65em!important}body.ifx-torrent-layout .ifx-torrent-page .explorer__files-head .filter--search{flex-basis:100%}body.ifx-torrent-layout .ifx-torrent-page .explorer__files-head .filter--back{flex:0 0 3.4em}body.ifx-torrent-layout .ifx-torrent-page .ifx-toolbar-heading{margin-bottom:.7em}body.ifx-torrent-layout .ifx-torrent-page .torrent-item{margin:.65em .3em!important}}\n\nbody.ifx-torrent-layout .ifx-torrent-page .explorer__files-head .scroll,body.ifx-torrent-layout .ifx-torrent-page .explorer__files-head .scroll__content,body.ifx-torrent-layout .ifx-torrent-page .explorer__files-head .scroll__body{width:100%!important;max-width:100%!important;min-width:0!important;height:auto!important;transform:none!important;overflow:visible!important;padding:0!important}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer__files-head .torrent-filter{display:flex!important;flex-wrap:wrap!important;gap:.6em!important;width:100%!important;white-space:normal!important}\nbody.ifx-torrent-layout .ifx-torrent-page .explorer__left .scroll__body{padding-top:0!important}\n@media(max-width:700px){body.ifx-torrent-layout .ifx-torrent-page .explorer__files-head .torrent-filter{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:.6em!important}body.ifx-torrent-layout .ifx-torrent-page .explorer__files-head .filter--search{grid-column:span 2}body.ifx-torrent-layout .ifx-torrent-page .explorer__files-head .simple-button{width:100%!important;font-size:1em!important;min-width:0!important}body.ifx-torrent-layout .ifx-torrent-page .explorer__files-head .simple-button>div:not(.hide){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;padding:.25em!important}body.ifx-torrent-layout .ifx-torrent-page .explorer__files-head .filter--sort{flex-wrap:wrap;gap:.1em;justify-content:center}}\n";
+        document.head.appendChild(style);
+        var scheduled = false;
+        function update() {
+            scheduled = false;
+            var active = Lampa.Activity.active();
+            document.body.classList.toggle('ifx-torrent-active', !!(active && active.component === 'torrents'));
+            document.querySelectorAll('.explorer').forEach(function (root) {
+                if (!root.querySelector('.torrent-list')) return;
+                root.classList.add('ifx-torrent-page');
+                var card = root.querySelector('.explorer-card');
+                if (card && !card.querySelector('.ifx-film-kicker')) {
+                    var kicker = document.createElement('div');
+                    kicker.className = 'ifx-film-kicker';
+                    kicker.textContent = 'Деталі';
+                    card.insertBefore(kicker, card.firstChild);
+                }
+                var head = root.querySelector('.explorer__files-head');
+                if (head && !head.querySelector('.ifx-toolbar-heading')) {
+                    var heading = document.createElement('div');
+                    heading.className = 'ifx-toolbar-heading';
+                    heading.innerHTML = '<strong>Оберіть свій реліз</strong><span>Пошук · Якість · Джерела</span>';
+                    head.insertBefore(heading, head.firstChild);
+                    // Native Scroll.minus() measures the toolbar on resize.
+                    setTimeout(function () { if (root.isConnected) window.dispatchEvent(new Event('resize')); }, 0);
+                }
+            });
+        }
+        function schedule() { if (!scheduled) { scheduled = true; setTimeout(update, 80); } }
+        var observer = new MutationObserver(function (mutations) {
+            if (mutations.some(function (m) { return Array.prototype.some.call(m.addedNodes, function (n) {
+                return n.nodeType === 1 && (n.matches('.activity,.explorer,.torrent-list') || n.querySelector('.explorer,.torrent-list'));
+            }) || Array.prototype.some.call(m.removedNodes, function (n) { return n.nodeType === 1 && n.matches('.activity'); }); })) schedule();
+        });
+        observer.observe(document.body, {childList:true, subtree:true});
+        Lampa.Listener.follow('torrent', function (e) { if (e && e.type === 'render') schedule(); });
+        update();
+    }
+    if (window.appready) startWorkspace();
+    else Lampa.Listener.follow('app', function (e) { if (e.type === 'ready') startWorkspace(); });
+})();

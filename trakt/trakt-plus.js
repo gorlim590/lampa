@@ -5,7 +5,7 @@
  *  - рядки на головній: «Зараз дивляться» (фільми / серіали / мультфільми+мульти-серіали / аніме+аніме-фільми),
  *    жанрові, «бо ти дивився X», приховані перлини, топ, свіже, очікувані, класика, документальні, нові серіали…
  *  - кнопка «Ще» відкриває повну сторінку з нескінченною підгрузкою (посторінково з Trakt)
- *  - у картці фільму/серіалу: блок «Подібні (Trakt)» + кнопка «Trakt: подібні»
+ *  - у картці фільму/серіалу: рядок «Подібні (Trakt)» після колекції; кнопка доступна як альтернатива
  *  - приховування переглянутого (фільми + серіали), позначка на картках (затемнення + риска + бейдж)
  *  - синхронізація переглянутого у Вибране, папка «Trakt: Переглянуті»
  *  - рядки реєструються одразу при завантаженні плагіна — повторно вмикати «Головну» не потрібно
@@ -226,6 +226,8 @@
       _votes: Number(m.votes || 0),
       _watchers: Number(entry.watchers || entry.watcher_count || 0),
       _genres: Array.isArray(m.genres) ? m.genres : [],
+      _country: String(m.country || '').toLowerCase(),
+      _language: String(m.language || '').toLowerCase(),
       _year: Number(m.year || 0)
     };
     if (isShow) {
@@ -371,6 +373,8 @@
   function passes(c, o) {
     o = o || {};
     var g = cfg();
+    if (o.countries && o.countries.indexOf(c._country) < 0) return false;
+    if (o.languages && o.languages.indexOf(c._language) < 0) return false;
     var hide = o.hideWatched != null ? o.hideWatched : g.hideWatched;
     if (hide && isWatched(c)) return false;
     if (o.notGenres) {
@@ -547,6 +551,19 @@
           return Math.floor(y / 10) * 10 - Math.floor(nextCursor / 5) * 10 >= 1890;
         }
       });
+    });
+
+    // Live-action Korean drama only; anime and other countries are excluded.
+    defs.push({
+      name: 'TraktPlusDoramas', uk: 'Популярні корейські дорами', en: 'Popular Korean dramas', index: 4.5, chunks: 2,
+      opts: { genre: 'drama', minRating: 0, minVotes: 0, hideWatched: false,
+        notGenres: ['animation', 'anime', 'reality', 'talk-show', 'news', 'game-show'],
+        countries: ['kr'], languages: ['ko'] },
+      urls: function (ch) {
+        return ['/shows/popular', '/shows/trending'].map(function (endpoint) {
+          return { u: feed(endpoint, { page: ch, genres: 'drama', countries: 'kr', languages: 'ko' }), hint: 'show' };
+        });
+      }
     });
 
     // Жанри
@@ -768,20 +785,108 @@
         return function (call) {
           getRow(def).then(function (r) {
             if (!r.cards || r.cards.length < 2) return call();
-            call(lineFor(def, r));
+            var line = lineFor(def, r);
+            line.trakt_related = true;
+            call(line);
           }).catch(function () { call(); });
         };
       }
     });
   }
 
-  // ───────────── КНОПКА У КАРТЦІ ─────────────
+  function insertFullRelatedRow(comp, movie) {
+    if (!comp || !comp.rows || comp._traktPlusRelatedInserted || !movie || !movie.id) return;
+    comp._traktPlusRelatedInserted = true;
+    var def = relatedDef(cardKind(movie), movie.id, '');
+    var payload = lineFor(def, { cards: [], title: tr('Подібні (Trakt)', 'Similar (Trakt)') });
+    payload.trakt_related = true;
+    payload.params = payload.params || {};
+    payload.params.emit = payload.params.emit || {};
+    payload.params.emit.onDestroy = function () { this._traktRelatedDestroyed = true; };
+    payload.params.emit.onCreate = function () {
+      var line = this;
+      getRow(def).then(function (r) {
+        if (line._traktRelatedDestroyed) return;
+        line.data.results = (r.cards || []).slice(0, cfg().rowLimit).map(finalize);
+        line.data.results.slice(0, line.view || 7).forEach(function (card) { line.emit('createAndAppend', card); });
+        if (!line.data.results.length) line.render().find('.items-line__body').text(tr('Подібних у Trakt поки немає', 'No Trakt matches yet'));
+        Lampa.Layer.visible(line.render(true));
+      }).catch(function () {
+        if (!line._traktRelatedDestroyed) line.render().find('.items-line__body').text(tr('Trakt тимчасово недоступний. Спробуйте «Ще».', 'Trakt is unavailable. Try More.'));
+      });
+    };
+    var props = comp.props;
+    var collection = props && props.get('collection');
+    var recommendation = props && props.get('recomend');
+    var similar = props && props.get('simular');
+    var index = comp.rows.length;
+    for (var i = 0; i < comp.rows.length; i++) {
+      var row = comp.rows[i];
+      if (!Array.isArray(row) || row[0] !== 'cards') continue;
+      if (row[1] && row[1].trakt_related) return;
+      if (collection && row[1] === collection) { index = i + 1; break; }
+      if ((recommendation && row[1] === recommendation) || (similar && row[1] === similar)) { index = i; break; }
+    }
+    comp.rows.splice(index, 0, ['cards', payload]);
+  }
+
+  function hookFullRows() {
+    if (!Lampa.Maker || !Lampa.Maker.map) return;
+    Lampa.Listener.follow('full', function (e) {
+      if (!e || e.type !== 'start' || !e.link || e.link._traktPlusBuildHook) return;
+      var comp = e.link, build = comp.build;
+      comp._traktPlusBuildHook = true;
+      comp.build = function (data) {
+        if (cfg().enable && cfg().fullRows && token()) {
+          insertFullRelatedRow(this, this.props.get('movie'));
+          if (Array.isArray(data)) data = this.rows.slice(0, data.length);
+        }
+        return build.call(this, data);
+      };
+    });
+    var items = Lampa.Maker.map('Main').Items;
+    if (!items || !items.onBuild || items.onBuild._traktPlusRelated) return;
+    var original = items.onBuild;
+    var wrapped = function (data) {
+      if (this.object && this.object.component === 'full' && cfg().enable && cfg().fullRows && token()) {
+        insertFullRelatedRow(this, this.props && this.props.get('movie'));
+        if (Array.isArray(data) && this.rows) data = this.rows.slice(0, data.length);
+      }
+      return original.call(this, data);
+    };
+    wrapped._traktPlusRelated = true;
+    items.onBuild = wrapped;
+    // A cached full page may finish before the plugins' app-ready handlers.
+    // Keep the native row and item arrays aligned when attaching after that build.
+    function attachCurrent() {
+      var active = Lampa.Activity.active();
+      var comp = active && active.component === 'full' && active.activity && active.activity.component;
+      if (!comp || !comp.rows || !comp.props || !cfg().enable || !cfg().fullRows || !token()) return;
+      var movie = comp.props.get('movie');
+      if (!movie || comp._traktPlusRelatedInserted) return;
+      insertFullRelatedRow(comp, movie);
+      var index = comp.rows.findIndex(function (row) { return Array.isArray(row) && row[1] && row[1].trakt_related; });
+      if (index < 0 || index >= comp.items.length) return;
+      var before = comp.items[index];
+      comp.fragment = document.createDocumentFragment();
+      comp.emit('createAndAppend', comp.rows[index]);
+      var item = comp.items.pop();
+      comp.items.splice(index, 0, item);
+      before.render(true).before(item.render(true));
+      if (comp.active >= index) comp.active++;
+      Lampa.Layer.visible(comp.scroll.render(true));
+    }
+    setTimeout(attachCurrent, 0);
+    setTimeout(attachCurrent, 1000);
+  }
+
+  // The star remains an optional fallback when the inline row is disabled.
   function hookFull() {
     Lampa.Listener.follow('full', function (e) {
       if (!e || e.type !== 'complite') return;
       try {
         var g = cfg();
-        if (!g.enable || !g.fullButton || !token()) return;
+        if (!g.enable || g.fullRows || !g.fullButton || !token()) return;
         var $ = window.$ || window.jQuery;
         var card = e.data && (e.data.movie || e.data.card);
         if (!$ || !card || !card.id || !e.object || !e.object.activity) return;
@@ -1409,10 +1514,10 @@
       tr('Так само, як для фільмів', 'Same as for movies'));
     add({ name: 'trakt_plus_full_rows', type: 'trigger', 'default': true },
       tr('У картці: блок «Подібні (Trakt)»', 'In card: "Similar (Trakt)" row'),
-      tr('Працює, якщо збірка Lampa підтримує рядки в картці', 'Works if your Lampa build supports rows in the card'));
+      tr('Після колекції, перед рекомендаціями та подібними TMDB', 'After collection, before TMDB recommendations and similar titles'));
     add({ name: 'trakt_plus_full_button', type: 'trigger', 'default': true },
       tr('У картці: кнопка «Trakt: подібні»', 'In card: "Trakt: similar" button'),
-      tr('Відкриває повний список подібних із Trakt', 'Opens the full list of similar titles from Trakt'));
+      tr('Показується, коли блок «Подібні (Trakt)» вимкнено', 'Shown when the Similar (Trakt) row is disabled'));
     add({ name: 'trakt_plus_auto_home', type: 'trigger', 'default': true },
       tr('Автоматично оновити головну, якщо рядки не з’явились', 'Auto-reload home if rows did not appear'));
     add({ name: 'trakt_plus_autosync', type: 'trigger', 'default': true },
@@ -1521,6 +1626,7 @@
     try { registerView(); } catch (e) {}
     try { addMenuItem(); } catch (e) {}
     try { hookDecorations(); } catch (e) {}
+    try { hookFullRows(); } catch (e) {}
     try { hookFull(); } catch (e) {}
 
     loadWatched().then(function () { decorateAll(); });

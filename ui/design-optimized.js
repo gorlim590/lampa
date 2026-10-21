@@ -1251,13 +1251,13 @@
         var sloganLang = getSet('ydesign_slogan_lang');
         var descLang = getSet('ydesign_desc_lang');
 
-        var cacheKey = 'ext_' + type + '_' + id + '_' + langPref + '_' + sloganLang + '_' + descLang + '_v6';
+        var cacheKey = 'ext_' + type + '_' + id + '_' + langPref + '_' + sloganLang + '_' + descLang + '_v7';
         var cached = ApiCache.get(cacheKey);
         // дані серіалів (остання/наступна серія) швидко старіють — оновлюємо раз на 12 годин
         if (cached && !(type === 'tv' && (!cached.fetched || Date.now() - cached.fetched > 43200000))) return Promise.resolve(cached);
 
         return new Promise(function (resolve) {
-            var langQuery = (sloganLang === 'uk' || sloganLang === 'uk_en' || descLang === 'uk' || descLang === 'uk_en' || langPref === 'uk' || langPref === 'uk_en') ? 'uk-UA' : 'en-US';
+            var langQuery = 'uk-UA'; // Always keep a Ukrainian text title, independently of the logo language.
             var url = 'https://api.themoviedb.org/3/' + type + '/' + id +
                 '?api_key=' + CONFIG.tmdbKey() +
                 '&language=' + langQuery +
@@ -1687,11 +1687,13 @@
     }
 
     // ---- «Продовження»: чи бачили попередню частину франшизи ----
+    var CollectionRequests = {};
     function fetchCollectionParts(cid) {
         var key = 'coll_' + cid;
         var cached = ApiCache.get(key);
         if (cached) return Promise.resolve(cached);
-        return new Promise(function (resolve) {
+        if (CollectionRequests[cid]) return CollectionRequests[cid];
+        var request = new Promise(function (resolve) {
             qajax({
                 url: 'https://api.themoviedb.org/3/collection/' + cid + '?api_key=' + CONFIG.tmdbKey() + '&language=en-US',
                 timeout: 4500,
@@ -1705,6 +1707,11 @@
                 error: function () { resolve(null); }
             });
         });
+        CollectionRequests[cid] = request.then(function (parts) {
+            delete CollectionRequests[cid];
+            return parts;
+        });
+        return CollectionRequests[cid];
     }
 
     function getCollParts(el, ext) {
@@ -1727,18 +1734,19 @@
             if (moviePercent({ original_title: p.o, title: p.t }) >= WATCHED_HISTORY) return true;
             if (inHistoryList({ id: p.id, title: p.t })) return true;
             try { var f = Lampa.Favorite.check({ id: p.id }) || {}; if (f.viewed) return true; } catch (e) {}
+            try { if (window.TraktPlus && TraktPlus.isWatched && TraktPlus.isWatched({ id: p.id, method: 'movie' })) return true; } catch (e) {}
         }
         return false;
     }
 
-    // викликається, коли картка потрапила у фокус: підвантажуємо франшизу (1 запит, далі з кешу)
+    // Підвантажуємо франшизу для видимих карток; фокус більше не потрібний.
     function ensureCollection(el, data, type, ext) {
         if (type === 'tv' || !ext || !ext.collection || el._ydesign_collLoading || el._ydesign_collParts) return;
         if (!getSet('ydesign_collection_mark')) return;
         el._ydesign_collLoading = true;
         fetchCollectionParts(ext.collection.id).then(function (parts) {
             el._ydesign_collLoading = false;
-            if (parts && parts.length && el._ydesign_updateMarks) {
+            if (parts && parts.length && el.isConnected && el._ydesign_updateMarks) {
                 el._ydesign_collParts = parts;
                 el._ydesign_mk = null;
                 el._ydesign_updateMarks();
@@ -2132,6 +2140,7 @@
         };
         el._ydesign_updateMarks = refreshMarks;
         el._ydesign_lazyMarks = function () { ensureCollection(el, data, type, el._ydesign_extData); };
+        refreshMarks();
 
         var buildExtendedCard = function () {
             var view = el.querySelector('.card__view');
@@ -2205,6 +2214,7 @@
                     };
                     el._ydesign_extData = extData;
                 }
+                ensureCollection(el, data, type, extData);
                 refreshMarks();
                 var bgToLoad = null;
                 if (extData) {
@@ -2237,39 +2247,12 @@
                 logoContainer.appendChild(titleText);
                 contentLayer.appendChild(logoContainer);
 
-                var addTitleWrap = null;
-                if (getSet(prefix + 'show_add_title', 'ydesign_show_add_title')) {
-                    addTitleWrap = document.createElement('div');
-                    addTitleWrap.className = 'ydesign-add-title';
-                    contentLayer.appendChild(addTitleWrap);
-                }
-
-                var updateAddTitleWrap = function () {
-                    if (!addTitleWrap) return;
-                    if (!extData.logo) { addTitleWrap.innerText = ' '; return; }
-                    var uTitle = '';
-                    var addTitleLang = getSet('ydesign_add_title_lang');
-                    var ukT = extData.title_uk || mainTitle;
-                    var enT = extData.title_en || data.original_title || data.original_name;
-
-                    if (addTitleLang === 'uk') uTitle = ukT;
-                    else if (addTitleLang === 'en') uTitle = enT;
-                    else {
-                        if (extData.logo_lang === 'en') uTitle = ukT;
-                        else if (extData.logo_lang === 'uk' || extData.logo_lang === 'ru') uTitle = enT;
-                        else uTitle = ukT;
-                    }
-
-                    if (uTitle) {
-                        var fTitle = '"' + uTitle + '"';
-                        if (fTitle.length > 34) fTitle = fTitle.substring(0, 32) + '...';
-                        addTitleWrap.innerText = fTitle;
-                    } else {
-                        addTitleWrap.innerText = ' ';
-                    }
-                };
-
-                updateAddTitleWrap();
+                // A readable Ukrainian title always precedes year, ratings and genres.
+                var addTitleWrap = document.createElement('div');
+                addTitleWrap.className = 'ydesign-add-title ydesign-local-title';
+                addTitleWrap.textContent = extData.title_uk || mainTitle;
+                addTitleWrap.title = addTitleWrap.textContent;
+                contentLayer.appendChild(addTitleWrap);
 
                 var infoWrap = document.createElement('div');
                 infoWrap.className = 'ydesign-info-wrap';
@@ -2677,6 +2660,7 @@
             "    line-height: 1.25; padding-bottom: 0.15em; ",
             "}",
             "",
+            "body .ydesign-card.ydesign-vertical .ydesign-add-title.ydesign-local-title, body .ydesign-card.ydesign-horizontal .ydesign-add-title.ydesign-local-title { display: -webkit-box !important; -webkit-line-clamp: 2; -webkit-box-orient: vertical; white-space: normal !important; overflow: hidden; font-size: .9em !important; font-weight: 700; line-height: 1.3 !important; min-height: 0 !important; text-align: left !important; margin: 0 0 .4em !important; text-shadow: 0 1px 6px rgba(0,0,0,.4) !important; }",
             ".ydesign-add-title {",
             "    width: 100%;",
             "    font-size: calc(var(--ydesign-add-title-size-eff, 0.9) * 1em) !important;",

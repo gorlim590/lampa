@@ -18,3 +18,6 @@
 | nrsua | community/lparty.js |
 
 Файли, де немає окремої ліцензії, належать своїм авторам; перед повторним поширенням звертайся до оригінальних репозиторіїв.
+
+
+UA Comments у `plugins.json` — зовнішній плагін Ярослава (@Yaroslav_Films), початкове джерело `http://lampalampa.free.nf/uacoments.js`. Використано HTTPS-дзеркало [marv2on/lampa-plugins-sync](https://github.com/marv2on/lampa-plugins-sync/blob/main/sync/Yaroslav/uacoments.js); код UA Comments не включено до цього репозиторію. Під час перевірки дзеркало й початковий JavaScript збігалися побайтово.
