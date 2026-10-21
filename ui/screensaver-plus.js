@@ -21,7 +21,7 @@
   var lastAct = Date.now();
   var sources = [], sourcesT = 0, sourcesErr = '', sourcesVia = '';
   var order = [], pos = -1, failStreak = 0;
-  var timers = { clock: null, sw: null, weather: null, corner: null, sleep: null, watch: null };
+  var timers = { clock: null, sw: null, weather: null, corner: null, sleep: null, watch: null, alerts: null };
   var weather = null, weatherT = 0, lastWeatherHtml = '';
   var corner = null, watchT = -1, watchN = 0;
   var origStart = null;
@@ -279,6 +279,164 @@
     }).catch(function () { return weather; });
   }
 
+  // ───────────── КАРТА ПОВІТРЯНИХ ТРИВОГ ─────────────
+  // УВАГА: не вставляйте секретний API-токен у публічний GitHub-репозиторій.
+  // Для приватного репозиторію теж бажано використовувати серверний проксі.
+  var ALERTS_API_TOKEN = ''; // Додайте токен локально або налаштуйте безпечний проксі
+  var ALERTS_API_URL = 'https://api.alerts.in.ua/v1/alerts/active.json';
+  var ALERTS_GEO_URL = 'https://cdn.jsdelivr.net/gh/darmat1/ukraine-geo-data@main/geodata/Ukraine.geojson';
+  var alertsGeo = null, alertsSvg = null, alertsByOblast = {}, alertsLastOk = 0;
+
+  function alertKey(s) {
+    return String(s || '').toLowerCase()
+      .replace(/область|обл\.?|області|областю|області/gi, '')
+      .replace(/\b(місто|м\.)\s*/g, '')
+      .replace(/[’'\-]/g, ' ')
+      .replace(/\s+/g, ' ').trim();
+  }
+
+  function alertTypeLevel(item) {
+    var text = '';
+    try { text = JSON.stringify(item.threats || []) + ' ' + (item.alert_type || '') + ' ' + (item.alert_level || '') + ' ' + (item.level || ''); } catch (e) {}
+    text = text.toLowerCase();
+    if (/missile|rocket|ракет|баліст|авіац/.test(text)) return 2;
+    if (/drone|uav|shahed|бпла|дрон|шахед/.test(text)) return 1;
+    return 0;
+  }
+
+  function readAlertRows(json) {
+    var rows = Array.isArray(json) ? json : (json && (json.alerts || json.data || json.items)) || [];
+    var result = {};
+    rows.forEach(function (a) {
+      if (!a) return;
+      var oblast = a.location_oblast || a.oblast || '';
+      var title = a.location_title || a.location || a.title || '';
+      var locType = String(a.location_type || a.type || '').toLowerCase();
+      var name = oblast || title;
+      if (!name) return;
+      // Районні/міські записи прив'язуємо до області, якщо API її передав.
+      var key = alertKey(name);
+      if (!result[key]) result[key] = 0;
+      var level = alertTypeLevel(a);
+      if (!level && (a.alert_type || a.alert_level || a.level)) level = 1;
+      if (level > result[key]) result[key] = level;
+      // Для загальнообласної тривоги без окремого типу показуємо жовтий рівень.
+      if (!level && (locType === 'oblast' || /область/i.test(title))) result[key] = Math.max(result[key], 1);
+    });
+    return result;
+  }
+
+  function featureName(feature) {
+    var p = feature && feature.properties || {};
+    return p.name || p.NAME_1 || p.NAME || p.name_uk || p.name_ua || p.NAME_UK || '';
+  }
+
+  function projectGeoJSON(geo) {
+    var coords = [];
+    function collect(g) {
+      if (!g) return;
+      var a = g.coordinates;
+      function walk(v) {
+        if (typeof v[0] === 'number') coords.push(v);
+        else v.forEach(walk);
+      }
+      if (a) walk(a);
+      else if (g.geometries) g.geometries.forEach(collect);
+    }
+    (geo.features || []).forEach(function (f) { collect(f.geometry); });
+    if (!coords.length) throw new Error('empty geojson');
+    var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    coords.forEach(function (p) { minX = Math.min(minX, p[0]); maxX = Math.max(maxX, p[0]); minY = Math.min(minY, p[1]); maxY = Math.max(maxY, p[1]); });
+    var W = 700, H = 470, pad = 8, sx = (W - pad * 2) / (maxX - minX), sy = (H - pad * 2) / (maxY - minY), scale = Math.min(sx, sy);
+    var ox = (W - (maxX - minX) * scale) / 2, oy = (H - (maxY - minY) * scale) / 2;
+    function ringPath(ring) {
+      return ring.map(function (p, i) {
+        var x = ox + (p[0] - minX) * scale;
+        var y = H - (oy + (p[1] - minY) * scale);
+        return (i ? 'L' : 'M') + x.toFixed(2) + ',' + y.toFixed(2);
+      }).join(' ') + 'Z';
+    }
+    function geomPath(g) {
+      if (!g) return '';
+      if (g.type === 'Polygon') return g.coordinates.map(ringPath).join(' ');
+      if (g.type === 'MultiPolygon') return g.coordinates.map(function (poly) { return poly.map(ringPath).join(' '); }).join(' ');
+      return '';
+    }
+    var paths = (geo.features || []).map(function (f, i) {
+      var n = featureName(f);
+      return '<path class="ssp-oblast" data-name="' + String(n).replace(/&/g, '&amp;').replace(/"/g, '&quot;') + '" data-key="' + alertKey(n).replace(/&/g, '&amp;').replace(/"/g, '&quot;') + '" d="' + geomPath(f.geometry) + '"/>';
+    }).join('');
+    return '<svg viewBox="0 0 700 470" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' + paths + '</svg>';
+  }
+
+  function updateAlertMapColors() {
+    if (!root || !alertsSvg) return;
+    var paths = alertsSvg.querySelectorAll('.ssp-oblast');
+    for (var i = 0; i < paths.length; i++) {
+      var el = paths[i], key = el.getAttribute('data-key') || '', level = 0;
+      Object.keys(alertsByOblast).forEach(function (k) {
+        if (k && (key === k || key.indexOf(k) > -1 || k.indexOf(key) > -1)) level = Math.max(level, alertsByOblast[k] || 0);
+      });
+      el.setAttribute('class', 'ssp-oblast' + (level >= 2 ? ' ssp-missile' : level === 1 ? ' ssp-drone' : ''));
+    }
+  }
+
+  function loadAlertsGeo() {
+    if (alertsGeo) return Promise.resolve(alertsGeo);
+    return http(ALERTS_GEO_URL, true).then(function (geo) {
+      alertsGeo = geo;
+      return geo;
+    });
+  }
+
+  function loadAlerts() {
+    if (!root) return Promise.resolve();
+    if (!ALERTS_API_TOKEN || ALERTS_API_TOKEN === 'ADD_TOKEN_HERE') {
+      // Віджет показує карту сірими областями, поки токен не налаштований.
+      alertsByOblast = {};
+      updateAlertMapColors();
+      return Promise.resolve();
+    }
+    return http(ALERTS_API_URL, true).then(function () {
+      // Повторний запит з Authorization робимо окремо, оскільки http() має простий інтерфейс.
+      return new Promise(function (resolve, reject) {
+        var x = new XMLHttpRequest();
+        x.open('GET', ALERTS_API_URL, true);
+        x.timeout = 12000;
+        x.setRequestHeader('Authorization', 'Bearer ' + ALERTS_API_TOKEN);
+        x.onload = function () {
+          if (x.status < 200 || x.status >= 300) return reject(new Error('alerts HTTP ' + x.status));
+          try { alertsByOblast = readAlertRows(JSON.parse(x.responseText)); alertsLastOk = Date.now(); updateAlertMapColors(); resolve(); }
+          catch (e) { reject(e); }
+        };
+        x.onerror = function () { reject(new Error('alerts network/CORS')); };
+        x.ontimeout = function () { reject(new Error('alerts timeout')); };
+        x.send();
+      });
+    }).catch(function () {
+      // Залишаємо останні відомі кольори, не показуємо хибний стан «усе спокійно».
+    });
+  }
+
+  function setupAlertMap() {
+    if (!root || root.querySelector('#ssp-alert-map')) return;
+    var el = document.createElement('div');
+    el.id = 'ssp-alert-map';
+    el.setAttribute('aria-hidden', 'true');
+    root.appendChild(el);
+    loadAlertsGeo().then(function (geo) {
+      if (!root || !el.parentNode) return;
+      el.innerHTML = projectGeoJSON(geo);
+      alertsSvg = el.querySelector('svg');
+      updateAlertMapColors();
+      return loadAlerts();
+    }).catch(function () {
+      // Якщо геодані тимчасово недоступні, не впливаємо на роботу заставки.
+    });
+    if (timers.alerts) clearInterval(timers.alerts);
+    timers.alerts = setInterval(loadAlerts, 60000);
+  }
+
   // ───────────── ОВЕРЛЕЙ ─────────────
   function injectStyle() {
     if (document.querySelector('style[data-ssp]')) return;
@@ -305,6 +463,11 @@
       '.ssp-h{display:flex;margin-top:.7em}.br .ssp-h,.tr .ssp-h{justify-content:flex-end}' +
       '.ssp-h div{margin-left:1.2em;text-align:center;font-size:1.25em;opacity:.92}.ssp-h div:first-child{margin-left:0}' +
       '.ssp-h b{display:block;font-weight:400;opacity:.75;font-size:.85em}' +
+      '#ssp-alert-map{position:absolute;left:2.4em;bottom:2em;width:18vw;max-width:270px;min-width:150px;aspect-ratio:1.48/1;pointer-events:none;filter:drop-shadow(0 2px 8px rgba(0,0,0,.45));z-index:5}' +
+      '#ssp-alert-map svg{display:block;width:100%;height:100%;overflow:visible}' +
+      '#ssp-alert-map .ssp-oblast{fill:#747b83;stroke:rgba(255,255,255,.78);stroke-width:.7;stroke-linejoin:round;vector-effect:non-scaling-stroke;transition:fill .35s}' +
+      '#ssp-alert-map .ssp-oblast.ssp-drone{fill:#f4c542}' +
+      '#ssp-alert-map .ssp-oblast.ssp-missile{fill:#e53935}' +
       '#ssp-name{position:absolute;left:50%;bottom:1.4em;transform:translateX(-50%);font-size:1.2em;opacity:.55;text-shadow:0 .06em .3em #000;white-space:nowrap;max-width:60%;overflow:hidden;text-overflow:ellipsis}';
     var s = document.createElement('style');
     s.setAttribute('data-ssp', '1');
@@ -492,6 +655,7 @@
       root.appendChild(dim); root.appendChild(vig); root.appendChild(w); root.appendChild(nm);
       document.body.appendChild(root);
       active = true;
+      setupAlertMap();
       front = vA; corner = c.pos; order = []; pos = -1; failStreak = 0; lastWeatherHtml = ''; watchT = -1; watchN = 0;
       applyCorner(); tickClock(); renderWeather();
       timers.clock = setInterval(tickClock, c.seconds ? 1000 : 5000);
@@ -517,7 +681,7 @@
     if (!active) return;
     active = false;
     clearInterval(timers.clock); clearInterval(timers.weather); clearInterval(timers.corner); clearInterval(timers.watch);
-    clearTimeout(timers.sw); clearTimeout(timers.sleep);
+    clearTimeout(timers.sw); clearTimeout(timers.sleep); clearInterval(timers.alerts); alertsSvg = null;
     [vA, vB].forEach(function (v) {
       if (!v) return;
       try { v.onerror = null; v.oncanplay = null; v.onended = null; v.onloadedmetadata = null; v.pause(); v.removeAttribute('src'); v.load(); } catch (e) {}
