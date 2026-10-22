@@ -1,0 +1,23 @@
+{
+  "time": "2026-10-22T11:25:45.165Z",
+  "cdp": "PASS",
+  "component": "main",
+  "plugin": "1.1.0",
+  "upstream": {
+    "commit": {
+      "status": 200,
+      "sha": "51191957278e08ca6ed3631b310aa6fd6740c121"
+    },
+    "file": {
+      "status": 200,
+      "sha256": "8ed325729c935e09aaa2f5f161e23951da00efea5a39f30f5a528ab038ba5d57",
+      "matchesBaseline": true
+    }
+  },
+  "parserKeys": [
+    "init",
+    "get",
+    "jackett",
+    "clear"
+  ]
+}

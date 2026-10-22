@@ -1,0 +1,97 @@
+{
+  "stage": "trailers",
+  "pluginSha256": "3e705c107dd539b5938fc38e3fa0b52dfcea99ed44e77e6c9393e9b55aea692c",
+  "tests": [
+    {
+      "name": "Movie trailers offered",
+      "status": "PASS",
+      "detail": {
+        "count": 3
+      }
+    },
+    {
+      "name": "Primary trailer opens native player",
+      "status": "PASS",
+      "detail": {
+        "controller": "player",
+        "player": true,
+        "iframes": 1,
+        "selects": 0,
+        "video": []
+      }
+    },
+    {
+      "name": "Primary actual video decoded",
+      "status": "PASS",
+      "detail": [
+        {
+          "ready": 4,
+          "time": 0.635898,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Primary trailer Back/focus",
+      "status": "PASS",
+      "detail": {
+        "component": "torrents",
+        "controller": "torrent_cinema",
+        "selects": 0
+      }
+    },
+    {
+      "name": "Alternative trailers offered",
+      "status": "PASS",
+      "detail": {
+        "count": 3
+      }
+    },
+    {
+      "name": "Alternative trailer opens native player",
+      "status": "PASS",
+      "detail": {
+        "controller": "player",
+        "player": true,
+        "iframes": 1,
+        "selects": 0,
+        "video": []
+      }
+    },
+    {
+      "name": "Alternative actual video decoded",
+      "status": "PASS",
+      "detail": [
+        {
+          "ready": 4,
+          "time": 1.004299,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Alternative trailer Back/focus",
+      "status": "PASS",
+      "detail": {
+        "component": "torrents",
+        "controller": "torrent_cinema",
+        "selects": 0
+      }
+    },
+    {
+      "name": "No-trailer empty state does not create a modal",
+      "status": "PASS",
+      "detail": {
+        "open": false,
+        "loading": false,
+        "controller": "torrent_cinema"
+      }
+    },
+    {
+      "name": "No trailer recursion or uncaught errors",
+      "status": "PASS",
+      "detail": []
+    }
+  ],
+  "errors": []
+}
