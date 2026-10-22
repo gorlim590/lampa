@@ -203,10 +203,45 @@ body.stremio-hybrid .sh-movie .full-start__button.sh-movie-primary { width:auto;
 body.stremio-hybrid .sh-movie .full-start__button.sh-movie-primary span, body.stremio-hybrid .sh-movie .full-start__button.sh-movie-primary .full-start__text { display:block !important; font-size:.95em; }
 body.stremio-hybrid .sh-movie .full-start__button.focus { background:#f0edf9 !important; color:#15121f !important; border-color:#fff; box-shadow:inset 0 0 0 .1em #fff !important; }
 body.stremio-hybrid .sh-movie-page .full-descr { padding-top:1em; }
+/* Embedded native movie torrent sources; standalone explorer styles are untouched. */
+body.stremio-hybrid .sh-streams { position:fixed; top:6em; bottom:1.8em; right:1.8em; width:30vw; z-index:2; display:flex; flex-direction:column; min-height:0; padding:1em; border-radius:.7em; background:rgba(12,12,22,.93); border:1px solid #ffffff10; color:#efeff5; }
+body.stremio-hybrid .sh-stream-head { display:flex; align-items:center; justify-content:space-between; gap:1em; }
+body.stremio-hybrid .sh-stream-head h2 { font-size:1.1em; font-weight:500; margin:0; }
+body.stremio-hybrid .sh-stream-advanced { padding:.1em .6em; border-radius:.4em; }
+body.stremio-hybrid .sh-stream-status { font-size:.7em; color:#aaa7b9; margin:.8em 0; }
+body.stremio-hybrid .sh-stream-load,body.stremio-hybrid .sh-stream-details { padding:.8em; font-size:.8em; background:#ffffff08; border-radius:.5em; }
+body.stremio-hybrid .sh-stream-details { margin-top:.7em; flex-shrink:0; }
+body.stremio-hybrid .sh-stream-content { flex:1; min-height:0; overflow:hidden; }
+body.stremio-hybrid .sh-streams .sh-stream-explorer { position:static !important; display:flex !important; padding:0 !important; width:100% !important; height:100% !important; background:transparent !important; }
+body.stremio-hybrid .sh-streams .explorer__left { display:none !important; }
+body.stremio-hybrid .sh-streams .explorer__files { display:flex; flex-direction:column; width:100% !important; height:100%; padding:0; min-width:0; }
+body.stremio-hybrid .sh-streams .explorer__files-head { flex-shrink:0; font-size:.75em; }
+body.stremio-hybrid .sh-streams .explorer__files-body { flex:1; min-height:0; }
+body.stremio-hybrid .sh-streams .explorer__files-body > .scroll { height:100% !important; max-height:100% !important; }
+body.stremio-hybrid .sh-streams .torrent-item { margin:0 0 .45em; padding:.8em; border-radius:.5em; background:#ffffff05; font-size:.75em; border:1px solid transparent; }
+body.stremio-hybrid .sh-streams .torrent-item__title { font-size:1em; line-height:1.4; overflow-wrap:anywhere; }
+body.stremio-hybrid .sh-streams .torrent-item__details { flex-wrap:wrap; font-size:.85em; gap:.4em; }
+body.stremio-hybrid .sh-streams .torrent-item__ffprobe { flex-wrap:wrap; }
+body.stremio-hybrid .sh-streams .torrent-item__ffprobe > div { margin:.15em .25em .15em 0; font-size:.85em; background:#ffffff0b; }
+body.stremio-hybrid .sh-streams .watched-history { font-size:.7em; }
+body.stremio-hybrid .sh-streams .empty { width:100%; font-size:.75em; padding:1em 0; }
+body.stremio-hybrid .sh-streams .focus { background:#ffffff12; border-color:#baa6f1; box-shadow:inset .15em 0 #9775fa; }
+body.stremio-hybrid .sh-streams .filter__item { min-width:0; }
+body.stremio-hybrid .sh-streams .explorer__files-head { margin:0 0 .5em !important; padding:0 !important; }
+body.stremio-hybrid .sh-streams .explorer__files-body .scroll__body,body.stremio-hybrid .sh-streams .scroll__content { padding:0 !important; }
+body.stremio-hybrid .sh-streams .torrent-item { display:grid; grid-template-columns:3.7em minmax(0,1fr); gap:.45em .6em; padding:.7em !important; border:1px solid transparent !important; box-shadow:none !important; animation:none !important; transform:none !important; }
+body.stremio-hybrid .sh-streams .torrent-item__title { grid-column:2; grid-row:1; }
+body.stremio-hybrid .sh-streams .torrent-item__ffprobe { grid-column:1; grid-row:1 / 3; display:flex; flex-direction:column; align-items:flex-start; align-content:flex-start; gap:.2em; margin:0 !important; }
+body.stremio-hybrid .sh-streams .torrent-item__details { grid-column:2; grid-row:2; display:flex !important; flex-wrap:wrap; justify-content:flex-start; gap:.25em .7em; margin:0 !important; }
+body.stremio-hybrid .sh-streams .torrent-item__details > * { width:auto !important; margin:0 !important; padding:0 !important; font-size:inherit !important; }
+body.stremio-hybrid .sh-streams .torrent-item__details span,body.stremio-hybrid .sh-streams .torrent-item__size { box-shadow:none !important; background:transparent !important; border:0 !important; padding:0 !important; color:inherit !important; }
+body.stremio-hybrid .sh-streams .torrent-item.focus { background:#ffffff12 !important; border-color:#bca8f0 !important; box-shadow:inset .15em 0 #9775fa !important; }
+body.stremio-hybrid .sh-streams .sh-empty-history { display:none; }
 `;
     // Cardify owns the native template/data. Move nodes with their handlers, never clone them.
     var movieRecords=[], movieFrame=0, movieTimers=[], movieModal=null;
     function restoreMovie(record) {
+        removeStreams(record);
         if(record.buttons){record.buttons.removeEventListener('hover:focus',movieButtonFocus,true);record.buttons.removeAttribute('data-sh-action');}
         record.moves.slice().reverse().forEach(function(move){
             if(move.parent) move.parent.insertBefore(move.node,move.next && move.next.parentNode===move.parent ? move.next : null);
@@ -254,6 +289,7 @@ body.stremio-hybrid .sh-movie-page .full-descr { padding-top:1em; }
         var record=movieRecords.filter(function(r){return r.root===root;})[0];
         if(!record){record={root:root,page:page,column:left,activity:active.activity,moves:[],labels:[]};movieRecords.push(record);}
         function move(node){if(node && node.parentNode!==left){record.moves.push({node:node,parent:node.parentNode,next:node.nextSibling});left.insertBefore(node,buttons);}}
+        setupStreams(record);
         root.classList.add('sh-movie');root.classList.toggle('sh-movie-native',!page.querySelector('.cardify-effects-overlay')); page.classList.add('sh-movie-page');left.classList.add('sh-movie-column');
         var description=root.querySelector('.custom-ghost-main') || page.querySelector('.full-descr__text');
         if(description){move(description);record.description=description;description.classList.add('sh-movie-description');description.addEventListener('hover:enter',movieDescriptionEnter,true);}
@@ -281,6 +317,156 @@ body.stremio-hybrid .sh-movie-page .full-descr { padding-top:1em; }
         [180,650].forEach(function(delay){movieTimers.push(setTimeout(adaptMovie,delay));});
     }
     function onMovieFull(event) { if(event && (event.type==='complite'||event.type==='archive'))scheduleMovie(); }
+
+    // Native torrent Component hosted inside Full. Parser, rows, filters and playback stay native.
+    var streamCache=[], streamGeneration=0;
+    function streamMovie(record) {
+        var movie=record.activity.component.props && record.activity.component.props.get('movie');
+        return movie || Lampa.Activity.active().card;
+    }
+    function streamParams(record) {
+        var movie=JSON.parse(JSON.stringify(streamMovie(record))),year=String(movie.release_date||'0000').slice(0,4), df=movie.original_title||movie.title,lg=movie.title||df;
+        var names={df:df,df_year:df+' '+year,df_lg:df+' '+lg,df_lg_year:df+' '+lg+' '+year,lg:lg,lg_year:lg+' '+year,lg_df:lg+' '+df,lg_df_year:lg+' '+df+' '+year};
+        return {component:'torrents',url:'',title:Lampa.Lang.translate('title_torrents'),search:names[Lampa.Storage.field('parse_lang')]||df,search_one:lg,search_two:df,movie:movie,page:1};
+    }
+    function streamStatus(record,text) {if(record.streamStatus)record.streamStatus.textContent=text;}
+    function streamInfo(record) {
+        record.streamFocused=false;
+        if(record.streamChild)record.streamChild.wantFocus=false;
+        Lampa.Controller.toggle('full_start');
+        var button=record.root.querySelector('.view--torrent:not(.hide)')||record.root.querySelector('.sh-movie-primary');
+        if(button)Lampa.Controller.collectionFocus(button,record.root);
+    }
+    function streamFallback(record) {var params=streamParams(record);Lampa.Activity.push(params);}
+    function streamWindow(st,start) {
+        var row=st.root.querySelector('.torrent-list');if(!row)return;
+        st.windowStart=Math.max(0,start);st.windowing=true;
+        st.rows.forEach(function(node,i){if(i<st.windowStart||i>=st.windowStart+40)$(node).detach();else row.appendChild(node);});
+        st.windowing=false;
+    }
+    function streamSyncRows(st) {
+        st.root.querySelectorAll('.torrent-item').forEach(function(row){if(st.rows.indexOf(row)<0)st.rows.push(row);});
+        if(st.rows.length>40)streamWindow(st,st.windowStart);
+    }
+    function streamFocus(st,node) {
+        if(st.dead||!st.wantFocus)return;
+        Lampa.Controller.collectionSet(st.record.streamPane,false,true);
+        var target=node&&node.isConnected&&node.offsetParent!==null?node:st.last&&st.last.isConnected&&st.last.offsetParent!==null?st.last:st.root.querySelector('.torrent-item')||st.root.querySelector('.selector:not(.hide)');
+        if(target)Lampa.Controller.collectionFocus(target,st.root);
+    }
+    function streamMove(record,direction) {
+        var st=record.streamChild;if(!st)return;if(st.loading)st.navigatedWhileLoading=true;
+        var index=st.rows.indexOf(st.last),filters=Array.prototype.filter.call(st.root.querySelectorAll('.torrent-filter .selector'),function(n){return n.offsetParent!==null;}),headers=Array.prototype.slice.call(record.streamPane.querySelectorAll('.sh-stream-head .selector')),footer=record.streamPane.querySelector('.sh-stream-details');
+        if(index>=0){
+            if(direction==='left'){streamInfo(record);return;}
+            if(direction==='right'){streamFocus(st,filters[0]||headers[0]);return;}
+            if(direction==='down'&&index+1>=st.rows.length)st.child.next();
+            var next=index+(direction==='down'?1:-1);
+            if(next<0){streamFocus(st,filters[filters.length-1]||headers[headers.length-1]);return;}
+            if(!st.rows[next]){streamFocus(st,footer);return;}
+            if(next<st.windowStart)streamWindow(st,Math.max(0,st.windowStart-20));
+            if(next>=st.windowStart+40)streamWindow(st,st.windowStart+20);
+            streamFocus(st,st.rows[next]);return;
+        }
+        if(st.last===footer){if(direction==='up')streamFocus(st,st.rows[Math.min(st.rows.length-1,st.windowStart+39)]||filters[0]||headers[0]);else if(direction==='left')streamInfo(record);return;}
+        var group=headers.indexOf(st.last)>=0?headers:filters,at=group.indexOf(st.last);
+        if(direction==='left'){if(at>0)streamFocus(st,group[at-1]);else streamInfo(record);}
+        else if(direction==='right')streamFocus(st,group[at+1]||filters[0]||st.rows[0]||footer);
+        else if(direction==='down')streamFocus(st,group===headers&&filters.length?filters[0]:st.rows[st.windowStart]||footer);
+        else if(group===headers)streamInfo(record);else streamFocus(st,headers[headers.length-1]);
+    }
+    function streamActivate(record) {
+        var st=record.streamChild;if(!st||st.dead)return;
+        st.wantFocus=true;record.streamFocused=true;
+        var history=st.root.querySelector('.watched-history'),historyBody=history&&history.querySelector('.watched-history__body');if(historyBody)history.classList.toggle('sh-empty-history',historyBody.textContent.trim()===Lampa.Lang.translate('no_watch_history'));
+        // Empty.start otherwise replaces start with a page-wide empty controller.
+        st.child.start=function(){streamActivate(record);};
+        Lampa.Controller.add('sh_movie_streams',{
+            toggle:function(){streamFocus(st);},
+            up:function(){streamMove(record,'up');},down:function(){streamMove(record,'down');},left:function(){streamMove(record,'left');},right:function(){streamMove(record,'right');},back:function(){streamInfo(record);}
+        });
+        Lampa.Controller.toggle('sh_movie_streams');
+    }
+    function closeStreamChild(record) {
+        var st=record.streamChild;if(!st)return;
+        st.dead=true;record.streamChild=null;
+        st.root.removeEventListener('hover:focus',st.onFocus,true);st.root.removeEventListener('hover:enter',st.onEnter,true);
+        Lampa.Torrent.back(null);if(st.started)Lampa.Torrent.opened(null);
+        st.child.destroy();st.rows.forEach(function(row){$(row).remove();});st.rows=[];
+        record.streamContent.textContent='';record.streamPane.setAttribute('aria-busy','false');record.streamPane.removeAttribute('data-cache-hit');streamStatus(record,'Джерела завантажуються лише після відкриття');record.streamLoad.hidden=false;
+        Lampa.Controller.add('sh_movie_streams',{toggle:function(){Lampa.Controller.toggle('content');},back:function(){Lampa.Controller.toggle('content');}});
+    }
+    function loadStreams(record) {
+        if(record.streamChild){streamActivate(record);return;}
+        if(typeof Lampa.Component.get('torrents')!=='function'){streamFallback(record);return;}
+        var params=streamParams(record), st={record:record,params:params,rows:[],windowStart:0,dead:false,wantFocus:true,loading:true};
+        record.streamChild=st;record.streamFocused=true;record.streamLoad.hidden=true;streamStatus(record,'Пошук джерел…');
+        var key=[params.movie.id,params.movie.source||'tmdb',params.search,Lampa.Storage.field('parser_torrent_type'),streamGeneration].join('|');st.key=key;
+        try {
+            st.child=Lampa.Component.create(params);st.root=st.child.render()[0];st.root.classList.add('sh-stream-explorer');record.streamContent.appendChild(st.root);
+            st.child.activity={loader:function(on){if(st.dead)return;st.loading=on;record.streamPane.setAttribute('aria-busy',on?'true':'false');streamStatus(record,on?'Пошук джерел…':st.error?'Парсер недоступний':st.total===0?'Джерел не знайдено':st.total!=null?'Знайдено: '+st.total:'Джерела');if(!on){streamSyncRows(st);if(!st.loadedOnce){st.loadedOnce=true;if(!st.navigatedWhileLoading)st.last=st.root.querySelector('.torrent-item')||st.last;}st.child.start=function(){streamActivate(record);};}},toggle:function(){if(!st.dead&&st.wantFocus)streamActivate(record);},render:function(){return $(st.root);}};
+            st.child.start=function(){streamActivate(record);};st.child.back=function(){streamInfo(record);};
+            var append=st.child.append,reset=st.child.reset,next=st.child.next,applyFilter=st.child.applyFilter;
+            st.child.applyFilter=function(){params.page=1;return applyFilter.apply(st.child,arguments);};
+            st.child.append=function(){append.apply(st.child,arguments);streamSyncRows(st);};
+            st.child.reset=function(){st.rows.forEach(function(row){$(row).remove();});st.rows=[];st.windowStart=0;return reset.apply(st.child,arguments);};
+            st.child.next=function(){if(st.dead||st.windowing||!st.wantFocus)return;var focused=st.last;next.apply(st.child,arguments);if(st.rows.length>st.windowStart+40){streamWindow(st,st.windowStart+20);if(focused&&focused.isConnected)streamFocus(st,focused);}};
+            st.onFocus=function(event){var node=event.target.closest('.selector');if(node&&st.root.contains(node))st.last=node;};
+            st.onEnter=function(event){if(event.target.closest('.torrent-item'))st.started=true;if(event.target.closest('.filter--back')){event.stopImmediatePropagation();streamInfo(record);}else if(event.target.closest('.filter--search,.empty__footer')){event.stopImmediatePropagation();streamFallback(record);}};
+            st.root.addEventListener('hover:focus',st.onFocus,true);st.root.addEventListener('hover:enter',st.onEnter,true);
+            var originalGet=Lampa.Parser.get;
+            // Scope this wrapper to initialize's synchronous Parser.get dispatch, not to global navigation.
+            Lampa.Parser.get=function(query,done,fail){
+                if(query!==params)return originalGet.apply(this,arguments);
+                streamCache=streamCache.filter(function(item){return item.expires>Date.now();});var cached=streamCache.filter(function(item){return item.key===key;})[0];
+                if(cached){record.streamPane.dataset.cacheHit='true';st.total=cached.data.Results.length;var data=JSON.parse(JSON.stringify(cached.data)),viewed=Lampa.Storage.cache('torrents_view',5000,[]);data.Results.forEach(function(item){item.viewed=viewed.indexOf(item.hash)>-1;});done(data);return;}
+                record.streamPane.dataset.cacheHit='false';
+                return originalGet.call(this,query,function(data){if(st.dead)return;st.total=data.Results.length;var serialized=JSON.stringify(data);if(serialized.length<2000000){streamCache=streamCache.filter(function(item){return item.key!==key;});streamCache.push({key:key,data:JSON.parse(serialized),expires:Date.now()+(data.Results.length?300000:60000)});while(streamCache.length>4)streamCache.shift();}done(data);},function(error){if(st.dead)return;st.error=true;fail(error);});
+            };
+            try{st.child.initialize();}finally{Lampa.Parser.get=originalGet;}
+            if(st.loading)streamActivate(record);
+            Lampa.Torrent.back(function(){if(!st.dead&&record.streamChild===st)streamActivate(record);else if(Lampa.Activity.active()?.component==='full')streamInfo(record);});
+        }catch(error){if(st.child&&typeof st.child.destroy==='function')closeStreamChild(record);else record.streamChild=null;streamStatus(record,'Вбудовані джерела недоступні. Скористайтеся розширеним режимом.');record.streamLoad.hidden=false;}
+    }
+    function removeStreams(record) {
+        if(!record.streamPane)return;
+        if(Lampa.Controller.enabled().name==='sh_movie_streams')streamInfo(record);
+        closeStreamChild(record);
+        record.page.removeEventListener('hover:enter',record.streamEnter,true);record.streamPane.removeEventListener('hover:focus',record.streamPaneFocus,true);
+        record.streamPane.remove();record.streamPane=null;record.page.classList.remove('sh-has-streams');
+        if(record.activity.component.pause===record.streamPause)record.activity.component.pause=record.originalPause;
+        if(record.streamInfoController&&record.streamInfoController.down===record.streamDown)record.streamInfoController.down=record.originalInfoDown;
+    }
+    function setupStreams(record) {
+        if(record.streamPane||!Lampa.Storage.field('parser_use')||!window.lampa_settings.torrents_use)return;
+        var pane=document.createElement('section');pane.className='sh-streams';pane.setAttribute('aria-label','Торрентні джерела');pane.setAttribute('aria-busy','false');
+        pane.innerHTML='<div class="sh-stream-head"><h2>Джерела</h2><div class="sh-stream-retry selector" title="Оновити джерела">↻</div><div class="sh-stream-advanced selector" title="Розширений режим торрентів">⋯</div></div><div class="sh-stream-status" role="status">Джерела завантажуються лише після відкриття</div><div class="sh-stream-load selector">Показати джерела</div><div class="sh-stream-content"></div><div class="sh-stream-details selector">Деталі й актори ↓</div>';
+        record.streamPane=pane;record.streamContent=pane.querySelector('.sh-stream-content');record.streamStatus=pane.querySelector('.sh-stream-status');record.streamLoad=pane.querySelector('.sh-stream-load');record.page.appendChild(pane);record.page.classList.add('sh-has-streams');
+        record.streamEnter=function(event){
+            if(event.target.closest('.view--torrent')&&record.root.contains(event.target)){event.stopImmediatePropagation();loadStreams(record);}
+            else if(event.target===record.streamLoad){event.stopImmediatePropagation();loadStreams(record);}
+            else if(event.target.closest('.sh-stream-retry')){event.stopImmediatePropagation();var key=record.streamChild&&record.streamChild.key;streamCache=streamCache.filter(function(item){return item.key!==key;});closeStreamChild(record);loadStreams(record);}
+            else if(event.target.closest('.sh-stream-advanced')){event.stopImmediatePropagation();streamFallback(record);}
+            else if(event.target.closest('.sh-stream-details')){event.stopImmediatePropagation();streamInfo(record);if(record.originalInfoDown)record.originalInfoDown();}
+        };
+        record.page.addEventListener('hover:enter',record.streamEnter,true);
+        record.streamPaneFocus=function(event){if(record.streamChild){var node=event.target.closest('.selector');if(node)record.streamChild.last=node;}};record.streamPane.addEventListener('hover:focus',record.streamPaneFocus,true);
+        record.originalPause=record.activity.component.pause;
+        record.streamPause=function(){closeStreamChild(record);record.streamFocused=false;return record.originalPause&&record.originalPause.apply(this,arguments);};
+        record.activity.component.pause=record.streamPause;
+        onStreamController({name:Lampa.Controller.enabled().name});
+    }
+    function onStreamController(event) {
+        if(!event||event.name!=='full_start')return;
+        var record=movieRecords.filter(function(r){return r.page.classList.contains('activity--active')&&r.streamPane;})[0];if(!record)return;
+        var controller=Lampa.Controller.enabled().controller;
+        if(controller.down===record.streamDown)return;
+        record.streamInfoController=controller;record.originalInfoDown=controller.down;
+        record.streamDown=function(){loadStreams(record);};controller.down=record.streamDown;
+    }
+    function onStreamSettings(event) {
+        if(event&&/^(jackett_|prowlarr_|parser_|parse_)/.test(event.name)){streamGeneration++;streamCache=[];movieRecords.forEach(closeStreamChild);}
+    }
 
     function actionLabel(node) {
         var map = {'notice--icon':'Сповіщення', 'open--settings':'Налаштування', 'open--profile':'Профіль', 'full--screen':'Повний екран', 'open--broadcast':'Трансляція', 'trakt-head-action':'Trakt · статус та списки'};
@@ -323,6 +509,7 @@ body.stremio-hybrid .sh-movie-page .full-descr { padding-top:1em; }
         searchRoots=[];
     }
     function onSearchSources(event) {
+        movieRecords.forEach(closeStreamChild);
         clearSearchSources(); searchSources=event.sources;
         searchSources.listener.follow('finded',onSearchFound);
     }
@@ -372,12 +559,12 @@ body.stremio-hybrid .sh-movie-page .full-descr { padding-top:1em; }
         if(event && event.type==='destroy')movieRecords=movieRecords.filter(function(record){if(record.activity===event.object.activity){restoreMovie(record);return false;}return true;});
     }
     function setupUI() {
-        if (!watching) { Lampa.Listener.follow('activity', onActivity); Lampa.Listener.follow('full',onMovieFull); Lampa.Search.listener.follow('close', onSearchClose); Lampa.Search.listener.follow('sources',onSearchSources); Lampa.Settings.listener.follow('open',onSettingsOpen); Lampa.Settings.listener.follow('close',onSettingsClose); document.addEventListener('keydown',onSettingsKey,true); document.addEventListener('keyup',onSettingsKey,true); installSettingsController(); watching=true; }
+        if (!watching) { Lampa.Listener.follow('activity', onActivity); Lampa.Listener.follow('full',onMovieFull); Lampa.Controller.listener.follow('toggle',onStreamController); Lampa.Storage.listener.follow('change',onStreamSettings); Lampa.Search.listener.follow('close', onSearchClose); Lampa.Search.listener.follow('sources',onSearchSources); Lampa.Settings.listener.follow('open',onSettingsOpen); Lampa.Settings.listener.follow('close',onSettingsClose); document.addEventListener('keydown',onSettingsKey,true); document.addEventListener('keyup',onSettingsKey,true); installSettingsController(); watching=true; }
         setupHeader(); scheduleMovie();
         if(document.body.classList.contains('settings--open')) onSettingsOpen({name:'resume'});
     }
     function removeUI() {
-        if (watching) { Lampa.Listener.remove('activity', onActivity); Lampa.Listener.remove('full',onMovieFull); Lampa.Search.listener.remove('close', onSearchClose); Lampa.Search.listener.remove('sources',onSearchSources); Lampa.Settings.listener.remove('open',onSettingsOpen); Lampa.Settings.listener.remove('close',onSettingsClose); document.removeEventListener('keydown',onSettingsKey,true); document.removeEventListener('keyup',onSettingsKey,true); settingsLeftConsumed=false; watching=false; }
+        if (watching) { Lampa.Listener.remove('activity', onActivity); Lampa.Listener.remove('full',onMovieFull); Lampa.Controller.listener.remove('toggle',onStreamController); Lampa.Storage.listener.remove('change',onStreamSettings); streamCache=[]; Lampa.Search.listener.remove('close', onSearchClose); Lampa.Search.listener.remove('sources',onSearchSources); Lampa.Settings.listener.remove('open',onSettingsOpen); Lampa.Settings.listener.remove('close',onSettingsClose); document.removeEventListener('keydown',onSettingsKey,true); document.removeEventListener('keyup',onSettingsKey,true); settingsLeftConsumed=false; watching=false; }
         removeSettingsUI();
         removeMovies();
         clearSearchSources();
@@ -553,7 +740,7 @@ body.stremio-hybrid .sh-movie-page .full-descr { padding-top:1em; }
         apply(enabled());
     }
     window.StremioHybrid = {
-        version: '2.1.0',
+        version: '2.2.0',
         setEnabled: setEnabled,
         refresh: function () { if (ready) apply(enabled()); },
         destroy: function () {

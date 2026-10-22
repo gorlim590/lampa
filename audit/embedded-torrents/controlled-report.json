@@ -1,0 +1,72 @@
+{
+  "kind": "Controlled Parser.get responses in existing tab; no real playback",
+  "checks": [
+    {
+      "name": "Few sources use three native rows",
+      "status": "PASS"
+    },
+    {
+      "name": "Zero results show native empty state in movie",
+      "status": "PASS"
+    },
+    {
+      "name": "Parser error stays local and retry remains accessible",
+      "status": "PASS"
+    },
+    {
+      "name": "Slow parser keeps movie interactive",
+      "status": "PASS"
+    },
+    {
+      "name": "Late response does not steal focus after Back",
+      "status": "PASS"
+    },
+    {
+      "name": "400-result native pagination keeps at most 40 rows and reaches item 85",
+      "status": "PASS",
+      "detail": {
+        "rows": 40,
+        "focus": "CONTROLLED release 314 2026 1080p WEB-DL UKR",
+        "dom": 661
+      }
+    },
+    {
+      "name": "Up restores detached previous windows with native handlers",
+      "status": "PASS",
+      "detail": {
+        "focus": "CONTROLLED release 374 2026 1080p WEB-DL UKR"
+      }
+    },
+    {
+      "name": "Repeated native child teardown does not accumulate listeners",
+      "status": "PASS",
+      "detail": {
+        "before": {
+          "torrentFile": 3,
+          "controller": 3,
+          "storage": 32,
+          "params": {},
+          "pane": 1,
+          "styles": 1
+        },
+        "after": {
+          "torrentFile": 3,
+          "controller": 3,
+          "storage": 32,
+          "params": {},
+          "pane": 1,
+          "styles": 1
+        }
+      }
+    },
+    {
+      "name": "Disable cancels pending work and restores original movie action",
+      "status": "PASS"
+    },
+    {
+      "name": "Reenable creates one lazy pane",
+      "status": "PASS"
+    }
+  ],
+  "errors": []
+}

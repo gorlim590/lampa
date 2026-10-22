@@ -170,3 +170,10 @@
 - Baseline Tenzing: Full 1146ms / 22 XHR-Fetch / 537 DOM; standalone sources 419ms / 3 XHR-Fetch / 732 DOM / 20 rows. Це один desktop-зразок із поточними кешами; не доказ TV speedup. baseline.json і standalone-before.png збережено.
 - Наступне: child native component із власним scoped Controller, lazy activation, bounded window/cache, cleanup до наступної Activity; реальні й контрольовані тести.
 - Коміт: docs: map native torrent dependencies and capture baseline.
+
+## Embedded native sources 2.2 — functional checkpoint
+- Native torrents Component mounted lazily inside movie Full; native parser, filter/sort, torrent handlers and TorrServer preserved. 40 connected rows maximum; bounded native pager, 4-entry TTL cache (5min results/1min empty), cancellation before next Activity/parser. Old page remains compatible fallback.
+- real-report.json: 14 PASS; controlled-report.json: 10 PASS, errors=[] in both. Real 31 sources; 720/1080/4K; native filter/sort, controlled OK/back, cache reopen. Controlled 400/3/0/error/slow responses; loading Back; 10 child cycles with stable listener counts; disable pending work/reenable. No playback.
+- Desktop sample: movie 1376ms/23 XHR-Fetch/544 DOM; sources 197ms/2 XHR-Fetch/891 DOM. Combined DOM is larger than old standalone 732; no general speedup claim. Lazy cache/windowing bounded; physical Google TV and actual player return BLOCKED.
+- Current user feedback: shrink sources, remove separate details/cast button, natural Down to lower content, language flags, highlight useful sources; fix rapid/choppy Cardify backdrop. Next checkpoint will address these rather than treating current visual layout as final.
+- Files: ui/stremio-hybrid.js, audit/embedded-torrents tests/reports/screenshots. Commit: feat: embed lazy native movie torrent sources.
