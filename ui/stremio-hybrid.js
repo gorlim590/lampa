@@ -34,6 +34,31 @@ body.stremio-hybrid .selectbox-item { border-radius:.65em; }
 body.stremio-hybrid .mapping--grid { padding:.6em .8em; }
 body.stremio-hybrid .mapping--grid .card { padding:0 .65em 1.8em; }
 body.stremio-hybrid .selectbox-item.focus, body.stremio-hybrid .settings-param.focus, body.stremio-hybrid .settings-folder.focus { background:#7960c9 !important; color:white !important; border-radius:.65em; }
+/* Keep Cardify's composition and provider actions; improve readable hierarchy. */
+body.stremio-hybrid .full-start__background { opacity:.48 !important; filter:none !important; }
+body.stremio-hybrid .cardify-effects-overlay { width:100% !important; background:linear-gradient(90deg,rgba(18,16,35,.76),rgba(18,16,35,.16)) !important; transition:opacity 160ms ease-out !important; }
+body.stremio-hybrid .full-start-new__title { font-size:2.4em !important; line-height:1.16 !important; font-weight:600; max-width:26em; white-space:normal !important; display:block !important; overflow:visible !important; text-overflow:clip; overflow-wrap:break-word; -webkit-line-clamp:unset !important; margin:.3em 0 .5em !important; }
+body.stremio-hybrid .full-start-new__head { color:#d0cadf; font-size:.95em; line-height:1.4; }
+body.stremio-hybrid .ifx-original-title { opacity:.7; font-weight:400; }
+body.stremio-hybrid .cardify__left { min-width:0; max-width:68%; padding-right:1.2em; }
+body.stremio-hybrid .full-start-new__right { gap:1em; }
+body.stremio-hybrid .full-start-new__rate-line { gap:.6em; }
+body.stremio-hybrid .full-start__button { border-radius:2em !important; background:#29233e; border:1px solid #ffffff16; min-height:2.8em; animation:none !important; opacity:1 !important; transition:transform 160ms ease-out,opacity 160ms ease-out !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
+body.stremio-hybrid .full-start__button.focus { background:#e9e0ff !important; color:#201536 !important; box-shadow:0 0 0 .13em #9775fa !important; transform:translateY(-.08em); }
+body.stremio-hybrid .custom-ghost-main { width:31% !important; padding:1.1em !important; background:rgba(24,21,43,.94); border:1px solid #ffffff12; border-radius:1em; z-index:1 !important; }
+body.stremio-hybrid .custom-ghost-main .full-descr__text { text-align:left !important; font-size:1em !important; line-height:1.55 !important; max-height:15.5em !important; }
+body.stremio-hybrid .full-descr__text.focus { outline:.12em solid #b79bff; outline-offset:.35em; border-radius:.3em; }
+body.stremio-hybrid .full-descr { padding-left:1.8em; padding-right:1.8em; }
+body.stremio-hybrid .full-descr__info-name { color:#aaa2be; }
+body.stremio-hybrid .full-descr__tag { border-radius:2em; background:#29233e; }
+body.stremio-hybrid .full-descr__tag.focus, body.stremio-hybrid .simple-button.focus { background:#7960c9 !important; color:white !important; }
+body.stremio-hybrid .full-person__photo { border-radius:.7em; }
+body.stremio-hybrid .settings__title, body.stremio-hybrid .selectbox__title { font-size:1.6em; font-weight:500; letter-spacing:.01em; }
+body.stremio-hybrid .settings-param, body.stremio-hybrid .settings-folder { border-radius:.65em; border:1px solid transparent; }
+body.stremio-hybrid .settings-param__descr, body.stremio-hybrid .settings-param__value { color:#bbb3ce; }
+body.stremio-hybrid .settings-param.focus .settings-param__descr, body.stremio-hybrid .settings-param.focus .settings-param__value { color:#f4eeff; }
+body.stremio-hybrid .settings-param.focus, body.stremio-hybrid .settings-folder.focus, body.stremio-hybrid .selectbox-item.focus { box-shadow:inset .18em 0 #d2bdff; }
+body.stremio-hybrid .menu__item, body.stremio-hybrid .head__action, body.stremio-hybrid .selectbox-item, body.stremio-hybrid .settings-param, body.stremio-hybrid .settings-folder { transition:transform 140ms ease-out,opacity 140ms ease-out !important; }
 @media(min-width:769px) {
  body.stremio-hybrid .wrap__content { flex:1; min-width:0; width:calc(100% - 4.4em) !important; }
  body.stremio-hybrid .activity { width:100% !important; }
@@ -47,9 +72,15 @@ body.stremio-hybrid .selectbox-item.focus, body.stremio-hybrid .settings-param.f
  body.stremio-hybrid .items-line:not(.vinyl-line) .card.ydesign-horizontal { width:27vw !important; }
  body.stremio-hybrid .mapping--grid .card.ydesign-vertical { width:calc(100% / 6) !important; }
 }
+@media(max-width:768px) {
+ body.stremio-hybrid .cardify__left { max-width:100%; padding-right:0; }
+ body.stremio-hybrid .custom-ghost-main { position:relative !important; width:100% !important; margin-top:1em; }
+ body.stremio-hybrid .full-start-new__title { font-size:1.8em !important; }
+}
 @media(prefers-reduced-motion:reduce) {
  body.stremio-hybrid .card, body.stremio-hybrid .ydesign-content-layer, body.stremio-hybrid .ydesign-desc-under { transition:none !important; }
- body.stremio-hybrid .card.focus { transform:none !important; }
+ body.stremio-hybrid .full-start__button, body.stremio-hybrid .menu__item, body.stremio-hybrid .head__action, body.stremio-hybrid .selectbox-item, body.stremio-hybrid .settings-param, body.stremio-hybrid .settings-folder, body.stremio-hybrid .cardify-effects-overlay { transition:none !important; }
+ body.stremio-hybrid .card.focus, body.stremio-hybrid .full-start__button.focus { transform:none !important; }
 }
 `;
     function enabled() {
