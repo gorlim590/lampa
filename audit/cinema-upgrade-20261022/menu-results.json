@@ -1,0 +1,59 @@
+{
+  "stage": "menus",
+  "tests": [
+    {
+      "name": "filter bounds/reopen 1280",
+      "status": "PASS",
+      "detail": {
+        "items": 11,
+        "inside": true,
+        "controller": "select"
+      }
+    },
+    {
+      "name": "parser bounds/reopen 1280",
+      "status": "PASS",
+      "detail": {
+        "items": 19,
+        "inside": true,
+        "controller": "select"
+      }
+    },
+    {
+      "name": "filter bounds/reopen 1920",
+      "status": "PASS",
+      "detail": {
+        "items": 11,
+        "inside": true,
+        "controller": "select"
+      }
+    },
+    {
+      "name": "parser bounds/reopen 1920",
+      "status": "PASS",
+      "detail": {
+        "items": 19,
+        "inside": true,
+        "controller": "select"
+      }
+    },
+    {
+      "name": "filter bounds/reopen 3840",
+      "status": "PASS",
+      "detail": {
+        "items": 11,
+        "inside": true,
+        "controller": "select"
+      }
+    },
+    {
+      "name": "parser bounds/reopen 3840",
+      "status": "PASS",
+      "detail": {
+        "items": 19,
+        "inside": true,
+        "controller": "select"
+      }
+    }
+  ]
+}

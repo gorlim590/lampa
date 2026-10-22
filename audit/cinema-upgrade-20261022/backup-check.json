@@ -1,0 +1,83 @@
+{
+  "settings_backup": "BLOCKED: current CDP unavailable",
+  "previous_json_backups": [
+    {
+      "file": "backups/before-large-list-1792617079565.json",
+      "valid_json": true,
+      "type": "dict"
+    },
+    {
+      "file": "backups/before-home-fixes-1792616735129.json",
+      "valid_json": true,
+      "type": "dict"
+    },
+    {
+      "file": "backups/lampa-session-storage-20261021.json",
+      "valid_json": true,
+      "type": "dict"
+    },
+    {
+      "file": "backups/before-card-audit-1792618401155.json",
+      "valid_json": true,
+      "type": "dict"
+    },
+    {
+      "file": "backups/before-large-list-1792617327785.json",
+      "valid_json": true,
+      "type": "dict"
+    },
+    {
+      "file": "backups/before-card-audit-1792626658762.json",
+      "valid_json": true,
+      "type": "dict"
+    },
+    {
+      "file": "backups/before-card-audit-1792627407087.json",
+      "valid_json": true,
+      "type": "dict"
+    },
+    {
+      "file": "backups/before-card-audit-1792618937341.json",
+      "valid_json": true,
+      "type": "dict"
+    },
+    {
+      "file": "backups/active-2026-10-21T20-39-26-787Z.json",
+      "valid_json": true,
+      "type": "dict"
+    },
+    {
+      "file": "backups/before-large-list-1792617111317.json",
+      "valid_json": true,
+      "type": "dict"
+    },
+    {
+      "file": "backups/lampa-cdp-storage-20261021.json",
+      "valid_json": true,
+      "type": "dict"
+    },
+    {
+      "file": "backups/before-card-audit-1792620155642.json",
+      "valid_json": true,
+      "type": "dict"
+    },
+    {
+      "file": "backups/active-storage-2026-10-21T20-39-26-787Z.json",
+      "valid_json": true,
+      "type": "dict"
+    }
+  ],
+  "archives": [
+    {
+      "file": "backups/chromium-profile-cdp-20261021.tar.gz",
+      "readable": true,
+      "members": 870
+    },
+    {
+      "file": "backups/chromium-profile-before-20261021.tar.gz",
+      "readable": true,
+      "members": 873
+    }
+  ],
+  "plugin_sha256": "8ed325729c935e09aaa2f5f161e23951da00efea5a39f30f5a528ab038ba5d57"
+}

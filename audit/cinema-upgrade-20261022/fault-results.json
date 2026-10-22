@@ -1,0 +1,95 @@
+{
+  "stage": "faults",
+  "pluginSha256": "04d2a4b5a30c39475e712d76893376ec7eecc78aaed624335ab115cda9368b2d",
+  "tests": [
+    {
+      "name": "Native empty parser UI",
+      "status": "PASS",
+      "detail": {
+        "root": true,
+        "nativeErrorFallback": false,
+        "text": "Тут порожньо\n    На ваш запит нічого не знайдено.\nУточнитиОновити",
+        "best": null,
+        "disabled": "true",
+        "background": "",
+        "titleVisible": true,
+        "requests": 0,
+        "elapsedMs": 206
+      }
+    },
+    {
+      "name": "No-image metadata fallback",
+      "status": "PASS",
+      "detail": {
+        "root": true,
+        "nativeErrorFallback": false,
+        "text": "Тут порожньо\n    На ваш запит нічого не знайдено.\nУточнитиОновити",
+        "best": null,
+        "disabled": "true",
+        "background": "",
+        "titleVisible": true,
+        "requests": 0
+      }
+    },
+    {
+      "name": "Native error parser UI",
+      "status": "PASS",
+      "detail": {
+        "root": false,
+        "nativeErrorFallback": true,
+        "text": "Тут порожньо\n    Помилка підключення: Парсер не відповідає на запит ([URL]\nОновити",
+        "best": null,
+        "disabled": "true",
+        "background": "",
+        "titleVisible": true,
+        "requests": 0,
+        "elapsedMs": 128
+      }
+    },
+    {
+      "name": "Slow parser leaves JS responsive",
+      "status": "PASS",
+      "detail": {
+        "pingMs": 22
+      }
+    },
+    {
+      "name": "Native slow parser UI",
+      "status": "PASS",
+      "detail": {
+        "root": true,
+        "nativeErrorFallback": false,
+        "text": "Тут порожньо\n    На ваш запит нічого не знайдено.\nУточнитиОновити",
+        "best": null,
+        "disabled": "true",
+        "background": "",
+        "titleVisible": true,
+        "requests": 0,
+        "elapsedMs": 1284
+      }
+    },
+    {
+      "name": "Discarded torrent activities released",
+      "status": "PASS",
+      "detail": {
+        "states": 1,
+        "detached": 0
+      }
+    },
+    {
+      "name": "CORS denial uses safe standard accent",
+      "status": "PASS",
+      "detail": {
+        "status": "fallback",
+        "color": "#e0243a"
+      }
+    },
+    {
+      "name": "No uncaught errors for network/image failures",
+      "status": "PASS",
+      "detail": []
+    }
+  ],
+  "errors": [],
+  "fixtureRequests": 3
+}

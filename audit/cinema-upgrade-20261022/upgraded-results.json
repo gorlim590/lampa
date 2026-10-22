@@ -1,0 +1,335 @@
+{
+  "stage": "upgraded",
+  "time": "2026-10-22T12:35:16.125Z",
+  "tests": [
+    {
+      "name": "Parser search returned native results",
+      "status": "PASS",
+      "detail": {
+        "rows": 20,
+        "trackers": [
+          "The Pirate Bay",
+          "Toloka.to",
+          "Mazepa"
+        ]
+      }
+    },
+    {
+      "name": "Real release titles and persistent trackers",
+      "status": "PASS",
+      "detail": [
+        {
+          "raw": "Fight.Club.1999.2160p.UHD.Bluray.Remux.HDR.HEVC.DTS-HD.MA.5.1",
+          "shown": "Fight.Club.1999.2160p.UHD.Bluray.Remux.HDR.HEVC.DTS-HD.MA.5.1",
+          "tracker": true
+        },
+        {
+          "raw": "Fight.Club.1999.USA.BluRay.2160p.REMUX.HDR10.DTS-HD.MA.5.1.MULTi.HEVC-SEIN",
+          "shown": "Fight.Club.1999.USA.BluRay.2160p.REMUX.HDR10.DTS-HD.MA.5.1.MULTi.HEVC-SEIN",
+          "tracker": true
+        },
+        {
+          "raw": "Fight.Club.1999.2160p.UHD.BluRay.Remux.HDR.MULTi.DTS-HD.MA.H265-BTM",
+          "shown": "Fight.Club.1999.2160p.UHD.BluRay.Remux.HDR.MULTi.DTS-HD.MA.H265-BTM",
+          "tracker": true
+        },
+        {
+          "raw": "Fight.Club.1999.REPACK.2160p.UHD.Blu-ray.Remux.HDR.HEVC.DTS-HD.MA.5.1-CiNEPHiLES",
+          "shown": "Fight.Club.1999.REPACK.2160p.UHD.Blu-ray.Remux.HDR.HEVC.DTS-HD.MA.5.1-CiNEPHiLES",
+          "tracker": true
+        }
+      ]
+    },
+    {
+      "name": "Sort opens with remote OK",
+      "status": "PASS",
+      "detail": {
+        "open": true,
+        "styled": true,
+        "controller": "select",
+        "items": [
+          "Популярне",
+          "По роздаючих",
+          "По розміру",
+          "За назвою",
+          "За джерелом",
+          "По даті",
+          "За переглянутими"
+        ]
+      }
+    },
+    {
+      "name": "Layout 1280",
+      "status": "PASS",
+      "detail": {
+        "viewport": [
+          1280,
+          720
+        ],
+        "root": {
+          "x": 0,
+          "y": 0,
+          "width": 1280,
+          "height": 720,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720,
+          "left": 0
+        },
+        "panel": {
+          "x": 779.78125,
+          "y": 88.765625,
+          "width": 442.625,
+          "height": 598.84375,
+          "top": 88.765625,
+          "right": 1222.40625,
+          "bottom": 687.609375,
+          "left": 779.78125
+        },
+        "inBounds": true,
+        "duplicates": 0,
+        "blur": "none"
+      }
+    },
+    {
+      "name": "Sort menu bounds 1280",
+      "status": "PASS",
+      "detail": {
+        "open": true,
+        "rect": {
+          "x": 736.015625,
+          "y": 72,
+          "width": 486.390625,
+          "height": 615.59375,
+          "top": 72,
+          "right": 1222.40625,
+          "bottom": 687.59375,
+          "left": 736.015625
+        },
+        "inBounds": true
+      }
+    },
+    {
+      "name": "Layout 1920",
+      "status": "PASS",
+      "detail": {
+        "viewport": [
+          1920,
+          1080
+        ],
+        "root": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "left": 0
+        },
+        "panel": {
+          "x": 1169.671875,
+          "y": 108,
+          "width": 663.9375,
+          "height": 923.40625,
+          "top": 108,
+          "right": 1833.609375,
+          "bottom": 1031.40625,
+          "left": 1169.671875
+        },
+        "inBounds": true,
+        "duplicates": 0,
+        "blur": "none"
+      }
+    },
+    {
+      "name": "Sort menu bounds 1920",
+      "status": "PASS",
+      "detail": {
+        "open": true,
+        "rect": {
+          "x": 1104.015625,
+          "y": 108,
+          "width": 729.59375,
+          "height": 923.390625,
+          "top": 108,
+          "right": 1833.609375,
+          "bottom": 1031.390625,
+          "left": 1104.015625
+        },
+        "inBounds": true
+      }
+    },
+    {
+      "name": "Layout 3840",
+      "status": "PASS",
+      "detail": {
+        "viewport": [
+          3840,
+          2160
+        ],
+        "root": {
+          "x": 0,
+          "y": 0,
+          "width": 3840,
+          "height": 2160,
+          "top": 0,
+          "right": 3840,
+          "bottom": 2160,
+          "left": 0
+        },
+        "panel": {
+          "x": 2339.34375,
+          "y": 216,
+          "width": 1327.859375,
+          "height": 1846.8125,
+          "top": 216,
+          "right": 3667.203125,
+          "bottom": 2062.8125,
+          "left": 2339.34375
+        },
+        "inBounds": true,
+        "duplicates": 0,
+        "blur": "none"
+      }
+    },
+    {
+      "name": "Sort menu bounds 3840",
+      "status": "PASS",
+      "detail": {
+        "open": true,
+        "rect": {
+          "x": 2208.015625,
+          "y": 216,
+          "width": 1459.1875,
+          "height": 1846.796875,
+          "top": 216,
+          "right": 3667.203125,
+          "bottom": 2062.796875,
+          "left": 2208.015625
+        },
+        "inBounds": true
+      }
+    },
+    {
+      "name": "Filter/source parent opens with OK",
+      "status": "PASS",
+      "detail": {
+        "items": [
+          "\n    Фільтри / трекери\n    \n",
+          "\n    Джерело\n    \n",
+          "\n    Пошук\n    \n"
+        ]
+      }
+    },
+    {
+      "name": "Native filters open",
+      "status": "PASS",
+      "detail": {
+        "count": 11
+      }
+    },
+    {
+      "name": "Sources open",
+      "status": "PASS",
+      "detail": {
+        "count": 19,
+        "titles": [
+          "Не вибрано",
+          "LampaUA Jackett (toloka, mazepa, etc.)",
+          "LampaUA (toloka, mazepa, etc.)",
+          "SpawnUA (toloka, mazepa only)",
+          "SpawnUA (toloka, mazepa, etc.)",
+          "Jac.red",
+          "Jacred.pro",
+          "Jac.black",
+          "Jac-red.ru",
+          "Jac.stull",
+          "Jr.Maxvol.pro",
+          "Jac.Maxvol.pro",
+          "NoName",
+          "407-Xyz",
+          "Alpac v1",
+          "Alpac v2",
+          "NMJC",
+          "LampaApp",
+          "Керування парсерами…"
+        ]
+      }
+    },
+    {
+      "name": "Remote navigation",
+      "status": "PASS",
+      "detail": {
+        "count": 1,
+        "inBounds": true,
+        "controller": "torrent_cinema"
+      }
+    },
+    {
+      "name": "No uncaught JavaScript errors",
+      "status": "PASS",
+      "detail": []
+    }
+  ],
+  "errors": [],
+  "network": {
+    "requests": 244,
+    "failed": 57,
+    "httpErrors": 3
+  },
+  "version": "1.2.0-audit",
+  "performance": {
+    "firstUsefulMs": 534,
+    "requestsToFirstUseful": 17,
+    "heap": 118730361,
+    "note": "One warm-session CDP run; Linux Chromium, not physical Google TV; request count includes other enabled plugins",
+    "keys16Ms": 257
+  },
+  "releaseData": {
+    "rows": 20,
+    "best": "Бійцівський клуб / Fight Club (1999) BDRemux 1080p 3xUkr/Eng | Sub Ukr/Eng",
+    "trackerNames": [
+      "The Pirate Bay",
+      "Toloka.to",
+      "Mazepa"
+    ],
+    "bestEligible": true,
+    "namesVisible": [
+      {
+        "raw": "Fight.Club.1999.2160p.UHD.Bluray.Remux.HDR.HEVC.DTS-HD.MA.5.1",
+        "shown": "Fight.Club.1999.2160p.UHD.Bluray.Remux.HDR.HEVC.DTS-HD.MA.5.1",
+        "tracker": true
+      },
+      {
+        "raw": "Fight.Club.1999.USA.BluRay.2160p.REMUX.HDR10.DTS-HD.MA.5.1.MULTi.HEVC-SEIN",
+        "shown": "Fight.Club.1999.USA.BluRay.2160p.REMUX.HDR10.DTS-HD.MA.5.1.MULTi.HEVC-SEIN",
+        "tracker": true
+      },
+      {
+        "raw": "Fight.Club.1999.2160p.UHD.BluRay.Remux.HDR.MULTi.DTS-HD.MA.H265-BTM",
+        "shown": "Fight.Club.1999.2160p.UHD.BluRay.Remux.HDR.MULTi.DTS-HD.MA.H265-BTM",
+        "tracker": true
+      },
+      {
+        "raw": "Fight.Club.1999.REPACK.2160p.UHD.Blu-ray.Remux.HDR.HEVC.DTS-HD.MA.5.1-CiNEPHiLES",
+        "shown": "Fight.Club.1999.REPACK.2160p.UHD.Blu-ray.Remux.HDR.HEVC.DTS-HD.MA.5.1-CiNEPHiLES",
+        "tracker": true
+      }
+    ]
+  },
+  "sortKeyboard": {
+    "open": true,
+    "styled": true,
+    "controller": "select",
+    "items": [
+      "Популярне",
+      "По роздаючих",
+      "По розміру",
+      "За назвою",
+      "За джерелом",
+      "По даті",
+      "За переглянутими"
+    ]
+  }
+}

@@ -1,0 +1,215 @@
+{
+  "stage": "settings-colors",
+  "pluginSha256": "7659e442b4fc79394541303f9bb1a718fc098c2dd7caa3f1b2fe866f1777a2b2",
+  "tests": [
+    {
+      "name": "Barbie accent extracted from logo",
+      "status": "PASS",
+      "detail": {
+        "title": "Барбі",
+        "accent": {
+          "acc": "rgb(243,36,171)",
+          "acc2": "rgb(67,243,36)",
+          "rgb": "243,36,171",
+          "rgb2": "67,243,36"
+        },
+        "status": "extracted",
+        "fromLogo": true,
+        "logos": 4
+      }
+    },
+    {
+      "name": "Barbie pink accent",
+      "status": "PASS",
+      "detail": {
+        "acc": "rgb(243,36,171)",
+        "acc2": "rgb(67,243,36)",
+        "rgb": "243,36,171",
+        "rgb2": "67,243,36"
+      }
+    },
+    {
+      "name": "Settings sections and implemented controls",
+      "status": "PASS",
+      "detail": {
+        "params": [
+          {
+            "key": "torrents_cinema_enabled",
+            "type": "trigger"
+          },
+          {
+            "key": "torrents_cinema_theme",
+            "type": "select"
+          },
+          {
+            "key": "cinema_section_Оформлення",
+            "type": "title"
+          },
+          {
+            "key": "torrents_cinema_color",
+            "type": "select"
+          },
+          {
+            "key": "torrents_cinema_color_edit",
+            "type": "static"
+          },
+          {
+            "key": "torrents_cinema_intensity",
+            "type": "select"
+          },
+          {
+            "key": "torrents_cinema_opacity",
+            "type": "select"
+          },
+          {
+            "key": "torrents_cinema_darkness",
+            "type": "select"
+          },
+          {
+            "key": "torrents_cinema_cards",
+            "type": "select"
+          },
+          {
+            "key": "torrents_cinema_title_lines",
+            "type": "select"
+          },
+          {
+            "key": "torrents_cinema_ratings",
+            "type": "trigger"
+          },
+          {
+            "key": "torrents_cinema_episode_ratings",
+            "type": "trigger"
+          },
+          {
+            "key": "torrents_cinema_animations",
+            "type": "trigger"
+          },
+          {
+            "key": "cinema_section_Торенти",
+            "type": "title"
+          },
+          {
+            "key": "torrents_cinema_ua",
+            "type": "trigger"
+          },
+          {
+            "key": "torrents_cinema_ua_audio",
+            "type": "trigger"
+          },
+          {
+            "key": "torrents_cinema_ua_subs",
+            "type": "trigger"
+          },
+          {
+            "key": "torrents_cinema_quality",
+            "type": "select"
+          },
+          {
+            "key": "torrents_cinema_auto",
+            "type": "trigger"
+          },
+          {
+            "key": "torrents_cinema_tracker",
+            "type": "select"
+          },
+          {
+            "key": "torrents_cinema_dedupe",
+            "type": "trigger"
+          },
+          {
+            "key": "torrents_cinema_suspect",
+            "type": "trigger"
+          },
+          {
+            "key": "cinema_section_Продуктивність",
+            "type": "title"
+          },
+          {
+            "key": "torrents_cinema_tv",
+            "type": "trigger"
+          },
+          {
+            "key": "torrents_cinema_metadata_cache",
+            "type": "trigger"
+          },
+          {
+            "key": "torrents_cinema_color_cache",
+            "type": "trigger"
+          },
+          {
+            "key": "torrents_cinema_parallel",
+            "type": "select"
+          },
+          {
+            "key": "torrents_cinema_lazy",
+            "type": "trigger"
+          },
+          {
+            "key": "torrents_cinema_rating_budget",
+            "type": "select"
+          }
+        ],
+        "sections": [
+          "Оформлення",
+          "Торенти",
+          "Продуктивність"
+        ],
+        "controller": "settings_component"
+      }
+    },
+    {
+      "name": "Manual color editor actually applies and saves",
+      "status": "PASS",
+      "detail": {
+        "mode": "static",
+        "color": "#f18ab2",
+        "applied": "#f18ab2"
+      }
+    },
+    {
+      "name": "Manual color survives reload",
+      "status": "PASS"
+    },
+    {
+      "name": "Presentation and TV settings change real UI",
+      "status": "PASS",
+      "detail": {
+        "lines": "5",
+        "padding": ".5em",
+        "blur": "none",
+        "autoDisabled": "true",
+        "bestHighlights": 0,
+        "noMotion": true
+      }
+    },
+    {
+      "name": "Tracker setting applies to visible releases",
+      "status": "PASS",
+      "detail": [
+        "Toloka.to",
+        "Toloka.to",
+        "Toloka.to",
+        "Toloka.to",
+        "Toloka.to",
+        "Toloka.to",
+        "Toloka.to",
+        "Toloka.to",
+        "Toloka.to",
+        "Toloka.to",
+        "Toloka.to",
+        "Toloka.to"
+      ]
+    },
+    {
+      "name": "Settings and color JS errors",
+      "status": "PASS",
+      "detail": []
+    },
+    {
+      "name": "Original tested settings restored",
+      "status": "PASS"
+    }
+  ],
+  "errors": []
+}
