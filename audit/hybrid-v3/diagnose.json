@@ -1,0 +1,83 @@
+{
+  "errors": [],
+  "before": {
+    "ready": true,
+    "theme": "1.1.0",
+    "component": "trakttv_recommendations",
+    "loading": false,
+    "cards": 36,
+    "activityCount": 1,
+    "controller": "settings",
+    "plugins": {
+      "ydesign": true,
+      "traktplus": true
+    },
+    "activityMethods": [
+      "init",
+      "listener",
+      "push",
+      "back",
+      "render",
+      "backward",
+      "call",
+      "last",
+      "out",
+      "replace",
+      "active",
+      "all",
+      "extractObject",
+      "renderLayers",
+      "inActivity",
+      "pushState",
+      "mixState",
+      "own",
+      "refresh"
+    ]
+  },
+  "after": {
+    "ready": true,
+    "theme": "1.1.0",
+    "component": "main",
+    "loading": false,
+    "cards": 28,
+    "activityCount": 2,
+    "controller": "items_line",
+    "plugins": {
+      "ydesign": true,
+      "traktplus": true
+    },
+    "activityMethods": [
+      "init",
+      "listener",
+      "push",
+      "back",
+      "render",
+      "backward",
+      "call",
+      "last",
+      "out",
+      "replace",
+      "active",
+      "all",
+      "extractObject",
+      "renderLayers",
+      "inActivity",
+      "pushState",
+      "mixState",
+      "own",
+      "refresh"
+    ],
+    "source": "tmdb"
+  },
+  "pending": [],
+  "networkSummary": {
+    "https://apx.lme.isroot.in 200": 21,
+    "https://api.themoviedb.org 200": 27,
+    "https://wh.lme.isroot.in 404": 10,
+    "https://mdblist.com 200": 9,
+    "https://www.omdbapi.com 200": 9,
+    "http://lampaua.mooo.com ": 6,
+    "https://wh.lme.isroot.in 200": 3,
+    "https://jackettua.mooo.com 200": 6
+  }
+}
