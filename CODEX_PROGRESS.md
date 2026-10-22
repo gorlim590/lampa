@@ -130,3 +130,13 @@
 - PASS p4-report.json: спільні токени, фактичний native Modal, native language picker без зміни мови, reduced-motion. Скриншоти p4-modal.png/p4-language.png. node --check PASS.
 - Наступне P5: lifecycle стрес, штатне завантаження 2.0.0 без ін’єкцій, оновлення пакета/інструкції. Фізичний Google TV лишається неперевіреним.
 - Коміт: style: unify design tokens and native auxiliary screens.
+
+## Phase 2 / P5 — регресія, lifecycle та native load 2.0.0: PASS (desktop)
+- native-reload.json: 3 PASS без addScriptTag/interception — disabled reload 7.8s, enabled 6.3s, Home 28 карток/23 рейтинги; style 0/1, один параметр. settings-reload.json: 4 PASS — reload із відкритими Settings, Home, Right, один localhost extension/style/параметр. Нових pageerror=0.
+- lifecycle.json: 6 PASS. 30 toggle: після GC DOM nodes 3538→3538, listeners 1025→1025. 10 destroy/reinit і duplicate load — без накопичення. Вісім Settings route/exit: update_scroll 0→0; Search open/close subscriptions незмінні, тимчасові дії прибираються. Вихідні card/header nodes збережено.
+- regression.json: 17 PASS + 1 BLOCKED hardware. Home/Discover 720p/1080p/4K, Right/Down і видимий фокус/рамка, sidebar, reduced-motion, усі активні UI-плагіни, metadata/UA/зелена галочка/затемнення. P0 повторно 9 PASS; P2 повторно 14 PASS з чистими overlays. Знімки p2-settings-* оновлено: попередній проміжний тест залишав Search/Exit відкритими.
+- Виправлено некоректний alpha suffix після CSS var у focus ring: окремий --sh-ring, перевірено computed box-shadow. Спільний --sh-speed використано й для auxiliary controls.
+- Тестові виправлення: чекати готову Activity, а не лише appready; Params listener може бути ще не ініціалізований; перед сценарієм закривати попередні native overlays. Ядро/профіль/чужі налаштування не змінювалися.
+- BLOCKED: фізичний Google TV, реальний пульт, апаратне профілювання/довга сесія. Playback/серверні записи Trakt не виконувалися; кожен параметр кожного плагіна не змінювався. Частина Stremio catalog fetch недоступна, референси збережено.
+- Наступне: синхронізувати README, пакет 2.0.0 та SHA256; остаточна контрольна точка. Push/merge/публікації немає.
+- Коміт: test: verify phase two native loading and bounded UI lifecycle.

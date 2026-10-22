@@ -104,13 +104,13 @@
       "status": "PASS",
       "detail": {
         "before": {
-          "updates": 4,
+          "updates": 1,
           "open": 13,
           "close": 1,
           "rail": 1
         },
         "after": {
-          "updates": 4,
+          "updates": 1,
           "open": 13,
           "close": 1,
           "rail": 1

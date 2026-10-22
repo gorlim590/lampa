@@ -4,7 +4,7 @@
     if (window.StremioHybrid) return;
     var style, ready = false, destroyed = false, waiting = false, watching = false, moreButton = null, menuOpen = false, searchNode = null, searchReturn = false, settingsRail = null, settingsFrame = 0, settingsParameter = null, settingsCategory = 'interface', settingsLeftConsumed = false, searchSources = null, searchRoots = [];
     var css = `
-body.stremio-hybrid { --sh-bg:#121023; --sh-panel:#211d35; --sh-accent:#9775fa; --sh-muted:#aba7bd; --sh-rail:#0c0b16; --sh-text:#f0eef8; --sh-border:#ffffff16; --sh-radius:.7em; --sh-pill:2em; --sh-gap:1.1em; --sh-speed:160ms; --sh-focus:#7960c9; --sh-focus-soft:#3e315b; --sh-header:#151127; --sh-panel-raised:#29233e; --sh-accent-soft:#b79bff; --sh-focus-text:#e9e0ff; --sh-focus-ink:#201536; --sh-inactive:#726d86; --sh-secondary:#d0cadf; --sh-inset:1.8em; --sh-ease:ease-out; background:#121023 !important; color:#f0eef8; }
+body.stremio-hybrid { --sh-bg:#121023; --sh-panel:#211d35; --sh-accent:#9775fa; --sh-muted:#aba7bd; --sh-rail:#0c0b16; --sh-text:#f0eef8; --sh-border:#ffffff16; --sh-radius:.7em; --sh-pill:2em; --sh-gap:1.1em; --sh-speed:160ms; --sh-ring:#9775fa66; --sh-focus:#7960c9; --sh-focus-soft:#3e315b; --sh-header:#151127; --sh-panel-raised:#29233e; --sh-accent-soft:#b79bff; --sh-focus-text:#e9e0ff; --sh-focus-ink:#201536; --sh-inactive:#726d86; --sh-secondary:#d0cadf; --sh-inset:1.8em; --sh-ease:ease-out; background:#121023 !important; color:#f0eef8; }
 body.stremio-hybrid .background { opacity:.12 !important; }
 body.stremio-hybrid .head { background:var(--sh-header) !important; border-bottom:1px solid #ffffff09; }
 body.stremio-hybrid .head__body { padding-left:1.8em; padding-right:var(--sh-inset); }
@@ -24,7 +24,7 @@ body.stremio-hybrid .card { transition:transform var(--sh-speed) var(--sh-ease) 
 body.stremio-hybrid .ydesign-card, body.stremio-hybrid .ydesign-card.focus { animation:none !important; }
 body.stremio-hybrid .card.focus { transform:scale(1.035) !important; z-index:20; }
 body.stremio-hybrid .card .card__view { border-radius:var(--sh-radius) !important; transition:none !important; }
-body.stremio-hybrid .card.focus .card__view { box-shadow:0 0 0 .14em var(--sh-text),0 0 0 .27em var(--sh-accent)66 !important; }
+body.stremio-hybrid .card.focus .card__view { box-shadow:0 0 0 .14em var(--sh-text),0 0 0 .27em var(--sh-ring) !important; }
 body.stremio-hybrid .ydesign-card.focus::after, body.stremio-hybrid .ydesign-card .ydesign-content-layer::after { display:none !important; }
 body.stremio-hybrid .ydesign-card .card__view::before { animation:none !important; }
 body.stremio-hybrid .ydesign-badge, body.stremio-hybrid .ydesign-genre-badge, body.stremio-hybrid .ydesign-rating, body.stremio-hybrid .ydesign-series-pill, body.stremio-hybrid .ydesign-card-notch { backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
@@ -118,7 +118,7 @@ body.stremio-hybrid .settings-param, body.stremio-hybrid .settings-folder { bord
 body.stremio-hybrid .settings-param__descr, body.stremio-hybrid .settings-param__value { color:var(--sh-muted); }
 body.stremio-hybrid .settings-param.focus .settings-param__descr, body.stremio-hybrid .settings-param.focus .settings-param__value { color:var(--sh-text); }
 body.stremio-hybrid .settings-param.focus, body.stremio-hybrid .settings-folder.focus, body.stremio-hybrid .selectbox-item.focus { box-shadow:inset .18em 0 var(--sh-accent-soft); }
-body.stremio-hybrid .menu__item, body.stremio-hybrid .head__action, body.stremio-hybrid .selectbox-item, body.stremio-hybrid .settings-param, body.stremio-hybrid .settings-folder { transition:transform 140ms ease-out,opacity 140ms ease-out !important; }
+body.stremio-hybrid .menu__item, body.stremio-hybrid .head__action, body.stremio-hybrid .selectbox-item, body.stremio-hybrid .settings-param, body.stremio-hybrid .settings-folder { transition:transform var(--sh-speed) var(--sh-ease),opacity var(--sh-speed) var(--sh-ease) !important; }
 @media(min-width:769px) {
  body.stremio-hybrid .wrap__content { flex:1; min-width:0; width:calc(100% - 4.4em) !important; }
  body.stremio-hybrid .activity { width:100% !important; }
