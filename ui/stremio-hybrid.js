@@ -50,6 +50,18 @@ body.stremio-hybrid .sh-head-more { width:2.65em; height:2.65em; margin:0 !impor
 body.stremio-hybrid .sh-head-more svg { width:1.1em; height:1.1em; }
 body.stremio-hybrid[data-sh-page="main"] .menu__item[data-action="main"], body.stremio-hybrid[data-sh-page="category_full"] .menu__item[data-action="filter"], body.stremio-hybrid[data-sh-page="search"] .menu__item[data-action="search"] { color:#a68ae7; background:#ffffff06; }
 /* Keep Cardify's composition and provider actions; improve readable hierarchy. */
+/* Reveal the existing native poster and recompose Cardify without replacing its DOM. */
+body.stremio-hybrid .cardify .full-start-new__body { height:auto !important; min-height:36em; padding-top:2em; align-items:flex-start !important; }
+body.stremio-hybrid .cardify .full-start-new__left { display:block !important; width:12vw; flex:0 0 12vw; max-width:12em; margin-right:1.8em; align-self:flex-start; }
+body.stremio-hybrid .cardify .full-start-new__poster { border-radius:var(--sh-radius); box-shadow:0 .5em 1.5em #0005; overflow:hidden; }
+body.stremio-hybrid .cardify .full-start-new__right { flex:1; min-width:0; width:auto; align-items:flex-start !important; }
+body.stremio-hybrid .cardify .cardify__left { max-width:58%; padding-right:0; }
+body.stremio-hybrid .cardify .full-start-new__title { font-size:2.1em !important; margin-top:0 !important; }
+body.stremio-hybrid .cardify .custom-ghost-main { top:2em !important; }
+body.stremio-hybrid .cardify .cardify__right-box { position:absolute; bottom:1em; right:1.8em; }
+body.stremio-hybrid .full-episode { border-radius:var(--sh-radius); background:var(--sh-panel); padding:.7em; }
+body.stremio-hybrid .full-episode__img { border-radius:.45em; }
+body.stremio-hybrid .full-episode.focus { box-shadow:0 0 0 .12em var(--sh-accent); }
 body.stremio-hybrid .full-start__background { opacity:.48 !important; filter:none !important; }
 body.stremio-hybrid .cardify-effects-overlay { width:100% !important; background:linear-gradient(90deg,rgba(18,16,35,.76),rgba(18,16,35,.16)) !important; transition:opacity 160ms ease-out !important; }
 body.stremio-hybrid .full-start-new__title { font-size:2.4em !important; line-height:1.16 !important; font-weight:600; max-width:26em; white-space:normal !important; display:block !important; overflow:visible !important; text-overflow:clip; overflow-wrap:break-word; -webkit-line-clamp:unset !important; margin:.3em 0 .5em !important; }
@@ -88,6 +100,8 @@ body.stremio-hybrid .menu__item, body.stremio-hybrid .head__action, body.stremio
  body.stremio-hybrid .mapping--grid .card.ydesign-vertical { width:calc(100% / 6) !important; }
 }
 @media(max-width:768px) {
+ body.stremio-hybrid .cardify .full-start-new__left { display:none !important; }
+ body.stremio-hybrid .cardify .cardify__left { max-width:100%; }
  body.stremio-hybrid .cardify__left { max-width:100%; padding-right:0; }
  body.stremio-hybrid .custom-ghost-main { position:relative !important; width:100% !important; margin-top:1em; }
  body.stremio-hybrid .full-start-new__title { font-size:1.8em !important; }

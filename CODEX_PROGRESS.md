@@ -100,3 +100,10 @@
 - PASS 9 перевірок: геометрія 720p/1080p/4K, склад меню, Back до More, native Settings через переміщену дію, Search Back, disable/reenable. Нових pageerror=0. Скриншоти і p0-report.json в audit/hybrid-phase2.
 - Наступне P1: композиція деталей із постером; P2: функціональний двопанельний Settings; P3/P4/P5: пошук/каталог, змінні та регресія.
 - Коміт: feat: add compact native header menu and full search field.
+
+## Phase 2 / P1 — композиція деталей із native постером: PASS
+- Відкрито фактичні деталі The Kid у Stremio (phase2-movie.png); відео й налаштування не запускалися/не змінювалися. Новий серіальний каталог Stremio частково недоступний; попередні series-details.png використано повторно.
+- CSS показує вже наявний native poster, формує композицію poster/metadata/description, зберігає backdrop, усі кнопки/рейтинги/жанри/Trakt та native епізоди. Немає нового постера, запитів чи копій бізнес-логіки. Кнопки можуть переноситися рядками замість приховування.
+- PASS 12 перевірок: фільм і серіал у 720p/1080p/4K з видимим постером, повною назвою, без перетину опису, видимою кнопкою фокусу; навігація дій і Back; один settings toggle й відкат. Нових pageerror=0. audit/hybrid-phase2/details-report.json, movie/series-*.png.
+- Наступне P2: native SettingsApi у двопанельній оболонці, зі збереженням callback/Back та без дублювання параметрів.
+- Коміт: feat: recompose native movie and series details around existing poster.
