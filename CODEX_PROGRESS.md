@@ -236,3 +236,11 @@
 - Source audit: “Найкращий вибір” is currently a badge on ranked real releases, NOT a separate supported selector option. No fabricated mode inserted. Native sorting remains authoritative; always-first best option cannot be claimed without new defined mode. Old Activity retained for unverified search/history/plugin routes and playback dependencies.
 - Files: ui/stremio-hybrid.js, README/package, files/detail reports/screenshots. Next: real Files/TorrServer and parser selection; Home profile/continue row, favorites, then remaining requested architecture. Critical real-player checks stay BLOCKED; do not remove core controller.
 - Commit: feat: style native file selection with verified episode metadata.
+
+## Stage5 managed CommunityWatches disable
+- Explicit user-requested extension disabled via native plugins registry; only exact owned community/community-watches.js and upstream lampame CommunityWatches path targeted. Status backup preserved; no scripts, row preferences, lists, caches or unrelated extensions deleted.
+- community-report: 3 PASS after real reload: status0 persisted, neither target script loaded, other four Trakt Home rows still displayed. Six owned CommunityWatches row registrations therefore absent in new runtime. No separate upstream script was active.
+- config/disabled-plugins.json records policy, not an automatic loader. Existing installation changed locally; another TV installation must disable its matching extension. Source/loader not republished. Helper and backup permit reversal.
+- Home profiling began separately: baseline first rows4131ms; 1801 DOM at15s, sanitized request paths/counts in home-baseline.json. No speedup claimed. Current native history/candidates counts both0; do not create empty continuation row or alter history for tests.
+- Next: native continuation-order adapter with controlled late-row test; remaining Home bottlenecks, Favorites, settings/header/Screensaver, UA license and Trakt architecture pending.
+- Commit: chore: disable managed CommunityWatches with reversible status backup.

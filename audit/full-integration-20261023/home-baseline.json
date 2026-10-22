@@ -1,0 +1,517 @@
+{
+  "elapsed": 15043,
+  "rows": [
+    {
+      "title": "Зараз дивляться: фільми",
+      "index": 0,
+      "ms": 4131,
+      "cards": 7
+    },
+    {
+      "title": "Зараз дивляться: серіали",
+      "index": 1,
+      "ms": 4131,
+      "cards": 7
+    },
+    {
+      "title": "Популярні корейські дорами",
+      "index": 2,
+      "ms": 4131,
+      "cards": 7
+    },
+    {
+      "title": "Зараз дивляться: мультфільми",
+      "index": 3,
+      "ms": 4131,
+      "cards": 7
+    }
+  ],
+  "requests": [
+    {
+      "path": "apx.lme.isroot.in/trakt/sync/last_activities",
+      "ms": 371
+    },
+    {
+      "path": "apx.lme.isroot.in/trakt/movies/trending",
+      "ms": 445
+    },
+    {
+      "path": "apx.lme.isroot.in/trakt/movies/popular",
+      "ms": 814
+    },
+    {
+      "path": "apx.lme.isroot.in/trakt/movies/trending",
+      "ms": 820
+    },
+    {
+      "path": "apx.lme.isroot.in/trakt/movies/popular",
+      "ms": 445
+    },
+    {
+      "path": "apx.lme.isroot.in/trakt/shows/popular",
+      "ms": 540
+    },
+    {
+      "path": "apx.lme.isroot.in/trakt/shows/trending",
+      "ms": 528
+    },
+    {
+      "path": "apx.lme.isroot.in/trakt/shows/trending",
+      "ms": 812
+    },
+    {
+      "path": "apx.lme.isroot.in/trakt/shows/popular",
+      "ms": 559
+    },
+    {
+      "path": "apx.lme.isroot.in/trakt/shows/trending",
+      "ms": 460
+    },
+    {
+      "path": "apx.lme.isroot.in/trakt/shows/popular",
+      "ms": 869
+    },
+    {
+      "path": "apx.lme.isroot.in/trakt/shows/popular",
+      "ms": 483
+    },
+    {
+      "path": "apx.lme.isroot.in/trakt/shows/trending",
+      "ms": 399
+    },
+    {
+      "path": "apx.lme.isroot.in/trakt/movies/trending",
+      "ms": 315
+    },
+    {
+      "path": "apx.lme.isroot.in/trakt/movies/popular",
+      "ms": 508
+    },
+    {
+      "path": "apx.lme.isroot.in/trakt/shows/popular",
+      "ms": 482
+    },
+    {
+      "path": "apx.lme.isroot.in/trakt/shows/trending",
+      "ms": 616
+    },
+    {
+      "path": "apx.lme.isroot.in/trakt/movies/trending",
+      "ms": 453
+    },
+    {
+      "path": "apx.lme.isroot.in/trakt/shows/trending",
+      "ms": 325
+    },
+    {
+      "path": "apx.lme.isroot.in/trakt/movies/popular",
+      "ms": 405
+    },
+    {
+      "path": "apx.lme.isroot.in/trakt/shows/popular",
+      "ms": 593
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 57
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 55
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 54
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 75
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 73
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 78
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 74
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 74
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 87
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 92
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 89
+    },
+    {
+      "path": "api.themoviedb.org/3/movie/1514026",
+      "ms": 5
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 49
+    },
+    {
+      "path": "api.themoviedb.org/3/movie/1058424",
+      "ms": 101
+    },
+    {
+      "path": "api.themoviedb.org/3/movie/1433583",
+      "ms": 100
+    },
+    {
+      "path": "api.themoviedb.org/3/movie/1380417",
+      "ms": 106
+    },
+    {
+      "path": "api.themoviedb.org/3/movie/1514026/external_ids",
+      "ms": 30
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 45
+    },
+    {
+      "path": "api.themoviedb.org/3/movie/1058424/external_ids",
+      "ms": 29
+    },
+    {
+      "path": "api.themoviedb.org/3/movie/1433583",
+      "ms": 2
+    },
+    {
+      "path": "lampaua.mooo.com/api/v2.0/indexers/all/results",
+      "ms": 0
+    },
+    {
+      "path": "api.themoviedb.org/3/movie/1380417/external_ids",
+      "ms": 31
+    },
+    {
+      "path": "mdblist.com/api/",
+      "ms": 3
+    },
+    {
+      "path": "api.themoviedb.org/3/movie/1433583/external_ids",
+      "ms": 3
+    },
+    {
+      "path": "mdblist.com/api/",
+      "ms": 3
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 43
+    },
+    {
+      "path": "mdblist.com/api/",
+      "ms": 4
+    },
+    {
+      "path": "www.omdbapi.com/",
+      "ms": 167
+    },
+    {
+      "path": "www.omdbapi.com/",
+      "ms": 169
+    },
+    {
+      "path": "www.omdbapi.com/",
+      "ms": 168
+    },
+    {
+      "path": "mdblist.com/api/",
+      "ms": 221
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 50
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 55
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 49
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/288673",
+      "ms": 4
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/247718",
+      "ms": 3
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 85
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/288673",
+      "ms": 3
+    },
+    {
+      "path": "www.omdbapi.com/",
+      "ms": 167
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/203857",
+      "ms": 33
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/288673/season/1",
+      "ms": 5
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/247718/external_ids",
+      "ms": 29
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/203857",
+      "ms": 2
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/288673/season/2",
+      "ms": 2
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/203857/season/4",
+      "ms": 3
+    },
+    {
+      "path": "mdblist.com/api/",
+      "ms": 2
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 46
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/288673/external_ids",
+      "ms": 28
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/203857/external_ids",
+      "ms": 30
+    },
+    {
+      "path": "mdblist.com/api/",
+      "ms": 4
+    },
+    {
+      "path": "mdblist.com/api/",
+      "ms": 6
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 51
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/120911",
+      "ms": 130
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 50
+    },
+    {
+      "path": "www.omdbapi.com/",
+      "ms": 169
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/213562",
+      "ms": 4
+    },
+    {
+      "path": "www.omdbapi.com/",
+      "ms": 166
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/213562",
+      "ms": 2
+    },
+    {
+      "path": "www.omdbapi.com/",
+      "ms": 163
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/213375",
+      "ms": 31
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/213375",
+      "ms": 32
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/120911",
+      "ms": 127
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/213375/external_ids",
+      "ms": 3
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/120911/season/2",
+      "ms": 3
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/95480",
+      "ms": 131
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/120911/external_ids",
+      "ms": 2
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/95480/season/6",
+      "ms": 2
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 57
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/213562/season/1",
+      "ms": 129
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/95480/external_ids",
+      "ms": 28
+    },
+    {
+      "path": "mdblist.com/api/",
+      "ms": 86
+    },
+    {
+      "path": "mdblist.com/api/",
+      "ms": 4
+    },
+    {
+      "path": "api.themoviedb.org/3/tv/213562/external_ids",
+      "ms": 29
+    },
+    {
+      "path": "mdblist.com/api/",
+      "ms": 84
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 66
+    },
+    {
+      "path": "mdblist.com/api/",
+      "ms": 4
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 90
+    },
+    {
+      "path": "www.omdbapi.com/",
+      "ms": 164
+    },
+    {
+      "path": "www.omdbapi.com/",
+      "ms": 165
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 90
+    },
+    {
+      "path": "www.omdbapi.com/",
+      "ms": 177
+    },
+    {
+      "path": "jackettua.mooo.com/api/v2.0/indexers/all/results",
+      "ms": 1118
+    },
+    {
+      "path": "lampaua.mooo.com/api/v2.0/indexers/all/results",
+      "ms": 0
+    },
+    {
+      "path": "www.omdbapi.com/",
+      "ms": 169
+    },
+    {
+      "path": "jackettua.mooo.com/api/v2.0/indexers/all/results",
+      "ms": 1029
+    },
+    {
+      "path": "lampaua.mooo.com/api/v2.0/indexers/all/results",
+      "ms": 0
+    },
+    {
+      "path": "jackettua.mooo.com/api/v2.0/indexers/all/results",
+      "ms": 862
+    },
+    {
+      "path": "lampaua.mooo.com/api/v2.0/indexers/all/results",
+      "ms": 0
+    },
+    {
+      "path": "jackettua.mooo.com/api/v2.0/indexers/all/results",
+      "ms": 897
+    },
+    {
+      "path": "lampaua.mooo.com/api/v2.0/indexers/all/results",
+      "ms": 0
+    },
+    {
+      "path": "jackettua.mooo.com/api/v2.0/indexers/all/results",
+      "ms": 621
+    },
+    {
+      "path": "lampaua.mooo.com/api/v2.0/indexers/all/results",
+      "ms": 0
+    },
+    {
+      "path": "jackettua.mooo.com/api/v2.0/indexers/all/results",
+      "ms": 239
+    },
+    {
+      "path": "lampaua.mooo.com/api/v2.0/indexers/all/results",
+      "ms": 0
+    },
+    {
+      "path": "jackettua.mooo.com/api/v2.0/indexers/all/results",
+      "ms": 252
+    }
+  ],
+  "dom": 1801,
+  "componentKeys": [
+    "components",
+    "object",
+    "params",
+    "scroll",
+    "html",
+    "items",
+    "loaded",
+    "active",
+    "limit_view",
+    "builded_time",
+    "props",
+    "activity",
+    "fragment"
+  ],
+  "visibleRows": [
+    "Зараз дивляться: фільми",
+    "Зараз дивляться: серіали",
+    "Популярні корейські дорами",
+    "Зараз дивляться: мультфільми"
+  ]
+}

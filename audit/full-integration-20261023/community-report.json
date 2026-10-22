@@ -1,0 +1,37 @@
+{
+  "before": [
+    {
+      "path": "https://gorlim590.github.io/lampa/community/community-watches.js",
+      "status": 1
+    }
+  ],
+  "after": {
+    "statuses": [
+      {
+        "path": "https://gorlim590.github.io/lampa/community/community-watches.js",
+        "status": 0
+      }
+    ],
+    "loaded": 0,
+    "rows": [
+      "Зараз дивляться: фільми",
+      "Зараз дивляться: серіали",
+      "Популярні корейські дорами",
+      "Зараз дивляться: мультфільми"
+    ]
+  },
+  "checks": [
+    {
+      "name": "Managed CommunityWatches disabled persistently",
+      "status": "PASS"
+    },
+    {
+      "name": "Neither managed CommunityWatches source loads after reload",
+      "status": "PASS"
+    },
+    {
+      "name": "Other Home rows remain",
+      "status": "PASS"
+    }
+  ]
+}
