@@ -107,3 +107,11 @@
 - PASS 12 перевірок: фільм і серіал у 720p/1080p/4K з видимим постером, повною назвою, без перетину опису, видимою кнопкою фокусу; навігація дій і Back; один settings toggle й відкат. Нових pageerror=0. audit/hybrid-phase2/details-report.json, movie/series-*.png.
 - Наступне P2: native SettingsApi у двопанельній оболонці, зі збереженням callback/Back та без дублювання параметрів.
 - Коміт: feat: recompose native movie and series details around existing poster.
+
+## Phase 2 / P2 — функціональні двопанельні налаштування: PASS
+- Окремий full-screen Settings: 29 категорій із native Main ліворуч, оригінальні параметри SettingsApi праворуч. Категорії викликають вихідні folder callbacks; параметри/значення не копіюються. Native main detach зберігає handlers; перед зміною категорії виконується штатний Back для очищення component/scroll.
+- Власний один controller slot sh_settings_nav: Up/Down/OK, Right до параметрів, Left назад, Back через категорії до head. Controller API не має remove, тому disable замінює цей slot маленьким native fallback без посилань на DOM. Rail/capture handlers/rAF/settings listeners видаляються. Нові категорії плагінів підхоплюються зі списку.
+- PASS 14 перевірок: усі категорії, 720p/1080p/4K, Left/Right/OK, категорія Interface+, 12 перемикань категорій без приросту update_scroll/open/close listeners, native language picker та Back без зміни мови, theme disable/reenable в Settings і повний Back. Звіт p2-report.json, screenshots p2-*.png. Нових pageerror=0.
+- Перевірено native стек шарів: збережено core z-index Settings=20, тому language/select/modal лишаються зверху. Native HoverSwitcher вимикає pointer-events після клавіш; stress маршрутизації категорій використовують DOM click events, TV-переходи — справжні клавіші CDP. Фізичні пульт/миша не заявляються перевіреними.
+- Наступне P3: реальний пошук/результати та порожні стани; P4/P5: змінні, додаткові екрани, clean reload і lifecycle stress.
+- Коміт: feat: build functional split settings with native parameter components.

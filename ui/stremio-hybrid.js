@@ -2,7 +2,7 @@
 (function () {
     'use strict';
     if (window.StremioHybrid) return;
-    var style, ready = false, destroyed = false, waiting = false, watching = false, moreButton = null, menuOpen = false, searchNode = null, searchReturn = false;
+    var style, ready = false, destroyed = false, waiting = false, watching = false, moreButton = null, menuOpen = false, searchNode = null, searchReturn = false, settingsRail = null, settingsFrame = 0, settingsParameter = null, settingsCategory = 'interface', settingsLeftConsumed = false;
     var css = `
 body.stremio-hybrid { --sh-bg:#121023; --sh-panel:#211d35; --sh-accent:#9775fa; --sh-muted:#aba7bd; --sh-rail:#0c0b16; --sh-text:#f0eef8; --sh-border:#ffffff16; --sh-radius:.7em; --sh-pill:2em; --sh-gap:1.1em; --sh-speed:160ms; background:#121023 !important; color:#f0eef8; }
 body.stremio-hybrid .background { opacity:.12 !important; }
@@ -49,6 +49,20 @@ body.stremio-hybrid .open--search.focus::after { color:white; }
 body.stremio-hybrid .sh-head-more { width:2.65em; height:2.65em; margin:0 !important; background:var(--sh-panel); display:flex; justify-content:center; align-items:center; }
 body.stremio-hybrid .sh-head-more svg { width:1.1em; height:1.1em; }
 body.stremio-hybrid[data-sh-page="main"] .menu__item[data-action="main"], body.stremio-hybrid[data-sh-page="category_full"] .menu__item[data-action="filter"], body.stremio-hybrid[data-sh-page="search"] .menu__item[data-action="search"] { color:#a68ae7; background:#ffffff06; }
+/* A full Settings screen; the right pane remains Lampa's original component. */
+body.stremio-hybrid.settings--open .settings { position:fixed; inset:0; width:100vw; height:100vh; }
+body.stremio-hybrid.settings--open .settings__layer { display:none; }
+body.stremio-hybrid.settings--open .settings__content { width:100% !important; max-width:none; height:100vh !important; background:var(--sh-bg) !important; pointer-events:auto; display:grid; grid-template-columns:minmax(13em,23%) minmax(0,1fr); grid-template-rows:auto minmax(0,1fr); gap:1em 1.8em; padding:1.8em; box-sizing:border-box; border-radius:0; }
+body.stremio-hybrid.settings--open .settings__head { grid-column:1 / -1; padding:0 0 .8em; }
+body.stremio-hybrid.settings--open .settings__body { grid-column:2; grid-row:2; min-height:0; min-width:0; overflow:hidden; background:var(--sh-panel); padding:1em; border-radius:var(--sh-radius); }
+body.stremio-hybrid.settings--open .settings__body > .scroll { height:100% !important; max-height:100% !important; }
+body.stremio-hybrid .sh-settings-rail { grid-column:1; grid-row:2; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding:.2em .5em .8em .1em; }
+body.stremio-hybrid .sh-settings-category { color:var(--sh-muted); padding:.85em 1em; margin-bottom:.3em; border-radius:var(--sh-pill); font-size:.95em; cursor:pointer; }
+body.stremio-hybrid .sh-settings-category[aria-current="page"] { background:#ffffff09; color:var(--sh-text); }
+body.stremio-hybrid .sh-settings-category.focus { color:white; background:#3e315b; box-shadow:inset .18em 0 var(--sh-accent); }
+body.stremio-hybrid .settings-param { padding:1em; margin-bottom:.25em; }
+body.stremio-hybrid .settings-param__name { font-size:1em; }
+body.stremio-hybrid .settings-param__value { font-size:.85em; }
 /* Keep Cardify's composition and provider actions; improve readable hierarchy. */
 /* Reveal the existing native poster and recompose Cardify without replacing its DOM. */
 body.stremio-hybrid .cardify .full-start-new__body { height:auto !important; min-height:36em; padding-top:2em; align-items:flex-start !important; }
@@ -164,17 +178,138 @@ body.stremio-hybrid .menu__item, body.stremio-hybrid .head__action, body.stremio
     }
     function onActivity(event) { if (!event || event.type === 'start') setupHeader(); }
     function setupUI() {
-        if (!watching) { Lampa.Listener.follow('activity', onActivity); Lampa.Search.listener.follow('close', onSearchClose); watching=true; }
+        if (!watching) { Lampa.Listener.follow('activity', onActivity); Lampa.Search.listener.follow('close', onSearchClose); Lampa.Settings.listener.follow('open',onSettingsOpen); Lampa.Settings.listener.follow('close',onSettingsClose); document.addEventListener('keydown',onSettingsKey,true); document.addEventListener('keyup',onSettingsKey,true); installSettingsController(); watching=true; }
         setupHeader();
+        if(document.body.classList.contains('settings--open')) onSettingsOpen({name:'resume'});
     }
     function removeUI() {
-        if (watching) { Lampa.Listener.remove('activity', onActivity); Lampa.Search.listener.remove('close', onSearchClose); watching=false; }
+        if (watching) { Lampa.Listener.remove('activity', onActivity); Lampa.Search.listener.remove('close', onSearchClose); Lampa.Settings.listener.remove('open',onSettingsOpen); Lampa.Settings.listener.remove('close',onSettingsClose); document.removeEventListener('keydown',onSettingsKey,true); document.removeEventListener('keyup',onSettingsKey,true); settingsLeftConsumed=false; watching=false; }
+        removeSettingsUI();
         searchReturn=false;
         if (searchNode) { $(searchNode).off('hover:enter.shHybrid', onSearchEnter); searchNode=null; }
         if (menuOpen) { menuOpen=false; Lampa.Select.close(); }
         if (moreButton) { $(moreButton).off('hover:enter', openActions).remove(); moreButton=null; }
         document.querySelectorAll('.sh-head-secondary').forEach(function (node) { node.classList.remove('sh-head-secondary'); });
         document.body.removeAttribute('data-sh-page');
+    }
+    // Categories route through the native folder callbacks. Parameters are never cloned.
+    function nativeSettingsFolders() {
+        return Lampa.Settings.main().render().find('.settings-folder[data-component]').filter(function () {
+            return !this.classList.contains('hide') && !this.classList.contains('hidden') && this.style.display !== 'none';
+        }).toArray();
+    }
+    function updateSettingsRail() {
+        var content = Lampa.Settings.render()[0].querySelector('.settings__content');
+        if (!settingsRail) {
+            settingsRail=document.createElement('div'); settingsRail.className='sh-settings-rail';
+            settingsRail.setAttribute('aria-label','Категорії налаштувань');
+            settingsRail.addEventListener('click',onSettingsCategory,true);
+            content.appendChild(settingsRail);
+        }
+        var folders=nativeSettingsFolders();
+        var signature=folders.map(function(n){return n.getAttribute('data-component')+':'+n.querySelector('.settings-folder__name').textContent;}).join('|');
+        if (settingsRail.getAttribute('data-signature') !== signature) {
+            settingsRail.textContent='';
+            folders.forEach(function(node){
+                var item=document.createElement('div'); item.className='sh-settings-category selector';
+                item.setAttribute('data-component',node.getAttribute('data-component'));
+                item.textContent=node.querySelector('.settings-folder__name').textContent;
+                settingsRail.appendChild(item);
+            });
+            settingsRail.setAttribute('data-signature',signature);
+        }
+        settingsRail.querySelectorAll('.sh-settings-category').forEach(function(node){
+            if(node.getAttribute('data-component')===settingsCategory) node.setAttribute('aria-current','page'); else node.removeAttribute('aria-current');
+        });
+    }
+    function focusSettingsCategory(delta) {
+        if (!settingsRail) return;
+        var items=Array.prototype.slice.call(settingsRail.querySelectorAll('.sh-settings-category'));
+        var index=items.indexOf(settingsRail.querySelector('.focus'));
+        index=Math.max(0,Math.min(items.length-1,(index<0?0:index)+delta));
+        if(items[index]) { Lampa.Controller.collectionFocus(items[index],settingsRail); items[index].scrollIntoView({block:'nearest'}); }
+    }
+    function releaseSettingsParameter() {
+        if (settingsParameter) {
+            var current=settingsParameter; settingsParameter=null; current.back();
+            for(var i=0;i<6 && Lampa.Controller.enabled().name==='settings_component';i++) Lampa.Controller.back();
+        } else if (Lampa.Controller.enabled().name !== 'settings') Lampa.Controller.toggle('settings');
+    }
+    function chooseSettingsCategory(name, initial) {
+        if(name===settingsCategory && settingsParameter) { Lampa.Controller.toggle('settings_component');return; }
+        releaseSettingsParameter();
+        var target=nativeSettingsFolders().filter(function(n){return n.getAttribute('data-component')===name;})[0];
+        if(!target) return;
+        // Detach, rather than remove: preserve the folder handlers and the native Main instance.
+        Lampa.Settings.main().render().detach();
+        settingsCategory=name;
+        $(target).trigger('hover:enter');
+        if(Lampa.Controller.enabled().name==='settings_component') settingsParameter=Lampa.Controller.enabled().controller;
+        updateSettingsRail();
+        if(initial) Lampa.Controller.toggle('sh_settings_nav');
+    }
+    function onSettingsCategory(event) {
+        var item=event.target.closest('.sh-settings-category');
+        if(item && settingsRail.contains(item)) { event.stopPropagation();chooseSettingsCategory(item.getAttribute('data-component'),false); }
+    }
+    function settingsNavToggle() {
+        if(!settingsRail) { Lampa.Controller.toggle('settings'); return; }
+        Lampa.Controller.collectionSet(settingsRail);
+        var node=settingsRail.querySelector('[aria-current="page"]') || settingsRail.querySelector('.sh-settings-category');
+        Lampa.Controller.collectionFocus(node,settingsRail);
+        if(node) node.scrollIntoView({block:'nearest'});
+    }
+    function settingsNavBack() {
+        releaseSettingsParameter();
+        if(Lampa.Controller.enabled().name!=='settings') Lampa.Controller.toggle('settings');
+        Lampa.Controller.back();
+    }
+    function installSettingsController() {
+        Lampa.Controller.add('sh_settings_nav',{
+            toggle:settingsNavToggle,
+            enter:function(){var item=settingsRail && settingsRail.querySelector('.sh-settings-category.focus');if(item)chooseSettingsCategory(item.getAttribute('data-component'),false);},
+            up:function(){focusSettingsCategory(-1);}, down:function(){focusSettingsCategory(1);},
+            right:function(){if(settingsParameter)Lampa.Controller.toggle('settings_component');},
+            left:settingsNavBack, back:settingsNavBack
+        });
+    }
+    function onSettingsKey(event) {
+        if(event.key==='ArrowLeft' && event.type==='keyup' && settingsLeftConsumed) { settingsLeftConsumed=false;event.preventDefault();event.stopImmediatePropagation();return; }
+        if(event.type==='keydown' && event.key==='ArrowLeft' && document.body.classList.contains('settings--open') && settingsRail && Lampa.Controller.enabled().name==='settings_component') {
+            settingsLeftConsumed=true; event.preventDefault(); event.stopImmediatePropagation(); Lampa.Controller.toggle('sh_settings_nav');
+        }
+    }
+    function onSettingsOpen(event) {
+        if(settingsFrame) cancelAnimationFrame(settingsFrame);
+        settingsFrame=requestAnimationFrame(function(){
+            settingsFrame=0;
+            if(!watching || !document.body.classList.contains('settings--open'))return;
+            updateSettingsRail();
+            if(event.name==='main') {
+                settingsParameter=null;
+                var folders=nativeSettingsFolders();
+                if(!folders.some(function(n){return n.getAttribute('data-component')===settingsCategory;})) settingsCategory=folders[0] ? folders[0].getAttribute('data-component') : '';
+                if(settingsCategory) chooseSettingsCategory(settingsCategory,true);
+            } else {
+                if(nativeSettingsFolders().some(function(n){return n.getAttribute('data-component')===event.name;})) settingsCategory=event.name;
+                if(Lampa.Controller.enabled().name==='settings_component') settingsParameter=Lampa.Controller.enabled().controller;
+                updateSettingsRail();
+            }
+        });
+    }
+    function onSettingsClose() {
+        if(settingsFrame) cancelAnimationFrame(settingsFrame); settingsFrame=0;
+        if(settingsRail){settingsRail.removeEventListener('click',onSettingsCategory,true);settingsRail.remove();settingsRail=null;}
+        settingsParameter=null;
+    }
+    function removeSettingsUI() {
+        if(settingsFrame) cancelAnimationFrame(settingsFrame); settingsFrame=0;
+        if(Lampa.Controller.enabled().name==='sh_settings_nav') {
+            if(settingsParameter) Lampa.Controller.toggle('settings_component'); else Lampa.Controller.toggle('settings');
+        }
+        onSettingsClose();
+        // Controller has no public remove API: replace our single registry slot with a small native fallback.
+        Lampa.Controller.add('sh_settings_nav',{toggle:function(){Lampa.Controller.toggle('settings');}});
     }
     function enabled() {
         var value = Lampa.Storage.get('stremio_hybrid_enabled', true);
