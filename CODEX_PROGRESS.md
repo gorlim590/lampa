@@ -220,3 +220,10 @@
 - Owner files are prepared locally, not published/reloaded as full plugins; Hybrid compatibility is what was tested with currently installed owners. No push/merge.
 - Next: ordinary source clarification search inline; remove advanced-route toolbar; scoped Files view and verified episode ratings, then Home/favorites. Old core APIs retained pending verified callers.
 - Commit: feat: share media details and repair metadata ownership (git log records hash).
+
+## Stage2a inline clarification 2.5.0
+- Removed own advanced-route overflow button. Native Filter clarification (including alternatives and keyboard/global callback) now restarts only embedded native component; no Activity.replace/push for ordinary search. Cache includes clarification/global flags; retry retains query.
+- Native Filter destroyed after submit/cancel; disabling during open keyboard calls its native Back, then releases detached filter. Core torrent Activity/API untouched for unverified callers.
+- inline-search-report: 10 PASS/errors=[], real native alternative menu choice and keyboard Back/disable; global callback controlled. No playback. Screenshots inline-search-menu/results.png. Existing owner fixes unchanged.
+- Next: Files view/verified episode ratings; parser picker if supported; best-choice semantics (currently release badge, not standalone mode); then Home/favorites. Physical TV/TorrServer/player remain BLOCKED.
+- Commit: fix: keep native source clarification inside media details.

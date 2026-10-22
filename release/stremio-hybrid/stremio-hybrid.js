@@ -207,7 +207,7 @@ body.stremio-hybrid .sh-movie-page .full-descr { padding-top:1em; }
 body.stremio-hybrid .sh-streams { position:absolute; top:.6em; right:1.8em; width:25vw; height:calc(100vh - 10em); max-height:42em; z-index:2; display:flex; flex-direction:column; min-height:0; padding:.75em; border-radius:.6em; background:rgba(12,12,22,.91); border:1px solid #ffffff10; color:#efeff5; }
 body.stremio-hybrid .sh-stream-head { display:flex; align-items:center; justify-content:space-between; gap:1em; }
 body.stremio-hybrid .sh-stream-head h2 { font-size:1.1em; font-weight:500; margin:0; }
-body.stremio-hybrid .sh-stream-advanced { padding:.1em .6em; border-radius:.4em; }
+
 body.stremio-hybrid .sh-stream-status { font-size:.7em; color:#aaa7b9; margin:.8em 0; }
 body.stremio-hybrid .sh-stream-load { padding:.8em; font-size:.8em; background:#ffffff08; border-radius:.5em; }
 
@@ -533,7 +533,23 @@ body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; 
         var button=record.root.querySelector('.view--torrent:not(.hide)')||record.root.querySelector('.sh-movie-primary');
         if(button)Lampa.Controller.collectionFocus(button,record.root);
     }
-    function streamFallback(record) {var params=streamParams(record);Lampa.Activity.push(params);}
+    function disposeStreamQuery(st) {
+        if(!st.queryFilter)return;
+        var filter=st.queryFilter;st.queryFilter=null;
+        filter.destroy();
+    }
+    function streamQuery(st) {
+        if(st.dead||st.queryFilter)return;
+        // Reuse core Filter's clarification/keyboard UI, overriding only its result callback.
+        var filter=st.queryFilter=new Lampa.Filter(st.params);
+        filter.onBack=function(){disposeStreamQuery(st);if(!st.dead)streamActivate(st.record);};
+        filter.onSearch=function(value,extra){
+            disposeStreamQuery(st);if(st.dead)return;
+            var record=st.record;record.streamQuery={search:String(value||''),clarification:true,global:!!(extra&&extra.global)};
+            closeStreamChild(record);loadStreams(record);
+        };
+        filter.render().find('.filter--search').trigger('hover:enter');
+    }
     function streamWindow(st,start) {
         var row=st.root.querySelector('.torrent-list');if(!row)return;
         st.windowStart=Math.max(0,start);st.windowing=true;
@@ -675,6 +691,7 @@ body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; 
         var st=record.streamChild;if(!st)return;
         if(streamSelectOwner===st){clearStreamSelect();Lampa.Select.close();streamInfo(record);}
         st.dead=true;record.streamChild=null;
+        if(st.queryFilter){var enabled=Lampa.Controller.enabled();if(document.querySelector('.search-box')&&enabled.controller&&typeof enabled.controller.back==='function')enabled.controller.back();disposeStreamQuery(st);}
         Lampa.Listener.remove('torrent',st.onRender);st.sourceData=new WeakMap();st.root.removeEventListener('hover:focus',st.onFocus,true);st.root.removeEventListener('hover:enter',st.onEnter,true);
         Lampa.Torrent.back(null);if(st.started)Lampa.Torrent.opened(null);
         st.child.destroy();st.rows.forEach(function(row){$(row).remove();});st.rows=[];
@@ -683,10 +700,10 @@ body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; 
     }
     function loadStreams(record) {
         if(record.streamChild){streamActivate(record);return;}
-        if(typeof Lampa.Component.get('torrents')!=='function'){streamFallback(record);return;}
-        var params=streamParams(record), st={record:record,params:params,rows:[],sourceData:new WeakMap(),windowStart:0,dead:false,wantFocus:true,loading:true};
+        if(typeof Lampa.Component.get('torrents')!=='function'){streamStatus(record,'Модуль торрентів недоступний');return;}
+        var params=Object.assign(streamParams(record),record.streamQuery||{}), st={record:record,params:params,rows:[],sourceData:new WeakMap(),windowStart:0,dead:false,wantFocus:true,loading:true};
         record.streamChild=st;record.streamFocused=true;record.streamLoad.hidden=true;streamStatus(record,'Пошук джерел…');
-        var key=[record.kind,params.movie.id,params.movie.source||'tmdb',params.search,Lampa.Storage.field('parser_torrent_type'),streamGeneration].join('|');st.key=key;
+        var key=[record.kind,params.movie.id,params.movie.source||'tmdb',params.search,!!params.global,!!params.clarification,Lampa.Storage.field('parser_torrent_type'),streamGeneration].join('|');st.key=key;
         try {
             st.child=Lampa.Component.create(params);st.root=st.child.render()[0];st.root.classList.add('sh-stream-explorer');record.streamContent.appendChild(st.root);
             st.child.activity={loader:function(on){if(st.dead)return;st.loading=on;record.streamPane.setAttribute('aria-busy',on?'true':'false');streamStatus(record,on?'Пошук джерел…':st.error?'Парсер недоступний':st.total===0?'Джерел не знайдено':st.total!=null?'Знайдено: '+st.total:'Джерела');if(!on){streamSyncRows(st);if(!st.loadedOnce){st.loadedOnce=true;if(!st.navigatedWhileLoading)st.last=st.root.querySelector('.torrent-item')||st.last;}st.child.start=function(){streamActivate(record);};}},toggle:function(){if(!st.dead&&st.wantFocus)streamActivate(record);},render:function(){return $(st.root);}};
@@ -698,7 +715,7 @@ body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; 
             st.child.reset=function(){st.rows.forEach(function(row){$(row).remove();});st.rows=[];st.windowStart=0;return reset.apply(st.child,arguments);};
             st.child.next=function(){if(st.dead||st.windowing||!st.wantFocus)return;var focused=st.last;next.apply(st.child,arguments);if(st.rows.length>st.windowStart+40){streamWindow(st,st.windowStart+20);if(focused&&focused.isConnected)streamFocus(st,focused);}};
             st.onFocus=function(event){var node=event.target.closest('.selector');if(node&&st.root.contains(node))st.last=node;};
-            st.onEnter=function(event){if(event.target.closest('.torrent-item'))st.started=true;if(event.target.closest('.filter--back')){event.stopImmediatePropagation();streamInfo(record);}else if(event.target.closest('.filter--search,.empty__footer')){event.stopImmediatePropagation();streamFallback(record);}};
+            st.onEnter=function(event){if(event.target.closest('.torrent-item'))st.started=true;if(event.target.closest('.filter--back')){event.stopImmediatePropagation();streamInfo(record);}else if(event.target.closest('.filter--search,.empty__footer')){event.stopImmediatePropagation();streamQuery(st);}};
             st.root.addEventListener('hover:focus',st.onFocus,true);st.root.addEventListener('hover:enter',st.onEnter,true);
             var originalGet;
             // Scope this wrapper to initialize's synchronous Parser.get dispatch, not to global navigation.
@@ -712,7 +729,7 @@ body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; 
             var parse=st.child.parse;st.child.parse=function(){if(st.dead)return;originalGet=Lampa.Parser.get;Lampa.Parser.get=getForChild;try{return parse.apply(st.child,arguments);}finally{Lampa.Parser.get=originalGet;}};st.child.initialize();
             if(st.loading)streamActivate(record);
             Lampa.Torrent.back(function(){if(!st.dead&&record.streamChild===st)streamActivate(record);else if(Lampa.Activity.active()?.component==='full')streamInfo(record);});
-        }catch(error){if(st.child&&typeof st.child.destroy==='function')closeStreamChild(record);else record.streamChild=null;streamStatus(record,'Вбудовані джерела недоступні. Скористайтеся розширеним режимом.');record.streamLoad.hidden=false;}
+        }catch(error){if(st.child&&typeof st.child.destroy==='function')closeStreamChild(record);else record.streamChild=null;streamStatus(record,'Вбудовані джерела недоступні. Спробуйте оновити джерела.');record.streamLoad.hidden=false;}
     }
     function removeStreams(record) {
         if(!record.streamPane)return;
@@ -727,13 +744,12 @@ body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; 
     function setupStreams(record) {
         if(record.streamPane||!Lampa.Storage.field('parser_use')||!window.lampa_settings.torrents_use)return;
         var pane=document.createElement('section');pane.className='sh-streams';pane.setAttribute('aria-label','Торрентні джерела');pane.setAttribute('aria-busy','false');
-        pane.innerHTML='<div class="sh-stream-head"><h2>Джерела</h2><div class="sh-stream-retry selector" title="Оновити джерела">↻</div><div class="sh-stream-advanced selector" title="Розширений режим торрентів">⋯</div></div><div class="sh-stream-status" role="status">Джерела завантажуються лише після відкриття</div><div class="sh-stream-load selector">Показати джерела</div><div class="sh-stream-content"></div>';
+        pane.innerHTML='<div class="sh-stream-head"><h2>Джерела</h2><div class="sh-stream-retry selector" title="Оновити джерела">↻</div></div><div class="sh-stream-status" role="status">Джерела завантажуються лише після відкриття</div><div class="sh-stream-load selector">Показати джерела</div><div class="sh-stream-content"></div>';
         record.streamPane=pane;record.streamContent=pane.querySelector('.sh-stream-content');record.streamStatus=pane.querySelector('.sh-stream-status');record.streamLoad=pane.querySelector('.sh-stream-load');var host=document.createElement('div');host.className='sh-movie-hero';record.root.parentNode.insertBefore(host,record.root);host.appendChild(record.root);host.appendChild(pane);record.streamHost=host;record.page.classList.add('sh-has-streams');
         record.streamEnter=function(event){
             if(event.target.closest('.view--torrent')&&record.root.contains(event.target)){event.stopImmediatePropagation();loadStreams(record);}
             else if(event.target===record.streamLoad){event.stopImmediatePropagation();loadStreams(record);}
             else if(event.target.closest('.sh-stream-retry')){event.stopImmediatePropagation();var key=record.streamChild&&record.streamChild.key;streamCache=streamCache.filter(function(item){return item.key!==key;});closeStreamChild(record);loadStreams(record);}
-            else if(event.target.closest('.sh-stream-advanced')){event.stopImmediatePropagation();streamFallback(record);}
         };
         record.page.addEventListener('hover:enter',record.streamEnter,true);
         record.streamPaneFocus=function(event){if(record.streamChild){var node=event.target.closest('.selector');if(node)record.streamChild.last=node;}};record.streamPane.addEventListener('hover:focus',record.streamPaneFocus,true);
@@ -1069,7 +1085,7 @@ body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; 
         apply(enabled());
     }
     window.StremioHybrid = {
-        version: '2.4.0',
+        version: '2.5.0',
         setEnabled: setEnabled,
         refresh: function () { if (ready) apply(enabled()); },
         destroy: function () {
