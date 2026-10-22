@@ -264,9 +264,9 @@
   ],
   "benchmark": {
     "rows": 10000,
-    "baselineParseMs": 87.49755199999998,
-    "newParseMs": 36.927021999999965,
-    "normalizationAndMatchMs": 276.73629200000005,
+    "baselineParseMs": 32.808302,
+    "newParseMs": 34.554700000000025,
+    "normalizationAndMatchMs": 200.15402200000017,
     "note": "Node CPU fixture only; not page load, network, FPS or Google TV performance"
   }
 }
