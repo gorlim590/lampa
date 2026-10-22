@@ -1,7 +1,7 @@
 'use strict';
 // Local desktop preview only. Explicit public source whitelist, loopback binding unchanged.
 const http=require('http'),fs=require('fs'),path=require('path');
-const assets={'/stremio-hybrid.js':'ui/stremio-hybrid.js','/providers/parsers.js':'providers/parsers.js','/media/custom-favorites.js':'media/custom-favorites.js','/ui/screensaver-plus.js':'ui/screensaver-plus.js','/ui/interface-plus.js':'ui/interface-plus.js','/media/average-rating.js':'media/average-rating.js','/preview-loader.js':'audit/preview-loader.js'};
+const assets={'/media/ua-comments.js':'media/ua-comments.js','/stremio-hybrid.js':'ui/stremio-hybrid.js','/providers/parsers.js':'providers/parsers.js','/media/custom-favorites.js':'media/custom-favorites.js','/ui/screensaver-plus.js':'ui/screensaver-plus.js','/ui/interface-plus.js':'ui/interface-plus.js','/media/average-rating.js':'media/average-rating.js','/preview-loader.js':'audit/preview-loader.js'};
 const server=http.createServer((req,res)=>{
  const headers={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Private-Network':'true','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'};
  if(req.method==='OPTIONS'){res.writeHead(204,{...headers,'Access-Control-Allow-Methods':'GET, HEAD, OPTIONS'});return res.end();}

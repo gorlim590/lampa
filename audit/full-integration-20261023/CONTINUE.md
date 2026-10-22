@@ -1,45 +1,84 @@
-# Continue the integration, do not restart
+# Контрольна точка: продовжити, не починати заново
 
-Actual checkout: `audit/stremio-hybrid-20261022/repository`, branch `design/stremio-hybrid-x11`. Root workspace is not Git. Root `ui/stremio-hybrid.js` is served by existing loopback preview; release copy and checkout must stay synced. No push/merge during this run.
+Робочий каталог `/home/gostrimchik/lampa-testing` НЕ є коренем Git.
+Чинний checkout: `audit/stremio-hybrid-20261022/repository`, гілка
+`design/stremio-hybrid-x11`. Перевірити `git status --short --branch` і
+`git log -6 --oneline` у цьому checkout. Root-файли використовує preview;
+після змін синхронізувати лише потрібні product/docs/tests у checkout.
 
-## Current delivery
+**Остання інструкція користувача:** завершити поточний UA Comments етап,
+зберегти локально, не публікувати в main, не витрачати ресурс на повну
+матрицю тестування. Попередній дозвіл push/merge відкликано.
+Через приблизно 5 годин користувач планує продовжити; автоматичний запуск
+або таймер відновлення не налаштований.
 
-- Hybrid 2.6.1 loaded through existing localhost extension, no manual evaluate bootstrap required. Release/stremio-hybrid matches source.
-- Owned Interface+/AverageRating/Screensaver+ files are local patches. Combined test uses exact existing URL response replacements during normal reload; no plugin duplication or persisted extension URL change. Routes are removed afterward. Current runtime can retain patched owners, but next ordinary reload downloads published owners again. Do not call local files published.
-- CommunityWatches extension status0 persists. `config/disabled-plugins.json` describes policy; does not itself run at startup. Targeted status backup is under backups/full-integration-20261023. Another TV installation needs its own extension disable.
-- Chromium remains open, same authorized profile/tab. No history, lists, cookies or user avatar altered. Native MP4 screensaver preview tested; no torrent/video content playback started.
+## Доставка, дані й обмеження
 
-## Evidence / remaining work
+- Hybrid **2.7.0**, ParserProviders1.0.0, DeviceBookmarks1.0.0,
+  Screensaver+2.1.0, локальний UAComments1.0.0.
+- `node audit/serve-hybrid.cjs`: існуючий сервер тільки127.0.0.1:8766,
+  явний whitelist8 публічних JS. Він уже працює; перевірити перед повторним
+  запуском. Після перезапуску ПК запускати вручну. Системних служб немає.
+- Звичайний reload поточної вкладки завантажує локальні виправлення без
+  Playwright routing. П'ять активних записів registry замінено URLами preview:
+  loader/parsers/Custom Favorites/Screensaver/UA Comments. Усього32 записи,
+  CommunityWatches status0. Preview-loader замінює тільки Interface+/ratings,
+  інші підплагіни зберігають оригінальні джерела й порядок.
+- `node audit/use-local-preview.cjs restore` повертає тільки ці URL;
+  `apply` застосовує локальну доставку. Backup:
+  `backups/integration-followup-20261023/preview-plugin-urls.json`.
+  Restore4/apply4 фактично перевірено ДО додавання UA; повний restore5 ще
+  не перевірено. Не видавати localhost за опубліковані/доступні TV адреси.
+- Chromium тільки поточний CDP9222, вкладка https://siaivo.isroot.in/.
+  Не browser.close/newContext/launch, не очищати storage/cookies/profile,
+  не читати токени/паролі, не запускати випадкові торренти.
+- Фактичний backup користувацьких списків:
+  `private-backups/integration-followup-20261023/favorite-before.json`,0600,
+  **ПОЗА Git**, не додавати/не віддавати сервером. Відкат tests був точковим,
+  початкові списки точно збережені. Решта backup JS/публічних URL не секретні.
+- Stremio X11 референси й аудит збережені. Попередній window ID0x06600004
+  (decimal106954756 для scrot). Без потреби аудит не повторювати.
 
-| Area | Evidence | Remaining |
+## Поточні локальні коміти цього продовження
+
+- `08674e5` scoped native parser switching, Hybrid2.7.0.
+- `c50a711` explicit device Favorites, без merge з account/Trakt.
+- `992137d` persistent local delivery for patched owners.
+- UA Comments й фінальна контрольна точка: див. останні коміти та CODEX_PROGRESS.
+
+## Стан початкових 15 етапів
+
+| Етап | Що вже зроблено / докази | Що залишилося |
 |---|---|---|
-| Dependency audit | AUDIT.md + classification/state/sources | Update only changed runtime facts; do not repeat full audit |
-| Movie/TV/anime details | details-report26PASS, rating-owner2PASS, screenshots | Actual cartoon samples; further user visual feedback |
-| Dune broken icon | Oscar remote SVG broken, count6 genuine; owner local SVG | Owner delivery |
-| Embedded clarification | inline-search10PASS | Native global keyboard submission end-to-end; callback is controlled |
-| Files | files11PASS native templates/OK spy, safe TMDB episode mapping | Real TorrServer/magnets/files/player return, IMDb loader integration |
-| Parsers | Native child reused | providers/parsers.js injects filter--parser only on standalone route; private reloadTorrents uses Activity.replace. Define public scoped callback before adapting; do not fake source picker |
-| Best choice | Current feature is a release badge, not a selector mode | Define/test always-first mode separately; no fabricated selector inserted |
-| Legacy torrent Activity | API and fallback callers retained | Cannot remove until series/history/plugins/TorrServer routes verified |
-| Home continuation | home-order10PASS including late rows and8toggles | Real nonempty history after restart, different-provider dataset merge rules |
-| Home speed | before4131ms/DOM1801; warm after93ms/DOM1942 | Not comparable speedup. Native partNext waits for entire batches; background rating/UA/parser traffic needs targeted profiling; card alignment pending |
-| CommunityWatches | community3PASS after reload | Apply policy on physical TV separately |
-| Header/profile | header11PASS, native clock, URL field/fallback | Actual saved avatar after restart/physical TV input; source menus beyond tested routes |
-| Screensaver+ | screensaver13PASS; correct show/resetTimer ownership, tracked listeners/timers, pending cancellation | Owner delivery, prolonged physical TV testing. Baseline3ms vs26.1/1.3/26.6ms is not speedup evidence |
-| Favorites | custom-favorites has separate v3/v2 branches | Audit active branch, native local lists vs Trakt Watchlist before reversible cycle tests. The component() call found in legacy v2 is not proof of current cause |
-| Settings | Existing functional Hybrid rail retained | Full category/option dependency audit and reorganization pending |
-| Add categories | new-category owns real provider/category rows | Retained, no blind removal |
-| UA Comments | Exact external owner identified in AUDIT.md | License/redistribution unresolved; no copy made |
-| Trakt-first | Existing Trakt rows retained | Official API research, list/order architecture deferred until critical routes stable |
-| BWA/community sources | Logic untouched | Visual/navigation compatibility pending |
-| TV performance | Desktop720/1080/4K checks | Physical Google TV/remote/FPS, long heap profiling BLOCKED |
+| 0. Відновлення й залежності | AUDIT.md, класифікація/знімки source/runtime; поточна гілка збережена | Оновлювати лише змінені факти, не повторювати повний аудит |
+| 1. Movie/TV/anime details | Спільна композиція, Cardify/Interface metadata, Oscar6 local SVG; details26 + owner2 + combined9PASS | Реальні мультфільми/нові візуальні побажання; не заявляти завершення всіх медіа |
+| 2. Торренти й Files | Native search/clarification child на Full, custom tools, Files skin, однозначні TMDB episode scores; inline10/Files11/parser12PASS | Реальні parser/backend changes, global keyboard E2E, TorrServer/magnet/multifile/player return; IMDb loader1.2 не активний. «Найкращий вибір» зараз badge релізу, НЕ selector mode. Старий Activity/API лишається fallback для неперевірених маршрутів |
+| 3. Home | Native continuation третім, late rows/identity/duplicate exact datasets; order10PASS | Account-resolved history порожня, але device history100: вирішити source ambiguity перед реальним continuation. Різні provider datasets не зливати навмання. Slow partNext batches/ratings traffic та card alignment ще не оптимізовані |
+| 4. Trakt-first | Наявні Trakt ряди й авторизація збережені | Окремий великий етап ПІСЛЯ критичних маршрутів: офіційні API docs, capabilities/rate limits/cache/list order/catalog/filter fallbacks. Нічого масово не синхронізувати |
+| 5. CommunityWatches | Status0 persisted, reload3PASS, інші Trakt ряди працюють | На іншому TV вимкнути окремо; config policy сам не завантажувач |
+| 6. UA Comments | Локальна MIT копія pinned mirror, авторство/NOTICE/LICENSE; lifecycle/cache/page scope/40-card pagination/без blur; focused smoke report | Повна live перевірка всіх5 джерел/налаштувань, movie/TV/anime,720/1080/4K, довгий heap/remote navigation відкладені за проханням. Зовнішні APIs/proxies/icons лишилися. Див. audit/ua-comments-20261023 |
+| 7. Screensaver+ | Actual native show/resetTimer ownership, destroy resources/cancel late start, rollback;13PASS | Фізичний TV/тривалі повторення. Затримка не відтворилася, speedup не доведено |
+| 8. Settings/categories | Чинна functional Hybrid rail збережена | Повний option dependency audit і категоризація не зроблені. «Додати категорії» new-category має реальні provider rows, не видаляти наосліп |
+| 9. Header/profile | Native дата/час без нового timer, URL avatar/fallback, transparent controls, reversible;11PASS | Реальний saved avatar/TV input після restart; решта source menus |
+| 10. Усі меню/джерела | Основні theme menus/Files/tools узгоджені | BWA, t.me/mmssixxx, online sources й повна cross-page перевірка |
+| 11. Favorites | Root cause: account списки порожні, device2book/45wath/100history/132cards. Explicit source selector+native Maker paging+local checkbox;26cycle/8navigationPASS,0remote writes | Визначити бажані правила local/account/Trakt sync окремо; НЕ робити автоматичне злиття. Різні сховища тепер доступні окремо |
+| 12. Plugin cleanup | Активні owners визначено; лише явно дозволений CommunityWatches вимкнений | Повний повторний final audit після стабілізації; не видаляти невідомі plugins/metadata/settings |
+| 13. TV optimization | Scoped resources, low-cost CSS, bounded UA DOM, native reuse/cache; desktop measurements retained | Немає доведеного Home speedup, FPS/heap на фізичному Google TV BLOCKED; тривале профілювання pending |
+| 14. QA | Попередні95PASS; follow-up parser12 + favorites26 + navigation8 + delivery20, окремі звіти | Це fixtures+desktop, не повна гарантія. Фінальна матриця/real playback/TV відкладені; не повторювати пройдене без змін |
+| 15. Автономність/checkpoints | Окремі local commits, root/checkout/release docs | Публікацію НЕ робити без нового дозволу; завершити лише наступний пріоритетний стабільний етап |
 
-## Next implementation order
+## Найближчий порядок продовження
 
-1. Finish parser switcher integration through an explicit per-child API, plus real Files/TorrServer tests when available. Do not expose private endpoint/key values or play random sources.
-2. Reproduce Favorites in active v3 branch; back up affected list in memory/outside Git, use reversible test items and separate local stores from Trakt Watchlist.
-3. Profile Home slow batches; preserve existing rows and useful badges. Resolve different-provider continuation semantics before merging data.
-4. Audit settings and Add Categories, UA Comments license, BWA/source menus. Trakt-first remains a separate stage; browse official API docs before assumptions.
-5. Package owner delivery and verify physical TV only when authorized/available. No publication merely because local tests passed.
+1. Прочитати останній UA smoke-report і progress; перевірити branch/log/dirty.
+   Не повторювати пройдену матрицю і не підміняти fixtures live-тестами у звітах.
+2. Пріоритетні неперевірені критичні шляхи: реальні Files/TorrServer/parser
+   і повернення player, коли є контрольоване джерело. Без нього BLOCKED,
+   native fallback не видаляти.
+3. Home: account/device continuation semantics, таргетоване profiling slow
+   batches і нерівних metadata, без queue rewrite без замірів.
+4. Settings/categories та source menus. UA live provider checks — за потреби
+   без повторного licensing audit. Потім окремий Trakt-first stage.
+5. Фізичний TV/публічна доставка лише коли реально доступні й дозволені.
 
-Tests connect only to existing Chromium CDP9222. Never browser.close(), new context/profile, storage.clear(), system permissions changes, credential output or force-push. Preserve saved real Stremio window references; no need to repeat completed X11 audit. Update CODEX_PROGRESS and commit each stable stage in actual checkout.
+Нових тестів заради кількості не додавати. Після логічного етапу — потрібні
+перевірки, CODEX_PROGRESS, sync у checkout, локальний commit.
