@@ -227,3 +227,12 @@
 - inline-search-report: 10 PASS/errors=[], real native alternative menu choice and keyboard Back/disable; global callback controlled. No playback. Screenshots inline-search-menu/results.png. Existing owner fixes unchanged.
 - Next: Files view/verified episode ratings; parser picker if supported; best-choice semantics (currently release badge, not standalone mode); then Home/favorites. Physical TV/TorrServer/player remain BLOCKED.
 - Commit: fix: keep native source clarification inside media details.
+
+## Stage2b Files presentation 2.5.1
+- Scoped native Files modal skin adapted from inspected TorrentsRedesign1.2. Preserves native serial/file templates, Timeline, handlers and modal controller; title/file-count summary, palette, safe cleanup on close/disable/child destroy.
+- Episode score from already loaded params.seasons only, explicitly labelled TMDB. Requires one matching season+episode with ID; missing/multi-episode files omitted. No series score reuse, new API requests, key reads or extra observers. Local1.2 IMDb loader not active in installed1.1; real IMDb restoration remains pending, not falsely claimed.
+- files-report: 11 PASS/errors=[], controlled native templates/metadata/OK spy; 720/1080/4K, native Down/OK/Back, repeated open, disable preserving native four rows. First draft CSS extraction was empty (earlier @media boundary); corrected scoped extraction and full fixed root before final checks. Real TorrServer/player BLOCKED, never played a random release.
+- Follow-up shared metadata: mark rich block even when already correct owner node; rebuild only own supplemental fields during bounded passes so late native metadata cannot duplicate counts. Repeated details-report26PASS/errors=[].
+- Source audit: “Найкращий вибір” is currently a badge on ranked real releases, NOT a separate supported selector option. No fabricated mode inserted. Native sorting remains authoritative; always-first best option cannot be claimed without new defined mode. Old Activity retained for unverified search/history/plugin routes and playback dependencies.
+- Files: ui/stremio-hybrid.js, README/package, files/detail reports/screenshots. Next: real Files/TorrServer and parser selection; Home profile/continue row, favorites, then remaining requested architecture. Critical real-player checks stay BLOCKED; do not remove core controller.
+- Commit: feat: style native file selection with verified episode metadata.
