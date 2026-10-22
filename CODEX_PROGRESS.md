@@ -16,3 +16,11 @@
 - Окремий Git-репозиторій: audit/stremio-hybrid-20261022/repository; гілка design/stremio-hybrid-x11. Корінь workspace не є Git-репозиторієм.
 - Наступне: ізольована тема, Home і перевірка в активному Chromium.
 - Коміт етапу: див. git log (docs: record live Stremio references).
+
+## Етап 3: основа та Home — PASS
+- Створено ui/stremio-hybrid.js: CSS під класом body.stremio-hybrid, захист повторного завантаження, перемикач Інтерфейс → Stremio × Lampa, API setEnabled/destroy. Без нових запитів, таймерів, MutationObserver чи обробників на картках.
+- Home: видима вузька бічна навігація, статичний фон, шість збагачених вертикальних карток, узгоджені відступи; фокус scale(1.035)/160ms, reduced-motion, без додаткового blur.
+- Тести: PASS 720p/1080p/4K геометрія, ArrowRight/ArrowDown, OK відкриває full, Back повертає main. PASS 5 циклів вимкнення/увімкнення: ті самі DOM-картки, 71 елемент метаданих до/після, один style. Нових pageerror: 0.
+- Скриншоти та machine-readable звіт: audit/hybrid-results/. Фізичний Google TV і довготривале використання — BLOCKED (не перевірено).
+- Виявлено: пункт «Фільтр» відкриває штатну панель пошуку, а не безпосередньо сітку. Наступне: виконати пошук та оформити його справжні контролери.
+- Коміт етапу: feat: add isolated Stremio hybrid theme and verified Home.

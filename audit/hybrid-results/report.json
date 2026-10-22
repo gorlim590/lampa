@@ -1,0 +1,76 @@
+{
+  "checks": [
+    {
+      "name": "toggle retains card nodes and metadata",
+      "status": "PASS",
+      "detail": {
+        "sameNodes": true,
+        "badgesBefore": 71,
+        "badgesAfter": 71,
+        "styles": 1
+      }
+    },
+    {
+      "name": "Home 1280x720",
+      "status": "PASS",
+      "detail": {
+        "right": 1280,
+        "width": 1280,
+        "rail": "visible",
+        "cardWidth": 174.86647033691406,
+        "cardHeight": 325.00616455078125,
+        "cards": 28
+      }
+    },
+    {
+      "name": "Home 1920x1080",
+      "status": "PASS",
+      "detail": {
+        "right": 1920,
+        "width": 1920,
+        "rail": "visible",
+        "cardWidth": 262.30780029296875,
+        "cardHeight": 487.5334777832031,
+        "cards": 28
+      }
+    },
+    {
+      "name": "Home 3840x2160",
+      "status": "PASS",
+      "detail": {
+        "right": 3840,
+        "width": 3840,
+        "rail": "visible",
+        "cardWidth": 524.6156005859375,
+        "cardHeight": 975.083251953125,
+        "cards": 28
+      }
+    },
+    {
+      "name": "ArrowRight changes focused card",
+      "status": "PASS"
+    },
+    {
+      "name": "ArrowDown retains card focus",
+      "status": "PASS"
+    },
+    {
+      "name": "OK opens details",
+      "status": "PASS",
+      "detail": {
+        "component": "full",
+        "controller": "full_start"
+      }
+    },
+    {
+      "name": "Back returns Home",
+      "status": "PASS"
+    }
+  ],
+  "screens": [
+    "home-1280.png",
+    "home-1920.png",
+    "home-3840.png"
+  ],
+  "errors": []
+}
