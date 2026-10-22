@@ -8,6 +8,7 @@ const dir=path.join(__dirname,'active-session');fs.mkdirSync(dir,{recursive:true
  const context=browser.contexts()[0];
  const page=context.pages().find(page=>page.url().includes('siaivo.isroot.in'));
  if(!page)throw Error('Активну вкладку Lampa не знайдено');
+ if(process.argv[2]==='hybrid'){page.setDefaultTimeout(10000);let timer;try{await Promise.race([require('./stremio-hybrid-20261022/browser.cjs')({browser,context,page}),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Hybrid audit deadline; browser left open')),120000)})]);}finally{clearTimeout(timer);}process.exit(0);}
  if(process.argv[2]==='cinema-audit'){page.setDefaultTimeout(12000);page.setDefaultNavigationTimeout(25000);let deadline;try{await Promise.race([require('./cinema-upgrade-20261022/browser.cjs')({browser,context,page}),new Promise((_,reject)=>{deadline=setTimeout(()=>reject(Error('Cinema audit deadline exceeded; browser left open')),150000)})]);}finally{clearTimeout(deadline);}process.exit(0);}
  if(process.argv[2]==='reload'){
   const errors=[],network=[];
