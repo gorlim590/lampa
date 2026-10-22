@@ -1,0 +1,48 @@
+{
+  "kind": "Clean existing-tab reload; inspected owned plugin responses replaced locally only; no auth/config edits",
+  "checks": [
+    {
+      "name": "Edited owners initialize once through existing URLs",
+      "status": "PASS"
+    },
+    {
+      "name": "Edited owners retain shared composition 438631",
+      "status": "PASS"
+    },
+    {
+      "name": "Owner itself renders local Oscar6 without Hybrid fallback",
+      "status": "PASS"
+    },
+    {
+      "name": "Edited owners retain shared composition 1396",
+      "status": "PASS"
+    },
+    {
+      "name": "Interface puts series metadata in non-Trakt owner node 1396",
+      "status": "PASS"
+    },
+    {
+      "name": "Edited owners retain shared composition 1429",
+      "status": "PASS"
+    },
+    {
+      "name": "Interface puts series metadata in non-Trakt owner node 1429",
+      "status": "PASS"
+    },
+    {
+      "name": "Combined repeated toggles retain one style/profile/clock/pane",
+      "status": "PASS"
+    },
+    {
+      "name": "CommunityWatches stays absent and native saver remains owned",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "served": [
+    "ui/screensaver-plus.js",
+    "ui/screensaver-plus.js",
+    "ui/interface-plus.js",
+    "media/average-rating.js"
+  ]
+}
