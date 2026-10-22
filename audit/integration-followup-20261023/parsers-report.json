@@ -1,0 +1,54 @@
+{
+  "kind": "Existing CDP tab, native selectors and private apply functions; fake parser configuration kept in memory, no real credentials/settings read or changed",
+  "checks": [
+    {
+      "name": "One scoped provider button mounts",
+      "status": "PASS"
+    },
+    {
+      "name": "Primary menu uses cinema skin and names only",
+      "status": "PASS"
+    },
+    {
+      "name": "Primary apply stays Full and dispatches once after transaction",
+      "status": "PASS"
+    },
+    {
+      "name": "Secondary selection dispatches one search",
+      "status": "PASS"
+    },
+    {
+      "name": "Selecting active parser does not search again",
+      "status": "PASS"
+    },
+    {
+      "name": "Nested Back restores embedded source focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Native secondary off option works inline",
+      "status": "PASS"
+    },
+    {
+      "name": "Provider menu fits 1280",
+      "status": "PASS"
+    },
+    {
+      "name": "Provider menu fits 1920",
+      "status": "PASS"
+    },
+    {
+      "name": "Provider menu fits 3840",
+      "status": "PASS"
+    },
+    {
+      "name": "Disable cleans scoped parser menu and binding",
+      "status": "PASS"
+    },
+    {
+      "name": "Reenable mounts exactly one provider control",
+      "status": "PASS"
+    }
+  ],
+  "errors": []
+}

@@ -706,6 +706,12 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         Object.keys(tokens).forEach(function(key){st.selectTokens[key]={before:node.style.getPropertyValue(key),ours:tokens[key]};node.style.setProperty(key,tokens[key]);});
     }
     function setupStreamTools(st){
+        if(!st.providerBinding&&window.ParserProviders&&typeof ParserProviders.mount==='function')st.providerBinding=ParserProviders.mount(st.root,{
+            isAlive:function(){return !st.dead&&st.record.streamChild===st;},
+            onBack:function(){if(!st.dead)streamActivate(st.record);},
+            beginChange:function(){st.providerChanging=true;},endChange:function(){st.providerChanging=false;},
+            onChange:function(){if(st.dead)return;var record=st.record;streamGeneration++;streamCache=[];closeStreamChild(record);loadStreams(record);}
+        });
         if(st.tools||!st.root.querySelector('.torrent-filter'))return;
         var tools=document.createElement('div');tools.className='ctr-tools';
         tools.innerHTML='<div class="ctr-tabs"></div><div class="ctr-menus"></div>';
@@ -773,6 +779,7 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
     function closeStreamChild(record) {
         var st=record.streamChild;if(!st)return;
         clearStreamFiles();
+        if(st.providerBinding){st.providerBinding.destroy();st.providerBinding=null;}
         if(streamSelectOwner===st){clearStreamSelect();Lampa.Select.close();streamInfo(record);}
         st.dead=true;record.streamChild=null;
         if(st.queryFilter){var enabled=Lampa.Controller.enabled();if(document.querySelector('.search-box')&&enabled.controller&&typeof enabled.controller.back==='function')enabled.controller.back();disposeStreamQuery(st);}
@@ -810,7 +817,7 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
                 record.streamPane.dataset.cacheHit='false';
                 return originalGet.call(this,query,function(data){if(st.dead)return;st.total=data.Results.length;var serialized=JSON.stringify(data);if(serialized.length<2000000){streamCache=streamCache.filter(function(item){return item.key!==key;});streamCache.push({key:key,data:JSON.parse(serialized),expires:Date.now()+(data.Results.length?300000:60000)});while(streamCache.length>4)streamCache.shift();}done(data);},function(error){if(st.dead)return;st.error=true;fail(error);});
             };
-            var parse=st.child.parse;st.child.parse=function(){if(st.dead)return;originalGet=Lampa.Parser.get;Lampa.Parser.get=getForChild;try{return parse.apply(st.child,arguments);}finally{Lampa.Parser.get=originalGet;}};st.child.initialize();
+            var parse=st.child.parse;st.child.parse=function(){if(st.dead)return;originalGet=Lampa.Parser.get;Lampa.Parser.get=getForChild;try{return parse.apply(st.child,arguments);}finally{Lampa.Parser.get=originalGet;}};st.child.initialize();streamSyncRows(st);
             if(st.loading)streamActivate(record);
             Lampa.Torrent.back(function(){if(!st.dead&&record.streamChild===st)streamActivate(record);else if(Lampa.Activity.active()?.component==='full')streamInfo(record);});
         }catch(error){if(st.child&&typeof st.child.destroy==='function')closeStreamChild(record);else record.streamChild=null;streamStatus(record,'Вбудовані джерела недоступні. Спробуйте оновити джерела.');record.streamLoad.hidden=false;}
@@ -852,7 +859,7 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         record.streamDown=controller.down;
     }
     function onStreamSettings(event) {
-        if(event&&/^(jackett_|prowlarr_|parser_|parse_)/.test(event.name)){streamGeneration++;streamCache=[];movieRecords.forEach(closeStreamChild);}
+        if(event&&/^(jackett_|prowlarr_|parser_|parse_)/.test(event.name)){if(movieRecords.some(function(r){return r.streamChild&&r.streamChild.providerChanging;}))return;streamGeneration++;streamCache=[];movieRecords.forEach(closeStreamChild);}
     }
 
     function actionLabel(node) {
@@ -1223,7 +1230,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         apply(enabled());
     }
     window.StremioHybrid = {
-        version: '2.6.1',
+        version: '2.7.0',
         setEnabled: setEnabled,
         refresh: function () { if (ready) apply(enabled()); },
         destroy: function () {
