@@ -1,0 +1,120 @@
+{
+  "checks": [
+    {
+      "name": "Genre opens existing choice list",
+      "status": "PASS",
+      "detail": {
+        "title": "Жанр",
+        "text": "Бойовик\nПригоди\nМультфільм\nКомедія\nКримінал\nДокументальний\nДрама\nСімейний\nФентезі\nІсторія\nЖахи\nМузика\nДетектив\nМелодрама\nФантастика\nТелевізійний фільм\nТрилер\nВійськовий\nВестерн",
+        "controller": "select"
+      }
+    },
+    {
+      "name": "Discover search opens category_full",
+      "status": "PASS"
+    },
+    {
+      "name": "Discover 1280x720",
+      "status": "PASS",
+      "detail": {
+        "cards": 32,
+        "first": {
+          "x": 67.66254425048828,
+          "y": 88.38389587402344,
+          "width": 206.6280517578125,
+          "height": 374.23333740234375,
+          "top": 88.38389587402344,
+          "right": 274.2905960083008,
+          "bottom": 462.6172332763672,
+          "left": 67.66254425048828
+        },
+        "right": 1280,
+        "columns": 6,
+        "metadata": 57
+      }
+    },
+    {
+      "name": "Discover 1920x1080",
+      "status": "PASS",
+      "detail": {
+        "cards": 32,
+        "first": {
+          "x": 101.50930786132812,
+          "y": 133.26792907714844,
+          "width": 309.95013427734375,
+          "height": 561.374267578125,
+          "top": 133.26792907714844,
+          "right": 411.4594421386719,
+          "bottom": 694.6421966552734,
+          "left": 101.50930786132812
+        },
+        "right": 1920,
+        "columns": 6,
+        "metadata": 57
+      }
+    },
+    {
+      "name": "Discover 3840x2160",
+      "status": "PASS",
+      "detail": {
+        "cards": 32,
+        "first": {
+          "x": 203.01861572265625,
+          "y": 266.76739501953125,
+          "width": 619.9002685546875,
+          "height": 1122.7646484375,
+          "top": 266.76739501953125,
+          "right": 822.9188842773438,
+          "bottom": 1389.5320434570312,
+          "left": 203.01861572265625
+        },
+        "right": 3840,
+        "columns": 6,
+        "metadata": 57
+      }
+    },
+    {
+      "name": "Discover Right",
+      "status": "PASS"
+    },
+    {
+      "name": "Discover Down moves row",
+      "status": "PASS",
+      "detail": {
+        "before": 142.06222534179688,
+        "after": 150.78240966796875
+      }
+    },
+    {
+      "name": "Discover vertical scroll keeps focus visible",
+      "status": "PASS",
+      "detail": {
+        "y": 468.19580078125
+      }
+    },
+    {
+      "name": "Sidebar expands with labels",
+      "status": "PASS",
+      "detail": {
+        "hidden": false,
+        "text": "block",
+        "controller": "menu"
+      }
+    },
+    {
+      "name": "Reduced motion",
+      "status": "PASS",
+      "detail": {
+        "transition": "0s",
+        "styles": 1,
+        "dom": 1293
+      }
+    },
+    {
+      "name": "Physical Google TV and long session",
+      "status": "BLOCKED",
+      "detail": "No physical-device profiling performed."
+    }
+  ],
+  "pageErrors": []
+}

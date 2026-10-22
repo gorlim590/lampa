@@ -21,6 +21,7 @@ body.stremio-hybrid .items-line__title { font-size:1.2em; font-weight:500; lette
 body.stremio-hybrid .items-line .scroll__content { padding-left:1.8em; padding-right:1.8em; }
 body.stremio-hybrid .items-line:not(.vinyl-line) .scroll__body { gap:1.1em; }
 body.stremio-hybrid .card { transition:transform 160ms ease-out !important; backface-visibility:visible !important; transform:none; }
+body.stremio-hybrid .ydesign-card, body.stremio-hybrid .ydesign-card.focus { animation:none !important; }
 body.stremio-hybrid .card.focus { transform:scale(1.035) !important; z-index:20; }
 body.stremio-hybrid .card .card__view { border-radius:.65em !important; transition:none !important; }
 body.stremio-hybrid .card.focus .card__view { box-shadow:0 0 0 .14em #f0eef8,0 0 0 .27em #9775fa66 !important; }
@@ -31,7 +32,10 @@ body.stremio-hybrid .ydesign-content-layer, body.stremio-hybrid .ydesign-desc-un
 body.stremio-hybrid .filter { padding:1em 1.8em; }
 body.stremio-hybrid .filter__item, body.stremio-hybrid .filter--button { background:#252039; border-radius:2em; padding:.7em 1.2em; }
 body.stremio-hybrid .filter__item.focus, body.stremio-hybrid .filter--button.focus { background:#7960c9 !important; color:white !important; }
-body.stremio-hybrid .selectbox__content, body.stremio-hybrid .modal__content { background:#211d35; border-radius:1em; }
+body.stremio-hybrid .selectbox__content, body.stremio-hybrid .settings__content, body.stremio-hybrid .modal__content { background:#211d35 !important; border-radius:1em; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
+body.stremio-hybrid .selectbox-item { border-radius:.65em; }
+body.stremio-hybrid .mapping--grid { padding:.6em .8em; }
+body.stremio-hybrid .mapping--grid .card { padding:0 .65em 1.8em; }
 body.stremio-hybrid .selectbox-item.focus, body.stremio-hybrid .settings-param.focus, body.stremio-hybrid .settings-folder.focus { background:#7960c9 !important; color:white !important; border-radius:.65em; }
 @media(min-width:769px) {
  body.stremio-hybrid .wrap__content { flex:1; min-width:0; width:calc(100% - 4.4em) !important; }
@@ -44,7 +48,7 @@ body.stremio-hybrid .selectbox-item.focus, body.stremio-hybrid .settings-param.f
  body.stremio-hybrid .wrap__left--hidden .menu__version { font-size:.45em; }
  body.stremio-hybrid .items-line:not(.vinyl-line) .card.ydesign-vertical { width:13.2vw !important; }
  body.stremio-hybrid .items-line:not(.vinyl-line) .card.ydesign-horizontal { width:27vw !important; }
- body.stremio-hybrid .category-full .card.ydesign-vertical { width:calc(100% / 6) !important; }
+ body.stremio-hybrid .mapping--grid .card.ydesign-vertical { width:calc(100% / 6) !important; }
 }
 @media(prefers-reduced-motion:reduce) {
  body.stremio-hybrid .card, body.stremio-hybrid .ydesign-content-layer, body.stremio-hybrid .ydesign-desc-under { transition:none !important; }
