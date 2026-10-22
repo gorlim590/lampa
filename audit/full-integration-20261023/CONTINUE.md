@@ -44,7 +44,8 @@
 - `08674e5` scoped native parser switching, Hybrid2.7.0.
 - `c50a711` explicit device Favorites, без merge з account/Trakt.
 - `992137d` persistent local delivery for patched owners.
-- UA Comments й фінальна контрольна точка: див. останні коміти та CODEX_PROGRESS.
+- `5b43e06` UA Comments: локальна копія/lifecycle/cache/pagination,13focusedPASS.
+- Фінальний docs checkpoint: див. останній git log; робочий стан після нього чистий.
 
 ## Стан початкових 15 етапів
 

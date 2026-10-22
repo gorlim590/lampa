@@ -310,3 +310,8 @@
 - Files: media/ua-comments.js; vendor/ua-comments snapshot/license/notice; audit/ua-comments-20261023 reproducible builder/smoke/report/screenshot; audit/serve-hybrid.cjs/use-local-preview.cjs; preview URL backup; README/release package; CONTINUE.md updated with all15 stages. Syntax checks PASS and pinned snapshot hash confirmed.
 - Remaining/next: real controlled Files/TorrServer/parser/player routes; Home account/device history ambiguity and slow batches/card metadata; settings/category/source menu audit; UA live checks when useful; then separate Trakt-first architecture. Exact map at audit/full-integration-20261023/CONTINUE.md. Earlier parser12/favorites26/navigation8/delivery20 reports retained, not rerun. Physical TV performance unverified. Private actual-list backup remains OUTSIDE Git.
 - Commit: feat: vendor UA Comments with scoped lifecycle and bounded rendering (see git log for SHA).
+
+## Saved handoff after UA stage
+- Stable implementation commit: `5b43e06`. Previous follow-up commits: `08674e5`, `c50a711`, `992137d`. All remain local on `design/stremio-hybrid-x11`; no push/merge/main changes were performed.
+- Focused UA report:13PASS/errors=[], remaining live/device/full-matrix checks explicitly deferred. Existing browser remains open; local eight-route preview remains running. Continue with `audit/full-integration-20261023/CONTINUE.md`, not a fresh audit.
+- No new large stage started after the user requested saving resources. Next session should read this checkpoint and verify branch/log/worktree once.
