@@ -2,17 +2,17 @@
 (function () {
     'use strict';
     if (window.StremioHybrid) return;
-    var style, ready = false, destroyed = false, waiting = false;
+    var style, ready = false, destroyed = false, waiting = false, watching = false, moreButton = null, menuOpen = false, searchNode = null, searchReturn = false;
     var css = `
-body.stremio-hybrid { --sh-bg:#121023; --sh-panel:#211d35; --sh-accent:#9775fa; --sh-muted:#aba7bd; background:#121023 !important; color:#f0eef8; }
+body.stremio-hybrid { --sh-bg:#121023; --sh-panel:#211d35; --sh-accent:#9775fa; --sh-muted:#aba7bd; --sh-rail:#0c0b16; --sh-text:#f0eef8; --sh-border:#ffffff16; --sh-radius:.7em; --sh-pill:2em; --sh-gap:1.1em; --sh-speed:160ms; background:#121023 !important; color:#f0eef8; }
 body.stremio-hybrid .background { opacity:.12 !important; }
 body.stremio-hybrid .head { background:#151127 !important; border-bottom:1px solid #ffffff09; }
 body.stremio-hybrid .head__body { padding-left:1.8em; padding-right:1.8em; }
 body.stremio-hybrid .head__action { border-radius:50%; }
 body.stremio-hybrid .head__action.focus { background:#7960c9 !important; color:white !important; }
 body.stremio-hybrid .wrap { background:#121023; }
-body.stremio-hybrid .wrap__left { background:#100e20 !important; visibility:visible !important; }
-body.stremio-hybrid .menu__item { margin:.15em .45em; border-radius:.7em !important; min-height:2.8em; color:#aba7bd; }
+body.stremio-hybrid .wrap__left { background:var(--sh-rail) !important; visibility:visible !important; }
+body.stremio-hybrid .menu__item { margin:.15em .45em; border-radius:.7em !important; min-height:2.8em; color:#726d86; }
 body.stremio-hybrid .menu__item.focus, body.stremio-hybrid .menu__item.traverse { background:#29233e !important; color:#b79bff !important; }
 body.stremio-hybrid .menu__ico { opacity:1; }
 body.stremio-hybrid .items-line { padding-bottom:2.4em; }
@@ -34,6 +34,21 @@ body.stremio-hybrid .selectbox-item { border-radius:.65em; }
 body.stremio-hybrid .mapping--grid { padding:.6em .8em; }
 body.stremio-hybrid .mapping--grid .card { padding:0 .65em 1.8em; }
 body.stremio-hybrid .selectbox-item.focus, body.stremio-hybrid .settings-param.focus, body.stremio-hybrid .settings-folder.focus { background:#7960c9 !important; color:white !important; border-radius:.65em; }
+/* Native search and native action nodes are retained. Only known secondary actions move into Select. */
+body.stremio-hybrid .head__body { gap:1em; }
+body.stremio-hybrid .head__title { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:1em; opacity:.7; max-width:26vw; }
+body.stremio-hybrid .head__actions { margin-left:auto; flex-shrink:0; gap:.65em; }
+body.stremio-hybrid .head__actions > .sh-head-secondary { display:none !important; }
+body.stremio-hybrid .head__time, body.stremio-hybrid .head__split { display:none; }
+body.stremio-hybrid .open--search { width:clamp(12em,29vw,24em) !important; height:2.65em; border-radius:var(--sh-pill) !important; background:var(--sh-panel); display:flex; align-items:center; justify-content:flex-start; gap:.8em; padding:0 1.2em; margin:0 !important; }
+body.stremio-hybrid .open--search { position:absolute; left:50%; transform:translateX(-50%) !important; }
+body.stremio-hybrid .open--search svg { width:1.2em; height:1.2em; flex-shrink:0; opacity:.75; }
+body.stremio-hybrid .open--search::after { content:'Пошук фільмів і серіалів'; font-size:.8em; color:var(--sh-muted); white-space:nowrap; }
+body.stremio-hybrid .open--search.focus { box-shadow:0 0 0 .1em #cab7ff; }
+body.stremio-hybrid .open--search.focus::after { color:white; }
+body.stremio-hybrid .sh-head-more { width:2.65em; height:2.65em; margin:0 !important; background:var(--sh-panel); display:flex; justify-content:center; align-items:center; }
+body.stremio-hybrid .sh-head-more svg { width:1.1em; height:1.1em; }
+body.stremio-hybrid[data-sh-page="main"] .menu__item[data-action="main"], body.stremio-hybrid[data-sh-page="category_full"] .menu__item[data-action="filter"], body.stremio-hybrid[data-sh-page="search"] .menu__item[data-action="search"] { color:#a68ae7; background:#ffffff06; }
 /* Keep Cardify's composition and provider actions; improve readable hierarchy. */
 body.stremio-hybrid .full-start__background { opacity:.48 !important; filter:none !important; }
 body.stremio-hybrid .cardify-effects-overlay { width:100% !important; background:linear-gradient(90deg,rgba(18,16,35,.76),rgba(18,16,35,.16)) !important; transition:opacity 160ms ease-out !important; }
@@ -83,6 +98,70 @@ body.stremio-hybrid .menu__item, body.stremio-hybrid .head__action, body.stremio
  body.stremio-hybrid .card.focus, body.stremio-hybrid .full-start__button.focus { transform:none !important; }
 }
 `;
+    function actionLabel(node) {
+        var map = {'notice--icon':'Сповіщення', 'open--settings':'Налаштування', 'open--profile':'Профіль', 'full--screen':'Повний екран', 'open--broadcast':'Трансляція', 'trakt-head-action':'Trakt · статус та списки'};
+        var keys = Object.keys(map);
+        for (var i=0;i<keys.length;i++) if (node.classList.contains(keys[i])) return map[keys[i]];
+        return node.getAttribute('aria-label') || node.getAttribute('title') || node.textContent.trim();
+    }
+    function secondaryActions() {
+        return Array.prototype.filter.call(document.querySelectorAll('.head__actions > .head__action'), function (node) {
+            if (node === moreButton || node.classList.contains('open--search') || node.classList.contains('hide') || node.classList.contains('hidden') || node.style.display === 'none' || node.querySelector('input,select,textarea')) return false;
+            var label = actionLabel(node);
+            if (label) node.classList.add('sh-head-secondary');
+            return !!label;
+        });
+    }
+    function restoreHead(target) {
+        Lampa.Controller.toggle('head');
+        if (target && target.isConnected) Lampa.Controller.collectionFocus($(target), Lampa.Head.render());
+    }
+    function openActions() {
+        var nodes = secondaryActions();
+        var items = nodes.map(function (node) { return {title:actionLabel(node), shNode:node}; });
+        var clock = document.querySelector('.head__time');
+        if (clock) items.push({title:clock.textContent.trim().replace(/\s+/g,' '), subtitle:'Час і дата'});
+        menuOpen = true;
+        Lampa.Select.show({title:'Меню', items:items, onBack:function () { menuOpen=false;restoreHead(moreButton); }, onSelect:function (item) {
+            menuOpen=false;
+            Lampa.Select.hide();
+            Lampa.Activity.mixState();
+            restoreHead(moreButton);
+            if (item.shNode && item.shNode.isConnected) $(item.shNode).trigger('hover:enter');
+        }});
+    }
+    function onSearchEnter() { searchReturn = true; }
+    function onSearchClose() { if (searchReturn) { searchReturn=false;restoreHead(searchNode); } }
+    function setupHeader() {
+        if (!moreButton && document.querySelector('.head__actions')) {
+            var button = $('<div class="head__action selector sh-head-more" role="button" aria-label="Меню" title="Меню"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></div>');
+            moreButton = Lampa.Head.addElement(button, openActions)[0];
+            document.querySelector('.head__actions').appendChild(moreButton);
+        }
+        var nativeSearch = document.querySelector('.head .open--search');
+        if (nativeSearch !== searchNode) {
+            if (searchNode) $(searchNode).off('hover:enter.shHybrid', onSearchEnter);
+            searchNode=nativeSearch;
+            if (searchNode) $(searchNode).on('hover:enter.shHybrid', onSearchEnter);
+        }
+        secondaryActions();
+        var active = Lampa.Activity.active();
+        document.body.setAttribute('data-sh-page', active ? active.component : 'main');
+    }
+    function onActivity(event) { if (!event || event.type === 'start') setupHeader(); }
+    function setupUI() {
+        if (!watching) { Lampa.Listener.follow('activity', onActivity); Lampa.Search.listener.follow('close', onSearchClose); watching=true; }
+        setupHeader();
+    }
+    function removeUI() {
+        if (watching) { Lampa.Listener.remove('activity', onActivity); Lampa.Search.listener.remove('close', onSearchClose); watching=false; }
+        searchReturn=false;
+        if (searchNode) { $(searchNode).off('hover:enter.shHybrid', onSearchEnter); searchNode=null; }
+        if (menuOpen) { menuOpen=false; Lampa.Select.close(); }
+        if (moreButton) { $(moreButton).off('hover:enter', openActions).remove(); moreButton=null; }
+        document.querySelectorAll('.sh-head-secondary').forEach(function (node) { node.classList.remove('sh-head-secondary'); });
+        document.body.removeAttribute('data-sh-page');
+    }
     function enabled() {
         var value = Lampa.Storage.get('stremio_hybrid_enabled', true);
         return value !== false && value !== 'false' && value !== 0 && value !== '0';
@@ -97,6 +176,7 @@ body.stremio-hybrid .menu__item, body.stremio-hybrid .head__action, body.stremio
             document.head.appendChild(style);
         }
         if (!on && style) { style.remove(); style = null; }
+        if (on) setupUI(); else removeUI();
     }
     function setEnabled(on) { Lampa.Storage.set('stremio_hybrid_enabled', !!on); apply(!!on); }
     function stopWaiting() {
@@ -128,7 +208,7 @@ body.stremio-hybrid .menu__item, body.stremio-hybrid .head__action, body.stremio
         apply(enabled());
     }
     window.StremioHybrid = {
-        version: '1.1.0',
+        version: '2.0.0',
         setEnabled: setEnabled,
         refresh: function () { if (ready) apply(enabled()); },
         destroy: function () {
