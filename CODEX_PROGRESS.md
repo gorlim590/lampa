@@ -124,3 +124,9 @@
 - Search sources/finded subscriptions і тимчасові grid actions прибираються при Search.close/disable/destroy, у т.ч. неактивні кешовані roots. Додаткових polling/observer немає.
 - Наступне P4/P5: завершити спільні змінні й допоміжні вікна, native reload, stress очищення й пакет 2.0.0.
 - Коміт: feat: unify native search and route results into the native catalog grid.
+
+## Phase 2 / P4 — спільні токени та допоміжні екрани: PASS
+- Кольори поверхонь/фокусу/тексту, радіуси, відступи й швидкість переходів винесені у --sh-*; native language, modal, notice, select, loading використовують спільну палітру. CSS ізольовано класом теми; blur/backdrop-filter не додано.
+- PASS p4-report.json: спільні токени, фактичний native Modal, native language picker без зміни мови, reduced-motion. Скриншоти p4-modal.png/p4-language.png. node --check PASS.
+- Наступне P5: lifecycle стрес, штатне завантаження 2.0.0 без ін’єкцій, оновлення пакета/інструкції. Фізичний Google TV лишається неперевіреним.
+- Коміт: style: unify design tokens and native auxiliary screens.
