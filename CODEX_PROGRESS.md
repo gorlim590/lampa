@@ -203,3 +203,10 @@
 - Additional fallback-report: 2 PASS, errors=[]; native standalone TorrentsRedesign route opens and Back/reopen retains exactly one cinema view and full filename per row. Older global decorator can run first: adapter now reapplies full title and removes subtitle chip without duplicating controls.
 - User explicitly authorized GitHub push of commits from this chat. Publish current design/stremio-hybrid-x11 branch, no merge to main. Final commit hash and push outcome are in git log / final response.
 - Stop new implementation here. Resume from 2.3 checkpoint and existing reports; remaining hardware/player checks above stay BLOCKED.
+
+## Full integration / Stage0 checkpoint (2026-10-23)
+- Resumed00990ff on existing design/stremio-hybrid-x11; clean tree; actual Git checkout is partial theme/audit package, upstream source snapshots are separate. CDP Hybrid2.3/TorrentsRedesign1.1 and X11 access PASS.
+- Active scripts/extensions/settings categories mapped without query strings or auth storage; classification/dependency report in audit/full-integration-20261023/AUDIT.md, state/classification/sources.json. No plugins removed. CommunityWatches confirmed direct managed source, new-category supplies real categories, UA Comments external source identified with license pending. Prior63PASS retained.
+- Prior GitHub publication BLOCKED: HTTPS missing authentication; SSH host key verification failed. No workaround or retry loop.
+- Next critical step: expand existing details adapter toTV/animation, restore native series metadata, diagnose Dune broken icon; then embed filter search and Files. Trakt architecture remains deferred.
+- Commit: docs: map active integration dependencies and outstanding causes.
