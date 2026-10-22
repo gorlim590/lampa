@@ -754,4 +754,3 @@
 
     if (!window.lampa_omdb_plugin_loaded) startPlugin();
 })();
-
