@@ -1,0 +1,23 @@
+{
+  "checks": [
+    {
+      "name": "20 real browser destroy/reinit cycles and duplicate load",
+      "status": "PASS",
+      "before": {
+        "styles": 1,
+        "nodes": 2639,
+        "settings": 1,
+        "appListeners": 32,
+        "activityListeners": 12
+      },
+      "after": {
+        "styles": 1,
+        "nodes": 2659,
+        "settings": 1,
+        "appListeners": 32,
+        "activityListeners": 12
+      }
+    }
+  ],
+  "note": "Script tags added by the test are excluded from claims about theme DOM overhead. This does not establish long-session hardware memory stability."
+}

@@ -43,3 +43,11 @@
 - Тема застосована локально; постійного URL та публікації немає. Після reload потрібен preview-скрипт. P2 повний редизайн деталей відкладено; відкриття деталей/Back перевірено. Фізичний TV і тривала продуктивність — BLOCKED.
 - Коміти: 1bdc8a1 (референси), f533000 (Home), 28a836c (Discover). Фінальний коміт: fix: verify reversible theme settings and document local delivery (hash у git log).
 - Наступний крок: фізичний Google TV, перевірка довгих назв/читабельності та профілювання; публікація лише після окремого дозволу. Push/merge не виконувалися.
+
+## Продовження, етап 6: стабільність життєвого циклу — PASS
+- Продовжено чисту гілку design/stremio-hybrid-x11 після d4d2d8a. X11/Stremio та CDP/Lampa доступні; повторний повний аудит не виконувався.
+- Ініціалізація 1.1.0 використовує штатний Lampa.Listener app/ready; pending listener видаляється після ready або destroy, немає залежності від jQuery для завантаження теми. Параметр налаштувань перевіряється в реєстрі SettingsApi, без додаткового глобального прапорця. Враховано false/0 у збереженому значенні.
+- PASS unit перевірки до appready без jQuery, скасування очікування, повторного завантаження, 10 destroy/reinit, одного налаштування й callback. PASS 20 destroy/reinit у справжньому Chromium: один style, один параметр, app listeners 32→32, activity listeners 12→12. +20 DOM script tags належать тестовим ін'єкціям, а не темі.
+- Файли: ui/stremio-hybrid.js, audit/hybrid-v2/lifecycle-unit.cjs, stability.cjs/json.
+- Відомі незавершені задачі: постійне локальне підключення через штатні Розширення; деталі (довга назва/контраст опису), налаштування, фінальна матриця та інструкція TV. Фізичний TV і довга сесія залишаються BLOCKED.
+- Коміт етапу: fix: make hybrid initialization lifecycle safe before app ready (hash у git log).

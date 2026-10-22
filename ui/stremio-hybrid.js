@@ -2,7 +2,7 @@
 (function () {
     'use strict';
     if (window.StremioHybrid) return;
-    var style, ready = false, destroyed = false;
+    var style, ready = false, destroyed = false, waiting = false;
     var css = `
 body.stremio-hybrid { --sh-bg:#121023; --sh-panel:#211d35; --sh-accent:#9775fa; --sh-muted:#aba7bd; background:#121023 !important; color:#f0eef8; }
 body.stremio-hybrid .background { opacity:.12 !important; }
@@ -52,7 +52,10 @@ body.stremio-hybrid .selectbox-item.focus, body.stremio-hybrid .settings-param.f
  body.stremio-hybrid .card.focus { transform:none !important; }
 }
 `;
-    function enabled() { return Lampa.Storage.get('stremio_hybrid_enabled', true) !== false && Lampa.Storage.get('stremio_hybrid_enabled', true) !== 'false'; }
+    function enabled() {
+        var value = Lampa.Storage.get('stremio_hybrid_enabled', true);
+        return value !== false && value !== 'false' && value !== 0 && value !== '0';
+    }
     function apply(on) {
         if (destroyed) return;
         document.body.classList.toggle('stremio-hybrid', on);
@@ -65,17 +68,48 @@ body.stremio-hybrid .selectbox-item.focus, body.stremio-hybrid .settings-param.f
         if (!on && style) { style.remove(); style = null; }
     }
     function setEnabled(on) { Lampa.Storage.set('stremio_hybrid_enabled', !!on); apply(!!on); }
+    function stopWaiting() {
+        document.removeEventListener('DOMContentLoaded', onDOM);
+        if (waiting && window.Lampa && Lampa.Listener) Lampa.Listener.remove('app', onApp);
+        waiting = false;
+    }
+    function onApp(event) { if (event && event.type === 'ready') init(); }
+    function onDOM() {
+        if (window.appready) init();
+        else if (!waiting && window.Lampa && Lampa.Listener) {
+            Lampa.Listener.follow('app', onApp);
+            waiting = true;
+        }
+    }
     function init() {
-        if (ready || destroyed || !window.Lampa) return;
+        if (ready || destroyed || !window.Lampa || !Lampa.SettingsApi) return;
         ready = true;
-        if (!window.StremioHybridSettingsRegistered) {
-        Lampa.SettingsApi.addParam({component:'interface', param:{name:'stremio_hybrid_enabled',type:'trigger',values:true,default:true}, field:{name:'Stremio × Lampa',description:'Темна тема, компактна навігація та легкий фокус. Зберігає ваші картки.'},onChange:function(){if(window.StremioHybrid) window.StremioHybrid.refresh();}});
-        window.StremioHybridSettingsRegistered = true;
+        stopWaiting();
+        var params = Lampa.SettingsApi.getParam('interface') || [];
+        if (!params.some(function (item) { return item.param && item.param.name === 'stremio_hybrid_enabled'; })) {
+            Lampa.SettingsApi.addParam({
+                component: 'interface',
+                param: {name:'stremio_hybrid_enabled', type:'trigger', values:true, default:true},
+                field: {name:'Stremio × Lampa', description:'Темна тема, компактна навігація та легкий фокус. Зберігає ваші картки.'},
+                onChange: function () { if (window.StremioHybrid) window.StremioHybrid.refresh(); }
+            });
         }
         apply(enabled());
-        $(document).off('appready.stremioHybrid', init);
     }
-    window.StremioHybrid = {version:'1.0.0',setEnabled:setEnabled,refresh:function(){apply(enabled());},destroy:function(){apply(false);destroyed=true;$(document).off('appready.stremioHybrid',init);delete window.StremioHybrid;}};
+    window.StremioHybrid = {
+        version: '1.1.0',
+        setEnabled: setEnabled,
+        refresh: function () { if (ready) apply(enabled()); },
+        destroy: function () {
+            apply(false);
+            destroyed = true;
+            stopWaiting();
+            delete window.StremioHybrid;
+        }
+    };
     if (window.appready) init();
-    else $(document).on('appready.stremioHybrid', init);
+    else {
+        onDOM();
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', onDOM);
+    }
 })();
