@@ -1,0 +1,181 @@
+{
+  "checks": [
+    {
+      "name": "Real movie logo and Ukrainian/original captions",
+      "status": "PASS"
+    },
+    {
+      "name": "Palette extracted by installed TorrentsRedesign",
+      "status": "PASS",
+      "detail": {
+        "source": "poster",
+        "accent": "rgb(84,157,212)"
+      }
+    },
+    {
+      "name": "Same cinema card structure, full release name and real metrics",
+      "status": "PASS"
+    },
+    {
+      "name": "No subtitle chip; transparent movie header",
+      "status": "PASS"
+    },
+    {
+      "name": "Same quality tabs and filter/source menu",
+      "status": "PASS"
+    },
+    {
+      "name": "Cinema menu is a visible right panel",
+      "status": "PASS",
+      "detail": {
+        "x": 1104.015625,
+        "y": 108,
+        "width": 729.59375,
+        "height": 923.40625
+      }
+    },
+    {
+      "name": "Cinema menu geometry 1280",
+      "status": "PASS",
+      "detail": {
+        "x": 736.015625,
+        "y": 72,
+        "width": 486.390625,
+        "height": 615.609375
+      }
+    },
+    {
+      "name": "Cinema menu geometry 3840",
+      "status": "PASS",
+      "detail": {
+        "x": 2208.015625,
+        "y": 216,
+        "width": 1459.1875,
+        "height": 1846.8125
+      }
+    },
+    {
+      "name": "Cinema sort button opens styled native sort",
+      "status": "PASS"
+    },
+    {
+      "name": "Cinema source/filter menu opens styled native Select",
+      "status": "PASS"
+    },
+    {
+      "name": "Nested native filter keeps cinema panel styling",
+      "status": "PASS"
+    },
+    {
+      "name": "Back restores cinema toolbar focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Branded cinema layout 1280",
+      "status": "PASS",
+      "detail": {
+        "pane": {
+          "x": 960,
+          "y": 50.625,
+          "width": 320,
+          "height": 669.359375,
+          "top": 50.625,
+          "right": 1280,
+          "bottom": 719.984375,
+          "left": 960
+        },
+        "column": {
+          "x": 88.9375,
+          "y": 113.5625,
+          "width": 755.515625,
+          "height": 474.4375,
+          "top": 113.5625,
+          "right": 844.453125,
+          "bottom": 588,
+          "left": 88.9375
+        },
+        "buttonsBottom": 588,
+        "overflow": false,
+        "logos": 1,
+        "rows": 12
+      }
+    },
+    {
+      "name": "Branded cinema layout 1920",
+      "status": "PASS",
+      "detail": {
+        "pane": {
+          "x": 1440,
+          "y": 75.953125,
+          "width": 480,
+          "height": 1004.03125,
+          "top": 75.953125,
+          "right": 1920,
+          "bottom": 1079.984375,
+          "left": 1440
+        },
+        "column": {
+          "x": 133.421875,
+          "y": 170.375,
+          "width": 1133.25,
+          "height": 656.3125,
+          "top": 170.375,
+          "right": 1266.671875,
+          "bottom": 826.6875,
+          "left": 133.421875
+        },
+        "buttonsBottom": 826.6875,
+        "overflow": false,
+        "logos": 1,
+        "rows": 12
+      }
+    },
+    {
+      "name": "Branded cinema layout 3840",
+      "status": "PASS",
+      "detail": {
+        "pane": {
+          "x": 2880,
+          "y": 151.921875,
+          "width": 960,
+          "height": 2008.078125,
+          "top": 151.921875,
+          "right": 3840,
+          "bottom": 2160,
+          "left": 2880
+        },
+        "column": {
+          "x": 266.859375,
+          "y": 340.78125,
+          "width": 2266.5,
+          "height": 1225.5,
+          "top": 340.78125,
+          "right": 2533.359375,
+          "bottom": 1566.28125,
+          "left": 266.859375
+        },
+        "buttonsBottom": 1566.28125,
+        "overflow": false,
+        "logos": 1,
+        "rows": 12
+      }
+    },
+    {
+      "name": "Quality tab filters through native component",
+      "status": "PASS"
+    },
+    {
+      "name": "Disable restores text title, original header and removes adapters",
+      "status": "PASS"
+    },
+    {
+      "name": "Reenable one logo and one original caption",
+      "status": "PASS"
+    },
+    {
+      "name": "Disable closes owned cinema menu without orphan controller/styles",
+      "status": "PASS"
+    }
+  ],
+  "errors": []
+}

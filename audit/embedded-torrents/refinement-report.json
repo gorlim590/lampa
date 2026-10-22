@@ -57,6 +57,16 @@
           "lang": "UKR",
           "visible": "🇺🇦",
           "label": "UKR"
+        },
+        {
+          "lang": "UKR",
+          "visible": "🇺🇦",
+          "label": "UKR"
+        },
+        {
+          "lang": "UKR",
+          "visible": "🇺🇦",
+          "label": "UKR"
         }
       ]
     },
@@ -73,7 +83,7 @@
       "status": "PASS",
       "detail": {
         "controller": "items_line",
-        "focus": "full-descr__text selector focus"
+        "focus": "card selector layer--visible layer--render card--loaded ydesign-card ydesign-vertical ydesign-is-watched ydesign-from-trakt ydesign-ready focus"
       }
     },
     {
@@ -92,11 +102,11 @@
       "status": "PASS",
       "detail": [
         {
-          "opacity": 0.905005,
+          "opacity": 0.863419,
           "transition": "0.8s"
         },
         {
-          "opacity": 0.0949955,
+          "opacity": 0.136581,
           "transition": "0.8s"
         }
       ]

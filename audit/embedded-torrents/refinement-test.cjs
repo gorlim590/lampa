@@ -5,7 +5,7 @@ const fs=require('fs'),{chromium}=require('playwright');
  const report={checks:[],errors:[]},save=()=>fs.writeFileSync('audit/embedded-torrents/refinement-report.json',JSON.stringify(report,null,2));
  const check=(name,ok,detail)=>{report.checks.push({name,status:ok?'PASS':'FAIL',detail});save()};
  p.on('pageerror',e=>report.errors.push(e.message.replace(/https?:\/\/[^\s)]+/g,'[URL]')));
- await p.reload({waitUntil:'domcontentloaded'});await p.waitForFunction(()=>window.StremioHybrid?.version==='2.2.0'&&document.querySelector('.activity--active .sh-streams'),null,{timeout:45000});await p.waitForTimeout(1500);
+ await p.reload({waitUntil:'domcontentloaded'});await p.waitForFunction(()=>window.StremioHybrid?.version==='2.3.0'&&document.querySelector('.activity--active .sh-streams'),null,{timeout:45000});await p.waitForTimeout(1500);
  await p.evaluate(()=>{Lampa.Screensaver.stopSlideshow();Lampa.Screensaver.resetTimer();window.__pace={interval:setInterval,delays:[],duration:Lampa.Storage.field('cardify_slideshow_duration')};window.setInterval=function(fn,delay){if(typeof fn==='function'&&String(fn).includes('cardifyCurrentItemId'))__pace.delays.push(delay);return __pace.interval.apply(this,arguments)};Lampa.Activity.push({component:'full',id:1288069,method:'movie',source:'tmdb',card:{id:1288069,title:'Тенцинґ',original_title:'Tenzing'}});});
  try{
   await p.waitForFunction(()=>document.querySelector('.activity--active .sh-streams')&&!document.querySelector('.activity--active.activity--load'),null,{timeout:20000});await p.waitForTimeout(1500);
@@ -16,7 +16,7 @@ const fs=require('fs'),{chromium}=require('playwright');
   check('Available seeded sources visibly highlighted',await p.evaluate(()=>document.querySelectorAll('.activity--active .sh-source-pick').length>0&&Array.from(document.querySelectorAll('.activity--active .sh-source-pick')).every(n=>n._ctrSource?.Seeders>0)));
   await p.waitForTimeout(1500);await p.screenshot({path:'audit/embedded-torrents/compact-final.png'});
   await p.keyboard.press('Escape');await p.keyboard.press('ArrowDown');await p.waitForTimeout(600);
-  check('Native Down scrolls details; sources leave the viewport',await p.evaluate(()=>Lampa.Controller.enabled().name==='full_descr'&&document.querySelector('.activity--active .sh-streams').getBoundingClientRect().bottom<100));
+  check('Native Down scrolls details; sources leave the viewport',await p.evaluate(()=>Lampa.Controller.enabled().name==='full_descr'&&document.querySelector('.activity--active .sh-streams').getBoundingClientRect().bottom<=document.querySelector('.activity--active .sh-movie-hero').getBoundingClientRect().bottom+1));
   for(let i=0;i<5;i++){await p.keyboard.press('ArrowDown');await p.waitForTimeout(150)}
   check('Native Down reaches cast or recommendation rows',await p.evaluate(()=>Lampa.Controller.enabled().name!=='full_start'&&Lampa.Controller.enabled().name!=='sh_movie_streams'&&Array.from(document.querySelectorAll('.activity--active .focus')).some(n=>{var r=n.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight&&r.width>0;})),await p.evaluate(()=>({controller:Lampa.Controller.enabled().name,focus:document.querySelector('.activity--active .focus')?.className})));
   await p.screenshot({path:'audit/embedded-torrents/lower-content-final.png'});

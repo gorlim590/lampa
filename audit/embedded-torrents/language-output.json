@@ -1,0 +1,17 @@
+{
+  "checks": [
+    {
+      "name": "Actual non-English film shows Ukrainian and English translation",
+      "status": "PASS"
+    },
+    {
+      "name": "Brand metadata does not start torrent parser",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "palette": {
+    "source": "poster",
+    "logo": "loaded"
+  }
+}

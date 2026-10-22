@@ -1,6 +1,24 @@
-# Stremio × Lampa 2.1.0
+# Stremio × Lampa 2.3.0
 
 Продовження `design/stremio-hybrid-x11`. Git-репозиторій: `audit/stremio-hybrid-20261022/repository`. Основний плагін — `ui/stremio-hybrid.js`; синхронна копія в кореневій `ui/` використовується локальним сервером. Пакет — `release/stremio-hybrid/`.
+
+## Джерела TorrentsRedesign у сторінці фільму (2.3.0)
+
+Дія «Торренти» відкриває реальні результати в суцільній правій панелі: 25% ширини, від хедера до нижнього краю, без floating-frame. Усередині використовується view-адаптер перевіреного `torrents-redesign.js`: плитка 4K/FHD, **повна назва релізу**, кодек/трекер, доступні мовні прапорці, розмір, сіди/піри, бітрейт. Назва дозволяє перевірити рік/сезон/епізод перед вибором. Окрему позначку субтитрів прибрано; вихідний release title не обрізається й може містити Sub. Unknown metadata не вигадується. Native рядок і його handlers збережені; приховане native metadata-представлення потрібне для сумісності, поверх нього працює одна cinema view. Кнопки не дублюються.
+
+Вкладки Усі / 4K / 1080p / 720p викликають native filter API. «Сортування» й «Фільтри та джерела» відкривають реальні native Select із кастомним оформленням TorrentsRedesign: права темна панель, колір фільму, великі рядки й фокус; вкладені фільтри також стилізовані. Недоступні в core пункти (наприклад окремий parser selector) не підробляються. Розширене уточнення запиту лишається сумісним fallback. Сам встановлений TorrentsRedesign 1.1.0 і локальна 1.2 audit-копія не перезаписуються; використовуються його публічні parseTitle/score/palette та адаптована view-частина перевірених версій. Це не встановлення всього 1.2 плагіна й не перенесення його додаткових сервісів.
+
+Над українською та original/англійською назвами показується справжній TMDB logo. Для неангломовного оригіналу запитується доступна англійська translation; за її відсутності залишається original title. Logo обирається uk → en → neutral, відсутній logo залишає текстову назву. Палітра обчислюється функцією TorrentsRedesign: кольоровий logo → poster → backdrop → спокійний fallback. На Tenzing logo монохромний, тому фактичний акцент блакитний із постера. Canvas 48×24, до 16 palette cache і 8 image/title записів; image API відповідь Cardify повторно використовується. Окремий anonymous image URL відділяє canvas CORS response від старого opaque display-cache. Немає обходу CORS або зміни Chromium security. Палітра не перераховується на кожному кадрі slideshow.
+
+На сторінці фільму хедер, пошук і меню прозорі. Інші розділи зберігають свої стилі. One hero wrapper відокремлює selectors джерел від FullStart collection: штатний пульт не перескакує випадково у сторонні рядки. Wrapper, logo/caption, CSS і listeners прибираються при disable/destroy; первинні metadata/action nodes повертаються.
+
+Пульт: OK на «Торренти» відкриває джерела; ↑/↓ — рядки, OK — native вибір, ←/Back — інформація. ↑ з рядків або → переводить до toolbar; ↑/↓ між вкладками/меню та списком, ←/→ між кнопками. Down із основних дій веде до деталей/акторів/рекомендацій; Down після останнього джерела також переводить униз. Окремої кнопки «Деталі й актори» немає. Правий блок прокручується разом із hero й не накладається на нижні ряди. Back із кастомного меню повертає його toolbar focus. «↻» — повторний пошук; «⋯» — standalone fallback. Зірочка/«Найкращий вибір» — heuristic серед завантажених рядків, а не гарантія кодека чи тотожності фільму; автоматичного запуску немає, native sort збережено.
+
+Парсери не запускаються до відкриття джерел. Cache: до 4 результатів, 5 хвилин / 1 хвилина empty, до 2MB JSON на запис; errors не кешуються. Оновлення/зміна parser settings скидає cache. До 40 connected rows; відвідані native вікна обмежені pager до 300 і видаляються після закриття. Shared Parser.clear виконується перед наступною Activity. Native Parser/Torrent/TorrServer та long-press/file flow збережені. Стара torrent Activity потрібна для Search/history/серіалів/чужих маршрутів/розширеного пошуку й не видаляється. Карта: `audit/embedded-torrents/DEPENDENCIES.md`.
+
+Backdrop: виправлено opacity !important конфлікт із Cardify; розпізнаний rotation callback має інтервал щонайменше 25 секунд та fade 800ms. Reduced-motion вимикає fade. Налаштування Cardify не записуються; disable повертає вихідний інтервал. На рушії без WeakRef pacing поточного таймера відновиться при наступному відкритті фільму. Невідомі версії callback пропускаються без підміни. Власних постійних таймерів немає.
+
+Тести/скриншоти — `audit/embedded-torrents/`: real, controlled, refinement, switch, branding reports. Native load без ін’єкцій, 720p/1080p/4K, cinema меню/вкладені фільтри/Back, flags, logos/palette, rollback, 400/3/0/error/slow fixtures, bounded rows/cache, міжфільмове перемикання, callback crossfade. Playback лише через контрольований spy; справжній TorrServer transfer/player return, фізичний Google TV/пульт і довга сесія BLOCKED. Поточний desktop sample: Full 1468ms/17 XHR-Fetch/482 DOM; джерела 705ms/2 requests/935 DOM/12 rows. Це інший набір/стан cache, порівнювати напряму зі старими 31 results некоректно. Combined DOM більший за standalone, загального speedup не заявлено.
 
 ## Деталі фільму: Stremio-first 2.1.0
 
@@ -10,7 +28,7 @@ Cardify-адаптер переміщує native description/status nodes, зб�
 
 Зміни ізольовано для `component=full`, `method=movie`; Home, Discover, серіали й налаштування не перероблялися в цьому етапі. Додано один full listener, по одному capture focus/description-enter handler на активні movie nodes, RAF і два скасовувані одноразові проходи для відкладеної роботи Interface+. Немає polling або MutationObserver. Disable/destroy очищує їх; activity destroy звільняє record.
 
-Референси отримано зі справжнього Stremio через X11, з переходом The Kid → жанр Drama → Tenzing → Show. Дві пари порівняння: `audit/movie-stremio-first/comparison-1.png` і `comparison-2.png`; аналіз власників DOM/конфліктів — `ANALYSIS.md`. На відміну від Stremio, збережені навігація й нижні ряди Lampa; її дії не підмінені декоративною streams pane.
+Референси отримано зі справжнього Stremio через X11, з переходом The Kid → жанр Drama → Tenzing → Show. Дві пари порівняння: `audit/movie-stremio-first/comparison-1.png` і `comparison-2.png`; аналіз власників DOM/конфліктів — `ANALYSIS.md`. На відміну від Stremio, збережені навігація й нижні ряди Lampa; native дії збережені, а в 2.2 додано справжній native torrents Component.
 
 Перевірки 2.1: `report.json` — 13 PASS (native reload, три розміри, focus/OK/Back, favorites/torrents, rollback, 12 toggle, збережені вузли, reduced-motion); `reopen-report.json` — 7 PASS (Cardify reopen/Back, нижній контент, Home без movie scope); `final-validation.json` — 7 PASS (повний опис/Back/disable, довга назва 720p/1080p/4K, серіал без movie scope). Нових pageerror=0. Дані Trakt/обраного не змінювалися, відео/трейлери не відтворювалися. Фізичний Google TV та довга сесія залишаються неперевіреними.
 
@@ -18,7 +36,7 @@ Cardify-адаптер переміщує native description/status nodes, зб�
 
 - Home/Discover: темна вузька навігація, горизонтальні ряди й native каталог, спокійна типографіка та фокус 1.035/160ms. Категорії та рекомендації збережено.
 - Верхня панель: помітне поле-підказка відкриває справжній Search Lampa. Меню «⋮» відкриває native Select із доступом до сповіщень, профілю, налаштувань, fullscreen, Trakt та підписаних сторонніх дій. Викликаються оригінальні handlers; невідомі дії без назви залишаються на панелі. Час/дата перенесені в меню. Back повертає фокус.
-- Деталі: існуючий постер, великий backdrop, повна назва, метадані та опис праворуч. Усі native кнопки, провайдери, торренти, списки, Trakt та епізоди залишаються у своїх компонентах. Кнопки переносяться рядками.
+- Деталі: існуючий постер, великий backdrop, повна назва, метадані та опис праворуч. Усі native кнопки, провайдери, торренти, списки, Trakt та епізоди залишаються у своїх компонентах. Кнопки переносяться рядками; movie-only 2.1–2.3 композиція описана вище.
 - Налаштування: окремий двопанельний екран; ліворуч категорії штатних Settings та плагінів (у тестовому профілі 29), праворуч оригінальні SettingsApi-параметри. Up/Down/OK обирають категорію, Right переходить у параметри, Left повертає до категорій, Back повертає через категорії в застосунок. Збереження й вкладені селектори залишаються native.
 - Пошук: поле, джерела, native групи фільмів/серіалів/анімації, порожні стани. Наприкінці TMDB-рядків фільмів і серіалів є «Сітка результатів»: відкриває native каталог з першої сторінки. Інші провайдери зберігають свою навігацію. Discover використовує справжні фільтри й сортування Lampa.
 - Єдині `--sh-*` токени поверхонь, кольорів, фокусу, відступів, радіусів та анімацій; узгоджені Select, Modal, вибір мови, повідомлення та loading.
@@ -53,7 +71,7 @@ API: `StremioHybrid.setEnabled(false)` / `true`, `StremioHybrid.refresh()`, `Str
 1. Перевірити SHA256 файлів у `release/stremio-hybrid/`.
 2. Після окремого дозволу розмістити `stremio-hybrid.js` на HTTPS-хості, доступному телевізору. Потрібен HTTP 200 із JavaScript. Файл ще не опубліковано; localhost ПК не є адресою для TV.
 3. Lampa на TV → Налаштування → Розширення → Додати плагін → фактичний HTTPS URL.
-4. Завантажувати після наявних Interface+/YDesign/Cardify+. Використати один спосіб підключення, не дублювати loader та Розширення.
+4. Завантажувати після наявних Interface+/YDesign/Cardify+ та TorrentsRedesign (для спільних parseTitle/palette/score). Використати один спосіб підключення, не дублювати loader та Розширення.
 5. Перезавантажити Lampa; увімкнути тему в Інтерфейсі. Перевірити стрілки/OK/Back, меню «⋮», пошук/сітку, фільтри, деталі, епізоди, рейтинги/UA/переглянуте та налаштування.
 6. Перевірити вимкнення, повторне ввімкнення й збереження стану після reload, а також довгу сесію прокручування на самому Google TV. За проблем плавності вимкнути тему й зафіксувати екран/модель/роздільність.
 
@@ -61,7 +79,7 @@ API: `StremioHybrid.setEnabled(false)` / `true`, `StremioHybrid.refresh()`, `Str
 
 Постійні додатки: один style, одна кнопка меню, один параметр SettingsApi. Тимчасові: одна панель категорій Settings і зазвичай дві дії TMDB-сітки. Картки не дублюються. Один controller slot `sh_settings_nav` повторно використовується; Lampa не має remove API, тому disable замінює його native fallback без посилань на DOM.
 
-До appready є тимчасовий listener, після старту він видаляється. В активному стані: activity, Search.close/sources, Settings.open/close, два capture keyboard handlers і namespaced handler штатного пошуку. У відкритому Search — один finded listener джерел; у Settings — один click handler та один скасовуваний requestAnimationFrame. Disable/destroy очищує їх. Polling, MutationObserver, фонових таймерів, власних мережевих запитів або обробників на кожній картці немає.
+До appready є тимчасовий listener, після старту він видаляється. В активному стані: activity, Search.close/sources, Settings.open/close, два capture keyboard handlers і namespaced handler штатного пошуку. У відкритому Search — один finded listener джерел; у Settings — один click handler та один скасовуваний requestAnimationFrame. Disable/destroy очищує їх. Власного polling, MutationObserver, постійних таймерів, backend-запитів або handlers на кожній картці немає. Movie sources додають scoped Controller, capture handlers і один torrent/render listener на час життя child; оригінальні row handlers створює native Component. Тимчасова підміна setInterval існує лише в синхронному callback Cardify images і відновлюється у finally.
 
 Переходи переважно transform/opacity, reduced-motion підтримується. Важкі blur/backdrop-filter та нескінченні анімації на картках вимкнені. Наявні механізми lazy rendering, кешу й запитів плагінів не переписувалися.
 

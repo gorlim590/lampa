@@ -1,0 +1,13 @@
+{
+  "checks": [
+    {
+      "name": "Native standalone fallback with original TorrentsRedesign still works",
+      "status": "PASS"
+    },
+    {
+      "name": "Back then reopen retains full release names and one cinema row per native source",
+      "status": "PASS"
+    }
+  ],
+  "errors": []
+}
