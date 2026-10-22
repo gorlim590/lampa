@@ -210,13 +210,18 @@
         return null;
     }
 
-    function updateRatings(e) {
-        var render = e.object.activity.render();
+    // A supplied target shares the same sources, icons, ordering and user settings.
+    // It never removes or moves ratings on the movie card.
+    function updateRatings(e, target) {
+        var render = target ? $(target) : e.object.activity.render();
         var movie = e.data.movie;
+
+        var container;
+        if (target) container = $(target).addClass(CONTAINER_CLASS);
+        if (!target) {
         
         render.find('.rate--tmdb, .rate--imdb, .rate--kp, .full-start__rates').remove();
-
-        var container = render.find('.' + CONTAINER_CLASS);
+        container = render.find('.' + CONTAINER_CLASS);
 
         if (container.length > 1) {
             container.not(':first').remove();
@@ -253,6 +258,7 @@
             }
         }
 
+        }
         var marginVal = getRatingMargin();
         var sat = getSaturation();
         container.css({
@@ -554,10 +560,18 @@
         }
 
         refreshAverage(container);
+        if (!target) Lampa.Listener.send('average_rating', {type: 'render', movie: movie});
     }
 
     function startPlugin() {
         window.lampa_omdb_plugin_loaded = true;
+        Lampa.AverageRating = {
+            render: function (movie, target, context) {
+                context = context || {};
+                updateRatings({object: {method: context.method || (movie.name ? 'tv' : 'movie'), source: context.source || movie.source || 'tmdb'}, data: {movie: movie, reactions: context.reactions}}, target);
+            }
+        };
+        Lampa.Listener.send('average_rating', {type: 'ready'});
         Lampa.SettingsApi.addComponent({ component: COMPONENT_NAME, name: 'OMDB' });
         Lampa.SettingsApi.addComponent({ component: 'omdb_ratings_select', name: 'Вибір рейтингів' });
 
@@ -740,3 +754,4 @@
 
     if (!window.lampa_omdb_plugin_loaded) startPlugin();
 })();
+
