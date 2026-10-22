@@ -1,0 +1,63 @@
+{
+  "kind": "Existing page reload with inspected local owner response; configured MP4 preview, no setting writes",
+  "checks": [
+    {
+      "name": "Correct show/resetTimer hooks own only native Lampa saver",
+      "status": "PASS"
+    },
+    {
+      "name": "Cancelled pending start cannot reopen saver",
+      "status": "PASS"
+    },
+    {
+      "name": "Native show opens only MP4 saver cycle0",
+      "status": "PASS"
+    },
+    {
+      "name": "First key exits without native residue cycle0",
+      "status": "PASS"
+    },
+    {
+      "name": "Native show opens only MP4 saver cycle1",
+      "status": "PASS"
+    },
+    {
+      "name": "First key exits without native residue cycle1",
+      "status": "PASS"
+    },
+    {
+      "name": "Native show opens only MP4 saver cycle2",
+      "status": "PASS"
+    },
+    {
+      "name": "First key exits without native residue cycle2",
+      "status": "PASS"
+    },
+    {
+      "name": "Disable restores original native show/reset methods",
+      "status": "PASS"
+    },
+    {
+      "name": "Reenable suppresses native idle timer again",
+      "status": "PASS"
+    },
+    {
+      "name": "Destroy releases capture input listeners",
+      "status": "PASS"
+    },
+    {
+      "name": "Destroy releases video DOM and restores native methods",
+      "status": "PASS"
+    },
+    {
+      "name": "Clean owner reload initializes once",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "exitMs": [
+    26.099999994039536,
+    1.300000011920929,
+    26.599999994039536
+  ]
+}
