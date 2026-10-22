@@ -140,3 +140,11 @@
 - BLOCKED: фізичний Google TV, реальний пульт, апаратне профілювання/довга сесія. Playback/серверні записи Trakt не виконувалися; кожен параметр кожного плагіна не змінювався. Частина Stremio catalog fetch недоступна, референси збережено.
 - Наступне: синхронізувати README, пакет 2.0.0 та SHA256; остаточна контрольна точка. Push/merge/публікації немає.
 - Коміт: test: verify phase two native loading and bounded UI lifecycle.
+
+## Phase 2 — фінальний пакет 2.0.0 та точка продовження
+- Завершені локальні коміти: 0586b7c P0, 5798c20 P1, 46ada59 P2, 9eda6e2 P3, 0498d69 P4, 1e33ff8 P5. Фінальний пакет: docs: package phase two hybrid theme and installation guide (hash — git log).
+- README-stremio-hybrid.md переписано для 2.0.0: фактичні UI-зміни, native підключення, керування/відкат, обсяг listeners/DOM, інструкція TV та межі перевірок. release/stremio-hybrid синхронізовано з ui/stremio-hybrid.js, SHA256SUMS оновлено.
+- Скриншоти/сценарії/JSON: audit/hybrid-phase2; acceptance-summary.json підсумовує звіти. COMPARISON.md містить пари знімків і відмінності від реального Stremio; попередні референси не видалялись.
+- Стан: тема enabled=true, один native localhost extension/style/параметр, Home доступний. Chromium та Stremio не закриті, localStorage/cookies не очищувались, плагіни/облікові дані збережені. Сервер 127.0.0.1:8766 лишається локальним preview без автозапуску.
+- Доступні етапи Phase 2 завершено й збережено. Наступне: реальний Google TV Streamer 4K/пульт/довга сесія, перевірка усіх потрібних провайдерів і plugin dialogs на пристрої; тільки потім окремо дозволена HTTPS-публікація та встановлення. Desktop 4K не підтверджує апаратну продуктивність TV.
+- Не починати аудит заново. За повторного native Home loading зібрати часову шкалу/знеособлені помилки, не додавати сліпі retries. Історична причина невідома; актуальні reload PASS. Push/merge/публікації не виконувалися.
