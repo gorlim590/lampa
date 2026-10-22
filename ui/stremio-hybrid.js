@@ -29,9 +29,6 @@ body.stremio-hybrid .ydesign-card.focus::after, body.stremio-hybrid .ydesign-car
 body.stremio-hybrid .ydesign-card .card__view::before { animation:none !important; }
 body.stremio-hybrid .ydesign-badge, body.stremio-hybrid .ydesign-genre-badge, body.stremio-hybrid .ydesign-rating, body.stremio-hybrid .ydesign-series-pill, body.stremio-hybrid .ydesign-card-notch { backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
 body.stremio-hybrid .ydesign-content-layer, body.stremio-hybrid .ydesign-desc-under { transition:opacity 160ms ease-out !important; }
-body.stremio-hybrid .filter { padding:1em 1.8em; }
-body.stremio-hybrid .filter__item, body.stremio-hybrid .filter--button { background:#252039; border-radius:2em; padding:.7em 1.2em; }
-body.stremio-hybrid .filter__item.focus, body.stremio-hybrid .filter--button.focus { background:#7960c9 !important; color:white !important; }
 body.stremio-hybrid .selectbox__content, body.stremio-hybrid .settings__content, body.stremio-hybrid .modal__content { background:#211d35 !important; border-radius:1em; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
 body.stremio-hybrid .selectbox-item { border-radius:.65em; }
 body.stremio-hybrid .mapping--grid { padding:.6em .8em; }
@@ -72,13 +69,13 @@ body.stremio-hybrid .selectbox-item.focus, body.stremio-hybrid .settings-param.f
         if (ready || destroyed || !window.Lampa) return;
         ready = true;
         if (!window.StremioHybridSettingsRegistered) {
-        Lampa.SettingsApi.addParam({component:'interface', param:{name:'stremio_hybrid_enabled',type:'trigger',default:true}, field:{name:'Stremio × Lampa',description:'Темна тема, компактна навігація та легкий фокус. Зберігає ваші картки.'},onChange:function(value){if(window.StremioHybrid) window.StremioHybrid.setEnabled(value === true || value === 'true');}});
+        Lampa.SettingsApi.addParam({component:'interface', param:{name:'stremio_hybrid_enabled',type:'trigger',values:true,default:true}, field:{name:'Stremio × Lampa',description:'Темна тема, компактна навігація та легкий фокус. Зберігає ваші картки.'},onChange:function(){if(window.StremioHybrid) window.StremioHybrid.refresh();}});
         window.StremioHybridSettingsRegistered = true;
         }
         apply(enabled());
         $(document).off('appready.stremioHybrid', init);
     }
-    window.StremioHybrid = {version:'1.0.0',setEnabled:setEnabled,destroy:function(){apply(false);destroyed=true;$(document).off('appready.stremioHybrid',init);}};
+    window.StremioHybrid = {version:'1.0.0',setEnabled:setEnabled,refresh:function(){apply(enabled());},destroy:function(){apply(false);destroyed=true;$(document).off('appready.stremioHybrid',init);delete window.StremioHybrid;}};
     if (window.appready) init();
     else $(document).on('appready.stremioHybrid', init);
 })();

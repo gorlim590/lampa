@@ -1,0 +1,42 @@
+{
+  "checks": [
+    {
+      "name": "Exactly one settings toggle after clean load",
+      "status": "PASS"
+    },
+    {
+      "name": "Settings toggle disables CSS",
+      "status": "PASS"
+    },
+    {
+      "name": "Settings toggle enables CSS",
+      "status": "PASS"
+    },
+    {
+      "name": "Loaded YDesign metadata survives theme toggle",
+      "status": "PASS",
+      "detail": {
+        "before": {
+          "ratings": 23,
+          "genres": 38,
+          "ua": 10
+        },
+        "after": {
+          "ratings": 23,
+          "genres": 38,
+          "ua": 10
+        },
+        "sameNodes": true,
+        "off": {
+          "styles": 0,
+          "rail": "hidden"
+        },
+        "styles": 1
+      }
+    },
+    {
+      "name": "Disable restores hidden sidebar and removes style",
+      "status": "PASS"
+    }
+  ]
+}
