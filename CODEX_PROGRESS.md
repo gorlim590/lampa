@@ -115,3 +115,12 @@
 - Перевірено native стек шарів: збережено core z-index Settings=20, тому language/select/modal лишаються зверху. Native HoverSwitcher вимикає pointer-events після клавіш; stress маршрутизації категорій використовують DOM click events, TV-переходи — справжні клавіші CDP. Фізичні пульт/миша не заявляються перевіреними.
 - Наступне P3: реальний пошук/результати та порожні стани; P4/P5: змінні, додаткові екрани, clean reload і lifecycle stress.
 - Коміт: feat: build functional split settings with native parameter components.
+
+## Phase 2 / P3 — пошук, native сітка та порожні стани: PASS
+- Стилізовано справжній Search: поле, джерела TMDB/TraktTV, результати, loading/empty, native фільтри. Збережено групи фільмів/серіалів і сторонні джерела.
+- Для TMDB додано по одній дії «Сітка результатів» у native рядки фільмів/серіалів. Вона викликає той самий штатний category_full/search/movie або search/tv з page=1; native Sources.select закриває пошук і зберігає історію штатно. Немає окремих запитів/бекенду або підроблених фільтрів. Для сторонніх джерел їхній контракт навігації не змінюється.
+- PASS 8 перевірок p3-report.json: «Дюна» повертає movies/series, 16 рейтингів/6 UA/2 watched; поле 720p/1080p/4K; native Controller Down/Right до дії сітки; Enter відкриває першу сторінку grid; реальний пустий запит показує «На ваш запит нічого не знайдено». Нових pageerror=0.
+- PASS anime-report.json: «Тоторо» — native animation card (genre id 16), три жанрові бейджі. Пошук підтримує текстове введення; Controller-навігація перевірена окремо від введення в system keyboard. Фізичний TV не тестувався.
+- Search sources/finded subscriptions і тимчасові grid actions прибираються при Search.close/disable/destroy, у т.ч. неактивні кешовані roots. Додаткових polling/observer немає.
+- Наступне P4/P5: завершити спільні змінні й допоміжні вікна, native reload, stress очищення й пакет 2.0.0.
+- Коміт: feat: unify native search and route results into the native catalog grid.

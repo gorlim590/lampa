@@ -2,7 +2,7 @@
 (function () {
     'use strict';
     if (window.StremioHybrid) return;
-    var style, ready = false, destroyed = false, waiting = false, watching = false, moreButton = null, menuOpen = false, searchNode = null, searchReturn = false, settingsRail = null, settingsFrame = 0, settingsParameter = null, settingsCategory = 'interface', settingsLeftConsumed = false;
+    var style, ready = false, destroyed = false, waiting = false, watching = false, moreButton = null, menuOpen = false, searchNode = null, searchReturn = false, settingsRail = null, settingsFrame = 0, settingsParameter = null, settingsCategory = 'interface', settingsLeftConsumed = false, searchSources = null, searchRoots = [];
     var css = `
 body.stremio-hybrid { --sh-bg:#121023; --sh-panel:#211d35; --sh-accent:#9775fa; --sh-muted:#aba7bd; --sh-rail:#0c0b16; --sh-text:#f0eef8; --sh-border:#ffffff16; --sh-radius:.7em; --sh-pill:2em; --sh-gap:1.1em; --sh-speed:160ms; background:#121023 !important; color:#f0eef8; }
 body.stremio-hybrid .background { opacity:.12 !important; }
@@ -49,6 +49,25 @@ body.stremio-hybrid .open--search.focus::after { color:white; }
 body.stremio-hybrid .sh-head-more { width:2.65em; height:2.65em; margin:0 !important; background:var(--sh-panel); display:flex; justify-content:center; align-items:center; }
 body.stremio-hybrid .sh-head-more svg { width:1.1em; height:1.1em; }
 body.stremio-hybrid[data-sh-page="main"] .menu__item[data-action="main"], body.stremio-hybrid[data-sh-page="category_full"] .menu__item[data-action="filter"], body.stremio-hybrid[data-sh-page="search"] .menu__item[data-action="search"] { color:#a68ae7; background:#ffffff06; }
+/* Native Search sources, keyboard and empty states share the same visual system. */
+body.stremio-hybrid .main-search { background:var(--sh-bg); color:var(--sh-text); }
+body.stremio-hybrid .main-search .search__body { padding:1em 1.8em 2em; }
+body.stremio-hybrid .main-search .head-backward { padding:1.4em 1.8em .7em; }
+body.stremio-hybrid .main-search .head-backward__title { font-size:1.4em; font-weight:500; }
+body.stremio-hybrid .main-search .simple-keyboard-input { background:var(--sh-panel); color:var(--sh-text); border:1px solid var(--sh-border); border-radius:var(--sh-pill); padding:.8em 1.1em; }
+body.stremio-hybrid .main-search .simple-keyboard-input.focus { border-color:var(--sh-accent); }
+body.stremio-hybrid .main-search .search__sources { gap:.7em; margin:1.2em 0; }
+body.stremio-hybrid .main-search .search-source { border-radius:var(--sh-pill); background:var(--sh-panel); color:var(--sh-muted); padding:.8em 1.2em; }
+body.stremio-hybrid .main-search .search-source.active { color:var(--sh-text); box-shadow:inset 0 -.12em var(--sh-accent); }
+body.stremio-hybrid .main-search .search-source.focus { background:#3e315b; color:white; }
+body.stremio-hybrid .main-search .search-source__count { background:#ffffff0d; border-radius:var(--sh-pill); }
+body.stremio-hybrid .search-empty, body.stremio-hybrid .search-looking, body.stremio-hybrid .empty { color:var(--sh-muted); }
+body.stremio-hybrid .main-search .items-line__title { font-size:1.15em; }
+body.stremio-hybrid .main-search .card.ydesign-vertical { width:13.2vw !important; }
+body.stremio-hybrid .sh-search-grid { width:13.2vw; min-height:12em; flex:0 0 auto; display:flex; align-items:center; justify-content:center; padding:1em; text-align:center; background:var(--sh-panel); border:1px solid var(--sh-border); border-radius:var(--sh-radius); color:var(--sh-muted); }
+body.stremio-hybrid .sh-search-grid.focus { color:white; background:#3e315b; box-shadow:0 0 0 .12em var(--sh-accent); }
+body.stremio-hybrid .filter__item, body.stremio-hybrid .filter--filter, body.stremio-hybrid .filter--sort { border-radius:var(--sh-pill); background:var(--sh-panel); }
+body.stremio-hybrid .filter__item.focus, body.stremio-hybrid .filter--filter.focus, body.stremio-hybrid .filter--sort.focus { background:#3e315b; box-shadow:0 0 0 .1em var(--sh-accent); }
 /* A full Settings screen; the right pane remains Lampa's original component. */
 body.stremio-hybrid.settings--open .settings { position:fixed; inset:0; width:100vw; height:100vh; }
 body.stremio-hybrid.settings--open .settings__layer { display:none; }
@@ -159,7 +178,42 @@ body.stremio-hybrid .menu__item, body.stremio-hybrid .head__action, body.stremio
         }});
     }
     function onSearchEnter() { searchReturn = true; }
-    function onSearchClose() { if (searchReturn) { searchReturn=false;restoreHead(searchNode); } }
+    function onSearchClose() { clearSearchSources(); if (searchReturn) { searchReturn=false;restoreHead(searchNode); } }
+    function clearSearchSources() {
+        if(searchSources) searchSources.listener.remove('finded',onSearchFound);
+        searchSources=null;
+        searchRoots.forEach(function(root){$(root).find('.sh-search-grid').off('.shHybrid').remove();});
+        searchRoots=[];
+    }
+    function onSearchSources(event) {
+        clearSearchSources(); searchSources=event.sources;
+        searchSources.listener.follow('finded',onSearchFound);
+    }
+    function onSearchFound(event) {
+        // Only TMDB's documented native search/movie and search/tv routes are adapted.
+        // Third-party discovery sources retain their own navigation contract.
+        if(!event.source || event.source.title!=='TMDB' || !event.data)return;
+        var root=event.result.render(true);
+        if(searchRoots.indexOf(root)<0)searchRoots.push(root);
+        $(root).find('.sh-search-grid').off('.shHybrid').remove();
+        var lines=root.querySelectorAll('.items-line');
+        event.data.forEach(function(group,index){
+            if((group.type!=='movie' && group.type!=='tv') || !lines[index])return;
+            var body=lines[index].querySelector('.mapping--line');
+            if(!body)return;
+            var button=$('<div class="sh-search-grid selector" role="button"></div>');
+            button.text(group.title+' · Сітка результатів');
+            button.on('hover:enter.shHybrid',function(){
+                var input=document.querySelector('.main-search .simple-keyboard-input');
+                var query=input?input.value:'';
+                if(!query)return;
+                var source=searchSources;
+                if(source)source.listener.send('select');else Lampa.Search.close();
+                Lampa.Activity.push({url:'search/'+group.type,title:'Пошук · '+group.title,component:'category_full',page:1,query:encodeURIComponent(query),source:'tmdb'});
+            });
+            body.appendChild(button[0]);
+        });
+    }
     function setupHeader() {
         if (!moreButton && document.querySelector('.head__actions')) {
             var button = $('<div class="head__action selector sh-head-more" role="button" aria-label="Меню" title="Меню"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></div>');
@@ -178,13 +232,14 @@ body.stremio-hybrid .menu__item, body.stremio-hybrid .head__action, body.stremio
     }
     function onActivity(event) { if (!event || event.type === 'start') setupHeader(); }
     function setupUI() {
-        if (!watching) { Lampa.Listener.follow('activity', onActivity); Lampa.Search.listener.follow('close', onSearchClose); Lampa.Settings.listener.follow('open',onSettingsOpen); Lampa.Settings.listener.follow('close',onSettingsClose); document.addEventListener('keydown',onSettingsKey,true); document.addEventListener('keyup',onSettingsKey,true); installSettingsController(); watching=true; }
+        if (!watching) { Lampa.Listener.follow('activity', onActivity); Lampa.Search.listener.follow('close', onSearchClose); Lampa.Search.listener.follow('sources',onSearchSources); Lampa.Settings.listener.follow('open',onSettingsOpen); Lampa.Settings.listener.follow('close',onSettingsClose); document.addEventListener('keydown',onSettingsKey,true); document.addEventListener('keyup',onSettingsKey,true); installSettingsController(); watching=true; }
         setupHeader();
         if(document.body.classList.contains('settings--open')) onSettingsOpen({name:'resume'});
     }
     function removeUI() {
-        if (watching) { Lampa.Listener.remove('activity', onActivity); Lampa.Search.listener.remove('close', onSearchClose); Lampa.Settings.listener.remove('open',onSettingsOpen); Lampa.Settings.listener.remove('close',onSettingsClose); document.removeEventListener('keydown',onSettingsKey,true); document.removeEventListener('keyup',onSettingsKey,true); settingsLeftConsumed=false; watching=false; }
+        if (watching) { Lampa.Listener.remove('activity', onActivity); Lampa.Search.listener.remove('close', onSearchClose); Lampa.Search.listener.remove('sources',onSearchSources); Lampa.Settings.listener.remove('open',onSettingsOpen); Lampa.Settings.listener.remove('close',onSettingsClose); document.removeEventListener('keydown',onSettingsKey,true); document.removeEventListener('keyup',onSettingsKey,true); settingsLeftConsumed=false; watching=false; }
         removeSettingsUI();
+        clearSearchSources();
         searchReturn=false;
         if (searchNode) { $(searchNode).off('hover:enter.shHybrid', onSearchEnter); searchNode=null; }
         if (menuOpen) { menuOpen=false; Lampa.Select.close(); }

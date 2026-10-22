@@ -1,0 +1,57 @@
+{
+  "checks": [
+    {
+      "name": "Native query returns enriched movies and series",
+      "status": "PASS",
+      "detail": {
+        "movies": true,
+        "series": true,
+        "cards": 9,
+        "ratings": 16,
+        "ua": 6,
+        "watched": 2,
+        "gridActions": 2
+      }
+    },
+    {
+      "name": "Search field 1280",
+      "status": "PASS"
+    },
+    {
+      "name": "Search field 1920",
+      "status": "PASS"
+    },
+    {
+      "name": "Search field 3840",
+      "status": "PASS"
+    },
+    {
+      "name": "Remote Down reaches native search cards",
+      "status": "PASS"
+    },
+    {
+      "name": "Grid action is reachable with remote",
+      "status": "PASS"
+    },
+    {
+      "name": "Grid uses native first page search route",
+      "status": "PASS",
+      "detail": {
+        "page": 1,
+        "url": "search/movie",
+        "source": "tmdb",
+        "cards": 8,
+        "grid": true
+      }
+    },
+    {
+      "name": "Native no results state",
+      "status": "PASS",
+      "detail": {
+        "cards": 0,
+        "text": "На ваш запит нічого не знайдено."
+      }
+    }
+  ],
+  "errors": []
+}
