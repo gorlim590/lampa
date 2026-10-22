@@ -1,0 +1,187 @@
+{
+  "kind": "Ordinary existing-tab reload, zero response interception or injected plugin bootstraps",
+  "checks": [
+    {
+      "name": "Local public asset matches file stremio-hybrid.js",
+      "status": "PASS"
+    },
+    {
+      "name": "Local public asset matches file providers/parsers.js",
+      "status": "PASS"
+    },
+    {
+      "name": "Local public asset matches file media/custom-favorites.js",
+      "status": "PASS"
+    },
+    {
+      "name": "Local public asset matches file ui/screensaver-plus.js",
+      "status": "PASS"
+    },
+    {
+      "name": "Local public asset matches file ui/interface-plus.js",
+      "status": "PASS"
+    },
+    {
+      "name": "Local public asset matches file media/average-rating.js",
+      "status": "PASS"
+    },
+    {
+      "name": "Local public asset matches file preview-loader.js",
+      "status": "PASS"
+    },
+    {
+      "name": "Unknown/private path not served CODEX_PROGRESS.md",
+      "status": "PASS"
+    },
+    {
+      "name": "Unknown/private path not served __proto__",
+      "status": "PASS"
+    },
+    {
+      "name": "Unknown/private path not served private-backups/integration-followup-20261023/favorite-before.json",
+      "status": "PASS"
+    },
+    {
+      "name": "Ordinary reload loads all local owners 0",
+      "status": "PASS"
+    },
+    {
+      "name": "Single initialization after reload 0",
+      "status": "PASS"
+    },
+    {
+      "name": "Ordinary reload loads all local owners 1",
+      "status": "PASS"
+    },
+    {
+      "name": "Single initialization after reload 1",
+      "status": "PASS"
+    },
+    {
+      "name": "Registry keeps same32 entries and CommunityWatches off",
+      "status": "PASS"
+    },
+    {
+      "name": "Normal reload preserves access to original two device bookmarks",
+      "status": "PASS"
+    },
+    {
+      "name": "Normal owner provides one local bookmark action",
+      "status": "PASS"
+    },
+    {
+      "name": "Real native sources integrate with persistent provider binding",
+      "status": "PASS"
+    },
+    {
+      "name": "Persistent source menu uses cinema skin",
+      "status": "PASS"
+    },
+    {
+      "name": "Owned local rating fallback works after normal reload",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "ownerRequests": [
+    {
+      "path": "/preview-loader.js",
+      "resourceType": "script"
+    },
+    {
+      "path": "/media/custom-favorites.js",
+      "resourceType": "script"
+    },
+    {
+      "path": "/providers/parsers.js",
+      "resourceType": "script"
+    },
+    {
+      "path": "/ui/screensaver-plus.js",
+      "resourceType": "script"
+    },
+    {
+      "path": "/stremio-hybrid.js",
+      "resourceType": "script"
+    },
+    {
+      "path": "/preview-loader.js",
+      "resourceType": "xhr"
+    },
+    {
+      "path": "/providers/parsers.js",
+      "resourceType": "xhr"
+    },
+    {
+      "path": "/ui/screensaver-plus.js",
+      "resourceType": "xhr"
+    },
+    {
+      "path": "/media/custom-favorites.js",
+      "resourceType": "xhr"
+    },
+    {
+      "path": "/stremio-hybrid.js",
+      "resourceType": "xhr"
+    },
+    {
+      "path": "/ui/interface-plus.js",
+      "resourceType": "script"
+    },
+    {
+      "path": "/media/average-rating.js",
+      "resourceType": "script"
+    },
+    {
+      "path": "/preview-loader.js",
+      "resourceType": "script"
+    },
+    {
+      "path": "/media/custom-favorites.js",
+      "resourceType": "script"
+    },
+    {
+      "path": "/providers/parsers.js",
+      "resourceType": "script"
+    },
+    {
+      "path": "/ui/screensaver-plus.js",
+      "resourceType": "script"
+    },
+    {
+      "path": "/stremio-hybrid.js",
+      "resourceType": "script"
+    },
+    {
+      "path": "/preview-loader.js",
+      "resourceType": "xhr"
+    },
+    {
+      "path": "/providers/parsers.js",
+      "resourceType": "xhr"
+    },
+    {
+      "path": "/ui/screensaver-plus.js",
+      "resourceType": "xhr"
+    },
+    {
+      "path": "/media/custom-favorites.js",
+      "resourceType": "xhr"
+    },
+    {
+      "path": "/stremio-hybrid.js",
+      "resourceType": "xhr"
+    },
+    {
+      "path": "/ui/interface-plus.js",
+      "resourceType": "script"
+    },
+    {
+      "path": "/media/average-rating.js",
+      "resourceType": "script"
+    }
+  ],
+  "fullMs": 389,
+  "sourceMs": 1205,
+  "rows": 20
+}

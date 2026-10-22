@@ -1,0 +1,18 @@
+[
+  {
+    "url": "https://gorlim590.github.io/lampa/loader.js",
+    "status": 1
+  },
+  {
+    "url": "https://gorlim590.github.io/lampa/media/custom-favorites.js",
+    "status": 1
+  },
+  {
+    "url": "https://gorlim590.github.io/lampa/providers/parsers.js",
+    "status": 1
+  },
+  {
+    "url": "https://gorlim590.github.io/lampa/ui/screensaver-plus.js",
+    "status": 1
+  }
+]
