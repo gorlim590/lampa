@@ -210,5 +210,10 @@
     "status": 0,
     "name": "Vinyl",
     "author": "@lme_chat"
+  },
+  {
+    "url": "https://gorlim590.github.io/lampa/torrents-redesign.js",
+    "status": 1,
+    "name": "Torrents Cinema"
   }
 ]
