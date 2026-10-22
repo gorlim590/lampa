@@ -1,0 +1,14 @@
+{
+  "movie": {
+    "elapsedMs": 1146,
+    "requests": 22,
+    "dom": 537
+  },
+  "standalone": {
+    "elapsedMs": 419,
+    "requests": 3,
+    "dom": 732,
+    "rows": 20,
+    "loading": 0
+  }
+}

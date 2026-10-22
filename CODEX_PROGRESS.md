@@ -162,3 +162,11 @@
 - README і release/stremio-hybrid синхронізовано на 2.1.0, SHA256SUMS оновлено. Тема enabled=true, фінальна вкладка — Tenzing/Cardify; сервер preview loopback-only, браузер/Stremio не закриті. LocalStorage/cookies/профіль не очищувались. Без push/merge/публікації.
 - Межі: фізичний Google TV, реальний пульт і довга сесія BLOCKED; online/trailer playback та записи Trakt/обраного не виконувалися. Збережено оригінальні дії/рейтинги/жанри/UA/status. Stremio Tenzing показує No streams were found; streams pane не підроблялася. Авторський logo-title не додавався, замість нього localized Lampa title. Праві потоки Stremio замінені native діями Lampa; актори/детальні ряди Lampa залишені нижче.
 - Коміт етапу: feat: rebuild movie details as a Stremio-first composition (фактичний hash — git log). Наступне: візуальний відгук користувача/фізичний Google TV; не починати аудит або редизайн інших екранів без нового завдання.
+
+## Embedded torrents / audit checkpoint
+- Початок після d063d36, гілка design/stremio-hybrid-x11 чиста; backup JS/README/progress у backups/embedded-torrents.
+- Реальний Stremio Hope має Torrentio sources: актуальні current/hope-hover/hope-scrolled.png у stremio-reference/streams. Відео не запускалося. Досліджено справжні quality/provider/title/seeds/size/tracker/language rows і scroll.
+- Виявлено native Lampa torrents Component з повним Parser/Filter/Torrent/TorrServer/20-row pager. Active TorrentsRedesign 1.1.0; локальна 1.2 audit копія не замінюється. DEPENDENCIES.md описує власників і маршрути. Старий controller не видаляти: Search/history/series/plugins та global clarification залежать від нього.
+- Baseline Tenzing: Full 1146ms / 22 XHR-Fetch / 537 DOM; standalone sources 419ms / 3 XHR-Fetch / 732 DOM / 20 rows. Це один desktop-зразок із поточними кешами; не доказ TV speedup. baseline.json і standalone-before.png збережено.
+- Наступне: child native component із власним scoped Controller, lazy activation, bounded window/cache, cleanup до наступної Activity; реальні й контрольовані тести.
+- Коміт: docs: map native torrent dependencies and capture baseline.
