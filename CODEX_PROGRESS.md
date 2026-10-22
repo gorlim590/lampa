@@ -73,3 +73,12 @@
 - Контроль: StremioHybrid.setEnabled(false) прибрав CSS, native loading та cards=0 залишилися; потім власний enabled повернуто true. Причину не встановлено. Lampa.Listener.send копіює список callbacks перед dispatch — видалення pending listener безпечне.
 - Звіти audit/hybrid-v2/reload-report.json, home-reload-blocker.json та final-state.png. Не заявляти повне PASS для clean-load або disabled persistence; попередні успішні native-load/regression/details звіти залишаються фактичними.
 - Наступна сесія: почати з діагностики завислого native main (помилки/запити без секретів), не переробляти тему і не повторювати всі скриншоти. Після усунення повторити native enabled/disabled reload, тоді фізичний TV. Публікацію відкладено. Ліміт бережеться: нові великі зміни не починалися.
+
+## Пауза за запитом користувача
+- Розробку й діагностику зупинено. Нічого не публікувати та не продовжувати до нового запиту.
+- Поточна гілка: design/stremio-hybrid-x11. Завершені коміти продовження: 6cee99a (безпечний lifecycle), 47279a0 (деталі й налаштування), dc6f899 (пакет, native підключення, звіти та блокер).
+- Тема 1.1.0 збережена в ui/stremio-hybrid.js, синхронній копії Git-репозиторію та release/stremio-hybrid/. README, SHA256SUMS, скриншоти й звіти збережено. Native extension localhost:8766 додано; локальний preview-сервер залишено запущеним, автозапуск ОС не створювався. Chromium і Stremio не закривалися.
+- Готово: візуальна тема Home/Discover, sidebar, фокус/reduced-motion, деталі фільмів/серіалів, налаштування, перевірки сумісності/DOM/lifecycle у Chromium. Дані карток і функції плагінів збережені. Успішні матриці: details-report.json та regression.json.
+- НЕ готово: на фінальному reload native Home завис у activity--load, cards=0; це залишилося й без CSS. Причина не встановлена. Повне приймання чистого запуску BLOCKED. Не називати збірку повністю стабільною або перевіреною на TV.
+- Після дозволу продовжити: 1) діагностика native Home loading без читання секретів; 2) після усунення — enabled/disabled native reload без ін'єкцій; 3) фізичний Google TV/пульт/довга сесія; 4) публікація тільки після окремого підтвердження. Не повторювати аудит Stremio й завершені візуальні тести без нової причини.
+- Push/merge не виконувалися. Джерело пам'яті для наступної сесії: цей файл, README-stremio-hybrid.md та Git log у audit/stremio-hybrid-20261022/repository.
