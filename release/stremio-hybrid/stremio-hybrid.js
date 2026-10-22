@@ -869,6 +869,26 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
             return !!label;
         });
     }
+    css += `
+body.stremio-hybrid .head .head__time{display:flex!important;position:static;transform:none;margin:0!important;gap:.6em;max-width:16vw;color:#d5d2df;pointer-events:none}
+body.stremio-hybrid .head .head__actions{display:flex;align-items:center;gap:.8em}
+body.stremio-hybrid .head .head__time-now{font-size:1.1em!important}
+body.stremio-hybrid .head .head__time-date{font-size:.65em!important;white-space:nowrap}
+body.stremio-hybrid .head .head__time-week{display:none}
+body.stremio-hybrid .head .head__logo-icon,body.stremio-hybrid .head .head__backward{display:none!important}
+body.stremio-hybrid .head .sh-head-more{position:relative;right:auto;top:auto;transform:none!important;flex-shrink:0;border-radius:.8em!important;overflow:hidden}
+body.stremio-hybrid .head .open--search,body.stremio-hybrid.sh-movie-active .head .open--search,body.stremio-hybrid .head .sh-head-more,body.stremio-hybrid.sh-movie-active .head .sh-head-more{background:rgba(255,255,255,.055)!important;background-image:none!important;border:1px solid #ffffff14}
+body.stremio-hybrid .head .open--search{left:45%;width:clamp(12em,26vw,24em)!important;border-radius:.8em!important}
+body.stremio-hybrid .head .sh-profile-avatar{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-accent-soft)}
+`;
+    function avatarURL(value){try{if(typeof value!=='string'||!value.trim()||value.length>2048)return '';var u=new URL(value);return /^(https?:)$/.test(u.protocol)&&!u.username&&!u.password?u.href:'';}catch(e){return '';}}
+    function updateAvatar(){
+        if(!moreButton)return;var url=avatarURL(Lampa.Storage.get('sh_profile_avatar','')),img=moreButton.querySelector('.sh-profile-avatar');
+        if(!url){if(img)img.remove();return;}
+        if(!img){img=document.createElement('img');img.className='sh-profile-avatar';img.alt='';img.referrerPolicy='no-referrer';img.onerror=function(){this.style.display='none';};moreButton.appendChild(img);}
+        if(img.getAttribute('src')!==url){img.style.display='block';img.src=url;}
+    }
     function restoreHead(target) {
         Lampa.Controller.toggle('head');
         if (target && target.isConnected) Lampa.Controller.collectionFocus($(target), Lampa.Head.render());
@@ -876,15 +896,15 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
     function openActions() {
         var nodes = secondaryActions();
         var items = nodes.map(function (node) { return {title:actionLabel(node), shNode:node}; });
-        var clock = document.querySelector('.head__time');
-        if (clock) items.push({title:clock.textContent.trim().replace(/\s+/g,' '), subtitle:'Час і дата'});
+        items.push({title:'Навігація',shAction:function(){Lampa.Controller.toggle('menu');}});
+        items.push({title:'Назад',shAction:function(){Lampa.Controller.back();}});
         menuOpen = true;
-        Lampa.Select.show({title:'Меню', items:items, onBack:function () { menuOpen=false;restoreHead(moreButton); }, onSelect:function (item) {
+        Lampa.Select.show({title:'Профіль', items:items, onBack:function () { menuOpen=false;restoreHead(moreButton); }, onSelect:function (item) {
             menuOpen=false;
             Lampa.Select.hide();
             Lampa.Activity.mixState();
             restoreHead(moreButton);
-            if (item.shNode && item.shNode.isConnected) $(item.shNode).trigger('hover:enter');
+            if(item.shAction)item.shAction();else if (item.shNode && item.shNode.isConnected) $(item.shNode).trigger('hover:enter');
         }});
     }
     function onSearchEnter() { searchReturn = true; }
@@ -927,7 +947,7 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
     }
     function setupHeader() {
         if (!moreButton && document.querySelector('.head__actions')) {
-            var button = $('<div class="head__action selector sh-head-more" role="button" aria-label="Меню" title="Меню"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></div>');
+            var button = $('<div class="head__action selector sh-head-more" role="button" aria-label="Профіль" title="Профіль"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 22v-2a8 8 0 0 1 16 0v2"/></svg></div>');
             moreButton = Lampa.Head.addElement(button, openActions)[0];
             document.querySelector('.head__actions').appendChild(moreButton);
         }
@@ -937,13 +957,15 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
             searchNode=nativeSearch;
             if (searchNode) $(searchNode).on('hover:enter.shHybrid', onSearchEnter);
         }
-        secondaryActions();
+        var clock=document.querySelector('.head .head__time');
+        if(clock&&moreButton&&!headTimeMove){headTimeMove={node:clock,parent:clock.parentNode,next:clock.nextSibling};moreButton.parentNode.insertBefore(clock,moreButton);}
+        secondaryActions();updateAvatar();
         var active = Lampa.Activity.active();
         document.body.setAttribute('data-sh-page', active ? active.component : 'main');
         document.body.classList.toggle('sh-movie-active',!!(active&&active.component==='full'&&(active.method==='movie'||active.method==='tv')));
     }
     css += '\nbody.stremio-hybrid .sh-home-duplicate{display:none!important}';
-    var homePolicies=[];
+    var homePolicies=[],headTimeMove=null;
     function continueLine(item){var data=item.data||{};if(!data.results||!data.results.length)return false;return /^Продовжити перегляд(?:\s|\(|$)|^Continue watching(?:\s|\(|$)/i.test(data.title||'')||(data.results||[]).some(function(c){return c.ydesign_row==='cont';});}
     function orderHome(record){
         var component=record.component;if(record.dead)return;
@@ -1030,6 +1052,7 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         searchReturn=false;
         if (searchNode) { $(searchNode).off('hover:enter.shHybrid', onSearchEnter); searchNode=null; }
         if (menuOpen) { menuOpen=false; Lampa.Select.close(); }
+        if(headTimeMove){var t=headTimeMove;headTimeMove=null;t.parent.insertBefore(t.node,t.next&&t.next.parentNode===t.parent?t.next:null);}
         if (moreButton) { $(moreButton).off('hover:enter', openActions).remove(); moreButton=null; }
         document.querySelectorAll('.sh-head-secondary').forEach(function (node) { node.classList.remove('sh-head-secondary'); });
         document.body.removeAttribute('data-sh-page');document.body.classList.remove('sh-movie-active');
@@ -1196,10 +1219,11 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
                 onChange: function () { if (window.StremioHybrid) window.StremioHybrid.refresh(); }
             });
         }
+        if(!params.some(function(item){return item.param&&item.param.name==='sh_profile_avatar';}))Lampa.SettingsApi.addParam({component:'interface',param:{name:'sh_profile_avatar',type:'input',values:'',placeholder:'https://example.org/avatar.jpg',default:''},field:{name:'Фото профілю · URL',description:'Адреса HTTP(S) зображення. Порожнє поле повертає стандартний значок; саме фото не зберігається в localStorage.'},onChange:function(){if(window.StremioHybrid)window.StremioHybrid.refresh();}});
         apply(enabled());
     }
     window.StremioHybrid = {
-        version: '2.6.0',
+        version: '2.6.1',
         setEnabled: setEnabled,
         refresh: function () { if (ready) apply(enabled()); },
         destroy: function () {

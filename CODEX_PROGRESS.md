@@ -251,3 +251,10 @@
 - Home profile baseline first4131ms/DOM1801 at15s, after profile in home-after.json. Warm/cold requests differ, so no general performance improvement claim. Large rating/UA/torrent background traffic and native partNext all-batch barrier remain optimization targets, no global queue rewrite yet.
 - Next unverified: different-provider continuation union, actual nonempty user history after restart, Home timing bottlenecks/card alignment; Favorites, header/settings, Screensaver+, UA license, Trakt-first still pending. Core player/TorrServer routes retained.
 - Commit: feat: keep continuation third in native Home navigation.
+
+## Stage9 compact profile header 2.6.1
+- Native clock/date returned, no new timer; reversible move into actions group. Profile icon replaces overflow, retains secondary native actions/settings/notifications plus navigation/Back. Theme-only redundant logo/back visuals hidden. Search/profile subtle translucent background consistent on all theme pages.
+- Native Interface settings adds one URL-only avatar field. HTTP(S), no URL credentials/data payloads; error fallback to profile SVG, no image stored in localStorage. Avatar tests temporarily override only own storage getter, no avatar preference written.
+- header-report11PASS/errors=[]:720/1080/4K including positive Y bounds, menu/functions/Back, native settings field, image decode/error, movie/Home background consistency, disable/reenable. First draft absolute anchoring clipped profile; moved native clock into flex group, restored exact prior parent on disable. Test corrected nonexistent Settings.close call to actual native controller Back, and waits for settings field readiness.
+- Home after sample93ms/DOM1942 is warm-cache, incomparable with baseline4131ms/1801; no speedup claim. Critical remaining: real Files/TorrServer/player, parser switcher private APIs, best-choice semantics, Home bottlenecks/card alignment, Favorite cycle; then full settings/Screensaver/UA license/Trakt architecture. Nothing published.
+- Commit: feat: restore clock and add reversible profile header.
