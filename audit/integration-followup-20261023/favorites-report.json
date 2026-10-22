@@ -1,0 +1,145 @@
+{
+  "kind": "Real device favorite store/native cards and menus; original snapshot kept privately, test-owned additions cleaned, no account/Trakt import/export",
+  "checks": [
+    {
+      "name": "Native local lists still exist independently of empty account lists",
+      "status": "PASS"
+    },
+    {
+      "name": "One explicit local action 438631",
+      "status": "PASS"
+    },
+    {
+      "name": "Native full action saves only device bookmark 438631",
+      "status": "PASS"
+    },
+    {
+      "name": "One explicit local action 1396",
+      "status": "PASS"
+    },
+    {
+      "name": "Native full action saves only device bookmark 1396",
+      "status": "PASS"
+    },
+    {
+      "name": "One explicit local action 1429",
+      "status": "PASS"
+    },
+    {
+      "name": "Native full action saves only device bookmark 1429",
+      "status": "PASS"
+    },
+    {
+      "name": "Three device bookmarks persist across normal reload",
+      "status": "PASS"
+    },
+    {
+      "name": "Favorites explicitly separates list sources",
+      "status": "PASS"
+    },
+    {
+      "name": "All test media appear in native device row",
+      "status": "PASS"
+    },
+    {
+      "name": "Device list no horizontal overflow 1280",
+      "status": "PASS"
+    },
+    {
+      "name": "Device list no horizontal overflow 1920",
+      "status": "PASS"
+    },
+    {
+      "name": "Device list no horizontal overflow 3840",
+      "status": "PASS"
+    },
+    {
+      "name": "Native card opens correct media 438631",
+      "status": "PASS"
+    },
+    {
+      "name": "Saved local state shown checked 438631",
+      "status": "PASS"
+    },
+    {
+      "name": "Back refresh removes only selected device bookmark 438631",
+      "status": "PASS"
+    },
+    {
+      "name": "Native card opens correct media 1396",
+      "status": "PASS"
+    },
+    {
+      "name": "Saved local state shown checked 1396",
+      "status": "PASS"
+    },
+    {
+      "name": "Back refresh removes only selected device bookmark 1396",
+      "status": "PASS"
+    },
+    {
+      "name": "Native card opens correct media 1429",
+      "status": "PASS"
+    },
+    {
+      "name": "Saved local state shown checked 1429",
+      "status": "PASS"
+    },
+    {
+      "name": "Back refresh removes only selected device bookmark 1429",
+      "status": "PASS"
+    },
+    {
+      "name": "No account or Trakt favorite mutation requests",
+      "status": "PASS"
+    },
+    {
+      "name": "Original account/custom favorites route remains available",
+      "status": "PASS"
+    },
+    {
+      "name": "Addon destroy removes only own listeners/API",
+      "status": "PASS"
+    },
+    {
+      "name": "Original local lists preserved after targeted fixture cleanup",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "remoteWrites": 0,
+  "favoriteRequests": [
+    {
+      "method": "GET",
+      "path": "/trakt/sync/watchlist/movies"
+    },
+    {
+      "method": "GET",
+      "path": "/trakt/sync/watchlist/movies"
+    },
+    {
+      "method": "GET",
+      "path": "/trakt/sync/watchlist/shows"
+    },
+    {
+      "method": "GET",
+      "path": "/trakt/sync/watchlist/shows"
+    },
+    {
+      "method": "GET",
+      "path": "/trakt/sync/watchlist/shows"
+    },
+    {
+      "method": "GET",
+      "path": "/trakt/sync/watchlist/movies"
+    },
+    {
+      "method": "GET",
+      "path": "/trakt/sync/watchlist/shows"
+    },
+    {
+      "method": "GET",
+      "path": "/trakt/sync/watchlist/shows"
+    }
+  ]
+}

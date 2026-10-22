@@ -1,0 +1,28 @@
+{
+  "outcome": "callback",
+  "before": {
+    "like": 0,
+    "wath": 0,
+    "book": 0,
+    "history": 0,
+    "look": 0,
+    "viewed": 0,
+    "scheduled": 0,
+    "continued": 0,
+    "thrown": 0,
+    "persons": 0
+  },
+  "after": {
+    "like": 0,
+    "wath": 0,
+    "book": 0,
+    "history": 0,
+    "look": 0,
+    "viewed": 0,
+    "scheduled": 0,
+    "continued": 0,
+    "thrown": 0,
+    "persons": 0
+  },
+  "ms": 24
+}
