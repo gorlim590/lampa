@@ -1,0 +1,238 @@
+[
+  {
+    "id": 438631,
+    "title": "Дюна",
+    "method": "movie",
+    "metadata": {},
+    "rates": [
+      {
+        "key": "oscar",
+        "value": "6",
+        "images": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/f/f8/Oscar_gold_silhouette.svg",
+            "ok": false
+          }
+        ]
+      },
+      {
+        "key": "award",
+        "value": "177",
+        "images": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Barnstar_film_3.svg",
+            "ok": true
+          }
+        ]
+      },
+      {
+        "key": "imdb",
+        "value": "8.0",
+        "images": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/5/53/IMDB_-_SuperTinyIcons.svg",
+            "ok": true
+          }
+        ]
+      },
+      {
+        "key": "trakt",
+        "value": "8.1",
+        "images": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/3/3d/Trakt.tv-favicon.svg",
+            "ok": true
+          }
+        ]
+      },
+      {
+        "key": "letterboxd",
+        "value": "7.8",
+        "images": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/9/9b/Letterboxd_2023_logo.png",
+            "ok": true
+          }
+        ]
+      }
+    ],
+    "blocks": [
+      {
+        "class": "full-start-new__head",
+        "text": "2021, СШАDune / Дюна"
+      },
+      {
+        "class": "cardify__details",
+        "text": "Тривалість фільму: 2 години 35 хв.ФантастикаПригоди"
+      },
+      {
+        "class": "full-start-new__details",
+        "text": "Тривалість фільму: 2 години 35 хв.ФантастикаПригоди"
+      },
+      {
+        "class": "cardify__right-box",
+        "text": "Випущено"
+      }
+    ]
+  },
+  {
+    "id": 1396,
+    "title": "Пуститися берега",
+    "method": "tv",
+    "metadata": {
+      "seasons": 5,
+      "episodes": 62,
+      "episodeRunTime": [],
+      "next": null,
+      "last": {
+        "id": 62161,
+        "name": "Феліна",
+        "overview": "Все погане колись закінчується.",
+        "vote_average": 9.292,
+        "vote_count": 330,
+        "air_date": "2013-09-29",
+        "episode_number": 16,
+        "episode_type": "finale",
+        "production_code": "",
+        "runtime": 56,
+        "season_number": 5,
+        "show_id": 1396,
+        "still_path": "/pA0YwyhvdDXP3BEGL2grrIhq8aM.jpg"
+      }
+    },
+    "rates": [
+      {
+        "key": "award",
+        "value": "172",
+        "images": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Barnstar_film_3.svg",
+            "ok": true
+          }
+        ]
+      },
+      {
+        "key": "imdb",
+        "value": "9.5",
+        "images": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/5/53/IMDB_-_SuperTinyIcons.svg",
+            "ok": true
+          }
+        ]
+      },
+      {
+        "key": "trakt",
+        "value": "9.3",
+        "images": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/3/3d/Trakt.tv-favicon.svg",
+            "ok": true
+          }
+        ]
+      }
+    ],
+    "blocks": [
+      {
+        "class": "full-start-new__head",
+        "text": "2008, СШАBreaking Bad / Пуститися берега"
+      },
+      {
+        "class": "cardify__details",
+        "text": "62 СеріїТривалість серії ≈ 56 хвилинСезони: 5ДрамаКримінал"
+      },
+      {
+        "class": "full-start-new__details",
+        "text": "62 СеріїТривалість серії ≈ 56 хвилинСезони: 5ДрамаКримінал"
+      },
+      {
+        "class": "cardify__right-box",
+        "text": "17+\n                        Завершено"
+      }
+    ]
+  },
+  {
+    "id": 1429,
+    "title": "Атака титанів",
+    "method": "tv",
+    "metadata": {
+      "seasons": 4,
+      "episodes": 87,
+      "episodeRunTime": [],
+      "next": null,
+      "last": {
+        "id": 3508327,
+        "name": "Світанок людства",
+        "overview": "",
+        "vote_average": 8.981,
+        "vote_count": 53,
+        "air_date": "2022-04-04",
+        "episode_number": 28,
+        "episode_type": "finale",
+        "production_code": "",
+        "runtime": 23,
+        "season_number": 4,
+        "show_id": 1429,
+        "still_path": "/9IT29LxBTDd610r2XzzGZXeca0b.jpg"
+      }
+    },
+    "rates": [
+      {
+        "key": "award",
+        "value": "42",
+        "images": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Barnstar_film_3.svg",
+            "ok": true
+          }
+        ]
+      },
+      {
+        "key": "imdb",
+        "value": "9.1",
+        "images": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/5/53/IMDB_-_SuperTinyIcons.svg",
+            "ok": true
+          }
+        ]
+      },
+      {
+        "key": "trakt",
+        "value": "8.9",
+        "images": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/3/3d/Trakt.tv-favicon.svg",
+            "ok": true
+          }
+        ]
+      }
+    ],
+    "blocks": [
+      {
+        "class": "full-start-new__head",
+        "text": "2013, Японія進撃の巨人 / Атака титанів"
+      },
+      {
+        "class": "full-start-new__details trakt",
+        "text": "87 СерійТривалість серії ≈ 23 хвилиниСезони: 4МультфільмНауково фантастичнийЕкшн і Пригоди"
+      },
+      {
+        "class": "cardify__details",
+        "text": "Сезони: 4●Серії: 87●Мультфільм | Науково фантастичний | Екшн і Пригоди"
+      },
+      {
+        "class": "full-start-new__details",
+        "text": "Сезони: 4●Серії: 87●Мультфільм | Науково фантастичний | Екшн і Пригоди"
+      },
+      {
+        "class": "cardify__right-box",
+        "text": "17+\n                        Завершено\n                    \n                                \n  \n\n                                Сезон: 1●\n                                Епізод: 25"
+      },
+      {
+        "class": "full-start-new__details trakt",
+        "text": "Сезон: 1●\n                                Епізод: 25"
+      }
+    ]
+  }
+]

@@ -1,0 +1,341 @@
+{
+  "checks": [
+    {
+      "name": "Shared composition 438631",
+      "status": "PASS",
+      "data": {
+        "type": "movie",
+        "title": "ДюнаDune",
+        "details": "\n                        Тривалість фільму: 2 години 35 хв.ФантастикаПригоди\n                     Тривалість фільму: 2 години 35 хв.ФантастикаПригоди",
+        "actions": 8,
+        "descriptions": 1,
+        "broken": 0,
+        "oscar": "6"
+      }
+    },
+    {
+      "name": "Dune Oscar count6 retained with working local icon",
+      "status": "PASS"
+    },
+    {
+      "name": "Shared layout 438631 1280",
+      "status": "PASS",
+      "data": {
+        "pane": {
+          "x": 960,
+          "y": 50.625,
+          "width": 320,
+          "height": 669.359375,
+          "top": 50.625,
+          "right": 1280,
+          "bottom": 719.984375,
+          "left": 960
+        },
+        "column": {
+          "x": 88.9375,
+          "y": 113.5625,
+          "width": 755.515625,
+          "height": 487.609375,
+          "top": 113.5625,
+          "right": 844.453125,
+          "bottom": 601.171875,
+          "left": 88.9375
+        },
+        "overflow": false
+      }
+    },
+    {
+      "name": "Shared layout 438631 1920",
+      "status": "PASS",
+      "data": {
+        "pane": {
+          "x": 1440,
+          "y": 75.953125,
+          "width": 480,
+          "height": 1004.03125,
+          "top": 75.953125,
+          "right": 1920,
+          "bottom": 1079.984375,
+          "left": 1440
+        },
+        "column": {
+          "x": 133.421875,
+          "y": 170.375,
+          "width": 1133.25,
+          "height": 692.046875,
+          "top": 170.375,
+          "right": 1266.671875,
+          "bottom": 862.421875,
+          "left": 133.421875
+        },
+        "overflow": false
+      }
+    },
+    {
+      "name": "Shared layout 438631 3840",
+      "status": "PASS",
+      "data": {
+        "pane": {
+          "x": 2880,
+          "y": 151.921875,
+          "width": 960,
+          "height": 2008.078125,
+          "top": 151.921875,
+          "right": 3840,
+          "bottom": 2160,
+          "left": 2880
+        },
+        "column": {
+          "x": 266.859375,
+          "y": 340.78125,
+          "width": 2266.5,
+          "height": 1328.984375,
+          "top": 340.78125,
+          "right": 2533.359375,
+          "bottom": 1669.765625,
+          "left": 266.859375
+        },
+        "overflow": false
+      }
+    },
+    {
+      "name": "Embedded native sources remain on same media 438631",
+      "status": "PASS"
+    },
+    {
+      "name": "Source Back restores native Full 438631",
+      "status": "PASS"
+    },
+    {
+      "name": "Native Down reaches lower detail/episode rows 438631",
+      "status": "PASS"
+    },
+    {
+      "name": "Shared composition 1396",
+      "status": "PASS",
+      "data": {
+        "type": "tv",
+        "title": "Пуститися берегаBreaking Bad",
+        "details": "\n                        62 СеріїТривалість серії ≈ 56 хвилинСезони: 5ДрамаКримінал\n                     62 СеріїТривалість серії ≈ 56 хвилинСезони: 5ДрамаКримінал",
+        "actions": 8,
+        "descriptions": 1,
+        "broken": 0
+      }
+    },
+    {
+      "name": "Existing season/episode/runtime metadata 1396",
+      "status": "PASS"
+    },
+    {
+      "name": "Shared layout 1396 1280",
+      "status": "PASS",
+      "data": {
+        "pane": {
+          "x": 960,
+          "y": 50.625,
+          "width": 320,
+          "height": 669.359375,
+          "top": 50.625,
+          "right": 1280,
+          "bottom": 719.984375,
+          "left": 960
+        },
+        "column": {
+          "x": 88.9375,
+          "y": 113.5625,
+          "width": 755.515625,
+          "height": 529.875,
+          "top": 113.5625,
+          "right": 844.453125,
+          "bottom": 643.4375,
+          "left": 88.9375
+        },
+        "overflow": false
+      }
+    },
+    {
+      "name": "Shared layout 1396 1920",
+      "status": "PASS",
+      "data": {
+        "pane": {
+          "x": 1440,
+          "y": 75.953125,
+          "width": 480,
+          "height": 1004.03125,
+          "top": 75.953125,
+          "right": 1920,
+          "bottom": 1079.984375,
+          "left": 1440
+        },
+        "column": {
+          "x": 133.421875,
+          "y": 170.375,
+          "width": 1133.25,
+          "height": 781.46875,
+          "top": 170.375,
+          "right": 1266.671875,
+          "bottom": 951.84375,
+          "left": 133.421875
+        },
+        "overflow": false
+      }
+    },
+    {
+      "name": "Shared layout 1396 3840",
+      "status": "PASS",
+      "data": {
+        "pane": {
+          "x": 2880,
+          "y": 151.921875,
+          "width": 960,
+          "height": 2008.078125,
+          "top": 151.921875,
+          "right": 3840,
+          "bottom": 2160,
+          "left": 2880
+        },
+        "column": {
+          "x": 266.859375,
+          "y": 340.78125,
+          "width": 2266.5,
+          "height": 1475.421875,
+          "top": 340.78125,
+          "right": 2533.359375,
+          "bottom": 1816.203125,
+          "left": 266.859375
+        },
+        "overflow": false
+      }
+    },
+    {
+      "name": "Embedded native sources remain on same media 1396",
+      "status": "PASS"
+    },
+    {
+      "name": "Source Back restores native Full 1396",
+      "status": "PASS"
+    },
+    {
+      "name": "Native Down reaches lower detail/episode rows 1396",
+      "status": "PASS"
+    },
+    {
+      "name": "Shared composition 1429",
+      "status": "PASS",
+      "data": {
+        "type": "tv",
+        "title": "Атака титанівAttack on Titan",
+        "details": "\n                        87 СерійТривалість серії ≈ 23 хвилиниСезони: 4МультфільмНауково фантастичнийЕкшн і ПригодиСезони: 4●Серії: 87●Мультфільм | Науково фантастичний | Екшн і Пригоди\n                     87 СерійТривалість серії ≈ 23 хвилиниСезони: 4МультфільмНауково фантастичнийЕкшн і Пригоди Сезони: 4●Серії: 87●Мультфільм | Науково фантастичний | Екшн і Пригоди \n                                \n  \n\n                                Сезон: 1●\n                                Епізод: 25\n                            ",
+        "actions": 8,
+        "descriptions": 1,
+        "broken": 0
+      }
+    },
+    {
+      "name": "Existing season/episode/runtime metadata 1429",
+      "status": "PASS"
+    },
+    {
+      "name": "Shared layout 1429 1280",
+      "status": "PASS",
+      "data": {
+        "pane": {
+          "x": 960,
+          "y": 50.625,
+          "width": 320,
+          "height": 669.359375,
+          "top": 50.625,
+          "right": 1280,
+          "bottom": 719.984375,
+          "left": 960
+        },
+        "column": {
+          "x": 88.9375,
+          "y": 113.5625,
+          "width": 755.515625,
+          "height": 493.25,
+          "top": 113.5625,
+          "right": 844.453125,
+          "bottom": 606.8125,
+          "left": 88.9375
+        },
+        "overflow": false
+      }
+    },
+    {
+      "name": "Shared layout 1429 1920",
+      "status": "PASS",
+      "data": {
+        "pane": {
+          "x": 1440,
+          "y": 75.953125,
+          "width": 480,
+          "height": 1004.03125,
+          "top": 75.953125,
+          "right": 1920,
+          "bottom": 1079.984375,
+          "left": 1440
+        },
+        "column": {
+          "x": 133.421875,
+          "y": 170.375,
+          "width": 1133.25,
+          "height": 726.515625,
+          "top": 170.375,
+          "right": 1266.671875,
+          "bottom": 896.890625,
+          "left": 133.421875
+        },
+        "overflow": false
+      }
+    },
+    {
+      "name": "Shared layout 1429 3840",
+      "status": "PASS",
+      "data": {
+        "pane": {
+          "x": 2880,
+          "y": 151.921875,
+          "width": 960,
+          "height": 2008.078125,
+          "top": 151.921875,
+          "right": 3840,
+          "bottom": 2160,
+          "left": 2880
+        },
+        "column": {
+          "x": 266.859375,
+          "y": 340.78125,
+          "width": 2266.5,
+          "height": 1307.59375,
+          "top": 340.78125,
+          "right": 2533.359375,
+          "bottom": 1648.375,
+          "left": 266.859375
+        },
+        "overflow": false
+      }
+    },
+    {
+      "name": "Embedded native sources remain on same media 1429",
+      "status": "PASS"
+    },
+    {
+      "name": "Source Back restores native Full 1429",
+      "status": "PASS"
+    },
+    {
+      "name": "Native Down reaches lower detail/episode rows 1429",
+      "status": "PASS"
+    },
+    {
+      "name": "Disable restores series structure, no own wrappers/captions",
+      "status": "PASS"
+    },
+    {
+      "name": "Reenable exactly one series pane",
+      "status": "PASS"
+    }
+  ],
+  "errors": []
+}

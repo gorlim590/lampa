@@ -210,3 +210,13 @@
 - Prior GitHub publication BLOCKED: HTTPS missing authentication; SSH host key verification failed. No workaround or retry loop.
 - Next critical step: expand existing details adapter toTV/animation, restore native series metadata, diagnose Dune broken icon; then embed filter search and Files. Trakt architecture remains deferred.
 - Commit: docs: map active integration dependencies and outstanding causes.
+
+## Full integration / Stage1 shared details 2.4.0
+- Existing adapter expanded to movie/tv (including animation); media-aware branding, translations, cache identity and deferred native anime parser dispatch. No duplicate search engine or playback logic.
+- Interface+ selected a Trakt details node as general metadata; owner selector now excludes .trakt, and Hybrid reversibly consolidates existing loaded blocks. Seasons/episodes/known next date/runtime preserved, no invented averages.
+- Dune broken image is remote Oscar SVG, count6 is real awards count. Owner AverageRating now uses local SVG + per-image error fallback; Hybrid repairs old loaded owner compatibly and restores source on disable.
+- Files: ui/stremio-hybrid.js, ui/interface-plus.js, media/average-rating.js, README/package, audit/full-integration-20261023 details/rating tests and screenshots. Backup under backups/full-integration-20261023.
+- Tests: details-report 26 PASS/errors=[]; extracted owner renderer 2 PASS (initial assertion erroneously included renderer whitespace, corrected to trim). Screenshots three media ×720/1080/4K. No playback. Physical TV, player return/TorrServer and prolonged memory test BLOCKED.
+- Owner files are prepared locally, not published/reloaded as full plugins; Hybrid compatibility is what was tested with currently installed owners. No push/merge.
+- Next: ordinary source clarification search inline; remove advanced-route toolbar; scoped Files view and verified episode ratings, then Home/favorites. Old core APIs retained pending verified callers.
+- Commit: feat: share media details and repair metadata ownership (git log records hash).
