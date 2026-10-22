@@ -1,0 +1,337 @@
+{
+  "movie": "Tenzing",
+  "keys": [
+    "url",
+    "component",
+    "id",
+    "method",
+    "card",
+    "source",
+    "params",
+    "activity"
+  ],
+  "scripts": [
+    "https://gorlim590.github.io/lampa/torrents-redesign.js",
+    "http://127.0.0.1:8766/stremio-hybrid.js",
+    "https://gorlim590.github.io/lampa/ui/interface-plus.js",
+    "https://gorlim590.github.io/lampa/ui/design-optimized.js",
+    "https://gorlim590.github.io/lampa/ui/cardify-plus.js"
+  ],
+  "tree": {
+    "tag": "DIV",
+    "cls": "full-start-new cardify",
+    "text": "",
+    "style": null,
+    "children": [
+      {
+        "tag": "DIV",
+        "cls": "full-start-new__body",
+        "text": "",
+        "style": "position: relative;",
+        "children": [
+          {
+            "tag": "DIV",
+            "cls": "full-start-new__left hide",
+            "text": "",
+            "style": null,
+            "children": [
+              {
+                "tag": "DIV",
+                "cls": "full-start-new__poster loaded",
+                "text": "",
+                "style": null,
+                "children": [
+                  {
+                    "tag": "IMG",
+                    "cls": "full-start-new__img full--poster",
+                    "text": "",
+                    "style": null,
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "DIV",
+            "cls": "full-start-new__right",
+            "text": "",
+            "style": null,
+            "children": [
+              {
+                "tag": "DIV",
+                "cls": "cardify__left",
+                "text": "",
+                "style": null,
+                "children": [
+                  {
+                    "tag": "DIV",
+                    "cls": "full-start-new__head",
+                    "text": "",
+                    "style": null,
+                    "children": [
+                      {
+                        "tag": "SPAN",
+                        "cls": "",
+                        "text": "2026",
+                        "style": null,
+                        "children": []
+                      },
+                      {
+                        "tag": "DIV",
+                        "cls": "ifx-original-title",
+                        "text": "Tenzing / Тенцинґ",
+                        "style": null,
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "tag": "DIV",
+                    "cls": "full-start-new__title",
+                    "text": "Тенцинґ",
+                    "style": null,
+                    "children": []
+                  },
+                  {
+                    "tag": "DIV",
+                    "cls": "omdb-mdb-yarik-rate",
+                    "text": "",
+                    "style": "gap: 0.5em; margin-top: 10px; margin-bottom: 10px;",
+                    "children": [
+                      {
+                        "tag": "DIV",
+                        "cls": "full-start__rate custom-rating rate--omdb-awards",
+                        "text": "",
+                        "style": "font-size: 1.5em; order: 2; color: red;",
+                        "children": []
+                      },
+                      {
+                        "tag": "DIV",
+                        "cls": "full-start__rate custom-rating rate--omdb-imdb",
+                        "text": "",
+                        "style": "font-size: 1.5em; order: 4; color: cornflowerblue;",
+                        "children": []
+                      },
+                      {
+                        "tag": "DIV",
+                        "cls": "full-start__rate custom-rating rate--mdblist-trakt",
+                        "text": "",
+                        "style": "font-size: 1.5em; order: 7; color: lawngreen;",
+                        "children": []
+                      },
+                      {
+                        "tag": "DIV",
+                        "cls": "full-start__rate custom-rating rate--mdblist-lb",
+                        "text": "",
+                        "style": "font-size: 1.5em; order: 11; color: cornflowerblue;",
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "tag": "DIV",
+                    "cls": "full-start-new__rate-line rate-fix",
+                    "text": "",
+                    "style": null,
+                    "children": [
+                      {
+                        "tag": "DIV",
+                        "cls": "full-start__rate rate--cub hide",
+                        "text": "",
+                        "style": null,
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "tag": "DIV",
+                    "cls": "cardify__details",
+                    "text": "",
+                    "style": null,
+                    "children": [
+                      {
+                        "tag": "DIV",
+                        "cls": "full-start-new__details",
+                        "text": "",
+                        "style": null,
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "tag": "DIV",
+                    "cls": "full-start-new__buttons",
+                    "text": "",
+                    "style": null,
+                    "children": [
+                      {
+                        "tag": "DIV",
+                        "cls": "full-start__button view--torrent selector button-mode-1 focus",
+                        "text": "",
+                        "style": "opacity: 0; animation: 0.4s ease 0s 1 normal forwards running button-fade-in;",
+                        "children": []
+                      },
+                      {
+                        "tag": "DIV",
+                        "cls": "full-start__button selector watchlist-button trakt-list-manager-button button-mode-1",
+                        "text": "",
+                        "style": "opacity: 0; animation: 0.4s ease 0.08s 1 normal forwards running button-fade-in;",
+                        "children": []
+                      },
+                      {
+                        "tag": "DIV",
+                        "cls": "full-start__button selector button--book button-mode-1",
+                        "text": "",
+                        "style": "opacity: 0; animation: 0.4s ease 0.16s 1 normal forwards running button-fade-in;",
+                        "children": []
+                      },
+                      {
+                        "tag": "DIV",
+                        "cls": "full-start__button selector button--subscribe hide button-mode-1",
+                        "text": "",
+                        "style": "opacity: 0; animation: 0.4s ease 0.24s 1 normal forwards running button-fade-in;",
+                        "children": []
+                      },
+                      {
+                        "tag": "DIV",
+                        "cls": "full-start__button selector view--trailer button-mode-1",
+                        "text": "",
+                        "style": "opacity: 0; animation: 0.4s ease 0.32s 1 normal forwards running button-fade-in;",
+                        "children": []
+                      },
+                      {
+                        "tag": "DIV",
+                        "cls": "full-start__button selector button--options hidden button-mode-1",
+                        "text": "",
+                        "style": null,
+                        "children": []
+                      },
+                      {
+                        "tag": "DIV",
+                        "cls": "full-start__button selector view--online view--bandera-online button-mode-1",
+                        "text": "",
+                        "style": "opacity: 0; animation: 0.4s ease 0.4s 1 normal forwards running button-fade-in;",
+                        "children": []
+                      },
+                      {
+                        "tag": "DIV",
+                        "cls": "full-start__button selector view--bwa button-mode-1",
+                        "text": "",
+                        "style": "opacity: 0; animation: 0.4s ease 0.48s 1 normal forwards running button-fade-in;",
+                        "children": []
+                      },
+                      {
+                        "tag": "DIV",
+                        "cls": "full-start__button selector button--edit-order",
+                        "text": "",
+                        "style": "order: 9999; opacity: 0; animation: 0.4s ease 0.56s 1 normal forwards running button-fade-in;",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "DIV",
+                "cls": "cardify__right-box",
+                "text": "",
+                "style": null,
+                "children": [
+                  {
+                    "tag": "DIV",
+                    "cls": "full-start-new__rate-line",
+                    "text": "",
+                    "style": null,
+                    "children": [
+                      {
+                        "tag": "DIV",
+                        "cls": "full-start__pg hide",
+                        "text": "",
+                        "style": null,
+                        "children": []
+                      },
+                      {
+                        "tag": "DIV",
+                        "cls": "full-start__status",
+                        "text": "Випущено",
+                        "style": "background-color: rgba(26, 188, 156, 0.9); color: white; border-color: transparent; display: inline-block;",
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "DIV",
+            "cls": "custom-ghost-main",
+            "text": "",
+            "style": "position: absolute; top: 0px; right: 0px; width: 40vw; z-index: 9999; pointer-events: none; box-sizing: border-box;",
+            "children": [
+              {
+                "tag": "DIV",
+                "cls": "full-descr__text selector",
+                "text": "",
+                "style": "line-height: 1.4; font-size: 1.2em; color: rgb(255, 255, 255); text-shadow: rgba(0, 0, 0, 0.9) 1px 1px 3px;",
+                "children": [
+                  {
+                    "tag": "BR",
+                    "cls": "",
+                    "text": "",
+                    "style": null,
+                    "children": []
+                  },
+                  {
+                    "tag": "BR",
+                    "cls": "",
+                    "text": "",
+                    "style": null,
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "tag": "DIV",
+        "cls": "hide buttons--container",
+        "text": "\n            \n            \n        ",
+        "style": null,
+        "children": []
+      }
+    ]
+  },
+  "descr": {
+    "tag": "DIV",
+    "cls": "full-descr",
+    "text": "",
+    "style": null,
+    "children": [
+      {
+        "tag": "DIV",
+        "cls": "full-descr__left",
+        "text": "",
+        "style": null,
+        "children": [
+          {
+            "tag": "DIV",
+            "cls": "full-descr__tags networks-wrapper",
+            "text": "",
+            "style": "margin-top:0;",
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  "bg": [
+    {
+      "cls": "full-start__background cardify__background loaded",
+      "style": "opacity: 1; transition: opacity 1.5s ease-in-out; transform: translateZ(0px);"
+    }
+  ]
+}
