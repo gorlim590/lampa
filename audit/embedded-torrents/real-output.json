@@ -13,14 +13,14 @@
       "status": "PASS",
       "detail": {
         "pane": {
-          "x": 871.375,
-          "y": 82.109375,
-          "width": 384,
-          "height": 613.265625,
-          "top": 82.109375,
+          "x": 935.375,
+          "y": 97.140625,
+          "width": 320,
+          "height": 574.828125,
+          "top": 97.140625,
           "right": 1255.375,
-          "bottom": 695.375,
-          "left": 871.375
+          "bottom": 671.96875,
+          "left": 935.375
         },
         "column": {
           "x": 88.9375,
@@ -51,14 +51,14 @@
       "status": "PASS",
       "detail": {
         "pane": {
-          "x": 1307.046875,
-          "y": 123.171875,
-          "width": 576,
-          "height": 919.875,
-          "top": 123.171875,
+          "x": 1403.046875,
+          "y": 145.734375,
+          "width": 480,
+          "height": 862.25,
+          "top": 145.734375,
           "right": 1883.046875,
-          "bottom": 1043.046875,
-          "left": 1307.046875
+          "bottom": 1007.984375,
+          "left": 1403.046875
         },
         "column": {
           "x": 133.421875,
@@ -89,14 +89,14 @@
       "status": "PASS",
       "detail": {
         "pane": {
-          "x": 2614.09375,
-          "y": 246.34375,
-          "width": 1152,
-          "height": 1839.75,
-          "top": 246.34375,
+          "x": 2806.09375,
+          "y": 291.5,
+          "width": 960,
+          "height": 1724.5,
+          "top": 291.5,
           "right": 3766.09375,
-          "bottom": 2086.09375,
-          "left": 2614.09375
+          "bottom": 2016,
+          "left": 2806.09375
         },
         "column": {
           "x": 266.859375,
@@ -131,7 +131,7 @@
       "status": "PASS"
     },
     {
-      "name": "Down reuses source list without another search",
+      "name": "Native Down reaches details without another search",
       "status": "PASS"
     },
     {
@@ -162,14 +162,14 @@
   "errors": [],
   "metrics": {
     "movie": {
-      "elapsedMs": 1376,
+      "elapsedMs": 1904,
       "requests": 23,
-      "dom": 544
+      "dom": 540
     },
     "sources": {
-      "elapsedMs": 197,
+      "elapsedMs": 185,
       "requests": 2,
-      "dom": 891,
+      "dom": 887,
       "rows": 20
     }
   }

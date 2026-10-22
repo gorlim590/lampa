@@ -6,6 +6,10 @@
       "status": "PASS"
     },
     {
+      "name": "Native multi-language audio keeps voice and unknown codes",
+      "status": "PASS"
+    },
+    {
       "name": "Zero results show native empty state in movie",
       "status": "PASS"
     },
@@ -27,7 +31,7 @@
       "detail": {
         "rows": 40,
         "focus": "CONTROLLED release 314 2026 1080p WEB-DL UKR",
-        "dom": 661
+        "dom": 660
       }
     },
     {
@@ -43,6 +47,7 @@
       "detail": {
         "before": {
           "torrentFile": 3,
+          "torrentRender": 4,
           "controller": 3,
           "storage": 32,
           "params": {},
@@ -51,6 +56,7 @@
         },
         "after": {
           "torrentFile": 3,
+          "torrentRender": 4,
           "controller": 3,
           "storage": 32,
           "params": {},

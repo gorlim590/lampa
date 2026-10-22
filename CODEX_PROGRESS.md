@@ -177,3 +177,11 @@
 - Desktop sample: movie 1376ms/23 XHR-Fetch/544 DOM; sources 197ms/2 XHR-Fetch/891 DOM. Combined DOM is larger than old standalone 732; no general speedup claim. Lazy cache/windowing bounded; physical Google TV and actual player return BLOCKED.
 - Current user feedback: shrink sources, remove separate details/cast button, natural Down to lower content, language flags, highlight useful sources; fix rapid/choppy Cardify backdrop. Next checkpoint will address these rather than treating current visual layout as final.
 - Files: ui/stremio-hybrid.js, audit/embedded-torrents tests/reports/screenshots. Commit: feat: embed lazy native movie torrent sources.
+
+## Embedded sources — compact layout and navigation checkpoint
+- Pane 30vw→25vw, removed Details/cast button; panel scrolls with hero. Native Down reaches lower content; final source Down also returns there. Fixed Full.active index when returning to hero after lower rows.
+- Audio flags preserve native language/voice labels. Seeded/UA hints preserve native sort. Cardify opacity !important conflict fixed: observed 800ms fade with intermediate computed opacity; callback interval 25s, disable restores original 8s, reenable repaces. No Cardify storage writes; no extra perpetual timer.
+- Latest tests: real 14 PASS, controlled 11 PASS, refinement 12 PASS, switch 3 PASS; errors=[] throughout. Controlled two actual movie routes prove no late results bleed; native playback intercepted only. Physical TV/player/TorrServer transfer still BLOCKED.
+- Screenshots: compact-{1280,1920,3840}.png, lower-content-final, backdrop-crossfade, comparison-1/2. Fresh X11 references compact-reference/top; scrot requires DECIMAL Window ID 106954756 (hex input captured desktop; incorrect new file overwritten before commit).
+- New user clarification: native row visuals still wrong; use actual torrents-redesign.js card renderer/style, logo-derived colors, movie logo with Ukrainian + original text underneath. This is NEXT work; compact native rows are a functional checkpoint, not final acceptance.
+- Commit: feat: compact embedded sources and smooth movie backdrops.
