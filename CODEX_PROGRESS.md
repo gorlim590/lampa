@@ -244,3 +244,10 @@
 - Home profiling began separately: baseline first rows4131ms; 1801 DOM at15s, sanitized request paths/counts in home-baseline.json. No speedup claimed. Current native history/candidates counts both0; do not create empty continuation row or alter history for tests.
 - Next: native continuation-order adapter with controlled late-row test; remaining Home bottlenecks, Favorites, settings/header/Screensaver, UA license and Trakt architecture pending.
 - Commit: chore: disable managed CommunityWatches with reversible status backup.
+
+## Stage3a native Home continuation order 2.6.0
+- One Main.use/unuse extension reorders existing native rows + DOM together; nonempty continuation third, first two remaining rows stable, current row identity retained. Late rows coalesce once per animation frame, no permanent observer/timer. Exact same media-type/ID duplicate datasets excluded from focus and restored on disable; distinct provider datasets preserved pending explicit merge rules. History untouched.
+- home-order-report10PASS/errors=[]: real empty state, temporary late native rows, ordering/DOM/nav identity, exact duplicates, disable/reenable, eight toggles (one hook), real reload and CommunityWatches remains off. Controlled test rows removed by reload, not saved to history. Initial hook-count assertion accidentally counted native Items module too; tagged own module and verified explicitly.
+- Home profile baseline first4131ms/DOM1801 at15s, after profile in home-after.json. Warm/cold requests differ, so no general performance improvement claim. Large rating/UA/torrent background traffic and native partNext all-batch barrier remain optimization targets, no global queue rewrite yet.
+- Next unverified: different-provider continuation union, actual nonempty user history after restart, Home timing bottlenecks/card alignment; Favorites, header/settings, Screensaver+, UA license, Trakt-first still pending. Core player/TorrServer routes retained.
+- Commit: feat: keep continuation third in native Home navigation.
