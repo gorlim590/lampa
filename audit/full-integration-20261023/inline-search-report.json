@@ -1,0 +1,45 @@
+{
+  "checks": [
+    {
+      "name": "No advanced-route overflow button",
+      "status": "PASS"
+    },
+    {
+      "name": "Native clarification uses cinema menu on Full",
+      "status": "PASS"
+    },
+    {
+      "name": "Native Filter callback owned by embedded child",
+      "status": "PASS"
+    },
+    {
+      "name": "Clarification dispatches once and remains on same Full",
+      "status": "PASS"
+    },
+    {
+      "name": "Search cancel restores source focus without request",
+      "status": "PASS"
+    },
+    {
+      "name": "Global clarification stays embedded",
+      "status": "PASS"
+    },
+    {
+      "name": "Native keyboard opens",
+      "status": "PASS"
+    },
+    {
+      "name": "Native keyboard cancel retains page/query",
+      "status": "PASS"
+    },
+    {
+      "name": "Disable while menu open cleans own menu/child",
+      "status": "PASS"
+    },
+    {
+      "name": "Reenable exactly one pane",
+      "status": "PASS"
+    }
+  ],
+  "errors": []
+}

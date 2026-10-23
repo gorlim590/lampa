@@ -1,5 +1,5 @@
 /*
- * Screensaver Plus v2 — відео-заставка для Lampa: папка з відео + годинник + погода.
+ * Screensaver Plus v2.1 — відео-заставка для Lampa: папка з відео + годинник + погода.
  *
  * «Папка з відео» (Налаштування → Скрінсейвер+) приймає:
  *   • локальний шлях:  /storage/emulated/0/Movies/wallpapers   (пробуємо file://, потім сервер на 127.0.0.1:8000/8080)
@@ -17,14 +17,14 @@
   var VIDEO_RE = /\.(mp4|webm|m4v|mov|mkv)(\?|$)/i;
 
   var root = null, vA = null, vB = null, front = null;
-  var active = false, starting = false;
+  var active = false, starting = false, runGeneration = 0, booted = false;
   var lastAct = Date.now();
   var sources = [], sourcesT = 0, sourcesErr = '', sourcesVia = '';
   var order = [], pos = -1, failStreak = 0;
   var timers = { clock: null, sw: null, weather: null, corner: null, sleep: null, watch: null };
   var weather = null, weatherT = 0, lastWeatherHtml = '';
   var corner = null, watchT = -1, watchN = 0;
-  var origStart = null;
+  var nativeOwner = null, inputBindings = [];
 
   // ───────────── ХЕЛПЕРИ ─────────────
   function lang() { return String(Lampa.Storage.get('language', 'en')); }
@@ -468,9 +468,11 @@
     var c = cfg();
     if (!manual && !c.enable) return;
     starting = true;
+    var generation = ++runGeneration;
     warmSources();
     var ready = sources.length && !manual ? Promise.resolve(sources) : loadSources(manual);
     ready.then(function (list) {
+      if(generation !== runGeneration) return;
       starting = false;
       if (active) return;
       if (!list.length) {
@@ -503,7 +505,7 @@
       playNext();
       // у фоні оновлюємо список (якщо стартували зі збереженого)
       if (!manual && Date.now() - sourcesT > 10 * 60000) loadSources(true);
-    }, function () { starting = false; });
+    }, function () { if(generation === runGeneration) starting = false; });
   }
 
   function sleepScreen() {
@@ -514,6 +516,7 @@
   }
 
   function stopSaver() {
+    runGeneration++;starting = false;
     if (!active) return;
     active = false;
     clearInterval(timers.clock); clearInterval(timers.weather); clearInterval(timers.corner); clearInterval(timers.watch);
@@ -534,22 +537,22 @@
 
   function hookActivity() {
     ['keydown', 'mousedown', 'click', 'touchstart', 'wheel', 'mousemove'].forEach(function (ev) {
-      window.addEventListener(ev, function (e) {
-        if (active) {
+      var handler = function (e) {
+        if (active || starting) {
           if (ev === 'mousemove') return;
           e.preventDefault(); e.stopImmediatePropagation();
           stopSaver();
           return;
         }
         lastAct = Date.now();
-      }, true);
+      };window.addEventListener(ev,handler,true);inputBindings.push({target:window,event:ev,handler:handler});
     });
-    window.addEventListener('keyup', function (e) {
+    var keyup = function (e) {
       if (active) { e.preventDefault(); e.stopImmediatePropagation(); }
-    }, true);
-    document.addEventListener('visibilitychange', function () { if (document.hidden) stopSaver(); });
+    };window.addEventListener('keyup',keyup,true);inputBindings.push({target:window,event:'keyup',handler:keyup});
+    var visibility = function(){if(document.hidden)stopSaver();};document.addEventListener('visibilitychange',visibility);inputBindings.push({target:document,event:'visibilitychange',handler:visibility});
 
-    setInterval(function () {
+    timers.idle = setInterval(function () {
       if (active || document.hidden) return;
       var c = cfg();
       if (!c.enable) return;
@@ -558,18 +561,31 @@
     }, 5000);
   }
 
+  function ownsNative() { var c=cfg();return c.enable && c.killNative && !!(sources.length || c.folder || c.urls); }
+  function restoreNative() {
+    if(!nativeOwner)return;var owner=nativeOwner;nativeOwner=null;
+    if(owner.saver.show===owner.show)owner.saver.show=owner.originalShow;
+    if(owner.saver.resetTimer===owner.reset)owner.saver.resetTimer=owner.originalReset;
+    owner.saver.resetTimer();
+  }
   function patchNative() {
-    try {
-      var S = Lampa.Screensaver;
-      if (!S || typeof S.start !== 'function' || S.start._ssp) return;
-      origStart = S.start;
-      S.start = function () {
-        var c = cfg();
-        if (c.enable && c.killNative && (sources.length || c.folder || c.urls)) return;
-        return origStart.apply(this, arguments);
-      };
-      S.start._ssp = true;
-    } catch (e) {}
+    var S=Lampa.Screensaver;if(!S||typeof S.show!=='function'||typeof S.resetTimer!=='function')return;
+    if(!ownsNative()){restoreNative();return;}
+    if(nativeOwner)return;
+    var owner={saver:S,originalShow:S.show,originalReset:S.resetTimer};nativeOwner=owner;
+    owner.show=function(){if(ownsNative())return startSaver(false);return owner.originalShow.apply(this,arguments);};
+    owner.reset=function(){if(ownsNative()){clearTimeout(this.timer);this.timer=null;this.time_reset=Date.now();return;}return owner.originalReset.apply(this,arguments);};
+    S.show=owner.show;S.resetTimer=owner.reset;
+    if(S.worked)S.stopSlideshow();S.resetTimer();
+  }
+  function nativeSettingsChanged(event){if(event&&/^ssp_/.test(event.name)){if(!cfg().enable)stopSaver();patchNative();}}
+  function destroy(){
+    stopSaver();Object.keys(timers).forEach(function(k){clearTimeout(timers[k]);clearInterval(timers[k]);});
+    inputBindings.forEach(function(b){b.target.removeEventListener(b.event,b.handler,true);b.target.removeEventListener(b.event,b.handler,false);});inputBindings=[];
+    Lampa.Storage.listener.remove('change',nativeSettingsChanged);restoreNative();
+    var style=document.querySelector('style[data-ssp]');if(style)style.parentNode.removeChild(style);
+    Lampa.SettingsApi.removeParams('screensaver_plus');Lampa.SettingsApi.removeComponent('screensaver_plus');
+    Lampa.Listener.remove('app',onAppReady);window.screensaver_plus_ready=false;delete window.ScreensaverPlus;
   }
 
   // ───────────── НАЛАШТУВАННЯ ─────────────
@@ -666,14 +682,17 @@
 
   // ───────────── СТАРТ ─────────────
   function boot() {
+    if(booted)return;booted=true;
+    Lampa.Storage.listener.follow('change',nativeSettingsChanged);
     try { initSettings(); } catch (e) {}
     try { hookActivity(); } catch (e) {}
     try { patchNative(); } catch (e) {}
-    setTimeout(patchNative, 3000);
-    setTimeout(function () { warmSources(); if (cfg().enable && (cfg().folder || cfg().urls)) loadSources(false); }, 4000);
-    window.ScreensaverPlus = { start: function () { startSaver(true); }, stop: stopSaver, reload: function () { return loadSources(true); } };
+    timers.patch = setTimeout(patchNative, 3000);
+    timers.warm = setTimeout(function () { warmSources(); if (cfg().enable && (cfg().folder || cfg().urls)) loadSources(false); }, 4000);
+    window.ScreensaverPlus = { version:'2.1.0', destroy:destroy, state:function(){return {active:active,starting:starting,nativeOwned:!!nativeOwner};}, start: function () { startSaver(true); }, stop: stopSaver, reload: function () { return loadSources(true); } };
   }
 
+  function onAppReady(e){if(e.type==='ready')boot();}
   if (window.appready) boot();
-  else Lampa.Listener.follow('app', function (e) { if (e.type === 'ready') boot(); });
+  else Lampa.Listener.follow('app', onAppReady);
 })();

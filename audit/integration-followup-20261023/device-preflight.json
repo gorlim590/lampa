@@ -1,0 +1,15 @@
+{
+  "errors": [],
+  "source": 2,
+  "local": {
+    "activity": "device_bookmarks",
+    "rows": 2,
+    "titles": [
+      "Закладки · на пристрої",
+      "Пізніше · на пристрої"
+    ],
+    "cards": 9
+  },
+  "localAction": 1,
+  "title": "Вибране"
+}

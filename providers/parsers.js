@@ -994,6 +994,35 @@ function initSecondaryPlugin(){
     }
 }
 
+/* Embedded view API: existing parser configuration/apply functions, no exposed credentials. */
+function embeddedParserButton(root,context){
+    root=root&&(root[0]||root);context=context||{};
+    if(!root)return null;
+    var line=root.querySelector('.torrent-filter');if(!line)return null;
+    var dead=false,button=document.createElement('div');button.className='simple-button simple-button--filter selector filter--parser';button.textContent='Джерела';
+    function alive(){return !dead&&(!context.isAlive||context.isAlive());}
+    function back(){if(alive()&&context.onBack)context.onBack();}
+    function choose(kind){
+        if(!alive())return;
+        var list=getParsers(),current=kind==='primary'?getSelectedBase():parseInt(Lampa.Storage.get(STORAGE_SEC_ACT,'-1'),10);
+        var items=[{title:'Не використовувати',value:kind==='primary'?NO_PARSER:-1,selected:kind==='primary'?current===NO_PARSER:current===-1}];
+        list.forEach(function(p,i){items.push({title:p.name||p.shortName||'Парсер '+(i+1),value:kind==='primary'?p.base:i,selected:kind==='primary'?current===p.base:current===i});});
+        Lampa.Select.show({title:kind==='primary'?'Основний парсер':'Додатковий парсер',items:items,onBack:open,onSelect:function(item){
+            if(!alive())return;if(item.value===current){back();return;}
+            var changed=false;if(context.beginChange)context.beginChange();
+            try{
+                if(kind==='primary'){Lampa.Storage.set(STORAGE_PRI_ACT,item.value);changed=applySelectedParser(item.value)!==false;updateSelectedLabelInSettings();}
+                else{Lampa.Storage.set(STORAGE_SEC_ACT,String(item.value));applySecondaryParser(item.value);changed=true;}
+            }finally{if(context.endChange)context.endChange(changed);}
+            if(changed&&alive()&&context.onChange)context.onChange();else back();
+        }});
+    }
+    function open(){if(!alive())return;Lampa.Select.show({title:'Джерела',items:[{title:'Основний парсер',kind:'primary'},{title:'Додатковий парсер',kind:'secondary'}],onBack:back,onSelect:function(item){choose(item.kind);}});}
+    button.addEventListener('hover:enter',open);line.appendChild(button);
+    return {destroy:function(){dead=true;button.removeEventListener('hover:enter',open);if(button.parentNode)button.parentNode.removeChild(button);}};
+}
+if(!window.ParserProviders)window.ParserProviders={version:'1.0.0',mount:embeddedParserButton};
+
 /* ============================================================
    INIT
    ============================================================ */

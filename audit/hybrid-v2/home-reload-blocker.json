@@ -1,0 +1,8 @@
+{
+  "status": "BLOCKED",
+  "off": {
+    "loading": true,
+    "cards": 0
+  },
+  "note": "Home remains in the native loading state with theme CSS removed. Cause has not been established; do not call full clean-load acceptance passed."
+}

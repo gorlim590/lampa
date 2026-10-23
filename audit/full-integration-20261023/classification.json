@@ -1,0 +1,162 @@
+[
+  {
+    "path": "http://wtch.ch/m",
+    "class": "Потенційно конфліктний",
+    "reason": "Віддалений провайдер: раніше були load failures; функцію/статус не прирівнюємо до непотрібності."
+  },
+  {
+    "path": "https://lampame.github.io/main/bo.js",
+    "class": "Корисний, але потребує оптимізації",
+    "reason": "Активний native/provider/plugin шлях; не видаляти до перевірки залежностей."
+  },
+  {
+    "path": "http://bwa.ad/rc",
+    "class": "Корисний, але потребує оптимізації",
+    "reason": "Активний native/provider/plugin шлях; не видаляти до перевірки залежностей."
+  },
+  {
+    "path": "https://cub.rip/plugin/lgbt",
+    "class": "Потенційно конфліктний",
+    "reason": "Віддалений провайдер: раніше були load failures; функцію/статус не прирівнюємо до непотрібності."
+  },
+  {
+    "path": "https://lampame.github.io/main/ttv.js",
+    "class": "Не використовується",
+    "reason": "Вимкнений у Extension registry; не видаляється."
+  },
+  {
+    "path": "loader.js",
+    "class": "Необхідний",
+    "reason": "Потрібний для поточної композиції або штатного parsing/playback."
+  },
+  {
+    "path": "media/seasons-info.js",
+    "class": "Корисний, але потребує оптимізації",
+    "reason": "Активний native/provider/plugin шлях; не видаляти до перевірки залежностей."
+  },
+  {
+    "path": "community/community-watches.js",
+    "class": "Дублює іншу функціональність",
+    "reason": "Шість ContentRows CommunityWatches (main/movie/tv × hidden gems/weekly); окремо дозволене вимкнення, не видалено на цьому етапі."
+  },
+  {
+    "path": "community/imdb-trailers.js",
+    "class": "Корисний, але потребує оптимізації",
+    "reason": "Активний native/provider/plugin шлях; не видаляти до перевірки залежностей."
+  },
+  {
+    "path": "community/new-category.js",
+    "class": "Корисний, але потребує оптимізації",
+    "reason": "Активний native/provider/plugin шлях; не видаляти до перевірки залежностей."
+  },
+  {
+    "path": "community/nightingale.js",
+    "class": "Корисний, але потребує оптимізації",
+    "reason": "Активний native/provider/plugin шлях; не видаляти до перевірки залежностей."
+  },
+  {
+    "path": "filters/anti-dmca.js",
+    "class": "Корисний, але потребує оптимізації",
+    "reason": "Активний native/provider/plugin шлях; не видаляти до перевірки залежностей."
+  },
+  {
+    "path": "filters/hide-content.js",
+    "class": "Корисний, але потребує оптимізації",
+    "reason": "Активний native/provider/plugin шлях; не видаляти до перевірки залежностей."
+  },
+  {
+    "path": "filters/lampac-source-filter.js",
+    "class": "Корисний, але потребує оптимізації",
+    "reason": "Активний native/provider/plugin шлях; не видаляти до перевірки залежностей."
+  },
+  {
+    "path": "filters/search-sanitizer.js",
+    "class": "Корисний, але потребує оптимізації",
+    "reason": "Активний native/provider/plugin шлях; не видаляти до перевірки залежностей."
+  },
+  {
+    "path": "filters/source-sort.js",
+    "class": "Корисний, але потребує оптимізації",
+    "reason": "Активний native/provider/plugin шлях; не видаляти до перевірки залежностей."
+  },
+  {
+    "path": "filters/trash-filter.js",
+    "class": "Корисний, але потребує оптимізації",
+    "reason": "Активний native/provider/plugin шлях; не видаляти до перевірки залежностей."
+  },
+  {
+    "path": "media/custom-favorites.js",
+    "class": "Корисний, але потребує оптимізації",
+    "reason": "Активний native/provider/plugin шлях; не видаляти до перевірки залежностей."
+  },
+  {
+    "path": "media/studio-picks.js",
+    "class": "Корисний, але потребує оптимізації",
+    "reason": "Активний native/provider/plugin шлях; не видаляти до перевірки залежностей."
+  },
+  {
+    "path": "providers/parsers.js",
+    "class": "Необхідний",
+    "reason": "Потрібний для поточної композиції або штатного parsing/playback."
+  },
+  {
+    "path": "providers/tmdb-networks.js",
+    "class": "Корисний, але потребує оптимізації",
+    "reason": "Активний native/provider/plugin шлях; не видаляти до перевірки залежностей."
+  },
+  {
+    "path": "providers/ts-tracks.js",
+    "class": "Необхідний",
+    "reason": "Потрібний для поточної композиції або штатного parsing/playback."
+  },
+  {
+    "path": "providers/tryzub-tv.js",
+    "class": "Корисний, але потребує оптимізації",
+    "reason": "Активний native/provider/plugin шлях; не видаляти до перевірки залежностей."
+  },
+  {
+    "path": "ui/buttons-plus.js",
+    "class": "Корисний, але потребує оптимізації",
+    "reason": "Активний native/provider/plugin шлях; не видаляти до перевірки залежностей."
+  },
+  {
+    "path": "ui/menu-hide.js",
+    "class": "Корисний, але потребує оптимізації",
+    "reason": "Активний native/provider/plugin шлях; не видаляти до перевірки залежностей."
+  },
+  {
+    "path": "ui/screensaver-plus.js",
+    "class": "Корисний, але потребує оптимізації",
+    "reason": "Активний native/provider/plugin шлях; не видаляти до перевірки залежностей."
+  },
+  {
+    "path": "ui/tv-status.js",
+    "class": "Корисний, але потребує оптимізації",
+    "reason": "Активний native/provider/plugin шлях; не видаляти до перевірки залежностей."
+  },
+  {
+    "path": "https://marv2on.github.io/lampa-plugins-sync/sync/Yaroslav/uacoments.js",
+    "class": "Корисний, але потребує оптимізації",
+    "reason": "Активний native/provider/plugin шлях; не видаляти до перевірки залежностей."
+  },
+  {
+    "path": "torrents-redesign.js",
+    "class": "Необхідний",
+    "reason": "Потрібний для поточної композиції або штатного parsing/playback."
+  },
+  {
+    "path": "http://127.0.0.1:8766/stremio-hybrid.js",
+    "class": "Необхідний",
+    "reason": "Потрібний для поточної композиції або штатного parsing/playback."
+  },
+  {
+    "path": "https://nrsua.github.io/lampa-nrs/lparty.js",
+    "class": "Не використовується",
+    "reason": "Вимкнений у Extension registry; не видаляється."
+  },
+  {
+    "path": "https://lampame.github.io/main/music.js",
+    "class": "Не використовується",
+    "reason": "Вимкнений у Extension registry; не видаляється."
+  }
+]

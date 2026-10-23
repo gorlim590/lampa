@@ -1,0 +1,11 @@
+{
+  "version": "2.1.0",
+  "enabled": true,
+  "component": "full",
+  "method": "movie",
+  "styles": 1,
+  "descriptions": 1,
+  "primary": 1,
+  "cardify": true,
+  "ratings": 4
+}

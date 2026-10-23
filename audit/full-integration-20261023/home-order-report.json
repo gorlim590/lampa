@@ -1,0 +1,46 @@
+{
+  "kind": "Real Home; temporary late native rows only, no history/storage writes",
+  "checks": [
+    {
+      "name": "Empty real history creates no empty continuation row",
+      "status": "PASS"
+    },
+    {
+      "name": "Late continuation is third in native item order",
+      "status": "PASS"
+    },
+    {
+      "name": "First two native row objects unchanged",
+      "status": "PASS"
+    },
+    {
+      "name": "DOM order matches native navigation order",
+      "status": "PASS"
+    },
+    {
+      "name": "Exact duplicate hidden/excluded from focus without deleting history",
+      "status": "PASS"
+    },
+    {
+      "name": "Active native row identity retained after reorder",
+      "status": "PASS"
+    },
+    {
+      "name": "Disable restores native order and duplicate row",
+      "status": "PASS"
+    },
+    {
+      "name": "Reenable uses exactly one additional native hook",
+      "status": "PASS"
+    },
+    {
+      "name": "Eight toggle cycles retain one Home hook",
+      "status": "PASS"
+    },
+    {
+      "name": "Reload removes fixture and preserves CommunityWatches disable",
+      "status": "PASS"
+    }
+  ],
+  "errors": []
+}

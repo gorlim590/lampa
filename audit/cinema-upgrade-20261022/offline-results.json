@@ -1,0 +1,272 @@
+{
+  "version": "1.2.0-audit",
+  "tests": [
+    {
+      "name": "Real release title preserved",
+      "status": "PASS"
+    },
+    {
+      "name": "Declared Ukrainian audio: Fight Club (1999) 1080p 2xUkr/Eng",
+      "status": "PASS"
+    },
+    {
+      "name": "Declared Ukrainian audio: Fight Club (1999) 2160p 4хУкр/Eng",
+      "status": "PASS"
+    },
+    {
+      "name": "Declared Ukrainian audio: Fight Club (1999) 720p 2×Укр",
+      "status": "PASS"
+    },
+    {
+      "name": "Ukrainian tracker does not imply audio",
+      "status": "PASS"
+    },
+    {
+      "name": "Subtitles do not imply audio",
+      "status": "PASS"
+    },
+    {
+      "name": "Ukraine word is not audio",
+      "status": "PASS"
+    },
+    {
+      "name": "Structured Ukrainian audio fields",
+      "status": "PASS"
+    },
+    {
+      "name": "Generic Languages field not audio evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "Alternate parser aliases",
+      "status": "PASS"
+    },
+    {
+      "name": "Missing parser values remain unknown",
+      "status": "PASS"
+    },
+    {
+      "name": "Matching bilingual title",
+      "status": "PASS"
+    },
+    {
+      "name": "Remaster remains eligible",
+      "status": "PASS"
+    },
+    {
+      "name": "Collection blocked",
+      "status": "PASS"
+    },
+    {
+      "name": "Wrong year blocked",
+      "status": "PASS"
+    },
+    {
+      "name": "Wrong movie blocked",
+      "status": "PASS"
+    },
+    {
+      "name": "Numeric title 1917 uses actual release year",
+      "status": "PASS"
+    },
+    {
+      "name": "Numeric title 2001 uses actual release year",
+      "status": "PASS"
+    },
+    {
+      "name": "Correct season eligible",
+      "status": "PASS"
+    },
+    {
+      "name": "Wrong season blocked",
+      "status": "PASS"
+    },
+    {
+      "name": "Season collection blocked",
+      "status": "PASS"
+    },
+    {
+      "name": "Cyrillic season blocked correctly",
+      "status": "PASS"
+    },
+    {
+      "name": "Wrong episode blocked",
+      "status": "PASS"
+    },
+    {
+      "name": "Double episode includes requested episode",
+      "status": "PASS"
+    },
+    {
+      "name": "Special season zero preserved",
+      "status": "PASS"
+    },
+    {
+      "name": "Anime native season/episode coordinates",
+      "status": "PASS"
+    },
+    {
+      "name": "Audio priority beats huge seed count and 4K",
+      "status": "PASS"
+    },
+    {
+      "name": "Ukrainian subtitles beat other languages",
+      "status": "PASS"
+    },
+    {
+      "name": "Wrong movie can never be recommended",
+      "status": "PASS"
+    },
+    {
+      "name": "Preferences can disable Ukrainian tier",
+      "status": "PASS"
+    },
+    {
+      "name": "Episode IMDb exact identity",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject Series rating",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject Wrong episode",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject Wrong season",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject Wrong series",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject Unknown rating",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject Missing IMDb ID",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject Parent IMDb ID",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject Double episode",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject Wrong rating",
+      "status": "PASS"
+    },
+    {
+      "name": "Episode special S00 IMDb accepted only on exact coordinates",
+      "status": "PASS"
+    },
+    {
+      "name": "Transparent pixels ignored",
+      "status": "PASS"
+    },
+    {
+      "name": "White logo produces fallback",
+      "status": "PASS"
+    },
+    {
+      "name": "Pink logo yields pink accent",
+      "status": "PASS"
+    },
+    {
+      "name": "Trailer selection filters clips, invalid IDs and duplicates",
+      "status": "PASS"
+    },
+    {
+      "name": "Filename coordinates alone are insufficient",
+      "status": "PASS"
+    },
+    {
+      "name": "TMDB episode metadata verifies file coordinates",
+      "status": "PASS"
+    },
+    {
+      "name": "Wrong expected episode IMDb ID rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "Resolution provided explicitly by parser",
+      "status": "PASS"
+    },
+    {
+      "name": "Standard ffprobe audio/subtitle metadata",
+      "status": "PASS"
+    },
+    {
+      "name": "Magnet infohash supports confirmed deduplication",
+      "status": "PASS"
+    },
+    {
+      "name": "A title hash cannot be mistaken for a torrent infohash",
+      "status": "PASS"
+    },
+    {
+      "name": "Human readable Size cannot masquerade as byte count",
+      "status": "PASS"
+    },
+    {
+      "name": "Normalized TV card with both title and name remains a series",
+      "status": "PASS"
+    },
+    {
+      "name": "Explicit parser year is checked if absent from title",
+      "status": "PASS"
+    },
+    {
+      "name": "Explicit parser season is checked if absent from title",
+      "status": "PASS"
+    },
+    {
+      "name": "Explicit parser episode is checked if absent from title",
+      "status": "PASS"
+    },
+    {
+      "name": "Multi-film pack cannot duplicate parent film rating onto another film",
+      "status": "PASS"
+    },
+    {
+      "name": "Corresponding film in a pack can use its parent identity",
+      "status": "PASS"
+    },
+    {
+      "name": "Sample file cannot use movie rating",
+      "status": "PASS"
+    },
+    {
+      "name": "Wrong explicit file year cannot use movie rating",
+      "status": "PASS"
+    },
+    {
+      "name": "Configured primary source is a small tie-breaker",
+      "status": "PASS"
+    },
+    {
+      "name": "Bright manual accents use readable black text",
+      "status": "PASS"
+    },
+    {
+      "name": "Dark manual accents use readable white text",
+      "status": "PASS"
+    },
+    {
+      "name": "Darkened primary blue retains readable white text",
+      "status": "PASS"
+    }
+  ],
+  "benchmark": {
+    "rows": 10000,
+    "baselineParseMs": 32.808302,
+    "newParseMs": 34.554700000000025,
+    "normalizationAndMatchMs": 200.15402200000017,
+    "note": "Node CPU fixture only; not page load, network, FPS or Google TV performance"
+  }
+}

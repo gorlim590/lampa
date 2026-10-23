@@ -1,0 +1,139 @@
+{
+  "configured": 17,
+  "usedSavedConfiguration": false,
+  "results": [
+    {
+      "name": "Jac.Maxvol",
+      "status": "BLOCKED",
+      "reason": "8-second audit deadline / unavailable parser",
+      "elapsedMs": 8000
+    },
+    {
+      "name": "NoName",
+      "status": "BLOCKED",
+      "reason": "Native parser returned an error (network/CORS/auth/schema); credentials preserved",
+      "elapsedMs": 2
+    },
+    {
+      "name": "407-Xyz",
+      "status": "PASS",
+      "count": 363,
+      "withTitle": 363,
+      "withTracker": 363,
+      "declaredUkrainianAudio": 27,
+      "declaredUkrainianSubs": 20,
+      "duplicateHashes": 0,
+      "fields": [
+        "Album",
+        "Artist",
+        "BlackholeLink",
+        "BookTitle",
+        "Category",
+        "CategoryDesc",
+        "Description",
+        "Details",
+        "DoubanId",
+        "DownloadVolumeFactor",
+        "Files",
+        "FirstSeen",
+        "Gain",
+        "Genres",
+        "Grabs",
+        "Guid",
+        "Imdb",
+        "InfoHash",
+        "Label",
+        "Languages",
+        "Link",
+        "MagnetUri",
+        "MinimumRatio",
+        "MinimumSeedTime",
+        "Peers",
+        "Poster",
+        "PublisTime",
+        "PublishDate",
+        "Publisher",
+        "RageID",
+        "Seeders",
+        "Size",
+        "Subs",
+        "TMDb",
+        "TVDBId",
+        "TVMazeId",
+        "Title",
+        "Track",
+        "Tracker",
+        "TrackerId",
+        "TrackerType",
+        "TraktId",
+        "UploadVolumeFactor",
+        "Year",
+        "checked_at",
+        "hash",
+        "size",
+        "source_rank",
+        "viewed"
+      ],
+      "samples": [
+        {
+          "title": "Fight Club (1999) 2160p 60FPS Ai Upscaled Open Matte H265 AC5.1 EngSubs_Marjenbo",
+          "tracker": "The Pirate Bay"
+        },
+        {
+          "title": "GCW 2026 10 11 Fight Club Tag 2 720p WEB H 264-JFF",
+          "tracker": "The Pirate Bay"
+        }
+      ],
+      "elapsedMs": 7296
+    },
+    {
+      "name": "alcoV1",
+      "status": "PASS",
+      "count": 342,
+      "withTitle": 342,
+      "withTracker": 342,
+      "declaredUkrainianAudio": 21,
+      "declaredUkrainianSubs": 18,
+      "duplicateHashes": 155,
+      "fields": [
+        "Category",
+        "Guid",
+        "InfoHash",
+        "Link",
+        "MagnetUri",
+        "OriginalTitle",
+        "Peers",
+        "PublisTime",
+        "PublishDate",
+        "Quality",
+        "Seeders",
+        "Size",
+        "Title",
+        "Tracker",
+        "TrackerId",
+        "Year",
+        "checked_at",
+        "hash",
+        "size",
+        "source_rank",
+        "viewed"
+      ],
+      "samples": [
+        {
+          "title": "National Geographic. Бойцовский клуб для животных (1 сезон: 3 серии из 3) / Animal Fight Club / 2013 / ДБ / HDTVRip",
+          "tracker": "kinozal"
+        },
+        {
+          "title": "National Geographic. Бойцовский клуб для животных (2 сезон: 6 серий из 6) / Animal Fight Club / 2014 / ДБ / HDTVRip (720p)",
+          "tracker": "kinozal"
+        }
+      ],
+      "elapsedMs": 981
+    },
+    {
+      "name": "alcoV2",
+      "status": "BLOCKED",
+      "reason": "Requires its configured adapter; direct Jackett base adapter is unsuitable"
+    }
+  ]
+}

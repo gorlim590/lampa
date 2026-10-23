@@ -1,0 +1,9 @@
+{
+  "name": "Native anime search retains enriched animation cards",
+  "status": "PASS",
+  "detail": {
+    "cards": 1,
+    "animationCards": 1,
+    "genres": 3
+  }
+}

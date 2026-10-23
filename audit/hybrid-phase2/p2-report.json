@@ -1,0 +1,151 @@
+{
+  "checks": [
+    {
+      "name": "All native categories mirrored",
+      "status": "PASS"
+    },
+    {
+      "name": "Settings layout 1280",
+      "status": "PASS",
+      "detail": {
+        "rail": {
+          "x": 25.625,
+          "y": 72.140625,
+          "width": 282.609375,
+          "height": 622.234375,
+          "top": 72.140625,
+          "right": 308.234375,
+          "bottom": 694.375,
+          "left": 25.625
+        },
+        "body": {
+          "x": 332.859375,
+          "y": 72.140625,
+          "width": 921.515625,
+          "height": 622.234375,
+          "top": 72.140625,
+          "right": 1254.375,
+          "bottom": 694.375,
+          "left": 332.859375
+        }
+      }
+    },
+    {
+      "name": "Settings layout 1920",
+      "status": "PASS",
+      "detail": {
+        "rail": {
+          "x": 37.953125,
+          "y": 107.734375,
+          "width": 424.140625,
+          "height": 934.3125,
+          "top": 107.734375,
+          "right": 462.09375,
+          "bottom": 1042.046875,
+          "left": 37.953125
+        },
+        "body": {
+          "x": 499.046875,
+          "y": 107.734375,
+          "width": 1383,
+          "height": 934.3125,
+          "top": 107.734375,
+          "right": 1882.046875,
+          "bottom": 1042.046875,
+          "left": 499.046875
+        }
+      }
+    },
+    {
+      "name": "Settings layout 3840",
+      "status": "PASS",
+      "detail": {
+        "rail": {
+          "x": 74.90625,
+          "y": 214.5,
+          "width": 848.734375,
+          "height": 1870.59375,
+          "top": 214.5,
+          "right": 923.640625,
+          "bottom": 2085.09375,
+          "left": 74.90625
+        },
+        "body": {
+          "x": 997.546875,
+          "y": 214.5,
+          "width": 2767.546875,
+          "height": 1870.59375,
+          "top": 214.5,
+          "right": 3765.09375,
+          "bottom": 2085.09375,
+          "left": 997.546875
+        }
+      }
+    },
+    {
+      "name": "Right enters native parameters",
+      "status": "PASS"
+    },
+    {
+      "name": "Left returns category rail",
+      "status": "PASS"
+    },
+    {
+      "name": "OK opens plugin Settings category",
+      "status": "PASS",
+      "detail": {
+        "active": "interface_mod_new",
+        "controller": "settings_component",
+        "params": 30
+      }
+    },
+    {
+      "name": "Repeated category routes do not accumulate listeners",
+      "status": "PASS",
+      "detail": {
+        "before": {
+          "updates": 1,
+          "open": 13,
+          "close": 1,
+          "rail": 1
+        },
+        "after": {
+          "updates": 1,
+          "open": 13,
+          "close": 1,
+          "rail": 1
+        }
+      }
+    },
+    {
+      "name": "Native language selector opens",
+      "status": "PASS",
+      "detail": {
+        "open": false,
+        "controller": "language",
+        "title": "Вихід"
+      }
+    },
+    {
+      "name": "Selector Back retains native settings",
+      "status": "PASS"
+    },
+    {
+      "name": "Disable restores stock Settings and header",
+      "status": "PASS"
+    },
+    {
+      "name": "Enable restores split Settings once",
+      "status": "PASS"
+    },
+    {
+      "name": "Back from parameters returns rail",
+      "status": "PASS"
+    },
+    {
+      "name": "Back from rail exits Settings",
+      "status": "PASS"
+    }
+  ],
+  "errors": []
+}

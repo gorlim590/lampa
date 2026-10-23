@@ -1,0 +1,93 @@
+{
+  "elapsed": 15047,
+  "rows": [
+    {
+      "title": "Зараз дивляться: фільми",
+      "index": 0,
+      "ms": 93,
+      "cards": 7
+    },
+    {
+      "title": "Зараз дивляться: серіали",
+      "index": 1,
+      "ms": 93,
+      "cards": 7
+    },
+    {
+      "title": "Популярні корейські дорами",
+      "index": 2,
+      "ms": 93,
+      "cards": 7
+    },
+    {
+      "title": "Зараз дивляться: мультфільми",
+      "index": 3,
+      "ms": 94,
+      "cards": 7
+    }
+  ],
+  "requests": [
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 43
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 51
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 48
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 48
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 46
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 45
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 82
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 85
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 82
+    },
+    {
+      "path": "wh.lme.isroot.in/",
+      "ms": 80
+    }
+  ],
+  "dom": 1942,
+  "componentKeys": [
+    "components",
+    "object",
+    "params",
+    "scroll",
+    "html",
+    "items",
+    "loaded",
+    "active",
+    "limit_view",
+    "builded_time",
+    "props",
+    "activity",
+    "fragment"
+  ],
+  "visibleRows": [
+    "Зараз дивляться: фільми",
+    "Зараз дивляться: серіали",
+    "Популярні корейські дорами",
+    "Зараз дивляться: мультфільми"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "kind": "Native navigation and paginated reads of existing lists; no list writes",
+  "checks": [
+    {
+      "name": "Native Right moves between existing device cards",
+      "status": "PASS"
+    },
+    {
+      "name": "Native OK opens focused original device card",
+      "status": "PASS"
+    },
+    {
+      "name": "Native Back returns to device lists",
+      "status": "PASS"
+    },
+    {
+      "name": "Native More paginates existing 45-entry list in bounded chunks",
+      "status": "PASS"
+    },
+    {
+      "name": "Final page exposes remaining five entries",
+      "status": "PASS"
+    },
+    {
+      "name": "Pagination Back preserves previous native page",
+      "status": "PASS"
+    },
+    {
+      "name": "Theme off retains functional device list component",
+      "status": "PASS"
+    },
+    {
+      "name": "Theme reenable preserves list without duplicate rows",
+      "status": "PASS"
+    }
+  ],
+  "errors": []
+}

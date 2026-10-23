@@ -1,0 +1,136 @@
+{
+  "checks": [
+    {
+      "name": "No separate Details/cast action",
+      "status": "PASS"
+    },
+    {
+      "name": "Flags replace actual audio language labels, accessible labels retained",
+      "status": "PASS",
+      "detail": [
+        {
+          "lang": "UKR",
+          "visible": "🇺🇦",
+          "label": "UKR"
+        },
+        {
+          "lang": "UKR",
+          "visible": "🇺🇦",
+          "label": "UKR"
+        },
+        {
+          "lang": "UKR",
+          "visible": "🇺🇦",
+          "label": "UKR"
+        },
+        {
+          "lang": "UKR",
+          "visible": "🇺🇦",
+          "label": "UKR"
+        },
+        {
+          "lang": "UKR",
+          "visible": "🇺🇦",
+          "label": "UKR"
+        },
+        {
+          "lang": "UKR",
+          "visible": "🇺🇦",
+          "label": "UKR"
+        },
+        {
+          "lang": "UKR",
+          "visible": "🇺🇦",
+          "label": "UKR"
+        },
+        {
+          "lang": "UKR",
+          "visible": "🇺🇦",
+          "label": "UKR"
+        },
+        {
+          "lang": "UKR",
+          "visible": "🇺🇦",
+          "label": "UKR"
+        },
+        {
+          "lang": "UKR",
+          "visible": "🇺🇦",
+          "label": "UKR"
+        },
+        {
+          "lang": "UKR",
+          "visible": "🇺🇦",
+          "label": "UKR"
+        },
+        {
+          "lang": "UKR",
+          "visible": "🇺🇦",
+          "label": "UKR"
+        }
+      ]
+    },
+    {
+      "name": "Available seeded sources visibly highlighted",
+      "status": "PASS"
+    },
+    {
+      "name": "Native Down scrolls details; sources leave the viewport",
+      "status": "PASS"
+    },
+    {
+      "name": "Native Down reaches cast or recommendation rows",
+      "status": "PASS",
+      "detail": {
+        "controller": "items_line",
+        "focus": "card selector layer--visible layer--render card--loaded ydesign-card ydesign-vertical ydesign-is-watched ydesign-from-trakt ydesign-ready focus"
+      }
+    },
+    {
+      "name": "Down at final source returns to native lower content",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual Cardify callback paced at >=25 seconds",
+      "status": "PASS",
+      "detail": [
+        25000
+      ]
+    },
+    {
+      "name": "Real Cardify rotation interpolates opacity instead of forced jump",
+      "status": "PASS",
+      "detail": [
+        {
+          "opacity": 0.863419,
+          "transition": "0.8s"
+        },
+        {
+          "opacity": 0.136581,
+          "transition": "0.8s"
+        }
+      ]
+    },
+    {
+      "name": "Cardify cleans old backdrop after crossfade",
+      "status": "PASS"
+    },
+    {
+      "name": "Theme off restores original Cardify interval",
+      "status": "PASS",
+      "detail": [
+        25000,
+        8000
+      ]
+    },
+    {
+      "name": "Reenable repaces existing timer without changing Cardify preferences",
+      "status": "PASS"
+    },
+    {
+      "name": "Reduced motion removes backdrop transition",
+      "status": "PASS"
+    }
+  ],
+  "errors": []
+}

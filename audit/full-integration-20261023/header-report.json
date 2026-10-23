@@ -1,0 +1,151 @@
+{
+  "checks": [
+    {
+      "name": "Clock/date and header do not overlap 1280",
+      "status": "PASS",
+      "data": {
+        "search": {
+          "x": 409.6015625,
+          "y": 10.234375,
+          "width": 332.796875,
+          "height": 54.390625,
+          "top": 10.234375,
+          "right": 742.3984375,
+          "bottom": 64.625,
+          "left": 409.6015625
+        },
+        "clock": {
+          "x": 983.390625,
+          "y": 27.28125,
+          "width": 188.84375,
+          "height": 20.3125,
+          "top": 27.28125,
+          "right": 1172.234375,
+          "bottom": 47.59375,
+          "left": 983.390625
+        },
+        "profile": {
+          "x": 1188.65625,
+          "y": 10.25,
+          "width": 54.390625,
+          "height": 54.390625,
+          "top": 10.25,
+          "right": 1243.046875,
+          "bottom": 64.640625,
+          "left": 1188.65625
+        },
+        "time": "01:49\n            \n                23 Жовтня 2026\n                П'ятниця",
+        "bg": "rgba(255, 255, 255, 0.055)"
+      }
+    },
+    {
+      "name": "Clock/date and header do not overlap 1920",
+      "status": "PASS",
+      "data": {
+        "search": {
+          "x": 617.6484375,
+          "y": 10.234375,
+          "width": 492.703125,
+          "height": 54.390625,
+          "top": 10.234375,
+          "right": 1110.3515625,
+          "bottom": 64.625,
+          "left": 617.6484375
+        },
+        "clock": {
+          "x": 1623.390625,
+          "y": 27.28125,
+          "width": 188.84375,
+          "height": 20.3125,
+          "top": 27.28125,
+          "right": 1812.234375,
+          "bottom": 47.59375,
+          "left": 1623.390625
+        },
+        "profile": {
+          "x": 1828.65625,
+          "y": 10.25,
+          "width": 54.390625,
+          "height": 54.390625,
+          "top": 10.25,
+          "right": 1883.046875,
+          "bottom": 64.640625,
+          "left": 1828.65625
+        },
+        "time": "01:49\n            \n                23 Жовтня 2026\n                П'ятниця",
+        "bg": "rgba(255, 255, 255, 0.055)"
+      }
+    },
+    {
+      "name": "Clock/date and header do not overlap 3840",
+      "status": "PASS",
+      "data": {
+        "search": {
+          "x": 1481.6484375,
+          "y": 10.234375,
+          "width": 492.703125,
+          "height": 54.390625,
+          "top": 10.234375,
+          "right": 1974.3515625,
+          "bottom": 64.625,
+          "left": 1481.6484375
+        },
+        "clock": {
+          "x": 3543.390625,
+          "y": 27.28125,
+          "width": 188.84375,
+          "height": 20.3125,
+          "top": 27.28125,
+          "right": 3732.234375,
+          "bottom": 47.59375,
+          "left": 3543.390625
+        },
+        "profile": {
+          "x": 3748.65625,
+          "y": 10.25,
+          "width": 54.390625,
+          "height": 54.390625,
+          "top": 10.25,
+          "right": 3803.046875,
+          "bottom": 64.640625,
+          "left": 3748.65625
+        },
+        "time": "01:49\n            \n                23 Жовтня 2026\n                П'ятниця",
+        "bg": "rgba(255, 255, 255, 0.055)"
+      }
+    },
+    {
+      "name": "Profile retains secondary functions and navigation/Back",
+      "status": "PASS"
+    },
+    {
+      "name": "Profile Back restores head focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Profile opens native settings with avatar URL field once",
+      "status": "PASS"
+    },
+    {
+      "name": "Avatar displays using URL only, without storage write",
+      "status": "PASS"
+    },
+    {
+      "name": "Unavailable avatar falls back to profile SVG",
+      "status": "PASS"
+    },
+    {
+      "name": "Same subtle header backgrounds on movie page",
+      "status": "PASS"
+    },
+    {
+      "name": "Disable restores native logo/time and removes own profile",
+      "status": "PASS"
+    },
+    {
+      "name": "Reenable has one profile and setting definition",
+      "status": "PASS"
+    }
+  ],
+  "errors": []
+}

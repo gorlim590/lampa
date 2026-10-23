@@ -1,0 +1,54 @@
+{
+  "configured": 17,
+  "usedSavedConfiguration": false,
+  "results": [
+    {
+      "name": "nmjc",
+      "status": "PASS",
+      "count": 113,
+      "withTitle": 113,
+      "withTracker": 113,
+      "declaredUkrainianAudio": 13,
+      "declaredUkrainianSubs": 12,
+      "duplicateHashes": 0,
+      "fields": [
+        "Category",
+        "CategoryDesc",
+        "Details",
+        "MagnetUri",
+        "Peers",
+        "PublisTime",
+        "PublishDate",
+        "Seeders",
+        "Size",
+        "Title",
+        "Tracker",
+        "checked_at",
+        "ffprobe",
+        "hash",
+        "info",
+        "languages",
+        "size",
+        "source_rank",
+        "viewed"
+      ],
+      "samples": [
+        {
+          "title": "Бойцовский клуб / Fight Club / 1999 / ДБ, СТ / BDRip (1080p) | Дубляж",
+          "tracker": "korsars, rutor, kinozal, bitru, megapeer"
+        },
+        {
+          "title": "Бойцовский клуб / Fight Club (Дэвид Финчер / David Fincher) [1999, США, Германия, триллер, драма, криминал, BDRip 1080p]",
+          "tracker": "rutracker, rutor"
+        }
+      ],
+      "elapsedMs": 802
+    },
+    {
+      "name": "lampaapp",
+      "status": "BLOCKED",
+      "reason": "8-second audit deadline / unavailable parser",
+      "elapsedMs": 8000
+    }
+  ]
+}

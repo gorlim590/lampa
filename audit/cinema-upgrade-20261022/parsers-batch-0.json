@@ -1,0 +1,138 @@
+{
+  "configured": 17,
+  "usedSavedConfiguration": false,
+  "results": [
+    {
+      "name": "LampaUA Jackett",
+      "status": "PASS",
+      "count": 126,
+      "withTitle": 126,
+      "withTracker": 126,
+      "declaredUkrainianAudio": 25,
+      "declaredUkrainianSubs": 19,
+      "duplicateHashes": 0,
+      "fields": [
+        "Album",
+        "Artist",
+        "BlackholeLink",
+        "BookTitle",
+        "Category",
+        "CategoryDesc",
+        "Description",
+        "Details",
+        "DoubanId",
+        "DownloadVolumeFactor",
+        "Files",
+        "FirstSeen",
+        "Gain",
+        "Genres",
+        "Grabs",
+        "Guid",
+        "Imdb",
+        "InfoHash",
+        "Label",
+        "Languages",
+        "Link",
+        "MagnetUri",
+        "MinimumRatio",
+        "MinimumSeedTime",
+        "Peers",
+        "Poster",
+        "PublisTime",
+        "PublishDate",
+        "Publisher",
+        "RageID",
+        "Seeders",
+        "Size",
+        "Subs",
+        "TMDb",
+        "TVDBId",
+        "TVMazeId",
+        "Title",
+        "Track",
+        "Tracker",
+        "TrackerId",
+        "TrackerType",
+        "TraktId",
+        "UploadVolumeFactor",
+        "Year",
+        "checked_at",
+        "hash",
+        "size",
+        "source_rank",
+        "viewed"
+      ],
+      "samples": [
+        {
+          "title": "Fight Club (1999) 2160p 60FPS Ai Upscaled Open Matte H265 AC5.1 EngSubs_Marjenbo",
+          "tracker": "The Pirate Bay"
+        },
+        {
+          "title": "GCW 2026 10 11 Fight Club Tag 2 720p WEB H 264-JFF",
+          "tracker": "The Pirate Bay"
+        }
+      ],
+      "elapsedMs": 704
+    },
+    {
+      "name": "LampaUA",
+      "status": "BLOCKED",
+      "reason": "Native parser returned an error (network/CORS/auth/schema); credentials preserved",
+      "elapsedMs": 24
+    },
+    {
+      "name": "Spawn (1)",
+      "status": "BLOCKED",
+      "reason": "Native parser returned an error (network/CORS/auth/schema); credentials preserved",
+      "elapsedMs": 2
+    },
+    {
+      "name": "Spawn (2)",
+      "status": "BLOCKED",
+      "reason": "Native parser returned an error (network/CORS/auth/schema); credentials preserved",
+      "elapsedMs": 3
+    },
+    {
+      "name": "Jac.red",
+      "status": "PASS",
+      "count": 113,
+      "withTitle": 113,
+      "withTracker": 113,
+      "declaredUkrainianAudio": 13,
+      "declaredUkrainianSubs": 12,
+      "duplicateHashes": 0,
+      "fields": [
+        "Category",
+        "CategoryDesc",
+        "Details",
+        "MagnetUri",
+        "Peers",
+        "PublisTime",
+        "PublishDate",
+        "Seeders",
+        "Size",
+        "Title",
+        "Tracker",
+        "checked_at",
+        "ffprobe",
+        "hash",
+        "info",
+        "languages",
+        "size",
+        "source_rank",
+        "viewed"
+      ],
+      "samples": [
+        {
+          "title": "Бойцовский клуб / Fight Club / 1999 / ДБ, СТ / BDRip (1080p) | Дубляж",
+          "tracker": "korsars, rutor, kinozal, bitru, megapeer"
+        },
+        {
+          "title": "Бойцовский клуб / Fight Club (Дэвид Финчер / David Fincher) [1999, США, Германия, триллер, драма, криминал, BDRip 1080p]",
+          "tracker": "rutracker, rutor"
+        }
+      ],
+      "elapsedMs": 235
+    }
+  ]
+}

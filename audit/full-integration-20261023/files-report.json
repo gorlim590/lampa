@@ -1,0 +1,68 @@
+{
+  "kind": "Native file templates, controlled metadata/playback callback; no TorrServer/player started",
+  "checks": [
+    {
+      "name": "Files uses scoped cinema modal and one summary",
+      "status": "PASS"
+    },
+    {
+      "name": "Different verified episode ratings remain distinct",
+      "status": "PASS"
+    },
+    {
+      "name": "Missing/ambiguous episode has no borrowed rating",
+      "status": "PASS"
+    },
+    {
+      "name": "Files layout 1280",
+      "status": "PASS",
+      "data": {
+        "x": 454.40625,
+        "y": 72,
+        "width": 768,
+        "height": 615.609375
+      }
+    },
+    {
+      "name": "Files layout 1920",
+      "status": "PASS",
+      "data": {
+        "x": 681.609375,
+        "y": 108,
+        "width": 1152,
+        "height": 923.40625
+      }
+    },
+    {
+      "name": "Files layout 3840",
+      "status": "PASS",
+      "data": {
+        "x": 1363.203125,
+        "y": 216,
+        "width": 2304,
+        "height": 1846.8125
+      }
+    },
+    {
+      "name": "Native file Down moves focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Native OK callback retained once",
+      "status": "PASS"
+    },
+    {
+      "name": "Native file Back returns embedded sources",
+      "status": "PASS"
+    },
+    {
+      "name": "Repeated Files open has one summary and two ratings",
+      "status": "PASS"
+    },
+    {
+      "name": "Disable restores native modal and removes only own additions",
+      "status": "PASS"
+    }
+  ],
+  "errors": []
+}

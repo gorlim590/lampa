@@ -1,0 +1,62 @@
+{
+  "stage": "functions",
+  "pluginSha256": "9086c1d090b80d1dc141184342a8a1c9f2d9cde9e92be2b59bd8bd20e4dc3bbd",
+  "tests": [
+    {
+      "name": "Native size sorting applied",
+      "status": "PASS",
+      "detail": {
+        "value": "Size",
+        "orderChanged": true,
+        "sizes": [
+          29860760125,
+          28722593792,
+          28722593792,
+          21625160335,
+          21625160335,
+          18199923916,
+          15096810045,
+          14645838479,
+          13636521164,
+          11499774935,
+          11499774935,
+          9663676416,
+          9663676416,
+          8793945538,
+          7097433456,
+          7097433456,
+          2952790016,
+          2952790016,
+          2738041651,
+          2738041651
+        ]
+      }
+    },
+    {
+      "name": "Quality filter applies with OK",
+      "status": "PASS",
+      "detail": {
+        "qualities": [
+          "720",
+          "720",
+          "720",
+          "720"
+        ],
+        "filter": {
+          "voice": [],
+          "tracker": [],
+          "season": [],
+          "quality": [
+            "720p"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Functions harness completion",
+      "status": "FAIL",
+      "detail": "page.waitForFunction: Timeout 20000ms exceeded."
+    }
+  ],
+  "errors": []
+}

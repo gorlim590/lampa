@@ -1,0 +1,219 @@
+{
+  "manualInjection": false,
+  "requestInterception": false,
+  "checks": [
+    {
+      "name": "Native reload with theme disabled",
+      "status": "PASS",
+      "elapsedMs": 7774,
+      "snapshot": {
+        "ready": true,
+        "version": "2.0.0",
+        "enabled": false,
+        "styles": 0,
+        "settings": 1,
+        "component": "main",
+        "loading": false,
+        "cards": 28,
+        "ratings": 0
+      }
+    },
+    {
+      "name": "Native reload with theme enabled",
+      "status": "PASS",
+      "elapsedMs": 6289,
+      "snapshot": {
+        "ready": true,
+        "version": "2.0.0",
+        "enabled": true,
+        "styles": 1,
+        "settings": 1,
+        "component": "main",
+        "loading": false,
+        "cards": 28,
+        "ratings": 0
+      }
+    },
+    {
+      "name": "Enriched card metadata after native reload",
+      "status": "PASS",
+      "snapshot": {
+        "ready": true,
+        "version": "2.0.0",
+        "enabled": true,
+        "styles": 1,
+        "settings": 1,
+        "component": "main",
+        "loading": false,
+        "cards": 28,
+        "ratings": 23
+      }
+    }
+  ],
+  "pageErrors": [],
+  "baseline": {
+    "ready": true,
+    "version": "2.0.0",
+    "enabled": true,
+    "styles": 1,
+    "settings": 1,
+    "component": "main",
+    "loading": false,
+    "cards": 28,
+    "ratings": 0
+  },
+  "pending": [
+    {
+      "origin": "https://siaivo.isroot.in",
+      "type": "Script"
+    },
+    {
+      "origin": "https://siaivo.isroot.in",
+      "type": "Script"
+    },
+    {
+      "origin": "https://siaivo.isroot.in",
+      "type": "Script"
+    },
+    {
+      "origin": "https://wh.lme.isroot.in",
+      "type": "XHR"
+    },
+    {
+      "origin": "https://wh.lme.isroot.in",
+      "type": "XHR"
+    },
+    {
+      "origin": "https://wh.lme.isroot.in",
+      "type": "XHR"
+    },
+    {
+      "origin": "https://wh.lme.isroot.in",
+      "type": "XHR"
+    },
+    {
+      "origin": "https://wh.lme.isroot.in",
+      "type": "XHR"
+    },
+    {
+      "origin": "https://wh.lme.isroot.in",
+      "type": "XHR"
+    },
+    {
+      "origin": "https://wh.lme.isroot.in",
+      "type": "XHR"
+    },
+    {
+      "origin": "https://wh.lme.isroot.in",
+      "type": "XHR"
+    },
+    {
+      "origin": "https://wh.lme.isroot.in",
+      "type": "XHR"
+    },
+    {
+      "origin": "https://wh.lme.isroot.in",
+      "type": "XHR"
+    },
+    {
+      "origin": "https://wh.lme.isroot.in",
+      "type": "XHR"
+    },
+    {
+      "origin": "https://wh.lme.isroot.in",
+      "type": "XHR"
+    },
+    {
+      "origin": "https://siaivo.isroot.in",
+      "type": "Script"
+    },
+    {
+      "origin": "https://siaivo.isroot.in",
+      "type": "Script"
+    },
+    {
+      "origin": "https://siaivo.isroot.in",
+      "type": "Script"
+    },
+    {
+      "origin": "https://wh.lme.isroot.in",
+      "type": "XHR"
+    },
+    {
+      "origin": "https://wh.lme.isroot.in",
+      "type": "XHR"
+    },
+    {
+      "origin": "https://siaivo.isroot.in",
+      "type": "Script"
+    },
+    {
+      "origin": "https://siaivo.isroot.in",
+      "type": "Script"
+    },
+    {
+      "origin": "https://siaivo.isroot.in",
+      "type": "Script"
+    },
+    {
+      "origin": "https://api.bwa.ad",
+      "type": "XHR"
+    },
+    {
+      "origin": "https://wh.lme.isroot.in",
+      "type": "XHR"
+    },
+    {
+      "origin": "https://wh.lme.isroot.in",
+      "type": "XHR"
+    },
+    {
+      "origin": "https://wh.lme.isroot.in",
+      "type": "XHR"
+    },
+    {
+      "origin": "https://wh.lme.isroot.in",
+      "type": "XHR"
+    },
+    {
+      "origin": "https://wh.lme.isroot.in",
+      "type": "XHR"
+    },
+    {
+      "origin": "https://wh.lme.isroot.in",
+      "type": "XHR"
+    },
+    {
+      "origin": "https://wh.lme.isroot.in",
+      "type": "XHR"
+    },
+    {
+      "origin": "https://wh.lme.isroot.in",
+      "type": "XHR"
+    }
+  ],
+  "networkSummary": {
+    "https://siaivo.isroot.in 200": 48,
+    "https://raw.githubusercontent.com 200": 3,
+    "http://durex.monster ": 48,
+    "http://cub.black ": 21,
+    "http://cubnotrip.top ": 21,
+    "http://cub.best ": 24,
+    "http://cub.red ": 21,
+    "https://api.bigdatacloud.net 200": 3,
+    "http://127.0.0.1:8766 200": 6,
+    "https://cub.best 200": 3,
+    "https://lampame.github.io 200": 9,
+    "https://gorlim590.github.io 200": 159,
+    "https://marv2on.github.io 200": 6,
+    "https://bwa.ad 200": 6,
+    "https://rust.bwa.ad 200": 6,
+    "https://wtch.ch net::ERR_CERT_COMMON_NAME_INVALID": 3,
+    "https://siaivo.isroot.in 404": 3,
+    "https://apx.lme.isroot.in 200": 66,
+    "https://api.bwa.ad net::ERR_ABORTED": 3,
+    "https://116-203-134-15.sslip.io 200": 3,
+    "https://msk1.fovea.club net::ERR_ABORTED": 1,
+    "https://wh.lme.isroot.in 404": 42
+  }
+}

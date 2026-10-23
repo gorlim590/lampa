@@ -1,0 +1,13 @@
+{
+  "kind": "Extracted edited createBlock/fallback in existing page; plugin bootstrap not repeated",
+  "checks": [
+    {
+      "name": "Owner renderer oscar fallback retains count6",
+      "status": "PASS"
+    },
+    {
+      "name": "Owner renderer tmdb fallback retains count6",
+      "status": "PASS"
+    }
+  ]
+}

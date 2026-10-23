@@ -1,0 +1,179 @@
+{
+  "checks": [
+    {
+      "name": "All existing UI integrations active",
+      "status": "PASS",
+      "detail": {
+        "YDesign": true,
+        "Interface": true,
+        "Cardify": true,
+        "Trakt": true,
+        "TraktPlus": true
+      }
+    },
+    {
+      "name": "Same card nodes and ratings/genres/UA/watch statuses through toggle",
+      "status": "PASS",
+      "detail": {
+        "before": {
+          "ratings": 23,
+          "genres": 38,
+          "ua": 11,
+          "watched": 2,
+          "dim": 2,
+          "trakt": 2
+        },
+        "off": {
+          "ratings": 23,
+          "genres": 38,
+          "ua": 11,
+          "watched": 2,
+          "dim": 2,
+          "trakt": 2
+        },
+        "after": {
+          "ratings": 23,
+          "genres": 38,
+          "ua": 11,
+          "watched": 2,
+          "dim": 2,
+          "trakt": 2
+        },
+        "sameNodes": true,
+        "plugins": {
+          "YDesign": true,
+          "Interface": true,
+          "Cardify": true,
+          "Trakt": true,
+          "TraktPlus": true
+        },
+        "watched": {
+          "opacity": "1",
+          "color": "rgba(0, 0, 0, 0)",
+          "dimOpacity": "1"
+        }
+      }
+    },
+    {
+      "name": "Watched green check and dim visible",
+      "status": "PASS",
+      "detail": {
+        "opacity": "1",
+        "color": "rgba(0, 0, 0, 0)",
+        "dimOpacity": "1"
+      }
+    },
+    {
+      "name": "home 1280x720",
+      "status": "PASS",
+      "detail": {
+        "right": 1280,
+        "cards": 28,
+        "metadata": 72,
+        "rail": "visible",
+        "styles": 1
+      }
+    },
+    {
+      "name": "home 1920x1080",
+      "status": "PASS",
+      "detail": {
+        "right": 1920,
+        "cards": 28,
+        "metadata": 72,
+        "rail": "visible",
+        "styles": 1
+      }
+    },
+    {
+      "name": "home 3840x2160",
+      "status": "PASS",
+      "detail": {
+        "right": 3840,
+        "cards": 28,
+        "metadata": 72,
+        "rail": "visible",
+        "styles": 1
+      }
+    },
+    {
+      "name": "home Right moves focus",
+      "status": "PASS"
+    },
+    {
+      "name": "home focus ring computed",
+      "status": "PASS"
+    },
+    {
+      "name": "home Down keeps focus in viewport",
+      "status": "PASS",
+      "detail": {
+        "x": 122.84609985351562,
+        "y": 227.09393310546875
+      }
+    },
+    {
+      "name": "discover 1280x720",
+      "status": "PASS",
+      "detail": {
+        "right": 1280,
+        "cards": 32,
+        "metadata": 35,
+        "rail": "visible",
+        "styles": 1
+      }
+    },
+    {
+      "name": "discover 1920x1080",
+      "status": "PASS",
+      "detail": {
+        "right": 1920,
+        "cards": 32,
+        "metadata": 55,
+        "rail": "visible",
+        "styles": 1
+      }
+    },
+    {
+      "name": "discover 3840x2160",
+      "status": "PASS",
+      "detail": {
+        "right": 3840,
+        "cards": 32,
+        "metadata": 55,
+        "rail": "visible",
+        "styles": 1
+      }
+    },
+    {
+      "name": "discover Right moves focus",
+      "status": "PASS"
+    },
+    {
+      "name": "discover focus ring computed",
+      "status": "PASS"
+    },
+    {
+      "name": "discover Down keeps focus in viewport",
+      "status": "PASS",
+      "detail": {
+        "x": 400.9780578613281,
+        "y": 123.6331787109375
+      }
+    },
+    {
+      "name": "Expanded sidebar labels",
+      "status": "PASS"
+    },
+    {
+      "name": "Reduced motion on card and actions",
+      "status": "PASS"
+    },
+    {
+      "name": "Physical Google TV performance / real remote / long session",
+      "status": "BLOCKED",
+      "detail": "Hardware not connected for profiling."
+    }
+  ],
+  "pageErrors": []
+}

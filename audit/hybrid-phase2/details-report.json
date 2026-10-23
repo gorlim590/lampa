@@ -1,0 +1,251 @@
+{
+  "checks": [
+    {
+      "name": "movie 1280x720",
+      "status": "PASS",
+      "detail": {
+        "poster": true,
+        "title": "Людина-павук: Абсолютно новий день",
+        "titleRect": {
+          "x": 258.953125,
+          "y": 156.671875,
+          "width": 580.296875,
+          "height": 66.65625,
+          "top": 156.671875,
+          "right": 839.25,
+          "bottom": 223.328125,
+          "left": 258.953125
+        },
+        "titleFits": true,
+        "descriptionRect": {
+          "x": 894.078125,
+          "y": 116.296875,
+          "width": 365.40625,
+          "height": 244.234375,
+          "top": 116.296875,
+          "right": 1259.484375,
+          "bottom": 360.53125,
+          "left": 894.078125
+        },
+        "titleDescriptionOverlap": false,
+        "buttons": 7,
+        "focusY": 362.59222412109375,
+        "focusBottom": 412.40472412109375,
+        "descriptions": 1,
+        "ratings": 3,
+        "opacity": "1",
+        "controller": "full_start"
+      }
+    },
+    {
+      "name": "movie 1920x1080",
+      "status": "PASS",
+      "detail": {
+        "poster": true,
+        "title": "Людина-павук: Абсолютно новий день",
+        "titleRect": {
+          "x": 388.453125,
+          "y": 233.0625,
+          "width": 870.4375,
+          "height": 100,
+          "top": 233.0625,
+          "right": 1258.890625,
+          "bottom": 333.0625,
+          "left": 388.453125
+        },
+        "titleFits": true,
+        "descriptionRect": {
+          "x": 1341.109375,
+          "y": 174.46875,
+          "width": 548.109375,
+          "height": 365.359375,
+          "top": 174.46875,
+          "right": 1889.21875,
+          "bottom": 539.828125,
+          "left": 1341.109375
+        },
+        "titleDescriptionOverlap": false,
+        "buttons": 7,
+        "focusY": 542.1304931640625,
+        "focusBottom": 616.8492431640625,
+        "descriptions": 1,
+        "ratings": 3,
+        "opacity": "1",
+        "controller": "full_start"
+      }
+    },
+    {
+      "name": "movie 3840x2160",
+      "status": "PASS",
+      "detail": {
+        "poster": true,
+        "title": "Людина-павук: Абсолютно новий день",
+        "titleRect": {
+          "x": 776.9375,
+          "y": 462.171875,
+          "width": 1740.859375,
+          "height": 200,
+          "top": 462.171875,
+          "right": 2517.796875,
+          "bottom": 662.171875,
+          "left": 776.9375
+        },
+        "titleFits": true,
+        "descriptionRect": {
+          "x": 2682.21875,
+          "y": 348.984375,
+          "width": 1096.203125,
+          "height": 728.734375,
+          "top": 348.984375,
+          "right": 3778.421875,
+          "bottom": 1077.71875,
+          "left": 2682.21875
+        },
+        "titleDescriptionOverlap": false,
+        "buttons": 7,
+        "focusY": 1080.370361328125,
+        "focusBottom": 1229.823486328125,
+        "descriptions": 1,
+        "ratings": 3,
+        "opacity": "1",
+        "controller": "full_start"
+      }
+    },
+    {
+      "name": "movie action focus",
+      "status": "PASS"
+    },
+    {
+      "name": "series 1280x720",
+      "status": "PASS",
+      "detail": {
+        "poster": true,
+        "title": "Кульгаві коні",
+        "titleRect": {
+          "x": 258.953125,
+          "y": 156.671875,
+          "width": 580.296875,
+          "height": 33.328125,
+          "top": 156.671875,
+          "right": 839.25,
+          "bottom": 190,
+          "left": 258.953125
+        },
+        "titleFits": true,
+        "descriptionRect": {
+          "x": 894.078125,
+          "y": 116.296875,
+          "width": 365.40625,
+          "height": 159.3125,
+          "top": 116.296875,
+          "right": 1259.484375,
+          "bottom": 275.609375,
+          "left": 894.078125
+        },
+        "titleDescriptionOverlap": false,
+        "buttons": 7,
+        "focusY": 355.97698974609375,
+        "focusBottom": 405.78948974609375,
+        "descriptions": 1,
+        "ratings": 3,
+        "opacity": "1",
+        "controller": "full_start"
+      }
+    },
+    {
+      "name": "series 1920x1080",
+      "status": "PASS",
+      "detail": {
+        "poster": true,
+        "title": "Кульгаві коні",
+        "titleRect": {
+          "x": 388.453125,
+          "y": 233.0625,
+          "width": 870.4375,
+          "height": 50,
+          "top": 233.0625,
+          "right": 1258.890625,
+          "bottom": 283.0625,
+          "left": 388.453125
+        },
+        "titleFits": true,
+        "descriptionRect": {
+          "x": 1341.109375,
+          "y": 174.46875,
+          "width": 548.109375,
+          "height": 238.03125,
+          "top": 174.46875,
+          "right": 1889.21875,
+          "bottom": 412.5,
+          "left": 1341.109375
+        },
+        "titleDescriptionOverlap": false,
+        "buttons": 7,
+        "focusY": 532.7711181640625,
+        "focusBottom": 607.4898681640625,
+        "descriptions": 1,
+        "ratings": 3,
+        "opacity": "1",
+        "controller": "full_start"
+      }
+    },
+    {
+      "name": "series 3840x2160",
+      "status": "PASS",
+      "detail": {
+        "poster": true,
+        "title": "Кульгаві коні",
+        "titleRect": {
+          "x": 776.9375,
+          "y": 462.171875,
+          "width": 1740.859375,
+          "height": 100,
+          "top": 462.171875,
+          "right": 2517.796875,
+          "bottom": 562.171875,
+          "left": 776.9375
+        },
+        "titleFits": true,
+        "descriptionRect": {
+          "x": 2682.21875,
+          "y": 348.984375,
+          "width": 1096.203125,
+          "height": 474.15625,
+          "top": 348.984375,
+          "right": 3778.421875,
+          "bottom": 823.140625,
+          "left": 2682.21875
+        },
+        "titleDescriptionOverlap": false,
+        "buttons": 7,
+        "focusY": 1061.667236328125,
+        "focusBottom": 1211.120361328125,
+        "descriptions": 1,
+        "ratings": 3,
+        "opacity": "1",
+        "controller": "full_start"
+      }
+    },
+    {
+      "name": "series action focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Back from series returns main",
+      "status": "PASS"
+    },
+    {
+      "name": "One interface toggle",
+      "status": "PASS"
+    },
+    {
+      "name": "Disable returns previous design",
+      "status": "PASS"
+    },
+    {
+      "name": "Enable theme from native settings",
+      "status": "PASS"
+    }
+  ],
+  "errors": []
+}

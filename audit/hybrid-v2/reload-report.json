@@ -1,0 +1,28 @@
+{
+  "checks": [
+    {
+      "name": "Native enabled theme after reload",
+      "status": "PASS"
+    },
+    {
+      "name": "One settings parameter after reload",
+      "status": "PASS"
+    },
+    {
+      "name": "Home data after repeated reload sequence",
+      "status": "BLOCKED",
+      "detail": ""
+    }
+  ],
+  "state": {
+    "version": "1.1.0",
+    "enabled": true,
+    "styles": 1,
+    "settings": 1,
+    "component": "main",
+    "cards": 0,
+    "text": ""
+  },
+  "manualScriptInjection": false,
+  "note": "The combined reload harness timed out waiting for enriched Home cards. No further reload retries. Initial native-load.json and completed regression remain valid; disabled persistence is not claimed as fully passed."
+}

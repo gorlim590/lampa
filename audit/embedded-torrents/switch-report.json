@@ -1,0 +1,18 @@
+{
+  "kind": "Two real movie pages, controlled parser responses, no playback",
+  "checks": [
+    {
+      "name": "Switching films cannot apply late results from previous movie",
+      "status": "PASS"
+    },
+    {
+      "name": "Each controlled film dispatches only one search",
+      "status": "PASS"
+    },
+    {
+      "name": "Returned film shows original real sources, no controlled data",
+      "status": "PASS"
+    }
+  ],
+  "errors": []
+}

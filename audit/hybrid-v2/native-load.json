@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "nativeExtension": true,
+  "manualInjectionAfterReload": false,
+  "requests": [
+    {
+      "status": 200
+    },
+    {
+      "status": 200
+    }
+  ],
+  "failures": [],
+  "after": {
+    "version": "1.1.0",
+    "styles": 1,
+    "settings": 1
+  }
+}

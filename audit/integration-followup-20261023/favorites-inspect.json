@@ -1,0 +1,34 @@
+{
+  "errors": [],
+  "before": {
+    "digital": 33537,
+    "custom": true,
+    "activity": "full",
+    "Favorite": [
+      "listener",
+      "init",
+      "check",
+      "add",
+      "remove",
+      "toggle",
+      "get",
+      "clear",
+      "continues",
+      "full",
+      "checkAnyNotHistory",
+      "all",
+      "read",
+      "refresh",
+      "caughtUp",
+      "candidates"
+    ],
+    "syncCustom": false
+  },
+  "menu": {
+    "activity": "bookmarks",
+    "items": 0,
+    "loaded": true,
+    "registers": [],
+    "ownAdd": 0
+  }
+}

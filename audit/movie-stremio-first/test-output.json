@@ -1,0 +1,486 @@
+{
+  "checks": [
+    {
+      "name": "Native reload loads movie adapter without injection",
+      "status": "PASS",
+      "detail": {
+        "version": "2.1.0",
+        "styles": 1,
+        "root": 1
+      }
+    },
+    {
+      "name": "Stremio composition 1280",
+      "status": "PASS",
+      "detail": {
+        "title": {
+          "x": 88.9375,
+          "y": 113.5625,
+          "width": 190.484375,
+          "height": 46.75,
+          "top": 113.5625,
+          "right": 279.421875,
+          "bottom": 160.3125,
+          "left": 88.9375
+        },
+        "description": {
+          "x": 88.9375,
+          "y": 368.53125,
+          "width": 670.640625,
+          "height": 67.734375,
+          "top": 368.53125,
+          "right": 759.578125,
+          "bottom": 436.265625,
+          "left": 88.9375
+        },
+        "buttons": [
+          {
+            "r": {
+              "x": 88.9375,
+              "y": 452.671875,
+              "width": 123.171875,
+              "height": 39.6875,
+              "top": 452.671875,
+              "right": 212.109375,
+              "bottom": 492.359375,
+              "left": 88.9375
+            },
+            "text": "Торренти"
+          },
+          {
+            "r": {
+              "x": 220.3125,
+              "y": 452.671875,
+              "width": 42.421875,
+              "height": 39.6875,
+              "top": 452.671875,
+              "right": 262.734375,
+              "bottom": 492.359375,
+              "left": 220.3125
+            },
+            "text": "TraktTV Списки"
+          },
+          {
+            "r": {
+              "x": 270.9375,
+              "y": 452.671875,
+              "width": 42.421875,
+              "height": 39.6875,
+              "top": 452.671875,
+              "right": 313.359375,
+              "bottom": 492.359375,
+              "left": 270.9375
+            },
+            "text": "Вибране"
+          },
+          {
+            "r": {
+              "x": 321.5625,
+              "y": 452.671875,
+              "width": 42.421875,
+              "height": 39.6875,
+              "top": 452.671875,
+              "right": 363.984375,
+              "bottom": 492.359375,
+              "left": 321.5625
+            },
+            "text": "Трейлери"
+          },
+          {
+            "r": {
+              "x": 372.1875,
+              "y": 452.671875,
+              "width": 42.421875,
+              "height": 39.6875,
+              "top": 452.671875,
+              "right": 414.609375,
+              "bottom": 492.359375,
+              "left": 372.1875
+            },
+            "text": "Спільнота t.me/mmssixxx"
+          },
+          {
+            "r": {
+              "x": 422.8125,
+              "y": 452.671875,
+              "width": 42.421875,
+              "height": 39.6875,
+              "top": 452.671875,
+              "right": 465.234375,
+              "bottom": 492.359375,
+              "left": 422.8125
+            },
+            "text": "BWA"
+          },
+          {
+            "r": {
+              "x": 473.4375,
+              "y": 452.671875,
+              "width": 42.421875,
+              "height": 39.6875,
+              "top": 452.671875,
+              "right": 515.859375,
+              "bottom": 492.359375,
+              "left": 473.4375
+            },
+            "text": ""
+          }
+        ],
+        "row": {
+          "x": 86.203125,
+          "y": 449.9375,
+          "width": 432.390625,
+          "height": 61.578125,
+          "top": 449.9375,
+          "right": 518.59375,
+          "bottom": 511.515625,
+          "left": 86.203125
+        },
+        "posterHidden": true,
+        "descriptionStatic": true,
+        "titleFits": true,
+        "primary": 1,
+        "ratings": 1,
+        "backdropOpacity": "0.78"
+      }
+    },
+    {
+      "name": "Stremio composition 1920",
+      "status": "PASS",
+      "detail": {
+        "title": {
+          "x": 133.421875,
+          "y": 170.375,
+          "width": 285.765625,
+          "height": 70.109375,
+          "top": 170.375,
+          "right": 419.1875,
+          "bottom": 240.484375,
+          "left": 133.421875
+        },
+        "description": {
+          "x": 133.421875,
+          "y": 551.953125,
+          "width": 1005.953125,
+          "height": 101.625,
+          "top": 551.953125,
+          "right": 1139.375,
+          "bottom": 653.578125,
+          "left": 133.421875
+        },
+        "buttons": [
+          {
+            "r": {
+              "x": 133.421875,
+              "y": 678.1875,
+              "width": 184.765625,
+              "height": 59.53125,
+              "top": 678.1875,
+              "right": 318.1875,
+              "bottom": 737.71875,
+              "left": 133.421875
+            },
+            "text": "Торренти"
+          },
+          {
+            "r": {
+              "x": 330.5,
+              "y": 678.1875,
+              "width": 63.640625,
+              "height": 59.53125,
+              "top": 678.1875,
+              "right": 394.140625,
+              "bottom": 737.71875,
+              "left": 330.5
+            },
+            "text": "TraktTV Списки"
+          },
+          {
+            "r": {
+              "x": 406.453125,
+              "y": 678.1875,
+              "width": 63.640625,
+              "height": 59.53125,
+              "top": 678.1875,
+              "right": 470.09375,
+              "bottom": 737.71875,
+              "left": 406.453125
+            },
+            "text": "Вибране"
+          },
+          {
+            "r": {
+              "x": 482.40625,
+              "y": 678.1875,
+              "width": 63.640625,
+              "height": 59.53125,
+              "top": 678.1875,
+              "right": 546.046875,
+              "bottom": 737.71875,
+              "left": 482.40625
+            },
+            "text": "Трейлери"
+          },
+          {
+            "r": {
+              "x": 558.359375,
+              "y": 678.1875,
+              "width": 63.640625,
+              "height": 59.53125,
+              "top": 678.1875,
+              "right": 622,
+              "bottom": 737.71875,
+              "left": 558.359375
+            },
+            "text": "Спільнота t.me/mmssixxx"
+          },
+          {
+            "r": {
+              "x": 634.3125,
+              "y": 678.1875,
+              "width": 63.640625,
+              "height": 59.53125,
+              "top": 678.1875,
+              "right": 697.953125,
+              "bottom": 737.71875,
+              "left": 634.3125
+            },
+            "text": "BWA"
+          },
+          {
+            "r": {
+              "x": 710.265625,
+              "y": 678.1875,
+              "width": 63.640625,
+              "height": 59.53125,
+              "top": 678.1875,
+              "right": 773.90625,
+              "bottom": 737.71875,
+              "left": 710.265625
+            },
+            "text": ""
+          }
+        ],
+        "row": {
+          "x": 129.328125,
+          "y": 674.09375,
+          "width": 648.671875,
+          "height": 92.359375,
+          "top": 674.09375,
+          "right": 778,
+          "bottom": 766.453125,
+          "left": 129.328125
+        },
+        "posterHidden": true,
+        "descriptionStatic": true,
+        "titleFits": true,
+        "primary": 1,
+        "ratings": 1,
+        "backdropOpacity": "0.78"
+      }
+    },
+    {
+      "name": "Stremio composition 3840",
+      "status": "PASS",
+      "detail": {
+        "title": {
+          "x": 266.859375,
+          "y": 340.78125,
+          "width": 571.5,
+          "height": 140.25,
+          "top": 340.78125,
+          "right": 838.359375,
+          "bottom": 481.03125,
+          "left": 266.859375
+        },
+        "description": {
+          "x": 266.859375,
+          "y": 1102.109375,
+          "width": 2011.921875,
+          "height": 203.25,
+          "top": 1102.109375,
+          "right": 2278.78125,
+          "bottom": 1305.359375,
+          "left": 266.859375
+        },
+        "buttons": [
+          {
+            "r": {
+              "x": 266.859375,
+              "y": 1354.609375,
+              "width": 369.53125,
+              "height": 119.0625,
+              "top": 1354.609375,
+              "right": 636.390625,
+              "bottom": 1473.671875,
+              "left": 266.859375
+            },
+            "text": "Торренти"
+          },
+          {
+            "r": {
+              "x": 661.015625,
+              "y": 1354.609375,
+              "width": 127.28125,
+              "height": 119.0625,
+              "top": 1354.609375,
+              "right": 788.296875,
+              "bottom": 1473.671875,
+              "left": 661.015625
+            },
+            "text": "TraktTV Списки"
+          },
+          {
+            "r": {
+              "x": 812.921875,
+              "y": 1354.609375,
+              "width": 127.28125,
+              "height": 119.0625,
+              "top": 1354.609375,
+              "right": 940.203125,
+              "bottom": 1473.671875,
+              "left": 812.921875
+            },
+            "text": "Вибране"
+          },
+          {
+            "r": {
+              "x": 964.828125,
+              "y": 1354.609375,
+              "width": 127.28125,
+              "height": 119.0625,
+              "top": 1354.609375,
+              "right": 1092.109375,
+              "bottom": 1473.671875,
+              "left": 964.828125
+            },
+            "text": "Трейлери"
+          },
+          {
+            "r": {
+              "x": 1116.734375,
+              "y": 1354.609375,
+              "width": 127.28125,
+              "height": 119.0625,
+              "top": 1354.609375,
+              "right": 1244.015625,
+              "bottom": 1473.671875,
+              "left": 1116.734375
+            },
+            "text": "Спільнота t.me/mmssixxx"
+          },
+          {
+            "r": {
+              "x": 1268.640625,
+              "y": 1354.609375,
+              "width": 127.28125,
+              "height": 119.0625,
+              "top": 1354.609375,
+              "right": 1395.921875,
+              "bottom": 1473.671875,
+              "left": 1268.640625
+            },
+            "text": "BWA"
+          },
+          {
+            "r": {
+              "x": 1420.546875,
+              "y": 1354.609375,
+              "width": 127.28125,
+              "height": 119.0625,
+              "top": 1354.609375,
+              "right": 1547.828125,
+              "bottom": 1473.671875,
+              "left": 1420.546875
+            },
+            "text": ""
+          }
+        ],
+        "row": {
+          "x": 258.65625,
+          "y": 1346.40625,
+          "width": 1297.375,
+          "height": 184.734375,
+          "top": 1346.40625,
+          "right": 1556.03125,
+          "bottom": 1531.140625,
+          "left": 258.65625
+        },
+        "posterHidden": true,
+        "descriptionStatic": true,
+        "titleFits": true,
+        "primary": 1,
+        "ratings": 1,
+        "backdropOpacity": "0.78"
+      }
+    },
+    {
+      "name": "Right moves focus and exposes action name",
+      "status": "PASS",
+      "detail": {
+        "text": "TraktTV Списки",
+        "caption": "TraktTV Списки"
+      }
+    },
+    {
+      "name": "Original favorites menu opens on OK",
+      "status": "PASS"
+    },
+    {
+      "name": "Back from favorite menu returns original movie controller",
+      "status": "PASS"
+    },
+    {
+      "name": "Original torrent action opens native flow",
+      "status": "PASS",
+      "detail": {
+        "component": "torrents",
+        "controller": "content"
+      }
+    },
+    {
+      "name": "Torrent Back returns same movie",
+      "status": "PASS"
+    },
+    {
+      "name": "Disable restores original parents, styling and same native nodes",
+      "status": "PASS",
+      "detail": {
+        "sameButtons": true,
+        "sameDescription": true,
+        "descriptionRestored": true,
+        "customClasses": 0,
+        "styles": 0,
+        "poster": "block"
+      }
+    },
+    {
+      "name": "12 toggle cycles: bounded DOM/listeners/style",
+      "status": "PASS",
+      "detail": {
+        "before": {
+          "nodes": 79,
+          "full": 23,
+          "activity": 9,
+          "styles": 1
+        },
+        "after": {
+          "nodes": 79,
+          "full": 23,
+          "activity": 9,
+          "styles": 1
+        }
+      }
+    },
+    {
+      "name": "Ratings/metadata/action nodes survive adapter",
+      "status": "PASS"
+    },
+    {
+      "name": "Reduced motion retained",
+      "status": "PASS"
+    }
+  ],
+  "pageErrors": [],
+  "nativeReload": true
+}

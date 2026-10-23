@@ -1,0 +1,176 @@
+{
+  "checks": [
+    {
+      "name": "Lazy native load: movie visible without parser requests",
+      "status": "PASS"
+    },
+    {
+      "name": "Real native sources embedded without a new Activity",
+      "status": "PASS"
+    },
+    {
+      "name": "Nonoverlapping source pane 1280",
+      "status": "PASS",
+      "detail": {
+        "pane": {
+          "x": 960,
+          "y": 50.625,
+          "width": 320,
+          "height": 669.359375,
+          "top": 50.625,
+          "right": 1280,
+          "bottom": 719.984375,
+          "left": 960
+        },
+        "column": {
+          "x": 88.9375,
+          "y": 113.5625,
+          "width": 755.515625,
+          "height": 474.4375,
+          "top": 113.5625,
+          "right": 844.453125,
+          "bottom": 588,
+          "left": 88.9375
+        },
+        "title": {
+          "x": 88.9375,
+          "y": 211.234375,
+          "width": 73.15625,
+          "height": 40.984375,
+          "top": 211.234375,
+          "right": 162.09375,
+          "bottom": 252.21875,
+          "left": 88.9375
+        },
+        "rows": 12,
+        "overflow": false
+      }
+    },
+    {
+      "name": "Nonoverlapping source pane 1920",
+      "status": "PASS",
+      "detail": {
+        "pane": {
+          "x": 1440,
+          "y": 75.953125,
+          "width": 480,
+          "height": 1004.03125,
+          "top": 75.953125,
+          "right": 1920,
+          "bottom": 1079.984375,
+          "left": 1440
+        },
+        "column": {
+          "x": 133.421875,
+          "y": 170.375,
+          "width": 1133.25,
+          "height": 656.3125,
+          "top": 170.375,
+          "right": 1266.671875,
+          "bottom": 826.6875,
+          "left": 133.421875
+        },
+        "title": {
+          "x": 133.421875,
+          "y": 274.890625,
+          "width": 109.8125,
+          "height": 61.515625,
+          "top": 274.890625,
+          "right": 243.234375,
+          "bottom": 336.40625,
+          "left": 133.421875
+        },
+        "rows": 12,
+        "overflow": false
+      }
+    },
+    {
+      "name": "Nonoverlapping source pane 3840",
+      "status": "PASS",
+      "detail": {
+        "pane": {
+          "x": 2880,
+          "y": 151.921875,
+          "width": 960,
+          "height": 2008.078125,
+          "top": 151.921875,
+          "right": 3840,
+          "bottom": 2160,
+          "left": 2880
+        },
+        "column": {
+          "x": 266.859375,
+          "y": 340.78125,
+          "width": 2266.5,
+          "height": 1225.5,
+          "top": 340.78125,
+          "right": 2533.359375,
+          "bottom": 1566.28125,
+          "left": 266.859375
+        },
+        "title": {
+          "x": 266.859375,
+          "y": 465.828125,
+          "width": 219.6875,
+          "height": 123.03125,
+          "top": 465.828125,
+          "right": 486.546875,
+          "bottom": 588.859375,
+          "left": 266.859375
+        },
+        "rows": 12,
+        "overflow": false
+      }
+    },
+    {
+      "name": "Native remote Down moves between real rows",
+      "status": "PASS"
+    },
+    {
+      "name": "Back returns to movie information",
+      "status": "PASS"
+    },
+    {
+      "name": "Native Down reaches details without another search",
+      "status": "PASS"
+    },
+    {
+      "name": "Native sort dialog available",
+      "status": "PASS"
+    },
+    {
+      "name": "Sort Back keeps sources and focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Native filter dialog available",
+      "status": "PASS"
+    },
+    {
+      "name": "Controlled OK invokes real row handler and native Torrent.start contract",
+      "status": "PASS"
+    },
+    {
+      "name": "Controlled native Torrent.back restores source focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Reopen film uses bounded TTL cache, no parser dispatch",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "metrics": {
+    "movie": {
+      "elapsedMs": 1468,
+      "requests": 17,
+      "dom": 482
+    },
+    "sources": {
+      "elapsedMs": 705,
+      "requests": 2,
+      "dom": 935,
+      "rows": 12
+    }
+  }
+}

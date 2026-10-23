@@ -1,0 +1,81 @@
+{
+  "checks": [
+    {
+      "name": "Home has no movie adapter classes",
+      "status": "PASS"
+    },
+    {
+      "name": "Cardify open/Back cycle 1",
+      "status": "PASS",
+      "detail": {
+        "cardify": true,
+        "descriptions": 1,
+        "primary": 1,
+        "styles": 1,
+        "ownFull": 1,
+        "ownActivity": 1,
+        "title": "Людина-павук: Абсолютно новий день",
+        "focus": true,
+        "ratings": 3
+      }
+    },
+    {
+      "name": "Native Down navigation reaches lower content",
+      "status": "PASS",
+      "detail": {
+        "controller": "items_line",
+        "focus": "full-person selector layer--visible full-person--loaded focus"
+      }
+    },
+    {
+      "name": "Cardify open/Back cycle 2",
+      "status": "PASS",
+      "detail": {
+        "cardify": true,
+        "descriptions": 1,
+        "primary": 1,
+        "styles": 1,
+        "ownFull": 1,
+        "ownActivity": 1,
+        "title": "Людина-павук: Абсолютно новий день",
+        "focus": true,
+        "ratings": 3
+      }
+    },
+    {
+      "name": "Cardify open/Back cycle 3",
+      "status": "PASS",
+      "detail": {
+        "cardify": true,
+        "descriptions": 1,
+        "primary": 1,
+        "styles": 1,
+        "ownFull": 1,
+        "ownActivity": 1,
+        "title": "Людина-павук: Абсолютно новий день",
+        "focus": true,
+        "ratings": 3
+      }
+    },
+    {
+      "name": "Cardify open/Back cycle 4",
+      "status": "PASS",
+      "detail": {
+        "cardify": true,
+        "descriptions": 1,
+        "primary": 1,
+        "styles": 1,
+        "ownFull": 1,
+        "ownActivity": 1,
+        "title": "Людина-павук: Абсолютно новий день",
+        "focus": true,
+        "ratings": 3
+      }
+    },
+    {
+      "name": "Final reference movie uses Cardify and one original description",
+      "status": "PASS"
+    }
+  ],
+  "pageErrors": []
+}

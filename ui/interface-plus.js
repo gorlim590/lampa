@@ -1361,7 +1361,8 @@
             if (data.type !== 'complite') return;
             setTimeout(function () {
                 var root = $(data.object.activity.render());
-                var details = root.find('.full-start-new__details, .full-start__details').first();
+                // Preserve Trakt progress nodes: decorate only the native information block.
+                var details = root.find('.full-start-new__details, .full-start__details').not('.trakt').first();
                 if (!details.length) return;
                 var movie = data.data.movie || {};
                 var isTvShow = (movie && (

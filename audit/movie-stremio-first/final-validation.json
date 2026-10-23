@@ -1,0 +1,62 @@
+{
+  "checks": [
+    {
+      "name": "OK opens full original synopsis in native Modal",
+      "status": "PASS"
+    },
+    {
+      "name": "Synopsis Back restores original description focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Disable closes own modal and restores original DOM",
+      "status": "PASS"
+    },
+    {
+      "name": "Cardify long title 1280",
+      "status": "PASS",
+      "detail": {
+        "title": "Людина-павук: Абсолютно новий день",
+        "titleFits": true,
+        "titleY": 113.5625,
+        "descriptionY": 402.390625,
+        "rowBottom": 597.390625,
+        "ratings": 3
+      }
+    },
+    {
+      "name": "Cardify long title 1920",
+      "status": "PASS",
+      "detail": {
+        "title": "Людина-павук: Абсолютно новий день",
+        "titleFits": true,
+        "titleY": 170.375,
+        "descriptionY": 590.171875,
+        "rowBottom": 882.671875,
+        "ratings": 3
+      }
+    },
+    {
+      "name": "Cardify long title 3840",
+      "status": "PASS",
+      "detail": {
+        "title": "Людина-павук: Абсолютно новий день",
+        "titleFits": true,
+        "titleY": 340.78125,
+        "descriptionY": 1177.265625,
+        "rowBottom": 1762.3125,
+        "ratings": 3
+      }
+    },
+    {
+      "name": "Series retains previous composition without movie adapter",
+      "status": "PASS",
+      "detail": {
+        "method": "tv",
+        "own": 0,
+        "poster": "block"
+      }
+    }
+  ],
+  "pageErrors": []
+}

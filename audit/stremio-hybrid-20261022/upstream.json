@@ -1,0 +1,22 @@
+{
+  "ui/design-optimized.js": {
+    "status": 200,
+    "matchesSnapshot": false,
+    "sha256": "d6e718d335b92e9d8d2dbc27e26343eb7cacd0f21cfd3286ede2a98a644f6422"
+  },
+  "ui/interface-plus.js": {
+    "status": 200,
+    "matchesSnapshot": true,
+    "sha256": "be2067dcdedcfa8e45399f688013e0b16b9eecad069a9c526634f5aaae984726"
+  },
+  "ui/cardify-plus.js": {
+    "status": 200,
+    "matchesSnapshot": false,
+    "sha256": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb"
+  },
+  "loader.js": {
+    "status": 200,
+    "matchesSnapshot": false,
+    "sha256": "30fc8ca57a14e221668a2dfb857bdf61af7f8e04e3368a6b22ddaff08bdc1837"
+  }
+}
