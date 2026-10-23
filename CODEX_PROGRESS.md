@@ -380,3 +380,8 @@
 ### Issue #8 — resumed with agreed reduced validation scope
 - Read the updated opening section of #8. main remains fcc148f; no open PR conflicts. Existing results retained without a repeated audit.
 - Full load-order/multi-screen/profile matrix is no longer required.161 focused tests and repository checks PASS at resumption. Existing harness now supports --final: exact source alias proof, short card/Hybrid smoke plus3 episode Activity transitions and resource cleanup; no additional detailed profiling. Final browser run follows this commit.
+
+### Issue #8 — focused runtime caught first-open rating dependency
+- First reduced final run:25PASS/1FAIL, exceptions=[]; exact source proof now covers Hybrid alias correctly.3 episode mounts/Back exits had exactly1 active observer/interval mounted and0 on Home; synthetic OK/timeline70%/reset PASS.
+- Failure reproduced: card-ready preceded remote rating-icon preload, leaving first-open values temporarily empty. Removed the icon preload gate/timers; values now render immediately and failed logos become readable labels.3 targeted regressions added;164 total tests PASS; repository/diff checks PASS.
+- Final focused runtime rerun is justified by this functional fix; no new baseline/profile/full matrix. Initial report preserved at audit/issue-8/final-before-rating-fix.json.

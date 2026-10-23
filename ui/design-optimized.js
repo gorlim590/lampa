@@ -36,21 +36,6 @@
         letterboxd: 'https://upload.wikimedia.org/wikipedia/commons/9/9b/Letterboxd_2023_logo.png'
     };
 
-    var IconCache = {};
-    function preloadIcon(key, url) {
-        return new Promise(function (resolve) {
-            if (IconCache[key] || !url || url.indexOf('data:') === 0) {
-                IconCache[key] = true;
-                return resolve();
-            }
-            var img = new Image();
-            img.onload = function () { IconCache[key] = true; resolve(); };
-            img.onerror = function () { IconCache[key] = true; resolve(); };
-            img.src = url;
-            setTimeout(resolve, 1500);
-        });
-    }
-
     // =========================================================================
     // 2. ДЕФОЛТНІ НАЛАШТУВАННЯ
     // =========================================================================
@@ -1391,17 +1376,10 @@
                 letterboxd: (extRatings && extRatings.letterboxd) ? formatR(parseFloat(extRatings.letterboxd) * 2, false) : null
             };
 
-            var iconsToLoad = [];
-            order.forEach(function (key) {
-                if (available[key] && key !== 'kp' && rateIcons[key]) {
-                    iconsToLoad.push(preloadIcon(key, rateIcons[key]));
-                }
-            });
-
-            Promise.all(iconsToLoad).then(function() {
+            // Render values immediately; remote logo availability must never gate metadata.
                 var rhtml = '';
                 order.forEach(function (key) {
-                    if (available[key]) {
+                    if (Object.prototype.hasOwnProperty.call(available, key) && available[key]) {
                         if (key === 'kp') {
                             rhtml += '<span class="ydesign-rating"><b style="color:#f60; font-weight:800; font-size:1.1em; line-height:1; display:flex; align-items:center;">Kp</b> ' + available[key] + '</span>';
                         } else {
@@ -1411,8 +1389,16 @@
                     }
                 });
                 container.innerHTML = rhtml;
+                container.querySelectorAll('img').forEach(function (img) {
+                    img.onerror = function () {
+                        img.onerror = null;
+                        if (!img.parentNode) return;
+                        var fallback = document.createElement('b');
+                        fallback.textContent = (img.alt || 'rating').toUpperCase();
+                        img.parentNode.replaceChild(fallback, img);
+                    };
+                });
                 resolve();
-            });
         });
     }
 
