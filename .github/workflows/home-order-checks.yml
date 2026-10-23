@@ -1,0 +1,23 @@
+name: Home order regressions
+on:
+  pull_request:
+    branches: [main, fix/issue-25-home-history]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  home-order:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Focused Home history and policy checks
+        run: node --test --test-timeout=15000 tests/home-history.cjs tests/home-order.cjs
+      - name: Repository JavaScript and delivery paths
+        run: node scripts/check-repository.mjs
+      - name: Whitespace
+        run: git diff --check ${{ github.event.pull_request.base.sha || 'HEAD^' }} HEAD
