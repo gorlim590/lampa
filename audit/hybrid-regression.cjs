@@ -1,0 +1,23 @@
+'use strict';
+const fs=require('fs');const {chromium}=require('playwright');
+(async()=>{const b=await chromium.connectOverCDP('http://127.0.0.1:9222');const page=b.contexts()[0].pages().find(p=>p.url().startsWith('https://siaivo.isroot.in/'));if(!page)throw Error('Lampa tab not found');
+const report={checks:[],screens:[],errors:[]};const check=(name,ok,detail)=>report.checks.push({name,status:ok?'PASS':'FAIL',detail});
+page.on('pageerror',e=>report.errors.push(e.message));
+await page.keyboard.press('Escape');await page.mouse.move(600,400);await page.waitForTimeout(500);
+const original=page.viewportSize();
+await page.evaluate(()=>{Lampa.Controller.toggle('content');});
+const lifecycle=await page.evaluate(()=>{const cards=[...document.querySelectorAll('.card')];const count=()=>document.querySelectorAll('.ydesign-rating,.ydesign-genre-badge,.ydesign-badge-ua,.trakt-chip').length;const before=count();const old=localStorage.getItem('stremio_hybrid_enabled');for(let i=0;i<5;i++){StremioHybrid.setEnabled(false);StremioHybrid.setEnabled(true);}const result={sameNodes:cards.every(n=>n.isConnected),badgesBefore:before,badgesAfter:count(),styles:document.querySelectorAll('#stremio-hybrid-style').length};if(old===null)localStorage.removeItem('stremio_hybrid_enabled');else localStorage.setItem('stremio_hybrid_enabled',old);return result;});check('toggle retains card nodes and metadata',lifecycle.sameNodes&&lifecycle.badgesBefore===lifecycle.badgesAfter&&lifecycle.styles===1,lifecycle);
+for(const [w,h] of [[1280,720],[1920,1080],[3840,2160]]){await page.setViewportSize({width:w,height:h});await page.waitForTimeout(700);const layout=await page.evaluate(()=>{const n=document.querySelector('.activity--active'),m=document.querySelector('.wrap__left'),c=document.querySelector('.card');const r=n.getBoundingClientRect();return {right:r.right,width:innerWidth,rail:getComputedStyle(m).visibility,cardWidth:c.getBoundingClientRect().width,cardHeight:c.getBoundingClientRect().height,cards:document.querySelectorAll('.card').length};});check('Home '+w+'x'+h,layout.right<=w+2&&layout.rail==='visible'&&layout.cardWidth>100,layout);await page.screenshot({path:`audit/hybrid-results/home-${w}.png`});report.screens.push(`home-${w}.png`);}
+await page.setViewportSize({width:1920,height:1080});await page.waitForTimeout(400);
+await page.evaluate(()=>{Lampa.Controller.toggle('content');});
+const focusBefore=await page.evaluate(()=>document.querySelector('.card.focus')?.innerText);
+await page.keyboard.press('ArrowRight');await page.waitForTimeout(250);
+const focusAfter=await page.evaluate(()=>document.querySelector('.card.focus')?.innerText);check('ArrowRight changes focused card',!!focusAfter&&focusBefore!==focusAfter);
+await page.keyboard.press('ArrowDown');await page.waitForTimeout(250);check('ArrowDown retains card focus',await page.evaluate(()=>!!document.querySelector('.card.focus')));
+await page.keyboard.press('Enter');await page.waitForTimeout(1800);const opened=await page.evaluate(()=>({component:Lampa.Activity.active().component,controller:Lampa.Controller.enabled().name}));check('OK opens details',opened.component==='full',opened);await page.screenshot({path:'audit/hybrid-results/details.png'});
+await page.keyboard.press('Escape');await page.waitForTimeout(600);check('Back returns Home',await page.evaluate(()=>Lampa.Activity.active().component==='main'));
+await page.evaluate(()=>{$('.menu__item[data-action="filter"]').trigger('hover:enter');});await page.waitForTimeout(1800);
+console.log('DISCOVER',JSON.stringify(await page.evaluate(()=>({component:Lampa.Activity.active().component,controller:Lampa.Controller.enabled().name,filter:document.querySelector('.activity--active .filter')?.outerHTML.slice(0,5000),text:document.querySelector('.activity--active')?.innerText.slice(0,1200)}))));
+await page.screenshot({path:'audit/hybrid-results/discover-first.png'});
+fs.writeFileSync('audit/hybrid-results/report.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));process.exit(0);
+})().catch(e=>{console.error(e.stack);process.exit(1)});

@@ -1,0 +1,138 @@
+{
+  "checks": [
+    {
+      "name": "Header 1280",
+      "status": "PASS",
+      "detail": {
+        "actions": [
+          {
+            "cls": "head__action selector open--search",
+            "r": {
+              "x": 475.765625,
+              "y": 6.828125,
+              "width": 328.46875,
+              "height": 36.265625,
+              "top": 6.828125,
+              "right": 804.234375,
+              "bottom": 43.09375,
+              "left": 475.765625
+            }
+          },
+          {
+            "cls": "head__action selector sh-head-more",
+            "r": {
+              "x": 1219.109375,
+              "y": 6.828125,
+              "width": 36.265625,
+              "height": 36.265625,
+              "top": 6.828125,
+              "right": 1255.375,
+              "bottom": 43.09375,
+              "left": 1219.109375
+            }
+          }
+        ],
+        "right": 1280
+      }
+    },
+    {
+      "name": "Header 1920",
+      "status": "PASS",
+      "detail": {
+        "actions": [
+          {
+            "cls": "head__action selector open--search",
+            "r": {
+              "x": 713.6484375,
+              "y": 10.25,
+              "width": 492.703125,
+              "height": 54.390625,
+              "top": 10.25,
+              "right": 1206.3515625,
+              "bottom": 64.640625,
+              "left": 713.6484375
+            }
+          },
+          {
+            "cls": "head__action selector sh-head-more",
+            "r": {
+              "x": 1828.65625,
+              "y": 10.25,
+              "width": 54.390625,
+              "height": 54.390625,
+              "top": 10.25,
+              "right": 1883.046875,
+              "bottom": 64.640625,
+              "left": 1828.65625
+            }
+          }
+        ],
+        "right": 1920
+      }
+    },
+    {
+      "name": "Header 3840",
+      "status": "PASS",
+      "detail": {
+        "actions": [
+          {
+            "cls": "head__action selector open--search",
+            "r": {
+              "x": 1427.2890625,
+              "y": 20.515625,
+              "width": 985.421875,
+              "height": 108.796875,
+              "top": 20.515625,
+              "right": 2412.7109375,
+              "bottom": 129.3125,
+              "left": 1427.2890625
+            }
+          },
+          {
+            "cls": "head__action selector sh-head-more",
+            "r": {
+              "x": 3657.296875,
+              "y": 20.515625,
+              "width": 108.796875,
+              "height": 108.796875,
+              "top": 20.515625,
+              "right": 3766.09375,
+              "bottom": 129.3125,
+              "left": 3657.296875
+            }
+          }
+        ],
+        "right": 3840
+      }
+    },
+    {
+      "name": "Secondary functions present",
+      "status": "PASS",
+      "detail": {
+        "text": "\n    \n    \n        \n            Меню\n        \n        \n    \n        \n    Сповіщення\n    \n\n    Налаштування\n    \n\n    Профіль\n    \n\n    Trakt · статус та списки\n    \n\n    Повний екран\n    \n\n    20:27 22 Жовтня 2026 Четвер\n    Час і дата\n\n    \n\n    \n",
+        "controller": "select"
+      }
+    },
+    {
+      "name": "Menu Back restores More",
+      "status": "PASS"
+    },
+    {
+      "name": "Moved Settings opens native categories",
+      "status": "PASS"
+    },
+    {
+      "name": "Search Back restores native field focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Disable restores native controls",
+      "status": "PASS"
+    },
+    {
+      "name": "Reenable has one More and style",
+      "status": "PASS"
+    }
+  ],
+  "errors": []
+}

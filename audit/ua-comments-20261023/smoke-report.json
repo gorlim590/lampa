@@ -1,0 +1,63 @@
+{
+  "kind": "Focused UA owner smoke test in existing CDP tab; controlled KinoStrain responses and transient settings getter, no preference writes or playback",
+  "checks": [
+    {
+      "name": "Normal local delivery, one owner and same32 extensions",
+      "status": "PASS"
+    },
+    {
+      "name": "65 genuine-shape fixture results render only40 cards",
+      "status": "PASS"
+    },
+    {
+      "name": "Next page contains remaining25 with exact indices",
+      "status": "PASS"
+    },
+    {
+      "name": "Native OK action opens functional viewer on comment41",
+      "status": "PASS"
+    },
+    {
+      "name": "Native viewer controller Back closes viewer",
+      "status": "PASS"
+    },
+    {
+      "name": "Same movie cache avoids repeat requests",
+      "status": "PASS"
+    },
+    {
+      "name": "Destroy aborts request and ignores manually delivered late callback",
+      "status": "PASS"
+    },
+    {
+      "name": "Empty response retains clear retryable state",
+      "status": "PASS"
+    },
+    {
+      "name": "Provider error terminates without hanging or caching outage",
+      "status": "PASS"
+    },
+    {
+      "name": "Repeated script leaves one style and one Full listener",
+      "status": "PASS"
+    },
+    {
+      "name": "Hybrid uses scoped cards without blur",
+      "status": "PASS"
+    },
+    {
+      "name": "Dispose releases requests/timers/style/listener",
+      "status": "PASS"
+    },
+    {
+      "name": "Final ordinary reload restores one local owner without fixtures",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "blocked": [
+    "Live completeness across all five providers",
+    "Full TV remote/resolution matrix and physical Google TV",
+    "Long-session heap profiling"
+  ]
+}

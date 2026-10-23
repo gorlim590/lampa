@@ -1,0 +1,45 @@
+{
+  "stage": "film-files",
+  "pluginSha256": "360d94a2fb61e47b57998b00dde9aa3ea6f6ec3d37b6e18d25cee5585b226722",
+  "tests": [
+    {
+      "name": "Film file uses the exact movie IMDb ID",
+      "status": "PASS",
+      "detail": {
+        "title": "Fight.Club.1999.mkv.mkv",
+        "rating": "IMDb 8.8",
+        "id": "tt0137523"
+      }
+    },
+    {
+      "name": "Other film/sample never receive the parent film rating",
+      "status": "PASS",
+      "detail": [
+        {
+          "title": "Other.Movie.1999.mkv.mkv",
+          "rating": "IMDb — відповідність файлу не підтверджено",
+          "id": ""
+        },
+        {
+          "title": "Fight.Club.1999.sample.mkv.mkv",
+          "rating": "IMDb — відповідність файлу не підтверджено",
+          "id": ""
+        }
+      ]
+    },
+    {
+      "name": "Original file OK handler preserved",
+      "status": "PASS"
+    },
+    {
+      "name": "Film fixture Back returns to torrents",
+      "status": "PASS"
+    },
+    {
+      "name": "No film-file JS errors",
+      "status": "PASS",
+      "detail": []
+    }
+  ],
+  "errors": []
+}

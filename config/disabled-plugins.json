@@ -1,0 +1,9 @@
+{
+  "disabled": [
+    "https://gorlim590.github.io/lampa/community/community-watches.js",
+    "https://lampame.github.io/main/CommunityWatches/CommunityWatches.js"
+  ],
+  "apply": "audit/full-integration-20261023/disable-community.cjs",
+  "restore": "Restore recorded status from backups/full-integration-20261023/community-status.json in the Extensions UI; no plugin or user cache was deleted.",
+  "scope": "Current CDP registry persisted; this manifest documents policy, it is not an automatic loader."
+}

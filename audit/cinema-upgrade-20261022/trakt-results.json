@@ -1,0 +1,53 @@
+{
+  "stage": "trakt-watchlist",
+  "pluginSha256": "336aec8b930f68f3705934996ac1b8bf722bbc676687a1d73dd0f32cc5764b07",
+  "tests": [
+    {
+      "name": "Trakt state loaded separately from Lampa Favorites",
+      "status": "PASS",
+      "detail": {
+        "value": false,
+        "label": "♡ У Watchlist Trakt"
+      }
+    },
+    {
+      "name": "Watchlist button updates immediately",
+      "status": "PASS",
+      "detail": {
+        "pressed": "true",
+        "busy": "true",
+        "label": "♥ У Watchlist Trakt · збереження…"
+      }
+    },
+    {
+      "name": "Trakt POST add confirmed by real read",
+      "status": "PASS"
+    },
+    {
+      "name": "Watchlist persists across reload",
+      "status": "PASS"
+    },
+    {
+      "name": "Repeated OK removes from Trakt Watchlist",
+      "status": "PASS"
+    },
+    {
+      "name": "Original Trakt movie membership restored",
+      "status": "PASS",
+      "detail": {
+        "beforeCount": 50,
+        "afterCount": 50
+      }
+    },
+    {
+      "name": "Lampa local/CUB Favorites not modified",
+      "status": "PASS"
+    },
+    {
+      "name": "No uncaught JavaScript errors",
+      "status": "PASS",
+      "detail": []
+    }
+  ],
+  "errors": []
+}

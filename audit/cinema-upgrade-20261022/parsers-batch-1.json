@@ -1,0 +1,36 @@
+{
+  "configured": 17,
+  "usedSavedConfiguration": false,
+  "results": [
+    {
+      "name": "Jacred.pro",
+      "status": "BLOCKED",
+      "reason": "Native parser returned an error (network/CORS/auth/schema); credentials preserved",
+      "elapsedMs": 19
+    },
+    {
+      "name": "Jac.black",
+      "status": "BLOCKED",
+      "reason": "Native parser returned an error (network/CORS/auth/schema); credentials preserved",
+      "elapsedMs": 164
+    },
+    {
+      "name": "Jac-red.ru",
+      "status": "BLOCKED",
+      "reason": "8-second audit deadline / unavailable parser",
+      "elapsedMs": 8001
+    },
+    {
+      "name": "Jac.Stull",
+      "status": "BLOCKED",
+      "reason": "Native parser returned an error (network/CORS/auth/schema); credentials preserved",
+      "elapsedMs": 140
+    },
+    {
+      "name": "Jr.Maxvol",
+      "status": "BLOCKED",
+      "reason": "8-second audit deadline / unavailable parser",
+      "elapsedMs": 8000
+    }
+  ]
+}

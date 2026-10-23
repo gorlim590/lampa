@@ -1,0 +1,225 @@
+{
+  "checks": [
+    {
+      "name": "30 enable cycles: bounded listeners/styles/controls",
+      "status": "PASS",
+      "detail": {
+        "before": {
+          "styles": 1,
+          "more": 1,
+          "rail": 0,
+          "params": 1,
+          "app": {
+            "menu": 1,
+            "app": 32,
+            "torrent": 3,
+            "full": 22,
+            "resize_start": 1,
+            "resize_end": 3,
+            "request_error": 1,
+            "request_secuses": 5,
+            "state:changed": 60,
+            "worker_storage": 1,
+            "activity": 9,
+            "line": 7,
+            "torrent_file": 2,
+            "average_rating": 1,
+            "request_before": 1
+          },
+          "search": {
+            "open": 2,
+            "close": 2,
+            "sources": 1
+          },
+          "settings": {
+            "open": 13,
+            "close": 1,
+            "change": 1
+          },
+          "scroll": 0
+        },
+        "after": {
+          "styles": 1,
+          "more": 1,
+          "rail": 0,
+          "params": 1,
+          "app": {
+            "menu": 1,
+            "app": 32,
+            "torrent": 3,
+            "full": 22,
+            "resize_start": 1,
+            "resize_end": 3,
+            "request_error": 1,
+            "request_secuses": 5,
+            "state:changed": 60,
+            "worker_storage": 1,
+            "activity": 9,
+            "line": 7,
+            "torrent_file": 2,
+            "average_rating": 1,
+            "request_before": 1
+          },
+          "search": {
+            "open": 2,
+            "close": 2,
+            "sources": 1
+          },
+          "settings": {
+            "open": 13,
+            "close": 1,
+            "change": 1
+          },
+          "scroll": 0
+        },
+        "domBefore": {
+          "documents": 10,
+          "nodes": 3538,
+          "jsEventListeners": 1025
+        },
+        "domAfter": {
+          "documents": 10,
+          "nodes": 3538,
+          "jsEventListeners": 1025
+        }
+      }
+    },
+    {
+      "name": "Existing cards and native header nodes preserved",
+      "status": "PASS"
+    },
+    {
+      "name": "10 destroy/reinit: no listener or setting accumulation",
+      "status": "PASS",
+      "detail": {
+        "styles": 1,
+        "more": 1,
+        "rail": 0,
+        "params": 1,
+        "app": {
+          "menu": 1,
+          "app": 32,
+          "torrent": 3,
+          "full": 22,
+          "resize_start": 1,
+          "resize_end": 3,
+          "request_error": 1,
+          "request_secuses": 5,
+          "state:changed": 60,
+          "worker_storage": 1,
+          "activity": 9,
+          "line": 7,
+          "torrent_file": 2,
+          "average_rating": 1,
+          "request_before": 1
+        },
+        "search": {
+          "open": 2,
+          "close": 2,
+          "sources": 1
+        },
+        "settings": {
+          "open": 13,
+          "close": 1,
+          "change": 1
+        },
+        "scroll": 0
+      }
+    },
+    {
+      "name": "Duplicate initialization ignored",
+      "status": "PASS"
+    },
+    {
+      "name": "Repeated settings route and exit: temporary DOM and scroll handlers released",
+      "status": "PASS",
+      "detail": {
+        "before": {
+          "styles": 1,
+          "more": 1,
+          "rail": 0,
+          "params": 1,
+          "app": {
+            "menu": 1,
+            "app": 32,
+            "torrent": 3,
+            "full": 22,
+            "resize_start": 1,
+            "resize_end": 3,
+            "request_error": 1,
+            "request_secuses": 5,
+            "state:changed": 60,
+            "worker_storage": 1,
+            "activity": 9,
+            "line": 7,
+            "torrent_file": 2,
+            "average_rating": 1,
+            "request_before": 1
+          },
+          "search": {
+            "open": 2,
+            "close": 2,
+            "sources": 1
+          },
+          "settings": {
+            "open": 13,
+            "close": 1,
+            "change": 1
+          },
+          "scroll": 0
+        },
+        "after": {
+          "styles": 1,
+          "more": 1,
+          "rail": 0,
+          "params": 1,
+          "app": {
+            "menu": 1,
+            "app": 32,
+            "torrent": 3,
+            "full": 22,
+            "resize_start": 1,
+            "resize_end": 3,
+            "request_error": 1,
+            "request_secuses": 5,
+            "state:changed": 60,
+            "worker_storage": 1,
+            "activity": 9,
+            "line": 7,
+            "torrent_file": 2,
+            "average_rating": 1,
+            "request_before": 1
+          },
+          "search": {
+            "open": 2,
+            "close": 2,
+            "sources": 1
+          },
+          "settings": {
+            "open": 13,
+            "close": 1,
+            "change": 1
+          },
+          "scroll": 0
+        }
+      }
+    },
+    {
+      "name": "Repeated search open/close: subscriptions bounded and grid actions removed",
+      "status": "PASS",
+      "detail": {
+        "before": {
+          "open": 2,
+          "close": 2,
+          "sources": 1
+        },
+        "after": {
+          "open": 2,
+          "close": 2,
+          "sources": 1
+        }
+      }
+    }
+  ],
+  "pageErrors": []
+}

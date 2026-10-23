@@ -1,0 +1,31 @@
+{
+  "checks": [
+    {
+      "name": "One native interface toggle",
+      "status": "PASS"
+    },
+    {
+      "name": "Home data loads after reload with Settings open",
+      "status": "PASS",
+      "detail": {
+        "cards": 28,
+        "styles": 1,
+        "settingsOpen": false
+      }
+    },
+    {
+      "name": "Right works after closing restored Settings",
+      "status": "PASS"
+    },
+    {
+      "name": "One extension entry, style and settings registration",
+      "status": "PASS",
+      "detail": {
+        "extensionEntries": 1,
+        "styles": 1,
+        "settingsParams": 1
+      }
+    }
+  ],
+  "manualInjection": false
+}

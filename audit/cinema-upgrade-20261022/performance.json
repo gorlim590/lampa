@@ -1,0 +1,71 @@
+{
+  "time": "2026-10-22T12:27:10.324Z",
+  "pluginSha256": "3e705c107dd539b5938fc38e3fa0b52dfcea99ed44e77e6c9393e9b55aea692c",
+  "runs": [
+    {
+      "variant": "baseline",
+      "version": "1.1.0",
+      "firstUsefulMs": 493,
+      "requestsToFirstUseful": 22,
+      "layoutAndStyleMs": 110.18,
+      "taskMs": 482.53,
+      "heapBeforeBytes": 52024560,
+      "heapAfterBytes": 52058152,
+      "longTasks": [
+        167
+      ],
+      "keys16Cpu4xMs": 562
+    },
+    {
+      "variant": "upgraded",
+      "version": "1.2.0-audit",
+      "firstUsefulMs": 544,
+      "requestsToFirstUseful": 15,
+      "layoutAndStyleMs": 112.45,
+      "taskMs": 536.69,
+      "heapBeforeBytes": 101839492,
+      "heapAfterBytes": 99596208,
+      "longTasks": [
+        261,
+        56
+      ],
+      "keys16Cpu4xMs": 508
+    },
+    {
+      "variant": "upgraded",
+      "version": "1.2.0-audit",
+      "firstUsefulMs": 431,
+      "requestsToFirstUseful": 16,
+      "layoutAndStyleMs": 60.56,
+      "taskMs": 421.17,
+      "heapBeforeBytes": 99150956,
+      "heapAfterBytes": 111166160,
+      "longTasks": [
+        53,
+        188,
+        59
+      ],
+      "keys16Cpu4xMs": 509
+    },
+    {
+      "variant": "baseline",
+      "version": "1.1.0",
+      "firstUsefulMs": 425,
+      "requestsToFirstUseful": 21,
+      "layoutAndStyleMs": 98.92,
+      "taskMs": 416.25,
+      "heapBeforeBytes": 133242624,
+      "heapAfterBytes": 145341028,
+      "longTasks": [
+        195
+      ],
+      "keys16Cpu4xMs": 506
+    }
+  ],
+  "notes": [
+    "Four alternating warm-session runs in the existing Linux Chromium at 1920x1080; other enabled plugins remain active",
+    "HTTP counts include all plugins in the measured interval",
+    "V8 heap snapshots depend on GC; these runs do not establish a memory improvement",
+    "CPU throttling is a browser simulation and is not Google TV hardware measurement"
+  ]
+}

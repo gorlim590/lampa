@@ -1,0 +1,245 @@
+{
+  "checks": [
+    {
+      "name": "movie 1280x720",
+      "status": "PASS",
+      "detail": {
+        "title": "Людина-павук: Абсолютно новий день",
+        "titleRect": {
+          "x": 80.734375,
+          "y": 434.28125,
+          "width": 785.125,
+          "height": 38.09375,
+          "top": 434.28125,
+          "right": 865.859375,
+          "bottom": 472.375,
+          "left": 80.734375
+        },
+        "titleFits": true,
+        "descriptionRect": {
+          "x": 894.078125,
+          "y": 88.9375,
+          "width": 365.40625,
+          "height": 244.234375,
+          "top": 88.9375,
+          "right": 1259.484375,
+          "bottom": 333.171875,
+          "left": 894.078125
+        },
+        "titleDescriptionOverlap": false,
+        "buttons": 8,
+        "focusY": 613.7015991210938,
+        "focusBottom": 663.5140991210938,
+        "descriptions": 1,
+        "ratings": 3,
+        "opacity": "1",
+        "controller": "full_start"
+      }
+    },
+    {
+      "name": "movie 1920x1080",
+      "status": "PASS",
+      "detail": {
+        "title": "Людина-павук: Абсолютно новий день",
+        "titleRect": {
+          "x": 121.109375,
+          "y": 651.28125,
+          "width": 1177.6875,
+          "height": 57.140625,
+          "top": 651.28125,
+          "right": 1298.796875,
+          "bottom": 708.421875,
+          "left": 121.109375
+        },
+        "titleFits": true,
+        "descriptionRect": {
+          "x": 1341.109375,
+          "y": 133.421875,
+          "width": 548.109375,
+          "height": 365.359375,
+          "top": 133.421875,
+          "right": 1889.21875,
+          "bottom": 498.78125,
+          "left": 1341.109375
+        },
+        "titleDescriptionOverlap": false,
+        "buttons": 8,
+        "focusY": 920.5679931640625,
+        "focusBottom": 995.2867431640625,
+        "descriptions": 1,
+        "ratings": 3,
+        "opacity": "1",
+        "controller": "full_start"
+      }
+    },
+    {
+      "name": "movie 3840x2160",
+      "status": "PASS",
+      "detail": {
+        "title": "Людина-павук: Абсолютно новий день",
+        "titleRect": {
+          "x": 242.234375,
+          "y": 1302.484375,
+          "width": 2355.328125,
+          "height": 114.3125,
+          "top": 1302.484375,
+          "right": 2597.5625,
+          "bottom": 1416.796875,
+          "left": 242.234375
+        },
+        "titleFits": true,
+        "descriptionRect": {
+          "x": 2682.21875,
+          "y": 266.875,
+          "width": 1096.203125,
+          "height": 728.734375,
+          "top": 266.875,
+          "right": 3778.421875,
+          "bottom": 995.609375,
+          "left": 2682.21875
+        },
+        "titleDescriptionOverlap": false,
+        "buttons": 8,
+        "focusY": 1841.151611328125,
+        "focusBottom": 1990.604736328125,
+        "descriptions": 1,
+        "ratings": 3,
+        "opacity": "1",
+        "controller": "full_start"
+      }
+    },
+    {
+      "name": "movie action focus",
+      "status": "PASS"
+    },
+    {
+      "name": "series 1280x720",
+      "status": "PASS",
+      "detail": {
+        "title": "Завдання Віжена",
+        "titleRect": {
+          "x": 80.734375,
+          "y": 377.15625,
+          "width": 785.125,
+          "height": 38.09375,
+          "top": 377.15625,
+          "right": 865.859375,
+          "bottom": 415.25,
+          "left": 80.734375
+        },
+        "titleFits": true,
+        "descriptionRect": {
+          "x": 894.078125,
+          "y": 88.9375,
+          "width": 365.40625,
+          "height": 138.109375,
+          "top": 88.9375,
+          "right": 1259.484375,
+          "bottom": 227.046875,
+          "left": 894.078125
+        },
+        "titleDescriptionOverlap": false,
+        "buttons": 8,
+        "focusY": 613.7015991210938,
+        "focusBottom": 663.5140991210938,
+        "descriptions": 1,
+        "ratings": 3,
+        "opacity": "1",
+        "controller": "full_start"
+      }
+    },
+    {
+      "name": "series 1920x1080",
+      "status": "PASS",
+      "detail": {
+        "title": "Завдання Віжена",
+        "titleRect": {
+          "x": 121.109375,
+          "y": 565.484375,
+          "width": 1177.6875,
+          "height": 57.140625,
+          "top": 565.484375,
+          "right": 1298.796875,
+          "bottom": 622.625,
+          "left": 121.109375
+        },
+        "titleFits": true,
+        "descriptionRect": {
+          "x": 1341.109375,
+          "y": 133.421875,
+          "width": 548.109375,
+          "height": 206.21875,
+          "top": 133.421875,
+          "right": 1889.21875,
+          "bottom": 339.640625,
+          "left": 1341.109375
+        },
+        "titleDescriptionOverlap": false,
+        "buttons": 8,
+        "focusY": 920.5679931640625,
+        "focusBottom": 995.2867431640625,
+        "descriptions": 1,
+        "ratings": 3,
+        "opacity": "1",
+        "controller": "full_start"
+      }
+    },
+    {
+      "name": "series 3840x2160",
+      "status": "PASS",
+      "detail": {
+        "title": "Завдання Віжена",
+        "titleRect": {
+          "x": 242.234375,
+          "y": 1130.859375,
+          "width": 2355.328125,
+          "height": 114.3125,
+          "top": 1130.859375,
+          "right": 2597.5625,
+          "bottom": 1245.171875,
+          "left": 242.234375
+        },
+        "titleFits": true,
+        "descriptionRect": {
+          "x": 2682.21875,
+          "y": 266.875,
+          "width": 1096.203125,
+          "height": 410.515625,
+          "top": 266.875,
+          "right": 3778.421875,
+          "bottom": 677.390625,
+          "left": 2682.21875
+        },
+        "titleDescriptionOverlap": false,
+        "buttons": 8,
+        "focusY": 1841.151611328125,
+        "focusBottom": 1990.604736328125,
+        "descriptions": 1,
+        "ratings": 3,
+        "opacity": "1",
+        "controller": "full_start"
+      }
+    },
+    {
+      "name": "series action focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Back from series returns main",
+      "status": "PASS"
+    },
+    {
+      "name": "One interface toggle",
+      "status": "PASS"
+    },
+    {
+      "name": "Disable returns previous design",
+      "status": "PASS"
+    },
+    {
+      "name": "Enable theme from native settings",
+      "status": "PASS"
+    }
+  ],
+  "errors": []
+}

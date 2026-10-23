@@ -1,0 +1,4 @@
+2699039 Include public baseline fixture so packaged offline tests run independently
+5fb6659 Document audit evidence, browser regression tests and Google TV checklist
+89be291 Fix torrent menus, Trakt Watchlist, release ranking and visible episode ratings
+ef6bc26 Baseline: local Torrents Cinema 1.1.0 before audit

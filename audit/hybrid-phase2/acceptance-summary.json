@@ -1,0 +1,52 @@
+{
+  "p0-report": {
+    "PASS": 9,
+    "FAIL": 0,
+    "BLOCKED": 0
+  },
+  "details-report": {
+    "PASS": 12,
+    "FAIL": 0,
+    "BLOCKED": 0
+  },
+  "p2-report": {
+    "PASS": 14,
+    "FAIL": 0,
+    "BLOCKED": 0
+  },
+  "p3-report": {
+    "PASS": 8,
+    "FAIL": 0,
+    "BLOCKED": 0
+  },
+  "anime-report": {
+    "PASS": 1,
+    "FAIL": 0,
+    "BLOCKED": 0
+  },
+  "p4-report": {
+    "PASS": 4,
+    "FAIL": 0,
+    "BLOCKED": 0
+  },
+  "native-reload": {
+    "PASS": 3,
+    "FAIL": 0,
+    "BLOCKED": 0
+  },
+  "settings-reload": {
+    "PASS": 4,
+    "FAIL": 0,
+    "BLOCKED": 0
+  },
+  "lifecycle": {
+    "PASS": 6,
+    "FAIL": 0,
+    "BLOCKED": 0
+  },
+  "regression": {
+    "PASS": 17,
+    "FAIL": 0,
+    "BLOCKED": 1
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "checks": [
+    {
+      "name": "Shared design tokens present",
+      "status": "PASS",
+      "detail": {
+        "--sh-bg": "#121023",
+        "--sh-panel": "#211d35",
+        "--sh-accent": "#9775fa",
+        "--sh-radius": ".7em",
+        "--sh-pill": "2em",
+        "--sh-speed": "160ms",
+        "--sh-inset": "1.8em"
+      }
+    },
+    {
+      "name": "Native modal uses theme without blur",
+      "status": "PASS",
+      "detail": {
+        "background": "rgb(33, 29, 53)",
+        "blur": "none",
+        "controller": "modal"
+      }
+    },
+    {
+      "name": "Native language screen themed and visible",
+      "status": "PASS",
+      "detail": {
+        "controller": "language",
+        "background": "rgb(18, 16, 35)",
+        "focusColor": "rgb(62, 49, 91)"
+      }
+    },
+    {
+      "name": "Reduced motion retained",
+      "status": "PASS"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+# Immutable audit evidence, backups and licensed upstream snapshots retain original bytes.
+audit/** -whitespace
+backups/** -whitespace
+vendor/** -whitespace

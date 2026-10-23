@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "enabled": true,
+  "styles": 1,
+  "more": 1,
+  "component": "main",
+  "cards": 28,
+  "searchOpen": false,
+  "settingsOpen": false,
+  "selectOpen": false
+}

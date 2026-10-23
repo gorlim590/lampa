@@ -1,0 +1,338 @@
+{
+  "stage": "files",
+  "pluginSha256": "3e705c107dd539b5938fc38e3fa0b52dfcea99ed44e77e6c9393e9b55aea692c",
+  "tests": [
+    {
+      "name": "Best choice honors the selected native season filter",
+      "status": "PASS",
+      "detail": {
+        "best": "Пуститися берега (S2) / Breaking Bad (S2) (2009) BDRip Ukr/Eng",
+        "valid": true
+      }
+    },
+    {
+      "name": "IMDb requests only for the currently visible screen",
+      "status": "PASS",
+      "detail": {
+        "total": 62,
+        "visible": 6,
+        "started": 6,
+        "offscreenStarted": 0
+      }
+    },
+    {
+      "name": "Real torrent files rendered through native Lampa",
+      "status": "PASS",
+      "detail": {
+        "count": 62,
+        "seasons": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+        ]
+      }
+    },
+    {
+      "name": "File episode coordinates cross-checked with season metadata",
+      "status": "PASS",
+      "detail": {
+        "verified": 62
+      }
+    },
+    {
+      "name": "Live IMDb episode ratings",
+      "status": "PASS",
+      "detail": {
+        "ratedVisible": 6,
+        "states": [
+          "IMDb 9.0",
+          "IMDb 8.6",
+          "IMDb 8.7",
+          "IMDb 8.2",
+          "IMDb 8.3",
+          "IMDb 9.3",
+          "IMDb —",
+          "IMDb —",
+          "IMDb —",
+          "IMDb —",
+          "IMDb —",
+          "IMDb —"
+        ]
+      }
+    },
+    {
+      "name": "Episode IMDb IDs are distinct and present",
+      "status": "PASS",
+      "detail": [
+        {
+          "text": "IMDb 9.0",
+          "title": "tt0959621 · S1E1",
+          "season": "1",
+          "episode": "1"
+        },
+        {
+          "text": "IMDb 8.6",
+          "title": "tt1054724 · S1E2",
+          "season": "1",
+          "episode": "2"
+        },
+        {
+          "text": "IMDb 8.7",
+          "title": "tt1054725 · S1E3",
+          "season": "1",
+          "episode": "3"
+        },
+        {
+          "text": "IMDb 8.2",
+          "title": "tt1054726 · S1E4",
+          "season": "1",
+          "episode": "4"
+        },
+        {
+          "text": "IMDb 8.3",
+          "title": "tt1054727 · S1E5",
+          "season": "1",
+          "episode": "5"
+        },
+        {
+          "text": "IMDb 9.3",
+          "title": "tt1054728 · S1E6",
+          "season": "1",
+          "episode": "6"
+        }
+      ]
+    },
+    {
+      "name": "Episode rating setting removes actual badges",
+      "status": "PASS"
+    },
+    {
+      "name": "Visible episode ratings reused from cache",
+      "status": "PASS",
+      "detail": {
+        "before": 7,
+        "after": 7
+      }
+    },
+    {
+      "name": "Files layout 1280",
+      "status": "PASS",
+      "detail": {
+        "rect": {
+          "x": 454.40625,
+          "y": 88.765625,
+          "width": 768,
+          "height": 598.84375,
+          "top": 88.765625,
+          "right": 1222.40625,
+          "bottom": 687.609375,
+          "left": 454.40625
+        },
+        "inBounds": true,
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Files layout 1920",
+      "status": "PASS",
+      "detail": {
+        "rect": {
+          "x": 681.609375,
+          "y": 108,
+          "width": 1152,
+          "height": 923.40625,
+          "top": 108,
+          "right": 1833.609375,
+          "bottom": 1031.40625,
+          "left": 681.609375
+        },
+        "inBounds": true,
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Files layout 3840",
+      "status": "PASS",
+      "detail": {
+        "rect": {
+          "x": 1363.203125,
+          "y": 216,
+          "width": 2304,
+          "height": 1846.8125,
+          "top": 216,
+          "right": 3667.203125,
+          "bottom": 2062.8125,
+          "left": 1363.203125
+        },
+        "inBounds": true,
+        "overflow": 0
+      }
+    },
+    {
+      "name": "Newly visible episodes receive ratings after scrolling",
+      "status": "PASS",
+      "detail": [
+        {
+          "season": "2",
+          "episode": "5",
+          "rating": "IMDb 8.2",
+          "id": "tt1232252 · S2E5"
+        },
+        {
+          "season": "2",
+          "episode": "6",
+          "rating": "IMDb 8.8",
+          "id": "tt1232253 · S2E6"
+        },
+        {
+          "season": "2",
+          "episode": "7",
+          "rating": "IMDb 8.6",
+          "id": "tt1232254 · S2E7"
+        },
+        {
+          "season": "2",
+          "episode": "8",
+          "rating": "IMDb 9.2",
+          "id": "tt1232255 · S2E8"
+        },
+        {
+          "season": "2",
+          "episode": "9",
+          "rating": "IMDb 9.2",
+          "id": "tt1232256 · S2E9"
+        },
+        {
+          "season": "2",
+          "episode": "10",
+          "rating": "IMDb — денний ліміт запитів плагіна",
+          "id": ""
+        }
+      ]
+    },
+    {
+      "name": "Files remote navigation and scrolling",
+      "status": "PASS",
+      "detail": {
+        "controller": "modal",
+        "season": "2",
+        "episode": "6",
+        "inView": true
+      }
+    },
+    {
+      "name": "File long OK actions",
+      "status": "PASS"
+    },
+    {
+      "name": "Files Back returns focus and releases observer",
+      "status": "PASS",
+      "detail": {
+        "controller": "torrent_cinema",
+        "observer": false,
+        "fileNodes": 0,
+        "requests": 0,
+        "modal": false
+      }
+    },
+    {
+      "name": "No uncaught file-page errors",
+      "status": "PASS",
+      "detail": []
+    }
+  ],
+  "errors": [],
+  "omdbRequests": 13,
+  "chosen": {
+    "release": "Пуститися берега (Сезони 1-5) / Breaking Bad (S1-5) (2008-2012) BDRip 1080p Ukr/Eng | sub Eng",
+    "eligible": true,
+    "omdbConfigured": true
+  },
+  "files": {
+    "count": 62,
+    "verified": 62,
+    "seasons": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "badges": [
+      {
+        "text": "IMDb 9.0",
+        "title": "tt0959621 · S1E1",
+        "season": "1",
+        "episode": "1"
+      },
+      {
+        "text": "IMDb 8.6",
+        "title": "tt1054724 · S1E2",
+        "season": "1",
+        "episode": "2"
+      },
+      {
+        "text": "IMDb 8.7",
+        "title": "tt1054725 · S1E3",
+        "season": "1",
+        "episode": "3"
+      },
+      {
+        "text": "IMDb 8.2",
+        "title": "tt1054726 · S1E4",
+        "season": "1",
+        "episode": "4"
+      },
+      {
+        "text": "IMDb 8.3",
+        "title": "tt1054727 · S1E5",
+        "season": "1",
+        "episode": "5"
+      },
+      {
+        "text": "IMDb 9.3",
+        "title": "tt1054728 · S1E6",
+        "season": "1",
+        "episode": "6"
+      },
+      {
+        "text": "IMDb —",
+        "title": "",
+        "season": "1",
+        "episode": "7"
+      },
+      {
+        "text": "IMDb —",
+        "title": "",
+        "season": "2",
+        "episode": "1"
+      },
+      {
+        "text": "IMDb —",
+        "title": "",
+        "season": "2",
+        "episode": "2"
+      },
+      {
+        "text": "IMDb —",
+        "title": "",
+        "season": "2",
+        "episode": "3"
+      },
+      {
+        "text": "IMDb —",
+        "title": "",
+        "season": "2",
+        "episode": "4"
+      },
+      {
+        "text": "IMDb —",
+        "title": "",
+        "season": "2",
+        "episode": "5"
+      }
+    ]
+  }
+}

@@ -83,7 +83,7 @@
   },
   {
     "url": "https://gorlim590.github.io/lampa/community/community-watches.js",
-    "status": 1,
+    "status": 0,
     "name": "CommunityWatches"
   },
   {
@@ -97,7 +97,7 @@
     "name": "Hide Content"
   },
   {
-    "url": "https://marv2on.github.io/lampa-plugins-sync/sync/Yaroslav/uacoments.js",
+    "url": "https://gorlim590.github.io/lampa/media/ua-comments.js",
     "status": 1,
     "name": "UA Comments"
   },

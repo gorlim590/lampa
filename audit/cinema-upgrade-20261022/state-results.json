@@ -1,0 +1,96 @@
+{
+  "tests": [
+    {
+      "name": "Request queue limits concurrency and coalesces identical work",
+      "status": "PASS"
+    },
+    {
+      "name": "Cancelling a queued job prevents its HTTP request",
+      "status": "PASS"
+    },
+    {
+      "name": "Cancelled active request does not call stale UI callback",
+      "status": "PASS"
+    },
+    {
+      "name": "Dead activity never starts queued requests",
+      "status": "PASS"
+    },
+    {
+      "name": "Cache honors TTL",
+      "status": "PASS"
+    },
+    {
+      "name": "Cache has a fixed bound and refreshing keys does not grow it",
+      "status": "PASS"
+    },
+    {
+      "name": "Metadata cache toggle actually bypasses completed cached request",
+      "status": "PASS"
+    },
+    {
+      "name": "Stored false survives Lampa truthiness/default behavior",
+      "status": "PASS"
+    },
+    {
+      "name": "Stored zero intensity is not replaced with default",
+      "status": "PASS"
+    },
+    {
+      "name": "Absent false default remains false",
+      "status": "PASS"
+    },
+    {
+      "name": "Resolution preferences remain strings matching parsed quality",
+      "status": "PASS"
+    },
+    {
+      "name": "Queued offscreen ratings are discarded before HTTP starts",
+      "status": "PASS"
+    },
+    {
+      "name": "Invisible cached ratings do not repaint or fetch",
+      "status": "PASS"
+    },
+    {
+      "name": "Trakt Watchlist updates the button immediately",
+      "status": "PASS"
+    },
+    {
+      "name": "Trakt add verifies backend state and preserves movie IDs/type",
+      "status": "PASS"
+    },
+    {
+      "name": "Repeated Trakt toggle removes and verifies removal",
+      "status": "PASS"
+    },
+    {
+      "name": "Duplicate pending Trakt click does not duplicate POST",
+      "status": "PASS"
+    },
+    {
+      "name": "Trakt errors produce unknown state and visible error",
+      "status": "PASS"
+    },
+    {
+      "name": "Trakt timeout prevents late response from claiming success",
+      "status": "PASS"
+    },
+    {
+      "name": "Failed Trakt persistence cannot be reported as saved",
+      "status": "PASS"
+    },
+    {
+      "name": "TV Watchlist operation explicitly uses TV type",
+      "status": "PASS"
+    },
+    {
+      "name": "Initial Watchlist lookup has loading and confirmed empty state",
+      "status": "PASS"
+    },
+    {
+      "name": "Destroyed page cannot receive a Watchlist completion",
+      "status": "PASS"
+    }
+  ]
+}

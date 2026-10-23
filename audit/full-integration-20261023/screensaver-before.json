@@ -1,0 +1,11 @@
+{
+  "nativeStart": "undefined",
+  "nativeShow": "function",
+  "alreadyWorked": false,
+  "customExitMs": 3,
+  "customGone": true,
+  "nativeWorkedAfterFirstKey": false,
+  "nativeLayerVisible": false,
+  "status": "PASS",
+  "meaning": "Controlled native saver shows concurrently; real configured MP4 preview, no torrent playback"
+}

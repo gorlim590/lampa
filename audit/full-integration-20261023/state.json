@@ -1,0 +1,389 @@
+{
+  "hybrid": "2.3.0",
+  "torrents": "1.1.0",
+  "activity": {
+    "component": "main"
+  },
+  "scripts": [
+    "https://siaivo.isroot.in/webos/webOSTV.js",
+    "https://siaivo.isroot.in/vender/jquery/jquery.js",
+    "https://siaivo.isroot.in/vender/notify/notify.js",
+    "https://siaivo.isroot.in/vender/scrollbar/jquery.scrollbar.js",
+    "https://siaivo.isroot.in/vender/navigator/navigator.js",
+    "https://siaivo.isroot.in/vender/keypad/keypad.js",
+    "https://siaivo.isroot.in/app.min.js",
+    "https://wtch.ch/m",
+    "https://lampame.github.io/main/bo.js",
+    "https://bwa.ad/rc",
+    "https://cub.best/plugin/lgbt",
+    "https://gorlim590.github.io/lampa/loader.js",
+    "https://gorlim590.github.io/lampa/media/seasons-info.js",
+    "https://gorlim590.github.io/lampa/community/community-watches.js",
+    "https://gorlim590.github.io/lampa/community/imdb-trailers.js",
+    "https://gorlim590.github.io/lampa/community/new-category.js",
+    "https://gorlim590.github.io/lampa/community/nightingale.js",
+    "https://gorlim590.github.io/lampa/filters/anti-dmca.js",
+    "https://gorlim590.github.io/lampa/filters/hide-content.js",
+    "https://gorlim590.github.io/lampa/filters/lampac-source-filter.js",
+    "https://gorlim590.github.io/lampa/filters/search-sanitizer.js",
+    "https://gorlim590.github.io/lampa/filters/source-sort.js",
+    "https://gorlim590.github.io/lampa/filters/trash-filter.js",
+    "https://gorlim590.github.io/lampa/media/custom-favorites.js",
+    "https://gorlim590.github.io/lampa/media/studio-picks.js",
+    "https://gorlim590.github.io/lampa/providers/parsers.js",
+    "https://gorlim590.github.io/lampa/providers/tmdb-networks.js",
+    "https://gorlim590.github.io/lampa/providers/ts-tracks.js",
+    "https://gorlim590.github.io/lampa/providers/tryzub-tv.js",
+    "https://gorlim590.github.io/lampa/ui/buttons-plus.js",
+    "https://gorlim590.github.io/lampa/ui/menu-hide.js",
+    "https://gorlim590.github.io/lampa/ui/screensaver-plus.js",
+    "https://gorlim590.github.io/lampa/ui/tv-status.js",
+    "https://marv2on.github.io/lampa-plugins-sync/sync/Yaroslav/uacoments.js",
+    "https://gorlim590.github.io/lampa/torrents-redesign.js",
+    "http://127.0.0.1:8766/stremio-hybrid.js",
+    "https://siaivo.isroot.in/plugins/modification.js",
+    "https://lampame.github.io/main/BanderaOnline/BanderaOnline.js",
+    "https://siaivo.isroot.in/vender/hls/hls.js",
+    "https://siaivo.isroot.in/lampa-ua-pack/feed.js",
+    "https://gorlim590.github.io/lampa/trakt/trakt.js",
+    "https://siaivo.isroot.in/invc-ws.js",
+    "https://siaivo.isroot.in/vender/dash/dash.js",
+    "https://gorlim590.github.io/lampa/trakt/trakt-plus.js",
+    "https://siaivo.isroot.in/vender/qrcode/qrcode.js",
+    "https://gorlim590.github.io/lampa/ui/interface-plus.js",
+    "https://gorlim590.github.io/lampa/ui/design-optimized.js",
+    "https://gorlim590.github.io/lampa/media/average-rating.js",
+    "https://gorlim590.github.io/lampa/ui/cardify-plus.js",
+    "https://gorlim590.github.io/lampa/localization/translate.js"
+  ],
+  "plugins": [
+    {
+      "url": "http://wtch.ch/m",
+      "name": "Онлайн тестовий",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://lampame.github.io/main/bo.js",
+      "name": "Bandera",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "http://bwa.ad/rc",
+      "name": "BWA",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://cub.rip/plugin/lgbt",
+      "name": "LGBT",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://lampame.github.io/main/ttv.js",
+      "name": "TV",
+      "status": 0,
+      "enabled": false
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/loader.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/media/seasons-info.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/community/community-watches.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/community/imdb-trailers.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/community/new-category.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/community/nightingale.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/filters/anti-dmca.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/filters/hide-content.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/filters/lampac-source-filter.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/filters/search-sanitizer.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/filters/source-sort.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/filters/trash-filter.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/media/custom-favorites.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/media/studio-picks.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/providers/parsers.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/providers/tmdb-networks.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/providers/ts-tracks.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/providers/tryzub-tv.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/ui/buttons-plus.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/ui/menu-hide.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/ui/screensaver-plus.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/ui/tv-status.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://marv2on.github.io/lampa-plugins-sync/sync/Yaroslav/uacoments.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/torrents-redesign.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "http://127.0.0.1:8766/stremio-hybrid.js",
+      "name": "",
+      "status": 1,
+      "enabled": true
+    },
+    {
+      "url": "https://nrsua.github.io/lampa-nrs/lparty.js",
+      "name": "LParty",
+      "status": 0,
+      "enabled": false
+    },
+    {
+      "url": "https://lampame.github.io/main/music.js",
+      "name": "Vinyl",
+      "status": 0,
+      "enabled": false
+    }
+  ],
+  "settings": [
+    {
+      "component": "siaivo",
+      "title": "Siaivo"
+    },
+    {
+      "component": "account",
+      "title": "Cub"
+    },
+    {
+      "component": "trakt",
+      "title": "Trakt.TV"
+    },
+    {
+      "component": "trakt_plus",
+      "title": "Trakt+"
+    },
+    {
+      "component": "interface",
+      "title": "Інтерфейс"
+    },
+    {
+      "component": "interface_mod_new",
+      "title": "Інтерфейс +"
+    },
+    {
+      "component": "content_rows",
+      "title": "Канали"
+    },
+    {
+      "component": "player",
+      "title": "Плеєр"
+    },
+    {
+      "component": "parser",
+      "title": "Парсер"
+    },
+    {
+      "component": "server",
+      "title": "TorrServer"
+    },
+    {
+      "component": "tmdb",
+      "title": "TMDB"
+    },
+    {
+      "component": "plugins",
+      "title": "Розширення"
+    },
+    {
+      "component": "hub",
+      "title": "Hub"
+    },
+    {
+      "component": "parental_control",
+      "title": "Батьківський контроль"
+    },
+    {
+      "component": "data",
+      "title": "Кеш та дані"
+    },
+    {
+      "component": "screensaver_plus",
+      "title": "Скрінсейвер+"
+    },
+    {
+      "component": "more",
+      "title": "Iнше"
+    },
+    {
+      "component": "bandera_online",
+      "title": "Bandera Online"
+    },
+    {
+      "component": "bwa",
+      "title": "BWA Online"
+    },
+    {
+      "component": "content_hiding",
+      "title": "Приховування контенту"
+    },
+    {
+      "component": "menu_filter",
+      "title": "Приховання інтерфейсу"
+    },
+    {
+      "component": "torrents_cinema",
+      "title": "Торенти · Кіно"
+    },
+    {
+      "component": "addCategory",
+      "title": "Додати категорії"
+    },
+    {
+      "component": "uacomentsy",
+      "title": "UaKomentsY"
+    },
+    {
+      "component": "ydesign",
+      "title": "YDesign"
+    },
+    {
+      "component": "omdb_config_ui",
+      "title": "undefined\n                    \n                    OMDB"
+    },
+    {
+      "component": "omdb_ratings_select",
+      "title": "undefined\n                    \n                    Вибір рейтингів"
+    },
+    {
+      "component": "cardify",
+      "title": "Cardify"
+    },
+    {
+      "component": "ytranslate",
+      "title": "YTranslate"
+    }
+  ],
+  "api": {
+    "trakt": "undefined",
+    "home": "function",
+    "keyboard": [
+      "edit"
+    ],
+    "screensaver": [
+      "listener",
+      "enabled",
+      "worked",
+      "time_reset",
+      "time_start",
+      "class_list",
+      "html",
+      "timer",
+      "screensaver"
+    ]
+  }
+}

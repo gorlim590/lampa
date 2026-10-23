@@ -21,13 +21,19 @@
         'simkl': 12, 'mal': 13
     };
 
+    function ratingFallback(key){
+        if(key==='oscar'||key==='award')return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path fill="#e9c65c" d="M9 3h14v5h6v5c0 5-4 8-9 8v4h5v4H7v-4h5v-4C7 21 3 18 3 13V8h6zm0 8H6v2c0 3 2 4 4 5zm14 0-1 7c2-1 4-2 4-5v-2z"/></svg>');
+        var label=({imdb:'IMDb',tmdb:'TMDB',cub:'CUB',trakt:'Trakt',rt:'RT',mc:'MC',letterboxd:'LB',avg:'AVG'})[key]||'★';
+        return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 32"><rect width="48" height="32" rx="5" fill="#252536"/><text x="24" y="21" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#eee">'+label+'</text></svg>');
+    }
+
     var icons = {
         imdb: 'https://upload.wikimedia.org/wikipedia/commons/5/53/IMDB_-_SuperTinyIcons.svg',
         rt: 'https://upload.wikimedia.org/wikipedia/commons/5/5b/Rotten_Tomatoes.svg',
         mc: 'https://upload.wikimedia.org/wikipedia/commons/e/e1/Metacritic_logo_Roundel.svg',
         tmdb: 'https://upload.wikimedia.org/wikipedia/commons/8/89/Tmdb.new.logo.svg',
         cub: 'https://raw.githubusercontent.com/yumata/lampa/9381985ad4371d2a7d5eb5ca8e3daf0f32669eb7/img/logo-icon.svg',
-        oscar: 'https://upload.wikimedia.org/wikipedia/commons/f/f8/Oscar_gold_silhouette.svg',
+        oscar: ratingFallback('oscar'),
         award: 'https://upload.wikimedia.org/wikipedia/commons/e/e8/Barnstar_film_3.svg',
         trakt: 'https://upload.wikimedia.org/wikipedia/commons/3/3d/Trakt.tv-favicon.svg',
         mdblist: mdblistSvg,
@@ -125,10 +131,12 @@
         var sat = getSaturation();
         var imgStyle = 'filter: saturate(' + sat + ');';
         
-        return $('<div class="full-start__rate custom-rating ' + className + '" data-rating-key="' + (orderKey || '') + '" style="font-size: ' + size + '; order: ' + order + ';">\
+        var block = $('<div class="full-start__rate custom-rating ' + className + '" data-rating-key="' + (orderKey || '') + '" style="font-size: ' + size + '; order: ' + order + ';">\
             <div class="rating-icon-wrap"><img src="' + iconUrl + '" style="' + imgStyle + '" /></div>\
             <div style="color: ' + (color || '#fff') + '">' + value + '</div>\
         </div>');
+        block.find('img').attr('alt',orderKey||'Рейтинг').one('error',function(){this.src=ratingFallback(orderKey);});
+        return block;
     }
 
     function refreshAverage(container) {
