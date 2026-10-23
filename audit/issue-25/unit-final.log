@@ -1,0 +1,274 @@
+✔ baseline reproducer: old YDesign excludes75% and starves history behind90 bookmark candidates (53.611866ms)
+✖ real incomplete positions include25%,75%,95%; zero, completed and percent-only movies excluded (42.91536ms)
+✖ more than three resumes and history beyond90 unrelated candidates are retained (29.521101ms)
+✖ confirmed Trakt watched is separate from stale local partial and never local viewed inference (12.709501ms)
+✔ movie/TV/anime watched requires provider true; one completed episode is not completed series (11.545535ms)
+✔ dedup joins explicit TMDB/Trakt/IMDb aliases transitively without changing input cards (10.492078ms)
+✔ same numeric movie/TV/source IDs are not merged without mapping (7.626368ms)
+✖ latest position beats an older completed hash and preserves exact hash/time for native source (9.221947ms)
+✔ latest reset or completion removes resume; tied unknown timestamps prefer completion (24.086028ms)
+✔ restart rebuilds from native data, with no Home cache or writes (16.740392ms)
+✖ active Lampa profile namespace and current Trakt provider are reevaluated on every build (11.168389ms)
+✖ offline or missing Trakt never invents watched/unwatched or blocks genuine local progress (10.573172ms)
+✖ title collisions reject ambiguous legacy hashes while explicit content links remain usable (11.004244ms)
+✖ renamed title finds a linked source hash; incompatible linked legacy collision rejected (9.194669ms)
+✔ legacy title records with real time work; percentages and malformed data alone do not (11.592733ms)
+✖ TV next aired episode uses completed predecessor, excludes specials/unaired, labels no exact position (15.356309ms)
+✔ TV/anime partial episode position and legacy season>10 hash are preserved (11.534457ms)
+✖ TV percentage without seconds is explicitly labelled, not fabricated as a seek position (9.958511ms)
+✖ latest episode reset wins over older partial; new aired episode reappears after completed cached set (10.901677ms)
+✔ ContentRows replaces legacy Home payloads without ever replacing Storage.get; category/unrelated rows retained (11.650761ms)
+✔ queued own callback reads new profile data rather than retaining earlier cards (8.334129ms)
+✔ events coalesce into one timeout and repeat initialization does not duplicate rows/listeners (8.687639ms)
+✔ local progress records and playback handlers are never overwritten by building rows (8.335943ms)
+✖ native row adapter creates missing rows, updates progress, removes empty rows and performs no-op refresh without duplicates (27.826215ms)
+✖ native row adapter retains selected content when progress reorders a focused row (9.706841ms)
+✖ anime feature film remains movie for content identity and resume position (9.961428ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 12
+ℹ fail 14
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1244.247011
+
+✖ failing tests:
+
+test at tests/home-history.cjs:26:1
+✖ real incomplete positions include25%,75%,95%; zero, completed and percent-only movies excluded (42.91536ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   1,
+  -   2,
+  -   3
+  - ]
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-25-home-history/tests/home-history.cjs:26:310)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 1, 2, 3 ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/home-history.cjs:27:1
+✖ more than three resumes and history beyond90 unrelated candidates are retained (29.521101ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 10
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-25-home-history/tests/home-history.cjs:27:333)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 10,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/home-history.cjs:28:1
+✖ confirmed Trakt watched is separate from stale local partial and never local viewed inference (12.709501ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   2
+  - ]
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-25-home-history/tests/home-history.cjs:28:330)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 2 ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/home-history.cjs:32:1
+✖ latest position beats an older completed hash and preserves exact hash/time for native source (9.221947ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'home_history_resume')
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-25-home-history/tests/home-history.cjs:32:245)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at tests/home-history.cjs:35:1
+✖ active Lampa profile namespace and current Trakt provider are reevaluated on every build (11.168389ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-25-home-history/tests/home-history.cjs:35:254)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/home-history.cjs:36:1
+✖ offline or missing Trakt never invents watched/unwatched or blocks genuine local progress (10.573172ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-25-home-history/tests/home-history.cjs:36:288)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/home-history.cjs:37:1
+✖ title collisions reject ambiguous legacy hashes while explicit content links remain usable (11.004244ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   2
+  - ]
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-25-home-history/tests/home-history.cjs:37:373)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 2 ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/home-history.cjs:38:1
+✖ renamed title finds a linked source hash; incompatible linked legacy collision rejected (9.194669ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'home_history_resume')
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-25-home-history/tests/home-history.cjs:38:242)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at tests/home-history.cjs:41:1
+✖ TV next aired episode uses completed predecessor, excludes specials/unaired, labels no exact position (15.356309ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'home_history_resume')
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-25-home-history/tests/home-history.cjs:41:274)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at tests/home-history.cjs:43:1
+✖ TV percentage without seconds is explicitly labelled, not fabricated as a seek position (9.958511ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'home_history_resume')
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-25-home-history/tests/home-history.cjs:43:252)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at tests/home-history.cjs:44:1
+✖ latest episode reset wins over older partial; new aired episode reappears after completed cached set (10.901677ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'home_history_resume')
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-25-home-history/tests/home-history.cjs:44:354)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at tests/home-history.cjs:53:1
+✖ native row adapter creates missing rows, updates progress, removes empty rows and performs no-op refresh without duplicates (27.826215ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  1 !== 2
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-25-home-history/tests/home-history.cjs:53:315)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 2,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/home-history.cjs:54:1
+✖ native row adapter retains selected content when progress reorders a focused row (9.706841ms)
+  TypeError [Error]: Cannot set properties of undefined (setting 'active')
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-25-home-history/tests/home-history.cjs:54:288)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at tests/home-history.cjs:55:1
+✖ anime feature film remains movie for content identity and resume position (9.961428ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'media_type')
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-25-home-history/tests/home-history.cjs:55:261)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)

@@ -1973,9 +1973,9 @@
         try {
             if (!window.Lampa || !Lampa.ContentRows || typeof Lampa.ContentRows.add !== 'function') return;
             RowsStore.registered = true;
-            Lampa.ContentRows.add({
+            if (!(window.LampaHomeHistory && window.LampaHomeHistory.active)) Lampa.ContentRows.add({
                 index: 1, name: 'ydesign_continue', title: 'Продовжити перегляд', screen: ['main'],
-                call: function () { return makeRowCall('cont', 'Продовжити перегляд'); }
+                call: function () { if (!(window.LampaHomeHistory && window.LampaHomeHistory.active)) return makeRowCall('cont', 'Продовжити перегляд'); }
             });
             Lampa.ContentRows.add({
                 index: 2, name: 'ydesign_week', title: 'Виходять цього тижня', screen: ['main'],
@@ -1987,7 +1987,7 @@
     // Фонове підтягування даних серіалів зі списків користувача (з кешем 12 год., через чергу запитів)
     function warmRows(force) {
         try {
-            if (!getSet('ydesign_row_continue') && !getSet('ydesign_row_week')) return;
+            if (((window.LampaHomeHistory && window.LampaHomeHistory.active) || !getSet('ydesign_row_continue')) && !getSet('ydesign_row_week')) return;
             var now = Date.now();
             if (RowsStore.busy || (!force && now - RowsStore.last < 20 * 60 * 1000)) return;
             RowsStore.busy = true;
