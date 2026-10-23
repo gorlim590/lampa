@@ -363,6 +363,11 @@
   }
 
   function watchStatus(card) {
+    try { return readWatchStatus(card); }
+    catch (e) { statusPhase = 'error'; return null; }
+  }
+
+  function readWatchStatus(card) {
     hydrateWatched();
     var id = tmdbId(card);
     if (!id || !card || !token() || statusPhase !== 'ready' || !freshStatus(statusAt)) return null;
