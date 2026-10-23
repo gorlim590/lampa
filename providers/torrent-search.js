@@ -48,10 +48,13 @@
         context = context || {}; var raw = text(row.Title || row.title || row.parsed && row.parsed.raw), reasons = [], tv = series(movie);
         names = names || titles(movie); var year = text(movie.first_air_date || movie.release_date).slice(0, 4);
         var seasonRange = /\bS(\d{1,2})\s*[-–]\s*S?(\d{1,2})(?![a-z0-9])/i.exec(raw);
-        var season = /\bS(\d{1,2})(?:E\d|\b)|\bSeason[ ._-]*(\d{1,2})/i.exec(raw), episode = /\bS\d{1,2}E(\d{1,3})(?!\d)(?:\s*[-–]\s*(?:S\d{1,2}E|E)?(\d{1,3})(?!\d))?/i.exec(raw);
+        var season = /\bS(\d{1,2})(?:E\d|\b)|(?:season|сезон)[ ._:-]*(\d{1,2})/i.exec(raw), episode = /\bS\d{1,2}E(\d{1,3})(?!\d)(?:\s*[-–]\s*(?:S\d{1,2}E|E)?(\d{1,3})(?!\d))?/i.exec(raw);
+        var alternateEpisode = /(?:\b(\d{1,2})x|(?:сері[яїій]|сери[яий]|епізод(?:и|ів)?|эпизод(?:ы|ов)?)[ ._:-]*)(\d{1,3})(?:\s*[-–]\s*(\d{1,3}))?/i.exec(raw);
         var rs = coordinate(row.Season != null ? row.Season : row.season), re = coordinate(row.Episode != null ? row.Episode : row.episode);
         if (rs === null && season) rs = Number(season[1] || season[2]);
+        if (rs === null && alternateEpisode && alternateEpisode[1]) rs = Number(alternateEpisode[1]);
         if (re === null && episode) re = Number(episode[1]);
+        if (re === null && alternateEpisode) re = Number(alternateEpisode[2]);
         if (re === null) { var absolute = /\s-\s(\d{1,3})(?:v\d)?(?:\s|\[|$)/i.exec(raw); if (absolute) re = Number(absolute[1]); }
         var expectedSeason = coordinate(context.season), expectedEpisode = coordinate(context.episode);
         var explicit = raw.match(/\b(?:19|20)\d{2}\b/g) || [], titleNumbers = names.map(normalize).join(' ').split(' ');
@@ -63,11 +66,13 @@
         if (tv && type === 'movie' || !tv && /^(tv|series|show)$/.test(type)) reasons.push('Інший тип');
         if (row.tmdb_id && text(row.tmdb_id) !== text(movie.id)) reasons.push('Інший TMDB ID');
         if (expectedSeason !== null && rs !== null && (seasonRange ? expectedSeason < Number(seasonRange[1]) || expectedSeason > Number(seasonRange[2]) : rs !== expectedSeason)) reasons.push('Інший сезон');
-        if (expectedEpisode !== null && re !== null && (expectedEpisode < re || expectedEpisode > Number(episode && episode[2] || re))) reasons.push('Інша серія');
+        if (expectedEpisode !== null && re !== null && (expectedEpisode < re || expectedEpisode > Number(episode && episode[2] || alternateEpisode && alternateEpisode[3] || re))) reasons.push('Інша серія');
         var clean = raw.replace(/^(?:\[[^\]]{1,60}\]\s*)+/, ''), pieces = clean.split(/\s*[\/|]\s*/);
         var found = pieces.some(function (piece) {
             // Strip release descriptors, never compare just a fraction of title words.
             var stop = /\b(?:S\d{1,2}E?\d*|Season\s*\d+|Episode\s*\d+|2160p|1080p|720p|480p|4K|WEB[ .-]?DL|WEBRip|BluRay|BDRip|HDTV|Remux|x26[45]|HEVC|AVC|Remastered|Ukr|Eng|Rus)\b|\s+-\s+\d{1,3}(?:\b|$)/i.exec(piece);
+            var localizedStop = /(?:^|[ ._([\/-])(?:сезон|сері[яїій]|сери[яий]|епізод|эпизод)[ ._:-]*\d|\b\d{1,2}x\d{1,3}/i.exec(piece);
+            if (localizedStop && (!stop || localizedStop.index < stop.index)) stop = localizedStop;
             if (stop) piece = piece.slice(0, stop.index);
             explicit.forEach(function (y) { var at = piece.indexOf(y); if (at >= 0) piece = piece.slice(0, at); });
             piece = normalize(piece); var normalizedNames = names.map(normalize); return normalizedNames.some(function (name) { return name === piece || piece.indexOf(name + ' ') === 0 && normalizedNames.indexOf(piece.slice(name.length + 1)) >= 0; });
