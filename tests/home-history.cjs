@@ -16,7 +16,7 @@ function fixture(options={}){
  return{state,L,context,document,rows,registry,handlers,timers,writes,fire:(event,data)=>{for(const fn of handlers[event]||[])fn(data)},flush:()=>{const jobs=[...timers.values()];timers.clear();jobs.forEach(j=>j.fn())},reload:()=>vm.runInContext(source,context)};
 }
 test('baseline reproducer: old YDesign excludes75% and starves history behind90 bookmark candidates',()=>{
- const s=fs.readFileSync(path.join(__dirname,'../ui/design-optimized.js'),'utf8');
+ const s=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/home-history-baseline.json'),'utf8')).functions;
  const a=s.indexOf('    function rowCandidates()'),b=s.indexOf('    function computeRows()'),c=s.indexOf('    function rowItem(',b);
  const old={Lampa:{Favorite:{get:({type})=>type==='look'?Array.from({length:90},(_,i)=>movie(i+1)):type==='history'?[movie(999,{p:75})]:[]}},ROW_LISTS:['look','continued','scheduled','book','like','wath','history'],isTvMedia:()=>false,moviePercent:c=>c.p||0,CONT_MIN:5,WATCHED_HISTORY:50};
  vm.createContext(old);vm.runInContext(s.slice(a,b)+s.slice(b,c)+';globalThis.result=computeRows();globalThis.cands=rowCandidates();',old);

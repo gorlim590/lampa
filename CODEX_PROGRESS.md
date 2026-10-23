@@ -385,3 +385,7 @@
 - New plugin moved by user request to plugins-to-enable/home-history.js, NOT in loader. Future activation/rollback README provided. Main old YDesign marks still await separate PR29; both UI patches apply3way clean to PR29, which stays unmerged.
 - Exact user's3/missing examples remain unavailable (test profile History0/Viewed0,1407 roads). Current horizontal viewport can show3 while dataset7; not a proven original cause. Physical TV/external/backend and unavailable localhost preview plugins unverified. Details/evidence at docs/issue-25-home-history.md.
 - Next: publish isolated branch as Draft, add separate focused Home CI workflow, check CI/report #25, retain Open status and no main merge. No further broad tests/profile required; no next Issue.
+
+### Issue #25 — publication and independent CI preparation
+- Feature history through2079da2 contains exact runtime306524b and final13/0 evidence. New focused CI workflow is separate from PR29's existing workflow to avoid adjacent edits/conflicts.
+- Baseline defect reproducer now reads frozen FCC function excerpts (tests/fixtures/home-history-baseline.json), not the current YDesign file. This preserves the evidence while preventing false CI failure after #29 legitimately fixes that old50% rule. Product source unchanged; no browser rerun required for this test-input correction.30 tests rechecked.
