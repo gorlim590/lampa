@@ -1,0 +1,39 @@
+{
+  "body": "rgb(18, 16, 35) none repeat scroll 0% 0% / auto padding-box border-box",
+  "header": "rgb(21, 17, 39) none repeat scroll 0% 0% / auto padding-box border-box",
+  "clock": "",
+  "weekDisplay": "none",
+  "text": "\n            20:32\n            \n                23 Жовтня 2026\n                П'ятниця\n            \n        ",
+  "clockRect": {
+    "x": 1604.984375,
+    "y": 30.3125,
+    "width": 195.296875,
+    "height": 22.578125,
+    "top": 30.3125,
+    "right": 1800.28125,
+    "bottom": 52.890625,
+    "left": 1604.984375
+  },
+  "searchRect": {
+    "x": 614.40625,
+    "y": 11.390625,
+    "width": 499.1875,
+    "height": 60.4375,
+    "top": 11.390625,
+    "right": 1113.59375,
+    "bottom": 71.828125,
+    "left": 614.40625
+  },
+  "dateLine": "14.8271px",
+  "nowMargin": "12.546px",
+  "inline": null,
+  "styles": [
+    "* { box-sizing: border-box; outline: none; -webkit-user-drag: none; }",
+    "* { -webkit-tap-highlight-color: transparent; }",
+    ":not(input) { user-select: none; }",
+    ".head { position: fixed; top: 0px; left: 0px; width: 100%; z-index: 15; }",
+    ":not(input) { user-select: none !important; }",
+    "* { -webkit-tap-highlight-color: transparent; box-sizing: border-box; outline: none; -webkit-user-drag: none; }",
+    "body.stremio-hybrid .head { border-bottom: 1px solid rgba(255, 255, 255, 0.035); background: var(--sh-header) !important; }"
+  ]
+}
