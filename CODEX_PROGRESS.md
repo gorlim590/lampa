@@ -332,3 +332,27 @@
 - Integration PR: https://github.com/gorlim590/lampa/pull/24 . User authorized merge after CI; its current PR state and checks are the source of truth for final publication status. Trakt fix PR #23 is already merged as c68cd3b0dceb6fb6a9b37d1b576ade2a88ca289a, with main CI/Pages successful.
 - Final focused checks:52 Trakt unit,16 existing-CDP browser,65 torrent offline and23 state checks PASS. Browser JavaScript errors=[]; no real Trakt writes or user preference changes. Syntax/link validation PASS (58 JS /436 URLs before this checkpoint); whitespace PASS. YDesign unchanged, API true/false/null preserved.
 - Published plugins remain reversible/opt-in as documented. Deferred live/TorrServer/physical TV work and the remaining roadmap are NOT complete; continue from audit/full-integration-20261023/CONTINUE.md. Issue #7 remains open; Issue #8 not started.
+
+## Issue #7 follow-up: account isolation and activity integrity
+- Based on current main a33f4b1, separate fix/issue-7-account-isolation; PR #23 implementation retained, not repeated. Only #7 and its native GET transport boundary are in scope; no YDesign/#8 changes.
+- Reproduced ownerless-cache and incomplete-activity bugs on mocks before implementation (34 failing cases in first41 new regressions; existing52 passed).
+- Implemented authenticated owner-bound cache v7, credential-generation guards/cancellation for background/manual/lazy progress, same-owner verified hydration after restart/rotation, owner-scoped auto-sync success metadata and strict initial/final activity timestamps. Local lists/history/progress/provenance are retained without deletion.
+- 98 unit/regression checks PASS at implementation checkpoint. Native GET optional options preserve old callers while integrity reads bypass native cache/in-flight dedup. Loader cache tag advanced; plugin order unchanged.
+- Details/contract/limits: docs/issue-7-account-isolation.md. Browser checks and final exact SHA/results follow in the Draft PR and audit/issue-7-account. No merge authorized for this follow-up; Issue #7 must remain open. No other Issue begins automatically.
+
+### Issue #7 account/integrity final checkpoint
+- Authenticated identity reuses the already supported native /users/me endpoint; UUID preferred, verified slug fallback. Local implementation commits ec333f1 /8321ffe, harness source-proof correction e70cd08. Source tested by CDP: e70cd0828da4fd548049076dcb6565a573aee9a5.
+- Final results:99 unit regressions PASS;23 existing-CDP runtime checks PASS,0FAIL, exceptions=[]; exact source SHA256/header commit checked for loader/TraktTV/Trakt+/unchanged YDesign. Normal profile delivery/methods restored; real local values preserved. No real Trakt mutation, storage reset, browser close or physical-TV claim.
+- Initial browser source check was corrected for this profile's preview-loader alias; final full focused run passed. Tests/limits/screenshots at audit/issue-7-account/RESULTS.md and browser-report.json; root causes at docs/issue-7-account-isolation.md.
+- Next authorized step: publish this isolated branch as a Draft PR, verify GitHub CI and add a detailed #7 report. Do not merge main or close #7. Further action after review requires the user's decision; no next Issue is started.
+
+### Issue #7 published Draft / wait for review
+- Draft PR #27: https://github.com/gorlim590/lampa/pull/27 . Feature implementation/evidence head ad620c43ee9243fcc4bca1ca2e6e0a6d354f112a; exact CDP source tested e70cd0828da4fd548049076dcb6565a573aee9a5. All4 original logical commits preserved on fix/issue-7-account-isolation.
+- GitHub CI Node20: https://github.com/gorlim590/lampa/actions/runs/39938617150 —99 tests PASS,0FAIL; syntax/link/whitespace PASS. Browser:23PASS,0FAIL,exceptions=[]; source SHA256/commit headers confirmed. Evidence/runtime deployment is temporary and restored, not a main installation.
+- Actions transport token could not push a CI-workflow change (permission boundary). The already authorized GitHub connector published the verified exact feature commit instead; temporary archive branch was subsequently deleted by its dedicated verified cleanup job. No main merge/push, issue close or real-account mutation occurred.
+- READY FOR REVIEW for #7 account/snapshot integrity. Stop here and wait for user's decision. Outstanding: real account/backend/954-vs911 and physical Google TV acceptance; YDesign's separate #8 UI rules were not changed.
+
+### Issue #7 final harness cleanup /24 runtime checks
+- Post-test inspection caught a legacy harness cleanup defect: it removed the hash but retained component=issue7_fixture in the query URL. Normal scripts/methods had already been restored; the remaining test Activity is now explicitly removed by navigating back to a real original route (Main if the starting route was itself an older fixture).
+- Repeated full focused browser run:24PASS/0FAIL, exceptions=[]; final24th check confirms real native Activity and no fixture globals/query. Exact runtime source commit07b5b5baf8ea8259a4336a0ed53e9c489bdb2170; all4 source SHA256/header matches confirmed. Production source is unchanged from the previous verified run.
+- Draft #27 remains the only feature PR; CI for07b5b5b is green: https://github.com/gorlim590/lampa/actions/runs/39938901975 .99 unit checks unchanged. Final cleanup/evidence update follows on this same branch; no main merge or other Issue work.

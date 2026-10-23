@@ -1,0 +1,738 @@
+✖ account A to B watched to unwatched invalidates both true and false (56.76263ms)
+✖ account A to B unwatched to watched invalidates both true and false (5.775016ms)
+✖ restart under B cannot hydrate A evidence; matching owner may restore only after verification (6.306512ms)
+✖ ownerless v6 cache remains unknown and is preserved until a verified replacement (3.890164ms)
+✖ logout/login clears in-memory authority without deleting local data (6.891595ms)
+✖ same-user token rotation verifies identity and restores same-owner evidence without reimport (5.07209ms)
+✖ account switch during background rejects stale response without committing (7.987218ms)
+✖ account switch during manual rejects stale response without committing (4.404033ms)
+✖ new account sync need not wait for hung old session and old completion cannot unlock new sync (3.514984ms)
+✖ identity response from an expired session cannot hydrate its cache (5.389842ms)
+✔ lazy show-progress from previous owner never marks, persists or emits into new account (5.583871ms)
+✖ manual rejects empty containers activity snapshot without writes (3.906764ms)
+✖ background rejects empty containers activity snapshot without writes (2.824963ms)
+✖ manual rejects missing all activity snapshot without writes (3.800305ms)
+✖ background rejects missing all activity snapshot without writes (2.789676ms)
+✖ manual rejects null watched activity snapshot without writes (3.436379ms)
+✖ background rejects null watched activity snapshot without writes (3.034635ms)
+✖ manual rejects numeric timestamp activity snapshot without writes (4.615591ms)
+✖ background rejects numeric timestamp activity snapshot without writes (5.456833ms)
+✖ manual rejects empty timestamp activity snapshot without writes (4.472011ms)
+✖ background rejects empty timestamp activity snapshot without writes (3.235554ms)
+✖ manual rejects garbage date activity snapshot without writes (3.029196ms)
+✖ background rejects garbage date activity snapshot without writes (2.517555ms)
+✖ manual rejects date-only activity snapshot without writes (2.991701ms)
+✖ background rejects date-only activity snapshot without writes (3.146143ms)
+✖ manual rejects invalid calendar date activity snapshot without writes (2.899989ms)
+✖ background rejects invalid calendar date activity snapshot without writes (3.474648ms)
+✖ manual rejects array container activity snapshot without writes (3.537936ms)
+✖ background rejects array container activity snapshot without writes (7.417512ms)
+✖ manual rejects invalid optional paused activity snapshot without writes (4.729257ms)
+✖ background rejects invalid optional paused activity snapshot without writes (3.107331ms)
+✔ manual validates final invalid snapshot and preserves prior trusted state (3.769262ms)
+✔ manual validates final changed snapshot and preserves prior trusted state (4.402922ms)
+✔ background validates final invalid snapshot and preserves prior trusted state (3.994456ms)
+✔ background validates final changed snapshot and preserves prior trusted state (3.921486ms)
+✔ valid empty-account timestamps and empty lists are complete, without invented watched data (3.658818ms)
+✖ unverified identity fails closed null (5.132128ms)
+✖ unverified identity fails closed {} (3.329612ms)
+✖ unverified identity fails closed {"user":{"ids":{}}} (3.60582ms)
+✖ unverified identity fails closed {"user":{"ids":{"uuid":4}}} (3.451093ms)
+✔ unavailable identity API retains cache and local records without asserting status (3.792762ms)
+ℹ tests 41
+ℹ suites 0
+ℹ pass 7
+ℹ fail 34
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 465.249897
+
+✖ failing tests:
+
+test at tests/trakt-account-isolation.cjs:17:105
+✖ account A to B watched to unwatched invalidates both true and false (56.76263ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== null
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:20:9)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: null,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:17:105
+✖ account A to B unwatched to watched invalidates both true and false (5.775016ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  false !== null
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:20:9)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: null,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:24:1
+✖ restart under B cannot hydrate A evidence; matching owner may restore only after verification (6.306512ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== null
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:26:97)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: null,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:29:1
+✖ ownerless v6 cache remains unknown and is preserved until a verified replacement (3.890164ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== null
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:31:81)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: null,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:33:1
+✖ logout/login clears in-memory authority without deleting local data (6.891595ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== null
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:35:62)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: null,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:37:1
+✖ same-user token rotation verifies identity and restores same-owner evidence without reimport (5.07209ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== null
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:39:60)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: null,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:42:43
+✖ account switch during background rejects stale response without committing (7.987218ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  ... Skipped lines
+  
+    {
+      trakt_plus_last_sync: 123,
+      trakt_plus_library: [
+        {
+          i: 99,
+  ...
+      ],
+  +   trakt_plus_watched_cache: {
+  +     m: [
+  +       '1'
+  +     ],
+  +     s: [],
+  +     shows: {},
+  +     stamp: '2026-01-01T00:00:00.000Z||2026-01-01T00:00:00.000Z||2026-01-01T00:00:00.000Z',
+  +     status: {
+  +       ids: [
+  +         '1'
+  +       ],
+  +       missingMovies: 0,
+  +       missingShows: 0,
+  +       movies: true,
+  +       phase: 'ready',
+  +       shows: true,
+  +       t: 1792749258245
+  +     },
+  +     t: 1792749258245,
+  +     v: 6
+  +   }
+    }
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:48:9)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { trakt_plus_synced: [ 'movie:99' ], trakt_plus_library: [ [Object] ], trakt_plus_last_sync: 123, trakt_plus_watched_cache: { v: 6, t: 1792749258245, stamp: '2026-01-01T00:00:00.000Z||2026-01-01T00:00:00.000Z||2026-01-01T00:00:00.000Z', m: [Array], s: [], shows: {}, status: [Object] } },
+    expected: { trakt_plus_synced: [ 'movie:99' ], trakt_plus_library: [ [Object] ], trakt_plus_last_sync: 123 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:42:43
+✖ account switch during manual rejects stale response without committing (4.404033ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    {
+  +   trakt_plus_last_sync: 1792749258251,
+  -   trakt_plus_last_sync: 123,
+      trakt_plus_library: [
+        {
+  +       i: 1,
+  +       p: '',
+  +       t: 'Fixture 1',
+  +       w: '2026-01-01',
+  +       y: 2020
+  +     },
+  +     {
+          i: 99,
+          p: '',
+          t: 'Earlier',
+          w: '2025-01-01'
+        }
+      ],
+  +   trakt_plus_library_t: 1792749258251,
+      trakt_plus_synced: [
+        'movie:99',
+  +     'movie:1'
+      ],
+  +   trakt_plus_watched_cache: {
+  +     m: [
+  +       '1'
+  +     ],
+  +     s: [],
+  +     shows: {},
+  +     stamp: '2026-01-01T00:00:00.000Z||2026-01-01T00:00:00.000Z||2026-01-01T00:00:00.000Z',
+  +     status: {
+  +       ids: [
+  +         '1'
+  +       ],
+  +       missingMovies: 0,
+  +       missingShows: 0,
+  +       movies: true,
+  +       phase: 'ready',
+  +       shows: true,
+  +       t: 1792749258251
+  +     },
+  +     t: 1792749258251,
+  +     v: 6
+  +   }
+    }
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:48:9)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { trakt_plus_synced: [ 'movie:99', 'movie:1' ], trakt_plus_library: [ [Object], [Object] ], trakt_plus_last_sync: 1792749258251, trakt_plus_library_t: 1792749258251, trakt_plus_watched_cache: { v: 6, t: 1792749258251, stamp: '2026-01-01T00:00:00.000Z||2026-01-01T00:00:00.000Z||2026-01-01T00:00:00.000Z', m: [Array], s: [], shows: {}, status: [Object] } },
+    expected: { trakt_plus_synced: [ 'movie:99' ], trakt_plus_library: [ [Object] ], trakt_plus_last_sync: 123 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:51:1
+✖ new account sync need not wait for hung old session and old completion cannot unlock new sync (3.514984ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  'busy' !== 'complete'
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:55:43)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'busy',
+    expected: 'complete',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:58:1
+✖ identity response from an expired session cannot hydrate its cache (5.389842ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + undefined
+  - 'uuid:fixture-b'
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:61:262)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: 'uuid:fixture-b',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:70:76
+✖ manual rejects empty containers activity snapshot without writes (3.906764ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'complete'
+  - 'failed'
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:72:28)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'complete',
+    expected: 'failed',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:70:76
+✖ background rejects empty containers activity snapshot without writes (2.824963ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:72:91)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:70:76
+✖ manual rejects missing all activity snapshot without writes (3.800305ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'complete'
+  - 'failed'
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:72:28)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'complete',
+    expected: 'failed',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:70:76
+✖ background rejects missing all activity snapshot without writes (2.789676ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:72:91)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:70:76
+✖ manual rejects null watched activity snapshot without writes (3.436379ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'complete'
+  - 'failed'
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:72:28)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'complete',
+    expected: 'failed',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:70:76
+✖ background rejects null watched activity snapshot without writes (3.034635ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:72:91)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:70:76
+✖ manual rejects numeric timestamp activity snapshot without writes (4.615591ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'complete'
+  - 'failed'
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:72:28)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'complete',
+    expected: 'failed',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:70:76
+✖ background rejects numeric timestamp activity snapshot without writes (5.456833ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:72:91)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:70:76
+✖ manual rejects empty timestamp activity snapshot without writes (4.472011ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'complete'
+  - 'failed'
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:72:28)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'complete',
+    expected: 'failed',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:70:76
+✖ background rejects empty timestamp activity snapshot without writes (3.235554ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:72:91)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:70:76
+✖ manual rejects garbage date activity snapshot without writes (3.029196ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'complete'
+  - 'failed'
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:72:28)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'complete',
+    expected: 'failed',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:70:76
+✖ background rejects garbage date activity snapshot without writes (2.517555ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:72:91)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:70:76
+✖ manual rejects date-only activity snapshot without writes (2.991701ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'complete'
+  - 'failed'
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:72:28)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'complete',
+    expected: 'failed',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:70:76
+✖ background rejects date-only activity snapshot without writes (3.146143ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:72:91)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:70:76
+✖ manual rejects invalid calendar date activity snapshot without writes (2.899989ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'complete'
+  - 'failed'
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:72:28)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'complete',
+    expected: 'failed',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:70:76
+✖ background rejects invalid calendar date activity snapshot without writes (3.474648ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:72:91)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:70:76
+✖ manual rejects array container activity snapshot without writes (3.537936ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'complete'
+  - 'failed'
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:72:28)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'complete',
+    expected: 'failed',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:70:76
+✖ background rejects array container activity snapshot without writes (7.417512ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:72:91)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:70:76
+✖ manual rejects invalid optional paused activity snapshot without writes (4.729257ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'complete'
+  - 'failed'
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:72:28)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'complete',
+    expected: 'failed',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:70:76
+✖ background rejects invalid optional paused activity snapshot without writes (3.107331ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:72:91)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:85:73
+✖ unverified identity fails closed null (5.132128ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'complete'
+  - 'failed'
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:87:9)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'complete',
+    expected: 'failed',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:85:73
+✖ unverified identity fails closed {} (3.329612ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'complete'
+  - 'failed'
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:87:9)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'complete',
+    expected: 'failed',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:85:73
+✖ unverified identity fails closed {"user":{"ids":{}}} (3.60582ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'complete'
+  - 'failed'
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:87:9)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'complete',
+    expected: 'failed',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/trakt-account-isolation.cjs:85:73
+✖ unverified identity fails closed {"user":{"ids":{"uuid":4}}} (3.451093ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'complete'
+  - 'failed'
+  
+      at TestContext.<anonymous> (/home/gostrimchik/lampa-testing/audit/issue-7-account-isolation/tests/trakt-account-isolation.cjs:87:9)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'complete',
+    expected: 'failed',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,11 @@
+{
+  "run": 39938901975,
+  "node": 20,
+  "conclusion": "success",
+  "tests": 99,
+  "pass": 99,
+  "fail": 0,
+  "tested_ci_head": "07b5b5baf8ea8259a4336a0ed53e9c489bdb2170",
+  "runtime_source_commit": "07b5b5baf8ea8259a4336a0ed53e9c489bdb2170",
+  "url": "https://github.com/gorlim590/lampa/actions/runs/39938901975"
+}

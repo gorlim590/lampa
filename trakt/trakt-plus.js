@@ -25,7 +25,7 @@
   var WATCH_RECHECK_SEC = 90;
   var DEFAULT_EXCLUDE = 'reality,talk-show,news,game-show,soap,sporting-event,special-interest';
   var MARK_TYPES = ['look', 'viewed', 'scheduled', 'continued', 'thrown'];
-  var CACHE_VER = 6;      // v6: authoritative tri-state status is separate from additive import history
+  var CACHE_VER = 7;      // v7: verified account owner; credentials are never persisted as identity
   var TOP_INDEX = 0;      // з якої позиції починаються рядки Trakt на головній (0 = самий верх)
   var QUEUE_MAX = 3;      // скільки запитів до Trakt одночасно (щоб не ловити 429)
   var FULL_FIRST = 600;   // перший екран «Ще»: великий список без збільшення рядів головної
@@ -73,11 +73,97 @@
   var ROWS = {};
   var syncing = false;
   var rowCalled = false;
+  var credentialSeen, sessionEpoch = 0, accountOwner = null, identityPromise = null, identityRetryAt = 0;
+  var sessionJobs = [], activeSync = null, accountTimer = null;
 
   // ───────────── ХЕЛПЕРИ ─────────────
   function lang() { return String(Lampa.Storage.get('language', 'en')); }
   function tr(uk, en) { return lang() === 'uk' ? uk : en; }
   function token() { return Lampa.Storage.get('trakt_token'); }
+  // Compare credentials only as an in-memory invalidation signal, never as an
+  // account ID/cache key. A rotated token must reverify the same authenticated owner.
+  function observeSession() {
+    var credential = token() || null;
+    if (credential === credentialSeen) return;
+    credentialSeen = credential; sessionEpoch++; readEpoch++;
+    var jobs = sessionJobs; sessionJobs = [];
+    accountOwner = null; identityPromise = null; identityRetryAt = 0;
+    hydrated = false; watchedPromise = null; lastCheck = 0; watchedStamp = '';
+    watchedMovies = {}; watchedShows = {}; showStates = {}; showSources = {};
+    verifiedMovies = {}; movieStatusReady = showStatusReady = false;
+    statusAt = 0; statusPhase = credential ? 'idle' : 'unavailable';
+    unmappedMovies = unmappedShows = 0; lastSyncResult = null;
+    progressQueue = []; progressPending = {}; progressActive = 0;
+    clearTimeout(progressNotifyTimer); progressNotifyTimer = null;
+    if (activeSync && activeSync.manual && Lampa.Loading) Lampa.Loading.stop();
+    activeSync = null; syncing = false; watchedVer++;
+    jobs.forEach(function (cancel) { cancel.listeners.slice().forEach(function (abort) { abort(); }); });
+    clearRowCaches();
+  }
+
+  function sessionCancel(epoch, operation, stopped) {
+    var cancel = function () {
+      observeSession();
+      return epoch !== sessionEpoch || (operation !== null && operation !== readEpoch) || !!(stopped && stopped());
+    };
+    cancel.listeners = []; sessionJobs.push(cancel); return cancel;
+  }
+  function releaseSession(cancel) {
+    var i = sessionJobs.indexOf(cancel); if (i >= 0) sessionJobs.splice(i, 1);
+  }
+  function waitForSession(promise, cancel) {
+    return new Promise(function (resolve, reject) {
+      var settled = false;
+      function finish(error, value) {
+        if (settled) return; settled = true;
+        var i = cancel.listeners.indexOf(abort); if (i >= 0) cancel.listeners.splice(i, 1);
+        if (error) reject(error); else resolve(value);
+      }
+      function abort() { finish(cancelledError()); }
+      cancel.listeners.push(abort);
+      try { checkCancelled(cancel); } catch (e) { finish(e); }
+      promise.then(function (value) { finish(null, value); }, function (error) { finish(error); });
+    });
+  }
+  function verifiedOwner(data) {
+    var user = data && (data.user || data);
+    var ids = user && user.ids;
+    if (!ids || typeof ids !== 'object' || Array.isArray(ids)) throw new Error('Missing authenticated Trakt identity');
+    if (typeof ids.uuid === 'string' && /^[a-zA-Z0-9-]{1,128}$/.test(ids.uuid)) return 'uuid:' + ids.uuid;
+    // Older Trakt profiles expose only the authenticated slug. A rename safely
+    // invalidates that fallback cache instead of guessing that two owners match.
+    if (typeof ids.slug === 'string' && /^[a-z0-9_-]{1,128}$/i.test(ids.slug)) return 'slug:' + ids.slug.toLowerCase();
+    throw new Error('Missing authenticated Trakt identity');
+  }
+  function ensureAccount(force) {
+    observeSession();
+    if (!credentialSeen) return Promise.reject(new Error('Trakt unavailable'));
+    if (accountOwner) return Promise.resolve(accountOwner);
+    if (identityPromise) return identityPromise;
+    if (!force && Date.now() < identityRetryAt) return Promise.reject(new Error('Trakt identity unavailable'));
+    var epoch = sessionEpoch, cancel = sessionCancel(epoch, null);
+    statusPhase = 'loading';
+    var pending = whenApi().then(function () {
+      checkCancelled(cancel); return getRetry('/users/me', 0, cancel);
+    }).then(function (data) {
+      checkCancelled(cancel); accountOwner = verifiedOwner(data);
+      hydrateWatched(); return accountOwner;
+    });
+    identityPromise = pending.then(function (owner) {
+      releaseSession(cancel); if (epoch === sessionEpoch) identityPromise = null; return owner;
+    }, function (error) {
+      releaseSession(cancel);
+      if (epoch === sessionEpoch) { identityPromise = null; accountOwner = null; statusPhase = 'error'; identityRetryAt = Date.now() + 30000; }
+      throw error;
+    });
+    return identityPromise;
+  }
+
+  function onAccountStorage(event) {
+    if (!event || (event.name !== 'trakt_token' && event.key !== 'trakt_token')) return;
+    observeSession(); clearTimeout(accountTimer);
+    accountTimer = setTimeout(function () { accountTimer = null; loadWatched(true).then(function () { decorateAll(); }); }, 150);
+  }
   function notify(text) { try { Lampa.Bell.push({ text: text }); } catch (e) {} }
   function field(name, def) {
     var v = Lampa.Storage.field(name);
@@ -334,19 +420,25 @@
     while (progressActive < 2 && progressQueue.length) {
       (function (job) {
         progressActive++;
-        getRetry(progressPath(job.item)).then(function (data) {
+        getRetry(progressPath(job.item), 0, job.cancel).then(function (data) {
+          checkCancelled(job.cancel);
           var evidence = progressEvidence(data);
           if (showSources[job.id] !== job.item) return;
           evidence.sig = job.sig; evidence.trakt = job.item.show.ids.trakt; showStates[job.id] = evidence;
           watchedShows = completedShows(); watchedVer++;
           clearTimeout(progressNotifyTimer);
           progressNotifyTimer = setTimeout(function () {
+            if (job.cancel()) return;
             try { persistWatched(); } catch (e) {}
             clearRowCaches(); emitWatched(); decorateAll();
           }, 100);
         }).catch(function () {
-          if (showSources[job.id] === job.item && showStates[job.id]) { showStates[job.id].retryAfter = Date.now() + 300000; showStates[job.id].error = true; }
-        }).then(function () { delete progressPending[job.id]; progressActive--; pumpProgress(); });
+          if (!job.cancel() && showSources[job.id] === job.item && showStates[job.id]) { showStates[job.id].retryAfter = Date.now() + 300000; showStates[job.id].error = true; }
+        }).then(function () {
+          releaseSession(job.cancel);
+          if (job.epoch !== sessionEpoch) return;
+          delete progressPending[job.id]; progressActive--; pumpProgress();
+        });
       })(progressQueue.shift());
     }
   }
@@ -356,7 +448,7 @@
     if (item && r && !r.known && !(r.retryAfter > Date.now()) && !progressPending[id] && progressQueue.length < 128) {
       try {
         progressPath(item);
-        progressPending[id] = true; progressQueue.push({ id: id, item: item, sig: r.sig }); pumpProgress();
+        progressPending[id] = true; progressQueue.push({ id: id, item: item, sig: r.sig, epoch: sessionEpoch, cancel: sessionCancel(sessionEpoch, readEpoch) }); pumpProgress();
       } catch (e) {}
     }
     return !!(r && r.complete && freshStatus(r.t));
@@ -368,6 +460,8 @@
   }
 
   function readWatchStatus(card) {
+    observeSession();
+    if (!accountOwner) { if (credentialSeen) ensureAccount().catch(function () {}); return null; }
     hydrateWatched();
     var id = tmdbId(card);
     if (!id || !card || !token() || statusPhase !== 'ready' || !freshStatus(statusAt)) return null;
@@ -410,8 +504,10 @@
   }
 
   function persistWatched() {
+    observeSession();
+    if (!accountOwner) throw cancelledError();
     Lampa.Storage.set('trakt_plus_watched_cache', {
-      v: CACHE_VER, t: Date.now(), stamp: watchedStamp, m: Object.keys(watchedMovies),
+      v: CACHE_VER, owner: accountOwner, t: Date.now(), stamp: watchedStamp, m: Object.keys(watchedMovies),
       s: Object.keys(completedShows()), shows: showStates,
       status: { t: statusAt, phase: statusPhase, movies: movieStatusReady, shows: showStatusReady,
         ids: Object.keys(verifiedMovies), missingMovies: unmappedMovies, missingShows: unmappedShows }
@@ -419,10 +515,10 @@
   }
 
   function hydrateWatched() {
-    if (hydrated) return;
+    if (hydrated || !accountOwner) return;
     hydrated = true;
     var c = Lampa.Storage.get('trakt_plus_watched_cache');
-    if (c && c.t) {
+    if (c && c.t && c.v === CACHE_VER && c.owner === accountOwner) {
       watchedMovies = arrToSet(c.m);
       // v4 s[] meant started shows: it is never valid completion evidence.
       showStates = c.v === CACHE_VER && c.shows && typeof c.shows === 'object' ? c.shows : {};
@@ -442,10 +538,31 @@
     }
   }
 
+  function validActivityTime(value) {
+    if (typeof value !== 'string') return false;
+    var match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d{1,9})?Z$/.exec(value);
+    if (!match || !isFinite(Date.parse(value))) return false;
+    var date = new Date(Date.parse(value));
+    return date.getUTCFullYear() === Number(match[1]) && date.getUTCMonth() + 1 === Number(match[2]) &&
+      date.getUTCDate() === Number(match[3]) && date.getUTCHours() === Number(match[4]) &&
+      date.getUTCMinutes() === Number(match[5]) && date.getUTCSeconds() === Number(match[6]);
+  }
   function activityStamp(a) {
-    if (!a || !a.movies || !a.episodes) return null;
-    return [a.movies.watched_at, a.movies.paused_at, a.episodes.watched_at,
-      a.episodes.paused_at, a.all].map(function (v) { return String(v || ''); }).join('|');
+    if (!a || typeof a !== 'object' || !a.movies || !a.episodes ||
+      typeof a.movies !== 'object' || typeof a.episodes !== 'object' ||
+      Array.isArray(a.movies) || Array.isArray(a.episodes)) return null;
+    var values = [a.movies.watched_at, a.episodes.watched_at, a.all];
+    if (!values.every(validActivityTime)) return null;
+    // Paused timestamps are not required for watched completeness. If supplied,
+    // validate them too; absence is encoded explicitly, never as an empty date.
+    for (var i = 0; i < 2; i++) {
+      var group = i ? a.episodes : a.movies;
+      if (Object.prototype.hasOwnProperty.call(group, 'paused_at')) {
+        if (!validActivityTime(group.paused_at)) return null;
+        values.push(group.paused_at);
+      } else values.push(null);
+    }
+    return JSON.stringify(values);
   }
 
   function cancelledError() { var e = new Error('Watched sync cancelled'); e.cancelled = true; return e; }
@@ -474,7 +591,12 @@
       function abort() { finish(cancelledError()); }
       if (cancel && cancel.listeners) cancel.listeners.push(abort);
       timer = setTimeout(function () { finish(new Error('Watched request timeout')); }, 20000);
-      Promise.resolve().then(function () { checkCancelled(cancel); return api.get(path); }).then(function (v) {
+      Promise.resolve().then(function () {
+        checkCancelled(cancel);
+        // Watched/identity validation must not reuse cached show progress or an
+        // in-flight request from a different credential generation in TraktTV.
+        return api.get(path, false, { cache: false, forceFresh: true, dedup: false });
+      }).then(function (v) {
         try { checkCancelled(cancel); finish(null, v); } catch (e) { finish(e); }
       }, function (e) { finish(e || new Error('Watched request failed')); });
     }).catch(function (e) {
@@ -514,10 +636,20 @@
   }
 
   function refreshWatched(force) {
+    observeSession();
     if (syncing) return Promise.resolve(false);
+    var session = sessionEpoch;
+    return ensureAccount(force).then(function () {
+      observeSession(); if (session !== sessionEpoch) throw cancelledError();
+      if (syncing) return false;
+      return refreshVerifiedWatched(force);
+    });
+  }
+
+  function refreshVerifiedWatched(force) {
     var epoch = ++readEpoch, cached = Lampa.Storage.get('trakt_plus_watched_cache') || {};
-    var cancel = function () { return epoch !== readEpoch; };
-    var tooOld = !cached.t || cached.v !== CACHE_VER || !cached.status || (cached.status.phase && cached.status.phase !== 'ready') || !freshStatus(cached.status.t);
+    var cancel = sessionCancel(sessionEpoch, epoch);
+    var tooOld = cached.owner !== accountOwner || !cached.t || cached.v !== CACHE_VER || !cached.status || (cached.status.phase && cached.status.phase !== 'ready') || !freshStatus(cached.status.t);
     statusPhase = 'loading';
     return getRetry('/sync/last_activities', 0, cancel).then(function (a) {
       var stamp = activityStamp(a);
@@ -541,16 +673,22 @@
     }).catch(function (e) {
       if (epoch === readEpoch) statusPhase = e && e.cancelled ? 'cancelled' : 'error';
       throw e;
+    }).then(function (value) { releaseSession(cancel); return value; }, function (error) {
+      releaseSession(cancel); throw error;
     });
   }
 
   function loadWatched(force) {
-    hydrateWatched();
+    observeSession();
     if (!token()) { statusPhase = 'unavailable'; return Promise.resolve(false); }
+    var session = sessionEpoch;
     var now = Date.now();
     if (!force && watchedPromise && (now - lastCheck) < WATCH_RECHECK_SEC * 1000) return watchedPromise;
     lastCheck = now;
-    watchedPromise = whenApi().then(function () { return refreshWatched(force); }).catch(function () { return false; });
+    watchedPromise = whenApi().then(function () {
+      observeSession(); if (session !== sessionEpoch) throw cancelledError();
+      return refreshWatched(force);
+    }).catch(function () { return false; });
     return watchedPromise;
   }
 
@@ -1433,17 +1571,20 @@
   }
 
   function syncWatched(manual) {
+    observeSession();
     if (syncing) return Promise.resolve({ status: 'busy' });
     if (!token() || !Lampa.Favorite) { statusPhase = 'unavailable'; return Promise.resolve({ status: 'unavailable' }); }
-    hydrateWatched();
     syncing = true; statusPhase = 'loading';
+    var session = sessionEpoch, ticket = { manual: !!manual }; activeSync = ticket;
     var epoch = ++readEpoch, stopped = false, result = { status: 'loading', added: 0, skipped: 0, removed: 0 };
     var mine = syncedSet(Lampa.Storage.get('trakt_plus_synced') || []), changed = false;
-    var cancel = function () { return stopped || epoch !== readEpoch; };
-    cancel.listeners = [];
+    var cancel = sessionCancel(session, epoch, function () { return stopped; });
     if (manual && Lampa.Loading) Lampa.Loading.start(function () { stopped = true; cancel.listeners.slice().forEach(function (abort) { abort(); }); }, tr('Завантаження переглянутого з Trakt…', 'Loading watched from Trakt…'));
     var beforeStamp;
     return whenApi().then(function () {
+      checkCancelled(cancel); return waitForSession(ensureAccount(true), cancel);
+    }).then(function () {
+      checkCancelled(cancel); statusPhase = 'loading';
       return getRetry('/sync/last_activities', 0, cancel);
     }).then(function (a) {
       beforeStamp = activityStamp(a);
@@ -1480,7 +1621,10 @@
               if (!libCount && (data.list.length || (Lampa.Storage.get('trakt_plus_library') || []).length)) throw new Error('Could not save watched library');
               acceptWatched(data.list, shows, beforeStamp, data.unmapped);
               persistWatched();
-              if (!result.unknownShows) Lampa.Storage.set('trakt_plus_last_sync', Date.now());
+              if (!result.unknownShows) {
+                Lampa.Storage.set('trakt_plus_last_sync_owner', accountOwner);
+                Lampa.Storage.set('trakt_plus_last_sync', Date.now());
+              }
               result.status = result.unknownShows ? 'partial' : 'complete';
               emitWatched(); clearRowCaches(); decorateAll(); resolve(result);
             } catch (e) { reject(e); }
@@ -1492,10 +1636,12 @@
       result.status = (e && e.cancelled) || cancel() ? 'cancelled' : 'failed';
       // Preserve provenance for additions already committed before a user cancellation.
       // Never overwrite it with an empty/partial set or advance last_sync on failure.
-      if (changed) { try { Lampa.Storage.set('trakt_plus_synced', Object.keys(mine)); } catch (ignore) {} }
+      if (changed && session === sessionEpoch) { try { Lampa.Storage.set('trakt_plus_synced', Object.keys(mine)); } catch (ignore) {} }
       return result;
     }).then(function (r) {
-      syncing = false; lastSyncResult = r;
+      releaseSession(cancel);
+      if (activeSync !== ticket) return r;
+      activeSync = null; syncing = false; lastSyncResult = r;
       if (r.status !== 'complete' && r.status !== 'partial') statusPhase = r.status === 'cancelled' ? 'cancelled' : 'error';
       if (manual && Lampa.Loading) Lampa.Loading.stop();
       if (manual) notify(r.status === 'complete'
@@ -1509,7 +1655,8 @@
     setTimeout(function () {
       if (!cfg().enable || !cfg().autosync || !token()) return;
       var last = Number(Lampa.Storage.get('trakt_plus_last_sync') || 0);
-      if (Date.now() - last > AUTO_SYNC_HOURS * 3600000) syncWatched(false);
+      observeSession();
+      if (!accountOwner || Lampa.Storage.get('trakt_plus_last_sync_owner') !== accountOwner || Date.now() - last > AUTO_SYNC_HOURS * 3600000) syncWatched(false);
     }, 20000);
   }
 
@@ -1738,7 +1885,7 @@
   window.TraktPlus = window.TraktPlus || {};
   // Status is independent of UI mark/hide preferences and local Favorite/Timeline.
   // null = not known (loading/error/stale/insufficient completion evidence).
-  window.TraktPlus.version = '3.2.0-issue7';
+  window.TraktPlus.version = '3.2.1-issue7-account';
   window.TraktPlus.syncWatched = function () { return syncWatched(true); };
   window.TraktPlus.syncStatus = function () { return lastSyncResult; };
   window.TraktPlus.isWatched = watchStatus;
@@ -1754,6 +1901,11 @@
     }
     return { value: value, source: 'trakt', phase: phase, updatedAt: statusAt || null };
   };
+
+  // One auth subscription for this plugin lifetime (the module guard prevents
+  // duplicate registration). Reads and every async boundary also check sessions.
+  if (Lampa.Storage.listener && Lampa.Storage.listener.follow) Lampa.Storage.listener.follow('change', onAccountStorage);
+  if (window.addEventListener) window.addEventListener('storage', onAccountStorage);
 
   // Рядки реєструємо ОДРАЗУ (до готовності додатку), щоб головна їх одразу підхопила
   try { registerRows(); } catch (e) {}

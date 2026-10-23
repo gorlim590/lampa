@@ -1,0 +1,167 @@
+{
+  "commit": "07b5b5baf8ea8259a4336a0ed53e9c489bdb2170",
+  "kind": "Real current Lampa/CDP + exact modified source; Trakt responses/Favorite/owned cache are fixtures, never live-account verification",
+  "checks": [
+    {
+      "name": "Exact modified Trakt+ and unchanged baseline YDesign loaded by SHA256, not stale cache",
+      "status": "PASS",
+      "data": {
+        "/loader.js": {
+          "expected": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
+          "received": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
+          "commit": "07b5b5baf8ea8259a4336a0ed53e9c489bdb2170"
+        },
+        "/trakt/trakt.js": {
+          "expected": "30ceedddf1f2f5e443d4e95ab03d5f00a3cdd68f33dfe4b5e57a956627e52071",
+          "received": "30ceedddf1f2f5e443d4e95ab03d5f00a3cdd68f33dfe4b5e57a956627e52071",
+          "commit": "07b5b5baf8ea8259a4336a0ed53e9c489bdb2170"
+        },
+        "/trakt/trakt-plus.js": {
+          "expected": "13e84da46578c0c96c56947969f460362bd1a96d5d549402b40fadd2e6735aa6",
+          "received": "13e84da46578c0c96c56947969f460362bd1a96d5d549402b40fadd2e6735aa6",
+          "commit": "07b5b5baf8ea8259a4336a0ed53e9c489bdb2170"
+        },
+        "/ui/design-optimized.js": {
+          "expected": "d6e718d335b92e9d8d2dbc27e26343eb7cacd0f21cfd3286ede2a98a644f6422",
+          "received": "d6e718d335b92e9d8d2dbc27e26343eb7cacd0f21cfd3286ede2a98a644f6422",
+          "commit": "07b5b5baf8ea8259a4336a0ed53e9c489bdb2170"
+        }
+      }
+    },
+    {
+      "name": "Known partial TV/anime are false; confirmed watched movie is true",
+      "status": "PASS"
+    },
+    {
+      "name": "Browser import succeeds additively on complete transport with partial-series evidence",
+      "status": "PASS",
+      "data": {
+        "status": "complete",
+        "added": 1,
+        "skipped": 0,
+        "removed": 0,
+        "movies": 1,
+        "shows": 2,
+        "unmapped": 0,
+        "unknownShows": 0
+      }
+    },
+    {
+      "name": "Browser API error preserves prior records and reports unknown, not false",
+      "status": "PASS"
+    },
+    {
+      "name": "All aired episodes mark series/anime without losing previous imports",
+      "status": "PASS"
+    },
+    {
+      "name": "Repeated browser import does not duplicate Favorite additions",
+      "status": "PASS"
+    },
+    {
+      "name": "Real native cards are decorated by existing YDesign with no duplicate Trakt badge",
+      "status": "PASS"
+    },
+    {
+      "name": "Confirmed complete fixtures produce real YDesign watched dim/check marks",
+      "status": "PASS"
+    },
+    {
+      "name": "API reports known partial-series false independently of existing local rendered marks",
+      "status": "PASS"
+    },
+    {
+      "name": "Account change immediately returns null instead of A watched status",
+      "status": "PASS"
+    },
+    {
+      "name": "Account B empty watched response becomes false with its own owner cache",
+      "status": "PASS"
+    },
+    {
+      "name": "Same-user credential rotation is unknown until identity reverified",
+      "status": "PASS"
+    },
+    {
+      "name": "Same-owner cache restored after credential rotation",
+      "status": "PASS"
+    },
+    {
+      "name": "Malformed final activity snapshot preserves all prior fixture storage",
+      "status": "PASS"
+    },
+    {
+      "name": "Reexecuting plugin registers no duplicate rows or initialization",
+      "status": "PASS"
+    },
+    {
+      "name": "Remote-style Right keeps visible native card focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Remote-style OK opens native details",
+      "status": "PASS"
+    },
+    {
+      "name": "Remote-style Back returns to native fixture cards",
+      "status": "PASS"
+    },
+    {
+      "name": "Home Trakt ContentRows actually register once in native registry",
+      "status": "PASS"
+    },
+    {
+      "name": "No native Favorite removal during any browser scenario",
+      "status": "PASS"
+    },
+    {
+      "name": "Restart with saved owned cache remains unknown before account verification",
+      "status": "PASS"
+    },
+    {
+      "name": "Restart verifies B identity and restores B unwatched status",
+      "status": "PASS"
+    },
+    {
+      "name": "Real Favorite and owned caches/preferences unchanged after test",
+      "status": "PASS"
+    },
+    {
+      "name": "Cleanup restores a real original Activity with no fixture globals or route",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "blockedMutations": [],
+  "sources": {
+    "/loader.js": {
+      "expected": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
+      "received": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
+      "commit": "07b5b5baf8ea8259a4336a0ed53e9c489bdb2170"
+    },
+    "/trakt/trakt.js": {
+      "expected": "30ceedddf1f2f5e443d4e95ab03d5f00a3cdd68f33dfe4b5e57a956627e52071",
+      "received": "30ceedddf1f2f5e443d4e95ab03d5f00a3cdd68f33dfe4b5e57a956627e52071",
+      "commit": "07b5b5baf8ea8259a4336a0ed53e9c489bdb2170"
+    },
+    "/trakt/trakt-plus.js": {
+      "expected": "13e84da46578c0c96c56947969f460362bd1a96d5d549402b40fadd2e6735aa6",
+      "received": "13e84da46578c0c96c56947969f460362bd1a96d5d549402b40fadd2e6735aa6",
+      "commit": "07b5b5baf8ea8259a4336a0ed53e9c489bdb2170"
+    },
+    "/ui/design-optimized.js": {
+      "expected": "d6e718d335b92e9d8d2dbc27e26343eb7cacd0f21cfd3286ede2a98a644f6422",
+      "received": "d6e718d335b92e9d8d2dbc27e26343eb7cacd0f21cfd3286ede2a98a644f6422",
+      "commit": "07b5b5baf8ea8259a4336a0ed53e9c489bdb2170"
+    }
+  },
+  "blocked": [
+    "Real Trakt sync/account954-vs911 reconciliation",
+    "Physical Google TV/performance/player"
+  ],
+  "readOnlyTrakt": {
+    "status": "BLOCKED",
+    "reason": "Read-only live sampling skipped",
+    "note": "Prior read-only schema/count observations; not repeated for this source revision"
+  }
+}
