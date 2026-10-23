@@ -2530,7 +2530,8 @@
     },
     get: function get(url) {
       var unauthorized = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-      return requestApi('GET', url, {}, unauthorized);
+      var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+      return requestApi('GET', url, {}, unauthorized, 0, options);
     },
     // Normalize ids for watchlist/history operations.
     // Prefer params.ids when filled; fall back to tmdb_id/trakt_id when needed.

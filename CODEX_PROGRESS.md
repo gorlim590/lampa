@@ -332,3 +332,10 @@
 - Integration PR: https://github.com/gorlim590/lampa/pull/24 . User authorized merge after CI; its current PR state and checks are the source of truth for final publication status. Trakt fix PR #23 is already merged as c68cd3b0dceb6fb6a9b37d1b576ade2a88ca289a, with main CI/Pages successful.
 - Final focused checks:52 Trakt unit,16 existing-CDP browser,65 torrent offline and23 state checks PASS. Browser JavaScript errors=[]; no real Trakt writes or user preference changes. Syntax/link validation PASS (58 JS /436 URLs before this checkpoint); whitespace PASS. YDesign unchanged, API true/false/null preserved.
 - Published plugins remain reversible/opt-in as documented. Deferred live/TorrServer/physical TV work and the remaining roadmap are NOT complete; continue from audit/full-integration-20261023/CONTINUE.md. Issue #7 remains open; Issue #8 not started.
+
+## Issue #7 follow-up: account isolation and activity integrity
+- Based on current main a33f4b1, separate fix/issue-7-account-isolation; PR #23 implementation retained, not repeated. Only #7 and its native GET transport boundary are in scope; no YDesign/#8 changes.
+- Reproduced ownerless-cache and incomplete-activity bugs on mocks before implementation (34 failing cases in first41 new regressions; existing52 passed).
+- Implemented authenticated owner-bound cache v7, credential-generation guards/cancellation for background/manual/lazy progress, same-owner verified hydration after restart/rotation, owner-scoped auto-sync success metadata and strict initial/final activity timestamps. Local lists/history/progress/provenance are retained without deletion.
+- 98 unit/regression checks PASS at implementation checkpoint. Native GET optional options preserve old callers while integrity reads bypass native cache/in-flight dedup. Loader cache tag advanced; plugin order unchanged.
+- Details/contract/limits: docs/issue-7-account-isolation.md. Browser checks and final exact SHA/results follow in the Draft PR and audit/issue-7-account. No merge authorized for this follow-up; Issue #7 must remain open. No other Issue begins automatically.
