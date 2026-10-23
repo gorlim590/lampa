@@ -56,7 +56,7 @@
         var expectedSeason = coordinate(context.season), expectedEpisode = coordinate(context.episode);
         var explicit = raw.match(/\b(?:19|20)\d{2}\b/g) || [], titleNumbers = names.map(normalize).join(' ').split(' ');
         explicit = explicit.filter(function (y) { return titleNumbers.indexOf(y) < 0; });
-        var releaseYear = row.Year || row.year || explicit[0], effectiveSeason = expectedSeason === null ? rs : expectedSeason;
+        var releaseYear = explicit[0] || row.Year || row.year, effectiveSeason = expectedSeason === null ? rs : expectedSeason;
         if (releaseYear && year && (!tv || effectiveSeason === null || effectiveSeason <= 1) && text(releaseYear) !== year) reasons.push('Інший рік');
         if (!tv && (rs !== null || re !== null)) reasons.push('Серіальний реліз');
         var type = text(row.media_type || row.MediaType || row.Type).toLowerCase();
