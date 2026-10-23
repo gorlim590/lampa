@@ -10,13 +10,14 @@ const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
  const browser=await chromium.connectOverCDP('http://127.0.0.1:9222'),page=browser.contexts()[0].pages().find(p=>p.url().startsWith('https://siaivo.isroot.in/'));if(!page)throw Error('Existing Lampa tab not found');
  page.on('pageerror',e=>r.errors.push(e.message.replace(/https?:\/\/[^\s)]+/g,'[URL]')));
  const files={'/loader.js':fs.readFileSync(path.join(root,'loader.js'),'utf8'),'/trakt/trakt.js':fs.readFileSync(path.join(root,'trakt/trakt.js'),'utf8'),'/trakt/trakt-plus.js':fs.readFileSync(path.join(root,'trakt/trakt-plus.js'),'utf8'),'/ui/design-optimized.js':fs.readFileSync(path.join(root,'ui/design-optimized.js'),'utf8')};
- const responseJobs=[];page.on('response',response=>{const url=new URL(response.url()),key=Object.keys(files).find(k=>url.pathname.endsWith(k));if(key)responseJobs.push(response.body().then(b=>r.sources[key]={expected:hash(files[key]),received:hash(b),commit:response.headers()['x-codex-source-commit']}).catch(()=>{}));});
+ const sourceKey=url=>url.pathname.endsWith('/preview-loader.js')?'/loader.js':Object.keys(files).find(k=>url.pathname.endsWith(k));
+ let captureSources=true;const responseJobs=[];page.on('response',response=>{if(!captureSources)return;const url=new URL(response.url()),key=sourceKey(url);if(key)responseJobs.push(response.body().then(b=>r.sources[key]={expected:hash(files[key]),received:hash(b),commit:response.headers()['x-codex-source-commit']}).catch(()=>{}));});
  let livePhase=false,liveDone=true,fixtureSeed=null; // This suite never samples a real account.
  if(liveDone){try{r.readOnlyTrakt=JSON.parse(fs.readFileSync(path.join(out,'browser-report.json'),'utf8')).readOnlyTrakt;r.readOnlyTrakt.note='Prior read-only schema/count observations; not repeated for this source revision';}catch{r.readOnlyTrakt={status:'BLOCKED',reason:'Read-only live sampling skipped'}}}
  const route=async route=>{
   const req=route.request(),url=new URL(req.url());
   if(!['GET','HEAD','OPTIONS'].includes(req.method())){r.blockedMutations.push({method:req.method(),path:url.pathname});return route.abort();}
-  const key=Object.keys(files).find(k=>url.pathname.endsWith(k));
+  const key=sourceKey(url);
   if(key==='/trakt/trakt-plus.js'&&!liveDone){
    liveDone=true;livePhase=true;
    r.readOnlyTrakt=await page.evaluate(async()=>{
@@ -111,6 +112,7 @@ const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
   try{
    const preserved=await page.evaluate(()=>{const s=__issue7;Lampa.Storage.get=s.oldGet;Lampa.Storage.set=s.oldSet;Lampa.Storage.field=s.oldField;TraktTV.api.get=s.oldApiGet;Object.assign(Lampa.Favorite,s.oldFavorite);Lampa.ContentRows.add=s.oldRowsAdd;Lampa.Timeline.view=s.oldTimelineView;return Object.entries(s.original).every(([k,v])=>JSON.stringify(s.oldGet.call(Lampa.Storage,k,null))===v)});check('Real Favorite and owned caches/preferences unchanged after test',preserved);
   }catch(e){r.errors.push('Cleanup: '+e.message)}
+  await Promise.all(responseJobs);captureSources=false;
   await page.unroute('**/*',route);
   // Remove fixture route from restored Activity URL before ordinary reload.
   if(page.url().includes('issue7_fixture'))await page.evaluate(()=>{location.hash=''});
