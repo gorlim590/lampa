@@ -1,5 +1,5 @@
 {
-  "commit": "e70cd0828da4fd548049076dcb6565a573aee9a5",
+  "commit": "07b5b5baf8ea8259a4336a0ed53e9c489bdb2170",
   "kind": "Real current Lampa/CDP + exact modified source; Trakt responses/Favorite/owned cache are fixtures, never live-account verification",
   "checks": [
     {
@@ -9,22 +9,22 @@
         "/loader.js": {
           "expected": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
           "received": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
-          "commit": "e70cd0828da4fd548049076dcb6565a573aee9a5"
+          "commit": "07b5b5baf8ea8259a4336a0ed53e9c489bdb2170"
         },
         "/trakt/trakt.js": {
           "expected": "30ceedddf1f2f5e443d4e95ab03d5f00a3cdd68f33dfe4b5e57a956627e52071",
           "received": "30ceedddf1f2f5e443d4e95ab03d5f00a3cdd68f33dfe4b5e57a956627e52071",
-          "commit": "e70cd0828da4fd548049076dcb6565a573aee9a5"
+          "commit": "07b5b5baf8ea8259a4336a0ed53e9c489bdb2170"
         },
         "/trakt/trakt-plus.js": {
           "expected": "13e84da46578c0c96c56947969f460362bd1a96d5d549402b40fadd2e6735aa6",
           "received": "13e84da46578c0c96c56947969f460362bd1a96d5d549402b40fadd2e6735aa6",
-          "commit": "e70cd0828da4fd548049076dcb6565a573aee9a5"
+          "commit": "07b5b5baf8ea8259a4336a0ed53e9c489bdb2170"
         },
         "/ui/design-optimized.js": {
           "expected": "d6e718d335b92e9d8d2dbc27e26343eb7cacd0f21cfd3286ede2a98a644f6422",
           "received": "d6e718d335b92e9d8d2dbc27e26343eb7cacd0f21cfd3286ede2a98a644f6422",
-          "commit": "e70cd0828da4fd548049076dcb6565a573aee9a5"
+          "commit": "07b5b5baf8ea8259a4336a0ed53e9c489bdb2170"
         }
       }
     },
@@ -125,6 +125,10 @@
     {
       "name": "Real Favorite and owned caches/preferences unchanged after test",
       "status": "PASS"
+    },
+    {
+      "name": "Cleanup restores a real original Activity with no fixture globals or route",
+      "status": "PASS"
     }
   ],
   "errors": [],
@@ -133,22 +137,22 @@
     "/loader.js": {
       "expected": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
       "received": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
-      "commit": "e70cd0828da4fd548049076dcb6565a573aee9a5"
+      "commit": "07b5b5baf8ea8259a4336a0ed53e9c489bdb2170"
     },
     "/trakt/trakt.js": {
       "expected": "30ceedddf1f2f5e443d4e95ab03d5f00a3cdd68f33dfe4b5e57a956627e52071",
       "received": "30ceedddf1f2f5e443d4e95ab03d5f00a3cdd68f33dfe4b5e57a956627e52071",
-      "commit": "e70cd0828da4fd548049076dcb6565a573aee9a5"
+      "commit": "07b5b5baf8ea8259a4336a0ed53e9c489bdb2170"
     },
     "/trakt/trakt-plus.js": {
       "expected": "13e84da46578c0c96c56947969f460362bd1a96d5d549402b40fadd2e6735aa6",
       "received": "13e84da46578c0c96c56947969f460362bd1a96d5d549402b40fadd2e6735aa6",
-      "commit": "e70cd0828da4fd548049076dcb6565a573aee9a5"
+      "commit": "07b5b5baf8ea8259a4336a0ed53e9c489bdb2170"
     },
     "/ui/design-optimized.js": {
       "expected": "d6e718d335b92e9d8d2dbc27e26343eb7cacd0f21cfd3286ede2a98a644f6422",
       "received": "d6e718d335b92e9d8d2dbc27e26343eb7cacd0f21cfd3286ede2a98a644f6422",
-      "commit": "e70cd0828da4fd548049076dcb6565a573aee9a5"
+      "commit": "07b5b5baf8ea8259a4336a0ed53e9c489bdb2170"
     }
   },
   "blocked": [

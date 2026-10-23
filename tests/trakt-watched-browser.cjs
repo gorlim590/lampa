@@ -9,6 +9,8 @@ const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
  const r={commit,kind:'Real current Lampa/CDP + exact modified source; Trakt responses/Favorite/owned cache are fixtures, never live-account verification',checks:[],errors:[],blockedMutations:[],sources:{},blocked:['Real Trakt sync/account954-vs911 reconciliation','Physical Google TV/performance/player']},check=(name,ok,data)=>r.checks.push({name,status:ok?'PASS':'FAIL',...(data===undefined?{}:{data})});
  const browser=await chromium.connectOverCDP('http://127.0.0.1:9222'),page=browser.contexts()[0].pages().find(p=>p.url().startsWith('https://siaivo.isroot.in/'));if(!page)throw Error('Existing Lampa tab not found');
  page.on('pageerror',e=>r.errors.push(e.message.replace(/https?:\/\/[^\s)]+/g,'[URL]')));
+ const originalUrl=page.url();
+ const restoreUrl=originalUrl.includes('issue7_fixture')?'https://siaivo.isroot.in/?component=main&source=tmdb&page=1':originalUrl;
  const files={'/loader.js':fs.readFileSync(path.join(root,'loader.js'),'utf8'),'/trakt/trakt.js':fs.readFileSync(path.join(root,'trakt/trakt.js'),'utf8'),'/trakt/trakt-plus.js':fs.readFileSync(path.join(root,'trakt/trakt-plus.js'),'utf8'),'/ui/design-optimized.js':fs.readFileSync(path.join(root,'ui/design-optimized.js'),'utf8')};
  const sourceKey=url=>url.pathname.endsWith('/preview-loader.js')?'/loader.js':Object.keys(files).find(k=>url.pathname.endsWith(k));
  let captureSources=true;const responseJobs=[];page.on('response',response=>{if(!captureSources)return;const url=new URL(response.url()),key=sourceKey(url);if(key)responseJobs.push(response.body().then(b=>r.sources[key]={expected:hash(files[key]),received:hash(b),commit:response.headers()['x-codex-source-commit']}).catch(()=>{}));});
@@ -114,9 +116,10 @@ const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
   }catch(e){r.errors.push('Cleanup: '+e.message)}
   await Promise.all(responseJobs);captureSources=false;
   await page.unroute('**/*',route);
-  // Remove fixture route from restored Activity URL before ordinary reload.
-  if(page.url().includes('issue7_fixture'))await page.evaluate(()=>{location.hash=''});
-  await page.reload({waitUntil:'domcontentloaded'});if(originalViewport)await page.setViewportSize(originalViewport);
+  // Restore the original real route, not only its hash: v3 keeps component in query.
+  await page.goto(restoreUrl,{waitUntil:'domcontentloaded'});if(originalViewport)await page.setViewportSize(originalViewport);
+  await page.waitForFunction(()=>window.Lampa?.Activity.active()?.activity&&Lampa.Activity.active()?.component!=='issue7_fixture'&&!window.__issue7,null,{timeout:50000});
+  check('Cleanup restores a real original Activity with no fixture globals or route',!page.url().includes('issue7_fixture')&&await page.evaluate(()=>!window.__issue7&&Lampa.Activity.active()?.component!=='issue7_fixture'));
  }
  fs.writeFileSync(path.join(out,'browser-report.json'),JSON.stringify(r,null,2));console.log(JSON.stringify(r,null,2));process.exit(r.errors.length||r.checks.some(c=>c.status==='FAIL')?1:0);
 })().catch(e=>{console.error(e.message);process.exit(1)});

@@ -10,11 +10,11 @@ Final implementation tests: `node --test --test-timeout=15000 tests/trakt-watche
 
 ## Existing authorized CDP browser
 
-`node tests/trakt-watched-browser.cjs --skip-live` — **23 PASS /0 FAIL**, JavaScript exceptions=[]; raw report: `browser-report.json`. Exact tested source commit: **e70cd0828da4fd548049076dcb6565a573aee9a5**. Later evidence/docs commits do not change these runtime sources.
+`node tests/trakt-watched-browser.cjs --skip-live` — **24 PASS /0 FAIL**, JavaScript exceptions=[]; raw report: `browser-report.json`. Exact tested source commit: **07b5b5baf8ea8259a4336a0ed53e9c489bdb2170**. Later evidence/docs commits do not change these runtime sources.
 
 The existing tab/profile on127.0.0.1:9222 is used; no new browser/context/profile or storage clearing. Temporarily fulfilled local committed sources carry the source commit header. SHA256 matches for all four loader/TraktTV/Trakt+/baseline YDesign responses are in the report. The test profile's preview-loader URL is explicitly mapped to the modified normal loader during the test; normal preview delivery is restored afterward. This is an isolated test deployment, not permanent installation of the Draft branch.
 
-The first runtime pass had22 passing behavior checks and one failing source-origin check because its loader lived at `/preview-loader.js`; the harness mapping was corrected. Capture is also stopped before restoring the original profile so cleanup reloads cannot overwrite evidence with baseline-source hashes. The final repeated run passed all23 checks.
+The first runtime pass had22 passing behavior checks and one failing source-origin check because its loader lived at `/preview-loader.js`; the harness mapping was corrected. Capture is also stopped before restoring the original profile so cleanup reloads cannot overwrite evidence with baseline-source hashes. The final repeated run passed all24 checks.
 
 Native cards/YDesign marks and row registrations are exercised, partial TV/anime stays false and complete TV/anime true through the Trakt+ API. Existing YDesign display rules and local marks are intentionally unchanged. Right/OK/Back opens and returns from native details. Synthetic A→B becomes null immediately and then B's false after sync; same-owner rotation restores B cache after identity verification; invalid final snapshot preserves the previous fixture storage; a renderer reload starts unknown until B identity is released and verified. Reexecuting the plugin does not register duplicate rows. Unit tests separately confirm one auth listener per event source.
 
@@ -34,3 +34,7 @@ Root causes, cache migration and minimum activity contract: `docs/issue-7-accoun
 ## Draft publication and CI
 
 Draft PR: https://github.com/gorlim590/lampa/pull/27 . Implementation/evidence head ad620c43ee9243fcc4bca1ca2e6e0a6d354f112a. GitHub CI on Node20 confirms99PASS/0FAIL plus static/whitespace checks: https://github.com/gorlim590/lampa/actions/runs/39938617150 . Later publication-checkpoint commits affect documentation/evidence only. Main remains unchanged; Issue #7 remains open.
+
+## Final cleanup hardening
+
+A post-test check caught the legacy cleanup only clearing the URL hash, while Lampa v3 retains its component in the query string. Production scripts and fixture methods were already restored, but the tab remained on the fixture Activity. The harness now navigates back to the original non-fixture URL (or Main if the starting URL was already a fixture), waits for a real native Activity, and asserts no fixture global/route. The repeated complete runtime run has24PASS/0FAIL and no JavaScript exceptions, including this new24th check. Tested source commit07b5b5b has unchanged runtime code from e70cd08; only the harness cleanup/evidence changes afterward.
