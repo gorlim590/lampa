@@ -325,3 +325,10 @@
 - Managed manifest: UA Comments uses this repository HTTPS copy; CommunityWatches status 0. Existing browser registry/preferences remain untouched. Hybrid stays opt-in via its own plugin URL.
 - Exact original history is transported as a verified Git bundle on a temporary publishing branch; archive transport/workflow must not enter main. Final GitHub merge/CI references are recorded separately in audit/PUBLICATION-20261023.md.
 - Known deferred work remains in audit/full-integration-20261023/CONTINUE.md: controlled TorrServer/player/File scenarios, live parser/provider cases, Home profiling, category/settings audit, Trakt-first architecture, physical TV performance. Do not claim these complete.
+
+
+## Published-history checkpoint / PR #24
+- All 41 original Hybrid commits now exist on GitHub at design/stremio-hybrid-x11, exact head eb41cb607b132e57bf0070ea128e076b29ce0458. Checksum-verified import succeeded: https://github.com/gorlim590/lampa/actions/runs/39919432388 . Temporary archive branch/workflow was deleted after the successful push and is excluded from main.
+- Integration PR: https://github.com/gorlim590/lampa/pull/24 . User authorized merge after CI; its current PR state and checks are the source of truth for final publication status. Trakt fix PR #23 is already merged as c68cd3b0dceb6fb6a9b37d1b576ade2a88ca289a, with main CI/Pages successful.
+- Final focused checks:52 Trakt unit,16 existing-CDP browser,65 torrent offline and23 state checks PASS. Browser JavaScript errors=[]; no real Trakt writes or user preference changes. Syntax/link validation PASS (58 JS /436 URLs before this checkpoint); whitespace PASS. YDesign unchanged, API true/false/null preserved.
+- Published plugins remain reversible/opt-in as documented. Deferred live/TorrServer/physical TV work and the remaining roadmap are NOT complete; continue from audit/full-integration-20261023/CONTINUE.md. Issue #7 remains open; Issue #8 not started.

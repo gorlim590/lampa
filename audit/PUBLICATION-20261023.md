@@ -9,3 +9,5 @@ Validation of combined source: 52 mocked Trakt unit regressions PASS; 16 existin
 Managed manifest points UA Comments to the repository copy and disables CommunityWatches. Theme remains opt-in. Six overlapping owner files retain the Hybrid versions. Licensed vendor snapshots are byte-preserved; the derived UA Comments whitespace is normalized, with reproducible builder updated. No credentials, private list backups, browser registry or user data are published/modified.
 
 Deferred implementation and device checks remain in full-integration-20261023/CONTINUE.md. Publishing does not make these completed.
+
+Integration PR: https://github.com/gorlim590/lampa/pull/24 . Original history import succeeded: https://github.com/gorlim590/lampa/actions/runs/39919432388 . Final additional torrent checks:65 offline +23 state PASS. Refer to PR status/checks for final merge and deployment.
