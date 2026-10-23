@@ -126,7 +126,8 @@
     });
   }
   function verifiedOwner(data) {
-    var ids = data && data.user && data.user.ids;
+    var user = data && (data.user || data);
+    var ids = user && user.ids;
     if (!ids || typeof ids !== 'object' || Array.isArray(ids)) throw new Error('Missing authenticated Trakt identity');
     if (typeof ids.uuid === 'string' && /^[a-zA-Z0-9-]{1,128}$/.test(ids.uuid)) return 'uuid:' + ids.uuid;
     // Older Trakt profiles expose only the authenticated slug. A rename safely
@@ -143,7 +144,7 @@
     var epoch = sessionEpoch, cancel = sessionCancel(epoch, null);
     statusPhase = 'loading';
     var pending = whenApi().then(function () {
-      checkCancelled(cancel); return getRetry('/users/settings', 0, cancel);
+      checkCancelled(cancel); return getRetry('/users/me', 0, cancel);
     }).then(function (data) {
       checkCancelled(cancel); accountOwner = verifiedOwner(data);
       hydrateWatched(); return accountOwner;

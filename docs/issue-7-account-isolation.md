@@ -10,7 +10,7 @@ Based on main a33f4b1 (PR #23 already merged). This follow-up changes only watch
 
 ## Identity and migration
 
-Trakt+ 3.2.1 verifies authenticated `/users/settings`, preferring `user.ids.uuid` and using the authenticated `user.ids.slug` only as a compatibility fallback. A slug rename causes a safe cold cache, not inferred identity matching. Never infer a user from a token, local History or a previous cache.
+Trakt+ 3.2.1 verifies authenticated `/users/me` (the existing native profile endpoint), preferring `user.ids.uuid` and using the authenticated `user.ids.slug` only as a compatibility fallback. A slug rename causes a safe cold cache, not inferred identity matching. Never infer a user from a token, local History or a previous cache.
 
 Cache v7 records `owner` alongside the verified watched evidence. It is hydrated only after the current authenticated owner has been verified. A missing/legacy/mismatched owner remains unknown until a fresh verified snapshot. The old stored cache is retained on errors and replaced only on valid acceptance. A single latest-owner cache is retained, not an unbounded per-account archive.
 
@@ -22,7 +22,7 @@ All identity/watched/progress requests use the existing TraktTV GET transport wi
 
 ## Minimum watched activity contract
 
-Primary references: [Trakt API](https://trakt.docs.apiary.io/), [last activity](https://trakt.docs.apiary.io/#reference/sync/last-activities/get-last-activity), [authenticated settings](https://trakt.docs.apiary.io/#reference/users/settings/get-settings), [Trakt maintainer explanation of global watched activity](https://github.com/trakt/trakt-api/discussions/473).
+Primary references: [Trakt API](https://trakt.docs.apiary.io/), [last activity](https://trakt.docs.apiary.io/#reference/sync/last-activities/get-last-activity), [authenticated settings](https://trakt.docs.apiary.io/#reference/users/me/get-settings), [Trakt maintainer explanation of global watched activity](https://github.com/trakt/trakt-api/discussions/473).
 
 The watched verifier requires object containers and nonempty valid UTC ISO timestamps for:
 

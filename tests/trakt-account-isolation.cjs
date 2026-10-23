@@ -6,7 +6,7 @@ const deferred=()=>{let resolve;const promise=new Promise(r=>resolve=r);return {
 const flush=async()=>{for(let i=0;i<80;i++)await Promise.resolve();};
 function switchTo(f,account,movies){f.options.account=account;f.options.credential='synthetic-'+account;f.options.movies=movies;}
 function transportFor(options,path){
- if(path==='/users/settings')return {user:{ids:{uuid:options.account||'fixture-a'}}};
+ if(path==='/users/me')return {user:{ids:{uuid:options.account||'fixture-a'}}};
  if(path==='/sync/last_activities')return clone(stamp);
  if(path.startsWith('/sync/watched/movies'))return options.movies||[];
  if(path.startsWith('/sync/watched/shows'))return options.shows||[];
@@ -57,7 +57,7 @@ test('new account sync need not wait for hung old session and old completion can
 });
 test('identity response from an expired session cannot hydrate its cache',async()=>{
  const wait=deferred(),options={};let first=true;
- options.transport=p=>{if(p==='/users/settings'&&first){first=false;return wait.promise;}return transportFor(options,p);};
+ options.transport=p=>{if(p==='/users/me'&&first){first=false;return wait.promise;}return transportFor(options,p);};
  const f=fixture(options);const old=f.api.__test.loadWatched(true);await flush();switchTo(f,'fixture-b',[]);const current=f.api.syncWatched();wait.resolve({user:{ids:{uuid:'fixture-a'}}});await old;await current;assert.equal(f.api.isWatched(card),false);assert.equal(f.store.trakt_plus_watched_cache.owner,'uuid:fixture-b');
 });
 test('lazy show-progress from previous owner never marks, persists or emits into new account',async()=>{
@@ -83,7 +83,7 @@ test('valid empty-account timestamps and empty lists are complete, without inven
  assert.equal((await f.api.syncWatched()).status,'complete');assert.equal(f.api.isWatched(card),false);assert.equal(f.api.isWatched({id:5,type:'anime'}),false);assert.equal(f.adds.length,0);assert.equal(f.removes.length,0);
 });
 for(const response of [null,{}, {user:{ids:{}}}, {user:{ids:{uuid:4}}}])test('unverified identity fails closed '+JSON.stringify(response),async()=>{
- const options={transport:p=>p==='/users/settings'?response:transportFor({},p)},f=fixture(options),before=clone(f.store);
+ const options={transport:p=>p==='/users/me'?response:transportFor({},p)},f=fixture(options),before=clone(f.store);
  assert.equal((await f.api.syncWatched()).status,'failed');assert.equal(f.api.isWatched(card),null);assert.deepEqual(f.store,before);assert.equal(f.adds.length,0);
 });
 test('unavailable identity API retains cache and local records without asserting status',async()=>{
@@ -97,7 +97,7 @@ test('stale manual completion cannot clear the busy lock of the active new-accou
  assert.equal((await f.api.syncWatched()).status,'busy');b.resolve([]);assert.equal((await current).status,'complete');assert.equal(f.api.isWatched(card),false);
 });
 test('authenticated slug fallback is account-bound and never inferred from a credential',async()=>{
- const options={transport:p=>p==='/users/settings'?{user:{ids:{slug:'Example-User'}}}:transportFor({},p)},f=fixture(options);
+ const options={transport:p=>p==='/users/me'?{user:{ids:{slug:'Example-User'}}}:transportFor({},p)},f=fixture(options);
  assert.equal((await f.api.syncWatched()).status,'complete');assert.equal(f.store.trakt_plus_watched_cache.owner,'slug:example-user');assert.equal(f.api.isWatched(card),false);
 });
 test('Trakt+ requests bypass native response cache and cross-session in-flight deduplication',async()=>{
@@ -108,8 +108,8 @@ test('Trakt+ requests bypass native response cache and cross-session in-flight d
  const native=fs.readFileSync(require('node:path').join(__dirname,'../trakt/trakt.js'),'utf8');
  const block=native.slice(native.indexOf('get: function get(url) {'));const body=block.slice(5,block.indexOf('\n    },')+6);
  const calls=[];const get=vm.runInNewContext('('+body.trim().replace(/,$/,'')+')',{requestApi:(...args)=>calls.push(args)});
- const options={cache:false,dedup:false,forceFresh:true};get('/users/settings',false,options);assert.deepEqual(calls[0].slice(0,2),['GET','/users/settings']);assert.equal(calls[0][5],options);get('/movies/1',true);assert.equal(calls[1][3],true);
- await f.api.syncWatched();assert(f.requests.includes('/users/settings'));assert(seen>=5);
+ const options={cache:false,dedup:false,forceFresh:true};get('/users/me',false,options);assert.deepEqual(calls[0].slice(0,2),['GET','/users/me']);assert.equal(calls[0][5],options);get('/movies/1',true);assert.equal(calls[1][3],true);
+ await f.api.syncWatched();assert(f.requests.includes('/users/me'));assert(seen>=5);
 });
 test('auth event invalidation is immediate and repeat initialization adds no auth listeners',async()=>{
  const f=fixture();await f.api.syncWatched();assert.equal(f.storageHandlers.length,1);assert.equal(f.windowHandlers.length,1);f.reinitialize();assert.equal(f.storageHandlers.length,1);assert.equal(f.windowHandlers.length,1);
@@ -118,4 +118,8 @@ test('auth event invalidation is immediate and repeat initialization adds no aut
 test('another owner last-success does not suppress automatic sync of the current account',async()=>{
  const f=fixture({storage:{trakt_plus_last_sync:Date.now(),trakt_plus_last_sync_owner:'uuid:fixture-b'}});await f.api.__test.loadWatched(true);assert.equal(f.adds.length,0);
  f.api.__test.scheduleAutoSync();for(const fn of [...f.timers.values()])fn();await flush();assert(f.adds.length>0);assert.equal(f.store.trakt_plus_last_sync_owner,'uuid:fixture-a');
+});
+test('native authenticated profile response supplies direct ids without a settings wrapper',async()=>{
+ const options={transport:p=>p==='/users/me'?{username:'fixture-name',ids:{uuid:'fixture-profile'}}:transportFor({},p)},f=fixture(options);
+ assert.equal((await f.api.syncWatched()).status,'complete');assert.equal(f.store.trakt_plus_watched_cache.owner,'uuid:fixture-profile');
 });
