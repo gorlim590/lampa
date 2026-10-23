@@ -57,7 +57,7 @@ const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
  let originalViewport=page.viewportSize();
  try{
   await page.reload({waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>window.TraktPlus?.version==='3.2.1-issue7-account'&&window.YDesignLoaded&&Lampa.Activity.active()?.activity,null,{timeout:50000});
+  await page.waitForFunction(()=>window.TraktPlus?.version==='3.2.2-issue8-context'&&window.YDesignLoaded&&Lampa.Activity.active()?.activity,null,{timeout:50000});
   await Promise.all(responseJobs);
   check('Exact modified Trakt+ and unchanged baseline YDesign loaded by SHA256, not stale cache',Object.keys(files).every(k=>r.sources[k]?.received===hash(files[k])&&r.sources[k]?.commit===commit),r.sources);
   await page.waitForFunction(()=>TraktPlus.isWatchedShow({id:1396,type:'tv'})===false&&TraktPlus.isWatched({id:438631,method:'movie'})===true);
@@ -103,7 +103,7 @@ const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
   await page.evaluate(()=>{__issue7.account='runtime-b';__issue7.credential='synthetic-runtime-b2';__issue7.movieWatched=false});await page.evaluate(()=>TraktPlus.syncWatched());
   fixtureSeed=await page.evaluate(()=>({account:__issue7.account,credential:__issue7.credential,movieWatched:false,holdIdentity:true,cache:__issue7.cache}));
   await page.reload({waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>window.TraktPlus?.version==='3.2.1-issue7-account'&&window.__issue7?.identityResolve,null,{timeout:50000});
+  await page.waitForFunction(()=>window.TraktPlus?.version==='3.2.2-issue8-context'&&window.__issue7?.identityResolve,null,{timeout:50000});
   check('Restart with saved owned cache remains unknown before account verification',await page.evaluate(()=>TraktPlus.isWatched({id:438631})===null));
   await page.evaluate(()=>{__issue7.holdIdentity=false;__issue7.identityResolve({user:{ids:{uuid:__issue7.account}}})});
   await page.waitForFunction(()=>TraktPlus.isWatched({id:438631})===false);

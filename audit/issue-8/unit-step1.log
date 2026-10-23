@@ -1,0 +1,12 @@
+✔ legacy orientations migrate to vertical without resetting unrelated settings (14.530546ms)
+✔ retired orientation never becomes a render/default/settings branch (5.900156ms)
+✔ retired background has no runtime/style/settings references and legacy value is ignored (8.512256ms)
+✔ vertical first-open information defaults are retained (5.364139ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 144.926085

@@ -1,0 +1,72 @@
+{
+  "baseline": true,
+  "commit": "fcc148f88257daab6ce56681c51ecc7903274d94",
+  "checks": [
+    {
+      "name": "Three native cards render without preset switching",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "sources": {
+    "/trakt/trakt-plus.js": {
+      "expected": "13e84da46578c0c96c56947969f460362bd1a96d5d549402b40fadd2e6735aa6",
+      "received": "13e84da46578c0c96c56947969f460362bd1a96d5d549402b40fadd2e6735aa6",
+      "commit": "fcc148f88257daab6ce56681c51ecc7903274d94"
+    },
+    "/ui/design-optimized.js": {
+      "expected": "d6e718d335b92e9d8d2dbc27e26343eb7cacd0f21cfd3286ede2a98a644f6422",
+      "received": "d6e718d335b92e9d8d2dbc27e26343eb7cacd0f21cfd3286ede2a98a644f6422",
+      "commit": "fcc148f88257daab6ce56681c51ecc7903274d94"
+    }
+  },
+  "metrics": {
+    "tmdbRequests": 3,
+    "uaRequests": 3,
+    "readyMs": 1020.0999999940395,
+    "sampleMs": 3480,
+    "queries": 45,
+    "timerTicks": 13,
+    "activeTimers": [
+      {
+        "ms": 400,
+        "repeat": true
+      }
+    ],
+    "observers": [
+      {
+        "active": true,
+        "calls": 130,
+        "records": 1093,
+        "target": "body"
+      }
+    ],
+    "callbacks": 0,
+    "listeners": 2,
+    "dom": 114,
+    "longTasks": [
+      179,
+      67,
+      152,
+      72,
+      300
+    ],
+    "heap": 24347974,
+    "ambient": true,
+    "horizontal": 0,
+    "watched": 3,
+    "ua": 3,
+    "genres": 3
+  },
+  "blocked": [
+    "Physical Google TV",
+    "Real player return/live accounts"
+  ],
+  "environment": {
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+    "width": 1280,
+    "height": 720,
+    "preset": "controlled vertical / full effects",
+    "hybrid": true
+  }
+}

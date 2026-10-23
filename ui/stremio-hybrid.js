@@ -28,7 +28,7 @@ body.stremio-hybrid .card.focus .card__view { box-shadow:0 0 0 .14em var(--sh-te
 body.stremio-hybrid .ydesign-card.focus::after, body.stremio-hybrid .ydesign-card .ydesign-content-layer::after { display:none !important; }
 body.stremio-hybrid .ydesign-card .card__view::before { animation:none !important; }
 body.stremio-hybrid .ydesign-badge, body.stremio-hybrid .ydesign-genre-badge, body.stremio-hybrid .ydesign-rating, body.stremio-hybrid .ydesign-series-pill, body.stremio-hybrid .ydesign-card-notch { backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
-body.stremio-hybrid .ydesign-content-layer, body.stremio-hybrid .ydesign-desc-under { transition:opacity var(--sh-speed) var(--sh-ease) !important; }
+body.stremio-hybrid .ydesign-content-layer { transition:opacity var(--sh-speed) var(--sh-ease) !important; }
 body.stremio-hybrid .selectbox__content, body.stremio-hybrid .settings__content, body.stremio-hybrid .modal__content { background:var(--sh-panel) !important; border-radius:1em; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
 body.stremio-hybrid .selectbox-item { border-radius:var(--sh-radius); }
 body.stremio-hybrid .mapping--grid { padding:.6em .8em; }
@@ -129,7 +129,6 @@ body.stremio-hybrid .menu__item, body.stremio-hybrid .head__action, body.stremio
  body.stremio-hybrid .wrap__left--hidden .menu__text { display:none; }
  body.stremio-hybrid .wrap__left--hidden .menu__version { font-size:.45em; }
  body.stremio-hybrid .items-line:not(.vinyl-line) .card.ydesign-vertical { width:13.2vw !important; }
- body.stremio-hybrid .items-line:not(.vinyl-line) .card.ydesign-horizontal { width:27vw !important; }
  body.stremio-hybrid .mapping--grid .card.ydesign-vertical { width:calc(100% / 6) !important; }
 }
 @media(max-width:768px) {
@@ -140,7 +139,7 @@ body.stremio-hybrid .menu__item, body.stremio-hybrid .head__action, body.stremio
  body.stremio-hybrid .full-start-new__title { font-size:1.8em !important; }
 }
 @media(prefers-reduced-motion:reduce) {
- body.stremio-hybrid .card, body.stremio-hybrid .ydesign-content-layer, body.stremio-hybrid .ydesign-desc-under { transition:none !important; }
+ body.stremio-hybrid .card, body.stremio-hybrid .ydesign-content-layer { transition:none !important; }
  body.stremio-hybrid .full-start__button, body.stremio-hybrid .menu__item, body.stremio-hybrid .head__action, body.stremio-hybrid .selectbox-item, body.stremio-hybrid .settings-param, body.stremio-hybrid .settings-folder, body.stremio-hybrid .cardify-effects-overlay { transition:none !important; }
  body.stremio-hybrid .card.focus, body.stremio-hybrid .full-start__button.focus { transform:none !important; }
 }
