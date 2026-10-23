@@ -369,3 +369,10 @@
 - UA: directly observed public WH movie/TV responses use {play:HTTPS URL}; new strict typed response parser, version/media/ID key, bounded TTL and in-flight dedup ignore legacy id-only values/errors instead of false positives. Full #22 localization work remains out of scope.
 - Corrected extCacheKey v6 vs actual v7 mismatch to one v8 key, shared in-flight details, malformed-response rejection, memory TTL checks and stale/disconnected render guards. Description-only English requests removed; rebuilt poster layers can no longer reuse a detached prior-image flag.
 -151 unit checks PASS (50 YDesign +101 Trakt, including2 metadata-contract regressions); JS syntax/diff checks PASS. Next: scoped episode lifecycle, Hybrid-owned shell and full browser matrix/profiling. No main merge.
+
+### Issue #8 — paused by user; resumable lifecycle/ownership checkpoint
+- Worktree `/home/gostrimchik/lampa-testing/audit/issue-8-ydesign`, branch `fix/issue-8-ydesign-vertical`, baseline main fcc148f. Earlier local5435b97/f58d52f retained; current commit saves all further work/evidence. LOCAL ONLY; no PR/merge/close.
+- Scoped episode lifecycle/cleanup, idempotent timeline writes, Hybrid shell CSS ownership/reduced-motion, restored shared mark styles, guarded init/font, coalesced settings/mark updates and bounded Home warmup implemented.161 unit checks PASS, repository58JS/449URLs PASS, diff check PASS.
+- Browser last run19PASS/1FAIL, exceptions=[]: only failure source coverage due Hybrid delivery alias. Alias fixed in harness, rerun pending. Exact YDesign body hash matches saved source; browser header still parent f58d52f. Final cleanup independently verified native Main/no fixture globals.
+- Before/after fixture route methodology differs; no speed/FPS claim. Full isolated mode/load-order/episode/provider/reload/browser checks and publication remain unfinished. Physical Google TV untested.
+- **Resume from `audit/issue-8/CONTINUE.md`** for exact commands, evidence, risks, missing tests and safe Draft publication path; no repeat broad audit. Do not continue until user resumes.
