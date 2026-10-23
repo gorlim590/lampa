@@ -1,0 +1,158 @@
+{
+  "kind": "Real current Lampa/CDP + exact modified source; Trakt responses/Favorite/owned cache are fixtures, never live-account verification",
+  "checks": [
+    {
+      "name": "Exact modified Trakt+ and unchanged baseline YDesign loaded by SHA256, not stale cache",
+      "status": "PASS",
+      "data": {
+        "/trakt/trakt-plus.js": {
+          "expected": "707026e644fa9ee9b3a832600b2fa0a2eeec943e43159bca156be695f42480e5",
+          "received": "707026e644fa9ee9b3a832600b2fa0a2eeec943e43159bca156be695f42480e5"
+        },
+        "/ui/design-optimized.js": {
+          "expected": "d6e718d335b92e9d8d2dbc27e26343eb7cacd0f21cfd3286ede2a98a644f6422",
+          "received": "d6e718d335b92e9d8d2dbc27e26343eb7cacd0f21cfd3286ede2a98a644f6422"
+        }
+      }
+    },
+    {
+      "name": "Known partial TV/anime are false; confirmed watched movie is true",
+      "status": "PASS"
+    },
+    {
+      "name": "Browser import succeeds additively on complete transport with partial-series evidence",
+      "status": "PASS",
+      "data": {
+        "status": "complete",
+        "added": 1,
+        "skipped": 0,
+        "removed": 0,
+        "movies": 1,
+        "shows": 2,
+        "unmapped": 0,
+        "unknownShows": 0
+      }
+    },
+    {
+      "name": "Browser API error preserves prior records and reports unknown, not false",
+      "status": "PASS"
+    },
+    {
+      "name": "All aired episodes mark series/anime without losing previous imports",
+      "status": "PASS"
+    },
+    {
+      "name": "Repeated browser import does not duplicate Favorite additions",
+      "status": "PASS"
+    },
+    {
+      "name": "Real native cards are decorated by existing YDesign with no duplicate Trakt badge",
+      "status": "PASS"
+    },
+    {
+      "name": "Confirmed complete fixtures produce real YDesign watched dim/check marks",
+      "status": "PASS"
+    },
+    {
+      "name": "API reports known partial-series false independently of existing local rendered marks",
+      "status": "PASS"
+    },
+    {
+      "name": "Reexecuting plugin registers no duplicate rows or initialization",
+      "status": "PASS"
+    },
+    {
+      "name": "Remote-style Right keeps visible native card focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Remote-style OK opens native details",
+      "status": "PASS"
+    },
+    {
+      "name": "Remote-style Back returns to native fixture cards",
+      "status": "PASS"
+    },
+    {
+      "name": "Home Trakt ContentRows actually register once in native registry",
+      "status": "PASS"
+    },
+    {
+      "name": "No native Favorite removal during any browser scenario",
+      "status": "PASS"
+    },
+    {
+      "name": "Real Favorite and owned caches/preferences unchanged after test",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "blockedMutations": [],
+  "sources": {
+    "/trakt/trakt-plus.js": {
+      "expected": "707026e644fa9ee9b3a832600b2fa0a2eeec943e43159bca156be695f42480e5",
+      "received": "707026e644fa9ee9b3a832600b2fa0a2eeec943e43159bca156be695f42480e5"
+    },
+    "/ui/design-optimized.js": {
+      "expected": "d6e718d335b92e9d8d2dbc27e26343eb7cacd0f21cfd3286ede2a98a644f6422",
+      "received": "d6e718d335b92e9d8d2dbc27e26343eb7cacd0f21cfd3286ede2a98a644f6422"
+    }
+  },
+  "blocked": [
+    "Real Trakt sync/account954-vs911 reconciliation",
+    "Physical Google TV/performance/player"
+  ],
+  "readOnlyTrakt": {
+    "kind": "Existing native API GET only; aggregate schema/counts, no token extraction or account writes; native API cache may apply",
+    "movies": {
+      "status": "PASS",
+      "records": 100,
+      "withTMDB": 100
+    },
+    "shows": {
+      "status": "PASS",
+      "records": 44,
+      "withTMDB": 44,
+      "withAiredTotal": 44,
+      "withSeasons": 0
+    },
+    "showsDefault": {
+      "status": "PASS",
+      "records": 44,
+      "withTMDB": 44,
+      "withAiredTotal": 44,
+      "withSeasons": 0
+    },
+    "showsEpisodes": {
+      "status": "PASS",
+      "records": 44,
+      "withTMDB": 44,
+      "withAiredTotal": 44,
+      "withSeasons": 0
+    },
+    "progress": {
+      "status": "PASS",
+      "keys": [
+        "aired",
+        "completed",
+        "last_watched_at",
+        "reset_at",
+        "last_episode",
+        "next_episode",
+        "stats",
+        "seasons",
+        "hidden_seasons"
+      ],
+      "aired": 8,
+      "completed": 8,
+      "withSeasons": true
+    },
+    "history": {
+      "status": "PASS",
+      "page1": 100,
+      "page2": 100,
+      "firstEventRepeated": false
+    },
+    "note": "Prior read-only schema/count observations; not repeated for this source revision"
+  }
+}
