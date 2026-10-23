@@ -1,7 +1,7 @@
 'use strict';
 // Existing CDP tab; synthetic Storage/Favorite/Timeline/Trakt/metadata only.
 const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process'),crypto=require('node:crypto'),{chromium}=require('playwright');
-const root=path.resolve(__dirname,'..'),baseline=process.argv.includes('--baseline'),out=path.join(root,'audit/issue-8');fs.mkdirSync(out,{recursive:true});
+const root=path.resolve(__dirname,'..'),baseline=process.argv.includes('--baseline'),finalPass=process.argv.includes('--final'),out=path.join(root,'audit/issue-8');fs.mkdirSync(out,{recursive:true});
 const sha=cp.execFileSync('git',['rev-parse',baseline?'fcc148f':'HEAD'],{cwd:root,encoding:'utf8'}).trim(),hash=b=>crypto.createHash('sha256').update(b).digest('hex');
 const sourceKey=u=>u.pathname.endsWith('/stremio-hybrid.js')?'/ui/stremio-hybrid.js':Object.keys(files).find(k=>u.pathname.endsWith(k));
 const files=Object.fromEntries(['ui/design-optimized.js','ui/stremio-hybrid.js','trakt/trakt-plus.js'].map(p=>['/'+p,baseline?cp.execFileSync('git',['show','fcc148f:'+p],{cwd:root,encoding:'utf8'}):fs.readFileSync(path.join(root,p),'utf8')]));
@@ -13,7 +13,7 @@ const files=Object.fromEntries(['ui/design-optimized.js','ui/stremio-hybrid.js',
  page.on('console',m=>{if(m.type()==='error'&&/YDesign/.test(m.text()))report.errors.push(m.text().slice(0,500))});
  page.on('pageerror',e=>report.errors.push(e.message.replace(/https?:\/\/\S+/g,'[URL]')));
  page.on('response',async r=>{const key=sourceKey(new URL(r.url()));if(capture&&key)try{const b=await r.body();report.sources[key]={expected:hash(files[key]),received:hash(b),commit:r.headers()['x-source-commit']};}catch{}});
- const setup=async()=>page.evaluate(seed=>{
+ const setup=async()=>page.evaluate(({seed,finalPass})=>{
   if(window.__issue8)return;const L=Lampa,oldGet=L.Storage.get,oldField=L.Storage.field,oldSet=L.Storage.set,oldLocalGet=Storage.prototype.getItem,oldLocalSet=Storage.prototype.setItem,oldLocalRemove=Storage.prototype.removeItem;
   const state=window.__issue8={shadow:{ydesign_card_type_main:'vertical',ydesign_card_type_other:'vertical',ydesign_ua_torrents:false,ydesign_perf_mode:'fx',ydesign_font:'golos-montserrat',stremio_hybrid_enabled:true},local:{ydesign_legacy_cleaned:'1'},account:'fixture-a',credential:'synthetic-a',watched:false,phase:'ready',requests:[],probe:{timers:new Map(),observers:[],listeners:0,queries:0,mutations:0,longTasks:[]}};
   if(seed){Object.assign(state.shadow,seed.shadow);Object.assign(state.local,seed.local);state.account=seed.account;state.credential=seed.credential;state.watched=seed.watched;state.phase=seed.phase;}
@@ -30,10 +30,12 @@ const files=Object.fromEntries(['ui/design-optimized.js','ui/stremio-hybrid.js',
   for(const [name,repeat]of [['setTimeout',false],['setInterval',true]]){const original=window[name];window[name]=function(fn,ms,...args){if(typeof fn!=='function'||!ours())return original(fn,ms,...args);const rec={ms,repeat,ticks:0},id=original(function(...a){rec.ticks++;if(!repeat)rec.done=true;return fn.apply(this,a)},ms,...args);state.probe.timers.set(id,rec);return id;};}
   for(const name of ['clearTimeout','clearInterval']){const original=window[name];window[name]=function(id){const rec=state.probe.timers.get(id);if(rec)rec.done=true;return original(id)}}
   const MO=window.MutationObserver;window.MutationObserver=function(fn){const own=ours(),rec={active:false,calls:0,records:0,target:''};const ob=new MO(function(ms,observer){if(own){rec.calls++;rec.records+=ms.length;}return fn(ms,observer)});if(own){state.probe.observers.push(rec);const observe=ob.observe,disconnect=ob.disconnect;ob.observe=function(target,opts){rec.active=true;rec.target=target===document.body?'body':target.className||target.nodeName;return observe.call(this,target,opts)};ob.disconnect=function(){rec.active=false;return disconnect.call(this)}}return ob;};window.MutationObserver.prototype=MO.prototype;
+  if(!finalPass){
   const add=EventTarget.prototype.addEventListener;EventTarget.prototype.addEventListener=function(...args){if(ours())state.probe.listeners++;return add.apply(this,args)};
   for(const proto of [Document.prototype,Element.prototype])for(const name of ['querySelector','querySelectorAll','getElementsByClassName'])if(proto[name]){const original=proto[name];proto[name]=function(...a){if(ours())state.probe.queries++;return original.apply(this,a)}}
   try{new PerformanceObserver(list=>state.probe.longTasks.push(...list.getEntries().map(e=>e.duration))).observe({type:'longtask',buffered:true})}catch{}
- },fixtureSeed);
+  }
+ },{seed:fixtureSeed,finalPass});
  const route=async route=>{
   const req=route.request(),u=new URL(req.url()),key=sourceKey(u);
   if(!['GET','HEAD','OPTIONS'].includes(req.method()))return route.abort();
@@ -58,9 +60,9 @@ const files=Object.fromEntries(['ui/design-optimized.js','ui/stremio-hybrid.js',
   await page.waitForFunction(()=>document.querySelectorAll('.activity--active .ydesign-ready').length===3,null,{timeout:30000});
   report.metrics.readyMs=await page.evaluate(()=>performance.now()-__issue8.renderStart);
   await page.evaluate(()=>{const p=__issue8.probe;p.startQueries=p.queries;p.startTicks=[...p.timers.values()].reduce((n,r)=>n+r.ticks,0);p.startCallbacks=p.observers.reduce((n,r)=>n+r.calls,0)});
-  for(let i=0;i<6;i++){await page.keyboard.press(i%2?'ArrowLeft':'ArrowRight');await page.waitForTimeout(80)}await page.waitForTimeout(3000);
-  report.metrics={...report.metrics,...await page.evaluate(()=>{const p=__issue8.probe;return{sampleMs:3480,queries:p.queries-p.startQueries,timerTicks:[...p.timers.values()].reduce((n,r)=>n+r.ticks,0)-p.startTicks,activeTimers:[...p.timers.values()].filter(r=>!r.done).map(r=>({ms:r.ms,repeat:r.repeat})),observers:p.observers.map(r=>({...r})),callbacks:p.observers.reduce((n,r)=>n+r.calls,0)-p.startCallbacks,listeners:p.listeners,dom:document.querySelectorAll('.activity--active *').length,longTasks:p.longTasks,heap:performance.memory?.usedJSHeapSize,ambient:!!document.querySelector('#ydesign-ambient'),horizontal:document.querySelectorAll('.activity--active .ydesign-horizontal').length,watched:document.querySelectorAll('.activity--active .ydesign-is-watched').length,ua:document.querySelectorAll('.activity--active .ydesign-badge-ua').length,genres:document.querySelectorAll('.activity--active .ydesign-genres').length}})};
-  check('Three native cards render without preset switching',true);await page.screenshot({path:path.join(out,baseline?'baseline.png':'candidate.png')});
+  for(let i=0;i<(finalPass?2:6);i++){await page.keyboard.press(i%2?'ArrowLeft':'ArrowRight');await page.waitForTimeout(80)}if(!finalPass)await page.waitForTimeout(3000);
+  report.metrics={...report.metrics,...await page.evaluate(finalPass=>{const p=__issue8.probe;return{sampleMs:finalPass?160:3480,queries:p.queries-p.startQueries,timerTicks:[...p.timers.values()].reduce((n,r)=>n+r.ticks,0)-p.startTicks,activeTimers:[...p.timers.values()].filter(r=>!r.done).map(r=>({ms:r.ms,repeat:r.repeat})),observers:p.observers.map(r=>({...r})),callbacks:p.observers.reduce((n,r)=>n+r.calls,0)-p.startCallbacks,listeners:p.listeners,dom:document.querySelectorAll('.activity--active *').length,longTasks:p.longTasks,heap:performance.memory?.usedJSHeapSize,ambient:!!document.querySelector('#ydesign-ambient'),horizontal:document.querySelectorAll('.activity--active .ydesign-horizontal').length,watched:document.querySelectorAll('.activity--active .ydesign-is-watched').length,ua:document.querySelectorAll('.activity--active .ydesign-badge-ua').length,genres:document.querySelectorAll('.activity--active .ydesign-genres').length}} ,finalPass)};
+  check('Three native cards render without preset switching',true);await page.screenshot({path:path.join(out,baseline?'baseline.png':finalPass?'final.png':'candidate.png')});
   if(!baseline){
    check('Exact changed sources loaded by hash',Object.keys(files).every(k=>report.sources[k]?.received===hash(files[k])&&report.sources[k]?.commit===sha),report.sources);
    const content=await page.evaluate(()=>[...document.querySelectorAll('.activity--active .ydesign-card')].map(c=>({genres:!!c.querySelector('.ydesign-genres'),age:!!c.querySelector('.ydesign-badge-age'),rating:!!c.querySelector('.ydesign-rating'),logo:!!c.querySelector('.ydesign-logo-container img'),slogan:!!c.querySelector('.ydesign-slogan'),series:!!c.querySelector('.ydesign-badge-seasons')})));
@@ -73,7 +75,7 @@ const files=Object.fromEntries(['ui/design-optimized.js','ui/stremio-hybrid.js',
    await page.evaluate(()=>StremioHybrid.setEnabled(false));await page.waitForTimeout(650);const solo=await inspect();check('YDesign standalone restores its own focus with Hybrid object still present',!solo.hybrid&&solo.transform!==combined.transform,solo);
    await page.evaluate(()=>StremioHybrid.setEnabled(true));await page.waitForTimeout(400);const restored=await inspect();check('Hybrid on/off reuses singleton styles/fonts',restored.hybrid&&restored.styles===1&&restored.fonts<=1,restored);
    await page.emulateMedia({reducedMotion:'reduce'});check('Reduced motion disables card transitions and animations',await page.evaluate(()=>{const c=getComputedStyle(document.querySelector('.activity--active .ydesign-card'));return c.animationName==='none'&&c.transitionDuration==='0s'}));await page.emulateMedia({reducedMotion:'no-preference'});
-   for(const [width,height]of [[1280,720],[1920,1080],[3840,2160]]){await page.setViewportSize({width,height});await page.waitForTimeout(250);const sizes=await page.evaluate(()=>[...document.querySelectorAll('.activity--active .ydesign-card .card__view')].map(c=>({w:c.getBoundingClientRect().width,h:c.getBoundingClientRect().height})));check('Vertical cards '+width+'x'+height,sizes.every(c=>c.w>0&&c.h>c.w),sizes);}
+   for(const [width,height]of (finalPass?[]:[[1280,720],[1920,1080],[3840,2160]])){await page.setViewportSize({width,height});await page.waitForTimeout(250);const sizes=await page.evaluate(()=>[...document.querySelectorAll('.activity--active .ydesign-card .card__view')].map(c=>({w:c.getBoundingClientRect().width,h:c.getBoundingClientRect().height})));check('Vertical cards '+width+'x'+height,sizes.every(c=>c.w>0&&c.h>c.w),sizes);}
    await page.setViewportSize({width:1280,height:720});
    await page.evaluate(()=>{__issue8.set('ydesign_card_type_main','horizontal');__issue8.set('ydesign_card_type_other','horizontal')});await page.waitForTimeout(200);check('Imported old orientation migrates without changing other preferences',await page.evaluate(()=>__issue8.shadow.ydesign_card_type_main==='vertical'&&__issue8.shadow.ydesign_card_type_other==='vertical'&&__issue8.shadow.ydesign_font==='golos-montserrat'&&!document.querySelector('.ydesign-horizontal')));
    const watched=()=>page.evaluate(()=>[...document.querySelectorAll('.activity--active .ydesign-card')].map(c=>c.getAttribute('data-ydesign-watched')));
@@ -83,8 +85,34 @@ const files=Object.fromEntries(['ui/design-optimized.js','ui/stremio-hybrid.js',
    await page.evaluate(()=>{__issue8.account='fixture-b';__issue8.credential='synthetic-b';Lampa.Storage.listener.send('change',{name:'trakt_token'});TraktPlus.isWatched(__issue8.cards[0])});await page.waitForTimeout(650);check('New account with failed API never reuses A evidence',(await watched()).every(v=>v==='unknown'),await watched());
    await page.evaluate(async()=>{__issue8.phase='ready';__issue8.watched=false;await TraktPlus.syncWatched()});await page.waitForTimeout(350);check('Account B confirmed negative replaces unknown',(await watched()).every(v=>v==='unwatched'),await watched());
    for(const key of ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'])await page.keyboard.press(key);check('Directional navigation retains native focus',await page.evaluate(()=>!!document.querySelector('.focus')));
+   if(finalPass){
+    // A native Activity/controller hosts synthetic provider episode DOM. No media playback.
+    await page.evaluate(()=>{Lampa.Component.add('issue8_episodes',function(o){const c=Lampa.Maker.make('Main',o);c.use({onCreate(){c.build([{title:'Episode fixture',results:__issue8.cards}])}});return c});__issue8.episodeCycles=[];});
+    for(let cycle=0;cycle<3;cycle++){
+     await page.evaluate(()=>Lampa.Activity.push({component:'issue8_episodes',title:'Synthetic provider episodes',movie:__issue8.cards[1],page:1}));
+     await page.waitForFunction(()=>Lampa.Activity.active()?.component==='issue8_episodes'&&document.querySelector('.activity--active .scroll__body'));
+     await page.evaluate(()=>{const list=document.createElement('div');list.className='issue8-episode-container';list.innerHTML=Array.from({length:3},(_,i)=>`<div class="online-prestige online-prestige--full selector" data-season="1" data-episode="${i+1}"><div class="online-prestige__body"><div class="online-prestige__title">Епізод ${i+1}</div><div class="online-prestige__info">Тестове озвучення</div></div><div class="time-line"><div style="width:25%"></div></div></div>`).join('');for(const c of list.children){c.data={season:1,episode:Number(c.dataset.episode),timeline:{percent:25}};$(c).on('hover:enter',()=>{__issue8.episodeOK=(__issue8.episodeOK||0)+1});}document.querySelector('.activity--active .scroll__body').appendChild(list);});
+     await page.waitForFunction(()=>document.querySelectorAll('.activity--active .online-prestige[data-fixed-layout="true"]').length===3);
+     const mounted=await page.evaluate(()=>({timers:[...__issue8.probe.timers.values()].filter(t=>t.repeat&&!t.done).length,observers:__issue8.probe.observers.filter(o=>o.active).length}));
+     check('Episode lifecycle mount '+(cycle+1),mounted.timers===1&&mounted.observers===1,mounted);
+     if(cycle===0){
+      await page.evaluate(()=>{const root=$('.activity--active .issue8-episode-container'),c=root.find('.online-prestige').first();Lampa.Controller.collectionSet(root);Lampa.Controller.collectionFocus(c,root);c[0].scrollIntoView({block:'nearest'});c[0].data.timeline.percent=70;});
+      await page.waitForFunction(()=>document.querySelector('.activity--active .online-prestige__timeline')?.getAttribute('data-percent')==='70%');
+      check('Episode JS timeline progress updates without new render',true);
+      await page.keyboard.press('Enter');check('OK reaches existing episode action without playback',await page.evaluate(()=>__issue8.episodeOK===1));
+      await page.evaluate(()=>{const c=document.querySelector('.activity--active .online-prestige');c.data.timeline.percent=0;});
+      await page.waitForFunction(()=>document.querySelector('.activity--active .online-prestige__timeline')?.style.display==='none');
+      check('Episode progress reset is retained',true);
+      await page.screenshot({path:path.join(out,'final-episodes.png')});
+     }
+     await page.keyboard.press('Escape');await page.waitForFunction(()=>Lampa.Activity.active()?.component==='main');await page.waitForTimeout(150);
+     const returned=await page.evaluate(()=>({timers:[...__issue8.probe.timers.values()].filter(t=>t.repeat&&!t.done).length,observers:__issue8.probe.observers.filter(o=>o.active).length,focus:!!document.querySelector('.activity--active .focus')}));
+     check('Back cleans episode resources '+(cycle+1),returned.timers===0&&returned.observers===0&&returned.focus,returned);
+    }
+   }
+
   }
  }catch(e){report.errors.push(e.message.replace(/https?:\/\/\S+/g,'[URL]'));report.diagnostic=await page.evaluate(()=>({loaded:!!window.YDesignLoaded,hybrid:!!window.StremioHybrid,activity:Lampa.Activity.active()?.component,cards:[...document.querySelectorAll('.activity--active .card')].map(c=>({cls:c.className,render:c._ydesign_render,data:!!c._ydesign_data,ext:!!c._ydesign_extData,lazy:!!c._ydesign_lazyMarks,connected:c.isConnected})).slice(0,5)})).catch(()=>null)}
  finally{capture=false;await page.unroute('**/*',route);await page.goto(restoreUrl,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>!window.__issue8&&window.Lampa?.Activity?.active()?.activity&&Lampa.Activity.active().component!=='issue8_fixture',null,{timeout:30000});check('Original native page restored without fixture globals',true);if(viewport)await page.setViewportSize(viewport);}
- fs.writeFileSync(path.join(out,baseline?'baseline.json':'runtime.json'),JSON.stringify(report,null,2));console.log(JSON.stringify({baseline,checks:report.checks,metrics:report.metrics,errors:report.errors}));process.exit(report.errors.length||report.checks.some(c=>c.status==='FAIL')?1:0);
+ fs.writeFileSync(path.join(out,baseline?'baseline.json':finalPass?'final-runtime.json':'runtime.json'),JSON.stringify(report,null,2));console.log(JSON.stringify({baseline,checks:report.checks,metrics:report.metrics,errors:report.errors}));process.exit(report.errors.length||report.checks.some(c=>c.status==='FAIL')?1:0);
 })().catch(e=>{console.error(e.message);process.exit(1)});

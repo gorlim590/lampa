@@ -376,3 +376,7 @@
 - Browser last run19PASS/1FAIL, exceptions=[]: only failure source coverage due Hybrid delivery alias. Alias fixed in harness, rerun pending. Exact YDesign body hash matches saved source; browser header still parent f58d52f. Final cleanup independently verified native Main/no fixture globals.
 - Before/after fixture route methodology differs; no speed/FPS claim. Full isolated mode/load-order/episode/provider/reload/browser checks and publication remain unfinished. Physical Google TV untested.
 - **Resume from `audit/issue-8/CONTINUE.md`** for exact commands, evidence, risks, missing tests and safe Draft publication path; no repeat broad audit. Do not continue until user resumes.
+
+### Issue #8 — resumed with agreed reduced validation scope
+- Read the updated opening section of #8. main remains fcc148f; no open PR conflicts. Existing results retained without a repeated audit.
+- Full load-order/multi-screen/profile matrix is no longer required.161 focused tests and repository checks PASS at resumption. Existing harness now supports --final: exact source alias proof, short card/Hybrid smoke plus3 episode Activity transitions and resource cleanup; no additional detailed profiling. Final browser run follows this commit.

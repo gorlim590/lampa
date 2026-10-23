@@ -1,3 +1,7 @@
+> Resumed under the updated #8 section «Узгоджений скорочений обсяг перевірок».
+> Its reduced validation scope supersedes the old pending full-matrix/profiling list below.
+> Reuse earlier evidence; no new baseline/profile. Run focused161 tests/checks and one final existing-CDP smoke with episode transitions/cleanup. Physical TV acceptance remains the user's step.
+
 # Issue #8 — continuation checkpoint (2026-10-23)
 
 Stopped at the user's explicit request. Do not begin new changes until resumed.
