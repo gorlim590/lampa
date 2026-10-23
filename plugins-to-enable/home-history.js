@@ -72,8 +72,7 @@
     }
     function cardFor(group) {
         var card = group.cards.find(function (c) { return c.source === 'tmdb' || c.source === 'cub' || !c.source; }) || group.cards[0];
-        var result = Object.assign({}, card), mapped = card.ids && card.ids.tmdb || card.tmdb_id;
-        if (mapped) { result.id = mapped; result.source = 'tmdb'; }
+        var result = Object.assign({}, card); // Keep native playback identity; aliases are for dedup only.
         result.media_type = tv(card) ? 'tv' : 'movie'; return result;
     }
     function schedule(card) {
@@ -82,21 +81,21 @@
     }
     function readings(group, snapshot, names, index) {
         var found = [], seen = Object.create(null), keys = group.cards.map(linked);
-        function add(hash, road) {
+        function add(hash, road, owner) {
             if (!road || typeof road !== 'object' || seen[hash] || road.card && keys.indexOf(road.card) < 0) return;
-            seen[hash] = true; found.push({ hash: hash, road: road });
+            seen[hash] = true; found.push({ hash: hash, road: road, owner: owner });
         }
         keys.forEach(function (key) { (index[key] || []).forEach(function (entry) { add(entry.hash, entry.road); }); });
         group.cards.forEach(function (c) {
             var episodes = tv(c) ? schedule(c) : [];
             [c.original_title, c.original_name, c.title, c.name].forEach(function (name) {
                 if (!name || names[name] > 1) return;
-                if (!tv(c)) { var hash = String(L.Utils.hash(name)); add(hash, snapshot[hash]); return; }
+                if (!tv(c)) { var hash = String(L.Utils.hash(name)); add(hash, snapshot[hash], c); return; }
                 episodes.forEach(function (ep) {
                     var s = Number(ep.season_number), e = Number(ep.episode_number);
                     if (!(s > 0 && e > 0)) return;
                     var hash = String(L.Utils.hash([s, s > 10 ? ':' : '', e, name].join(''))), road = snapshot[hash];
-                    if (road && typeof road === 'object') add(hash, Object.assign({}, road, { season: s, episode: e }));
+                    if (road && typeof road === 'object') add(hash, Object.assign({}, road, { season: s, episode: e }), c);
                 });
             });
         });
@@ -180,7 +179,13 @@
                     positionKnown: p.time > 0, label: p.time > 0 ? 'Продовжити збережене відтворення' : 'Прогрес відомий · позиція недоступна' };
                 if (card.media_type === 'tv') { resume.season = Number(road.season); resume.episode = Number(road.episode); }
             } else if (card.media_type === 'tv') resume = nextEpisode(card, evidence);
-            if (resume) result.resume.push({ card: annotate(card, resume), index: index, updated: resume.updated });
+            if (resume) {
+                if (latest && resume.mode === 'position') {
+                    var owner = group.cards.find(function (c) { return linked(c) === latest.entry.road.card; }) || latest.entry.owner;
+                    if (owner) card = Object.assign({}, card, owner, { media_type: tv(owner) ? 'tv' : 'movie' });
+                }
+                result.resume.push({ card: annotate(card, resume), index: index, updated: resume.updated });
+            }
         });
         result.resume.sort(function (a, b) { return b.updated - a.updated || a.index - b.index; });
         result.resume = result.resume.map(function (r) { return r.card; }); return result;
