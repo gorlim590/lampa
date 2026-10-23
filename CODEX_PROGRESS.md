@@ -339,3 +339,9 @@
 - Implemented authenticated owner-bound cache v7, credential-generation guards/cancellation for background/manual/lazy progress, same-owner verified hydration after restart/rotation, owner-scoped auto-sync success metadata and strict initial/final activity timestamps. Local lists/history/progress/provenance are retained without deletion.
 - 98 unit/regression checks PASS at implementation checkpoint. Native GET optional options preserve old callers while integrity reads bypass native cache/in-flight dedup. Loader cache tag advanced; plugin order unchanged.
 - Details/contract/limits: docs/issue-7-account-isolation.md. Browser checks and final exact SHA/results follow in the Draft PR and audit/issue-7-account. No merge authorized for this follow-up; Issue #7 must remain open. No other Issue begins automatically.
+
+### Issue #7 account/integrity final checkpoint
+- Authenticated identity reuses the already supported native /users/me endpoint; UUID preferred, verified slug fallback. Local implementation commits ec333f1 /8321ffe, harness source-proof correction e70cd08. Source tested by CDP: e70cd0828da4fd548049076dcb6565a573aee9a5.
+- Final results:99 unit regressions PASS;23 existing-CDP runtime checks PASS,0FAIL, exceptions=[]; exact source SHA256/header commit checked for loader/TraktTV/Trakt+/unchanged YDesign. Normal profile delivery/methods restored; real local values preserved. No real Trakt mutation, storage reset, browser close or physical-TV claim.
+- Initial browser source check was corrected for this profile's preview-loader alias; final full focused run passed. Tests/limits/screenshots at audit/issue-7-account/RESULTS.md and browser-report.json; root causes at docs/issue-7-account-isolation.md.
+- Next authorized step: publish this isolated branch as a Draft PR, verify GitHub CI and add a detailed #7 report. Do not merge main or close #7. Further action after review requires the user's decision; no next Issue is started.
