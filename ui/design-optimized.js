@@ -8,6 +8,7 @@
 
     if (window.YDesignLoaded) return;
     window.YDesignLoaded = true;
+    window.YDesignVersion = '3.4.0';
 
     // =========================================================================
     // 1. КОНФІГУРАЦІЯ ТА ВЕКТОРНІ ІКОНКИ РЕЙТИНГІВ
@@ -61,7 +62,6 @@
         ydesign_ua_torrents: false,
         ydesign_ribbons: true,
         ydesign_watched_mark: true,
-        ydesign_history_watched: true,
         ydesign_progress_marks: true,
         ydesign_collection_mark: true,
         ydesign_row_continue: true,
@@ -544,7 +544,7 @@
                 };
                 for (var i = 0; i < markKeys.length; i++) {
                     var mk = markKeys[i];
-                    if (favStatus[mk]) {
+                    if (mk === 'viewed' ? isWatched(data) === true : favStatus[mk]) {
                         var markTitle = (window.Lampa && Lampa.Lang && Lampa.Lang.translate) ? Lampa.Lang.translate('title_' + mk) : '';
                         if (!markTitle || markTitle.indexOf('title_') === 0) {
                             markTitle = markDict[mk] || mk;
@@ -595,12 +595,7 @@
         var iconsHtml = '';
         try {
             var favStatus = (window.Lampa && Lampa.Favorite && Lampa.Favorite.check) ? Lampa.Favorite.check(data) : {};
-            var isWatched = false;
-            try {
-                if (window.Lampa && Lampa.Timeline && Lampa.Timeline.watched) {
-                    isWatched = Lampa.Timeline.watched(data);
-                }
-            } catch (e) {}
+            var hasProgress = moviePercent(data) > 0;
 
             // 1. Закладки (book)
             if (favStatus.book) {
@@ -615,7 +610,7 @@
                 iconsHtml += '<svg class="ydesign-notch-icon ydesign-notch-icon-wath" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm.5 13H11V7h1.5v6.2l3.75 2.25-.75 1.23-4-2.48z"/></svg>';
             }
             // 4. Історія перегляду (history / watched)
-            if (favStatus.history || isWatched) {
+            if (favStatus.history || hasProgress) {
                 iconsHtml += '<svg class="ydesign-notch-icon ydesign-notch-icon-history" viewBox="0 0 24 24" fill="currentColor"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>';
             }
         } catch (e) {}
@@ -790,11 +785,15 @@
 
     var ApiCache = {
         get: function (key) {
-            if (MemoryCache.has(key)) return MemoryCache.get(key);
+            if (MemoryCache.has(key)) {
+                var memory = MemoryCache.get(key), age = Date.now() - Number(memory.t);
+                if (isFinite(age) && age >= 0 && age < CONFIG.cacheTime) return memory.v;
+                MemoryCache.delete(key);
+            }
             persistLoad();
             var rec = persistData[key];
-            if (rec && rec.t && (Date.now() - rec.t < CONFIG.cacheTime)) {
-                MemoryCache.set(key, rec.v);
+            if (rec && rec.t && Date.now() >= rec.t && (Date.now() - rec.t < CONFIG.cacheTime)) {
+                MemoryCache.set(key, rec);
                 return rec.v;
             }
             return null;
@@ -804,7 +803,7 @@
                 var keys = MemoryCache.keys();
                 if (keys.length > 0) MemoryCache.delete(keys[0]);
             }
-            MemoryCache.set(key, val);
+            MemoryCache.set(key, { v: val, t: Date.now() });
             persistLoad();
             persistData[key] = { v: val, t: Date.now() };
             persistSchedule();
@@ -961,30 +960,40 @@
 
     var UA_NEG_TTL = 12 * 60 * 60 * 1000; // «немає UA» перевіряємо знову через 12 годин (раніше — 7 діб)
 
+    var UaRequests = {};
+    function parseUaResponse(value) {
+        if (value === true || value === false) return value;
+        if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+        if (value.error || value.status === 'error' || value.success === false || value.ok === false) return null;
+        // Observed WH schema: {play: absolute HTTP(S) URL}. A generic success
+        // object is not audio evidence. Errors/unknown shapes are never cached.
+        if (Object.prototype.hasOwnProperty.call(value, 'play')) {
+            if (typeof value.play === 'string' && /^https?:\/\/[^\s]+$/i.test(value.play)) return true;
+            if (value.play === null || value.play === '') return false;
+        }
+        return null;
+    }
     function checkUaVoiceover(tmdbId, type) {
-        return new Promise(function (resolve) {
-            var cacheKey = 'ua_' + tmdbId;
-            var cached = ApiCache.get(cacheKey);
-            if (cached === true) return resolve(true);
-            if (cached && typeof cached === 'object' && cached.n && (Date.now() - cached.n < UA_NEG_TTL)) return resolve(false);
-
-            var isSerial = (type === 'tv' || type === 'tv_series') ? 1 : 0;
-            var url = 'https://wh.lme.isroot.in/?tmdb_id=' + encodeURIComponent(tmdbId) + '&serial=' + isSerial + '&silent=true';
-
+        var media = type === 'tv' || type === 'tv_series' || type === 'anime' ? 'tv' : 'movie';
+        var id = Number(tmdbId);
+        if (!(id > 0 && id % 1 === 0)) return Promise.resolve(null);
+        var cacheKey = 'ua_v2_' + media + '_' + id, cached = ApiCache.get(cacheKey);
+        if (cached && cached.v === 2 && typeof cached.value === 'boolean' && cached.t > 0 && Date.now() >= cached.t && Date.now() - cached.t < (cached.value ? CONFIG.cacheTime : UA_NEG_TTL)) return Promise.resolve(cached.value);
+        if (UaRequests[cacheKey]) return UaRequests[cacheKey];
+        var request = new Promise(function (resolve) {
             qajax({
-                url: url,
+                url: 'https://wh.lme.isroot.in/?tmdb_id=' + encodeURIComponent(id) + '&serial=' + (media === 'tv' ? 1 : 0) + '&silent=true',
                 timeout: 5000,
-                success: function (r) {
-                    var hasUa = (r === true || (r && (r.success === true || r.status === 'success' || r.ok === true || (typeof r === 'object' && Object.keys(r).length > 0 && !r.error))));
-                    ApiCache.set(cacheKey, hasUa ? true : { n: Date.now() });
-                    resolve(hasUa);
+                success: function (value) {
+                    var answer = parseUaResponse(value);
+                    if (answer !== null) ApiCache.set(cacheKey, { v: 2, value: answer, t: Date.now() });
+                    resolve(answer);
                 },
-                error: function () {
-                    // збій мережі/таймаут не кешуємо — інакше плашка не з'являлась би тиждень
-                    resolve(false);
-                }
+                error: function () { resolve(null); }
             });
         });
+        UaRequests[cacheKey] = request.then(function (value) { delete UaRequests[cacheKey]; return value; }, function () { delete UaRequests[cacheKey]; return null; });
+        return UaRequests[cacheKey];
     }
 
     // =========================================================================
@@ -1197,16 +1206,18 @@
         });
     }
 
+    var ExtendedRequests = {};
     function fetchExtendedData(id, type) {
         var langPref = getSet('ydesign_lang');
         var sloganLang = getSet('ydesign_slogan_lang');
 
-        var cacheKey = 'ext_' + type + '_' + id + '_' + langPref + '_' + sloganLang + '_v7';
+        var cacheKey = extCacheKey(id, type);
         var cached = ApiCache.get(cacheKey);
         // дані серіалів (остання/наступна серія) швидко старіють — оновлюємо раз на 12 годин
         if (cached && !(type === 'tv' && (!cached.fetched || Date.now() - cached.fetched > 43200000))) return Promise.resolve(cached);
 
-        return new Promise(function (resolve) {
+        if (ExtendedRequests[cacheKey]) return ExtendedRequests[cacheKey];
+        var request = new Promise(function (resolve) {
             var langQuery = 'uk-UA'; // Always keep a Ukrainian text title, independently of the logo language.
             var url = 'https://api.themoviedb.org/3/' + type + '/' + id +
                 '?api_key=' + CONFIG.tmdbKey() +
@@ -1218,6 +1229,7 @@
                 url: url,
                 timeout: 4500,
                 success: function(data) {
+                    if (!data || typeof data !== 'object' || Number(data.id) !== Number(id)) { resolve(null); return; }
                     var enData = null;
                     var needEn = false;
                     if (sloganLang === 'en' || langPref === 'en_orig') needEn = true;
@@ -1346,7 +1358,8 @@
                     resolve(null);
                 }
             });
-        });
+        });        ExtendedRequests[cacheKey] = request.then(function (value) { delete ExtendedRequests[cacheKey]; return value; }, function () { delete ExtendedRequests[cacheKey]; return null; });
+        return ExtendedRequests[cacheKey];
     }
 
     // =========================================================================
@@ -1431,16 +1444,13 @@
     var NEW_DAYS = 14;          // «Новинка»: вийшло не раніше ніж 14 днів тому
     var SOON_DAYS = 14;         // «Нова серія» / «Скоро»: у найближчі 14 днів
     var WEEK_DAYS = 7;          // рядок «Виходять цього тижня»
-    var WATCHED_MOVIE = 90;     // фільм вважається переглянутим від 90%
-    var WATCHED_HISTORY = 50;   // запасне правило для фільму з Історії (якщо вимкнено «усі з Історії»)
-    var WATCHED_EPISODE = 90;   // серія вважається переглянутою від 90%
+    var EPISODE_PROGRESS_DONE = 90;   // серія вважається переглянутою від 90%
     var CONT_MIN = 3;           // від скількох % фільм вважається «розпочатим»
     var EXT_FAILED = { failed: true };
 
     // «епоха» позначок: збільшуємо, коли змінились таймлайн/історія — тоді кеш карток недійсний
     var MarksEpoch = 0;
-    var HistoryIdx = { t: 0, map: {} };
-    function bumpMarks() { MarksEpoch++; HistoryIdx.t = 0; }
+    function bumpMarks() { MarksEpoch++; }
 
     function parseYmd(s) {
         var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s || ''));
@@ -1524,23 +1534,7 @@
     }
 
     // Чи є картка в списку «Історія перегляду» (індекс кешується на кілька секунд)
-    function inHistoryList(card) {
-        var now = Date.now();
-        if (now - HistoryIdx.t > 4000) {
-            var map = {};
-            try {
-                var list = (Lampa.Favorite && Lampa.Favorite.get({ type: 'history' })) || [];
-                for (var i = 0; i < list.length; i++) {
-                    var c = list[i];
-                    if (c && c.id) map[c.id] = (map[c.id] || 0) | (isTvMedia(c) ? 1 : 2);
-                }
-            } catch (e) {}
-            HistoryIdx.map = map;
-            HistoryIdx.t = now;
-        }
-        var m = HistoryIdx.map[card.id];
-        return !!(m && (m & (isTvMedia(card) ? 1 : 2)));
-    }
+
 
     // Прогрес серіалу/аніме: скільки серій переглянуто, яка наступна, прогрес поточного сезону
     function tvProgress(data, ext) {
@@ -1558,7 +1552,7 @@
                 var ss = 0;
                 for (var e = 1; e <= max && guard < 4000; e++, guard++) {
                     aired++;
-                    if (tlPercent(episodeHash(title, s.n, e)) >= WATCHED_EPISODE) { seen++; ss++; }
+                    if (tlPercent(episodeHash(title, s.n, e)) >= EPISODE_PROGRESS_DONE) { seen++; ss++; }
                     else if (!next) next = { s: s.n, e: e };
                 }
                 per[s.n] = { seen: ss, total: s.c || max };
@@ -1577,50 +1571,82 @@
      *   Позначка «Переглянуто» враховується лише для завершених серіалів.
      */
     // Міст до плагіна Trakt+ (window.TraktPlus.isWatched) — єдина позначка «Переглянуто» без дублювання
-    function traktWatched(d) {
-        try { return !!(d && window.TraktPlus && typeof window.TraktPlus.isWatched === 'function' && window.TraktPlus.isWatched(d)); }
-        catch (e) { return false; }
-    }
+
     // власний (повний URL) постер картки, якщо немає TMDB-шляху — наприклад, картки Trakt+
     function ownImg(d) {
         var u = d && (d.poster || d.img || d.image || '');
         return (typeof u === 'string' && u.indexOf('http') === 0) ? u : '';
     }
 
-    function isWatched(data, type, ext, inHistory) {
+    // Presentation remembers only confirmed Trakt evidence, partitioned by account,
+    // normalized media type and TMDB ID. Local playback progress is unrelated.
+    var WatchPresentation = { loaded: false, accounts: {}, timer: null, dirty: false };
+    var WATCH_PRESENT_KEY = 'ydesign_trakt_status_v1';
+    function watchMetadata(data) {
         try {
-            if (data && data._lib) return false; // папка «Trakt: Переглянуті» — там усе переглянуте, не затемнюємо
-            if (!window.Lampa || !Lampa.Utils || typeof Lampa.Utils.hash !== 'function' ||
-                !Lampa.Timeline || typeof Lampa.Timeline.view !== 'function') return false;
-
-            var fav = {};
-            try { fav = (Lampa.Favorite && Lampa.Favorite.check(data)) || {}; } catch (e1) {}
-            var title = data.original_title || data.original_name || data.title || data.name || '';
-
-            if (type !== 'tv') {
-                if (data.ydesign_row === 'cont') return false;
-                if (fav.viewed) return true;
-                if (traktWatched(data)) return true;
-                var hist = !!(fav.history || inHistory || inHistoryList(data));
-                if (hist && getSet('ydesign_history_watched')) return true;
-                var p = moviePercent(data);
-                if (p >= WATCHED_MOVIE) return true;
-                return hist && p >= WATCHED_HISTORY;
+            var provider = window.TraktPlus;
+            if (!provider || typeof provider.watchedStatus !== 'function') return null;
+            var state = provider.watchedStatus(data);
+            if (!state || state.source !== 'trakt' || typeof state.owner !== 'string' || !/^(?:uuid|slug):[a-zA-Z0-9_-]{1,128}$/.test(state.owner) ||
+                typeof state.session !== 'number' || !isFinite(state.session)) return null;
+            return state;
+        } catch (e) { return null; }
+    }
+    function presentationLoad() {
+        if (WatchPresentation.loaded) return;
+        WatchPresentation.loaded = true;
+        try {
+            var raw = Lampa.Storage.get(WATCH_PRESENT_KEY);
+            if (raw && raw.v === 1 && raw.accounts && typeof raw.accounts === 'object' && !Array.isArray(raw.accounts)) {
+                WatchPresentation.accounts = JSON.parse(JSON.stringify(raw.accounts));
             }
-
-            // Trakt має пріоритет і не залежить від завантаження додаткових даних TMDB.
-            if (traktWatched(data)) return true;
-            if (!ext) return false;                 // дані серіалу ще вантажаться — не мигаємо позначкою
-            if (ext.failed) return !!fav.viewed;    // TMDB недоступний — лишаємо тільки позначку Lampa
-            if (!title) return false;
-
-            var last = ext.last_ep;
-            if (last && last.season !== undefined && last.episode !== undefined) {
-                if (tlPercent(episodeHash(title, last.season, last.episode)) >= WATCHED_EPISODE) return true;
+        } catch (e) { WatchPresentation.accounts = {}; }
+    }
+    function presentationSave(data, state) {
+        if (WatchPresentation.timer) return;
+        var owner = state.owner, session = state.session;
+        WatchPresentation.timer = setTimeout(function () {
+            WatchPresentation.timer = null;
+            var current = watchMetadata(data);
+            if (!current || current.owner !== owner || current.session !== session) {
+                if (current && WatchPresentation.dirty) presentationSave(data, current);
+                return;
             }
-            return !!(fav.viewed && ext.ended);
-        } catch (e) {}
-        return false;
+            var accounts = WatchPresentation.accounts;
+            Object.keys(accounts).forEach(function (key) {
+                var account = accounts[key];
+                if (!account || !account.items || typeof account.items !== 'object') { delete accounts[key]; return; }
+                var ids = Object.keys(account.items).sort(function (a, b) { return (account.items[b].t || 0) - (account.items[a].t || 0); });
+                ids.slice(1500).forEach(function (id) { delete account.items[id]; });
+            });
+            Object.keys(accounts).sort(function (a, b) { return (accounts[b].t || 0) - (accounts[a].t || 0); }).slice(3).forEach(function (key) { delete accounts[key]; });
+            try { Lampa.Storage.set(WATCH_PRESENT_KEY, { v: 1, accounts: JSON.parse(JSON.stringify(accounts)) }); WatchPresentation.dirty = false; } catch (e) {}
+        }, 300);
+    }
+    function isWatched(data, output) {
+        var state = watchMetadata(data);
+        if (output) output.watchPhase = state ? state.phase : 'unavailable';
+        if (!state) return null; // No plugin/authenticated owner is never negative evidence.
+        var id = Number(state.tmdbId), media = state.mediaType;
+        var expected = data && data.ids && data.ids.tmdb || data && data.tmdb_id || (data && data.source !== 'trakt' && data.id);
+        if (!data || !(id > 0 && id % 1 === 0) || Number(expected) !== id ||
+            (media !== 'movie' && media !== 'tv') || media !== (isTvMedia(data) ? 'tv' : 'movie')) return null;
+        presentationLoad();
+        var account = WatchPresentation.accounts[state.owner], key = media + ':' + id;
+        var old = account && account.items && account.items[key];
+        if (state.phase === 'ready' && typeof state.value === 'boolean' &&
+            typeof state.updatedAt === 'number' && state.updatedAt > 0 && state.updatedAt <= Date.now()) {
+            if (old && old.confirmedAt > state.updatedAt && typeof old.value === 'boolean') return old.value;
+            if (!account || !account.items || Array.isArray(account.items)) account = WatchPresentation.accounts[state.owner] = { items: {}, t: 0 };
+            if (!old || old.value !== state.value || old.confirmedAt !== state.updatedAt) {
+                account.items[key] = { value: state.value, confirmedAt: state.updatedAt, t: Date.now() };
+                account.t = Date.now(); WatchPresentation.dirty = true;
+            }
+            if (WatchPresentation.dirty) presentationSave(data, state);
+            return state.value;
+        }
+        if (WatchPresentation.dirty) presentationSave(data, state);
+        return old && typeof old.value === 'boolean' && old.confirmedAt > 0 && old.confirmedAt <= Date.now() ? old.value : null;
     }
 
     // ---- «Продовження»: чи бачили попередню частину франшизи ----
@@ -1668,10 +1694,7 @@
         for (var i = 0; i < parts.length; i++) {
             var p = parts[i];
             if (p.id == data.id || !p.d || (mine && p.d >= mine)) continue;
-            if (moviePercent({ original_title: p.o, title: p.t }) >= WATCHED_HISTORY) return true;
-            if (inHistoryList({ id: p.id, title: p.t })) return true;
-            try { var f = Lampa.Favorite.check({ id: p.id }) || {}; if (f.viewed) return true; } catch (e) {}
-            try { if (window.TraktPlus && TraktPlus.isWatched && TraktPlus.isWatched({ id: p.id, method: 'movie' })) return true; } catch (e) {}
+            if (isWatched({id:p.id,media_type:'movie',source:'tmdb'}) === true) return true;
         }
         return false;
     }
@@ -1696,11 +1719,11 @@
         var day = new Date().getDate();
         var parts = type === 'tv' ? null : getCollParts(el, ext);
         var mk = el._ydesign_mk;
-        if (mk && mk.epoch === MarksEpoch && mk.ext === ext && mk.day === day && mk.coll === !!parts) return mk;
+        if (mk && mk.epoch === MarksEpoch && mk.ext === ext && mk.day === day && mk.coll === !!parts) { mk.watched = isWatched(data, mk); return mk; }
 
         mk = { epoch: MarksEpoch, ext: ext, day: day, coll: !!parts, pct: 0, tv: null, seq: false };
         mk.info = releaseInfo(data, type, ext);
-        mk.watched = isWatched(data, type, ext, !!el._ydesign_inHistory);
+        mk.watched = isWatched(data, mk);
         if (type === 'tv') {
             if (ext && !ext.failed) mk.tv = tvProgress(data, ext);
         } else {
@@ -1775,7 +1798,7 @@
         }
 
         // знизу (фільми): смужка прогресу, відсоток видно у фокусі
-        var showBar = progressOn && type !== 'tv' && mk.pct >= CONT_MIN && mk.pct < WATCHED_MOVIE;
+        var showBar = progressOn && type !== 'tv' && mk.pct >= CONT_MIN && mk.pct < 100;
         var bar = view.querySelector('.ydesign-pbar');
         if (showBar) {
             var pct = Math.min(100, Math.round(mk.pct));
@@ -1806,9 +1829,13 @@
             chk.innerHTML = CHECK_SVG;
             view.appendChild(chk);
         }
-        if (el.classList.contains('ydesign-is-watched') !== mk.watched) el.classList.toggle('ydesign-is-watched', mk.watched);
-        var fromTrakt = !!(mk.watched && traktWatched(data));
-        if (el.classList.contains('ydesign-from-trakt') !== fromTrakt) el.classList.toggle('ydesign-from-trakt', fromTrakt);
+        var confirmed = mk.watched === true;
+        if (!confirmed) { removeNode(view, 'ydesign-watched-dim'); removeNode(view, 'ydesign-watched-check'); }
+        if (el.classList.contains('ydesign-is-watched') !== confirmed) el.classList.toggle('ydesign-is-watched', confirmed);
+        if (el.classList.contains('ydesign-from-trakt') !== confirmed) el.classList.toggle('ydesign-from-trakt', confirmed);
+        el.setAttribute('data-ydesign-watched', mk.watched === null ? 'unknown' : confirmed ? 'watched' : 'unwatched');
+        el.setAttribute('data-ydesign-watch-phase', mk.watchPhase);
+
     }
 
     // Оновлення позначок на видимих картках після змін у таймлайні/історії (порціями, без фризів)
@@ -1837,7 +1864,7 @@
     var ROW_LISTS = ['look', 'continued', 'scheduled', 'book', 'like', 'wath', 'history'];
 
     function extCacheKey(id, type) {
-        return 'ext_' + type + '_' + id + '_' + getSet('ydesign_lang') + '_' + getSet('ydesign_slogan_lang') + '_v6';
+        return 'ext_' + type + '_' + id + '_' + getSet('ydesign_lang') + '_' + getSet('ydesign_slogan_lang') + '_v8';
     }
 
     function rowCandidates() {
@@ -1877,7 +1904,7 @@
                 if (pr && pr.seen > 0 && pr.unseen > 0) cont.push(c);
             } else {
                 var p = moviePercent(c);
-                if (p >= CONT_MIN && p < WATCHED_HISTORY) cont.push(c);
+                if (p >= CONT_MIN && p < 100) cont.push(c);
             }
         }
         up.sort(function (a, b) { return a.d - b.d; });
@@ -1995,6 +2022,9 @@
         el.classList.add('ydesign-card');
         migrateVertical(el);
 
+        var render = el._ydesign_render = (el._ydesign_render || 0) + 1;
+        el._ydesign_data = data;
+        function current() { return el.isConnected && el._ydesign_render === render && el._ydesign_data === data; }
         var prefix = 'ydesign_v_';
         var type = isTvMedia(data, el) ? 'tv' : (data.media_type || 'movie');
         if (!data.media_type) data.media_type = type;
@@ -2016,6 +2046,7 @@
             var view = el.querySelector('.card__view');
             if (!view) return;
             view.innerHTML = '';
+            el._ydesign_bg_applied = null;
 
             var imgLayer = document.createElement('div'); imgLayer.className = 'ydesign-img-layer';
             var gradientLayer = document.createElement('div'); gradientLayer.className = 'ydesign-gradient-layer';
@@ -2036,6 +2067,7 @@
                 el._ydesign_bg_applied = fullUrl;
 
                 getProminentColorAsync(path).then(function (color) {
+                    if (!current()) return;
                     if (color) {
                         view.style.backgroundColor = color;
                         el.style.setProperty('--yd-glow', color);
@@ -2048,6 +2080,7 @@
                     var img = new Image();
                     img.decoding = 'async';
                     img.onload = function () {
+                        if (!current()) return;
                         imgLayer.style.setProperty('--loaded-bg', 'url(' + fullUrl + ')');
                         imgLayer.classList.add('loaded');
                     };
@@ -2056,6 +2089,7 @@
             };
 
             fetchExtendedData(data.id, type).then(function (extData) {
+                if (!current()) return;
                 if (extData) {
                     // Якщо детальна відповідь не містить опису/жанрів, використовуємо дані картки.
                     if (!Array.isArray(extData.genres) || !extData.genres.length) extData.genres = fallbackGenres(data, type);
@@ -2166,13 +2200,14 @@
                     if (cached === true) { addUaBadge('Є в торентах'); return; }
                     if (cached === false) return;
                     checkTorrentsUa(data, type).then(function (found) {
-                        if (found && el.isConnected) addUaBadge('Є в торентах');
+                        if (found && current()) addUaBadge('Є в торентах');
                     });
                 }
 
                 if (torrentUaCached(data.id, type) === true) addUaBadge('Є в торентах');
                 checkUaVoiceover(data.id, type).then(function (hasUa) {
-                    if (hasUa) addUaBadge();
+                    if (!current()) return;
+                    if (hasUa === true) addUaBadge();
                     else armTorrentUa();
                 });
 
@@ -2199,7 +2234,9 @@
 
                 renderRatingsAsync(ratingsWrap, data, extData, null).then(function() {
                     scheduleOverflowFix(contentLayer);
+                    if (!current()) return;
                     fetchExternalRatings(data.id, type).then(function (extRatings) {
+                        if (!current()) return;
                         if (extRatings && Object.keys(extRatings).length > 0) {
                             renderRatingsAsync(ratingsWrap, data, extData, extRatings).then(function () { scheduleOverflowFix(contentLayer); });
                         }
@@ -2225,7 +2262,7 @@
                 }
 
                 scheduleOverflowFix(contentLayer);
-                setTimeout(function () { scheduleOverflowFix(contentLayer); }, 1500);
+                setTimeout(function () { if (current()) scheduleOverflowFix(contentLayer); }, 1500);
                 el.classList.add('ydesign-ready');
             });
         };
@@ -3090,9 +3127,8 @@
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_lazy_load', type: 'trigger', default: DefaultSettings.ydesign_lazy_load }, field: { name: 'Ліниве завантаження', description: 'Завантажувати додаткові дані (лого, рейтинги) тільки при появі картки на екрані' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_ua_torrents', type: 'trigger', default: DefaultSettings.ydesign_ua_torrents }, field: { name: 'UA-плашка за торентами', description: 'Додатково шукати українську озвучку через парсер Lampa (Jackett/Prowlarr/JacRed з Толокою тощо). Видимі картки перевіряються у фоні без наведення. Потрібен налаштований парсер' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_ribbons', type: 'trigger', default: DefaultSettings.ydesign_ribbons }, field: { name: 'Позначки «Новинка» / «Скоро»', description: 'Новинка — вийшло менше ніж 14 днів тому; Нова серія — серіал/аніме з серією в найближчі 14 днів; Скоро — прем’єра серіалу' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_watched_mark', type: 'trigger', default: DefaultSettings.ydesign_watched_mark }, field: { name: 'Позначка «Переглянуто»', description: 'Постер тьмяніє й отримує галочку (фільм з Історії, від 90% перегляду або за відміткою Lampa; серіал — якщо переглянуто останню серію)' } });
+        Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_watched_mark', type: 'trigger', default: DefaultSettings.ydesign_watched_mark }, field: { name: 'Позначка «Переглянуто»', description: 'Підтверджений статус Trakt+ для поточного акаунта; локальна історія зберігає лише прогрес' } });
 
-        Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_history_watched', type: 'trigger', default: DefaultSettings.ydesign_history_watched }, field: { name: 'Усі фільми з Історії — переглянуто', description: 'Фільм з «Історії перегляду» тьмяніє й отримує галочку. Вимкнено — лише від 50% перегляду' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_progress_marks', type: 'trigger', default: DefaultSettings.ydesign_progress_marks }, field: { name: 'Прогрес на картках', description: 'Смужка для розпочатих фільмів; для серіалів — «Далі S2E5», «+3» непереглянутих і кільце сезону «7/12»' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_collection_mark', type: 'trigger', default: DefaultSettings.ydesign_collection_mark }, field: { name: 'Мітка «Продовження»', description: 'Для фільму з франшизи, попередню частину якого ви вже дивились' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_row_continue', type: 'trigger', default: DefaultSettings.ydesign_row_continue }, field: { name: 'Рядок «Продовжити перегляд»', description: 'На головній: розпочаті серіали та фільми з лічильником. Дані з’являються після першого фонового завантаження' } });
