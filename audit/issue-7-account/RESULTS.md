@@ -30,3 +30,7 @@ All tested Trakt/Favorite/cache operations are fixtures in memory; outbound HTTP
 - Consistently truncated but plausible HTTP200 responses cannot be fully proven complete by these array-only wrappers. Existing additive import retains local data.
 
 Root causes, cache migration and minimum activity contract: `docs/issue-7-account-isolation.md`. Stop after #7; do not start another Issue automatically.
+
+## Draft publication and CI
+
+Draft PR: https://github.com/gorlim590/lampa/pull/27 . Implementation/evidence head ad620c43ee9243fcc4bca1ca2e6e0a6d354f112a. GitHub CI on Node20 confirms99PASS/0FAIL plus static/whitespace checks: https://github.com/gorlim590/lampa/actions/runs/39938617150 . Later publication-checkpoint commits affect documentation/evidence only. Main remains unchanged; Issue #7 remains open.
