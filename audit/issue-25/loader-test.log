@@ -1,4 +1,4 @@
-✔ loader refreshes Trakt+ source version without changing plugin order (22.742092ms)
+✔ loader refreshes Trakt+ source version without changing plugin order (8.13601ms)
 ℹ tests 1
 ℹ suites 0
 ℹ pass 1
@@ -6,4 +6,4 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 418.661662
+ℹ duration_ms 133.958066

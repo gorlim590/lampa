@@ -3,7 +3,8 @@
 const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process'),crypto=require('node:crypto'),{chromium}=require('playwright');
 const root=path.resolve(__dirname,'..'),out=path.join(root,'audit/issue-25');fs.mkdirSync(out,{recursive:true});
 const sha=cp.execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
-const files=Object.fromEntries(['loader.js','ui/design-optimized.js','plugins-to-enable/home-history.js'].map(p=>['/'+p,fs.readFileSync(path.join(root,p),'utf8')]));
+const files=Object.fromEntries(['loader.js','ui/design-optimized.js','plugins-to-enable/home-history.js','ui/stremio-hybrid.js'].map(p=>['/'+p,fs.readFileSync(path.join(root,p),'utf8')]));
+const sourceKey=u=>u.pathname.endsWith('/preview-loader.js')?'/loader.js':u.pathname.endsWith('/stremio-hybrid.js')?'/ui/stremio-hybrid.js':Object.keys(files).find(k=>u.pathname.endsWith(k));
 const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
 //60 seconds of silence, valid PCM WAV, no downloads or random stream playback.
 const wav=Buffer.alloc(44+480000,128);wav.write('RIFF');wav.writeUInt32LE(wav.length-8,4);wav.write('WAVEfmt ',8);wav.writeUInt32LE(16,16);wav.writeUInt16LE(1,20);wav.writeUInt16LE(1,22);wav.writeUInt32LE(8000,24);wav.writeUInt32LE(8000,28);wav.writeUInt16LE(1,32);wav.writeUInt16LE(8,34);wav.write('data',36);wav.writeUInt32LE(480000,40);
@@ -11,7 +12,7 @@ const wav=Buffer.alloc(44+480000,128);wav.write('RIFF');wav.writeUInt32LE(wav.le
  const r={commit:sha,checks:[],errors:[],sources:{},blocked:['Physical Google TV','Actual user three titles/missing examples not available in this test profile','External player/provider backend']},check=(name,ok,data)=>r.checks.push({name,status:ok?'PASS':'FAIL',...(data===undefined?{}:{data})});
  const browser=await chromium.connectOverCDP('http://127.0.0.1:9222'),page=browser.contexts()[0].pages().find(p=>p.url().includes('siaivo.isroot.in'));if(!page)throw Error('BLOCKED: existing Lampa tab unavailable');
  const originalUrl=page.url(),restoreUrl=/issue25_/.test(originalUrl)?'https://siaivo.isroot.in/?component=main&source=tmdb&page=1':originalUrl;let capture=true;
- const jobs=[];page.on('response',response=>{const u=new URL(response.url()),key=u.pathname.endsWith('/preview-loader.js')?'/loader.js':Object.keys(files).find(k=>u.pathname.endsWith(k));if(capture&&key)jobs.push(response.body().then(b=>r.sources[key]={received:hash(b),expected:hash(files[key]),commit:response.headers()['x-issue25-commit']}).catch(()=>{}))});
+ const jobs=[];page.on('response',response=>{const u=new URL(response.url()),key=sourceKey(u);if(capture&&key)jobs.push(response.body().then(b=>r.sources[key]={received:hash(b),expected:hash(files[key]),commit:response.headers()['x-issue25-commit']}).catch(()=>{}))});
  page.on('pageerror',e=>r.errors.push(e.message.replace(/https?:\/\/\S+/g,'[URL]')));
  const setup=()=>page.evaluate(()=>{
   if(window.__issue25)return;const L=Lampa,og=L.Storage.get,of=L.Storage.field;
@@ -27,7 +28,7 @@ const wav=Buffer.alloc(44+480000,128);wav.write('RIFF');wav.writeUInt32LE(wav.le
   const add=L.ContentRows.add;L.ContentRows.add=function(row){s.registry.push(row);return add.call(this,row)};
  });
  const route=async route=>{
-  const req=route.request(),u=new URL(req.url()),key=u.pathname.endsWith('/preview-loader.js')?'/loader.js':Object.keys(files).find(k=>u.pathname.endsWith(k));
+  const req=route.request(),u=new URL(req.url()),key=sourceKey(u);
   if(!['GET','HEAD','OPTIONS'].includes(req.method()))return route.abort();
   if(key){await setup();return route.fulfill({status:200,contentType:'application/javascript',body:files[key],headers:{'Cache-Control':'no-store','X-Issue25-Commit':sha}})}
   if(u.pathname==='/issue25-fixture.wav'){
@@ -69,6 +70,7 @@ const wav=Buffer.alloc(44+480000,128);wav.write('RIFF');wav.writeUInt32LE(wav.le
   await page.waitForFunction(()=>!document.querySelector('[data-home-history]'));check('New empty profile removes old datasets without reusing a Home cache',true);
   await page.evaluate(()=>{__issue25.filename='file_view_fixture_a';__issue25.watched={'movie:6':true};__issue25.files.file_view_fixture_a['provider-1']={card:'movie_1',percent:100/3,time:20,duration:60,updated:200};Lampa.Timeline.read();document.dispatchEvent(new Event('traktplus:watched'))});
   await page.waitForFunction(()=>document.querySelectorAll('[data-home-history]').length===2);check('Returning profile restores native positions and no duplicate rows',true);
+  if(await page.evaluate(()=>!!window.StremioHybrid)){await page.waitForTimeout(100);await page.evaluate(()=>StremioHybrid.setEnabled(false));check('Hybrid off does not restore destroyed profile/history rows',(await datasets()).find(r=>r.kind==='resume')?.count===7);await page.evaluate(()=>StremioHybrid.setEnabled(true));check('Hybrid on retains one of each managed row',(await datasets()).length===2);}
   await page.keyboard.press('ArrowRight');await page.keyboard.press('ArrowLeft');check('Native directional focus survives refresh',await page.locator('.activity--active .focus').count()>0);
   const native=await page.evaluate(()=>{const c=LampaHomeHistory.buildRows().resume.find(c=>c.id===1),meta=Lampa.Timeline.link(c),hash=Lampa.Utils.hash(c.original_title),position=Lampa.Timeline.view(hash,meta);__issue25.playCard=c;__issue25.nativePosition=position;return{time:position.time,duration:position.duration,percent:position.percent,handler:typeof position.handler,customHash:c.home_history_resume.hash,nativeHash:hash}});
   check('Native Timeline resolves provider hash to actual playable position/handler',native.time===20&&native.duration===60&&native.handler==='function',native);

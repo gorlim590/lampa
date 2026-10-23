@@ -155,17 +155,17 @@
         return copy;
     }
     function buildRows() {
-        var groups = candidates(), snapshot = roads(), names = Object.create(null), index = Object.create(null), result = { resume: [], watched: [] };
+        var groups = candidates(), snapshot = roads(), names = Object.create(null), byLink = Object.create(null), result = { resume: [], watched: [] };
         Object.keys(snapshot).forEach(function (hash) {
             var road = snapshot[hash];
-            if (road && typeof road === 'object' && road.card) (index[road.card] || (index[road.card] = [])).push({ hash: hash, road: road });
+            if (road && typeof road === 'object' && road.card) (byLink[road.card] || (byLink[road.card] = [])).push({ hash: hash, road: road });
         });
         groups.forEach(function (g) {
             var unique = Object.create(null);
             g.cards.forEach(function (c) { [c.original_title, c.original_name, c.title, c.name].forEach(function (n) { if (n && !unique[n]) { names[n] = (names[n] || 0) + 1; unique[n] = true; } }); });
         });
         groups.forEach(function (group, index) {
-            var card = cardFor(group), entries = readings(group, snapshot, names, index);
+            var card = cardFor(group), entries = readings(group, snapshot, names, byLink);
             if (watched(card) === true) { result.watched.push(card); return; }
             var evidence = card.media_type === 'tv' ? episodeEvidence(entries) : {}, latest = null;
             if (card.media_type !== 'tv') entries.forEach(function (entry) { var p = progress(entry.road); if (p) latest = newer(latest, { entry: entry, progress: p }); });
@@ -196,7 +196,7 @@
             if (!cards.length) return;
             var fragment = component.fragment; component.fragment = document.createDocumentFragment();
             component.emit('createAndAppend', payload(kind, cards));
-            component.scroll.append(component.fragment); component.fragment = fragment; return;
+            component.scroll.append(component.fragment); component.fragment = fragment; return true;
         }
         var sig = function (items) { return JSON.stringify(items.map(function (c) { return [aliases(c), c.home_history_resume || null]; })); };
         var old = line.data.results || []; if (sig(old) === sig(cards)) return;
@@ -214,6 +214,7 @@
         cards.slice(0, Math.max(line.view || 7, selectedIndex + 1)).forEach(function (card) { line.emit('createAndAppend', card); });
         line.active = Math.max(0, selectedIndex); if (line.items[line.active]) line.last = line.items[line.active].render(true);
         if (own) line.toggle(); if (L.Layer) L.Layer.visible(line.render(true));
+        return true;
     }
     function refresh() {
         timer = null;
@@ -223,7 +224,9 @@
             var record = { component: component, hook: { onBuild: queue, onAppend: queue, onDestroy: function () { hooks.splice(hooks.indexOf(record), 1); } } };
             hooks.push(record); component.use(record.hook);
         }
-        var rows = buildRows(); ['resume', 'watched'].forEach(function (kind) { paint(component, kind, rows[kind]); });
+        var rows = buildRows(), changed = false;
+        ['resume', 'watched'].forEach(function (kind) { if (paint(component, kind, rows[kind])) changed = true; });
+        if (changed) component.emit('homeHistoryChanged');
     }
     function queue() { if (!timer) timer = setTimeout(refresh, 120); }
     function install() {

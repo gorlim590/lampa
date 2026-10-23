@@ -974,8 +974,13 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
     css += '\nbody.stremio-hybrid .sh-home-duplicate{display:none!important}';
     var homePolicies=[],headTimeMove=null;
     function continueLine(item){var data=item.data||{};if(!data.results||!data.results.length)return false;return /^Продовжити перегляд(?:\s|\(|$)|^Continue watching(?:\s|\(|$)/i.test(data.title||'')||(data.results||[]).some(function(c){return c.ydesign_row==='cont';});}
+    function pruneHome(record){
+        // A managed history row can disappear while Home stays mounted.
+        record.original=record.original.filter(function(item){return !!item.render(true).parentNode;});
+        record.hidden=record.hidden.filter(function(item){return !!item.render(true).parentNode;});
+    }
     function orderHome(record){
-        var component=record.component;if(record.dead)return;
+        var component=record.component;if(record.dead)return;pruneHome(record);
         component.items.forEach(function(item){if(record.original.indexOf(item)<0)record.original.push(item);});
         var selected=component.items[component.active],rows=record.original.slice(),resumes=rows.filter(continueLine),resume=resumes[0];
         if(!resume)return;
@@ -990,7 +995,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
     function releaseHome(record,destroying){
         if(record.dead)return;record.dead=true;if(record.frame)cancelAnimationFrame(record.frame);record.component.unuse(record.hook);
         if(destroying){record.hidden.forEach(function(item){item.destroy();});}
-        else{var selected=record.component.items[record.component.active];record.component.items=record.original;record.original.forEach(function(item){var node=item.render(true);node.classList.remove('sh-home-duplicate');if(node.parentNode)node.parentNode.appendChild(node);});record.component.active=Math.max(0,record.original.indexOf(selected));}
+        else{pruneHome(record);var selected=record.component.items[record.component.active];record.component.items=record.original;record.original.forEach(function(item){var node=item.render(true);node.classList.remove('sh-home-duplicate');if(node.parentNode)node.parentNode.appendChild(node);});record.component.active=Math.max(0,record.original.indexOf(selected));}
         homePolicies=homePolicies.filter(function(r){return r!==record;});
     }
     function setupHome(){
@@ -998,7 +1003,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         if(!active||active.component!=='main'||!component||typeof component.use!=='function'||typeof component.unuse!=='function'||!Array.isArray(component.items)||homePolicies.some(function(r){return r.component===component;}))return;
         var record={component:component,original:component.items.slice(),hidden:[],dead:false,frame:0};
         function queue(){if(record.dead||record.frame)return;record.frame=requestAnimationFrame(function(){record.frame=0;orderHome(record);});}
-        record.hook={shHomePolicy:true,onAppend:queue,onBuild:queue,onDestroy:function(){releaseHome(record,true);}};homePolicies.push(record);component.use(record.hook);queue();
+        record.hook={shHomePolicy:true,onAppend:queue,onBuild:queue,onHomeHistoryChanged:queue,onDestroy:function(){releaseHome(record,true);}};homePolicies.push(record);component.use(record.hook);queue();
     }
     function onActivity(event) {
         if (!event || event.type === 'start') {setupHeader();scheduleMovie();setupHome();}
