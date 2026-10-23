@@ -128,7 +128,7 @@
                 if (!alive()) return;
                 if (calls >= MAX_CALLS || remaining() <= 0) return finish(Object.assign({}, lastData, { Results: [] }));
                 var available = candidates();
-                if (!metadataTried && (!available.length || available.every(function (name) { return /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/.test(name); }))) return metadataThenNext();
+                if (!metadataTried && (!available.length || available.every(function (name) { return /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/.test(name); }) && names.every(function (name) { return /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/.test(name); }))) return metadataThenNext();
                 if (!available.length) return finish(Object.assign({}, lastData, { Results: [] }));
                 run(available[0], true);
             }
