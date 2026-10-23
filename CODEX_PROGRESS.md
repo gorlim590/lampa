@@ -385,3 +385,9 @@
 - First reduced final run:25PASS/1FAIL, exceptions=[]; exact source proof now covers Hybrid alias correctly.3 episode mounts/Back exits had exactly1 active observer/interval mounted and0 on Home; synthetic OK/timeline70%/reset PASS.
 - Failure reproduced: card-ready preceded remote rating-icon preload, leaving first-open values temporarily empty. Removed the icon preload gate/timers; values now render immediately and failed logos become readable labels.3 targeted regressions added;164 total tests PASS; repository/diff checks PASS.
 - Final focused runtime rerun is justified by this functional fix; no new baseline/profile/full matrix. Initial report preserved at audit/issue-8/final-before-rating-fix.json.
+
+### Issue #8 — reduced final acceptance complete; publish Draft next
+- Exact product source1e0ae2423d7eeb95acd87ef97757979f39b89923:164 unit regressions PASS; repository syntax/links and diff checks PASS; final existing-CDP26PASS/0FAIL, exceptions=[]; SHA256/header verified for all3 product plugins including Hybrid alias.
+- Native cards/movie-TV-anime metadata/strict UA, no Ambient, Hybrid on/off/reduced-motion, migration, Trakt truth/unknown/account/error behaviors PASS on fixtures.3 synthetic provider episode Activity round trips:1timer/1observer mounted,0/0 after native Back; progress70%/reset/OK and focus retained. Native Main/no fixture globals restored.
+- No new baseline/profile/full load-order matrix per updated #8 scope. Reuse earlier viewport evidence; no speed/FPS claim. Physical TV/live provider/player/authenticated backend NOT tested. Limits in docs/issue-8-ydesign.md.
+- Source/evidence saved; remaining authorized workflow: publish isolated branch/Draft PR, add CI YDesign regressions, check CI and report #8 with only verified boxes. No main merge/Issue close/next Issue.

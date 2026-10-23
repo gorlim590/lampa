@@ -1,3 +1,7 @@
+> **FINAL REDUCED ACCEPTANCE COMPLETE — 2026-10-23**
+> 164 unit regressions PASS; final CDP26PASS/0FAIL, exceptions=[]; exact source1e0ae24 verified including Hybrid alias.3 episode round trips clean1/1 mounted ->0/0 on Home. First-open rating fix included. Browser restored. No new profile/full matrix required.
+> See `docs/issue-8-ydesign.md`, final-runtime.json/unit-final.log. Next step is Draft PR/CI and #8 report, never merge/close. Physical TV and live provider/player remain user acceptance. Earlier checkpoint's pending broad matrix/profiling list is historical and superseded by the new #8 agreement.
+
 > Resumed under the updated #8 section «Узгоджений скорочений обсяг перевірок».
 > Its reduced validation scope supersedes the old pending full-matrix/profiling list below.
 > Reuse earlier evidence; no new baseline/profile. Run focused161 tests/checks and one final existing-CDP smoke with episode transitions/cleanup. Physical TV acceptance remains the user's step.
