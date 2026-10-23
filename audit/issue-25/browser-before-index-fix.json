@@ -1,0 +1,77 @@
+{
+  "commit": "e68b3daec7211f8592bbbfddc3483888b5f90fd0",
+  "checks": [
+    {
+      "name": "Exact changed source and loader loaded by hash/commit",
+      "status": "PASS",
+      "data": {
+        "/loader.js": {
+          "received": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
+          "expected": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
+          "commit": "e68b3daec7211f8592bbbfddc3483888b5f90fd0"
+        },
+        "/ui/design-optimized.js": {
+          "received": "0e1375316ef0767c6d1e49dd00ee60bada94845efd973a8339b14e62bc2d7930",
+          "expected": "0e1375316ef0767c6d1e49dd00ee60bada94845efd973a8339b14e62bc2d7930",
+          "commit": "e68b3daec7211f8592bbbfddc3483888b5f90fd0"
+        },
+        "/plugins-to-enable/home-history.js": {
+          "received": "35eb01b57e1eea4760ff544c2edac35aacbc7ccf65cd892bda925e1319b93141",
+          "expected": "35eb01b57e1eea4760ff544c2edac35aacbc7ccf65cd892bda925e1319b93141",
+          "commit": "e68b3daec7211f8592bbbfddc3483888b5f90fd0"
+        }
+      }
+    },
+    {
+      "name": "More than3 real-position/episode fixtures and confirmed watched are distinct/deduplicated",
+      "status": "FAIL",
+      "data": [
+        {
+          "kind": "resume",
+          "ids": [],
+          "count": 0
+        },
+        {
+          "kind": "watched",
+          "ids": [
+            6
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "Next episode without position is visibly labelled",
+      "status": "FAIL"
+    },
+    {
+      "name": "Original page/methods restored with no fixture globals",
+      "status": "PASS"
+    }
+  ],
+  "errors": [
+    "page.waitForFunction: Timeout 30000ms exceeded."
+  ],
+  "sources": {
+    "/loader.js": {
+      "received": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
+      "expected": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
+      "commit": "e68b3daec7211f8592bbbfddc3483888b5f90fd0"
+    },
+    "/ui/design-optimized.js": {
+      "received": "0e1375316ef0767c6d1e49dd00ee60bada94845efd973a8339b14e62bc2d7930",
+      "expected": "0e1375316ef0767c6d1e49dd00ee60bada94845efd973a8339b14e62bc2d7930",
+      "commit": "e68b3daec7211f8592bbbfddc3483888b5f90fd0"
+    },
+    "/plugins-to-enable/home-history.js": {
+      "received": "35eb01b57e1eea4760ff544c2edac35aacbc7ccf65cd892bda925e1319b93141",
+      "expected": "35eb01b57e1eea4760ff544c2edac35aacbc7ccf65cd892bda925e1319b93141",
+      "commit": "e68b3daec7211f8592bbbfddc3483888b5f90fd0"
+    }
+  },
+  "blocked": [
+    "Physical Google TV",
+    "Actual user three titles/missing examples not available in this test profile",
+    "External player/provider backend"
+  ]
+}

@@ -1,0 +1,145 @@
+{
+  "commit": "306524bdbcc76847d6924bc13b27af9d69f428a1",
+  "checks": [
+    {
+      "name": "Exact changed source and loader loaded by hash/commit",
+      "status": "PASS",
+      "data": {
+        "/loader.js": {
+          "received": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
+          "expected": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
+          "commit": "306524bdbcc76847d6924bc13b27af9d69f428a1"
+        },
+        "/ui/stremio-hybrid.js": {
+          "received": "2ea5f597463f8d1ad4bb919e42853cce9dc90406a7300426257426c20d61ec39",
+          "expected": "2ea5f597463f8d1ad4bb919e42853cce9dc90406a7300426257426c20d61ec39",
+          "commit": "306524bdbcc76847d6924bc13b27af9d69f428a1"
+        },
+        "/ui/design-optimized.js": {
+          "received": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6",
+          "expected": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6",
+          "commit": "306524bdbcc76847d6924bc13b27af9d69f428a1"
+        },
+        "/plugins-to-enable/home-history.js": {
+          "received": "f2404a135d166071e572cab7bd5fd696705cd0e5fbe22541ec6c0d515f8b0088",
+          "expected": "f2404a135d166071e572cab7bd5fd696705cd0e5fbe22541ec6c0d515f8b0088",
+          "commit": "306524bdbcc76847d6924bc13b27af9d69f428a1"
+        }
+      }
+    },
+    {
+      "name": "More than3 real-position/episode fixtures and confirmed watched are distinct/deduplicated",
+      "status": "PASS",
+      "data": [
+        {
+          "kind": "resume",
+          "ids": [
+            8,
+            7,
+            5,
+            4,
+            3,
+            2,
+            1
+          ],
+          "count": 7
+        },
+        {
+          "kind": "watched",
+          "ids": [
+            6
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "Next episode without position is visibly labelled",
+      "status": "PASS"
+    },
+    {
+      "name": "Timeline completion updates mounted Home row",
+      "status": "PASS"
+    },
+    {
+      "name": "New empty profile removes old datasets without reusing a Home cache",
+      "status": "PASS"
+    },
+    {
+      "name": "Returning profile restores native positions and no duplicate rows",
+      "status": "PASS"
+    },
+    {
+      "name": "Hybrid off does not restore destroyed profile/history rows",
+      "status": "PASS"
+    },
+    {
+      "name": "Hybrid on retains one of each managed row",
+      "status": "PASS"
+    },
+    {
+      "name": "Native directional focus survives refresh",
+      "status": "PASS"
+    },
+    {
+      "name": "Native Timeline resolves provider hash to actual playable position/handler",
+      "status": "PASS",
+      "data": {
+        "time": 20,
+        "duration": 60,
+        "percent": 33.333333333333336,
+        "handler": "function",
+        "customHash": "provider-1",
+        "nativeHash": "1386623199"
+      }
+    },
+    {
+      "name": "Real built-in player resumes controlled PCM media near20s",
+      "status": "PASS",
+      "data": {
+        "currentTime": 20.008768,
+        "duration": 60
+      }
+    },
+    {
+      "name": "Player Back returns to Home and saves only fixture progress",
+      "status": "PASS"
+    },
+    {
+      "name": "Original page/methods restored with no fixture globals",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "sources": {
+    "/loader.js": {
+      "received": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
+      "expected": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
+      "commit": "306524bdbcc76847d6924bc13b27af9d69f428a1"
+    },
+    "/ui/stremio-hybrid.js": {
+      "received": "2ea5f597463f8d1ad4bb919e42853cce9dc90406a7300426257426c20d61ec39",
+      "expected": "2ea5f597463f8d1ad4bb919e42853cce9dc90406a7300426257426c20d61ec39",
+      "commit": "306524bdbcc76847d6924bc13b27af9d69f428a1"
+    },
+    "/ui/design-optimized.js": {
+      "received": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6",
+      "expected": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6",
+      "commit": "306524bdbcc76847d6924bc13b27af9d69f428a1"
+    },
+    "/plugins-to-enable/home-history.js": {
+      "received": "f2404a135d166071e572cab7bd5fd696705cd0e5fbe22541ec6c0d515f8b0088",
+      "expected": "f2404a135d166071e572cab7bd5fd696705cd0e5fbe22541ec6c0d515f8b0088",
+      "commit": "306524bdbcc76847d6924bc13b27af9d69f428a1"
+    }
+  },
+  "blocked": [
+    "Physical Google TV",
+    "Actual user three titles/missing examples not available in this test profile",
+    "External player/provider backend"
+  ],
+  "player": {
+    "currentTime": 20.008768,
+    "duration": 60
+  }
+}

@@ -1973,9 +1973,9 @@
         try {
             if (!window.Lampa || !Lampa.ContentRows || typeof Lampa.ContentRows.add !== 'function') return;
             RowsStore.registered = true;
-            Lampa.ContentRows.add({
+            if (!(window.LampaHomeHistory && window.LampaHomeHistory.active)) Lampa.ContentRows.add({
                 index: 1, name: 'ydesign_continue', title: 'Продовжити перегляд', screen: ['main'],
-                call: function () { return makeRowCall('cont', 'Продовжити перегляд'); }
+                call: function () { if (!(window.LampaHomeHistory && window.LampaHomeHistory.active)) return makeRowCall('cont', 'Продовжити перегляд'); }
             });
             Lampa.ContentRows.add({
                 index: 2, name: 'ydesign_week', title: 'Виходять цього тижня', screen: ['main'],
