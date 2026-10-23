@@ -59,6 +59,8 @@
   var watchedMovies = {};
   var watchedShows = {};
   var showStates = {};
+  var showSources = {};
+  var progressQueue = [], progressPending = {}, progressActive = 0, progressNotifyTimer = null;
   var readEpoch = 0;
   var lastSyncResult = null;
   var managedSynced = null;
@@ -285,7 +287,20 @@
 
   // Replays and specials cannot substitute for distinct aired regular episodes.
   // Missing totals/seasons mean unknown, never a completed series.
+  function progressEvidence(progress) {
+    var aired = Number(progress && progress.aired), count = Number(progress && progress.completed);
+    if (!progress || !isFinite(aired) || !isFinite(count) || aired < 0 || count < 0 || aired % 1 || count % 1 || count > aired) throw new Error('Invalid show progress');
+    return { t: Date.now(), aired: aired, watched: count, known: aired > 0, complete: aired > 0 && count === aired };
+  }
+
+  function progressPath(item) {
+    var id = item.show && item.show.ids && item.show.ids.trakt;
+    if (!(Number(id) > 0)) throw new Error('Missing Trakt show ID for progress');
+    return '/shows/' + encodeURIComponent(id) + '/progress/watched?hidden=true&specials=false&count_specials=false';
+  }
+
   function showEvidence(item) {
+    if (item.progress) return progressEvidence(item.progress);
     var aired = Number(item.show && item.show.aired_episodes), seen = {}, valid = true;
     if (!Array.isArray(item.seasons)) valid = false;
     (item.seasons || []).forEach(function (season) {
@@ -300,7 +315,7 @@
     });
     var count = Object.keys(seen).length;
     return { t: Date.now(), aired: aired > 0 && aired % 1 === 0 ? aired : 0,
-      watched: count, complete: !!(valid && aired > 0 && aired % 1 === 0 && count === aired) };
+      watched: count, known: !!(valid && aired > 0), complete: !!(valid && aired > 0 && aired % 1 === 0 && count === aired) };
   }
 
   function completedShows() {
@@ -312,8 +327,35 @@
     return out;
   }
 
+  function pumpProgress() {
+    while (progressActive < 2 && progressQueue.length) {
+      (function (job) {
+        progressActive++;
+        getRetry(progressPath(job.item)).then(function (data) {
+          var evidence = progressEvidence(data);
+          if (showSources[job.id] !== job.item) return;
+          evidence.sig = job.sig; showStates[job.id] = evidence;
+          watchedShows = completedShows(); watchedVer++;
+          clearTimeout(progressNotifyTimer);
+          progressNotifyTimer = setTimeout(function () {
+            try { persistWatched(); } catch (e) {}
+            clearRowCaches(); emitWatched(); decorateAll();
+          }, 100);
+        }).catch(function () {
+          if (showSources[job.id] === job.item && showStates[job.id]) showStates[job.id].retryAfter = Date.now() + 300000;
+        }).then(function () { delete progressPending[job.id]; progressActive--; pumpProgress(); });
+      })(progressQueue.shift());
+    }
+  }
+
   function isCompletedShow(id) {
-    var r = showStates[id];
+    var r = showStates[id], item = showSources[id];
+    if (item && r && !r.known && !(r.retryAfter > Date.now()) && !progressPending[id] && progressQueue.length < 128) {
+      try {
+        progressPath(item);
+        progressPending[id] = true; progressQueue.push({ id: id, item: item, sig: r.sig }); pumpProgress();
+      } catch (e) {}
+    }
     return !!(r && r.complete && Date.now() - r.t < SHOW_STATE_TTL);
   }
 
@@ -322,7 +364,12 @@
     // delete an earlier known movie. Explicit unwatch reconciliation is separate.
     watchedMovies = unionIds(watchedMovies, collectIds(movies, 'movie'));
     shows.forEach(function (it) {
-      if (it.show.ids.tmdb) showStates[it.show.ids.tmdb] = showEvidence(it);
+      var id = it.show.ids.tmdb;
+      if (!id) return;
+      var evidence = showEvidence(it), old = showStates[id];
+      var sig = [it.last_updated_at || it.last_watched_at || '', it.show.aired_episodes || ''].join('|');
+      evidence.sig = sig; showSources[id] = it;
+      showStates[id] = !evidence.known && old && old.sig === sig && Date.now() - old.t < SHOW_STATE_TTL ? old : evidence;
     });
     watchedShows = completedShows();
     watchedStamp = stamp || '';
@@ -369,11 +416,22 @@
     attempt = attempt || 0;
     return new Promise(function (resolve, reject) {
       try { checkCancelled(cancel); } catch (e) { return reject(e); }
-      var timer = setTimeout(function () { reject(new Error('Watched request timeout')); }, 20000);
-      Promise.resolve().then(function () { return api.get(path); }).then(function (v) {
-        clearTimeout(timer);
-        try { checkCancelled(cancel); resolve(v); } catch (e) { reject(e); }
-      }, function (e) { clearTimeout(timer); reject(e); });
+      var settled = false, timer;
+      function finish(error, value) {
+        if (settled) return;
+        settled = true; clearTimeout(timer);
+        if (cancel && cancel.listeners) {
+          var index = cancel.listeners.indexOf(abort);
+          if (index >= 0) cancel.listeners.splice(index, 1);
+        }
+        if (error) reject(error); else resolve(value);
+      }
+      function abort() { finish(cancelledError()); }
+      if (cancel && cancel.listeners) cancel.listeners.push(abort);
+      timer = setTimeout(function () { finish(new Error('Watched request timeout')); }, 20000);
+      Promise.resolve().then(function () { checkCancelled(cancel); return api.get(path); }).then(function (v) {
+        try { checkCancelled(cancel); finish(null, v); } catch (e) { finish(e); }
+      }, function (e) { finish(e || new Error('Watched request failed')); });
     }).catch(function (e) {
       e = e || new Error('Watched request failed');
       checkCancelled(cancel);
@@ -384,9 +442,30 @@
     });
   }
 
-  function fetchShows(cancel) {
-    // noseasons discards precisely the evidence needed to distinguish started/completed.
-    return getRetry('/sync/watched/shows?extended=full', 0, cancel).then(function (a) { return strictList(a, 'show'); });
+  function fetchShows(cancel, detailed) {
+    // Some installed proxies omit seasons even without noseasons. The explicit
+    // import obtains authoritative progress; Home resolves visible candidates lazily.
+    return getRetry('/sync/watched/shows?extended=full', 0, cancel).then(function (a) {
+      var list = strictList(a, 'show');
+      if (!detailed) return list;
+      var next = 0, result = list.slice();
+      function worker() {
+        checkCancelled(cancel);
+        var index, item;
+        do {
+          index = next++;
+          if (index >= list.length) return Promise.resolve();
+          item = list[index];
+        } while (showEvidence(item).known || !item.show.ids.trakt);
+        return getRetry(progressPath(item), 0, cancel).then(function (p) {
+          progressEvidence(p);
+          var copy = {}; Object.keys(item).forEach(function (k) { copy[k] = item[k]; });
+          copy.progress = p; result[index] = copy;
+          return worker();
+        });
+      }
+      return Promise.all([worker(), worker()]).then(function () { return result; });
+    });
   }
 
   function refreshWatched(force) {
@@ -397,7 +476,9 @@
     return getRetry('/sync/last_activities', 0, cancel).then(function (a) {
       var stamp = activityStamp(a);
       if (!force && !tooOld && stamp !== null && stamp === cached.stamp) return false;
-      return Promise.all([pagedWatchedMovies(false, cancel), fetchShows(cancel)]).then(function (r) {
+      return Promise.all([pagedWatchedMovies(false, cancel).then(function (movies) {
+        return movies.length === HIST_PAGE ? pagedHistory(false, null, cancel).then(function (history) { return mergeWatched(movies, history); }) : movies;
+      }), fetchShows(cancel)]).then(function (r) {
         checkCancelled(cancel);
         acceptWatched(r[0], r[1], stamp);
         persistWatched(); emitWatched();
@@ -1305,14 +1386,15 @@
     var epoch = ++readEpoch, stopped = false, result = { status: 'loading', added: 0, skipped: 0, removed: 0 };
     var mine = syncedSet(Lampa.Storage.get('trakt_plus_synced') || []), changed = false;
     var cancel = function () { return stopped || epoch !== readEpoch; };
-    if (manual && Lampa.Loading) Lampa.Loading.start(function () { stopped = true; }, tr('Завантаження переглянутого з Trakt…', 'Loading watched from Trakt…'));
+    cancel.listeners = [];
+    if (manual && Lampa.Loading) Lampa.Loading.start(function () { stopped = true; cancel.listeners.slice().forEach(function (abort) { abort(); }); }, tr('Завантаження переглянутого з Trakt…', 'Loading watched from Trakt…'));
     var beforeStamp;
     return whenApi().then(function () {
       return getRetry('/sync/last_activities', 0, cancel);
     }).then(function (a) {
       beforeStamp = activityStamp(a);
       if (beforeStamp === null) throw new Error('Missing activity snapshot');
-      return Promise.all([fetchAllMerged({ images: true, cancel: cancel }), fetchShows(cancel)]);
+      return Promise.all([fetchAllMerged({ images: true, cancel: cancel }), fetchShows(cancel, true)]);
     }).then(function (r) {
       return getRetry('/sync/last_activities', 0, cancel).then(function (a) {
         if (activityStamp(a) !== beforeStamp) throw new Error('Trakt changed during sync; retry');
@@ -1321,6 +1403,7 @@
         shows.forEach(function (it) { if (showEvidence(it).complete) { var c = cardFromWatchedShow(it); if (c) cards.push(c); } });
         if (cards.length > MAX_WATCHED) throw new Error('Import size limit; nothing committed');
         result.movies = data.list.length; result.shows = shows.length; result.unmapped = data.unmapped;
+        result.unknownShows = shows.filter(function (it) { return !showEvidence(it).known; }).length;
         return new Promise(function (resolve, reject) {
           var i = 0;
           function step() {
@@ -1343,8 +1426,8 @@
               if (!libCount && (data.list.length || (Lampa.Storage.get('trakt_plus_library') || []).length)) throw new Error('Could not save watched library');
               acceptWatched(data.list, shows, beforeStamp);
               persistWatched();
-              Lampa.Storage.set('trakt_plus_last_sync', Date.now());
-              result.status = 'complete';
+              if (!result.unknownShows) Lampa.Storage.set('trakt_plus_last_sync', Date.now());
+              result.status = result.unknownShows ? 'partial' : 'complete';
               emitWatched(); clearRowCaches(); decorateAll(); resolve(result);
             } catch (e) { reject(e); }
           }
@@ -1551,7 +1634,7 @@
         watchedPromise = null;
         watchedMovies = {};
         watchedShows = {};
-        showStates = {}; readEpoch++;
+        showStates = {}; showSources = {}; progressQueue = []; clearTimeout(progressNotifyTimer); readEpoch++;
         watchedStamp = '';
         watchedVer++;
         lastCheck = 0;
