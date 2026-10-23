@@ -73,7 +73,7 @@ const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
   seed=await page.evaluate(()=>Object.fromEntries(Object.entries(__issue30.shadow).filter(([k])=>k.startsWith('home_history_order_v1:'))));
   await page.screenshot({path:path.join(out,'home-order-final.png')});
   // A real page restart; only synthetic order namespace carried into the fixture.
-  await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>window.TraktPlus&&window.StremioHybrid,null,{timeout:40000});
+  await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>window.TraktPlus&&window.StremioHybrid&&window.appready&&Lampa.Activity.active()?.activity,null,{timeout:40000});
   await page.addScriptTag({url:'https://gorlim590.github.io/lampa/plugins-to-enable/home-history.js?fixture='+sha});await page.waitForFunction(()=>LampaHomeHistory.policyReady);
   await page.evaluate(()=>Lampa.Activity.replace({component:'main',source:'tmdb',page:1}));await page.waitForFunction(()=>Lampa.Activity.active().activity.component.items.filter(l=>l.data.trakt_line).length>=2);await page.waitForTimeout(200);
   const restored=await datasets(),expected=reordered.ids.filter(id=>/^TraktPlusTrend_/.test(id));check('Persisted native setting restores order after page restart with temporarily missing rows',restored.ids.filter(id=>/^TraktPlusTrend_/.test(id)).join()===expected.join(),restored.ids);
