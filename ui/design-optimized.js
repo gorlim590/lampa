@@ -1987,7 +1987,7 @@
     // Фонове підтягування даних серіалів зі списків користувача (з кешем 12 год., через чергу запитів)
     function warmRows(force) {
         try {
-            if (((window.LampaHomeHistory && window.LampaHomeHistory.active) || !getSet('ydesign_row_continue')) && !getSet('ydesign_row_week')) return;
+            if (!getSet('ydesign_row_continue') && !getSet('ydesign_row_week')) return;
             var now = Date.now();
             if (RowsStore.busy || (!force && now - RowsStore.last < 20 * 60 * 1000)) return;
             RowsStore.busy = true;

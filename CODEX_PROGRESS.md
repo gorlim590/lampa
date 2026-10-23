@@ -370,3 +370,7 @@
 - Repaired the indexed-road variable shadowing;27 focused tests PASS plus unchanged loader1PASS. Fail-fast shell validation now stops before later steps on a failed test. Prior failed unit/browser evidence retained explicitly, not accepted as PASS.
 - Added targeted Hybrid pruning + homeHistoryChanged hook so toggling Hybrid cannot resurrect a destroyed managed row; actual ordering/release functions tested. Optional plugin remains plugins-to-enable/home-history.js, never auto-loaded.
 - JS syntax/repository450URLs/diff checks PASS. Current code will receive one focused CDP rerun because it changed after the failed run; includes controlled native PCM resume, not random media. No publication/PR yet.
+
+### Issue #25 — targeted integration check and runtime harness correction
+- Exact818935e sources were proven in CDP. Dataset>3/dedup, timeline completion/profile refresh, Hybrid stale-row/off/on and native Timeline hash-to20s resolution PASS. Native media launch was NOT reached: harness button was outside viewport; focus precondition was not established. These are not playback PASS results; report retained as browser-before-harness-fix.json.
+- Positioned the controlled test button within viewport and establish native resume-row focus before update tests. Removed an optional YDesign warmup condition change after a dry-run3way check identified an unnecessary conflict with PR29; the two required registration guards remain. Recheck focused tests and dry-run integration, then rerun only this short focused suite after corrections.

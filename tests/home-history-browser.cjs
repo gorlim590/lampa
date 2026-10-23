@@ -62,6 +62,8 @@ const wav=Buffer.alloc(44+480000,128);wav.write('RIFF');wav.writeUInt32LE(wav.le
   });
   const datasets=()=>page.evaluate(()=>{const comp=Lampa.Activity.active().activity.component;return comp.items.filter(l=>l.data.home_history).map(l=>({kind:l.data.home_history,ids:l.data.results.map(c=>c.id),count:l.data.results.length}))});
   await page.waitForFunction(()=>document.querySelectorAll('[data-home-history]').length===2);
+  await page.evaluate(()=>Lampa.Activity.active().activity.component.items.find(l=>l.data.home_history==='resume').toggle());
+  await page.waitForFunction(()=>!!document.querySelector('.activity--active .focus'));
   const rows=await datasets();check('More than3 real-position/episode fixtures and confirmed watched are distinct/deduplicated',rows.find(r=>r.kind==='resume')?.count===7&&rows.find(r=>r.kind==='watched')?.ids.join(',')==='6',rows);
   check('Next episode without position is visibly labelled',await page.locator('.home-history-note').filter({hasText:'позиція недоступна'}).count()>0);
   await page.evaluate(()=>{__issue25.files.file_view_fixture_a['provider-1']={card:'movie_1',percent:100,time:60,duration:60,updated:100};Lampa.Timeline.read()});
@@ -74,7 +76,7 @@ const wav=Buffer.alloc(44+480000,128);wav.write('RIFF');wav.writeUInt32LE(wav.le
   await page.keyboard.press('ArrowRight');await page.keyboard.press('ArrowLeft');check('Native directional focus survives refresh',await page.locator('.activity--active .focus').count()>0);
   const native=await page.evaluate(()=>{const c=LampaHomeHistory.buildRows().resume.find(c=>c.id===1),meta=Lampa.Timeline.link(c),hash=Lampa.Utils.hash(c.original_title),position=Lampa.Timeline.view(hash,meta);__issue25.playCard=c;__issue25.nativePosition=position;return{time:position.time,duration:position.duration,percent:position.percent,handler:typeof position.handler,customHash:c.home_history_resume.hash,nativeHash:hash}});
   check('Native Timeline resolves provider hash to actual playable position/handler',native.time===20&&native.duration===60&&native.handler==='function',native);
-  await page.evaluate(()=>{const b=document.createElement('button');b.id='issue25-play';b.textContent='Controlled resume test';b.onclick=()=>{__issue25.playerStarted=true;Lampa.Player.play({url:location.origin+'/issue25-fixture.wav',title:'Issue25 controlled silence',launch_player:'inner',timeline:__issue25.nativePosition})};document.body.appendChild(b)});
+  await page.evaluate(()=>{const b=document.createElement('button');b.id='issue25-play';b.style.cssText='position:fixed;top:20px;right:20px;z-index:2147483647;padding:16px;background:#fff;color:#000';b.textContent='Controlled resume test';b.onclick=()=>{__issue25.playerStarted=true;Lampa.Player.play({url:location.origin+'/issue25-fixture.wav',title:'Issue25 controlled silence',launch_player:'inner',timeline:__issue25.nativePosition})};document.body.appendChild(b)});
   await page.locator('#issue25-play').click();
   try{
    await page.waitForFunction(()=>[...document.querySelectorAll('video,audio')].some(v=>v.currentSrc.includes('issue25-fixture.wav')&&v.currentTime>=18&&v.currentTime<40&&v.duration===60),null,{timeout:15000});
