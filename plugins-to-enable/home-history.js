@@ -2,7 +2,8 @@
 (function () {
     'use strict';
     if (window.LampaHomeHistory) return;
-    var L = window.Lampa, timer = null, hooks = [], installed = false;
+    var L = window.Lampa, timer = null, hooks = [], installed = false, policy = null;
+    var entryUrl = document.currentScript && document.currentScript.src;
     var titles = { resume: 'Продовжити перегляд', watched: 'Переглянуто' };
     var lists = ['history', 'viewed', 'look', 'continued', 'book', 'like', 'scheduled'];
     function tv(c) {
@@ -192,7 +193,7 @@
     }
     function node(line) { var el = line.render(true); return el && (el[0] || el); }
     function payload(kind, cards) {
-        return { title: titles[kind] + ' (' + cards.length + ')', results: cards, home_history: kind,
+        return { title: titles[kind] + ' (' + cards.length + ')', results: cards, home_history: kind, home_row_id: 'home_history_' + kind, home_row_origin: 'history',
             params: { emit: { onCreate: function () { node(this).setAttribute('data-home-history', kind); } } } };
     }
     function paint(component, kind, cards) {
@@ -209,7 +210,7 @@
         if (!cards.length) {
             var index = component.items.indexOf(line); component.items.splice(index, 1); line.destroy();
             component.active = Math.max(0, Math.min(component.active - (index < component.active ? 1 : 0), component.items.length - 1));
-            if (own && component.items[component.active]) component.items[component.active].toggle(); return;
+            if (own && component.items[component.active]) component.items[component.active].toggle(); return true;
         }
         (line.items || []).forEach(function (item) { item.destroy(); });
         line.items = []; line.more = null; line.last = null; line.active = 0;
@@ -231,31 +232,25 @@
         }
         var rows = buildRows(), changed = false;
         ['resume', 'watched'].forEach(function (kind) { if (paint(component, kind, rows[kind])) changed = true; });
+        if (policy) policy.apply(component);
         if (changed) component.emit('homeHistoryChanged');
     }
     function queue() { if (!timer) timer = setTimeout(refresh, 120); }
     function install() {
         if (installed || !L || !L.ContentRows || !L.ContentRows.call) return;
         installed = true; window.LampaHomeHistory.active = true; var originalCall = L.ContentRows.call;
-        // Native registry removes by object identity, and existing rows predate plugins.
-        // Use its public result callback boundary: keep unrelated providers untouched,
-        // drop only legacy continuation/history payloads replaced by these two rows.
-        var legacyTitles = ['Продовжити перегляд', 'Переглянуто', 'Ви дивилися', 'Вы смотрели', 'Продолжить просмотр', 'Continue watching', 'You watched'];
-        if (L.Lang && L.Lang.translate) ['title_continue', 'title_watched'].forEach(function (key) { legacyTitles.push(L.Lang.translate(key)); });
+        // One registry boundary owns history replacement, core provenance and row metadata.
+        var originalAdd = L.ContentRows.add;
+        L.ContentRows.add = function (row) { if (policy) policy.register(row); return originalAdd.apply(this, arguments); };
         L.ContentRows.call = function (screen, params, calls) {
             if (screen !== 'main') return originalCall.apply(this, arguments);
-            var previous = calls.slice();
-            originalCall.apply(this, arguments);
-            calls.forEach(function (callback, index) {
-                if (typeof callback !== 'function' || previous.indexOf(callback) >= 0) return;
-                calls[index] = function (done) {
-                    return callback(function (data) {
-                        var title = data && String(data.title || '').replace(/\s*\(\d+\)\s*$/, '').trim();
-                        if (data && !data.home_history && legacyTitles.indexOf(title) >= 0) return done();
-                        return done.apply(this, arguments);
-                    });
-                };
-            });
+            if (policy) policy.prepare(calls);
+            var previous = calls.slice(); originalCall.apply(this, arguments);
+            for (var i = calls.length - 1; i >= 0; i--) {
+                var callback = calls[i]; if (typeof callback !== 'function') continue;
+                var wrapped = policy ? policy.wrap(callback, previous.indexOf(callback) < 0) : callback;
+                if (wrapped) calls[i] = wrapped; else calls.splice(i, 1);
+            }
         };
         ['resume', 'watched'].forEach(function (kind, i) {
             L.ContentRows.add({ name: 'home_history_' + kind, title: titles[kind], index: 2 + i, screen: ['main'], call: function () {
@@ -267,8 +262,23 @@
         if (L.Timeline && L.Timeline.listener) { L.Timeline.listener.follow('update', queue); L.Timeline.listener.follow('read', queue); }
         if (L.Favorite && L.Favorite.listener) ['add', 'added', 'remove', 'read'].forEach(function (name) { L.Favorite.listener.follow(name, queue); });
         if (L.Storage.listener) L.Storage.listener.follow('change', function (e) { if (e && /^(trakt_|account|profile|file_view)/.test(e.name || '')) queue(); });
-        document.addEventListener('traktplus:watched', queue); queue();
+        document.addEventListener('traktplus:watched', queue);
+        if (policy) { policy.install(); policy.bootstrap(); }
+        queue();
     }
-    window.LampaHomeHistory = { version: '1.0.0', active: false, buildRows: buildRows, refresh: queue };
-    if (window.appready) install(); else if (L && L.Listener) L.Listener.follow('app', function (e) { if (e.type === 'ready') install(); });
+    function start() {
+        function ready() {
+            if (window.createHomeHistoryPolicy) policy = window.createHomeHistoryPolicy(L, { scope: scope, node: node, refresh: queue });
+            window.LampaHomeHistory.policyReady = !!policy; install();
+        }
+        if (window.createHomeHistoryPolicy || !entryUrl || !document.head) return ready();
+        var script = document.createElement('script');
+        script.src = entryUrl.replace(/home-history\.js(?=\?|$)/, 'home-policy.js');
+        script.onload = ready; script.onerror = function () { console.warn('Home policy unavailable; retaining history-only mode.'); ready(); };
+        document.head.appendChild(script);
+    }
+    window.LampaHomeHistory = { version: '2.0.0', active: false, policyReady: false, buildRows: buildRows, refresh: queue,
+        applyOrder: function (component) { if (policy) policy.apply(component); },
+        policy: function () { return policy; } };
+    if (window.appready) start(); else if (L && L.Listener) L.Listener.follow('app', function (e) { if (e.type === 'ready') start(); });
 })();

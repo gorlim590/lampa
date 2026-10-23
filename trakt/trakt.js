@@ -11267,6 +11267,8 @@
   function attachOnMore(line, config) {
     if (!line) return null;
     var payload = Object.assign({}, line);
+    payload.home_row_id = config.name;
+    payload.home_row_origin = 'trakt';
     payload.onMore = createOnMoreHandler(config);
     return payload;
   }

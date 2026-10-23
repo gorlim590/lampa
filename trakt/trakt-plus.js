@@ -1047,6 +1047,8 @@
     var line = {
       title: title,
       trakt_line: true,
+      home_row_id: def.name,
+      home_row_origin: 'trakt',
       trakt_line_title: title,
       source: 'tmdb',
       page: 1,

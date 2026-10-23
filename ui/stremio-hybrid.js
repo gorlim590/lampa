@@ -980,7 +980,9 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         record.hidden=record.hidden.filter(function(item){return !!item.render(true).parentNode;});
     }
     function orderHome(record){
-        var component=record.component;if(record.dead)return;pruneHome(record);
+        var component=record.component;if(record.dead)return;
+        if(window.LampaHomeHistory&&window.LampaHomeHistory.policyReady){window.LampaHomeHistory.applyOrder(component);return;}
+        pruneHome(record);
         component.items.forEach(function(item){if(record.original.indexOf(item)<0)record.original.push(item);});
         var selected=component.items[component.active],rows=record.original.slice(),resumes=rows.filter(continueLine),resume=resumes[0];
         if(!resume)return;
@@ -995,6 +997,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
     function releaseHome(record,destroying){
         if(record.dead)return;record.dead=true;if(record.frame)cancelAnimationFrame(record.frame);record.component.unuse(record.hook);
         if(destroying){record.hidden.forEach(function(item){item.destroy();});}
+        else if(window.LampaHomeHistory&&window.LampaHomeHistory.policyReady){window.LampaHomeHistory.applyOrder(record.component);}
         else{pruneHome(record);var selected=record.component.items[record.component.active];record.component.items=record.original;record.original.forEach(function(item){var node=item.render(true);node.classList.remove('sh-home-duplicate');if(node.parentNode)node.parentNode.appendChild(node);});record.component.active=Math.max(0,record.original.indexOf(selected));}
         homePolicies=homePolicies.filter(function(r){return r!==record;});
     }
