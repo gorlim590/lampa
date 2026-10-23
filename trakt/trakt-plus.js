@@ -25,7 +25,7 @@
   var WATCH_RECHECK_SEC = 90;
   var DEFAULT_EXCLUDE = 'reality,talk-show,news,game-show,soap,sporting-event,special-interest';
   var MARK_TYPES = ['look', 'viewed', 'scheduled', 'continued', 'thrown'];
-  var CACHE_VER = 5;      // v5: completion evidence replaces any-episode show membership
+  var CACHE_VER = 6;      // v6: authoritative tri-state status is separate from additive import history
   var TOP_INDEX = 0;      // з якої позиції починаються рядки Trakt на головній (0 = самий верх)
   var QUEUE_MAX = 3;      // скільки запитів до Trakt одночасно (щоб не ловити 429)
   var FULL_FIRST = 600;   // перший екран «Ще»: великий список без збільшення рядів головної
@@ -63,7 +63,8 @@
   var progressQueue = [], progressPending = {}, progressActive = 0, progressNotifyTimer = null;
   var readEpoch = 0;
   var lastSyncResult = null;
-  var managedSynced = null;
+  var verifiedMovies = {}, movieStatusReady = false, showStatusReady = false;
+  var statusPhase = 'idle', statusAt = 0, unmappedMovies = 0, unmappedShows = 0;
   var SHOW_STATE_TTL = 6 * 3600000;
   var watchedPromise = null;
   var watchedStamp = '';
@@ -290,7 +291,7 @@
   function progressEvidence(progress) {
     var aired = Number(progress && progress.aired), count = Number(progress && progress.completed);
     if (!progress || !isFinite(aired) || !isFinite(count) || aired < 0 || count < 0 || aired % 1 || count % 1 || count > aired) throw new Error('Invalid show progress');
-    return { t: Date.now(), aired: aired, watched: count, known: aired > 0, complete: aired > 0 && count === aired };
+    return { t: Date.now(), aired: aired, watched: count, known: aired > 0, retryAfter: aired > 0 ? 0 : Date.now() + 300000, complete: aired > 0 && count === aired };
   }
 
   function progressPath(item) {
@@ -318,11 +319,13 @@
       watched: count, known: !!(valid && aired > 0), complete: !!(valid && aired > 0 && aired % 1 === 0 && count === aired) };
   }
 
+  function freshStatus(t) { var age = Date.now() - Number(t); return isFinite(age) && age >= 0 && age < SHOW_STATE_TTL; }
+
   function completedShows() {
     var out = {};
     Object.keys(showStates).forEach(function (id) {
       var r = showStates[id];
-      if (r.complete && Date.now() - r.t < SHOW_STATE_TTL) out[id] = 1;
+      if (r.complete && freshStatus(r.t)) out[id] = 1;
     });
     return out;
   }
@@ -334,7 +337,7 @@
         getRetry(progressPath(job.item)).then(function (data) {
           var evidence = progressEvidence(data);
           if (showSources[job.id] !== job.item) return;
-          evidence.sig = job.sig; showStates[job.id] = evidence;
+          evidence.sig = job.sig; evidence.trakt = job.item.show.ids.trakt; showStates[job.id] = evidence;
           watchedShows = completedShows(); watchedVer++;
           clearTimeout(progressNotifyTimer);
           progressNotifyTimer = setTimeout(function () {
@@ -342,7 +345,7 @@
             clearRowCaches(); emitWatched(); decorateAll();
           }, 100);
         }).catch(function () {
-          if (showSources[job.id] === job.item && showStates[job.id]) showStates[job.id].retryAfter = Date.now() + 300000;
+          if (showSources[job.id] === job.item && showStates[job.id]) { showStates[job.id].retryAfter = Date.now() + 300000; showStates[job.id].error = true; }
         }).then(function () { delete progressPending[job.id]; progressActive--; pumpProgress(); });
       })(progressQueue.shift());
     }
@@ -356,21 +359,46 @@
         progressPending[id] = true; progressQueue.push({ id: id, item: item, sig: r.sig }); pumpProgress();
       } catch (e) {}
     }
-    return !!(r && r.complete && Date.now() - r.t < SHOW_STATE_TTL);
+    return !!(r && r.complete && freshStatus(r.t));
   }
 
-  function acceptWatched(movies, shows, stamp) {
+  function watchStatus(card) {
+    hydrateWatched();
+    var id = tmdbId(card);
+    if (!id || !card || !token() || statusPhase !== 'ready' || !freshStatus(statusAt)) return null;
+    if (cardKind(card) !== 'show') {
+      if (!movieStatusReady) return null;
+      if (verifiedMovies[id]) return true;
+      return unmappedMovies ? null : false;
+    }
+    if (!showStatusReady) return null;
+    var record = showStates[id];
+    if (!record) return unmappedShows ? null : false;
+    isCompletedShow(id); // resolve missing proxy progress lazily, without blocking callers
+    record = showStates[id];
+    if (!record.known || record.error || !freshStatus(record.t)) return null;
+    return !!record.complete;
+  }
+
+  function acceptWatched(movies, shows, stamp, missingMovies) {
     // Read-only imports are additive: even a silently truncated HTTP 200 cannot
     // delete an earlier known movie. Explicit unwatch reconciliation is separate.
-    watchedMovies = unionIds(watchedMovies, collectIds(movies, 'movie'));
+    verifiedMovies = collectIds(movies, 'movie');
+    watchedMovies = unionIds(watchedMovies, verifiedMovies);
+    movieStatusReady = showStatusReady = true;
+    statusPhase = 'ready'; statusAt = Date.now();
+    unmappedMovies = missingMovies || 0;
+    unmappedShows = shows.filter(function (it) { return !it.show.ids.tmdb; }).length;
+    var currentStates = {}, currentSources = {};
     shows.forEach(function (it) {
       var id = it.show.ids.tmdb;
       if (!id) return;
       var evidence = showEvidence(it), old = showStates[id];
       var sig = [it.last_updated_at || it.last_watched_at || '', it.show.aired_episodes || ''].join('|');
-      evidence.sig = sig; showSources[id] = it;
-      showStates[id] = !evidence.known && old && old.sig === sig && Date.now() - old.t < SHOW_STATE_TTL ? old : evidence;
+      evidence.sig = sig; evidence.trakt = it.show.ids.trakt; currentSources[id] = it;
+      currentStates[id] = !evidence.known && !it.progress && old && old.sig === sig && freshStatus(old.t) ? old : evidence;
     });
+    showStates = currentStates; showSources = currentSources;
     watchedShows = completedShows();
     watchedStamp = stamp || '';
     watchedVer++;
@@ -379,7 +407,9 @@
   function persistWatched() {
     Lampa.Storage.set('trakt_plus_watched_cache', {
       v: CACHE_VER, t: Date.now(), stamp: watchedStamp, m: Object.keys(watchedMovies),
-      s: Object.keys(completedShows()), shows: showStates
+      s: Object.keys(completedShows()), shows: showStates,
+      status: { t: statusAt, phase: statusPhase, movies: movieStatusReady, shows: showStatusReady,
+        ids: Object.keys(verifiedMovies), missingMovies: unmappedMovies, missingShows: unmappedShows }
     });
   }
 
@@ -392,6 +422,16 @@
       // v4 s[] meant started shows: it is never valid completion evidence.
       showStates = c.v === CACHE_VER && c.shows && typeof c.shows === 'object' ? c.shows : {};
       watchedShows = completedShows();
+      if (c.v === CACHE_VER && c.status && (!c.status.phase || c.status.phase === 'ready') && freshStatus(c.status.t)) {
+        statusAt = c.status.t; statusPhase = 'ready';
+        verifiedMovies = arrToSet(c.status.ids);
+        movieStatusReady = c.status.movies === true; showStatusReady = c.status.shows === true;
+        unmappedMovies = c.status.missingMovies || 0; unmappedShows = c.status.missingShows || 0;
+        Object.keys(showStates).forEach(function (id) {
+          var r = showStates[id];
+          if (r.trakt) showSources[id] = { show: { ids: { tmdb: id, trakt: r.trakt } } };
+        });
+      }
       watchedStamp = c.v === CACHE_VER ? (c.stamp || '') : '';
       watchedVer++;
     }
@@ -472,24 +512,36 @@
     if (syncing) return Promise.resolve(false);
     var epoch = ++readEpoch, cached = Lampa.Storage.get('trakt_plus_watched_cache') || {};
     var cancel = function () { return epoch !== readEpoch; };
-    var tooOld = !cached.t || cached.v !== CACHE_VER || Date.now() - cached.t > SHOW_STATE_TTL;
+    var tooOld = !cached.t || cached.v !== CACHE_VER || !cached.status || (cached.status.phase && cached.status.phase !== 'ready') || !freshStatus(cached.status.t);
+    statusPhase = 'loading';
     return getRetry('/sync/last_activities', 0, cancel).then(function (a) {
       var stamp = activityStamp(a);
-      if (!force && !tooOld && stamp !== null && stamp === cached.stamp) return false;
-      return Promise.all([pagedWatchedMovies(false, cancel).then(function (movies) {
-        return movies.length === HIST_PAGE ? pagedHistory(false, null, cancel).then(function (history) { return mergeWatched(movies, history); }) : movies;
-      }), fetchShows(cancel)]).then(function (r) {
-        checkCancelled(cancel);
-        acceptWatched(r[0], r[1], stamp);
-        persistWatched(); emitWatched();
-        return true;
+      if (!force && !tooOld && stamp !== null && stamp === cached.stamp) { statusPhase = 'ready'; return false; }
+      if (stamp === null) throw new Error('Missing activity snapshot');
+      var movies = pagedWatchedMovies(false, cancel).then(function (items) {
+        var missing = items.filter(function (it) { return !it.movie.ids.tmdb; }).length;
+        if (items.length !== HIST_PAGE) return { list: items, unmapped: missing };
+        return pagedHistory(false, null, cancel).then(function (history) {
+          return { list: mergeWatched(items, history), unmapped: missing + history.filter(function (it) { return !it.movie.ids.tmdb; }).length };
+        });
       });
+      return Promise.all([movies, fetchShows(cancel)]).then(function (r) {
+        return getRetry('/sync/last_activities', 0, cancel).then(function (after) {
+          checkCancelled(cancel);
+          if (activityStamp(after) !== stamp) throw new Error('Trakt changed during refresh');
+          acceptWatched(r[0].list, r[1], stamp, r[0].unmapped);
+          persistWatched(); emitWatched(); return true;
+        });
+      });
+    }).catch(function (e) {
+      if (epoch === readEpoch) statusPhase = e && e.cancelled ? 'cancelled' : 'error';
+      throw e;
     });
   }
 
   function loadWatched(force) {
     hydrateWatched();
-    if (!token()) return Promise.resolve(false);
+    if (!token()) { statusPhase = 'unavailable'; return Promise.resolve(false); }
     var now = Date.now();
     if (!force && watchedPromise && (now - lastCheck) < WATCH_RECHECK_SEC * 1000) return watchedPromise;
     lastCheck = now;
@@ -498,11 +550,8 @@
   }
 
   function isWatched(c) {
-    var g = cfg();
-    var id = tmdbId(c);
-    if (!id) return false;
-    if (cardKind(c) === 'show') return g.hideShows && isCompletedShow(id);
-    return !!watchedMovies[id];
+    if (cardKind(c) === 'show' && !cfg().hideShows) return false;
+    return watchStatus(c) === true;
   }
 
   // ───────────── ФІЛЬТРИ ТА РАНЖУВАННЯ ─────────────
@@ -838,8 +887,8 @@
   }
 
   function tmdbId(d) {
-    var id = d && (d.id || (d.ids && d.ids.tmdb));
-    if (id === undefined || id === null || id === '') return '';
+    var id = d && (d.tmdb_id || (d.ids && d.ids.tmdb) || (d.source === 'trakt' ? null : d.id));
+    if (id === undefined || id === null || !/^[1-9]\d*$/.test(String(id))) return '';
     return String(id);
   }
 
@@ -1380,9 +1429,9 @@
 
   function syncWatched(manual) {
     if (syncing) return Promise.resolve({ status: 'busy' });
-    if (!token() || !Lampa.Favorite) return Promise.resolve({ status: 'unavailable' });
+    if (!token() || !Lampa.Favorite) { statusPhase = 'unavailable'; return Promise.resolve({ status: 'unavailable' }); }
     hydrateWatched();
-    syncing = true;
+    syncing = true; statusPhase = 'loading';
     var epoch = ++readEpoch, stopped = false, result = { status: 'loading', added: 0, skipped: 0, removed: 0 };
     var mine = syncedSet(Lampa.Storage.get('trakt_plus_synced') || []), changed = false;
     var cancel = function () { return stopped || epoch !== readEpoch; };
@@ -1421,10 +1470,10 @@
               checkCancelled(cancel);
               // Deliberately no Favorite.remove: local marks and earlier successful imports
               // are not evidence of permission to propagate remote unwatch/deletions.
-              if (changed) { Lampa.Storage.set('trakt_plus_synced', Object.keys(mine)); managedSynced = mine; }
+              if (changed) { Lampa.Storage.set('trakt_plus_synced', Object.keys(mine)); }
               var libCount = saveLibrary(data.list);
               if (!libCount && (data.list.length || (Lampa.Storage.get('trakt_plus_library') || []).length)) throw new Error('Could not save watched library');
-              acceptWatched(data.list, shows, beforeStamp);
+              acceptWatched(data.list, shows, beforeStamp, data.unmapped);
               persistWatched();
               if (!result.unknownShows) Lampa.Storage.set('trakt_plus_last_sync', Date.now());
               result.status = result.unknownShows ? 'partial' : 'complete';
@@ -1438,10 +1487,11 @@
       result.status = (e && e.cancelled) || cancel() ? 'cancelled' : 'failed';
       // Preserve provenance for additions already committed before a user cancellation.
       // Never overwrite it with an empty/partial set or advance last_sync on failure.
-      if (changed) { try { Lampa.Storage.set('trakt_plus_synced', Object.keys(mine)); managedSynced = mine; } catch (ignore) {} }
+      if (changed) { try { Lampa.Storage.set('trakt_plus_synced', Object.keys(mine)); } catch (ignore) {} }
       return result;
     }).then(function (r) {
       syncing = false; lastSyncResult = r;
+      if (r.status !== 'complete' && r.status !== 'partial') statusPhase = r.status === 'cancelled' ? 'cancelled' : 'error';
       if (manual && Lampa.Loading) Lampa.Loading.stop();
       if (manual) notify(r.status === 'complete'
         ? tr('Trakt: додано ', 'Trakt: added ') + r.added + tr(', пропущено ', ', skipped ') + r.skipped + tr('. Видалень немає.', '. No deletions.')
@@ -1462,14 +1512,15 @@
   function isMarked(d, g) {
     var id = d.id || (d.ids && d.ids.tmdb);
     if (!id) return false;
-    if (cardKind(d) === 'show') return !!(g.markShows && isCompletedShow(id));
-    return !!watchedMovies[id];
+    if (cardKind(d) === 'show') return !!(g.markShows && watchStatus(d) === true);
+    return watchStatus(d) === true;
   }
 
   function decorate(node, data, g) {
     if (!node || !node.classList || !data) return;
     g = g || cfg();
-    var yd = !!window.YDesignLoaded; // YDesign сам малює «Переглянуто» через window.TraktPlus.isWatched
+    var yd = !!window.YDesignLoaded; // YDesign rules are intentionally unchanged until Issue #8.
+    if (!yd && g.mark && !data._lib && (cardKind(data) !== 'show' || g.markShows) && watchStatus(data) === null) return;
     var on = !!(!yd && g.mark && !data._lib && isMarked(data, g));
     var view = node.querySelector ? node.querySelector('.card__view') : null;
     if (on) {
@@ -1624,7 +1675,8 @@
       tr('Якщо 0 — натисніть «Скинути кеш»', 'If 0 — press "Reset cache"'),
       function () {
         loadWatched().then(function () {
-          notify(tr('Фільмів: ', 'Movies: ') + Object.keys(watchedMovies).length + tr(', серіалів: ', ', shows: ') + Object.keys(watchedShows).length);
+          if (statusPhase !== 'ready') return notify(tr('Статус Trakt поки невідомий', 'Trakt status is not known yet'));
+          notify(tr('Фільмів: ', 'Movies: ') + Object.keys(verifiedMovies).length + tr(', завершених серіалів: ', ', completed shows: ') + Object.keys(completedShows()).length);
         });
       });
     add({ name: 'trakt_plus_reset_cache', type: 'button' },
@@ -1634,7 +1686,7 @@
         watchedPromise = null;
         watchedMovies = {};
         watchedShows = {};
-        showStates = {}; showSources = {}; progressQueue = []; clearTimeout(progressNotifyTimer); readEpoch++;
+        showStates = {}; showSources = {}; verifiedMovies = {}; movieStatusReady = showStatusReady = false; statusPhase = 'idle'; statusAt = 0; progressQueue = []; clearTimeout(progressNotifyTimer); readEpoch++;
         watchedStamp = '';
         watchedVer++;
         lastCheck = 0;
@@ -1642,7 +1694,7 @@
         clearRowCaches();
         loadWatched(true).then(function () {
           decorateAll();
-          notify(tr('Кеш скинуто. Фільмів: ', 'Cache cleared. Movies: ') + Object.keys(watchedMovies).length + tr(', серіалів: ', ', shows: ') + Object.keys(watchedShows).length);
+          notify(tr('Кеш скинуто. Фільмів: ', 'Cache cleared. Movies: ') + Object.keys(verifiedMovies).length + tr(', завершених серіалів: ', ', completed shows: ') + Object.keys(completedShows()).length);
         });
       });
   }
@@ -1679,32 +1731,23 @@
 
   // Міст для інших плагінів (YDesign): чи фільм переглянутий на Trakt. Доступний одразу, ще до boot().
   window.TraktPlus = window.TraktPlus || {};
-  window.TraktPlus.version = '3.1.0-issue7';
+  // Status is independent of UI mark/hide preferences and local Favorite/Timeline.
+  // null = not known (loading/error/stale/insufficient completion evidence).
+  window.TraktPlus.version = '3.2.0-issue7';
   window.TraktPlus.syncWatched = function () { return syncWatched(true); };
   window.TraktPlus.syncStatus = function () { return lastSyncResult; };
-  window.TraktPlus.isUnconfirmedSyncedShow = function (d) {
-    hydrateWatched();
-    var id = tmdbId(d);
-    if (!managedSynced) managedSynced = syncedSet(Lampa.Storage.get('trakt_plus_synced') || []);
-    return cardKind(d) === 'show' && !!managedSynced['tv:' + id] && !isCompletedShow(id);
+  window.TraktPlus.isWatched = watchStatus;
+  window.TraktPlus.isWatchedShow = function (card) {
+    return cardKind(card) === 'show' ? watchStatus(card) : null;
   };
-  window.TraktPlus.isWatched = function (d) {
-    try {
-      hydrateWatched();
-      var id = tmdbId(d);
-      if (!id || !d || d._lib) return false;
-      var g = cfg();
-      if (cardKind(d) === 'show') return !!(g.mark && g.markShows && isCompletedShow(id));
-      return !!(g.mark && watchedMovies[id]);
-    } catch (e) { return false; }
-  };
-  window.TraktPlus.isWatchedShow = function (d) {
-    try {
-      hydrateWatched();
-      var id = tmdbId(d);
-      var g = cfg();
-      return !!(id && d && !d._lib && g.mark && g.markShows && isCompletedShow(id));
-    } catch (e) { return false; }
+  window.TraktPlus.watchedStatus = function (card) {
+    var value = watchStatus(card);
+    var phase = !token() ? 'unavailable' : !freshStatus(statusAt) && statusAt ? 'expired' : statusPhase;
+    if (value === null && phase === 'ready') {
+      var id = tmdbId(card), r = showStates[id];
+      phase = cardKind(card) === 'show' && r && r.error ? 'error' : progressPending[id] ? 'loading' : 'unknown';
+    }
+    return { value: value, source: 'trakt', phase: phase, updatedAt: statusAt || null };
   };
 
   // Рядки реєструємо ОДРАЗУ (до готовності додатку), щоб головна їх одразу підхопила

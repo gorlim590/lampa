@@ -1681,10 +1681,7 @@
             if (last && last.season !== undefined && last.episode !== undefined) {
                 if (tlPercent(episodeHash(title, last.season, last.episode)) >= WATCHED_EPISODE) return true;
             }
-            // Old Trakt+ imported any started show as viewed. Keep the stored mark,
-            // but do not present that managed mark as completion without evidence.
-            var unconfirmedImport = window.TraktPlus && TraktPlus.isUnconfirmedSyncedShow && TraktPlus.isUnconfirmedSyncedShow(data);
-            return !!(fav.viewed && ext.ended && !unconfirmedImport);
+            return !!(fav.viewed && ext.ended);
         } catch (e) {}
         return false;
     }
