@@ -38,3 +38,6 @@ jobs:
       - name: Trakt watched sync regressions
         working-directory: main-checkout
         run: node --test --test-timeout=15000 tests/trakt-watched-sync.cjs tests/trakt-account-isolation.cjs
+      - name: Anime and dorama torrent search regressions
+        working-directory: main-checkout
+        run: node --test --test-timeout=15000 tests/torrent-search.cjs
