@@ -391,3 +391,7 @@
 - Native cards/movie-TV-anime metadata/strict UA, no Ambient, Hybrid on/off/reduced-motion, migration, Trakt truth/unknown/account/error behaviors PASS on fixtures.3 synthetic provider episode Activity round trips:1timer/1observer mounted,0/0 after native Back; progress70%/reset/OK and focus retained. Native Main/no fixture globals restored.
 - No new baseline/profile/full load-order matrix per updated #8 scope. Reuse earlier viewport evidence; no speed/FPS claim. Physical TV/live provider/player/authenticated backend NOT tested. Limits in docs/issue-8-ydesign.md.
 - Source/evidence saved; remaining authorized workflow: publish isolated branch/Draft PR, add CI YDesign regressions, check CI and report #8 with only verified boxes. No main merge/Issue close/next Issue.
+
+### Issue #8 — feature history published; Draft/CI finalization
+- Feature branch fix/issue-8-ydesign-vertical published at a5a6e337dc28a2646ece6a275d8176d74e3a9b4a, preserving all7 local commits. Verified archive transport run https://github.com/gorlim590/lampa/actions/runs/39960773838 succeeded; temporary transport branch self-deleted. main unchanged.
+- Final runtime product commit1e0ae24,26PASS/0FAIL;164 unit checks PASS. Adding YDesign regressions to the existing repository CI command through the authorized GitHub connector (no runtime change). Draft PR/report follow; do not merge or close #8.
