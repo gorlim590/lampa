@@ -1,6 +1,22 @@
 (function () {
     'use strict';
 
+    // One static header rule applies before app-ready and across native routes.
+    // Keep the native localized minute clock; no second clock or DOM tick loop.
+    (function injectHeaderCss() {
+        if (document.getElementById('ifx_header_css')) return;
+        var style = document.createElement('style');
+        style.id = 'ifx_header_css';
+        style.textContent = [
+            'body .head { background:#15171c !important; background-image:none !important; color:#f4f4f7; }',
+            'body .head .head__time { align-items:center; -webkit-align-items:center; margin-top:0; flex-shrink:0; }',
+            'body .head .head__time-now { font-size:1.5em; line-height:1.15; margin:0 .55em 0 0; font-variant-numeric:tabular-nums; font-feature-settings:"tnum"; }',
+            'body .head .head__time > div:last-child { text-align:left; }',
+            'body .head .head__time-date, body .head .head__time-week { font-size:.72em; line-height:1.3; white-space:nowrap; }'
+        ].join('\n');
+        document.head.appendChild(style);
+    })();
+
     var IFX_TITLE_SIZE_DEFAULT = 0.75;
     var IFX_TMDB_UA_TTL_MS = 1000 * 60 * 60 * 24 * 2;
     var IFX_TMDB_UA_CACHE_PREFIX = 'ifx_tmdb_ua_title_v1.7:';

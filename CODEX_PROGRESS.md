@@ -403,3 +403,10 @@
 - CI https://github.com/gorlim590/lampa/actions/runs/39988020432 SUCCESS:43 focused tests, repository checks, whitespace. Product unchanged since exact-source browser11PASS/0FAIL atbb1a45a.
 - Issue #30 report comment6369822192;23 confirmed scoped checkboxes checked, broader/device/live-backend acceptance left open. Producer/action table and limitations in docs/issue-30-home-order.md. Root workspace progress receives final published-head pointer.
 - Next action requires review: review/merge #25, then retarget #33 to main; physical Google TV Settings editor/remote/scroll acceptance remains. Unknown preloaded plugin rows without stable IDs are intentionally read-only; future core signature changes fail open. No new Issue work automatically.
+
+## Issue #21 — neutral header and native clock
+- Based on main ee40032; product 786a47f. Earlier publication already included native clock relocation; retained it and its minute cadence.
+- Computed baseline #151127 came from Hybrid's explicit token; transparent movie/native headers could expose body/backdrop. Native negative clock margin/line-height and Hybrid 16vw cap/hidden weekday/absolute search caused layout inconsistency.
+- Interface+ single static neutral header/clock style; Hybrid 2.7.1 shares neutral color and flex search, shows UA weekday without capped width. Loader cache tag advanced; optional plugin defaults unchanged. No new product hooks/timers/observers.
+- 99 relevant automated checks PASS; repository syntax/paths/whitespace PASS. Fresh isolated Chromium 24 PASS, errors/network failures=[], seven exact source hashes at 786a47f. Home/details/Settings/catalog, themes, Hybrid toggles/reload, native focus/scroll, 720p/1080p/4K and long translated labels checked. No physical TV/backend claims.
+- Full review, superseded harness fixture failures, screenshots and activation: docs/issue-21-header-clock.md and audit/issue-21. PR29 patch dry-run clean, branch untouched. User authorizes dedicated PR and merge after current-head CI; final PR/main references follow in Issue #21.

@@ -1,0 +1,182 @@
+{
+  "commit": "ee40032cd3564a4f3ecd263cf55638e3a1e1524a",
+  "checks": [
+    {
+      "name": "Actual source hashes match all seven requested files",
+      "status": "PASS",
+      "data": {
+        "loader.js": {
+          "expected": "f24adfda2bfb3d069edb48a66e3210abda8a306301404a43c6e1f2b3c5b77afa",
+          "received": "f24adfda2bfb3d069edb48a66e3210abda8a306301404a43c6e1f2b3c5b77afa",
+          "commit": "ee40032cd3564a4f3ecd263cf55638e3a1e1524a"
+        },
+        "trakt/trakt.js": {
+          "expected": "4e5316729db4e0a9f9247dd0713a6cc067007dc2dbe50b21fda892f700c99e1f",
+          "received": "4e5316729db4e0a9f9247dd0713a6cc067007dc2dbe50b21fda892f700c99e1f",
+          "commit": "ee40032cd3564a4f3ecd263cf55638e3a1e1524a"
+        },
+        "trakt/trakt-plus.js": {
+          "expected": "770846b84e900086f4ce6d5512f2a267e0d3da7c7cde587423d0941f86fd1522",
+          "received": "770846b84e900086f4ce6d5512f2a267e0d3da7c7cde587423d0941f86fd1522",
+          "commit": "ee40032cd3564a4f3ecd263cf55638e3a1e1524a"
+        },
+        "ui/interface-plus.js": {
+          "expected": "2b1997a7489087d157f3e5e5e8f60f573f8720752ea8aed283c532831ed7abff",
+          "received": "2b1997a7489087d157f3e5e5e8f60f573f8720752ea8aed283c532831ed7abff",
+          "commit": "ee40032cd3564a4f3ecd263cf55638e3a1e1524a"
+        },
+        "ui/design-optimized.js": {
+          "expected": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6",
+          "received": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6",
+          "commit": "ee40032cd3564a4f3ecd263cf55638e3a1e1524a"
+        },
+        "ui/cardify-plus.js": {
+          "expected": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+          "received": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+          "commit": "ee40032cd3564a4f3ecd263cf55638e3a1e1524a"
+        },
+        "ui/stremio-hybrid.js": {
+          "expected": "cf843770f3fe5fe39f115c25e866c7bb9d091d2c81116d8b3a485717ece31f17",
+          "received": "cf843770f3fe5fe39f115c25e866c7bb9d091d2c81116d8b3a485717ece31f17",
+          "commit": "ee40032cd3564a4f3ecd263cf55638e3a1e1524a"
+        }
+      }
+    },
+    {
+      "name": "Home neutral header without route flicker",
+      "status": "PASS",
+      "data": [
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)"
+      ]
+    },
+    {
+      "name": "1920x1080 readable UA clock and full weekday without clipping/overlap",
+      "status": "PASS",
+      "data": {
+        "background": "rgb(21, 23, 28)",
+        "image": "none",
+        "color": "rgb(244, 244, 247)",
+        "clock": {
+          "x": 1531.6875,
+          "y": 20.265625,
+          "width": 268.59375,
+          "height": 42.6875,
+          "top": 20.265625,
+          "right": 1800.28125,
+          "bottom": 62.953125,
+          "left": 1531.6875
+        },
+        "time": {
+          "x": 1531.6875,
+          "y": 21.9375,
+          "width": 97.6875,
+          "height": 39.34375,
+          "top": 21.9375,
+          "right": 1629.375,
+          "bottom": 61.28125,
+          "left": 1531.6875
+        },
+        "date": {
+          "x": 1648.1875,
+          "y": 20.265625,
+          "width": 152.09375,
+          "height": 21.34375,
+          "top": 20.265625,
+          "right": 1800.28125,
+          "bottom": 41.609375,
+          "left": 1648.1875
+        },
+        "week": {
+          "x": 1648.1875,
+          "y": 41.609375,
+          "width": 152.09375,
+          "height": 21.34375,
+          "top": 41.609375,
+          "right": 1800.28125,
+          "bottom": 62.953125,
+          "left": 1648.1875
+        },
+        "search": {
+          "x": 63.84375,
+          "y": 11.390625,
+          "width": 499.1875,
+          "height": 60.4375,
+          "top": 11.390625,
+          "right": 563.03125,
+          "bottom": 71.828125,
+          "left": 63.84375
+        },
+        "profile": {
+          "x": 1818.515625,
+          "y": 11.390625,
+          "width": 60.4375,
+          "height": 60.4375,
+          "top": 11.390625,
+          "right": 1878.953125,
+          "bottom": 71.828125,
+          "left": 1818.515625
+        },
+        "text": "\n            18:47\n            \n                16 Листопада 2026\n                Понеділок\n            \n        ",
+        "weekDisplay": "block",
+        "route": "main",
+        "body": "platform--noname mouse--controll orientation--portrait size--normal ifx-colored-bookmarks ydesign-active ydesign-theme-default ydesign-style-classic ydesign-focus-scale ydesign-series-active ydesign-series-glass-pill ydesign-series-shape-pill ydesign-hide-left-column ydesign-border-year ydesign-border-age ydesign-border-seasons ydesign-border-ua ydesign-border-genres ydesign-border-ratings ydesign-color-age ydesign-color-ua ydesign-glass-pill ydesign-shape-pill ydesign-notch-bg ydesign-notch-border ydesign-v-uniform-badges ydesign-h-uniform-badges ydesign--font cardify-ratings-card stremio-hybrid"
+      }
+    },
+    {
+      "name": "Remote arrows retain native focus",
+      "status": "PASS"
+    }
+  ],
+  "sources": {
+    "loader.js": {
+      "expected": "f24adfda2bfb3d069edb48a66e3210abda8a306301404a43c6e1f2b3c5b77afa",
+      "received": "f24adfda2bfb3d069edb48a66e3210abda8a306301404a43c6e1f2b3c5b77afa",
+      "commit": "ee40032cd3564a4f3ecd263cf55638e3a1e1524a"
+    },
+    "trakt/trakt.js": {
+      "expected": "4e5316729db4e0a9f9247dd0713a6cc067007dc2dbe50b21fda892f700c99e1f",
+      "received": "4e5316729db4e0a9f9247dd0713a6cc067007dc2dbe50b21fda892f700c99e1f",
+      "commit": "ee40032cd3564a4f3ecd263cf55638e3a1e1524a"
+    },
+    "trakt/trakt-plus.js": {
+      "expected": "770846b84e900086f4ce6d5512f2a267e0d3da7c7cde587423d0941f86fd1522",
+      "received": "770846b84e900086f4ce6d5512f2a267e0d3da7c7cde587423d0941f86fd1522",
+      "commit": "ee40032cd3564a4f3ecd263cf55638e3a1e1524a"
+    },
+    "ui/interface-plus.js": {
+      "expected": "2b1997a7489087d157f3e5e5e8f60f573f8720752ea8aed283c532831ed7abff",
+      "received": "2b1997a7489087d157f3e5e5e8f60f573f8720752ea8aed283c532831ed7abff",
+      "commit": "ee40032cd3564a4f3ecd263cf55638e3a1e1524a"
+    },
+    "ui/design-optimized.js": {
+      "expected": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6",
+      "received": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6",
+      "commit": "ee40032cd3564a4f3ecd263cf55638e3a1e1524a"
+    },
+    "ui/cardify-plus.js": {
+      "expected": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+      "received": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+      "commit": "ee40032cd3564a4f3ecd263cf55638e3a1e1524a"
+    },
+    "ui/stremio-hybrid.js": {
+      "expected": "cf843770f3fe5fe39f115c25e866c7bb9d091d2c81116d8b3a485717ece31f17",
+      "received": "cf843770f3fe5fe39f115c25e866c7bb9d091d2c81116d8b3a485717ece31f17",
+      "commit": "ee40032cd3564a4f3ecd263cf55638e3a1e1524a"
+    }
+  },
+  "errors": [
+    "page.waitForFunction: Timeout 30000ms exceeded."
+  ],
+  "network": [],
+  "limitations": [
+    "Physical Google TV and older WebViews untested",
+    "Synthetic metadata; no authenticated backend or playback claims"
+  ]
+}
