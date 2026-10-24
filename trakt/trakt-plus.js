@@ -1107,7 +1107,9 @@
   function projectPerson(data, params) {
     var view = filmography(data, params.tp_person_filter, params.tp_person_sort), groups = [];
     if ((!params.tp_person_filter || params.tp_person_filter === 'all') && view.started.length) groups.push({ name: tr('Переглянуто з цим актором · Trakt', 'Watched with this person · Trakt'), credits: view.started });
-    if (view.selected.length) groups.push({ name: params.tp_person_filter === 'watched' ? tr('Переглянуті · Trakt', 'Watched · Trakt') : params.tp_person_filter === 'unwatched' ? tr('Не переглянуті · Trakt', 'Unwatched · Trakt') : tr('Усі роботи', 'All works'), credits: view.selected });
+    var selected = view.selected;
+    if (groups.length) { var seen = {};view.started.forEach(function(card){seen[mediaKey(card)]=true;});selected=selected.filter(function(card){return !seen[mediaKey(card)];}); }
+    if (selected.length) groups.push({ name: params.tp_person_filter === 'watched' ? tr('Переглянуті · Trakt', 'Watched · Trakt') : params.tp_person_filter === 'unwatched' ? tr('Не переглянуті · Trakt', 'Unwatched · Trakt') : groups.length ? tr('Інші роботи', 'Other works') : tr('Усі роботи', 'All works'), credits: selected });
     personContexts.set(params, { scope: actorScope(), raw: data, view: view });
     return Object.assign({}, data, { credits: Object.assign({}, data.credits, { knownFor: groups }) });
   }
