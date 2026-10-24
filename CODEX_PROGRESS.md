@@ -453,3 +453,5 @@
 - Validation:3/3 skill-creator quick_validate PASS;31 local Markdown links/Claude import PASS; documented focused test paths exist; git diff --check PASS. Product/browser suites intentionally NOT RUN for docs-only diff. Existing mandatory GitHub CI may run broader checks automatically.
 - Preserve historical evidence/baselines: PR29 YDesign changes are not in this main; source catalogue vs broadcast seasons and unknown watched remain explicit.
 - Next: publish documentation branch, Draft PR only; no merge. Claude/other-agent skill auto-discovery is client-dependent; no claim of behavioral certification or physicalTV testing.
+
+- DraftPR41 created, no merge. CI exposed a documentation-only URL formatting issue: existing checker captured a closing backtick after the localhost port. Changed CDP address to a Markdown autolink; no checker/workflow/runtime change. Reran repository checker only to verify this concrete failure; no repeated product/browser suite.
