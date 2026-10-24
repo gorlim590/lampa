@@ -174,10 +174,6 @@
             if (status === true) result.watched.push(Object.assign({}, card, { _trakt_cached_only: true, home_history_watched_at: Number(remote.lastWatchedAt) || 0 }));
             var evidence = card.media_type === 'tv' ? episodeEvidence(entries) : {}, latest = null;
             if (card.media_type !== 'tv') entries.forEach(function (entry) { var p = progress(entry.road); if (p) latest = newer(latest, { entry: entry, progress: p }); });
-            else Object.keys(evidence).forEach(function (key) {
-                var item = evidence[key];
-                if (item.progress.partial && (!latest || latest.progress.updated < item.progress.updated)) latest = item;
-            });
             // Verified Trakt episodes supplement local predecessor evidence, never a playback position.
             if (card.media_type === 'tv' && status !== null) (Array.isArray(remote.episodes) ? remote.episodes : []).forEach(function (ep) {
                 if (!(ep.season > 0 && ep.episode > 0 && ep.season % 1 === 0 && ep.episode % 1 === 0)) return;

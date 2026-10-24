@@ -434,7 +434,10 @@
           checkCancelled(job.cancel);
           var evidence = progressEvidence(data);
           if (showSources[job.id] !== job.item) return;
-          evidence.sig = job.sig; evidence.trakt = job.item.show.ids.trakt; showStates[job.id] = evidence;
+          evidence.sig = job.sig; evidence.trakt = job.item.show.ids.trakt;
+          evidence.episodes = showStates[job.id] && showStates[job.id].episodes || [];
+          evidence.lastWatchedAt = showStates[job.id] && showStates[job.id].lastWatchedAt || 0;
+          showStates[job.id] = evidence;
           watchedShows = completedShows(); watchedVer++;
           clearTimeout(progressNotifyTimer);
           progressNotifyTimer = setTimeout(function () {

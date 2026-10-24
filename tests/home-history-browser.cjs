@@ -2,6 +2,7 @@
 // Existing CDP tab only. Owned source routes + isolated storage/provider fixtures.
 const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process'),crypto=require('node:crypto'),{chromium}=require('playwright');
 const root=path.resolve(__dirname,'..'),out=path.join(root,'audit/issue-25-followup');fs.mkdirSync(out,{recursive:true});
+const sourcesOnly=process.env.HOME25_SOURCES_ONLY==='1';
 const sha=cp.execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
 const files=Object.fromEntries(['loader.js','trakt/trakt-plus.js','ui/design-optimized.js','plugins-to-enable/home-history.js','plugins-to-enable/home-policy.js','ui/stremio-hybrid.js'].map(p=>['/'+p,fs.readFileSync(path.join(root,p),'utf8')]));
 const sourceKey=u=>u.pathname.endsWith('/preview-loader.js')?'/loader.js':u.pathname.endsWith('/stremio-hybrid.js')?'/ui/stremio-hybrid.js':Object.keys(files).find(k=>u.pathname.endsWith(k));
@@ -44,7 +45,7 @@ const wav=Buffer.alloc(44+480000,128);wav.write('RIFF');wav.writeUInt32LE(wav.le
   return route.continue();
  };
  await page.route('**/*',route);
- try{
+ try{stage:{
   await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>window.Lampa?.Activity?.active()?.activity&&window.YDesignLoaded,null,{timeout:50000});
   await page.evaluate(()=>{
    const s=__issue25;s.cards=Array.from({length:6},(_,i)=>({id:i+1,source:'tmdb',media_type:'movie',original_title:'Movie '+(i+1),title:'Fixture '+(i+1),release_date:'2020-01-01',poster_path:'/fixture.svg'}));
@@ -58,7 +59,9 @@ const wav=Buffer.alloc(44+480000,128);wav.write('RIFF');wav.writeUInt32LE(wav.le
   });
   await page.waitForFunction(()=>TraktPlus.version==='3.3.1-home'&&TraktPlus.cachedWatched({id:6,media_type:'movie'})===true,null,{timeout:20000});
   await page.addScriptTag({url:'https://gorlim590.github.io/lampa/plugins-to-enable/home-history.js?fixture='+sha});
+  await page.waitForFunction(()=>window.LampaHomeHistory?.active&&window.LampaHomeHistory?.policyReady);
   await Promise.all(jobs);check('Exact changed source and loader loaded by hash/commit',Object.keys(files).every(k=>r.sources[k]?.received===hash(files[k])&&r.sources[k]?.commit===sha),r.sources);
+  if(sourcesOnly)break stage;
   await page.evaluate(()=>{
    const s=__issue25;s.prefix=[{title:'First',results:[s.cards[0]]},{title:'Second',results:[s.cards[1]]}];
    Lampa.Component.add('main',function(o){const c=Lampa.Maker.make('Main',o);c.use({onCreate(){const rows=s.registry.filter(r=>/^home_history_/.test(r.name)).map(r=>{let data;r.call()((result)=>data=result);return data});c.build(s.prefix.concat(rows));}});return c});Lampa.Activity.push({component:'main',source:'tmdb',title:'Issue25 fixtures',page:1});
@@ -94,10 +97,10 @@ const wav=Buffer.alloc(44+480000,128);wav.write('RIFF');wav.writeUInt32LE(wav.le
   }catch(e){r.blocked.push('Controlled native player: '+e.message.replace(/https?:\/\/\S+/g,'[URL]'));if(await page.evaluate(()=>Lampa.Player.opened()))await page.evaluate(()=>Lampa.Player.close())}
   await page.evaluate(()=>{__issue25.token=null;Lampa.Storage.listener.send('change',{name:'trakt_token'})});await page.waitForFunction(()=>!Lampa.Activity.active().activity.component.items.some(l=>l.data.home_history==='watched'));check('Unavailable Trakt removes unconfirmed watched row but preserves real local resume', (await datasets()).some(r=>r.kind==='resume'&&r.count>3));
   await page.screenshot({path:path.join(out,'home-final.png')});
- }catch(e){r.errors.push(e.message.replace(/https?:\/\/\S+/g,'[URL]'))}
+ }}catch(e){r.errors.push(e.message.replace(/https?:\/\/\S+/g,'[URL]'))}
  finally{
   capture=false;try{await page.evaluate(()=>{if(window.__issue25?.playerStarted&&Lampa.Player.opened())Lampa.Player.close()})}catch{}
   await page.unroute('**/*',route);await page.goto(restoreUrl,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>window.Lampa?.Activity?.active()?.activity&&!window.__issue25,null,{timeout:30000});check('Original page/methods restored with no fixture globals',true);
  }
- fs.writeFileSync(path.join(out,'browser.json'),JSON.stringify(r,null,2));console.log(JSON.stringify({checks:r.checks,errors:r.errors,blocked:r.blocked}));process.exit(r.errors.length||r.checks.some(c=>c.status==='FAIL')?1:0);
+ fs.writeFileSync(path.join(out,sourcesOnly?'browser-source-proof.json':'browser.json'),JSON.stringify(r,null,2));console.log(JSON.stringify({checks:r.checks,errors:r.errors,blocked:r.blocked}));process.exit(r.errors.length||r.checks.some(c=>c.status==='FAIL')?1:0);
 })().catch(e=>{console.error(e.message);process.exit(1)});
