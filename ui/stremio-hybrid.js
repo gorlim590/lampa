@@ -348,7 +348,7 @@ body.stremio-hybrid .full-person:not(.full-person--small){width:9.5em;display:fl
 body.stremio-hybrid .full-person:not(.full-person--small) .full-person__photo{width:100%;height:11em;flex-shrink:0;overflow:hidden;border-radius:.6em}
 body.stremio-hybrid .full-person__photo img{width:100%;height:100%;object-fit:cover}
 body.stremio-hybrid .full-person:not(.full-person--small) .full-person__body{padding:0;min-width:0}
-body.stremio-hybrid .full-person__name{font-size:.95em;line-height:1.3;white-space:normal}
+body.stremio-hybrid .full-person__name{color:var(--sh-text);font-size:.95em;line-height:1.3;white-space:normal}
 body.stremio-hybrid .full-person__role{font-size:.8em;line-height:1.3;color:var(--sh-muted);white-space:normal}
 body.stremio-hybrid .full-person.focus{transform:scale(1.025);box-shadow:0 0 0 .12em var(--sh-accent-soft)}
 body.stremio-hybrid .tp-person-watch{position:absolute;bottom:.5em;left:.5em;right:.5em;z-index:8;font-size:.8em;color:#d3c4ff;background:#10111be8;border-radius:.4em;padding:.3em .5em;pointer-events:none}\nbody.stremio-hybrid .sh-cast-watched{font-size:.75em;color:var(--sh-accent-soft);margin-top:.4em}
