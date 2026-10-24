@@ -1,0 +1,52 @@
+{
+  "baseline": "67bad5f5432022030a93bd1c2b1ceef3bb7c63e6",
+  "scenarios": [
+    {
+      "buttons": false,
+      "before": {
+        "component": "full",
+        "torrentButtons": [
+          {
+            "visible": false,
+            "classes": "full-start__button view--torrent selector",
+            "insideHero": true,
+            "events": [
+              "hover:enter"
+            ]
+          }
+        ],
+        "focus": "full_start"
+      },
+      "after": {
+        "component": "torrents",
+        "embedded": false,
+        "rows": 0,
+        "focus": "content"
+      }
+    },
+    {
+      "buttons": true,
+      "before": {
+        "component": "full",
+        "torrentButtons": [
+          {
+            "visible": true,
+            "classes": "full-start__button view--torrent selector button-mode-2 sh-movie-primary focus",
+            "insideHero": true,
+            "events": [
+              "hover:enter"
+            ]
+          }
+        ],
+        "focus": "full_start"
+      },
+      "after": {
+        "component": "torrents",
+        "embedded": false,
+        "rows": 0,
+        "focus": "torrent_cinema"
+      }
+    }
+  ],
+  "errors": []
+}

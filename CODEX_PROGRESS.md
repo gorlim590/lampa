@@ -444,3 +444,19 @@
 - 131targeted testsPASS; repository checker62JS454URLsPASS;12existingCDP checksPASS with7exact source hashes/noexceptions. No real Trakt writes, physicalTV or real playback testing.
 - Evidence and caveats: docs/issue-10-details.md, audit/issue-10-details/{before.png,after-full.png,owners-before.json,browser.json}.
 - Next: publish scoped follow-up PR, required CI, authorized merge if green; verify main/postmerge; report #10 without premature closure/user acceptance.
+
+
+## 2026-10-24 Issue14 integration checkpoint
+Worktree /home/gostrimchik/lampa-testing/audit/issue-14-torrents; branch fix/issue-14-torrent-integration frommain67bad5f. Productcommit0d66952. PR29/41 stilldraftunmerged, noAGENTS/CLAUDEinmain. Userallowsconditionalautomerge; keepoldpageunlessrealTorrServerplaybackconfirmed. Issue14alsoincludes Filesmetadata andlazyper-episodeIMDb.
+Baseline reproduced cleanreload ButtonsPlusoff: nativeview--torrent hidden inbuttons--container; on:ButtonsPlusmovesitvisible. CorejQuery hover:enter bypassesDOMcapture inboth, navigatesto oldtorrentsroute. Fixedhiddennativebuttonrelocation+scopedActivitypush/replacegateway, preservingallnativehandlers/unrelatedroutes/themeoff. SharedTorrentsRedesign.attachFiles reusesratingpipeline inFull;stale/recyclednodeguard added. No #16/#17sourcechanges.
+Tests:64existingparser/aliasesPASS,65Cinemaoffline+23statetestsPASS,6newtargetedunitsPASS;syntax/diffPASS. Afterroutefix bothfreshloads stayFull/embededsourcesvisible. BaselineJSON audit/issue-14/buttons-before.json; initialrouteafter /tmp/issue14-route-after.log. Baselineharnesslatercorrectedfixtureproviderselection (initial afterusedrealparser20rows, notcontrolled1); finalfreshpassstillneeded. NativeTorrServerread-onlyhealthPASS; officialSintel fixture download https://webtorrent.io/torrents/sintel.torrent hash08ada5a7a6183aae1e09d831df6748d566095a10 confirmedNOTpreexistingonserver. Realplaybacknotyetperformed; nolegacyremoval.
+CDP9222had1existingcontext/0tabs, so createdoneisolatedtestTABintheexistingprofile(notnewbrowser/context/profile). MaintabviaCuaChrome2id833880663 leftuntouched. Testtab https://siaivo.isroot.in; onlyCDPtesttab used. CuaBrowserreadonlyscope notusedforinjection.
+Next: finalcontrolledruntime Files/IMDblazy+loadorder/filters; realnativeTorrent->Files->Player test withofficialSintelonlyandcleanuponlyourfixturehash, thenruntimeproof. DoNOTclaimmocksasrealplayback orremoveexternalcoreAPIs. UpdateIssue14/PR/CI; mergeonlyindependentfullyverifiedfixesiffullscopeblocked.
+
+## Issue #14 — saved review checkpoint (2026-10-24)
+- Scope: embedded torrent entry independence and shared Files IMDb owner. Baseline main67bad5f; no PR29/41 code imported; #16/#17 providers unchanged.
+- Product0d66952 plus follow-up foreign file event/offscreen callback guards. New targeted tests8PASS; existing parser/alias64PASS, Cinema65+23PASS; repository62JS456URLsPASS; syntax/diffPASS.
+- Final exact-source movie CDP keyboard cases2PASS (ButtonsPlus off/on, Enter/Down/Up/Back, Full preserved); evidence audit/issue-14/movie-keyboard.json + screenshots; hashes included. Third TV/anime setup failed; not a PASS. Controlled writes memory-only, existing user browser not closed.
+- Real native Torrserver healthPASS; official Sintel hash confirmed absent. Playback harness timed out before native Files/player, nativeCalls0 and no fixture added. Real playback UNCONFIRMED. Do not delete legacy component/routes or claim Files/audio/subtitle/GoogleTV verified.
+- docs/issue-14-torrents.md maps owners, cause and pending tests. Need fresh TV/anime metadata fixture, native Files IMDb/cache/stale checks, ffprobe track metadata, real native playback before legacy UI removal. No automatic merge of this partial PR; keep #14 open.
+- Next: publish scoped Draft PR, inspect CI, add Issue14 report with confirmed results only; preserve this checkpoint for continuation.
