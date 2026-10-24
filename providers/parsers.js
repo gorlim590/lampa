@@ -1,5 +1,7 @@
 (function(){
 'use strict';
+if(window.plugin_combined_parser_ready)return;
+var entryUrl=document.currentScript&&document.currentScript.src;
 
 var STORAGE_PARSERS='ps_list_combo_v0.9',
     STORAGE_PRI_ACT='bat_url_two',
@@ -135,7 +137,8 @@ function updateStandardFieldsUI(){
         var j2 = sec ? getFinalParserUrl(sec, 'secondary') : '';
 
         $('div[data-name="jackett_url"] .settings-param__value').text(j1);
-        $('div[data-name="jackett_url_two"] .settings-param__value').text(j2);
+        $('div[data-name="jackett_url_two"] .settings-param__value').text(sec&&sec.settings&&sec.settings.parser_torrent_type==='prowlarr'?'':j2);
+        $('div[data-name="prowlarr_url_two"] .settings-param__value').text(sec&&sec.settings&&sec.settings.parser_torrent_type==='prowlarr'?j2:'');
         $('div[data-name="prowlarr_url"] .settings-param__value').text(p1);
     },50);
 }
@@ -660,6 +663,8 @@ function applySecondaryParser(idx){
         setRawUrl(STORAGE_RAW_SEC, '');
         Lampa.Storage.set('jackett_url_two', '');
         Lampa.Storage.set('jackett_key_two', '');
+        Lampa.Storage.set('prowlarr_url_two', '');
+        Lampa.Storage.set('prowlarr_key_two', '');
         updateParserUseLink();
         updateStandardFieldsUI();
         return;
@@ -671,8 +676,12 @@ function applySecondaryParser(idx){
     var finalUrl = getFinalParserUrl(p, 'secondary');
 
     setRawUrl(STORAGE_RAW_SEC, stripProxy(p.url));
-    Lampa.Storage.set('jackett_url_two',finalUrl);
-    Lampa.Storage.set('jackett_key_two',(p.settings&&p.settings.key)||'');
+    var type=p.settings&&p.settings.parser_torrent_type||'jackett';
+    Lampa.Storage.set('parser_torrent_type_two',type);
+    Lampa.Storage.set('jackett_url_two',type==='jackett'?finalUrl:'');
+    Lampa.Storage.set('jackett_key_two',type==='jackett'?(p.settings&&p.settings.key)||'':'');
+    Lampa.Storage.set('prowlarr_url_two',type==='prowlarr'?finalUrl:'');
+    Lampa.Storage.set('prowlarr_key_two',type==='prowlarr'?(p.settings&&p.settings.key)||'':'');
     updateParserUseLink();
     updateStandardFieldsUI();
 }
@@ -949,7 +958,7 @@ function initSecondaryPlugin(){
     var isFixingUrl=false;
     
     Lampa.Storage.listener.follow('change', function(e){
-        if(!isFixingUrl && (e.name==='jackett_url' || e.name==='jackett_url_two' || e.name==='prowlarr_url')){
+        if(!isFixingUrl && (e.name==='jackett_url' || e.name==='jackett_url_two' || e.name==='prowlarr_url_two' || e.name==='prowlarr_url')){
             if(e.value){
                 var expectedUrl = '';
                 var p = null;
@@ -960,11 +969,12 @@ function initSecondaryPlugin(){
                 } else if (e.name === 'prowlarr_url') {
                     p = getParserByBase(getSelectedBase());
                     if(p && p.settings.parser_torrent_type === 'prowlarr') expectedUrl = getFinalParserUrl(p, 'primary');
-                } else if (e.name === 'jackett_url_two') {
+                } else if (e.name === 'jackett_url_two' || e.name === 'prowlarr_url_two') {
                     var secIdx = parseInt(Lampa.Storage.get(STORAGE_SEC_ACT,'-1'), 10);
                     var secList = getParsers();
                     if(!isNaN(secIdx) && secIdx >= 0 && secIdx < secList.length) {
-                        expectedUrl = getFinalParserUrl(secList[secIdx], 'secondary');
+                        var expectedType=secList[secIdx].settings&&secList[secIdx].settings.parser_torrent_type||'jackett';
+                        if((e.name==='prowlarr_url_two')===(expectedType==='prowlarr')) expectedUrl = getFinalParserUrl(secList[secIdx], 'secondary');
                     }
                 }
 
@@ -1023,14 +1033,33 @@ function embeddedParserButton(root,context){
 }
 if(!window.ParserProviders)window.ParserProviders={version:'1.0.0',mount:embeddedParserButton};
 
+function searchSources(){
+    if(Lampa.Storage.field('parser_torrent_type')==='torrserver')return null;
+    var use=Lampa.Storage.field('parser_use_link')||'one',result=[],list=getParsers();
+    function add(role,parser,type,url,key){if(url)result.push({id:role,label:(role==='primary'?'Основний':'Додатковий')+' · '+(parser&&parser.shortName||parser&&parser.name||type),type:type,url:url,key:key||''});}
+    var primary=getParserByBase(getSelectedBase()),type=Lampa.Storage.field('parser_torrent_type')||'jackett';
+    if(use!=='two')add('primary',primary,type,primary?getFinalParserUrl(primary,'primary'):Lampa.Storage.field(type==='prowlarr'?'prowlarr_url':'jackett_url'),primary&&primary.settings?primary.settings.key:Lampa.Storage.field(type==='prowlarr'?'prowlarr_key':'jackett_key'));
+    var index=parseInt(Lampa.Storage.get(STORAGE_SEC_ACT,'-1'),10),secondary=list[index],secondaryType=secondary&&secondary.settings&&secondary.settings.parser_torrent_type||Lampa.Storage.get('parser_torrent_type_two',type);
+    if(use!=='one')add('secondary',secondary,secondaryType,secondary?getFinalParserUrl(secondary,'secondary'):Lampa.Storage.field(secondaryType==='prowlarr'?'prowlarr_url_two':'jackett_url_two'),secondary&&secondary.settings?secondary.settings.key:Lampa.Storage.field(secondaryType==='prowlarr'?'prowlarr_key_two':'jackett_key_two'));
+    return result;
+}
+function installSearch(){
+    function ready(){if(window.ParserProviders.search||!window.createParserCoordinator)return;var api=window.createParserCoordinator(Lampa,searchSources);window.ParserProviders.search=api.search;window.ParserProviders.cancel=api.cancel;window.ParserProviders.stats=api.stats;window.ParserProviders.version='1.1.0';}
+    if(window.createParserCoordinator)return ready();
+    var script=document.createElement('script');script.src=entryUrl?entryUrl.replace(/parsers\.js(?=\?|$)/,'parser-search.js'):'https://gorlim590.github.io/lampa/providers/parser-search.js';script.onload=ready;document.head.appendChild(script);
+}
+
 /* ============================================================
    INIT
    ============================================================ */
+var initialized=false;
 function initAll(){
+    if(initialized)return;initialized=true;
     Lampa.Lang.add=Lampa.Lang.add||function(){};
     translate();
     initPrimarySettings();
     initSecondaryPlugin();
+    installSearch();
     console.log('[CombinedParserPlugin V28 - Safe Polish & Bell] Loaded successfully');
 }
 

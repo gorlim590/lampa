@@ -90,6 +90,7 @@
         return /^[a-f0-9]{40}$|^[a-f0-9]{64}$/.test(value) ? value : '';
     }
     function releaseKey(row) {
+        if (row.parser_release_key) return row.parser_release_key;
         var value = text(row.InfoHash || row.infoHash || row.info_hash), magnet = text(row.MagnetUri || row.magnet), fromMagnet = '';
         try { var m = /[?&]xt=urn:btih:([a-z0-9]+)/i.exec(decodeURIComponent(magnet)); if (m) fromMagnet = m[1]; } catch (e) { /* malformed magnet remains distinct */ }
         var hash = canonicalHash(value) || canonicalHash(fromMagnet); if (hash) return 'hash:' + hash;
@@ -100,6 +101,12 @@
         var used = Object.create(null), out = [];
         rows.forEach(function (row) { var key = releaseKey(row); if (!used[key]) { used[key] = true; out.push(row); } }); return out;
     }
+    function dispatch(self, params, done, fail) {
+        var providers = window.ParserProviders;
+        if (providers && providers.search && !originalGet.__parserCoordinator) return providers.search(params, done, fail, function (p, ok, no) { return originalGet.call(self, p, ok, no); });
+        return originalGet.call(self, params, done, fail);
+    }
+    function clearTransport(self) { if (!originalGet.__parserCoordinator && window.ParserProviders && window.ParserProviders.cancel && window.ParserProviders.cancel()) return; if (originalClear) return originalClear.call(self); }
     function cancel() { generation++; if (current) current.cancel(); current = null; }
     function install() {
         if (!L || !L.Parser || typeof L.Parser.get !== 'function') return;
@@ -110,7 +117,7 @@
             cancel();
             var mine = generation;
             if (!params || (params.from_search || params.clarification) || !target(params.movie)) {
-                return originalGet.call(this, params, function () { if (mine === generation && typeof done === 'function') return done.apply(this, arguments); }, function () { if (mine === generation && typeof fail === 'function') return fail.apply(this, arguments); });
+                return dispatch(this, params, function () { if (mine === generation && typeof done === 'function') return done.apply(this, arguments); }, function () { if (mine === generation && typeof fail === 'function') return fail.apply(this, arguments); });
             }
             var movie = params.movie, names = titles(movie, params), used = Object.create(null), calls = 0, ended = false, metadataRequest = null, timer = null;
             var metadataTried = false, fallbackStart = 0, lastData = { Results: [] }, self = this;
@@ -150,21 +157,22 @@
                 if (!alive()) return;
                 used[normalize(query)] = true; calls++; stats.calls = calls;
                 var request = fallback || !params.search ? Object.assign({}, params, { search: query, torrent_search_owner: params }) : params; if (fallback) request.clarification = true;
-                if (fallback) timer = setTimeout(function () { if (!alive()) return; if (originalClear) originalClear.call(L.Parser); finish(Object.assign({}, lastData, { Results: [] })); }, Math.min(4000, remaining()));
-                originalGet.call(self, request, function (data) {
+                if (fallback) timer = setTimeout(function () { if (!alive()) return; clearTransport(L.Parser); finish(Object.assign({}, lastData, { Results: [] })); }, Math.min(4000, remaining()));
+                dispatch(self, request, function (data) {
                     if (!alive()) return; clearTimeout(timer); lastData = data || { Results: [] };
                     var rows = dedup((Array.isArray(lastData.Results) ? lastData.Results : []).filter(function (row) { return match(row, movie, Object.assign({}, params, params.params || {}), names).eligible; }));
+                    if (lastData.parser_pending) { if (rows.length) done(Object.assign({}, lastData, { Results: rows })); return; }
                     if (rows.length) { remember(movie, Object.assign({}, cached(movie) || {}, { aliases: names.map(function (title) { return { title: title }; }) })); return finish(Object.assign({}, lastData, { Results: rows })); }
                     if (!fallback) { fallbackStart = Date.now(); next(); } else next();
                 }, function (error) { if (!alive()) return; clearTimeout(timer); if (!fallback) finish(null, error); else finish(Object.assign({}, lastData, { Results: [] })); });
             }
             run(params.search || names[0], false);
         };
-        wrappedClear = function () { cancel(); if (originalClear) return originalClear.apply(this, arguments); };
+        wrappedClear = function () { cancel(); return clearTransport(this); };
         L.Parser.get = wrappedGet; L.Parser.clear = wrappedClear;
     }
     window.LampaTorrentSearch = { version: '1.0.0', normalize: normalize, titles: titles, match: match, dedup: dedup, target: target,
-        install: install, destroy: function () { stopped = true; cancel(); if (L && L.Listener && L.Listener.remove) L.Listener.remove('app', ready); if (L && L.Parser) { if (L.Parser.get === wrappedGet) L.Parser.get = originalGet; if (L.Parser.clear === wrappedClear) L.Parser.clear = originalClear; } } };
+        canonicalHash: canonicalHash, releaseKey: releaseKey, nativeClear: function () { if (originalClear) originalClear.call(L.Parser); }, install: install, destroy: function () { stopped = true; cancel(); if (L && L.Listener && L.Listener.remove) L.Listener.remove('app', ready); if (L && L.Parser) { if (L.Parser.get === wrappedGet) L.Parser.get = originalGet; if (L.Parser.clear === wrappedClear) L.Parser.clear = originalClear; } } };
     function ready(e) { if (e.type === 'ready') { install(); if (L.Listener.remove) L.Listener.remove('app', ready); } }
     if (L && L.Parser) install(); else if (L && L.Listener) L.Listener.follow('app', ready);
 })();
