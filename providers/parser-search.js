@@ -57,7 +57,7 @@
             if (!job.pending && !success) { job.subscribers.forEach(function (sub) { if (sub.fail) sub.fail('Налаштовані джерела недоступні'); }); return; }
             if (data.Results.length && job.stats.firstResultMs == null) job.stats.firstResultMs = Date.now() - job.stats.started;
             job.stats.results = data.Results.length; job.stats.pending = job.pending;
-            job.subscribers.forEach(function (sub) { sub.done(data); });
+            job.subscribers.forEach(function (sub) { if (!data.parser_pending || sub.streaming) sub.done(data); });
         }
         function prowlarr(params, slot, ok, fail) {
             var request = slot.request = new L.Reguest(), spec = slot.spec, movie = params.movie || {};
@@ -88,9 +88,9 @@
             if (!configured || !configured.length || configured.some(function (s) { return s.type !== 'jackett' && s.type !== 'prowlarr'; })) return nativeGet(params, done, fail);
             var queryKey = JSON.stringify([params.search, params.from_search, params.clarification, params.global, params.movie, params.params, params.season, params.episode]);
             var allKey = configured.map(specKey).join('|') + queryKey;
-            if (active && !active.dead && active.pending && active.key === allKey) { active.subscribers.push({ done: done, fail: fail }); if (merged(active).length) done(snapshot(active)); return; }
+            if (active && !active.dead && active.pending && active.key === allKey) { active.subscribers.push({ done: done, fail: fail, streaming: !!params.parser_streaming }); if (params.parser_streaming && merged(active).length) done(snapshot(active)); return; }
             cancel();
-            var job = active = { key: allKey, epoch: epoch, dead: false, slots: configured.map(function (spec) { return { spec: spec, status: 'loading', rows: [] }; }), pending: configured.length, subscribers: [{ done: done, fail: fail }], stats: { started: Date.now(), requests: 0, cacheHits: 0, firstResultMs: null, results: 0, pending: configured.length } }; lastStats = job.stats;
+            var job = active = { key: allKey, epoch: epoch, dead: false, slots: configured.map(function (spec) { return { spec: spec, status: 'loading', rows: [] }; }), pending: configured.length, subscribers: [{ done: done, fail: fail, streaming: !!params.parser_streaming }], stats: { started: Date.now(), requests: 0, cacheHits: 0, firstResultMs: null, results: 0, pending: configured.length } }; lastStats = job.stats;
             if (job.slots.every(function (slot) { var entry = memo[specKey(slot.spec) + queryKey]; return entry && entry.expires > Date.now(); })) {
                 job.slots.forEach(function (slot) { slot.rows = memo[specKey(slot.spec) + queryKey].rows; slot.status = slot.rows.length ? 'ready' : 'empty'; });
                 job.pending = 0; job.stats.cacheHits = job.slots.length; emit(job); return;
@@ -128,7 +128,7 @@
                 var child = new Original(object), build = child.build, parse = child.parse, seen = false;
                 child.parse = function () {
                     var get = L.Parser.get, delivered = false;
-                    L.Parser.get = function (params, done, fail) { return get.call(this, params, function (data) {
+                    L.Parser.get = function (params, done, fail) { params.parser_streaming = true; return get.call(this, params, function (data) {
                         var toggle = child.activity.toggle, late = delivered; delivered = true;
                         if (late) child.activity.toggle = function () {};
                         try { done(data); } finally { child.activity.toggle = toggle; }
