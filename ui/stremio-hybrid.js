@@ -780,6 +780,7 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         clearStreamFiles();
         if(st.providerBinding){st.providerBinding.destroy();st.providerBinding=null;}
         if(streamSelectOwner===st){clearStreamSelect();Lampa.Select.close();streamInfo(record);}
+        if(st.filesBinding){st.filesBinding.destroy();st.filesBinding=null;}
         st.dead=true;record.streamChild=null;
         if(st.queryFilter){var enabled=Lampa.Controller.enabled();if(document.querySelector('.search-box')&&enabled.controller&&typeof enabled.controller.back==='function')enabled.controller.back();disposeStreamQuery(st);}
         Lampa.Listener.remove('torrent',st.onRender);st.sourceData=new WeakMap();st.root.removeEventListener('hover:focus',st.onFocus,true);st.root.removeEventListener('hover:enter',st.onEnter,true);
@@ -787,6 +788,37 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         st.child.destroy();st.rows.forEach(function(row){$(row).remove();});st.rows=[];
         record.streamContent.textContent='';record.streamPane.setAttribute('aria-busy','false');record.streamPane.removeAttribute('data-cache-hit');streamStatus(record,'Джерела завантажуються лише після відкриття');record.streamLoad.hidden=false;
         Lampa.Controller.add('sh_movie_streams',{toggle:function(){Lampa.Controller.toggle('content');},back:function(){Lampa.Controller.toggle('content');}});
+    }
+    // Core button handlers use jQuery events, which do not reach DOM capture listeners.
+    // Route only this active details owner's matching torrent request; retain core handlers/APIs.
+    var streamRouteHooks = [];
+    function streamRouteMatches(params, movie, kind) {
+        if (!params || params.component !== 'torrents' || !params.movie || !movie || !movie.id) return false;
+        if (String(params.movie.id) !== String(movie.id) || (params.movie.source || 'tmdb') !== (movie.source || 'tmdb')) return false;
+        var incoming = params.movie.media_type || (params.movie.name || params.movie.first_air_date ? 'tv' : 'movie');
+        return incoming === kind;
+    }
+    function installStreamRoutes() {
+        ['push', 'replace'].forEach(function (name) {
+            if (streamRouteHooks.some(function (hook) { return hook.name === name; })) return;
+            var original = Lampa.Activity[name]; if (typeof original !== 'function') return;
+            var wrapped = function (params) {
+                var active = Lampa.Activity.active(), record = watching && active && active.component === 'full' && movieRecords.filter(function (r) { return r.activity === active.activity && r.streamPane && r.page.classList.contains('activity--active'); })[0];
+                if (!record || !streamRouteMatches(params, streamMovie(record), record.kind)) return original.apply(this, arguments);
+                var fields = ['search', 'search_one', 'search_two', 'global', 'clarification', 'season', 'episode', 'filter_season', 'filter_episode'];
+                var previous = record.streamQuery || streamParams(record), changed = fields.some(function (key) { return params[key] !== previous[key]; });
+                if (changed && record.streamChild) closeStreamChild(record);
+                record.streamQuery = Object.assign({}, params);
+                loadStreams(record);
+            };
+            streamRouteHooks.push({name:name, original:original, wrapped:wrapped}); Lampa.Activity[name] = wrapped;
+        });
+    }
+    function removeStreamRoutes() {
+        streamRouteHooks = streamRouteHooks.filter(function (hook) {
+            if (Lampa.Activity[hook.name] !== hook.wrapped) return true; // preserve a later plugin's chain
+            Lampa.Activity[hook.name] = hook.original; return false;
+        });
     }
     function loadStreams(record) {
         if(record.streamChild){streamActivate(record);return;}
@@ -796,6 +828,7 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         var key=[record.kind,params.movie.id,params.movie.source||'tmdb',params.search,!!params.global,!!params.clarification,Lampa.Storage.field('parser_torrent_type'),streamGeneration].join('|');st.key=key;
         try {
             st.child=Lampa.Component.create(params);st.root=st.child.render()[0];st.root.classList.add('sh-stream-explorer');record.streamContent.appendChild(st.root);
+            if(window.TorrentsRedesign&&typeof TorrentsRedesign.attachFiles==='function')st.filesBinding=TorrentsRedesign.attachFiles({root:st.root,movie:params.movie,kind:record.kind,component:record.activity.component,isAlive:function(){return !st.dead&&record.streamChild===st;}});
             st.child.activity={loader:function(on){if(st.dead)return;st.loading=on;record.streamPane.setAttribute('aria-busy',on?'true':'false');streamStatus(record,on?'Пошук джерел…':st.error?'Парсер недоступний':st.total===0?'Джерел не знайдено':st.total!=null?'Знайдено: '+st.total:'Джерела');if(!on){streamSyncRows(st);if(!st.loadedOnce){st.loadedOnce=true;if(!st.navigatedWhileLoading)st.last=st.root.querySelector('.torrent-item')||st.last;}st.child.start=function(){streamActivate(record);};}},toggle:function(){if(!st.dead&&st.wantFocus)streamActivate(record);},render:function(){return $(st.root);}};
             st.child.start=function(){streamActivate(record);};st.child.back=function(){streamInfo(record);};
             var append=st.child.append,reset=st.child.reset,next=st.child.next,applyFilter=st.child.applyFilter;
@@ -833,6 +866,13 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
     }
     function setupStreams(record) {
         if(record.streamPane||!Lampa.Storage.field('parser_use')||!window.lampa_settings.torrents_use)return;
+        var action=record.root.querySelector('.view--torrent'),bar=record.root.querySelector('.full-start-new__buttons');
+        // Core keeps optional actions in a hidden template pool. Buttons+ used to move it.
+        // Move the existing node once, preserving every handler; restore it with the theme.
+        if(action&&bar&&action.closest('.buttons--container.hide')){
+            record.moves.push({node:action,parent:action.parentNode,next:action.nextSibling});bar.appendChild(action);
+        }
+        installStreamRoutes();
         var pane=document.createElement('section');pane.className='sh-streams';pane.setAttribute('aria-label','Торрентні джерела');pane.setAttribute('aria-busy','false');
         pane.innerHTML='<div class="sh-stream-head"><h2>Джерела</h2><div class="sh-stream-retry selector" title="Оновити джерела">↻</div></div><div class="sh-stream-status" role="status">Джерела завантажуються лише після відкриття</div><div class="sh-stream-load selector">Показати джерела</div><div class="sh-stream-content"></div>';
         record.streamPane=pane;record.streamContent=pane.querySelector('.sh-stream-content');record.streamStatus=pane.querySelector('.sh-stream-status');record.streamLoad=pane.querySelector('.sh-stream-load');var host=document.createElement('div');host.className='sh-movie-hero';record.root.parentNode.insertBefore(host,record.root);host.appendChild(record.root);host.appendChild(pane);record.streamHost=host;record.page.classList.add('sh-has-streams');
@@ -1058,6 +1098,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
     }
     function removeUI() {
         removeBackdropPacing();
+        removeStreamRoutes();
         if (watching) { Lampa.Listener.remove('activity', onActivity); Lampa.Listener.remove('full',onMovieFull); Lampa.Controller.listener.remove('toggle',onStreamController); Lampa.Modal.listener.remove('fullshow',onStreamFiles); Lampa.Modal.listener.remove('update',onStreamFiles); Lampa.Modal.listener.remove('close',clearStreamFiles); Lampa.Listener.remove('torrent_file',onStreamFile); clearStreamFiles(); Lampa.Select.listener.remove('fullshow',onStreamSelect); Lampa.Select.listener.remove('hide',clearStreamSelect); Lampa.Storage.listener.remove('change',onStreamSettings); streamCache=[]; brandPending={}; Lampa.Search.listener.remove('close', onSearchClose); Lampa.Search.listener.remove('sources',onSearchSources); Lampa.Settings.listener.remove('open',onSettingsOpen); Lampa.Settings.listener.remove('close',onSettingsClose); document.removeEventListener('error',onRatingError,true); document.removeEventListener('keydown',onSettingsKey,true); document.removeEventListener('keyup',onSettingsKey,true); settingsLeftConsumed=false; watching=false; }
         homePolicies.slice().forEach(function(r){releaseHome(r,false);});
         removeSettingsUI();

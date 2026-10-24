@@ -1,0 +1,13 @@
+{
+  "baseline": "0d66952e8612e6e85a76da0879017d93802313b7",
+  "scenarios": [],
+  "errors": [
+    "page.waitForFunction: Timeout 20000ms exceeded."
+  ],
+  "diagnostic": {
+    "component": "full",
+    "select": "\n    \n    \n        \n            \n        \n        \n    \n        \n            \n        \n    \n\n    \n",
+    "videos": [],
+    "nativeCalls": 0
+  }
+}
