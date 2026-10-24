@@ -1,0 +1,210 @@
+{
+  "active": "full",
+  "keys": [
+    "components",
+    "object",
+    "params",
+    "scroll",
+    "html",
+    "items",
+    "loaded",
+    "active",
+    "limit_view",
+    "build",
+    "props",
+    "activity",
+    "tv",
+    "view",
+    "rows",
+    "_traktPlusBuildHook",
+    "_traktPlusRelatedInserted",
+    "fragment"
+  ],
+  "rows": [
+    {
+      "keys": [
+        "component",
+        "source",
+        "id",
+        "method",
+        "card",
+        "reactions",
+        "recomend",
+        "persons",
+        "videos",
+        "simular",
+        "movie",
+        "episodes"
+      ]
+    },
+    {
+      "keys": [
+        "component",
+        "source",
+        "id",
+        "method",
+        "card",
+        "reactions",
+        "recomend",
+        "persons",
+        "videos",
+        "simular",
+        "movie",
+        "episodes"
+      ]
+    },
+    {
+      "title": "Сезон 3",
+      "keys": [
+        "movie",
+        "title",
+        "results",
+        "params"
+      ],
+      "results": [
+        {
+          "name": "Серія 53",
+          "title": "Серія 53",
+          "season_number": 3,
+          "episode_number": 5
+        },
+        {
+          "name": "Серія 52",
+          "title": "Серія 52",
+          "season_number": 3,
+          "episode_number": 4
+        },
+        {
+          "name": "Якщо нема хліба...",
+          "title": "Якщо нема хліба...",
+          "season_number": 3,
+          "episode_number": 3
+        },
+        {
+          "name": "Вбрання Вогняного Щура",
+          "title": "Вбрання Вогняного Щура",
+          "season_number": 3,
+          "episode_number": 2
+        },
+        {
+          "name": "Сарана",
+          "title": "Сарана",
+          "season_number": 3,
+          "episode_number": 1
+        }
+      ]
+    },
+    {
+      "title": "Актори",
+      "keys": [
+        "results",
+        "title",
+        "params"
+      ],
+      "results": [
+        {
+          "name": "Аой Юкі"
+        },
+        {
+          "name": "Такео Оцука"
+        },
+        {
+          "name": "Кацуюкі Коніші"
+        }
+      ]
+    },
+    {
+      "title": "Подібні (Trakt)",
+      "keys": [
+        "title",
+        "trakt_line",
+        "home_row_id",
+        "home_row_origin",
+        "trakt_line_title",
+        "source",
+        "page",
+        "total_pages",
+        "results",
+        "more",
+        "onMore",
+        "params",
+        "trakt_related"
+      ],
+      "results": [
+        {
+          "name": "Raven of the Inner Palace",
+          "title": "Raven of the Inner Palace"
+        },
+        {
+          "name": "Bibliophile Princess",
+          "title": "Bibliophile Princess"
+        },
+        {
+          "name": "My Happy Marriage",
+          "title": "My Happy Marriage"
+        },
+        {
+          "name": "Gosick",
+          "title": "Gosick"
+        },
+        {
+          "name": "The Story of Saiunkoku",
+          "title": "The Story of Saiunkoku"
+        }
+      ]
+    },
+    {
+      "title": "Рекомендації",
+      "keys": [
+        "page",
+        "results",
+        "total_pages",
+        "total_results",
+        "original_length",
+        "url",
+        "source",
+        "title",
+        "params"
+      ],
+      "results": [
+        {
+          "name": "Анніка",
+          "title": "Анніка"
+        },
+        {
+          "name": "Unnatural",
+          "title": "Unnatural"
+        },
+        {
+          "name": "Baretta",
+          "title": "Baretta"
+        },
+        {
+          "name": "Таємниці Брокенвуда",
+          "title": "Таємниці Брокенвуда"
+        }
+      ]
+    },
+    {
+      "title": "Подібні",
+      "keys": [
+        "page",
+        "results",
+        "total_pages",
+        "total_results",
+        "original_length",
+        "url",
+        "source",
+        "title",
+        "params"
+      ],
+      "results": [
+        {
+          "name": "The Crow Girl",
+          "title": "The Crow Girl"
+        }
+      ]
+    }
+  ],
+  "text": "2023, Японія\n薬屋のひとりごと\nМонолог травниці\nСезон: 1\n●\nЕпізод: 52\n51 Серія з 60\nТривалість серії ≈ 23 хвилини\nСезони: 1\nМультфільм\nДрама\nДетектив\n14+\nОнгоїнг\nСезон: 1\n●\nЕпізод: 52\nПри імператорському дворі в стародавньому Китаї минуло кілька місяців відтоді, як 17-річну дівчину на ім'я Маомао викрали і змусили працювати найнижчою служницею в імператорському палаці. Та все ж придворні інтриги змушують її нарешті вийти з тіні й заявити, що насправді вона досвідчена травниця, що добре розуміється на ліках та отрутах. Здивовані слуги запрошують Маомао у свиту до фаворитки імператора, де й починаються її справжні пригоди, сповнені інтриг і таємниць.\n\n\nЩе\n2\nЩе\n5\nПов'язані списки\nКоментарі не знайдено\nДата релізу\n22 Жовтня 2023\nКраїни\nЯпонія\nЖанр\n3\nВиробництво\n8\nТеги\n12\nПов'язані списки\nСезон 3\nЩе\n5\nСерія 53\n30 Жовтня\nАктори\nАой Юкі\nMaomao (voice)\nТакео Оцука\nJinshi (voice)\nКацуюкі Коніші\nGaoshun (voice)\nПодібні (Trakt)\nЩе\nTV\nTV\nTV\nTV\nTV\nTV\nTV\nРекомендації\nЩе\nTV\nTV\nTV\nTV\nПодібні\nЩе\nTV"
+}

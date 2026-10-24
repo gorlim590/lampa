@@ -1,0 +1,26 @@
+[
+  {
+    "requested": 1,
+    "id": 329141,
+    "name": "Сезон 1",
+    "season_number": 1,
+    "episodes": 24,
+    "firstEpisodeId": 901001
+  },
+  {
+    "requested": 2,
+    "id": 329141,
+    "name": "Сезон 2",
+    "season_number": 2,
+    "episodes": 24,
+    "firstEpisodeId": 902001
+  },
+  {
+    "requested": 3,
+    "id": 329141,
+    "name": "Сезон 3",
+    "season_number": 3,
+    "episodes": 12,
+    "firstEpisodeId": 903001
+  }
+]

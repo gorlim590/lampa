@@ -1,0 +1,129 @@
+[
+  {
+    "id": 220542,
+    "name": "Монолог травниці",
+    "original_name": "薬屋のひとりごと",
+    "number_of_seasons": 1,
+    "seasons": [
+      {
+        "id": 363363,
+        "name": "Спеціальне",
+        "season_number": 0,
+        "episode_count": 53,
+        "air_date": "2023-10-23"
+      },
+      {
+        "id": 329141,
+        "name": "Сезон 1",
+        "season_number": 1,
+        "episode_count": 60,
+        "air_date": "2023-10-22"
+      }
+    ],
+    "last_episode_to_air": {
+      "season_number": 1,
+      "episode_number": 51
+    }
+  },
+  {
+    "id": 1396,
+    "name": "Пуститися берега",
+    "original_name": "Breaking Bad",
+    "number_of_seasons": 5,
+    "seasons": [
+      {
+        "id": 3577,
+        "name": "Спеціальне",
+        "season_number": 0,
+        "episode_count": 9,
+        "air_date": "2009-02-17"
+      },
+      {
+        "id": 3572,
+        "name": "Сезон 1",
+        "season_number": 1,
+        "episode_count": 7,
+        "air_date": "2008-01-20"
+      },
+      {
+        "id": 3573,
+        "name": "Сезон 2",
+        "season_number": 2,
+        "episode_count": 13,
+        "air_date": "2009-03-08"
+      },
+      {
+        "id": 3575,
+        "name": "Сезон 3",
+        "season_number": 3,
+        "episode_count": 13,
+        "air_date": "2010-03-21"
+      },
+      {
+        "id": 3576,
+        "name": "Сезон 4",
+        "season_number": 4,
+        "episode_count": 13,
+        "air_date": "2011-07-17"
+      },
+      {
+        "id": 3578,
+        "name": "Сезон 5",
+        "season_number": 5,
+        "episode_count": 16,
+        "air_date": "2012-07-15"
+      }
+    ],
+    "last_episode_to_air": {
+      "season_number": 5,
+      "episode_number": 16
+    }
+  },
+  {
+    "id": 1429,
+    "name": "Атака титанів",
+    "original_name": "進撃の巨人",
+    "number_of_seasons": 4,
+    "seasons": [
+      {
+        "id": 3789,
+        "name": "Спеціальне",
+        "season_number": 0,
+        "episode_count": 37,
+        "air_date": "2013-07-07"
+      },
+      {
+        "id": 3788,
+        "name": "Сезон 1",
+        "season_number": 1,
+        "episode_count": 25,
+        "air_date": "2013-04-07"
+      },
+      {
+        "id": 84756,
+        "name": "Сезон 2",
+        "season_number": 2,
+        "episode_count": 12,
+        "air_date": "2017-04-01"
+      },
+      {
+        "id": 98013,
+        "name": "Сезон 3",
+        "season_number": 3,
+        "episode_count": 22,
+        "air_date": "2018-07-23"
+      },
+      {
+        "id": 126952,
+        "name": "Фінальний сезон",
+        "season_number": 4,
+        "episode_count": 28,
+        "air_date": "2020-12-07"
+      }
+    ],
+    "last_episode_to_air": {
+      "season_number": 4,
+      "episode_number": 28
+    }
+  }
+]
