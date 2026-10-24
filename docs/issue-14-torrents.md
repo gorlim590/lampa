@@ -13,7 +13,8 @@ Status: **PARTIAL — review required, no automatic merge**. Baseline main
   DOM capture listener misses those events. A reversible `Activity.push/replace`
   adapter now owns only matching torrent requests from the active Full page:
   content ID, source and movie/TV type must match. Other routes and arguments
-  remain native. Changed search/season parameters recreate only the embedded
+  remain native. Activity object identity is checked as well: overlapping old/new
+  CSS activity classes cannot assign ownership to the previous page. Changed search/season parameters recreate only the embedded
   child. The adapter preserves later wrappers and is dormant when Hybrid is off.
 * Cinema's Files rating context previously admitted only an active standalone
   `torrents` Activity. `TorrentsRedesign.attachFiles()` gives the existing rating
@@ -43,7 +44,7 @@ break the new block. No shared API, legacy route or fallback was deleted.
 
 ## Evidence and checks
 
-* `node --test tests/torrent-details.cjs`: **8 PASS / 0 FAIL**. Covers route/type/
+* `node --test tests/torrent-details.cjs`: **9 PASS / 0 FAIL**. Covers route/type/
   source boundaries, cleanup and later wrappers, Full ownership, lazy/cache
   reuse, ambiguous episodes, recycled nodes, foreign events and late metadata.
 * Existing #16/#17 tests: **64 PASS / 0 FAIL**; existing Cinema offline tests:
@@ -52,13 +53,18 @@ break the new block. No shared API, legacy route or fallback was deleted.
   Syntax and `git diff --check`: **PASS**. Focused tests added to existing CI.
 * `audit/issue-14/buttons-before.json`: clean reload with ButtonsPlus off/on
   reproduces the hidden button and escape to standalone Activity.
-* `audit/issue-14/movie-keyboard.json`: two movie cases **PASS**, ButtonsPlus
-  off/on, actual keyboard Enter/Down/Up/Back; one embedded fixture result, active
-  Activity remains Full, Back restores `full_start`. Source SHA-256 hashes are
-  recorded. Its third anime attempt failed and is explicitly retained as such.
-* Screenshots `audit/issue-14/movie-off.png` and `movie-on.png` show those tested
-  movie states. Only the existing CDP profile was used. Writes in controlled
-  tests were memory-only; the ordinary user tab/browser were not closed.
+* `audit/issue-14/movie-keyboard.json`: two exploratory keyboard checks returned
+  Full/one embedded fixture result, but checked only the component name. Screenshot
+  inspection showed another media page after Back. **These are not acceptance
+  PASS results**: title identity and correct Back destination were not established.
+* `audit/issue-14/native-entry.json`: the stricter check uses the native active
+  Activity render and matching loaded movie ID. It timed out waiting for one
+  fixture result after Enter. **Browser runtime acceptance BLOCKED**; no final
+  ButtonsPlus/TV/anime equivalence claim. Source hashes and failed attempts are
+  preserved for continuation. Existing screenshots are diagnostic, not visual signoff.
+* Existing CDP profile only; controlled writes were memory-only. Ordinary user
+  tab/browser not closed. Test metadata fixtures did not reliably control the
+  native restored detail view; this was not presented as real TMDB/Trakt testing.
 * Native Torserver read-only health: **PASS**. Official WebTorrent Sintel fixture
   was checked as absent before testing. **Real playback NOT CONFIRMED**: the test
   timed out waiting for the active detail fixture, before native file selection
@@ -69,7 +75,8 @@ break the new block. No shared API, legacy route or fallback was deleted.
 1. Fix the controlled metadata setup for fresh TV/anime and Sintel details in the
    current native core. Network fixtures did not reliably control the active
    detail component; a later provider callback fixture also failed to populate it.
-   Movie entry checks passed, but do not prove TV/anime runtime equivalence.
+   Earlier entry checks did not establish title identity and are superseded by
+   stricter runtime failure; verify movie, TV and anime on the actual active owner.
 2. Run the changed rating pipeline in real native Files: verify exact episode
    identities, visible-only IMDb requests, warm cache and no stale updates. Unit
    mocks are not a substitute for this runtime check.

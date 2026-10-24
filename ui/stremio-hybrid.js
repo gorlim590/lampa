@@ -803,7 +803,7 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
             if (streamRouteHooks.some(function (hook) { return hook.name === name; })) return;
             var original = Lampa.Activity[name]; if (typeof original !== 'function') return;
             var wrapped = function (params) {
-                var active = Lampa.Activity.active(), record = watching && active && active.component === 'full' && movieRecords.filter(function (r) { return r.streamPane && r.page.classList.contains('activity--active'); })[0];
+                var active = Lampa.Activity.active(), record = watching && active && active.component === 'full' && movieRecords.filter(function (r) { return r.activity === active.activity && r.streamPane && r.page.classList.contains('activity--active'); })[0];
                 if (!record || !streamRouteMatches(params, streamMovie(record), record.kind)) return original.apply(this, arguments);
                 var fields = ['search', 'search_one', 'search_two', 'global', 'clarification', 'season', 'episode', 'filter_season', 'filter_episode'];
                 var previous = record.streamQuery || streamParams(record), changed = fields.some(function (key) { return params[key] !== previous[key]; });
