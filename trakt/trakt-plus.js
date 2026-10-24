@@ -1116,12 +1116,18 @@
     Lampa.Api._tpDetails = true;
     var full = Lampa.Api.full, person = Lampa.Api.person;
     Lampa.Api.full = function (params, done, fail) { return full.call(this, params, function (data) { done(detailsPayload(data)); }, fail); };
+    function personRequestAlive(params) {
+      if (!params || params.component !== 'actor') return true;
+      var active = Lampa.Activity && Lampa.Activity.active && Lampa.Activity.active();
+      return !!(active && active.component === 'actor' && active.activity && active.activity.component.object === params);
+    }
     Lampa.Api.person = function (params, done, fail) {
       if (!cfg().enable || params.only_credits || ['tmdb', 'cub'].indexOf(params.source || 'tmdb') < 0) return person.apply(this, arguments);
       var scope = actorScope(), key = personCacheKey(params), cached = personCache[key], pending;
       if (cached && Date.now() - cached.time < PERSON_TTL) pending = Promise.resolve(cached.data);
       else {
         pending = personJobs[key];
+        if (pending && !personRequestAlive(pending._tpParams)) pending = null;
         if (!pending) {
           pending = new Promise(function (resolve, reject) {
             var settled = false, timer = setTimeout(function () { finish(null, { timeout: true }); }, 15000);
@@ -1129,21 +1135,24 @@
             try { person.call(Lampa.Api, params, function (data) { finish(data); }, function (error) { finish(null, error || { unavailable: true }); }); }
             catch (error) { finish(null, error); }
           });
+          pending._tpParams = params;
           personJobs[key] = pending;
           pending.then(function (data) {
+            if (personJobs[key] !== pending) return;
             delete personJobs[key];
             if (!data || !data.person || String(data.person.id) !== String(params.id) || !data.credits) return;
             personCache[key] = { time: Date.now(), data: data };
             var at = personKeys.indexOf(key); if (at >= 0) personKeys.splice(at, 1); personKeys.push(key);
             while (personKeys.length > 32) delete personCache[personKeys.shift()];
-          }, function () { delete personJobs[key]; });
+          }, function () { if (personJobs[key] === pending) delete personJobs[key]; });
         }
       }
       pending.then(function (data) {
+        if (!personRequestAlive(params)) return;
         if (scope !== actorScope()) { if (fail) fail({ cancelled: true }); return; }
         if (!data || !data.person || String(data.person.id) !== String(params.id) || !data.credits) { if (fail) fail({ invalid_metadata: true }); return; }
         done(projectPerson(data, params));
-      }, function (error) { if (fail) fail(error); });
+      }, function (error) { if (personRequestAlive(params) && fail) fail(error); });
     };
   }
   function actorTools(comp, rows) {
