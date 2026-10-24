@@ -4,9 +4,9 @@
     if (window.StremioHybrid) return;
     var style, ready = false, destroyed = false, waiting = false, watching = false, moreButton = null, menuOpen = false, searchNode = null, searchReturn = false, settingsRail = null, settingsFrame = 0, settingsParameter = null, settingsCategory = 'interface', settingsLeftConsumed = false, searchSources = null, searchRoots = [];
     var css = `
-body.stremio-hybrid { --sh-bg:#121023; --sh-panel:#211d35; --sh-accent:#9775fa; --sh-muted:#aba7bd; --sh-rail:#0c0b16; --sh-text:#f0eef8; --sh-border:#ffffff16; --sh-radius:.7em; --sh-pill:2em; --sh-gap:1.1em; --sh-speed:160ms; --sh-ring:#9775fa66; --sh-focus:#7960c9; --sh-focus-soft:#3e315b; --sh-header:#15171c; --sh-panel-raised:#29233e; --sh-accent-soft:#b79bff; --sh-focus-text:#e9e0ff; --sh-focus-ink:#201536; --sh-inactive:#726d86; --sh-secondary:#d0cadf; --sh-inset:1.8em; --sh-ease:ease-out; background:#121023 !important; color:#f0eef8; }
+body.stremio-hybrid { --sh-bg:#121023; --sh-panel:#211d35; --sh-accent:#9775fa; --sh-muted:#aba7bd; --sh-rail:#0c0b16; --sh-text:#f0eef8; --sh-border:#ffffff16; --sh-radius:.7em; --sh-pill:2em; --sh-gap:1.1em; --sh-speed:160ms; --sh-ring:#9775fa66; --sh-focus:#7960c9; --sh-focus-soft:#3e315b; --sh-header:transparent; --sh-panel-raised:#29233e; --sh-accent-soft:#b79bff; --sh-focus-text:#e9e0ff; --sh-focus-ink:#201536; --sh-inactive:#726d86; --sh-secondary:#d0cadf; --sh-inset:1.8em; --sh-ease:ease-out; background:#121023 !important; color:#f0eef8; }
 body.stremio-hybrid .background { opacity:.12 !important; }
-body.stremio-hybrid .head { background:var(--sh-header) !important; border-bottom:1px solid #ffffff09; }
+body.stremio-hybrid .head { background:transparent !important; background-image:none !important; border:0 !important; box-shadow:none !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
 body.stremio-hybrid .head__body { padding-left:1.8em; padding-right:var(--sh-inset); }
 body.stremio-hybrid .head__action { border-radius:50%; }
 body.stremio-hybrid .head__action.focus { background:var(--sh-focus) !important; color:white !important; }
@@ -29,7 +29,7 @@ body.stremio-hybrid .ydesign-card.focus::after, body.stremio-hybrid .ydesign-car
 body.stremio-hybrid .ydesign-card .card__view::before { animation:none !important; }
 body.stremio-hybrid .ydesign-badge, body.stremio-hybrid .ydesign-genre-badge, body.stremio-hybrid .ydesign-rating, body.stremio-hybrid .ydesign-series-pill, body.stremio-hybrid .ydesign-card-notch { backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
 body.stremio-hybrid .ydesign-content-layer, body.stremio-hybrid .ydesign-desc-under { transition:opacity var(--sh-speed) var(--sh-ease) !important; }
-body.stremio-hybrid .selectbox__content, body.stremio-hybrid .settings__content, body.stremio-hybrid .modal__content { background:var(--sh-panel) !important; border-radius:1em; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
+body.stremio-hybrid .selectbox__content, body.stremio-hybrid .settings__content, body.stremio-hybrid .modal__content { background:rgba(17,18,29,.96) !important; border-radius:1em; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
 body.stremio-hybrid .selectbox-item { border-radius:var(--sh-radius); }
 body.stremio-hybrid .mapping--grid { padding:.6em .8em; }
 body.stremio-hybrid .mapping--grid .card { padding:0 .65em 1.8em; }
@@ -230,7 +230,7 @@ body.stremio-hybrid .sh-streams .filter__item { min-width:0; }
 body.stremio-hybrid .sh-streams .explorer__files-head { margin:0 0 .5em !important; padding:0 !important; }
 body.stremio-hybrid .sh-streams .explorer__files-body .scroll__body,body.stremio-hybrid .sh-streams .scroll__content { padding:0 !important; }
 body.stremio-hybrid .sh-streams .torrent-item { display:grid; grid-template-columns:3.5em minmax(0,1fr); gap:.3em .55em; padding:.55em !important; border:1px solid transparent !important; box-shadow:none !important; animation:none !important; transform:none !important; }
-body.stremio-hybrid .sh-streams .torrent-item__title { grid-column:2; grid-row:1; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+body.stremio-hybrid .sh-streams .torrent-item__title { grid-column:2; grid-row:1; display:block; -webkit-line-clamp:unset; white-space:normal; overflow:visible; }
 body.stremio-hybrid .sh-streams .torrent-item__ffprobe { grid-column:1; grid-row:1 / 3; display:flex; flex-direction:row; flex-wrap:wrap; padding:0 !important; align-items:flex-start; align-content:flex-start; gap:.2em; margin:0 !important; }
 body.stremio-hybrid .sh-streams .torrent-item__details { grid-column:2; grid-row:2; display:flex !important; flex-wrap:wrap; justify-content:flex-start; gap:.25em .7em; margin:0 !important; }
 body.stremio-hybrid .sh-streams .torrent-item__details > * { width:auto !important; margin:0 !important; padding:0 !important; font-size:inherit !important; }
@@ -301,7 +301,7 @@ body.stremio-hybrid .sh-streams .ctr-release-info { min-width:0; }
 body.stremio-hybrid .sh-movie-page .scroll--mask { mask-image:none !important; -webkit-mask-image:none !important; }
 /* Full-height Stremio source rail; remains inside the movie scroll, so lower rows are unobstructed. */
 body.stremio-hybrid .sh-movie-hero { position:relative; }
-body.stremio-hybrid .sh-streams { top:-2.8em; right:0; width:25vw; height:calc(100vh - 3.7em); max-height:none; padding:.8em; border-radius:0; border:0; border-left:1px solid #ffffff10; background:rgba(9,10,18,.94); }
+body.stremio-hybrid .sh-streams { top:-2.8em; right:0; width:30vw; height:calc(100vh - 3.7em); max-height:none; padding:.8em; border-radius:0; border:0; border-left:1px solid #ffffff10; background:rgba(9,10,18,.94); }
 body.stremio-hybrid.sh-movie-active { --sh-bg:#0c0c16; }
 body.stremio-hybrid.sh-movie-active .head { background:var(--sh-header) !important; border:0 !important; box-shadow:none !important; }
 body.stremio-hybrid.sh-movie-active .head .open--search,body.stremio-hybrid.sh-movie-active .head .sh-head-more { background:transparent !important; background-image:none !important; }
@@ -331,11 +331,24 @@ body.stremio-hybrid .sh-movie .sh-metadata-rich span { color:#b8b8c6 !important;
 body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; }
 
 `;
+    css += `
+body.stremio-hybrid .sh-has-streams .sh-movie-column{width:calc(100% - 32vw)!important;max-width:calc(100% - 32vw)!important}
+body.stremio-hybrid .sh-movie .full-descr__text{display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:3;max-height:4.95em!important;overflow:hidden;white-space:normal!important}
+body.stremio-hybrid .sh-movie.sh-description-expanded .full-descr__text{display:block!important;-webkit-line-clamp:unset;max-height:none!important;overflow:visible;white-space:pre-line!important}
+body.stremio-hybrid .sh-movie .sh-description-toggle{display:flex;align-items:center;justify-content:center;width:auto;min-width:0;min-height:2.9em;flex:0 0 auto;font-size:.85em!important;color:var(--sm-text);padding:0 .8em!important;border-radius:.55em;background:#ffffff12;border:1px solid #ffffff18}\nbody.stremio-hybrid .sh-movie .sh-description-toggle.focus{background:var(--sh-focus-soft);box-shadow:0 0 0 .12em var(--sh-accent-soft)}
+body.stremio-hybrid .head .head__title{max-width:20vw}
+body.stremio-hybrid .sh-profile-menu .selectbox__content{position:absolute;right:1.8em;top:5em;bottom:auto;left:auto;width:23em;max-width:90vw;max-height:calc(100vh - 7em);border:1px solid var(--sh-border);box-shadow:0 .7em 2em #0005}
+body.stremio-hybrid .selectbox-item{transition:opacity var(--sh-speed) var(--sh-ease)!important}
+body.stremio-hybrid .selectbox-item__title{white-space:normal;overflow-wrap:anywhere}
+body.stremio-hybrid .wrap__left{background:#090a12!important}
+@media(prefers-reduced-motion:reduce){body.stremio-hybrid .selectbox,body.stremio-hybrid .selectbox-item,body.stremio-hybrid .sh-movie-page .full-start__background{transition:none!important;animation:none!important}}
+`;
     // Cardify owns the native template/data. Move nodes with their handlers, never clone them.
     var movieRecords=[], movieFrame=0, movieTimers=[], movieModal=null;
     function restoreMovie(record) {
         (record.seriesFields||[]).forEach(function(n){n.remove();});
         (record.ratingRepairs||[]).forEach(function(item){delete item.img.dataset.shRatingFallback;if(item.img.getAttribute('src')===item.fallback)item.img.setAttribute('src',item.src);});
+        clearDescription(record);
         removeMovieBrand(record);
         removeStreams(record);
         if(record.buttons){record.buttons.removeEventListener('hover:focus',movieButtonFocus,true);record.buttons.removeAttribute('data-sh-action');}
@@ -354,6 +367,24 @@ body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; 
     }
     function removeMovies() {
         stopMovieQueue(); movieRecords.forEach(restoreMovie); movieRecords=[];
+    }
+    function setupDescription(record, description) {
+        if(record.descriptionToggle&&record.descriptionToggle.isConnected)return;
+        clearDescription(record);
+        var button=document.createElement("div");button.className="selector sh-description-toggle";
+        button.setAttribute("role","button");button.setAttribute("aria-expanded","false");button.textContent="Показати більше";
+        record.descriptionToggle=button;
+        record.toggleDescription=function(){
+            var expanded=button.getAttribute("aria-expanded")!=="true";
+            button.setAttribute("aria-expanded",String(expanded));button.textContent=expanded?"Згорнути опис":"Показати більше";
+            record.root.classList.toggle("sh-description-expanded",expanded);
+        };
+        $(button).on("hover:enter.shDescription",record.toggleDescription);
+        record.root.querySelector(".full-start-new__buttons").appendChild(button);
+    }
+    function clearDescription(record) {
+        if(record.descriptionToggle){$(record.descriptionToggle).off(".shDescription").remove();record.descriptionToggle=null;record.toggleDescription=null;}
+        record.root.classList.remove("sh-description-expanded");
     }
     function movieDescriptionEnter(event) {
         var root=event.currentTarget.closest('.sh-movie');if(!root)return;
@@ -418,7 +449,7 @@ body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; 
         setupStreams(record);setupMovieBrand(record);
         root.classList.add('sh-movie');root.classList.toggle('sh-series',record.kind==='tv');consolidateMetadata(record);updateSeriesMetadata(record);root.classList.toggle('sh-movie-native',!page.querySelector('.cardify-effects-overlay')); page.classList.add('sh-movie-page');left.classList.add('sh-movie-column');
         var description=root.querySelector('.custom-ghost-main') || page.querySelector('.full-descr__text');
-        if(description){move(description);record.description=description;description.classList.add('sh-movie-description');description.addEventListener('hover:enter',movieDescriptionEnter,true);}
+        if(description){move(description);record.description=description;description.classList.add('sh-movie-description');setupDescription(record,description);description.addEventListener('hover:enter',movieDescriptionEnter,true);}
         move(root.querySelector('.cardify__right-box'));
         root.querySelectorAll('.sh-movie-primary').forEach(function(n){n.classList.remove('sh-movie-primary');});
         var visible=Array.prototype.filter.call(buttons.querySelectorAll('.full-start__button'),function(n){return !n.classList.contains('hide')&&!n.classList.contains('hidden')&&getComputedStyle(n).display!=='none';});
@@ -693,11 +724,13 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
 
     var streamSelectOwner=null;
     function clearStreamSelect(){
+        document.querySelectorAll('.sh-profile-menu').forEach(function(n){n.classList.remove('sh-profile-menu');});
         var st=streamSelectOwner;if(!st)return;streamSelectOwner=null;
         if(st.selectNode){st.selectNode.classList.remove('sh-cinema-select');Object.keys(st.selectTokens||{}).forEach(function(key){var entry=st.selectTokens[key];if(st.selectNode.style.getPropertyValue(key)===entry.ours){if(entry.before)st.selectNode.style.setProperty(key,entry.before);else st.selectNode.style.removeProperty(key);}});st.selectNode=null;st.selectTokens=null;}
     }
     function onStreamSelect(event){
         clearStreamSelect();
+        if(menuOpen)return; // Profile owns its compact native Select surface.
         var record=movieRecords.filter(function(r){return r.streamFocused&&r.streamChild&&!r.streamChild.dead&&r.page.classList.contains('activity--active');})[0];
         if(!record)return;var st=record.streamChild,node=event&&event.html&&(event.html[0]||event.html)||Lampa.Select.render()[0];if(!node)return;
         streamSelectOwner=st;st.selectNode=node;st.selectTokens={};node.classList.add('sh-cinema-select');
@@ -884,7 +917,7 @@ body.stremio-hybrid .head .head__time-week{display:block}
 body.stremio-hybrid .head .head__logo-icon,body.stremio-hybrid .head .head__backward{display:none!important}
 body.stremio-hybrid .head .sh-head-more{position:relative;right:auto;top:auto;transform:none!important;flex-shrink:0;border-radius:.8em!important;overflow:hidden}
 body.stremio-hybrid .head .open--search,body.stremio-hybrid.sh-movie-active .head .open--search,body.stremio-hybrid .head .sh-head-more,body.stremio-hybrid.sh-movie-active .head .sh-head-more{background:rgba(255,255,255,.055)!important;background-image:none!important;border:1px solid #ffffff14}
-body.stremio-hybrid .head .open--search{position:static;transform:none!important;margin-right:auto!important;width:26vw!important;max-width:24em;border-radius:.8em!important}
+body.stremio-hybrid .head .head__body,body.stremio-hybrid .head .head__actions{position:static!important;background:transparent!important;background-image:none!important;box-shadow:none!important}\nbody.stremio-hybrid .head::before,body.stremio-hybrid .head::after{background:none!important;box-shadow:none!important;backdrop-filter:none!important}\nbody.stremio-hybrid .head .open--search{position:absolute;left:50%;transform:translateX(-50%)!important;margin:0!important;width:clamp(12em,30vw,26em)!important;max-width:36vw;border-radius:var(--sh-pill)!important}
 body.stremio-hybrid .head .sh-profile-avatar{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit}
 body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-accent-soft)}
 `;
@@ -912,9 +945,10 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
             restoreHead(moreButton);
             if(item.shAction)item.shAction();else if (item.shNode && item.shNode.isConnected) $(item.shNode).trigger('hover:enter');
         }});
+        var panel=Lampa.Select.render()[0];if(panel)panel.classList.add('sh-profile-menu');
     }
     function onSearchEnter() { searchReturn = true; }
-    function onSearchClose() { clearSearchSources(); if (searchReturn) { searchReturn=false;restoreHead(searchNode); } }
+    function onSearchClose() { clearSearchSources();scheduleMovie(); if (searchReturn) { searchReturn=false;restoreHead(searchNode); } }
     function clearSearchSources() {
         if(searchSources) searchSources.listener.remove('finded',onSearchFound);
         searchSources=null;
@@ -1063,7 +1097,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         removeSettingsUI();
         removeMovies();clearStreamSelect();
         clearSearchSources();
-        searchReturn=false;
+        searchReturn=false;document.querySelectorAll('.sh-profile-menu').forEach(function(n){n.classList.remove('sh-profile-menu');});
         if (searchNode) { $(searchNode).off('hover:enter.shHybrid', onSearchEnter); searchNode=null; }
         if (menuOpen) { menuOpen=false; Lampa.Select.close(); }
         if(headTimeMove){var t=headTimeMove;headTimeMove=null;t.parent.insertBefore(t.node,t.next&&t.next.parentNode===t.parent?t.next:null);}
@@ -1237,7 +1271,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         apply(enabled());
     }
     window.StremioHybrid = {
-        version: '2.7.1',
+        version: '2.8.0',
         setEnabled: setEnabled,
         refresh: function () { if (ready) apply(enabled()); },
         destroy: function () {
