@@ -1,0 +1,394 @@
+{
+  "commit": "20aa5d29bc127b11e3a332e1c854235c1d1a30ae",
+  "checks": [
+    {
+      "name": "Changed Hybrid bytes loaded and API initialized",
+      "status": "PASS",
+      "data": {
+        "ui/buttons-plus.js": {
+          "expected": "d8f36832b021642758fa57dd0020fd347413aabd50562b1bdad16e6329873915",
+          "received": "d8f36832b021642758fa57dd0020fd347413aabd50562b1bdad16e6329873915"
+        },
+        "torrents-redesign.js": {
+          "expected": "0efeacb89c6c4456f40ac2b98bd71352b7c33f02479fdfe843aee6649db39abd",
+          "received": "0efeacb89c6c4456f40ac2b98bd71352b7c33f02479fdfe843aee6649db39abd"
+        },
+        "ui/stremio-hybrid.js": {
+          "expected": "7dadd41bc1179d9b078e56ede282bde7101b3468944192c65d39ee1e49325e6f",
+          "received": "7dadd41bc1179d9b078e56ede282bde7101b3468944192c65d39ee1e49325e6f"
+        },
+        "ui/interface-plus.js": {
+          "expected": "3d84de325be4f9c09578caa604ac16c1d0c9da67574fc52ad571f4cc9a0ef979",
+          "received": "3d84de325be4f9c09578caa604ac16c1d0c9da67574fc52ad571f4cc9a0ef979"
+        },
+        "ui/design-optimized.js": {
+          "expected": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6",
+          "received": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6"
+        },
+        "ui/cardify-plus.js": {
+          "expected": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+          "received": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb"
+        }
+      }
+    },
+    {
+      "name": "Transparent centered header 1280",
+      "status": "PASS",
+      "data": {
+        "width": 5120,
+        "head": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "shadow": "none",
+          "filter": "none"
+        },
+        "body": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "shadow": "none",
+          "filter": "none"
+        },
+        "actions": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "shadow": "none",
+          "filter": "none"
+        },
+        "before": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "shadow": "none",
+          "filter": "none"
+        },
+        "after": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "shadow": "none",
+          "filter": "none"
+        },
+        "search": {
+          "x": 1792,
+          "y": 40.9375,
+          "width": 1536,
+          "height": 217.5625,
+          "top": 40.9375,
+          "right": 3328,
+          "bottom": 258.5,
+          "left": 1792
+        },
+        "clock": {
+          "x": 3819.4375,
+          "y": 72.9375,
+          "width": 869.5,
+          "height": 153.625,
+          "top": 72.9375,
+          "right": 4688.9375,
+          "bottom": 226.5625,
+          "left": 3819.4375
+        },
+        "profile": {
+          "x": 4754.625,
+          "y": 41,
+          "width": 217.5625,
+          "height": 217.5625,
+          "top": 41,
+          "right": 4972.1875,
+          "bottom": 258.5625,
+          "left": 4754.625
+        },
+        "searchFill": {
+          "background": "rgba(255, 255, 255, 0.055)",
+          "image": "none",
+          "shadow": "none",
+          "filter": "none"
+        },
+        "clockText": "\n            21:23\n            \n                24 Жовтня 2026\n                Субота\n            \n        "
+      }
+    },
+    {
+      "name": "Transparent centered header 1920",
+      "status": "PASS",
+      "data": {
+        "width": 7680,
+        "head": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "shadow": "none",
+          "filter": "none"
+        },
+        "body": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "shadow": "none",
+          "filter": "none"
+        },
+        "actions": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "shadow": "none",
+          "filter": "none"
+        },
+        "before": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "shadow": "none",
+          "filter": "none"
+        },
+        "after": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "shadow": "none",
+          "filter": "none"
+        },
+        "search": {
+          "x": 2772.46875,
+          "y": 40.9375,
+          "width": 2135.0625,
+          "height": 217.5625,
+          "top": 40.9375,
+          "right": 4907.53125,
+          "bottom": 258.5,
+          "left": 2772.46875
+        },
+        "clock": {
+          "x": 6379.4375,
+          "y": 72.9375,
+          "width": 869.5,
+          "height": 153.625,
+          "top": 72.9375,
+          "right": 7248.9375,
+          "bottom": 226.5625,
+          "left": 6379.4375
+        },
+        "profile": {
+          "x": 7314.625,
+          "y": 41,
+          "width": 217.5625,
+          "height": 217.5625,
+          "top": 41,
+          "right": 7532.1875,
+          "bottom": 258.5625,
+          "left": 7314.625
+        },
+        "searchFill": {
+          "background": "rgba(255, 255, 255, 0.055)",
+          "image": "none",
+          "shadow": "none",
+          "filter": "none"
+        },
+        "clockText": "\n            21:23\n            \n                24 Жовтня 2026\n                Субота\n            \n        "
+      }
+    },
+    {
+      "name": "Transparent centered header 3840",
+      "status": "PASS",
+      "data": {
+        "width": 15360,
+        "head": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "shadow": "none",
+          "filter": "none"
+        },
+        "body": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "shadow": "none",
+          "filter": "none"
+        },
+        "actions": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "shadow": "none",
+          "filter": "none"
+        },
+        "before": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "shadow": "none",
+          "filter": "none"
+        },
+        "after": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "shadow": "none",
+          "filter": "none"
+        },
+        "search": {
+          "x": 6612.46875,
+          "y": 40.9375,
+          "width": 2135.0625,
+          "height": 217.5625,
+          "top": 40.9375,
+          "right": 8747.53125,
+          "bottom": 258.5,
+          "left": 6612.46875
+        },
+        "clock": {
+          "x": 14059.4375,
+          "y": 72.9375,
+          "width": 869.5,
+          "height": 153.625,
+          "top": 72.9375,
+          "right": 14928.9375,
+          "bottom": 226.5625,
+          "left": 14059.4375
+        },
+        "profile": {
+          "x": 14994.625,
+          "y": 41,
+          "width": 217.5625,
+          "height": 217.5625,
+          "top": 41,
+          "right": 15212.1875,
+          "bottom": 258.5625,
+          "left": 14994.625
+        },
+        "searchFill": {
+          "background": "rgba(255, 255, 255, 0.055)",
+          "image": "none",
+          "shadow": "none",
+          "filter": "none"
+        },
+        "clockText": "\n            21:23\n            \n                24 Жовтня 2026\n                Субота\n            \n        "
+      }
+    },
+    {
+      "name": "Profile keeps native actions",
+      "status": "PASS"
+    },
+    {
+      "name": "Profile Back restores native head focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Description initially collapsed",
+      "status": "PASS"
+    },
+    {
+      "name": "OK expands full text without losing focus",
+      "status": "PASS"
+    },
+    {
+      "name": "OK collapses on the same media owner",
+      "status": "PASS"
+    },
+    {
+      "name": "Disable removes owned description action and profile",
+      "status": "PASS"
+    },
+    {
+      "name": "Re-enable creates one collapsed action",
+      "status": "PASS"
+    },
+    {
+      "name": "Torrent presentation fixture: wider rail, complete long release and no overflow",
+      "status": "PASS",
+      "data": {
+        "railWidth": 2304,
+        "viewport": 7680,
+        "inside": true,
+        "titleExact": true,
+        "noHorizontalClip": true,
+        "lines": "none"
+      }
+    },
+    {
+      "name": "Native Select filter-style fixture retains keyboard focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Settings retains transparent shared header",
+      "status": "PASS"
+    },
+    {
+      "name": "No JavaScript exceptions",
+      "status": "PASS",
+      "data": []
+    }
+  ],
+  "sources": {
+    "ui/buttons-plus.js": {
+      "expected": "d8f36832b021642758fa57dd0020fd347413aabd50562b1bdad16e6329873915",
+      "received": "d8f36832b021642758fa57dd0020fd347413aabd50562b1bdad16e6329873915"
+    },
+    "torrents-redesign.js": {
+      "expected": "0efeacb89c6c4456f40ac2b98bd71352b7c33f02479fdfe843aee6649db39abd",
+      "received": "0efeacb89c6c4456f40ac2b98bd71352b7c33f02479fdfe843aee6649db39abd"
+    },
+    "ui/stremio-hybrid.js": {
+      "expected": "7dadd41bc1179d9b078e56ede282bde7101b3468944192c65d39ee1e49325e6f",
+      "received": "7dadd41bc1179d9b078e56ede282bde7101b3468944192c65d39ee1e49325e6f"
+    },
+    "ui/interface-plus.js": {
+      "expected": "3d84de325be4f9c09578caa604ac16c1d0c9da67574fc52ad571f4cc9a0ef979",
+      "received": "3d84de325be4f9c09578caa604ac16c1d0c9da67574fc52ad571f4cc9a0ef979"
+    },
+    "ui/design-optimized.js": {
+      "expected": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6",
+      "received": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6"
+    },
+    "ui/cardify-plus.js": {
+      "expected": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+      "received": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb"
+    }
+  },
+  "errors": [],
+  "limits": [
+    "No physical Google TV test",
+    "No playback or parser equivalence claim; #14 remains pending",
+    "Inherited browser zoom: requested window widths1280/1920/3840 corresponded to innerWidth5120/7680/15360; not 1:1 TV CSS viewport certification",
+    "Torrent row/filter menu are presentation fixtures, not parser/filter integration proof"
+  ],
+  "active": {
+    "hybrid": "2.8.0",
+    "design": true,
+    "interface": true,
+    "cinema": "1.2.0-audit",
+    "scripts": [
+      "/lampa/providers/parser-search.js",
+      "/lampa/ui/interface-plus.js",
+      "/lampa/ui/design-optimized.js",
+      "/lampa/ui/cardify-plus.js",
+      "/preview-loader.js",
+      "/lampa/media/seasons-info.js",
+      "/lampa/community/imdb-trailers.js",
+      "/lampa/community/new-category.js",
+      "/lampa/community/nightingale.js",
+      "/lampa/filters/anti-dmca.js",
+      "/lampa/filters/hide-content.js",
+      "/lampa/filters/lampac-source-filter.js",
+      "/lampa/filters/search-sanitizer.js",
+      "/lampa/filters/source-sort.js",
+      "/lampa/filters/trash-filter.js",
+      "/media/custom-favorites.js",
+      "/lampa/media/studio-picks.js",
+      "/providers/parsers.js",
+      "/lampa/providers/tmdb-networks.js",
+      "/lampa/providers/ts-tracks.js",
+      "/lampa/providers/tryzub-tv.js",
+      "/lampa/ui/buttons-plus.js",
+      "/lampa/ui/menu-hide.js",
+      "/ui/screensaver-plus.js",
+      "/lampa/ui/tv-status.js",
+      "/media/ua-comments.js",
+      "/lampa/torrents-redesign.js",
+      "/stremio-hybrid.js",
+      "/lampa/trakt/trakt.js",
+      "/invc-ws.js",
+      "/lampa/trakt/trakt-plus.js",
+      "/lampa/providers/torrent-search.js",
+      "/lampa/ui/interface-plus.js",
+      "/lampa/ui/design-optimized.js",
+      "/lampa/media/average-rating.js",
+      "/lampa/ui/cardify-plus.js",
+      "/lampa/localization/translate.js"
+    ]
+  },
+  "detail": {
+    "id": "105248",
+    "method": "tv"
+  },
+  "testedProductCommit": "010fd56b9641c3dd1842386f411a2d4e04f2386d",
+  "productBytesVerifiedAgainstCommit": true
+}
