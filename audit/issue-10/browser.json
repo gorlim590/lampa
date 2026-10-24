@@ -1,0 +1,172 @@
+{
+  "commit": "bcf152aee1103046d3898f4f2c7d5a90d4aa62f4",
+  "sources": {
+    "/media/seasons-info.js": {
+      "sha": "76b263185258ed58a64c474ab644c04000c86120baf1612cda2edc5c6f0fbeb4",
+      "expected": "76b263185258ed58a64c474ab644c04000c86120baf1612cda2edc5c6f0fbeb4",
+      "commit": "bcf152aee1103046d3898f4f2c7d5a90d4aa62f4"
+    },
+    "/ui/stremio-hybrid.js": {
+      "sha": "cf843770f3fe5fe39f115c25e866c7bb9d091d2c81116d8b3a485717ece31f17",
+      "expected": "cf843770f3fe5fe39f115c25e866c7bb9d091d2c81116d8b3a485717ece31f17",
+      "commit": "bcf152aee1103046d3898f4f2c7d5a90d4aa62f4"
+    },
+    "/trakt/trakt-plus.js": {
+      "sha": "770846b84e900086f4ce6d5512f2a267e0d3da7c7cde587423d0941f86fd1522",
+      "expected": "770846b84e900086f4ce6d5512f2a267e0d3da7c7cde587423d0941f86fd1522",
+      "commit": "bcf152aee1103046d3898f4f2c7d5a90d4aa62f4"
+    },
+    "/ui/interface-plus.js": {
+      "sha": "2b1997a7489087d157f3e5e5e8f60f573f8720752ea8aed283c532831ed7abff",
+      "expected": "2b1997a7489087d157f3e5e5e8f60f573f8720752ea8aed283c532831ed7abff",
+      "commit": "bcf152aee1103046d3898f4f2c7d5a90d4aa62f4"
+    },
+    "/ui/design-optimized.js": {
+      "sha": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6",
+      "expected": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6",
+      "commit": "bcf152aee1103046d3898f4f2c7d5a90d4aa62f4"
+    },
+    "/ui/cardify-plus.js": {
+      "sha": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+      "expected": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+      "commit": "bcf152aee1103046d3898f4f2c7d5a90d4aa62f4"
+    },
+    "/info/seasons-info.js": {
+      "sha": "21a0925708d75b948dc0410eb06459cc5484736c2e8da33168f7d73890aff603",
+      "expected": "21a0925708d75b948dc0410eb06459cc5484736c2e8da33168f7d73890aff603",
+      "commit": "bcf152aee1103046d3898f4f2c7d5a90d4aa62f4"
+    }
+  },
+  "checks": [
+    {
+      "name": "Canonical+legacy duplicate execution does not add styles",
+      "status": "PASS"
+    },
+    {
+      "name": "Apothecary native episode page: all60 original episodes, one confirmed season and no fabricated IDs",
+      "status": "PASS",
+      "data": {
+        "count": 1,
+        "items": 61,
+        "first": {
+          "id": 4237712,
+          "season": 1,
+          "episode": 1,
+          "name": "Маомао"
+        }
+      }
+    },
+    {
+      "name": "Native OK opens only official season1 + separate S0",
+      "status": "PASS",
+      "data": [
+        {
+          "season": "0",
+          "title": "Спеціальне · S0"
+        },
+        {
+          "season": "1",
+          "title": "Сезон 1"
+        }
+      ]
+    },
+    {
+      "name": "Season0 selected via native keyboard routing, not mistaken for last regular season",
+      "status": "PASS",
+      "data": {
+        "season": "0",
+        "count": 54
+      }
+    },
+    {
+      "name": "Native directional episode focus exists",
+      "status": "PASS"
+    },
+    {
+      "name": "Breaking Bad season5 has16 original episodes and5 regular seasons",
+      "status": "PASS"
+    },
+    {
+      "name": "Attack on Titan season4 has28 original episodes and4 regular seasons",
+      "status": "PASS"
+    },
+    {
+      "name": "Reopening Apothecary adds no duplicate season/episode entries",
+      "status": "PASS"
+    },
+    {
+      "name": "Native Full/YDesign/Cardify/Interface/Trakt+/Hybrid retains one episode row with real episode identity",
+      "status": "PASS",
+      "data": {
+        "ydesign": true,
+        "hybrid": true,
+        "trakt": true,
+        "cardify": true
+      }
+    },
+    {
+      "name": "Exact changed sources and active UI scripts verified by hash/commit",
+      "status": "PASS",
+      "data": {
+        "/media/seasons-info.js": {
+          "sha": "76b263185258ed58a64c474ab644c04000c86120baf1612cda2edc5c6f0fbeb4",
+          "expected": "76b263185258ed58a64c474ab644c04000c86120baf1612cda2edc5c6f0fbeb4",
+          "commit": "bcf152aee1103046d3898f4f2c7d5a90d4aa62f4"
+        },
+        "/ui/stremio-hybrid.js": {
+          "sha": "cf843770f3fe5fe39f115c25e866c7bb9d091d2c81116d8b3a485717ece31f17",
+          "expected": "cf843770f3fe5fe39f115c25e866c7bb9d091d2c81116d8b3a485717ece31f17",
+          "commit": "bcf152aee1103046d3898f4f2c7d5a90d4aa62f4"
+        },
+        "/trakt/trakt-plus.js": {
+          "sha": "770846b84e900086f4ce6d5512f2a267e0d3da7c7cde587423d0941f86fd1522",
+          "expected": "770846b84e900086f4ce6d5512f2a267e0d3da7c7cde587423d0941f86fd1522",
+          "commit": "bcf152aee1103046d3898f4f2c7d5a90d4aa62f4"
+        },
+        "/ui/interface-plus.js": {
+          "sha": "2b1997a7489087d157f3e5e5e8f60f573f8720752ea8aed283c532831ed7abff",
+          "expected": "2b1997a7489087d157f3e5e5e8f60f573f8720752ea8aed283c532831ed7abff",
+          "commit": "bcf152aee1103046d3898f4f2c7d5a90d4aa62f4"
+        },
+        "/ui/design-optimized.js": {
+          "sha": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6",
+          "expected": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6",
+          "commit": "bcf152aee1103046d3898f4f2c7d5a90d4aa62f4"
+        },
+        "/ui/cardify-plus.js": {
+          "sha": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+          "expected": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+          "commit": "bcf152aee1103046d3898f4f2c7d5a90d4aa62f4"
+        },
+        "/info/seasons-info.js": {
+          "sha": "21a0925708d75b948dc0410eb06459cc5484736c2e8da33168f7d73890aff603",
+          "expected": "21a0925708d75b948dc0410eb06459cc5484736c2e8da33168f7d73890aff603",
+          "commit": "bcf152aee1103046d3898f4f2c7d5a90d4aa62f4"
+        }
+      }
+    },
+    {
+      "name": "Page restart restores single season and full episode count",
+      "status": "PASS"
+    },
+    {
+      "name": "No JavaScript exceptions",
+      "status": "PASS",
+      "data": []
+    },
+    {
+      "name": "Original browser page restored without fixture storage/account mutations",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "requests": [
+    "/3/tv/1396",
+    "/3/tv/220542/images",
+    "/3/tv/220542/translations"
+  ],
+  "blocked": [
+    "Physical Google TV / older WebView hardware",
+    "Real playback and Trakt writes: deliberately not performed"
+  ]
+}
