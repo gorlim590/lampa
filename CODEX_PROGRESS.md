@@ -435,3 +435,12 @@
 -64 targeted unit tests PASS (30new +34existing16), syntax/repository62JS454URLs/diff PASS. Recorded controlled native baseline664.5ms first result/2requests/3rows; after73.6ms first,664.4ms final/2requests/2unique; warm0requests/1callback. No real server/FPS/physical TV claim. Earlier harness baseline/load timing failures separate, no false PASS.
 - Docs/evidence: docs/issue-17-parsers.md, audit/issue-17/browser.json and screenshot; tests/parser-providers.cjs + browser harness. No real preset credentials or account data logged. Default presets Jackett-compatible, custom Prowlarr; native TorrServer query mode delegated unchanged. Live every-host and actual TorrServer playback unverified.
 - Next: publish exact history, add focused CI, open non-draft PR main, check latest base/conflicts/required CI then authorized auto-merge. Verify main/postmerge CI/Pages; final Issue17 comment/close only if acceptance remains satisfied. User authorized merge; no force/protection bypass. Do not start another Issue.
+
+
+## 2026-10-24 — Issue10 upper details follow-up
+- Branch fix/issue-10-details-info-dedup, baseline58448f6; product e03b1be.
+- Confirmed duplicate owner: native Trakt multi-anchor insertion; Interface+ owns middle block, Hybrid next-field overlap.
+- Latest user scope: Trakt-only upper counts/progress, preserve runtime; omit unverified season total and absolute S1E52; provider catalogue still merged despite3 broadcast seasons.
+- 131targeted testsPASS; repository checker62JS454URLsPASS;12existingCDP checksPASS with7exact source hashes/noexceptions. No real Trakt writes, physicalTV or real playback testing.
+- Evidence and caveats: docs/issue-10-details.md, audit/issue-10-details/{before.png,after-full.png,owners-before.json,browser.json}.
+- Next: publish scoped follow-up PR, required CI, authorized merge if green; verify main/postmerge; report #10 without premature closure/user acceptance.
