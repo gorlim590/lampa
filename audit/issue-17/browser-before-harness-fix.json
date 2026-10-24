@@ -1,0 +1,226 @@
+{
+  "commit": "0fb879566b8fd6954c7ffdd050445840ffe3c470",
+  "checks": [
+    {
+      "name": "Baseline native both dispatch waits for slow source and full-magnet comparison retains duplicate",
+      "status": "FAIL",
+      "data": [
+        {
+          "ms": 76.89999997615814,
+          "pending": true,
+          "count": 1
+        },
+        {
+          "ms": 664.5999999940395,
+          "pending": false,
+          "count": 2
+        }
+      ]
+    },
+    {
+      "name": "Original existing browser restored; no fixture globals/account writes",
+      "status": "PASS"
+    }
+  ],
+  "errors": [
+    "Baseline native both dispatch waits for slow source and full-magnet comparison retains duplicate"
+  ],
+  "sources": {
+    "/loader.js": {
+      "received": "0b9aa4a81f89ddd196a660d766400f29fc31744434f433bde39014e2e7f1993c",
+      "expected": "0b9aa4a81f89ddd196a660d766400f29fc31744434f433bde39014e2e7f1993c",
+      "commit": "0fb879566b8fd6954c7ffdd050445840ffe3c470"
+    },
+    "/providers/parsers.js": {
+      "received": "d3496f227af0e70a1d3e03e90591f1b8d1f2da670761f72f09160b6db165ffbf",
+      "expected": "d3496f227af0e70a1d3e03e90591f1b8d1f2da670761f72f09160b6db165ffbf",
+      "commit": "0fb879566b8fd6954c7ffdd050445840ffe3c470"
+    },
+    "/torrents-redesign.js": {
+      "received": "0efeacb89c6c4456f40ac2b98bd71352b7c33f02479fdfe843aee6649db39abd",
+      "expected": "0efeacb89c6c4456f40ac2b98bd71352b7c33f02479fdfe843aee6649db39abd",
+      "commit": "0fb879566b8fd6954c7ffdd050445840ffe3c470"
+    },
+    "/ui/stremio-hybrid.js": {
+      "received": "d3ec91eb569af5d64b51e2a8cec2a44de1b4ee31886eaf821303dd9658e09941",
+      "expected": "d3ec91eb569af5d64b51e2a8cec2a44de1b4ee31886eaf821303dd9658e09941",
+      "commit": "0fb879566b8fd6954c7ffdd050445840ffe3c470"
+    },
+    "/providers/parser-search.js": {
+      "received": "7f1fe9a8645b9224e267f93cffb2e4588cbde13e92479852ce463257eb981ff5",
+      "expected": "7f1fe9a8645b9224e267f93cffb2e4588cbde13e92479852ce463257eb981ff5",
+      "commit": "0fb879566b8fd6954c7ffdd050445840ffe3c470"
+    },
+    "/providers/torrent-search.js": {
+      "received": "e2ad632d67939927145d840bd70eadd7e6405d11006baa217890d034c5a044fa",
+      "expected": "e2ad632d67939927145d840bd70eadd7e6405d11006baa217890d034c5a044fa",
+      "commit": "0fb879566b8fd6954c7ffdd050445840ffe3c470"
+    }
+  },
+  "requests": [
+    {
+      "stage": "baseline",
+      "role": "primary",
+      "path": "/api/v2.0/indexers/all/results",
+      "query": "Fixture baseline",
+      "started": 1792821446694
+    },
+    {
+      "stage": "baseline",
+      "role": "secondary",
+      "path": "/api/v2.0/indexers/all/results",
+      "query": "Fixture baseline",
+      "started": 1792821446695
+    }
+  ],
+  "beforeAfter": {
+    "before": {
+      "events": [
+        {
+          "ms": 76.89999997615814,
+          "pending": true,
+          "count": 1
+        },
+        {
+          "ms": 664.5999999940395,
+          "pending": false,
+          "count": 2
+        }
+      ],
+      "results": [
+        {
+          "Title": "Fixture (2020) 1080p Ukr",
+          "Tracker": "fixture",
+          "Size": 1073741824,
+          "Seeders": 50,
+          "Peers": 2,
+          "PublishDate": "2026-10-01T12:00:00Z",
+          "MagnetUri": "magnet:?xt=urn:btih:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "AudioLanguages": [
+            "uk"
+          ],
+          "PublisTime": 1790856000000,
+          "hash": "2077900719",
+          "viewed": false,
+          "size": "1 ГБ",
+          "checked_at": 1792821446761,
+          "source_rank": 0,
+          "parser_release_key": "hash:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "parser_sources": [
+            {
+              "id": "primary",
+              "label": "Основний · Fixture primary",
+              "type": "jackett"
+            },
+            {
+              "id": "secondary",
+              "label": "Додатковий · Fixture secondary",
+              "type": "jackett"
+            }
+          ],
+          "parser_originals": [
+            {
+              "Title": "Fixture (2020) 1080p Ukr",
+              "Tracker": "fixture",
+              "Size": 1073741824,
+              "Seeders": 50,
+              "Peers": 2,
+              "PublishDate": "2026-10-01T12:00:00Z",
+              "MagnetUri": "magnet:?xt=urn:btih:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "AudioLanguages": [
+                "uk"
+              ],
+              "PublisTime": 1790856000000,
+              "hash": "2077900719",
+              "viewed": false,
+              "size": "1 ГБ",
+              "checked_at": 1792821446761,
+              "source_rank": 0
+            },
+            {
+              "Title": "Fixture (2020) 1080p Ukr",
+              "Tracker": "fixture",
+              "Size": 1073741824,
+              "Seeders": 50,
+              "Peers": 2,
+              "PublishDate": "2026-10-01T12:00:00Z",
+              "MagnetUri": "magnet:?xt=urn:btih:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&tr=https://tracker.invalid",
+              "AudioLanguages": [
+                "uk"
+              ],
+              "PublisTime": 1790856000000,
+              "hash": "2077900719",
+              "viewed": false,
+              "size": "1 ГБ",
+              "checked_at": 1792821447349,
+              "source_rank": 1
+            }
+          ]
+        },
+        {
+          "Title": "Fixture (2020) 2160p Eng",
+          "Tracker": "fixture",
+          "Size": 1073741824,
+          "Seeders": 50,
+          "Peers": 2,
+          "PublishDate": "2026-10-01T12:00:00Z",
+          "MagnetUri": "magnet:?xt=urn:btih:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "AudioLanguages": [
+            "en"
+          ],
+          "PublisTime": 1790856000000,
+          "hash": "377399793",
+          "viewed": false,
+          "size": "1 ГБ",
+          "checked_at": 1792821447349,
+          "source_rank": 1,
+          "parser_release_key": "hash:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "parser_sources": [
+            {
+              "id": "secondary",
+              "label": "Додатковий · Fixture secondary",
+              "type": "jackett"
+            }
+          ],
+          "parser_originals": [
+            {
+              "Title": "Fixture (2020) 2160p Eng",
+              "Tracker": "fixture",
+              "Size": 1073741824,
+              "Seeders": 50,
+              "Peers": 2,
+              "PublishDate": "2026-10-01T12:00:00Z",
+              "MagnetUri": "magnet:?xt=urn:btih:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "AudioLanguages": [
+                "en"
+              ],
+              "PublisTime": 1790856000000,
+              "hash": "377399793",
+              "viewed": false,
+              "size": "1 ГБ",
+              "checked_at": 1792821447349,
+              "source_rank": 1
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "started": 1792821446687,
+        "requests": 2,
+        "cacheHits": 0,
+        "firstResultMs": 75,
+        "results": 2,
+        "pending": 0
+      }
+    }
+  },
+  "limits": [
+    "Synthetic backend responses; no live endpoint health claim",
+    "No real TorrServer mutations/playback or physical Google TV test"
+  ],
+  "diagnostic": {
+    "component": "main",
+    "items": 0,
+    "menu": ""
+  }
+}
