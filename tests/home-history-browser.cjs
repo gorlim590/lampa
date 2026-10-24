@@ -1,9 +1,9 @@
 'use strict';
 // Existing CDP tab only. Owned source routes + isolated storage/provider fixtures.
 const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process'),crypto=require('node:crypto'),{chromium}=require('playwright');
-const root=path.resolve(__dirname,'..'),out=path.join(root,'audit/issue-25');fs.mkdirSync(out,{recursive:true});
+const root=path.resolve(__dirname,'..'),out=path.join(root,'audit/issue-25-followup');fs.mkdirSync(out,{recursive:true});
 const sha=cp.execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
-const files=Object.fromEntries(['loader.js','ui/design-optimized.js','plugins-to-enable/home-history.js','ui/stremio-hybrid.js'].map(p=>['/'+p,fs.readFileSync(path.join(root,p),'utf8')]));
+const files=Object.fromEntries(['loader.js','trakt/trakt-plus.js','ui/design-optimized.js','plugins-to-enable/home-history.js','plugins-to-enable/home-policy.js','ui/stremio-hybrid.js'].map(p=>['/'+p,fs.readFileSync(path.join(root,p),'utf8')]));
 const sourceKey=u=>u.pathname.endsWith('/preview-loader.js')?'/loader.js':u.pathname.endsWith('/stremio-hybrid.js')?'/ui/stremio-hybrid.js':Object.keys(files).find(k=>u.pathname.endsWith(k));
 const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
 //60 seconds of silence, valid PCM WAV, no downloads or random stream playback.
@@ -19,8 +19,8 @@ const wav=Buffer.alloc(44+480000,128);wav.write('RIFF');wav.writeUInt32LE(wav.le
   const s=window.__issue25={shadow:{ydesign_ua_torrents:false},local:{ydesign_legacy_cleaned:'1'},files:{file_view_fixture_a:{},file_view_fixture_b:{}},filename:'file_view_fixture_a',lists:{},watched:{},registry:[],writes:[],socketWrites:[],playerStarted:false};
   const originalFilename=L.Timeline.filename;s.originalFilename=originalFilename;
   L.Timeline.filename=()=>s.filename;
-  L.Storage.get=function(k,d){if(/^file_view(?:_|$)/.test(k))return s.files[s.filename];if(k==='player_timecode')return'continue';if(/^trakt_/.test(k))return k==='trakt_token'?null:false;if(k in s.shadow)return s.shadow[k];if(/^ydesign_/.test(k))return d;return og.call(this,k,d)};
-  L.Storage.field=function(k){if(k==='player_timecode')return'continue';if(/^trakt_/.test(k))return false;if(k in s.shadow)return s.shadow[k];if(/^ydesign_/.test(k))return undefined;return of.call(this,k)};
+  L.Storage.get=function(k,d){if(/^file_view(?:_|$)/.test(k))return s.files[s.filename];if(k==='player_timecode')return'continue';if(/^trakt_/.test(k))return k==='trakt_token'?(s.token||null):k==='trakt_plus_enable'?true:false;if(k in s.shadow)return s.shadow[k];if(/^ydesign_/.test(k))return d;return og.call(this,k,d)};
+  L.Storage.field=function(k){if(k==='player_timecode')return'continue';if(/^trakt_/.test(k))return k==='trakt_plus_enable'?true:false;if(k in s.shadow)return s.shadow[k];if(/^ydesign_/.test(k))return undefined;return of.call(this,k)};
   L.Storage.set=function(k,v){s.writes.push(k);if(/^file_view(?:_|$)/.test(k))s.files[s.filename]=v;else s.shadow[k]=v;};
   const get=Storage.prototype.getItem;Storage.prototype.getItem=function(k){if(k in s.local)return s.local[k];if(/^ydesign_/.test(k))return null;return get.call(this,k)};Storage.prototype.setItem=function(k,v){s.local[k]=String(v)};Storage.prototype.removeItem=function(k){s.local[k]=null};
   L.Favorite.get=({type})=>s.lists[type]||[];L.Favorite.check=()=>({});L.Favorite.add=()=>{throw Error('Unexpected Favorite mutation')};L.Favorite.remove=()=>{throw Error('Unexpected Favorite deletion')};
@@ -52,8 +52,11 @@ const wav=Buffer.alloc(44+480000,128);wav.write('RIFF');wav.writeUInt32LE(wav.le
    s.lists.history=s.cards.concat([{...s.cards[0],source:'trakt',id:999,ids:{tmdb:1,trakt:999}}]);s.watched={'movie:6':true};
    for(const c of s.cards)s.files.file_view_fixture_a['provider-'+c.id]={card:(c.media_type==='tv'?'tv_':'movie_')+c.id,percent:c.id===6||c.id===8?100:100/3,time:c.id===6||c.id===8?60:20,duration:60,updated:c.id,...(c.media_type==='tv'?{season:1,episode:1}:{})};
    s.schedule=[{season_number:1,episode_number:1,air_date:'2020-01-01'},{season_number:1,episode_number:2,air_date:'2020-01-02'}];Lampa.TimeTable.get=()=>s.schedule;
-   window.TraktPlus={isWatched:c=>s.watched[c.media_type+':'+c.id]??null};Lampa.Timeline.read(true);
+   s.account='A';s.token='synthetic-home-A';
+   TraktTV.api.get=async path=>{s.apiCalls=(s.apiCalls||0)+1;if(path==='/users/me')return{user:{ids:{uuid:'home-'+s.account}}};if(path==='/sync/last_activities')return{all:'2026-01-01T12:00:00Z',movies:{watched_at:'2026-01-01T12:00:00Z'},episodes:{watched_at:'2026-01-01T12:00:00Z'}};if(path.startsWith('/sync/watched/movies'))return s.account==='A'?[{movie:{ids:{tmdb:6,trakt:6},title:'Movie6'},last_watched_at:'2026-01-01T12:00:00Z'}]:[];if(path.startsWith('/sync/watched/shows'))return s.account==='A'?[{show:{ids:{tmdb:7,trakt:7},aired_episodes:2},seasons:[{number:1,episodes:[{number:1,plays:1}]}]}]:[];return[]};
+   Lampa.Storage.listener.send('change',{name:'trakt_token'});Lampa.Timeline.read(true);
   });
+  await page.waitForFunction(()=>TraktPlus.version==='3.3.1-home'&&TraktPlus.cachedWatched({id:6,media_type:'movie'})===true,null,{timeout:20000});
   await page.addScriptTag({url:'https://gorlim590.github.io/lampa/plugins-to-enable/home-history.js?fixture='+sha});
   await Promise.all(jobs);check('Exact changed source and loader loaded by hash/commit',Object.keys(files).every(k=>r.sources[k]?.received===hash(files[k])&&r.sources[k]?.commit===sha),r.sources);
   await page.evaluate(()=>{
@@ -68,10 +71,14 @@ const wav=Buffer.alloc(44+480000,128);wav.write('RIFF');wav.writeUInt32LE(wav.le
   check('Next episode without position is visibly labelled',await page.locator('.home-history-note').filter({hasText:'позиція недоступна'}).count()>0);
   await page.evaluate(()=>{__issue25.files.file_view_fixture_a['provider-1']={card:'movie_1',percent:100,time:60,duration:60,updated:100};Lampa.Timeline.read()});
   await page.waitForFunction(()=>Lampa.Activity.active().activity.component.items.find(l=>l.data.home_history==='resume')?.data.results.length===6);check('Timeline completion updates mounted Home row',true);
-  await page.evaluate(()=>{__issue25.filename='file_view_fixture_b';__issue25.watched={};Lampa.Timeline.read();document.dispatchEvent(new Event('traktplus:watched'))});
+  await page.evaluate(()=>{__issue25.filename='file_view_fixture_b';__issue25.watched={};__issue25.account='B';__issue25.token='synthetic-home-B';Lampa.Storage.listener.send('change',{name:'trakt_token'});Lampa.Timeline.read();document.dispatchEvent(new Event('traktplus:watched'))});
   await page.waitForFunction(()=>!document.querySelector('[data-home-history]'));check('New empty profile removes old datasets without reusing a Home cache',true);
-  await page.evaluate(()=>{__issue25.filename='file_view_fixture_a';__issue25.watched={'movie:6':true};__issue25.files.file_view_fixture_a['provider-1']={card:'movie_1',percent:100/3,time:20,duration:60,updated:200};Lampa.Timeline.read();document.dispatchEvent(new Event('traktplus:watched'))});
+  await page.evaluate(()=>{__issue25.filename='file_view_fixture_a';__issue25.watched={'movie:6':true};__issue25.account='A';__issue25.token='synthetic-home-A';Lampa.Storage.listener.send('change',{name:'trakt_token'});__issue25.files.file_view_fixture_a['provider-1']={card:'movie_1',percent:100/3,time:20,duration:60,updated:200};Lampa.Timeline.read();document.dispatchEvent(new Event('traktplus:watched'))});
   await page.waitForFunction(()=>document.querySelectorAll('[data-home-history]').length===2);check('Returning profile restores native positions and no duplicate rows',true);
+  await page.evaluate(()=>{const s=__issue25;s.files.file_view_fixture_a['provider-6'].percent=25;s.files.file_view_fixture_a['provider-6'].time=15;s.files.file_view_fixture_a['provider-6'].updated=Date.parse('2026-01-02T00:00:00Z');Lampa.Timeline.read()});
+  await page.waitForFunction(()=>Lampa.Activity.active().activity.component.items.find(l=>l.data.home_history==='resume')?.data.results.some(c=>c.id===6&&c.home_history_resume.rewatch));check('Newer actual position supports explicit replay while confirmed watched history remains', (await datasets()).find(r=>r.kind==='watched')?.ids.join(',')==='6');
+  await page.evaluate(()=>{const s=__issue25;s.files.file_view_fixture_a['provider-6'].percent=100;s.files.file_view_fixture_a['provider-6'].time=60;Lampa.Timeline.read()});await page.waitForFunction(()=>Lampa.Activity.active().activity.component.items.find(l=>l.data.home_history==='resume')?.data.results.length===7);
+  const requestsBefore=await page.evaluate(()=>__issue25.apiCalls);await page.evaluate(()=>{LampaHomeHistory.buildRows();LampaHomeHistory.buildRows();});check('Repeated Home builds use cache-only Trakt status and progress with no API calls',await page.evaluate(n=>__issue25.apiCalls===n,requestsBefore));
   if(await page.evaluate(()=>!!window.StremioHybrid)){await page.waitForTimeout(100);await page.evaluate(()=>StremioHybrid.setEnabled(false));check('Hybrid off does not restore destroyed profile/history rows',(await datasets()).find(r=>r.kind==='resume')?.count===7);await page.evaluate(()=>StremioHybrid.setEnabled(true));check('Hybrid on retains one of each managed row',(await datasets()).length===2);}
   await page.evaluate(()=>Lampa.Activity.active().activity.component.items.find(l=>l.data.home_history==='resume').toggle());
   await page.keyboard.press('ArrowRight');await page.keyboard.press('ArrowLeft');check('Native directional focus survives refresh',await page.locator('.activity--active .focus').count()>0);
@@ -85,6 +92,7 @@ const wav=Buffer.alloc(44+480000,128);wav.write('RIFF');wav.writeUInt32LE(wav.le
    await page.keyboard.press('Escape');await page.waitForFunction(()=>!Lampa.Player.opened());
    check('Player Back returns to Home and saves only fixture progress',await page.evaluate(()=>Lampa.Activity.active().component==='main'&&__issue25.writes.some(k=>/^file_view/.test(k))));
   }catch(e){r.blocked.push('Controlled native player: '+e.message.replace(/https?:\/\/\S+/g,'[URL]'));if(await page.evaluate(()=>Lampa.Player.opened()))await page.evaluate(()=>Lampa.Player.close())}
+  await page.evaluate(()=>{__issue25.token=null;Lampa.Storage.listener.send('change',{name:'trakt_token'})});await page.waitForFunction(()=>!Lampa.Activity.active().activity.component.items.some(l=>l.data.home_history==='watched'));check('Unavailable Trakt removes unconfirmed watched row but preserves real local resume', (await datasets()).some(r=>r.kind==='resume'&&r.count>3));
   await page.screenshot({path:path.join(out,'home-final.png')});
  }catch(e){r.errors.push(e.message.replace(/https?:\/\/\S+/g,'[URL]'))}
  finally{

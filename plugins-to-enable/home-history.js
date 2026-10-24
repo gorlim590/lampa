@@ -68,8 +68,12 @@
     }
     function watched(c) {
         // Reuse #7/#8. Do not infer watched or persist another watched cache.
-        try { return window.TraktPlus && typeof window.TraktPlus.isWatched === 'function' ? window.TraktPlus.isWatched(c) : null; }
+        try { return window.TraktPlus && typeof window.TraktPlus.cachedWatched === 'function' ? window.TraktPlus.cachedWatched(c) : window.TraktPlus && typeof window.TraktPlus.isWatched === 'function' ? window.TraktPlus.isWatched(c) : null; }
         catch (e) { return null; }
+    }
+    function homeProgress(card) {
+        try { return window.TraktPlus && typeof window.TraktPlus.cachedHomeProgress === 'function' ? window.TraktPlus.cachedHomeProgress(card) || {} : {}; }
+        catch (e) { return {}; }
     }
     function cardFor(group) {
         var card = group.cards.find(function (c) { return c.source === 'tmdb' || c.source === 'cub' || !c.source; }) || group.cards[0];
@@ -133,10 +137,10 @@
         return null;
     }
     function annotate(card, resume) {
-        var copy = Object.assign({}, card, { home_history_resume: resume, ydesign_row: 'cont' });
+        var copy = Object.assign({}, card, { home_history_resume: resume, ydesign_row: 'cont', _trakt_cached_only: true });
         // Carry exact provider hash/position as metadata, never inject a guessed Timeline.
         // Native Full/source selection still owns playback and reads its own Timeline.
-        if (!resume.positionKnown) {
+        if (!resume.positionKnown || resume.rewatch) {
             copy.params = Object.assign({}, card.params);
             copy.params.emit = Object.assign({}, copy.params.emit);
             ['onCreate', 'onVisible'].forEach(function (event) {
@@ -147,7 +151,7 @@
                     if (!root || root.querySelector('.home-history-note')) return;
                     var label = document.createElement('div'); label.className = 'home-history-note';
                     label.style.cssText = 'font-size:.65em;opacity:.8;line-height:1.3;padding-top:.3em';
-                    label.textContent = 'S' + resume.season + ' E' + resume.episode + ' · ' + resume.label;
+                    label.textContent = (resume.season ? 'S' + resume.season + ' E' + resume.episode + ' · ' : '') + resume.label;
                     root.appendChild(label);
                 };
             });
@@ -166,13 +170,26 @@
         });
         groups.forEach(function (group, index) {
             var card = cardFor(group), entries = readings(group, snapshot, names, byLink);
-            if (watched(card) === true) { result.watched.push(card); return; }
+            var status = watched(card), remote = homeProgress(card);
+            if (status === true) result.watched.push(Object.assign({}, card, { _trakt_cached_only: true, home_history_watched_at: Number(remote.lastWatchedAt) || 0 }));
             var evidence = card.media_type === 'tv' ? episodeEvidence(entries) : {}, latest = null;
             if (card.media_type !== 'tv') entries.forEach(function (entry) { var p = progress(entry.road); if (p) latest = newer(latest, { entry: entry, progress: p }); });
             else Object.keys(evidence).forEach(function (key) {
                 var item = evidence[key];
                 if (item.progress.partial && (!latest || latest.progress.updated < item.progress.updated)) latest = item;
             });
+            // Verified Trakt episodes supplement local predecessor evidence, never a playback position.
+            if (card.media_type === 'tv' && status !== null) (Array.isArray(remote.episodes) ? remote.episodes : []).forEach(function (ep) {
+                if (!(ep.season > 0 && ep.episode > 0 && ep.season % 1 === 0 && ep.episode % 1 === 0)) return;
+                var key = ep.season + ':' + ep.episode, local = evidence[key], updated = Number(ep.watchedAt) || 0;
+                if (!local || updated > 0 && updated >= local.progress.updated) evidence[key] = { progress: { complete: true, updated: updated } };
+            });
+            if (card.media_type === 'tv') {
+                latest = null;
+                Object.keys(evidence).forEach(function (key) { var item = evidence[key]; if (item.entry && item.progress.partial && (!latest || latest.progress.updated < item.progress.updated)) latest = item; });
+            }
+            var rewatch = status === true && latest && latest.progress.partial && latest.progress.time > 0 && Number(remote.lastWatchedAt) > 0 && latest.progress.updated > remote.lastWatchedAt;
+            if (status === true && !rewatch) return;
             var resume;
             if (latest && latest.progress.partial && (latest.progress.time > 0 || card.media_type === 'tv')) {
                 var p = latest.progress, road = latest.entry.road;
@@ -181,6 +198,7 @@
                 if (card.media_type === 'tv') { resume.season = Number(road.season); resume.episode = Number(road.episode); }
             } else if (card.media_type === 'tv') resume = nextEpisode(card, evidence);
             if (resume) {
+                if (rewatch) { resume.rewatch = true; resume.label = 'Повторний перегляд · збережена позиція'; }
                 if (latest && resume.mode === 'position') {
                     var owner = group.cards.find(function (c) { return linked(c) === latest.entry.road.card; }) || latest.entry.owner;
                     if (owner) card = Object.assign({}, card, owner, { media_type: tv(owner) ? 'tv' : 'movie' });
@@ -189,7 +207,8 @@
             }
         });
         result.resume.sort(function (a, b) { return b.updated - a.updated || a.index - b.index; });
-        result.resume = result.resume.map(function (r) { return r.card; }); return result;
+        result.resume = result.resume.map(function (r) { return r.card; });
+        result.watched.sort(function (a, b) { return b.home_history_watched_at - a.home_history_watched_at; }); return result;
     }
     function node(line) { var el = line.render(true); return el && (el[0] || el); }
     function payload(kind, cards) {
@@ -204,7 +223,7 @@
             component.emit('createAndAppend', payload(kind, cards));
             component.scroll.append(component.fragment); component.fragment = fragment; return true;
         }
-        var sig = function (items) { return JSON.stringify(items.map(function (c) { return [aliases(c), c.home_history_resume || null]; })); };
+        var sig = function (items) { return JSON.stringify(items.map(function (c) { return [aliases(c), c.home_history_resume || null, c.home_history_watched_at || 0]; })); };
         var old = line.data.results || []; if (sig(old) === sig(cards)) return;
         var own = L.Controller && L.Controller.own && L.Controller.own(line), selected = old[line.active || 0], key = selected && aliases(selected)[0];
         if (!cards.length) {
@@ -277,7 +296,7 @@
         script.onload = ready; script.onerror = function () { console.warn('Home policy unavailable; retaining history-only mode.'); ready(); };
         document.head.appendChild(script);
     }
-    window.LampaHomeHistory = { version: '2.0.0', active: false, policyReady: false, buildRows: buildRows, refresh: queue,
+    window.LampaHomeHistory = { version: '2.1.0', active: false, policyReady: false, buildRows: buildRows, refresh: queue,
         applyOrder: function (component) { if (policy) policy.apply(component); },
         policy: function () { return policy; } };
     if (window.appready) start(); else if (L && L.Listener) L.Listener.follow('app', function (e) { if (e.type === 'ready') start(); });
