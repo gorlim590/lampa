@@ -24,8 +24,14 @@
             var result = [], seen = Object.create(null);
             job.slots.forEach(function (slot) { (slot.rows || []).forEach(function (row, index) {
                 var key = identity(row, slot.spec, index), existing = seen[key], provenance = { id: slot.spec.id, label: slot.spec.label, type: slot.spec.type };
-                if (existing) { existing.parser_sources.push(provenance); existing.parser_originals.push(row); return; }
-                var item = clone(row); item.parser_release_key = key; item.parser_sources = [provenance]; item.parser_originals = [row]; seen[key] = item; result.push(item);
+                if (existing) {
+                    if (!existing.parser_sources.some(function (source) { return source.id === provenance.id; })) existing.parser_sources.push(provenance);
+                    ['AudioLanguages','audio_languages','SubtitleLanguages','subtitle_languages','ffprobe','info','Resolution','resolution','Season','season','Episode','episode','InfoHash'].forEach(function (field) { if (existing[field] == null && row[field] != null) existing[field] = row[field]; });
+                    existing.parser_originals.push(row); return;
+                }
+                var item = clone(row);
+                if (item.hash && L.Storage.cache) item.viewed = L.Storage.cache('torrents_view', 5000, []).indexOf(item.hash) >= 0;
+                item.parser_release_key = key; item.parser_sources = [provenance]; item.parser_originals = [row]; seen[key] = item; result.push(item);
             }); });
             return result;
         }
@@ -85,6 +91,10 @@
             if (active && !active.dead && active.pending && active.key === allKey) { active.subscribers.push({ done: done, fail: fail }); if (merged(active).length) done(snapshot(active)); return; }
             cancel();
             var job = active = { key: allKey, epoch: epoch, dead: false, slots: configured.map(function (spec) { return { spec: spec, status: 'loading', rows: [] }; }), pending: configured.length, subscribers: [{ done: done, fail: fail }], stats: { started: Date.now(), requests: 0, cacheHits: 0, firstResultMs: null, results: 0, pending: configured.length } }; lastStats = job.stats;
+            if (job.slots.every(function (slot) { var entry = memo[specKey(slot.spec) + queryKey]; return entry && entry.expires > Date.now(); })) {
+                job.slots.forEach(function (slot) { slot.rows = memo[specKey(slot.spec) + queryKey].rows; slot.status = slot.rows.length ? 'ready' : 'empty'; });
+                job.pending = 0; job.stats.cacheHits = job.slots.length; emit(job); return;
+            }
             var runs = Object.create(null);
             job.slots.forEach(function (slot) {
                 var key = specKey(slot.spec) + queryKey, cached = memo[key], finished = false;
