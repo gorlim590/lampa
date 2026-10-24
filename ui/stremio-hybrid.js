@@ -369,7 +369,8 @@ body.stremio-hybrid .wrap__left{background:#090a12!important}
         stopMovieQueue(); movieRecords.forEach(restoreMovie); movieRecords=[];
     }
     function setupDescription(record, description) {
-        if(record.descriptionToggle)return;
+        if(record.descriptionToggle&&record.descriptionToggle.isConnected)return;
+        clearDescription(record);
         var button=document.createElement("div");button.className="selector sh-description-toggle";
         button.setAttribute("role","button");button.setAttribute("aria-expanded","false");button.textContent="Показати більше";
         record.descriptionToggle=button;
@@ -729,6 +730,7 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
     }
     function onStreamSelect(event){
         clearStreamSelect();
+        if(menuOpen)return; // Profile owns its compact native Select surface.
         var record=movieRecords.filter(function(r){return r.streamFocused&&r.streamChild&&!r.streamChild.dead&&r.page.classList.contains('activity--active');})[0];
         if(!record)return;var st=record.streamChild,node=event&&event.html&&(event.html[0]||event.html)||Lampa.Select.render()[0];if(!node)return;
         streamSelectOwner=st;st.selectNode=node;st.selectTokens={};node.classList.add('sh-cinema-select');
@@ -946,7 +948,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         var panel=Lampa.Select.render()[0];if(panel)panel.classList.add('sh-profile-menu');
     }
     function onSearchEnter() { searchReturn = true; }
-    function onSearchClose() { clearSearchSources(); if (searchReturn) { searchReturn=false;restoreHead(searchNode); } }
+    function onSearchClose() { clearSearchSources();scheduleMovie(); if (searchReturn) { searchReturn=false;restoreHead(searchNode); } }
     function clearSearchSources() {
         if(searchSources) searchSources.listener.remove('finded',onSearchFound);
         searchSources=null;

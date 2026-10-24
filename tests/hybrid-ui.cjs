@@ -5,7 +5,7 @@ function fixture(){
  const buttons=[],classes=new Set(),handlers=new Map();
  const root={classList:{toggle:(k,on)=>on?classes.add(k):classes.delete(k),remove:k=>classes.delete(k)},querySelector:()=>({appendChild:n=>buttons.push(n)})};
  const $=node=>({on:(key,fn)=>handlers.set(node,fn),off:()=>{handlers.delete(node);return{remove:()=>buttons.splice(buttons.indexOf(node),1)}}});
- const context={document:{createElement:()=>({attrs:{},setAttribute(k,v){this.attrs[k]=v},getAttribute(k){return this.attrs[k]}})},$};
+ const context={document:{createElement:()=>({isConnected:true,attrs:{},setAttribute(k,v){this.attrs[k]=v},getAttribute(k){return this.attrs[k]}})},$};
  vm.createContext(context);vm.runInContext(source.slice(source.indexOf('    function setupDescription('),source.indexOf('    function movieDescriptionEnter(')),context);
  return{context,root,buttons,classes,handlers,record:{root}};
 }
@@ -14,3 +14,6 @@ test('description action is outside ButtonsPlus generic movie-action rewriting',
 test('native enter toggles inline expansion without replacing text or changing focus',()=>{const f=fixture();f.context.setupDescription(f.record,{});const button=f.buttons[0],enter=f.handlers.get(button);enter();assert.equal(button.getAttribute('aria-expanded'),'true');assert.equal(button.textContent,'Згорнути опис');assert(f.classes.has('sh-description-expanded'));enter();assert.equal(button.textContent,'Показати більше');assert.equal(button.getAttribute('aria-expanded'),'false');});
 test('theme cleanup removes the exact action/handler and reactivation is collapsed',()=>{const f=fixture();f.context.setupDescription(f.record,{});f.handlers.get(f.buttons[0])();f.context.clearDescription(f.record);assert.equal(f.buttons.length,0);assert.equal(f.handlers.size,0);assert.equal(f.record.descriptionToggle,null);assert(!f.classes.has('sh-description-expanded'));f.context.setupDescription(f.record,{});assert.equal(f.buttons[0].getAttribute('aria-expanded'),'false');});
 test('description state is owned by one detail instance, not shared by media type',()=>{const f=fixture(),other={root:f.root};f.context.setupDescription(f.record,{});f.context.setupDescription(other,{});f.handlers.get(f.record.descriptionToggle)();assert.equal(other.descriptionToggle.getAttribute('aria-expanded'),'false');});
+test('profile Select never inherits the focused torrent filter surface',()=>{let cleared=0;const context={menuOpen:true,clearStreamSelect:()=>cleared++};vm.createContext(context);vm.runInContext(source.slice(source.indexOf('    function onStreamSelect('),source.indexOf('    function setupStreamTools(')),context);context.onStreamSelect({});assert.equal(cleared,1);});
+
+test('a replaced action bar releases its detached handler before rebuilding',()=>{const f=fixture();f.context.setupDescription(f.record,{});const old=f.record.descriptionToggle;old.isConnected=false;f.context.setupDescription(f.record,{});assert.notEqual(f.record.descriptionToggle,old);assert(!f.handlers.has(old));assert.equal(f.handlers.size,1);assert.equal(f.record.descriptionToggle.getAttribute('aria-expanded'),'false');});

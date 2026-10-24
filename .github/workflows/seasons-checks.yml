@@ -16,4 +16,4 @@ jobs:
         with:
           node-version: 20
       - name: Native seasons and upper details ownership
-        run: node --test --test-timeout=15000 tests/seasons-info.cjs tests/details-info.cjs
+        run: node --test --test-timeout=15000 tests/seasons-info.cjs tests/details-info.cjs tests/hybrid-ui.cjs
