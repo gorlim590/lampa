@@ -309,7 +309,7 @@
                     options = copy(options);
                     options.items = list.map(function (season) {
                         var n = Number(season.season_number), label = 'Сезон ' + n;
-                        return { title: n === 0 ? (season.name || 'Спеціальні випуски') + ' · S0' : label + (season.name && season.name !== label ? ' · ' + season.name : ''), season: String(n), selected: Number(active.season) === n };
+                        return { title: n === 0 ? (season.name || 'Спеціальні випуски') + ' · S0' : label + (season.name && season.name !== label ? ' · ' + season.name : ''), season: String(n), selected: Number(active.season == null ? list[list.length - 1].season_number : active.season) === n };
                     });
                 }
                 return originalSelect.call(this, options);
