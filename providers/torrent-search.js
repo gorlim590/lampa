@@ -126,7 +126,9 @@
             function clean() { clearTimeout(timer); if (metadataRequest) metadataRequest.clear(); metadataRequest = null; }
             current = { cancel: function () { ended = true; stats.cancelled = true; clean(); } };
             function finish(data, error) {
-                if (!alive()) return; ended = true; clean(); current = null; stats.elapsed = Date.now() - stats.started;
+                if (!alive()) return; ended = true; clean(); current = null;
+                if (data && data.parser_pending) data = Object.assign({}, data, { parser_pending: false, parser_status: (data.parser_status || []).map(function (s) { return s.status === 'loading' ? Object.assign({}, s, { status: 'cancelled' }) : s; }) });
+                stats.elapsed = Date.now() - stats.started;
                 if (error) { if (typeof fail === 'function') fail(error); } else done(data);
             }
             function remaining() { return FALLBACK_MS - (Date.now() - fallbackStart); }
@@ -159,9 +161,10 @@
                 var request = fallback || !params.search ? Object.assign({}, params, { search: query, torrent_search_owner: params }) : params; if (fallback) request.clarification = true;
                 if (fallback) timer = setTimeout(function () { if (!alive()) return; clearTransport(L.Parser); finish(Object.assign({}, lastData, { Results: [] })); }, Math.min(4000, remaining()));
                 dispatch(self, request, function (data) {
-                    if (!alive()) return; clearTimeout(timer); lastData = data || { Results: [] };
+                    if (!alive()) return; lastData = data || { Results: [] };
                     var rows = dedup((Array.isArray(lastData.Results) ? lastData.Results : []).filter(function (row) { return match(row, movie, Object.assign({}, params, params.params || {}), names).eligible; }));
-                    if (lastData.parser_pending) { if (rows.length) done(Object.assign({}, lastData, { Results: rows })); return; }
+                    if (lastData.parser_pending) { if (rows.length) { clearTimeout(timer); done(Object.assign({}, lastData, { Results: rows })); } return; }
+                    clearTimeout(timer);
                     if (rows.length) { remember(movie, Object.assign({}, cached(movie) || {}, { aliases: names.map(function (title) { return { title: title }; }) })); return finish(Object.assign({}, lastData, { Results: rows })); }
                     if (!fallback) { fallbackStart = Date.now(); next(); } else next();
                 }, function (error) { if (!alive()) return; clearTimeout(timer); if (!fallback) finish(null, error); else finish(Object.assign({}, lastData, { Results: [] })); });
