@@ -444,3 +444,12 @@
 - 131targeted testsPASS; repository checker62JS454URLsPASS;12existingCDP checksPASS with7exact source hashes/noexceptions. No real Trakt writes, physicalTV or real playback testing.
 - Evidence and caveats: docs/issue-10-details.md, audit/issue-10-details/{before.png,after-full.png,owners-before.json,browser.json}.
 - Next: publish scoped follow-up PR, required CI, authorized merge if green; verify main/postmerge; report #10 without premature closure/user acceptance.
+
+
+## 2026-10-24 — AI agent workflow preparation (documentation only)
+- Baseline main:67bad5f5432022030a93bd1c2b1ceef3bb7c63e6; branch docs/ai-agent-workflow. Existing product/tests/CI inspected only at relevant ownership boundaries, no repeated runtime audit.
+- Added AGENTS.md, shared CLAUDE.md import, docs/ARCHITECTURE.md, docs/TESTING.md, docs/PLUGIN_COMPATIBILITY.md; README links and loader/manual distinction corrected.
+- Added .agents/skills/{lampa-plugin-development,lampa-ui-testing,lampa-release-check}/SKILL.md. No duplicate skill resources, dependencies, plugin activation or runtime/CI changes.
+- Validation:3/3 skill-creator quick_validate PASS;31 local Markdown links/Claude import PASS; documented focused test paths exist; git diff --check PASS. Product/browser suites intentionally NOT RUN for docs-only diff. Existing mandatory GitHub CI may run broader checks automatically.
+- Preserve historical evidence/baselines: PR29 YDesign changes are not in this main; source catalogue vs broadcast seasons and unknown watched remain explicit.
+- Next: publish documentation branch, Draft PR only; no merge. Claude/other-agent skill auto-discovery is client-dependent; no claim of behavioral certification or physicalTV testing.
