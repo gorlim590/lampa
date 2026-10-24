@@ -1,3 +1,47 @@
+# Issue #25 follow-up — current checkpoint (2026-10-25)
+
+**PARTIAL; do not merge or close #25 yet.** Baseline `main@f87edf3d969b8d91cd019099637e753c70563689` after #44. Branch `fix/issue-25-home-completion`. The historical report below describes the original PR#32; this section supersedes its replay rule and extends its cached episode support. Draft#29 remains unrelated/unmerged.
+
+## Current real-data observation
+
+Read-only existing CDP session: Home has four loaded Trakt recommendation rows; Home History is **not active**. Native History has0cards, Timeline has1407records (98timestamped,0linked `card` identities). Only aggregate counts were exported, no titles/history/tokens. Trakt+ in that restored profile reports3.2.1; the modified3.3.1code is proven only in the controlled runtime below. This is not the original populated profile with the three reported movies. The exact three titles and missing examples still cannot be identified. No hardcoded3-item limit was found in the existing Home History implementation; controlled7/10-item scenarios pass. Do not present this as a reconstruction of the user's incident.
+
+## Confirmed changes
+
+- The unconditional watched early return prevented a real newer **rewatch** position from appearing. A movie remains in confirmed Trakt Watched; it can also appear as an explicitly labeled replay only when exact positive native seconds have an update timestamp later than a precise verified Trakt `last_watched_at`. Old/undated/ambiguous partial records remain excluded; no status/history mutation occurs.
+- Home previously had only local predecessor evidence. Existing verified Trakt watched snapshots now retain lightweight per-episode facts and precise watch activity in the existing owner-bound cache. A cache-only `TraktPlus.cachedHomeProgress(card)` exposes them; no new parser, remote library, watched engine, per-card sync or progress percentage-to-seconds conversion. Old caches without optional fields simply lack that evidence.
+- Cached Trakt episode completion can supplement cached native aired TimeTable and suppress an older partial episode position. A later local episode replay is preserved. Next-episode cards explicitly say position unavailable; specials/future episodes are excluded. TV/anime completion still comes exclusively from existing Trakt+ semantics. Lazy progress replacement preserves the new evidence instead of dropping it.
+- Watched rows use confirmed Trakt activity sorting; resume rows keep native most-recent activity sorting. Both tag cards for the existing #44 cache-only YDesign adapter. No changes to YDesign/Hybrid/Home Policy algorithms or player/TorrServer code.
+- Home reads `cachedWatched` when available, so building the two rows makes no extra Trakt calls. Existing state-change/player/Activity/profile hooks remain; no added observer/interval. Loader revision changes only for cache busting; default plugin list/order unchanged. Home History remains opt-in in `plugins-to-enable/`.
+
+## Targeted verification
+
+```sh
+node --test --test-timeout=15000 tests/home-history.cjs tests/home-trakt-progress.cjs tests/home-order.cjs tests/trakt-account-isolation.cjs tests/trakt-watched-sync.cjs tests/details-info.cjs tests/details-cast.cjs
+node scripts/check-repository.mjs
+git diff --check
+node tests/home-history-browser.cjs
+# Diagnostic-only gates; do not repeat the complete player scenario unnecessarily:
+HOME25_SOURCES_ONLY=1 node tests/home-history-browser.cjs
+HOME25_PROFILE_ONLY=1 node tests/home-history-browser.cjs
+```
+
+**191 unique targeted automated tests PASS /0FAIL** (40 Home/progress tests +151 related regressions), repository62JS/454URLs and syntax/whitespace PASS. Earlier38-case run reproduced/fixed replay and missing remote predecessor support; later tests cover account/restart/offline/invalid timestamps/future/specials/lazy progress. No #8 full matrix or CPU/FPS profiling.
+
+**Final browser:17PASS/0FAIL/noexceptions at local6365ad6 / published exact-tree5d300535a4d06a88b54548372e14b6fd87e842bf; controlled native player resumed at20.000s.** Browser acceptance is stored in `audit/issue-25-followup/browser.json` for the tested product SHA: real native Home/Timeline/player plus real modified Trakt+ and Home History, controlled synthetic transport/accounts/titles. Six source-response hashes and commit headers prove changed code, not cached code. More than3items, no duplicate active card DOM, completion, profile A/B/return, explicit replay, zero extra Trakt calls on repeated builds, Hybrid toggle, native arrows, actual20s resume and player Back, offline unknown/local-progress retention, and restoration are covered. All writes/socket operations remain memory fixtures; HTTP mutations blocked. Browser/tab/profile are not closed or cleared.
+
+Two harness issues were corrected rather than counted as success: source verification raced async Home Policy loading; profile assertions originally included hidden cached activities. Scoping to `.activity--active` confirmed native cleanup works. An unnecessary provisional DOM-removal change was reverted; no such change remains in the final diff. Repeated expensive scenarios were only rerun after changed source or these concrete failures.
+
+## Remaining acceptance / merge blockers
+
+- **Original three titles and missing personal entries unavailable.** Need the original populated profile or concrete examples, including which source/player produced the progress. The current profile's unlinked Timeline hashes cannot safely be reverse-mapped to invented cards. Do not edit user history to manufacture links.
+- Native-card candidates and cached timetable are still required. This is not a complete download of remote Trakt Watched/Playback. The base Trakt playback endpoint exists, but its percentages are not a verified native provider hash/exact-seconds resume binding. No speculative seek is added.
+- New TV/anime episodes are handled after fresh confirmed Trakt evidence and an aired timetable are available. Automatic release-time invalidation when only an old complete Trakt snapshot is present, missing timetables and full remote library discovery remain **Partial**, not claimed solved. No full watched sync is initiated on each Home visit.
+- Physical Google TV, real Trakt account/service, real external-player/TorrServer/provider-return/cloud path are **NOT TESTED**. Controlled native PCM proves native resume only. Existing #7/#44 behavior is covered by relevant regressions, not blanket all-plugin certification.
+- Keep this PR Draft/open and Issue#25 open until the critical personal-data acceptance can be established. No merge/Pages deployment for this follow-up is claimed. Existing published main remains unchanged.
+
+---
+
 # Issue #25 — independent resume and confirmed watched rows
 
 Baseline main: `fcc148f88257daab6ce56681c51ecc7903274d94`. Branch: `fix/issue-25-home-history`. PR #29 remains separate/unmerged; its audit and164 tests were not repeated.
