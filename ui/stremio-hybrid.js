@@ -343,9 +343,26 @@ body.stremio-hybrid .selectbox-item__title{white-space:normal;overflow-wrap:anyw
 body.stremio-hybrid .wrap__left{background:#090a12!important}
 @media(prefers-reduced-motion:reduce){body.stremio-hybrid .selectbox,body.stremio-hybrid .selectbox-item,body.stremio-hybrid .sh-movie-page .full-start__background{transition:none!important;animation:none!important}}
 `;
+    css += `
+body.stremio-hybrid .full-person:not(.full-person--small){width:9.5em;display:flex;flex-direction:column;align-items:stretch;gap:.55em;padding:.45em;border-radius:.75em;background:#ffffff06;transition:transform var(--sh-speed) ease-out}
+body.stremio-hybrid .full-person:not(.full-person--small) .full-person__photo{width:100%;height:11em;flex-shrink:0;overflow:hidden;border-radius:.6em}
+body.stremio-hybrid .full-person__photo img{width:100%;height:100%;object-fit:cover}
+body.stremio-hybrid .full-person:not(.full-person--small) .full-person__body{padding:0;min-width:0}
+body.stremio-hybrid .full-person__name{color:var(--sh-text);font-size:.95em;line-height:1.3;white-space:normal}
+body.stremio-hybrid .full-person__role{font-size:.8em;line-height:1.3;color:var(--sh-muted);white-space:normal}
+body.stremio-hybrid .full-person.focus{transform:scale(1.025);box-shadow:0 0 0 .12em var(--sh-accent-soft)}
+body.stremio-hybrid .tp-person-watch{position:absolute;bottom:.5em;left:.5em;right:.5em;z-index:8;font-size:.8em;color:#d3c4ff;background:#10111be8;border-radius:.4em;padding:.3em .5em;pointer-events:none}\nbody.stremio-hybrid .sh-cast-watched{font-size:.75em;color:var(--sh-accent-soft);margin-top:.4em}
+body.stremio-hybrid .tp-person-tools{display:flex;flex-wrap:wrap;align-items:center;gap:.6em}
+body.stremio-hybrid .tp-person-tool{padding:.65em 1em;background:var(--sh-panel);border-radius:var(--sh-pill);color:var(--sh-text)}
+body.stremio-hybrid .tp-person-tool.focus{box-shadow:0 0 0 .12em var(--sh-accent-soft)}
+body.stremio-hybrid .tp-person-unknown{font-size:.8em;color:var(--sh-muted)}
+@media(prefers-reduced-motion:reduce){body.stremio-hybrid .full-person{transition:none!important;transform:none!important}}
+`;
     // Cardify owns the native template/data. Move nodes with their handlers, never clone them.
     var movieRecords=[], movieFrame=0, movieTimers=[], movieModal=null;
     function restoreMovie(record) {
+        (record.castLines||[]).forEach(function(entry){entry.line.unuse(entry.hook);delete entry.line._shCastHook;var rendered=entry.line.render(),node=rendered&&(rendered[0]||rendered);if(node&&node.querySelectorAll)node.querySelectorAll('.sh-cast-watched').forEach(function(n){n.remove();});});
+        record.root.querySelectorAll('.sh-generated-description').forEach(function(n){n.remove();});
         (record.seriesFields||[]).forEach(function(n){n.remove();});
         (record.ratingRepairs||[]).forEach(function(item){delete item.img.dataset.shRatingFallback;if(item.img.getAttribute('src')===item.fallback)item.img.setAttribute('src',item.src);});
         clearDescription(record);
@@ -445,10 +462,13 @@ body.stremio-hybrid .wrap__left{background:#090a12!important}
         if(!left || !buttons)return;
         var record=movieRecords.filter(function(r){return r.root===root;})[0];
         if(!record){record={root:root,page:page,column:left,activity:active.activity,kind:active.method==='tv'?'tv':'movie',moves:[],labels:[]};movieRecords.push(record);}
+        page.querySelectorAll('.full-descr__details').forEach(function(fields){if(fields.parentNode){record.moves.push({node:fields,parent:fields.parentNode,next:fields.nextSibling});fields.remove();}});
         function move(node){if(node && node.parentNode!==left){record.moves.push({node:node,parent:node.parentNode,next:node.nextSibling});left.insertBefore(node,buttons);}}
         setupStreams(record);setupMovieBrand(record);
         root.classList.add('sh-movie');root.classList.toggle('sh-series',record.kind==='tv');consolidateMetadata(record);updateSeriesMetadata(record);root.classList.toggle('sh-movie-native',!page.querySelector('.cardify-effects-overlay')); page.classList.add('sh-movie-page');left.classList.add('sh-movie-column');
         var description=root.querySelector('.custom-ghost-main') || page.querySelector('.full-descr__text');
+        var movie=streamMovie(record);
+        if(!description&&movie._tp_omit_details&&movie.overview){description=document.createElement('div');description.className='full-descr__text sh-generated-description';description.textContent=movie.overview;}
         if(description){move(description);record.description=description;description.classList.add('sh-movie-description');setupDescription(record,description);description.addEventListener('hover:enter',movieDescriptionEnter,true);}
         move(root.querySelector('.cardify__right-box'));
         root.querySelectorAll('.sh-movie-primary').forEach(function(n){n.classList.remove('sh-movie-primary');});
@@ -461,6 +481,7 @@ body.stremio-hybrid .wrap__left{background:#090a12!important}
         record.buttons=buttons;buttons.addEventListener('hover:focus',movieButtonFocus,true);
         page.querySelectorAll('.custom-rating img').forEach(function(img){if(img.complete&&!img.naturalWidth)repairRatingImage(img);});
         movieButtonFocus({currentTarget:buttons,target:buttons.querySelector('.focus')||visible[0]||buttons});
+        (record.castLines||[]).forEach(function(entry){(entry.line.items||[]).forEach(decoratePerson);});
         // Interface+ can replace a button after core FullStart cached it as last focus.
         var controller=Lampa.Controller.enabled(), link=controller.controller && controller.controller.link;
         if(controller.name==='full_start' && link && visible[0] && (!root.querySelector('.selector.focus') || (link.last && !root.contains(link.last)))) {
@@ -474,7 +495,29 @@ body.stremio-hybrid .wrap__left{background:#090a12!important}
         // Two bounded passes accommodate that work; no observer or recurring polling.
         [180,650].forEach(function(delay){movieTimers.push(setTimeout(adaptMovie,delay));});
     }
-    function onMovieFull(event) { if(event && (event.type==='complite'||event.type==='archive'))scheduleMovie(); }
+    function decoratePerson(person) {
+        if(!watching||!person||!person.render)return;
+        var rendered=person.render(),node=rendered&&(rendered[0]||rendered);if(!node||!node.querySelector)return;
+        var api=window.TraktPlus,data=person.data||{},view=api&&api.cachedFilmography&&api.cachedFilmography(data),badge=node.querySelector('.sh-cast-watched');
+        if(!view||!view.complete||!view.all.length){if(badge)badge.remove();return;}
+        if(!badge){badge=document.createElement('div');badge.className='sh-cast-watched';(node.querySelector('.full-person__body')||node).appendChild(badge);}
+        badge.textContent='Trakt · '+view.watched.length+' переглянуто';
+    }
+    function onCastWatched(){movieRecords.forEach(function(record){if(record.page.isConnected)(record.castLines||[]).forEach(function(entry){(entry.line.items||[]).forEach(decoratePerson);});});}
+    function onMovieFull(event) {
+        if(!watching||!event)return;
+        if(event.type==='build'&&(event.name==='description'||event.name==='persons')){
+            adaptMovie();var record=movieRecords.filter(function(r){return r.activity.component===event.link;})[0];if(!record)return;
+            if(event.name==='description'){
+                var fields=event.item.render()[0].querySelector('.full-descr__details');
+                if(fields&&fields.parentNode){record.moves.push({node:fields,parent:fields.parentNode,next:fields.nextSibling});fields.remove();}
+            }else if(!event.item._shCastHook){
+                var hook={onInstance:function(person){person.use({onCreate:function(){decoratePerson(this);}});}};
+                event.item._shCastHook=hook;event.item.use(hook);record.castLines=record.castLines||[];record.castLines.push({line:event.item,hook:hook});(event.item.items||[]).forEach(decoratePerson);
+            }
+        }
+        if(event.type==='complite'||event.type==='archive')scheduleMovie();
+    }
 
     // Native torrent Component hosted inside Full. Parser, rows, filters and playback stay native.
 
@@ -1086,13 +1129,13 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         backdropApi=null;backdropGet=null;backdropWrapper=null;backdropRotation=null;
     }
     function setupUI() {
-        if (!watching) { Lampa.Listener.follow('activity', onActivity); Lampa.Listener.follow('full',onMovieFull); Lampa.Controller.listener.follow('toggle',onStreamController); Lampa.Modal.listener.follow('fullshow',onStreamFiles); Lampa.Modal.listener.follow('update',onStreamFiles); Lampa.Modal.listener.follow('close',clearStreamFiles); Lampa.Listener.follow('torrent_file',onStreamFile); Lampa.Select.listener.follow('fullshow',onStreamSelect); Lampa.Select.listener.follow('hide',clearStreamSelect); Lampa.Storage.listener.follow('change',onStreamSettings); Lampa.Search.listener.follow('close', onSearchClose); Lampa.Search.listener.follow('sources',onSearchSources); Lampa.Settings.listener.follow('open',onSettingsOpen); Lampa.Settings.listener.follow('close',onSettingsClose); document.addEventListener('error',onRatingError,true); document.addEventListener('keydown',onSettingsKey,true); document.addEventListener('keyup',onSettingsKey,true); installSettingsController(); watching=true; installBackdropPacing(); }
+        if (!watching) { Lampa.Listener.follow('activity', onActivity); Lampa.Listener.follow('full',onMovieFull); Lampa.Controller.listener.follow('toggle',onStreamController); Lampa.Modal.listener.follow('fullshow',onStreamFiles); Lampa.Modal.listener.follow('update',onStreamFiles); Lampa.Modal.listener.follow('close',clearStreamFiles); Lampa.Listener.follow('torrent_file',onStreamFile); Lampa.Select.listener.follow('fullshow',onStreamSelect); Lampa.Select.listener.follow('hide',clearStreamSelect); Lampa.Storage.listener.follow('change',onStreamSettings); Lampa.Search.listener.follow('close', onSearchClose); Lampa.Search.listener.follow('sources',onSearchSources); Lampa.Settings.listener.follow('open',onSettingsOpen); Lampa.Settings.listener.follow('close',onSettingsClose); document.addEventListener('error',onRatingError,true); document.addEventListener('traktplus:watched',onCastWatched); document.addEventListener('keydown',onSettingsKey,true); document.addEventListener('keyup',onSettingsKey,true); installSettingsController(); watching=true; installBackdropPacing(); }
         setupHeader(); scheduleMovie();setupHome();
         if(document.body.classList.contains('settings--open')) onSettingsOpen({name:'resume'});
     }
     function removeUI() {
         removeBackdropPacing();
-        if (watching) { Lampa.Listener.remove('activity', onActivity); Lampa.Listener.remove('full',onMovieFull); Lampa.Controller.listener.remove('toggle',onStreamController); Lampa.Modal.listener.remove('fullshow',onStreamFiles); Lampa.Modal.listener.remove('update',onStreamFiles); Lampa.Modal.listener.remove('close',clearStreamFiles); Lampa.Listener.remove('torrent_file',onStreamFile); clearStreamFiles(); Lampa.Select.listener.remove('fullshow',onStreamSelect); Lampa.Select.listener.remove('hide',clearStreamSelect); Lampa.Storage.listener.remove('change',onStreamSettings); streamCache=[]; brandPending={}; Lampa.Search.listener.remove('close', onSearchClose); Lampa.Search.listener.remove('sources',onSearchSources); Lampa.Settings.listener.remove('open',onSettingsOpen); Lampa.Settings.listener.remove('close',onSettingsClose); document.removeEventListener('error',onRatingError,true); document.removeEventListener('keydown',onSettingsKey,true); document.removeEventListener('keyup',onSettingsKey,true); settingsLeftConsumed=false; watching=false; }
+        if (watching) { Lampa.Listener.remove('activity', onActivity); Lampa.Listener.remove('full',onMovieFull); Lampa.Controller.listener.remove('toggle',onStreamController); Lampa.Modal.listener.remove('fullshow',onStreamFiles); Lampa.Modal.listener.remove('update',onStreamFiles); Lampa.Modal.listener.remove('close',clearStreamFiles); Lampa.Listener.remove('torrent_file',onStreamFile); clearStreamFiles(); Lampa.Select.listener.remove('fullshow',onStreamSelect); Lampa.Select.listener.remove('hide',clearStreamSelect); Lampa.Storage.listener.remove('change',onStreamSettings); streamCache=[]; brandPending={}; Lampa.Search.listener.remove('close', onSearchClose); Lampa.Search.listener.remove('sources',onSearchSources); Lampa.Settings.listener.remove('open',onSettingsOpen); Lampa.Settings.listener.remove('close',onSettingsClose); document.removeEventListener('error',onRatingError,true); document.removeEventListener('traktplus:watched',onCastWatched); document.removeEventListener('keydown',onSettingsKey,true); document.removeEventListener('keyup',onSettingsKey,true); settingsLeftConsumed=false; watching=false; }
         homePolicies.slice().forEach(function(r){releaseHome(r,false);});
         removeSettingsUI();
         removeMovies();clearStreamSelect();
@@ -1271,7 +1314,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         apply(enabled());
     }
     window.StremioHybrid = {
-        version: '2.8.0',
+        version: '2.8.1-details',
         setEnabled: setEnabled,
         refresh: function () { if (ready) apply(enabled()); },
         destroy: function () {

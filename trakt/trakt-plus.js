@@ -160,6 +160,15 @@
   }
 
   function onAccountStorage(event) {
+    if (event && (event.name || event.key) === 'stremio_hybrid_enabled') {
+      var page = Lampa.Activity && Lampa.Activity.active && Lampa.Activity.active(), movie = page && page.component === 'full' && page.activity && page.activity.component.props && page.activity.component.props.get('movie');
+      if (movie && movie._tp_details_policy && !hasUsefulDetails(movie) && typeof requestAnimationFrame === 'function') {
+        if (detailsRefreshFrame) cancelAnimationFrame(detailsRefreshFrame);
+        detailsRefreshFrame = requestAnimationFrame(function () { detailsRefreshFrame = 0; if (Lampa.Activity.active() === page) Lampa.Activity.refresh(); });
+      }
+      return;
+    }
+    if(event && /^(trakt_token|account|profile)/.test(event.name || event.key || ''))refreshActor();
     if (!event || (event.name !== 'trakt_token' && event.key !== 'trakt_token')) return;
     observeSession(); clearTimeout(accountTimer);
     accountTimer = setTimeout(function () { accountTimer = null; loadWatched(true).then(function () { decorateAll(); }); }, 150);
@@ -362,7 +371,7 @@
       var ev;
       if (typeof window.CustomEvent === 'function') ev = new CustomEvent('traktplus:watched');
       else { ev = document.createEvent('Event'); ev.initEvent('traktplus:watched', true, true); }
-      document.dispatchEvent(ev);
+      document.dispatchEvent(ev);refreshActor();
     } catch (e) {}
   }
 
@@ -455,13 +464,13 @@
   }
 
   function watchStatus(card) {
-    try { return readWatchStatus(card); }
+    try { return readWatchStatus(card, !!(card && card._trakt_cached_only) || !!(Lampa.Activity && Lampa.Activity.active && Lampa.Activity.active() && Lampa.Activity.active().component === 'actor')); }
     catch (e) { statusPhase = 'error'; return null; }
   }
 
-  function readWatchStatus(card) {
+  function readWatchStatus(card, cacheOnly) {
     observeSession();
-    if (!accountOwner) { if (credentialSeen) ensureAccount().catch(function () {}); return null; }
+    if (!accountOwner) { if (credentialSeen && !cacheOnly) ensureAccount().catch(function () {}); return null; }
     hydrateWatched();
     var id = tmdbId(card);
     if (!id || !card || !token() || statusPhase !== 'ready' || !freshStatus(statusAt)) return null;
@@ -473,7 +482,7 @@
     if (!showStatusReady) return null;
     var record = showStates[id];
     if (!record) return unmappedShows ? null : false;
-    isCompletedShow(id); // resolve missing proxy progress lazily, without blocking callers
+    if (!cacheOnly) isCompletedShow(id); // actor projections must not create per-card requests
     record = showStates[id];
     if (!record.known || record.error || !freshStatus(record.t)) return null;
     return !!record.complete;
@@ -1035,6 +1044,170 @@
     return String(id);
   }
 
+  // Public metadata is cached independently of profiles; watched projections never are.
+  var personCache = {}, personJobs = {}, personKeys = [], PERSON_TTL = 21600000, actorRefreshFrame = 0, detailsRefreshFrame = 0, personContexts = new WeakMap();
+  function mediaKey(card) { var id = tmdbId(card); return id ? cardKind(card) + ':' + id : ''; }
+  function uniqueWorks(cards) {
+    var seen = {};
+    return (Array.isArray(cards) ? cards : []).filter(function (card) {
+      if (!card || (card.media_type && ['movie', 'tv', 'show', 'anime'].indexOf(card.media_type) < 0)) return false;
+      var key = mediaKey(card); if (!key || seen[key]) return false; seen[key] = true; return true;
+    }).map(function (card) { return Object.assign({}, card, { source: 'tmdb', media_type: cardKind(card) === 'show' ? 'tv' : 'movie', _trakt_cached_only: true }); });
+  }
+  function cachedWatch(card) { try { return readWatchStatus(card, true); } catch (e) { return null; } }
+  function cachedViewing(card) {
+    var value = cachedWatch(card), result = { value: value };
+    if (value !== null && cardKind(card) === 'show') {
+      var record = showStates[tmdbId(card)];
+      if (record && record.known && !record.error && freshStatus(record.t)) { result.completed = record.watched; result.aired = record.aired; result.partial = value === false && record.watched > 0; }
+    }
+    return result;
+  }
+  function actorScope() {
+    observeSession(); var permit = Lampa.Account && Lampa.Account.Permit, profile = permit && permit.account && permit.account.profile;
+    return sessionEpoch + ':' + String(profile && profile.id || 'default');
+  }
+  function personCacheKey(params) { return String(params.source || 'tmdb') + ':' + params.id + ':' + Lampa.Storage.get('tmdb_lang', lang()); }
+  function sortPersonWorks(cards, order) { return cards.slice().sort(function (a, b) {
+    var yearA = parseInt(a.release_date || a.first_air_date, 10) || 0, yearB = parseInt(b.release_date || b.first_air_date, 10) || 0;
+    return (order === 'rating' ? (Number(b.vote_average) || 0) - (Number(a.vote_average) || 0) : 0) || yearB - yearA || mediaKey(a).localeCompare(mediaKey(b));
+  }); }
+  function filmography(data, mode, order) {
+    var credits = data && data.credits || {}, raw = credits.raw || credits;
+    var cast = Array.isArray(raw.cast) ? raw.cast : Array.isArray(credits.cast) ? credits.cast : [], crew = Array.isArray(raw.crew) ? raw.crew : Array.isArray(credits.crew) ? credits.crew : [];
+    var works = uniqueWorks(cast.concat(crew)), watched = [], started = [], unwatched = [], unknown = 0;
+    works.forEach(function (card) { var progress = cachedViewing(card), value = progress.value; if (value === true) watched.push(card); else if (value === false) unwatched.push(card); else unknown++; if (value === true || progress.partial) started.push(card); });
+    function sort(cards) { return sortPersonWorks(cards, order); }
+    return { all: sort(works), watched: sort(watched), started: sort(started), unknown: unknown, complete: unknown === 0,
+      selected: sort(mode === 'watched' ? watched : mode === 'unwatched' ? unwatched : works) };
+  }
+  function officialCollection(movie, collection) {
+    var id = movie && movie.belongs_to_collection && movie.belongs_to_collection.id;
+    if (!movie || cardKind(movie) === 'show' || !/^[1-9]\d*$/.test(String(id)) || !collection || String(collection.id) !== String(id)) return null;
+    var parts = Array.isArray(collection.results) ? collection.results : Array.isArray(collection.parts) ? collection.parts : [];
+    var results = uniqueWorks(parts.filter(function (card) { return card && cardKind(card) === 'movie' && (!card.belongs_to_collection || String(card.belongs_to_collection.id) === String(id)); }).concat([movie]));
+    if (results.length < 2) return null;
+    results.sort(function (a, b) { return (a.release_date || '9999').localeCompare(b.release_date || '9999') || Number(a.id) - Number(b.id); });
+    return Object.assign({}, collection, { title: tr('Колекція Trakt', 'Trakt collection'), results: results, tp_official_collection: true, collection_origin: 'tmdb', watched_origin: 'trakt' });
+  }
+  function hasUsefulDetails(movie) { var tags = movie.keywords && (movie.keywords.results || movie.keywords.keywords) || []; return !!((movie.genres || []).length || (movie.production_companies || []).length || tags.length); }
+  function detailsPayload(data) {
+    if (!data || !data.movie || (!cfg().enable && !(document.body && document.body.classList.contains('stremio-hybrid')))) return data;
+    var out = Object.assign({}, data);
+    out.movie = Object.assign({}, data.movie, { _tp_details_policy: true });
+    delete out.movie._tp_omit_details;
+    out.collection = officialCollection(data.movie, data.collection);
+    if (document.body && document.body.classList.contains('stremio-hybrid') && !hasUsefulDetails(data.movie)) out.movie._tp_omit_details = true;
+    // Only the Full presentation payload is copied. Shared API responses/models are untouched.
+    if (data.recomend) out.recomend = Object.assign({}, data.recomend, { results: [] });
+    if (data.simular) out.simular = Object.assign({}, data.simular, { results: [] });
+    if (data.discuss && !(data.discuss.result || []).length) out.discuss = null;
+    return out;
+  }
+  function projectPerson(data, params) {
+    var view = filmography(data, params.tp_person_filter, params.tp_person_sort), groups = [];
+    if ((!params.tp_person_filter || params.tp_person_filter === 'all') && view.started.length) groups.push({ name: tr('Переглянуто з цим актором · Trakt', 'Watched with this person · Trakt'), credits: view.started });
+    var selected = view.selected;
+    if (groups.length) { var seen = {};view.started.forEach(function(card){seen[mediaKey(card)]=true;});selected=selected.filter(function(card){return !seen[mediaKey(card)];}); }
+    if (selected.length) groups.push({ name: params.tp_person_filter === 'watched' ? tr('Переглянуті · Trakt', 'Watched · Trakt') : params.tp_person_filter === 'unwatched' ? tr('Не переглянуті · Trakt', 'Unwatched · Trakt') : groups.length ? tr('Інші роботи', 'Other works') : tr('Усі роботи', 'All works'), credits: selected });
+    personContexts.set(params, { scope: actorScope(), raw: data, view: view });
+    return Object.assign({}, data, { credits: Object.assign({}, data.credits, { knownFor: groups }) });
+  }
+  function hookDetailsApi() {
+    if (!Lampa.Api || Lampa.Api._tpDetails || typeof Lampa.Api.full !== 'function' || typeof Lampa.Api.person !== 'function') return;
+    Lampa.Api._tpDetails = true;
+    var full = Lampa.Api.full, person = Lampa.Api.person;
+    Lampa.Api.full = function (params, done, fail) { return full.call(this, params, function (data) { done(detailsPayload(data)); }, fail); };
+    function personRequestAlive(params) {
+      if (!params || params.component !== 'actor') return true;
+      var active = Lampa.Activity && Lampa.Activity.active && Lampa.Activity.active();
+      return !!(active && active.component === 'actor' && active.activity && active.activity.component.object === params);
+    }
+    Lampa.Api.person = function (params, done, fail) {
+      if (!cfg().enable || params.only_credits || ['tmdb', 'cub'].indexOf(params.source || 'tmdb') < 0) return person.apply(this, arguments);
+      var scope = actorScope(), key = personCacheKey(params), cached = personCache[key], pending;
+      if (cached && Date.now() - cached.time < PERSON_TTL) pending = Promise.resolve(cached.data);
+      else {
+        pending = personJobs[key];
+        if (pending && !personRequestAlive(pending._tpParams)) pending = null;
+        if (!pending) {
+          pending = new Promise(function (resolve, reject) {
+            var settled = false, timer = setTimeout(function () { finish(null, { timeout: true }); }, 15000);
+            function finish(data, error) { if (settled) return; settled = true; clearTimeout(timer); if (error) reject(error); else resolve(data); }
+            try { person.call(Lampa.Api, params, function (data) { finish(data); }, function (error) { finish(null, error || { unavailable: true }); }); }
+            catch (error) { finish(null, error); }
+          });
+          pending._tpParams = params;
+          personJobs[key] = pending;
+          pending.then(function (data) {
+            if (personJobs[key] !== pending) return;
+            delete personJobs[key];
+            if (!data || !data.person || String(data.person.id) !== String(params.id) || !data.credits) return;
+            personCache[key] = { time: Date.now(), data: data };
+            var at = personKeys.indexOf(key); if (at >= 0) personKeys.splice(at, 1); personKeys.push(key);
+            while (personKeys.length > 32) delete personCache[personKeys.shift()];
+          }, function () { if (personJobs[key] === pending) delete personJobs[key]; });
+        }
+      }
+      pending.then(function (data) {
+        if (!personRequestAlive(params)) return;
+        if (scope !== actorScope()) { if (fail) fail({ cancelled: true }); return; }
+        if (!data || !data.person || String(data.person.id) !== String(params.id) || !data.credits) { if (fail) fail({ invalid_metadata: true }); return; }
+        done(projectPerson(data, params));
+      }, function (error) { if (personRequestAlive(params) && fail) fail(error); });
+    };
+  }
+  function actorTools(comp, rows) {
+    if (!cfg().enable || !comp.object || comp.object.component !== 'actor' || !personContexts.get(comp.object) || !rows || !rows[0]) return;
+    // Native actor construction re-sorts credits by year; apply the selected order
+    // at the last pre-build boundary, before any card is created.
+    rows.forEach(function (row) { if (Array.isArray(row.results)) row.results = sortPersonWorks(row.results, comp.object.tp_person_sort); });
+    if (!comp._tpPersonCardsHook) {
+      comp._tpPersonCardsHook = true;
+      comp.use({ onInstance: function (line) {
+        line.use({ onInstance: function (card, data) {
+          card.use({ onCreate: function () { decorate(this.render(true), data); } });
+        } });
+      } });
+    }
+    var first = rows[0], emits = first.params && first.params.emit;
+    if (!emits || emits._tpPerson) return; emits._tpPerson = true;
+    var create = emits.onCreate, destroy = emits.onDestroy, toggle = emits.onToggle;
+    emits.onCreate = function () {
+      create.apply(this, arguments); var line = this, host = line.render().find('.person-start__bottom'), info = personContexts.get(comp.object);
+      var tools = $('<div class="tp-person-tools"></div>');
+      function button(label, field, values) {
+        var node = $('<div class="selector tp-person-tool" role="button"></div>').text(label);
+        node.on('hover:enter.tpPerson', function () {
+          var previous = Lampa.Controller.enabled().name;
+          function back() { Lampa.Select.hide(); Lampa.Controller.toggle(previous); Lampa.Controller.collectionFocus(node, line.render()); }
+          Lampa.Select.show({ title: label, items: values.map(function (v) { return { title: v[1], value: v[0] }; }), onBack: back, onSelect: function (item) {
+            if ((comp.object[field] || (field === 'tp_person_sort' ? 'year' : 'all')) === item.value) return back();
+            Lampa.Select.hide(); var next = Object.assign({}, comp.object, { tp_focus_tools: field }); delete next.activity; next[field] = item.value; Lampa.Activity.replace(next);
+          } });
+        });
+        tools.append(node);
+      }
+      button(tr('Роботи · фільтр', 'Works · filter'), 'tp_person_filter', [['all', tr('Усі роботи', 'All works')], ['watched', tr('Переглянуті', 'Watched')], ['unwatched', tr('Не переглянуті (підтверджені)', 'Unwatched (confirmed)')]]);
+      button(tr('Сортування', 'Sort'), 'tp_person_sort', [['year', tr('За роком', 'Year')], ['rating', tr('За рейтингом', 'Rating')]]);
+      if (info.view.unknown) tools.append($('<div class="tp-person-unknown"></div>').text(tr('Trakt: статус невідомий для ', 'Trakt: unknown status for ') + info.view.unknown));
+      host.append(tools); line._tpPersonTools = tools;
+    };
+    emits.onToggle = function () {
+      if (toggle) toggle.apply(this, arguments);
+      if (comp.object.tp_focus_tools && this._tpPersonTools) { var toolIndex=comp.object.tp_focus_tools==='tp_person_sort'?1:0;delete comp.object.tp_focus_tools;Lampa.Controller.collectionFocus(this._tpPersonTools.find('.selector').eq(toolIndex),this.render()); }
+    };
+    emits.onDestroy = function () { if (this._tpPersonTools) { this._tpPersonTools.find('.selector').off('.tpPerson'); this._tpPersonTools.remove(); } if (destroy) destroy.apply(this, arguments); };
+  }
+  function refreshActor() {
+    if (!Lampa.Activity || !Lampa.Activity.active || typeof requestAnimationFrame !== 'function') return;
+    var a = Lampa.Activity.active(); if (!a || a.component !== 'actor' || !(a.activity && personContexts.get(a.activity.component.object || a)) || actorRefreshFrame) return;
+    actorRefreshFrame = requestAnimationFrame(function () {
+      actorRefreshFrame = 0; var current = Lampa.Activity.active(); if (current !== a) return;
+      var next = Object.assign({}, a, { tp_focus_tools: true }); delete next.activity; delete next._tpPerson; Lampa.Activity.replace(next);
+    });
+  }
+
   function openMore(def, title) {
     if (def.fullUk) title = tr(def.fullUk, def.fullEn);
     Lampa.Activity.push({ url: '', title: title, component: 'trakt_plus_view', row: def.name, page: 1 });
@@ -1100,6 +1273,7 @@
     defs.sort(function (a, b) { return a.index - b.index; });
     defs.forEach(function (d, i) { d.index = TOP_INDEX + i; registerRow(d); }); // Trakt-рядки — з самого верху
 
+    if (Lampa.Maker && Lampa.Maker.map) return; // one canonical native Full owner
     // Блок «Подібні (Trakt)» у картці (якщо ця збірка Lampa підтримує рядки в full)
     Lampa.ContentRows.add({
       name: 'TraktPlusFullRelated',
@@ -1124,53 +1298,58 @@
     });
   }
 
-  function insertFullRelatedRow(comp, movie) {
-    if (!comp || !comp.rows || comp._traktPlusRelatedInserted || !movie || !movie.id) return;
-    comp._traktPlusRelatedInserted = true;
-    var def = relatedDef(cardKind(movie), movie.id, '');
-    var payload = lineFor(def, { cards: [], title: tr('Подібні (Trakt)', 'Similar (Trakt)') });
-    payload.trakt_related = true;
-    payload.params = payload.params || {};
-    payload.params.emit = payload.params.emit || {};
-    payload.params.emit.onDestroy = function () { this._traktRelatedDestroyed = true; };
-    payload.params.emit.onCreate = function () {
-      var line = this;
-      getRow(def).then(function (r) {
-        if (line._traktRelatedDestroyed) return;
-        line.data.results = (r.cards || []).slice(0, cfg().rowLimit).map(finalize);
-        line.data.results.slice(0, line.view || 7).forEach(function (card) { line.emit('createAndAppend', card); });
-        if (!line.data.results.length) line.render().find('.items-line__body').text(tr('Подібних у Trakt поки немає', 'No Trakt matches yet'));
-        Lampa.Layer.visible(line.render(true));
-      }).catch(function () {
-        if (!line._traktRelatedDestroyed) line.render().find('.items-line__body').text(tr('Trakt тимчасово недоступний. Спробуйте «Ще».', 'Trakt is unavailable. Try More.'));
-      });
-    };
-    var props = comp.props;
-    var collection = props && props.get('collection');
-    var recommendation = props && props.get('recomend');
-    var similar = props && props.get('simular');
-    var index = comp.rows.length;
-    for (var i = 0; i < comp.rows.length; i++) {
-      var row = comp.rows[i];
-      if (!Array.isArray(row) || row[0] !== 'cards') continue;
-      if (row[1] && row[1].trakt_related) return;
-      if (collection && row[1] === collection) { index = i + 1; break; }
-      if ((recommendation && row[1] === recommendation) || (similar && row[1] === similar)) { index = i; break; }
-    }
-    comp.rows.splice(index, 0, ['cards', payload]);
+  function prepareFullRows(comp) {
+    if (!comp || !comp.rows || !comp.props) return;
+    if (!cfg().enable && !(document.body && document.body.classList.contains('stremio-hybrid'))) return;
+    var movie = comp.props.get('movie'), collection = comp.props.get('collection'), recommendation = comp.props.get('recomend'), similar = comp.props.get('simular');
+    comp.rows = comp.rows.filter(function (row) {
+      if (row === 'description' && movie && movie._tp_omit_details) return false;
+      if (!Array.isArray(row)) return true;
+      if (row[0] === 'cards' && (row[1] === recommendation || row[1] === similar)) return false;
+      if (row[0] === 'cards' && row[1] === collection) { if (!collection || !collection.tp_official_collection) return false; collection.title = tr('Колекція Trakt', 'Trakt collection'); }
+      return row[0] !== 'discuss' || !!(row[1] && row[1].results && row[1].results.length);
+    });
   }
-
+  function insertFullRelatedRow(comp, movie) {
+    if (!comp || !comp.rows || comp._traktPlusRelatedInserted || !movie || !movie.id || !api || !token()) return;
+    comp._traktPlusRelatedInserted = true;
+    var scope = actorScope(), def = relatedDef(cardKind(movie), movie.id, '');
+    getRow(def).then(function (result) {
+      if (comp._tpDetailsDead || scope !== actorScope()) return;
+      var collection = comp.props.get('collection'), excluded = {};
+      excluded[mediaKey(movie)] = true;
+      if (collection && collection.tp_official_collection) collection.results.forEach(function (card) { excluded[mediaKey(card)] = true; });
+      var cards = uniqueWorks(result.cards || []).filter(function (card) { return !excluded[mediaKey(card)]; });
+      if (!cards.length) return;
+      if (comp.rows.some(function (row) { return Array.isArray(row) && row[1] && row[1].trakt_related; })) return;
+      var payload = lineFor(def, { cards: cards, title: tr('Подібні Trakt', 'Similar Trakt') });
+      payload.trakt_related = true;
+      // More must not reopen an unfiltered related dataset with collection duplicates.
+      delete payload.more; delete payload.onMore; payload.total_pages = 1; payload.params = {};
+      var index = comp.rows.length;
+      comp.rows.splice(index, 0, ['cards', payload]);
+      if (!comp.items || index > comp.items.length) return; // native lazy row creation
+      var selected = comp.items[comp.active], before = comp.items[index], previousFragment = comp.fragment;
+      comp.fragment = document.createDocumentFragment(); comp.emit('createAndAppend', comp.rows[index]);
+      var item = comp.items.pop(); comp.items.splice(index, 0, item);
+      if (before) before.render(true).before(item.render(true)); else comp.scroll.append(comp.fragment);
+      comp.fragment = previousFragment;
+      if (selected) comp.active = Math.max(0, comp.items.indexOf(selected));
+      Lampa.Layer.visible(comp.scroll.render(true));
+    }).catch(function () { if (!comp._tpDetailsDead) comp._traktPlusRelatedInserted = false; });
+  }
+  var fullRowsHooked = false;
   function hookFullRows() {
-    if (!Lampa.Maker || !Lampa.Maker.map) return;
+    if (fullRowsHooked || !Lampa.Maker || !Lampa.Maker.map) return;
+    fullRowsHooked = true;
     Lampa.Listener.follow('full', function (e) {
       if (!e || e.type !== 'start' || !e.link || e.link._traktPlusBuildHook) return;
-      var comp = e.link, build = comp.build;
-      comp._traktPlusBuildHook = true;
+      var comp = e.link, build = comp.build; comp._traktPlusBuildHook = true;
+      comp.use({ onDestroy: function () { this._tpDetailsDead = true; } });
       comp.build = function (data) {
-        if (cfg().enable && cfg().fullRows && token()) {
-          insertFullRelatedRow(this, this.props.get('movie'));
-          if (Array.isArray(data)) data = this.rows.slice(0, data.length);
-        }
+        prepareFullRows(this);
+        if (cfg().enable && cfg().fullRows) insertFullRelatedRow(this, this.props.get('movie'));
+        if (Array.isArray(data)) data = this.rows.slice(0, data.length);
         return build.call(this, data);
       };
     });
@@ -1178,36 +1357,14 @@
     if (!items || !items.onBuild || items.onBuild._traktPlusRelated) return;
     var original = items.onBuild;
     var wrapped = function (data) {
-      if (this.object && this.object.component === 'full' && cfg().enable && cfg().fullRows && token()) {
-        insertFullRelatedRow(this, this.props && this.props.get('movie'));
+      if (this.object && this.object.component === 'full') {
+        prepareFullRows(this);
+        if (cfg().enable && cfg().fullRows) insertFullRelatedRow(this, this.props && this.props.get('movie'));
         if (Array.isArray(data) && this.rows) data = this.rows.slice(0, data.length);
-      }
+      } else if (this.object && this.object.component === 'actor') actorTools(this, data);
       return original.call(this, data);
     };
-    wrapped._traktPlusRelated = true;
-    items.onBuild = wrapped;
-    // A cached full page may finish before the plugins' app-ready handlers.
-    // Keep the native row and item arrays aligned when attaching after that build.
-    function attachCurrent() {
-      var active = Lampa.Activity.active();
-      var comp = active && active.component === 'full' && active.activity && active.activity.component;
-      if (!comp || !comp.rows || !comp.props || !cfg().enable || !cfg().fullRows || !token()) return;
-      var movie = comp.props.get('movie');
-      if (!movie || comp._traktPlusRelatedInserted) return;
-      insertFullRelatedRow(comp, movie);
-      var index = comp.rows.findIndex(function (row) { return Array.isArray(row) && row[1] && row[1].trakt_related; });
-      if (index < 0 || index >= comp.items.length) return;
-      var before = comp.items[index];
-      comp.fragment = document.createDocumentFragment();
-      comp.emit('createAndAppend', comp.rows[index]);
-      var item = comp.items.pop();
-      comp.items.splice(index, 0, item);
-      before.render(true).before(item.render(true));
-      if (comp.active >= index) comp.active++;
-      Lampa.Layer.visible(comp.scroll.render(true));
-    }
-    setTimeout(attachCurrent, 0);
-    setTimeout(attachCurrent, 1000);
+    wrapped._traktPlusRelated = true; items.onBuild = wrapped;
   }
 
   // The star remains an optional fallback when the inline row is disabled.
@@ -1672,6 +1829,11 @@
 
   function decorate(node, data, g) {
     if (!node || !node.classList || !data) return;
+    if (data._trakt_cached_only && !window.YDesignLoaded && node.querySelector) {
+      var personView=node.querySelector('.card__view'), progress=cachedViewing(data), personBadge=node.querySelector('.tp-person-watch');
+      var label=progress.partial?'Trakt · '+progress.completed+'/'+progress.aired+' еп.':'';
+      if(label&&personView){if(!personBadge){personBadge=document.createElement('div');personBadge.className='tp-person-watch';personView.appendChild(personBadge);}personBadge.textContent=label;}else if(personBadge)personBadge.remove();
+    }
     g = g || cfg();
     var yd = !!window.YDesignLoaded; // YDesign rules are intentionally unchanged until Issue #8.
     if (!yd && g.mark && !data._lib && (cardKind(data) !== 'show' || g.markShows) && watchStatus(data) === null) return;
@@ -1730,6 +1892,7 @@
         clearTimeout(timer);
         timer = setTimeout(function () {
           decorateAll();
+          if(Lampa.Activity&&Lampa.Activity.active&&Lampa.Activity.active()&&Lampa.Activity.active().component==='actor')return;
           loadWatched().then(function (changed) { if (changed) { clearRowCaches(); decorateAll(); } });
         }, 300);
       }).observe(document.body, { childList: true, subtree: true });
@@ -1934,10 +2097,13 @@
   window.TraktPlus = window.TraktPlus || {};
   // Status is independent of UI mark/hide preferences and local Favorite/Timeline.
   // null = not known (loading/error/stale/insufficient completion evidence).
-  window.TraktPlus.version = '3.2.1-issue7-account';
+  window.TraktPlus.version = '3.3.0-details';
   window.TraktPlus.syncWatched = function () { return syncWatched(true); };
   window.TraktPlus.syncStatus = function () { return lastSyncResult; };
   window.TraktPlus.isWatched = watchStatus;
+  window.TraktPlus.cachedWatched = cachedWatch;
+  window.TraktPlus.cachedViewing = cachedViewing;
+  window.TraktPlus.cachedFilmography = function(person){var cached=personCache[personCacheKey({id:person.id,source:person.source||'tmdb'})];return cached&&Date.now()-cached.time<PERSON_TTL?filmography(cached.data,'all','year'):null;};
   window.TraktPlus.detailsProgress = detailsProgress;
   window.TraktPlus.detailsSession = function () { observeSession(); return sessionEpoch; };
   window.TraktPlus.isWatchedShow = function (card) {
@@ -1957,6 +2123,8 @@
   // duplicate registration). Reads and every async boundary also check sessions.
   if (Lampa.Storage.listener && Lampa.Storage.listener.follow) Lampa.Storage.listener.follow('change', onAccountStorage);
   if (window.addEventListener) window.addEventListener('storage', onAccountStorage);
+
+  try { hookDetailsApi(); hookFullRows(); } catch (e) {}
 
   // Рядки реєструємо ОДРАЗУ (до готовності додатку), щоб головна їх одразу підхопила
   try { registerRows(); } catch (e) {}
@@ -1978,12 +2146,15 @@
     try { registerView(); } catch (e) {}
     try { addMenuItem(); } catch (e) {}
     try { hookDecorations(); } catch (e) {}
+    try { hookDetailsApi(); } catch (e) {}
     try { hookFullRows(); } catch (e) {}
     try { hookFull(); } catch (e) {}
 
     loadWatched().then(function () { decorateAll(); });
     scheduleAutoSync();
     ensureHome();
+    // One late-load handoff uses the native cached Full API; never a recurring scan.
+    setTimeout(function(){var a=Lampa.Activity&&Lampa.Activity.active&&Lampa.Activity.active(),movie=a&&a.component==='full'&&a.activity&&a.activity.component.props&&a.activity.component.props.get('movie');if(movie&&!movie._tp_details_policy&&cfg().enable){var next=Object.assign({},a);delete next.activity;Lampa.Activity.replace(next);}},0);
   }
 
   if (window.appready) boot();

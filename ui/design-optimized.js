@@ -1652,6 +1652,11 @@
 
     function isWatched(data, type, ext, inHistory) {
         try {
+            // Native person/collection/related rows owned by Trakt+ must not inherit
+            // legacy local-history marks. Other YDesign rows retain their behavior.
+            if (data && data._trakt_cached_only) {
+                return !!(window.TraktPlus && typeof TraktPlus.cachedWatched === 'function' && TraktPlus.cachedWatched(data) === true);
+            }
             if (data && data._lib) return false; // папка «Trakt: Переглянуті» — там усе переглянуте, не затемнюємо
             if (!window.Lampa || !Lampa.Utils || typeof Lampa.Utils.hash !== 'function' ||
                 !Lampa.Timeline || typeof Lampa.Timeline.view !== 'function') return false;
@@ -1759,9 +1764,10 @@
         var day = new Date().getDate();
         var parts = type === 'tv' ? null : getCollParts(el, ext);
         var mk = el._ydesign_mk;
-        if (mk && mk.epoch === MarksEpoch && mk.ext === ext && mk.day === day && mk.coll === !!parts) return mk;
+        var traktSession = data && data._trakt_cached_only && window.TraktPlus && typeof TraktPlus.detailsSession === 'function' ? TraktPlus.detailsSession() : null;
+        if (mk && mk.epoch === MarksEpoch && mk.ext === ext && mk.day === day && mk.coll === !!parts && mk.traktSession === traktSession) return mk;
 
-        mk = { epoch: MarksEpoch, ext: ext, day: day, coll: !!parts, pct: 0, tv: null, seq: false };
+        mk = { epoch: MarksEpoch, ext: ext, day: day, coll: !!parts, traktSession: traktSession, pct: 0, tv: null, seq: false };
         mk.info = releaseInfo(data, type, ext);
         mk.watched = isWatched(data, type, ext, !!el._ydesign_inHistory);
         if (type === 'tv') {
@@ -1800,6 +1806,10 @@
         var view = el.querySelector ? el.querySelector('.card__view') : null;
         if (!view) return;
         var mk = computeMarks(el, data, type, ext);
+        if (data && data._trakt_cached_only) {
+            var cachedProgress = window.TraktPlus && TraktPlus.cachedViewing ? TraktPlus.cachedViewing(data) : null;
+            syncNode(view, 'tp-person-watch', 'tp-person-watch', cachedProgress && cachedProgress.partial ? 'Trakt · ' + cachedProgress.completed + '/' + cachedProgress.aired + ' еп.' : null);
+        }
 
         // зліва зверху: «Новинка» / «Нова серія · Завтра» / «Скоро» + «Продовження»
         var tl = view.querySelector('.ydesign-tl');

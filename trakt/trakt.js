@@ -10647,6 +10647,13 @@
         logDebugOnce(API_MISSING_LOG_KEY, 'API bridge is unavailable in events');
         return;
       }
+      var relatedOwner = e.object && e.object.activity;
+      var relatedSession = window.TraktPlus && window.TraktPlus.detailsSession ? window.TraktPlus.detailsSession() : null;
+      var relatedProfile = Lampa.Account && Lampa.Account.Permit && Lampa.Account.Permit.account && Lampa.Account.Permit.account.profile;
+      var relatedProfileId = String(relatedProfile && relatedProfile.id || 'default');
+      var relatedScope = params.method + ':' + params.id + ':' + relatedSession + ':' + relatedProfileId;
+      if (relatedOwner && relatedOwner._traktRelatedPending === relatedScope) return;
+      if (relatedOwner) relatedOwner._traktRelatedPending = relatedScope;
       Promise.all([Api && Api.getMediaLists(params), Api && Api.likesLists({
         page: 1,
         limit: 1000
@@ -10656,6 +10663,9 @@
           mediaListsResponse = _ref2[0],
           likedListsResponse = _ref2[1];
         var formattedMediaLists = mediaListsResponse; // getMediaLists вже повертає відформатовані дані
+        if (window.TraktPlus && window.TraktPlus.detailsSession && window.TraktPlus.detailsSession() !== relatedSession) return;
+        var currentProfile = Lampa.Account && Lampa.Account.Permit && Lampa.Account.Permit.account && Lampa.Account.Permit.account.profile;
+        if (String(currentProfile && currentProfile.id || 'default') !== relatedProfileId) return;
         var likedListIds = likedListsResponse.results.map(function (list) {
           return list.id;
         });
@@ -10671,8 +10681,8 @@
         }
 
         // Знаходимо блок з тегами
-        var tagsBlock = e.object.activity.render().find('.full-descr__tags');
-        if (tagsBlock.length === 0) {
+        var tagsBlock = e.object.activity.render().find('.full-descr__tags').first();
+        if (tagsBlock.length === 0 || tagsBlock.find('.tag-count.trakttv-lists').length) {
           return;
         }
 
@@ -10729,7 +10739,7 @@
         logWarn('Related lists loading failed', error, {
           debugOnly: true
         });
-      });
+      }).then(function () { if (relatedOwner && relatedOwner._traktRelatedPending === relatedScope) delete relatedOwner._traktRelatedPending; });
     },
     /**
      * Обробник події готовності картки фільму/серіалу
