@@ -1806,6 +1806,10 @@
         var view = el.querySelector ? el.querySelector('.card__view') : null;
         if (!view) return;
         var mk = computeMarks(el, data, type, ext);
+        if (data && data._trakt_cached_only) {
+            var cachedProgress = window.TraktPlus && TraktPlus.cachedViewing ? TraktPlus.cachedViewing(data) : null;
+            syncNode(view, 'tp-person-watch', 'tp-person-watch', cachedProgress && cachedProgress.partial ? 'Trakt · ' + cachedProgress.completed + '/' + cachedProgress.aired + ' еп.' : null);
+        }
 
         // зліва зверху: «Новинка» / «Нова серія · Завтра» / «Скоро» + «Продовження»
         var tl = view.querySelector('.ydesign-tl');

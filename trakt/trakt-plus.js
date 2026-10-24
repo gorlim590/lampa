@@ -1828,7 +1828,7 @@
 
   function decorate(node, data, g) {
     if (!node || !node.classList || !data) return;
-    if (data._trakt_cached_only && node.querySelector) {
+    if (data._trakt_cached_only && !window.YDesignLoaded && node.querySelector) {
       var personView=node.querySelector('.card__view'), progress=cachedViewing(data), personBadge=node.querySelector('.tp-person-watch');
       var label=progress.partial?'Trakt · '+progress.completed+'/'+progress.aired+' еп.':'';
       if(label&&personView){if(!personBadge){personBadge=document.createElement('div');personBadge.className='tp-person-watch';personView.appendChild(personBadge);}personBadge.textContent=label;}else if(personBadge)personBadge.remove();
