@@ -116,7 +116,7 @@
                 slot.timer = setTimeout(function () { if (slot.request) slot.request.clear(); reply(null, 'timeout'); }, slot.timeout);
                 job.stats.requests++;
                 try {
-                    if (slot.spec.type === 'jackett') L.Parser.jackett(params, slot.spec.url, slot.spec.key, slot.spec.id === 'primary' ? 0 : 1, function (data) { reply(data); }, function () { reply(null, 'network'); });
+                    if (slot.spec.type === 'jackett') L.Parser.jackett(params, L.Utils.checkEmptyUrl ? L.Utils.checkEmptyUrl(slot.spec.url) : slot.spec.url.replace(/\/+$/, ''), slot.spec.key, slot.spec.id === 'primary' ? 0 : 1, function (data) { reply(data); }, function () { reply(null, 'network'); });
                     else prowlarr(params, slot, function (data) { reply(data); }, function (error) { reply(null, error); });
                 } catch (e) { reply(null, 'invalid'); }
             });
