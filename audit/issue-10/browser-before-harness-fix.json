@@ -1,0 +1,38 @@
+{
+  "commit": "e57cccb129f483ed3c43c6505dfac8eddb0781c2",
+  "sources": {
+    "/media/seasons-info.js": {
+      "sha": "8bb335662c6a5c32e186bcbbe6dee6d5ceacc31a85b93e427fe911e4abefdace",
+      "expected": "8bb335662c6a5c32e186bcbbe6dee6d5ceacc31a85b93e427fe911e4abefdace",
+      "commit": "e57cccb129f483ed3c43c6505dfac8eddb0781c2"
+    },
+    "/ui/stremio-hybrid.js": {
+      "sha": "cf843770f3fe5fe39f115c25e866c7bb9d091d2c81116d8b3a485717ece31f17",
+      "expected": "cf843770f3fe5fe39f115c25e866c7bb9d091d2c81116d8b3a485717ece31f17",
+      "commit": "e57cccb129f483ed3c43c6505dfac8eddb0781c2"
+    },
+    "/info/seasons-info.js": {
+      "sha": "21a0925708d75b948dc0410eb06459cc5484736c2e8da33168f7d73890aff603",
+      "expected": "21a0925708d75b948dc0410eb06459cc5484736c2e8da33168f7d73890aff603",
+      "commit": "e57cccb129f483ed3c43c6505dfac8eddb0781c2"
+    }
+  },
+  "checks": [
+    {
+      "name": "Canonical+legacy duplicate execution does not add styles",
+      "status": "FAIL"
+    },
+    {
+      "name": "Original browser page restored without fixture storage/account mutations",
+      "status": "PASS"
+    }
+  ],
+  "errors": [
+    "Canonical+legacy duplicate execution does not add styles"
+  ],
+  "requests": [],
+  "blocked": [
+    "Physical Google TV / older WebView hardware",
+    "Real playback and Trakt writes: deliberately not performed"
+  ]
+}
