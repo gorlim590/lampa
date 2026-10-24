@@ -395,14 +395,13 @@ body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; 
         if(rich.parentNode!==plain.parentNode){record.moves.push({node:rich,parent:rich.parentNode,next:rich.nextSibling});plain.parentNode.insertBefore(rich,plain);}
     }
     function updateSeriesMetadata(record){
-        if(record.kind!=='tv')return;
+        if(record.kind!=='tv'||record.root.querySelector('[data-series-info]'))return;
         var movie=streamMovie(record),details=record.root.querySelector('.sh-metadata-rich')||record.root.querySelector('.cardify__details .full-start-new__details:not(.trakt)')||record.root.querySelector('.full-start-new__details:not(.trakt)');if(!details)return;
         (record.seriesFields||[]).forEach(function(n){n.remove();});record.seriesFields=[];
         function add(key,value){if(!value||record.seriesFields.some(function(n){return n.dataset.shField===key;}))return;var n=document.createElement('span');n.className='sh-series-field';n.dataset.shField=key;n.textContent=value;details.appendChild(n);record.seriesFields.push(n);}
         var text=details.textContent;
-        if(movie.number_of_seasons>0&&!/сезон|season/i.test(text))add('seasons','Сезони: '+movie.number_of_seasons);
-        if(movie.number_of_episodes>0&&!/сері[йїя]|епізод|episode/i.test(text))add('episodes','Епізоди: '+movie.number_of_episodes);
-        var next=movie.next_episode_to_air;if(next&&next.air_date&&!text.includes(next.air_date))add('next','Наступна: S'+next.season_number+' · E'+next.episode_number+' · '+next.air_date);
+        // Series/episode counts and next-episode numbering belong to Trakt+.
+        // Keep only the pre-existing runtime fallback when Interface+ is absent.
         if(Array.isArray(movie.episode_run_time)&&movie.episode_run_time.length&&!/тривалість|runtime|хв|mins/i.test(text)){var times=movie.episode_run_time.filter(function(n){return n>0;});if(times.length)add('runtime','Тривалість серії: '+Math.min.apply(Math,times)+(times.length>1?'–'+Math.max.apply(Math,times):'')+' хв');}
     }
     function adaptMovie() {

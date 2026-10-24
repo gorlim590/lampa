@@ -6444,10 +6444,13 @@
   var TraktHistory = {
     // Функція для відображення прогресу перегляду серіалу
     showWatchProgress: function showWatchProgress(data, element) {
+      // Interface+ owns the single details section when available.
+      if (window.LampaSeriesDetails && window.LampaSeriesDetails.owns(data.movie)) return;
       // Перевіряємо чи це серіал
       if (data.movie && data.movie.first_air_date && element.object.method === 'tv') {
         // Отримуємо історію серіалу
         getShowHistory(data.movie.id).then(function (historyData) {
+          if (window.LampaSeriesDetails && window.LampaSeriesDetails.owns(data.movie)) return;
           if (historyData && historyData.length > 0) {
             // Отримуємо останній переглянутий епізод
             var lastWatched = historyData[0];
@@ -6499,15 +6502,12 @@
               progressElement.className = 'full-start-new__details trakt';
               progressElement.innerHTML = "\n                                <div class=\"trakt-icon\">".concat(icons.TRAKT_ICON, "</div>\n                                <span>").concat(Lampa.Lang.translate('full_season'), ": ").concat(season, "</span><span class=\"full-start-new__split\">\u25CF</span>\n                                <span>").concat(Lampa.Lang.translate('full_episode'), ": ").concat(episode, "</span>\n                            ");
 
-              // Знаходимо елемент після якого вставити прогрес
-              var taglineElement = renderRoot.find('.full-start-new__rate-line');
-              if (taglineElement.length) {
-                // Перевіряємо чи вже є елемент прогресу
-                var existingProgress = renderRoot.find('.full-start-new__details.trakt');
-                if (existingProgress.length) {
-                  existingProgress.remove();
-                }
-                taglineElement.after(progressElement);
+              var host = renderRoot.find('.full-start-new__details:not(.trakt), .full-start__details:not(.trakt)').first();
+              if (host.length) {
+                renderRoot.find('.full-start-new__details.trakt, .trakt-details-progress').remove();
+                progressElement.className = 'trakt-details-progress';
+                progressElement.setAttribute('aria-label', 'Остання переглянута серія · нумерація Trakt');
+                host.append(progressElement);
               }
             }
           }

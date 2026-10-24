@@ -1883,6 +1883,53 @@
     setTimeout(check, 15000);
   }
 
+  // Read-only, account-scoped details progress. Never imports or changes watched/history.
+  var detailCache = {}, detailJobs = {}, detailKeys = [];
+  function detailEpisode(ep) {
+    if (!ep || !(Number(ep.season) > 0) || !(Number(ep.number) > 0)) return null;
+    return { season: Number(ep.season), number: Number(ep.number), tmdb: ep.ids && Number(ep.ids.tmdb) || null,
+      title: typeof ep.title === 'string' ? ep.title.trim() : null,
+      date: typeof ep.first_aired === 'string' && isFinite(Date.parse(ep.first_aired)) ? ep.first_aired.slice(0, 10) : null };
+  }
+  function detailsProgress(card, force) {
+    observeSession();
+    var id = tmdbId(card), epoch = sessionEpoch;
+    function unknown(phase) { return { confirmed: false, phase: phase, session: epoch }; }
+    if (!bool('trakt_plus_enable', true) || !token() || cardKind(card) !== 'show') return Promise.resolve(unknown('unavailable'));
+    if (!id) return Promise.resolve(unknown('unknown'));
+    return whenApi().then(function () { return ensureAccount(); }).then(function (owner) {
+      if (epoch !== sessionEpoch) return unknown('cancelled');
+      var key = owner + ':' + epoch + ':tv:' + id, previous = detailCache[key];
+      if (detailJobs[key]) return detailJobs[key];
+      if (!force && previous && Date.now() - previous.time < 60000) return previous.data;
+      var cancel = sessionCancel(epoch, null), source = showSources[id];
+      var identity = source && source.show && source.show.ids;
+      var mapping = identity && String(identity.tmdb) === String(id) && identity.trakt ? Promise.resolve(identity) : getRetry('/search/tmdb/' + encodeURIComponent(id) + '?type=show', 2, cancel).then(function (rows) {
+        var match = Array.isArray(rows) && rows.filter(function (r) { return r && r.show && r.show.ids && String(r.show.ids.tmdb) === String(id) && Number(r.show.ids.trakt) > 0; });
+        if (!match || match.length !== 1) throw new Error('Unverified show mapping');
+        return match[0].show.ids;
+      });
+      var pending = mapping.then(function (ids) {
+        checkCancelled(cancel);
+        return getRetry(progressPath({ show: { ids: ids } }), 2, cancel);
+      }).then(function (data) {
+        checkCancelled(cancel);
+        if (typeof data.aired !== 'number' || typeof data.completed !== 'number') throw new Error('Incomplete progress');
+        var valid = progressEvidence(data), result = { confirmed: true, phase: 'ready', session: epoch,
+          completed: valid.watched, aired: valid.aired, complete: valid.complete, last: detailEpisode(data.last_episode), next: detailEpisode(data.next_episode),
+          seasons: Array.isArray(data.seasons) ? data.seasons.filter(function (s) { return Number(s.number) > 0; }).map(function (s) { return { number: Number(s.number), aired: s.aired, completed: s.completed }; }) : [] };
+        detailCache[key] = { time: Date.now(), data: result }; var index = detailKeys.indexOf(key); if (index >= 0) detailKeys.splice(index, 1); detailKeys.push(key);
+        while (detailKeys.length > 32) delete detailCache[detailKeys.shift()];
+        return result;
+      }).catch(function () {
+        if (epoch !== sessionEpoch) return unknown('cancelled');
+        if (previous && Date.now() - previous.time < SHOW_STATE_TTL) return Object.assign({}, previous.data, { phase: 'error' });
+        return unknown('error');
+      }).then(function (result) { releaseSession(cancel); delete detailJobs[key]; return result; });
+      detailJobs[key] = pending; return pending;
+    }).catch(function () { return unknown(epoch === sessionEpoch ? 'unavailable' : 'cancelled'); });
+  }
+
   // Міст для інших плагінів (YDesign): чи фільм переглянутий на Trakt. Доступний одразу, ще до boot().
   window.TraktPlus = window.TraktPlus || {};
   // Status is independent of UI mark/hide preferences and local Favorite/Timeline.
@@ -1891,6 +1938,8 @@
   window.TraktPlus.syncWatched = function () { return syncWatched(true); };
   window.TraktPlus.syncStatus = function () { return lastSyncResult; };
   window.TraktPlus.isWatched = watchStatus;
+  window.TraktPlus.detailsProgress = detailsProgress;
+  window.TraktPlus.detailsSession = function () { observeSession(); return sessionEpoch; };
   window.TraktPlus.isWatchedShow = function (card) {
     return cardKind(card) === 'show' ? watchStatus(card) : null;
   };
