@@ -1083,16 +1083,16 @@
   }
   function officialCollection(movie, collection) {
     var id = movie && movie.belongs_to_collection && movie.belongs_to_collection.id;
-    if (!movie || cardKind(movie) === 'show' || !id || !collection || String(collection.id) !== String(id)) return null;
+    if (!movie || cardKind(movie) === 'show' || !/^[1-9]\d*$/.test(String(id)) || !collection || String(collection.id) !== String(id)) return null;
     var parts = Array.isArray(collection.results) ? collection.results : Array.isArray(collection.parts) ? collection.parts : [];
-    var results = uniqueWorks(parts.filter(function (card) { return card && cardKind(card) === 'movie'; }).concat([movie]));
+    var results = uniqueWorks(parts.filter(function (card) { return card && cardKind(card) === 'movie' && (!card.belongs_to_collection || String(card.belongs_to_collection.id) === String(id)); }).concat([movie]));
     if (results.length < 2) return null;
     results.sort(function (a, b) { return (a.release_date || '9999').localeCompare(b.release_date || '9999') || Number(a.id) - Number(b.id); });
     return Object.assign({}, collection, { title: tr('Колекція Trakt', 'Trakt collection'), results: results, tp_official_collection: true, collection_origin: 'tmdb', watched_origin: 'trakt' });
   }
   function hasUsefulDetails(movie) { var tags = movie.keywords && (movie.keywords.results || movie.keywords.keywords) || []; return !!((movie.genres || []).length || (movie.production_companies || []).length || tags.length); }
   function detailsPayload(data) {
-    if (!data || !data.movie || !cfg().enable) return data;
+    if (!data || !data.movie || (!cfg().enable && !(document.body && document.body.classList.contains('stremio-hybrid')))) return data;
     var out = Object.assign({}, data);
     out.movie = Object.assign({}, data.movie, { _tp_details_policy: true });
     delete out.movie._tp_omit_details;
@@ -1299,7 +1299,8 @@
   }
 
   function prepareFullRows(comp) {
-    if (!comp || !comp.rows || !comp.props || !cfg().enable) return;
+    if (!comp || !comp.rows || !comp.props) return;
+    if (!cfg().enable && !(document.body && document.body.classList.contains('stremio-hybrid'))) return;
     var movie = comp.props.get('movie'), collection = comp.props.get('collection'), recommendation = comp.props.get('recomend'), similar = comp.props.get('simular');
     comp.rows = comp.rows.filter(function (row) {
       if (row === 'description' && movie && movie._tp_omit_details) return false;
