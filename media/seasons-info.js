@@ -246,21 +246,21 @@
         var requests = Object.create(null), descriptors = Object.create(null);
         source.seasons = function (movie, from, done) {
             var list = seasons(movie), numbers = [];
+            var language = L.Storage && L.Storage.field ? L.Storage.field('tmdb_lang') : '';
             if (!list) {
-                var descriptorKey = String(movie.id);
-                if (descriptors[descriptorKey]) { descriptors[descriptorKey].push(function (data) { retry(data); }); return; }
-                descriptors[descriptorKey] = [retry];
-                function retry(data) {
+                var descriptorKey = language + ':' + movie.id;
+                var retry = function (data) {
                     if (!data || String(data.id) !== String(movie.id) || !seasons(data)) return done({});
                     var verified = copy(movie); verified.seasons = seasons(data);
                     source.seasons(verified, from, done);
-                }
-                function descriptorDone(data) { var callbacks = descriptors[descriptorKey]; delete descriptors[descriptorKey]; callbacks.forEach(function (callback) { callback(data); }); }
+                };
+                if (descriptors[descriptorKey]) { descriptors[descriptorKey].push(retry); return; }
+                var waiting = [retry]; descriptors[descriptorKey] = waiting;
+                var descriptorDone = function (data) { if (descriptors[descriptorKey] !== waiting) return; delete descriptors[descriptorKey]; waiting.forEach(function (callback) { callback(data); }); };
                 return source.get('tv/' + movie.id, {}, descriptorDone, function () { descriptorDone(null); });
             }
             (from || []).forEach(function (n) { if (integer(n) && numbers.indexOf(Number(n)) < 0 && (!list || list.some(function (s) { return Number(s.season_number) === Number(n); }))) numbers.push(Number(n)); });
             if (!numbers.length) return done({});
-            var language = L.Storage && L.Storage.field ? L.Storage.field('tmdb_lang') : '';
             var key = [movie.source || 'tmdb', movie.id, language, numbers.join(',')].join(':');
             if (requests[key]) { requests[key].push(done); return; }
             requests[key] = [done];
@@ -370,6 +370,7 @@
 
         }
 
+        if (!CONFIG.tmdbApiKey) { reject(new Error('Native TMDB transport unavailable')); return; }
         var url =
             'https://api.themoviedb.org/3/tv/' + tvId +
             '?api_key=' + CONFIG.tmdbApiKey +
@@ -704,7 +705,7 @@
                 }
             })
             .catch(function (error) {
-
+                if (cardEl.card_data !== data || !view.contains(badge)) return;
                 try {
                     console.log('SeasonBadgePlugin помилка:', error && error.message ? error.message : error);
                 } catch (eLog) { }
@@ -894,7 +895,7 @@
     Lampa.SettingsApi.addParam({
       component:'sbadger',
       param:{ name:'sbadger_tmdb_key', type:'input', values:'', "default": (st.tmdb_key||'') },
-      field:{ name:'TMDB API ключ', description:'Потрібен для отримання даних про сезони. Можна отримати на themoviedb.org' },
+      field:{ name:'TMDB API ключ', description:'Необов’язковий резервний ключ; зазвичай використовується штатний TMDB Lampa' },
       onRender:function(item){ try{ $(item).find('input').attr('placeholder','встав ключ TMDB'); }catch(e){} },
       onChange:function(v){ st.tmdb_key = String(v||'').trim(); save(); }
     });
