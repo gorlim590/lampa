@@ -19,11 +19,12 @@ body.stremio-hybrid .items-line { padding-bottom:2.4em; }
 body.stremio-hybrid .items-line__head { padding:0 1.8em 1em; }
 body.stremio-hybrid .items-line__title { font-size:1.2em; font-weight:500; letter-spacing:.01em; }
 body.stremio-hybrid .items-line .scroll__content { padding-left:1.8em; padding-right:var(--sh-inset); }
-body.stremio-hybrid .items-line:not(.vinyl-line) .scroll__body { gap:var(--sh-gap); }
+body.stremio-hybrid .items-line:not(.vinyl-line) .scroll__body { gap:var(--ydesign-card-gap,var(--sh-gap)); }
 body.stremio-hybrid .card { transition:transform var(--sh-speed) var(--sh-ease) !important; backface-visibility:visible !important; transform:none; }
 body.stremio-hybrid .ydesign-card, body.stremio-hybrid .ydesign-card.focus { animation:none !important; }
 body.stremio-hybrid .card.focus { transform:scale(1.035) !important; z-index:20; }
 body.stremio-hybrid .card .card__view { border-radius:var(--sh-radius) !important; transition:none !important; }
+body.stremio-hybrid .card.ydesign-card .card__view { border-radius:var(--yd-r,var(--sh-radius)) !important; }
 body.stremio-hybrid .card.focus .card__view { box-shadow:0 0 0 .14em var(--sh-text),0 0 0 .27em var(--sh-ring) !important; }
 body.stremio-hybrid .ydesign-card.focus::after, body.stremio-hybrid .ydesign-card .ydesign-content-layer::after { display:none !important; }
 body.stremio-hybrid .ydesign-card .card__view::before { animation:none !important; }
@@ -128,8 +129,8 @@ body.stremio-hybrid .menu__item, body.stremio-hybrid .head__action, body.stremio
  body.stremio-hybrid .wrap__left--hidden .menu__ico { margin:0; }
  body.stremio-hybrid .wrap__left--hidden .menu__text { display:none; }
  body.stremio-hybrid .wrap__left--hidden .menu__version { font-size:.45em; }
- body.stremio-hybrid .items-line:not(.vinyl-line) .card.ydesign-vertical { width:13.2vw !important; }
- body.stremio-hybrid .mapping--grid .card.ydesign-vertical { width:calc(100% / 6) !important; }
+ body.stremio-hybrid .items-line:not(.vinyl-line) .card.ydesign-vertical { width:calc((100% + var(--ydesign-card-gap,var(--sh-gap))) / var(--ydesign-grid-items-v,5) - var(--ydesign-card-gap,var(--sh-gap))) !important; }
+ body.stremio-hybrid .mapping--grid .card.ydesign-vertical { width:calc(100% / var(--ydesign-grid-items-v,5)) !important; }
 }
 @media(max-width:768px) {
  body.stremio-hybrid .cardify .full-start-new__left { display:none !important; }
@@ -1371,7 +1372,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         apply(enabled());
     }
     window.StremioHybrid = {
-        version: '2.8.2-details-ux',
+        version: '2.8.3-card-controls',
         setEnabled: setEnabled,
         refresh: function () { if (ready) apply(enabled()); },
         destroy: function () {
