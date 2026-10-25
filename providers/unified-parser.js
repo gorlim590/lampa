@@ -41,7 +41,7 @@
         var magnet = str(item.magnet || item.magnet_uri || item.MagnetUri);
         // A tracker topic page is not a torrent download. Prefer magnet for playback.
         var direct = str(item.torrent_url || item.download_url || item.Link);
-        var link = magnet || (/^(magnet:|https?:\\/\\/[^\\s]+\\.torrent(?:[?#]|$))/i.test(direct) ? direct : '');
+        var link = magnet || (/^https?:/i.test(direct) && /\.torrent(?:[?#]|$)/i.test(direct) ? direct : '');
         var source = str(item.source || item.tracker || item.Tracker || 'Unified');
         var infoHash = hash(magnet, item.infohash || item.info_hash || item.InfoHash);
         if (!title || !link) return null;
