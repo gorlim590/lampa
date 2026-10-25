@@ -2,7 +2,7 @@
 // Existing CDP tab only. Owned source routes + isolated storage/provider fixtures.
 const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process'),crypto=require('node:crypto'),{chromium}=require('playwright');
 const root=path.resolve(__dirname,'..'),out=path.join(root,'audit/issue-25-followup');fs.mkdirSync(out,{recursive:true});
-const sourcesOnly=process.env.HOME25_SOURCES_ONLY==='1';
+const sourcesOnly=process.env.HOME25_SOURCES_ONLY==='1', releaseOnly=process.env.HOME25_RELEASE_ONLY==='1';
 const sha=cp.execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
 const files=Object.fromEntries(['loader.js','trakt/trakt-plus.js','ui/design-optimized.js','plugins-to-enable/home-history.js','plugins-to-enable/home-policy.js','ui/stremio-hybrid.js'].map(p=>['/'+p,fs.readFileSync(path.join(root,p),'utf8')]));
 const sourceKey=u=>u.pathname.endsWith('/preview-loader.js')?'/loader.js':u.pathname.endsWith('/stremio-hybrid.js')?'/ui/stremio-hybrid.js':Object.keys(files).find(k=>u.pathname.endsWith(k));
@@ -54,7 +54,7 @@ const wav=Buffer.alloc(44+480000,128);wav.write('RIFF');wav.writeUInt32LE(wav.le
    for(const c of s.cards)s.files.file_view_fixture_a['provider-'+c.id]={card:(c.media_type==='tv'?'tv_':'movie_')+c.id,percent:c.id===6||c.id===8?100:100/3,time:c.id===6||c.id===8?60:20,duration:60,updated:c.id,...(c.media_type==='tv'?{season:1,episode:1}:{})};
    s.schedule=[{season_number:1,episode_number:1,air_date:'2020-01-01'},{season_number:1,episode_number:2,air_date:'2020-01-02'}];Lampa.TimeTable.get=()=>s.schedule;
    s.account='A';s.token='synthetic-home-A';
-   TraktTV.api.get=async path=>{s.apiCalls=(s.apiCalls||0)+1;if(path==='/users/me')return{user:{ids:{uuid:'home-'+s.account}}};if(path==='/sync/last_activities')return{all:'2026-01-01T12:00:00Z',movies:{watched_at:'2026-01-01T12:00:00Z'},episodes:{watched_at:'2026-01-01T12:00:00Z'}};if(path.startsWith('/sync/watched/movies'))return s.account==='A'?[{movie:{ids:{tmdb:6,trakt:6},title:'Movie6'},last_watched_at:'2026-01-01T12:00:00Z'}]:[];if(path.startsWith('/sync/watched/shows'))return s.account==='A'?[{show:{ids:{tmdb:7,trakt:7},aired_episodes:2},seasons:[{number:1,episodes:[{number:1,plays:1}]}]}]:[];return[]};
+   TraktTV.api.get=async path=>{s.apiCalls=(s.apiCalls||0)+1;if(path==='/users/me')return{user:{ids:{uuid:'home-'+s.account}}};if(path==='/sync/last_activities')return{all:'2026-01-01T12:00:00Z',movies:{watched_at:'2026-01-01T12:00:00Z'},episodes:{watched_at:'2026-01-01T12:00:00Z'}};if(path.startsWith('/sync/watched/movies'))return s.account==='A'?[{movie:{ids:{tmdb:6,trakt:6},title:'Movie6'},last_watched_at:'2026-01-01T12:00:00Z'}]:[];if(path.startsWith('/sync/watched/shows'))return s.account==='A'?[{show:{ids:{tmdb:7,trakt:7},aired_episodes:s.releaseTest?1:2},seasons:[{number:1,episodes:[{number:1,plays:1}]}]}]:[];if(path.startsWith('/shows/7/progress/')){s.progressCalls=(s.progressCalls||0)+1;return{aired:2,completed:1}}return[]};
    Lampa.Storage.listener.send('change',{name:'trakt_token'});Lampa.Timeline.read(true);
   });
   await page.waitForFunction(()=>TraktPlus.version==='3.3.1-home'&&TraktPlus.cachedWatched({id:6,media_type:'movie'})===true,null,{timeout:20000});
@@ -62,12 +62,20 @@ const wav=Buffer.alloc(44+480000,128);wav.write('RIFF');wav.writeUInt32LE(wav.le
   await page.waitForFunction(()=>window.LampaHomeHistory?.active&&window.LampaHomeHistory?.policyReady);
   await Promise.all(jobs);check('Exact changed source and loader loaded by hash/commit',Object.keys(files).every(k=>r.sources[k]?.received===hash(files[k])&&r.sources[k]?.commit===sha),r.sources);
   if(sourcesOnly)break stage;
+  if(releaseOnly){await page.evaluate(()=>{const s=__issue25;s.releaseTest=true;s.token='synthetic-release-A';s.schedule=s.schedule.slice(0,1);s.files.file_view_fixture_a['provider-7'].percent=100;s.files.file_view_fixture_a['provider-7'].time=60;Lampa.Storage.listener.send('change',{name:'trakt_token'})});await page.waitForFunction(()=>TraktPlus.cachedWatched({id:7,media_type:'tv'})===true);}
   await page.evaluate(()=>{
    const s=__issue25;s.prefix=[{title:'First',results:[s.cards[0]]},{title:'Second',results:[s.cards[1]]}];
    Lampa.Component.add('main',function(o){const c=Lampa.Maker.make('Main',o);c.use({onCreate(){const rows=s.registry.filter(r=>/^home_history_/.test(r.name)).map(r=>{let data;r.call()((result)=>data=result);return data});c.build(s.prefix.concat(rows));}});return c});Lampa.Activity.push({component:'main',source:'tmdb',title:'Issue25 fixtures',page:1});
   });
   const datasets=()=>page.evaluate(()=>{const comp=Lampa.Activity.active().activity.component;return comp.items.filter(l=>l.data.home_history).map(l=>({kind:l.data.home_history,ids:l.data.results.map(c=>c.id),count:l.data.results.length}))});
   await page.waitForFunction(()=>document.querySelectorAll('.activity--active [data-home-history]').length===2);
+  if(releaseOnly){
+  check('Before release, cached complete show is watched and absent from Continue',await page.evaluate(()=>{const r=LampaHomeHistory.buildRows();return r.watched.some(c=>c.id===7)&&!r.resume.some(c=>c.id===7)}));
+  const before=await page.evaluate(()=>__issue25.apiCalls);await page.evaluate(()=>{__issue25.schedule.push({season_number:1,episode_number:2,air_date:'2020-01-02'});Lampa.Listener.send('state:changed',{target:'timetable'})});
+  await page.waitForFunction(()=>{const c=Lampa.Activity.active().activity.component,r=c.items.find(l=>l.data.home_history==='resume');return TraktPlus.cachedWatched({id:7,media_type:'tv'})===false&&r?.data.results.some(c=>c.id===7&&c.home_history_resume.mode==='next_episode'&&c.home_history_resume.episode===2)});
+  check('New aired episode refreshes Trakt cache and mounted Home without fake resume seconds',await page.evaluate(()=>{const r=LampaHomeHistory.buildRows();return !r.watched.some(c=>c.id===7)&&r.resume.filter(c=>c.id===7).length===1&&r.resume.find(c=>c.id===7).home_history_resume.time===undefined}));
+  await page.evaluate(()=>{LampaHomeHistory.buildRows();LampaHomeHistory.refresh()});await page.waitForTimeout(180);check('One progress request; no full sync or duplicate search on repeated Home builds',await page.evaluate(n=>__issue25.progressCalls===1&&__issue25.apiCalls===n+1,before));break stage;
+  }
   await page.evaluate(()=>Lampa.Activity.active().activity.component.items.find(l=>l.data.home_history==='resume').toggle());
   await page.waitForFunction(()=>!!document.querySelector('.activity--active .focus'));
   const rows=await datasets();check('More than3 real-position/episode fixtures and confirmed watched are distinct/deduplicated',rows.find(r=>r.kind==='resume')?.count===7&&rows.find(r=>r.kind==='watched')?.ids.join(',')==='6',rows);
@@ -102,5 +110,5 @@ const wav=Buffer.alloc(44+480000,128);wav.write('RIFF');wav.writeUInt32LE(wav.le
   capture=false;try{await page.evaluate(()=>{if(window.__issue25?.playerStarted&&Lampa.Player.opened())Lampa.Player.close()})}catch{}
   await page.unroute('**/*',route);await page.goto(restoreUrl,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>window.Lampa?.Activity?.active()?.activity&&!window.__issue25,null,{timeout:30000});check('Original page/methods restored with no fixture globals',true);
  }
- fs.writeFileSync(path.join(out,sourcesOnly?'browser-source-proof.json':'browser.json'),JSON.stringify(r,null,2));console.log(JSON.stringify({checks:r.checks,errors:r.errors,blocked:r.blocked,diagnostic:r.diagnostic}));process.exit(r.errors.length||r.checks.some(c=>c.status==='FAIL')?1:0);
+ fs.writeFileSync(path.join(out,releaseOnly?'browser-release.json':sourcesOnly?'browser-source-proof.json':'browser.json'),JSON.stringify(r,null,2));console.log(JSON.stringify({checks:r.checks,errors:r.errors,blocked:r.blocked,diagnostic:r.diagnostic}));process.exit(r.errors.length||r.checks.some(c=>c.status==='FAIL')?1:0);
 })().catch(e=>{console.error(e.message);process.exit(1)});

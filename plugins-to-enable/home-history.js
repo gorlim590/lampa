@@ -171,6 +171,9 @@
         groups.forEach(function (group, index) {
             var card = cardFor(group), entries = readings(group, snapshot, names, byLink);
             var status = watched(card), remote = homeProgress(card);
+            if (card.media_type === 'tv' && window.TraktPlus && typeof window.TraktPlus.refreshHomeProgress === 'function') {
+                try { window.TraktPlus.refreshHomeProgress(card, schedule(card)); } catch (e) {}
+            }
             if (status === true) result.watched.push(Object.assign({}, card, { _trakt_cached_only: true, home_history_watched_at: Number(remote.lastWatchedAt) || 0 }));
             var evidence = card.media_type === 'tv' ? episodeEvidence(entries) : {}, latest = null;
             if (card.media_type !== 'tv') entries.forEach(function (entry) { var p = progress(entry.road); if (p) latest = newer(latest, { entry: entry, progress: p }); });

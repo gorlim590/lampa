@@ -437,6 +437,7 @@
           evidence.sig = job.sig; evidence.trakt = job.item.show.ids.trakt;
           evidence.episodes = showStates[job.id] && showStates[job.id].episodes || [];
           evidence.lastWatchedAt = showStates[job.id] && showStates[job.id].lastWatchedAt || 0;
+          evidence.homeCheckedAt = job.homeCheckedAt || showStates[job.id] && showStates[job.id].homeCheckedAt || 0;
           showStates[job.id] = evidence;
           watchedShows = completedShows(); watchedVer++;
           clearTimeout(progressNotifyTimer);
@@ -519,6 +520,28 @@
       }
     }
     return result;
+  }
+
+  // Home may request a single verified show's progress when cached aired metadata
+  // proves a release newer than its snapshot. Reuse the existing two-slot queue.
+  function refreshHomeProgress(card, episodes) {
+    observeSession(); hydrateWatched();
+    var id = tmdbId(card), record = showStates[id], item = showSources[id], now = Date.now();
+    if (!bool('trakt_plus_enable', true) || cardKind(card) !== 'show' || !accountOwner || !token() || syncing || statusPhase !== 'ready' || !freshStatus(statusAt) || !record || !record.known || !freshStatus(record.t) || !item || progressPending[id] || progressQueue.length >= 128 || record.retryAfter > now || now - (record.homeCheckedAt || 0) < 300000) return false;
+    var seen = {}, count = 0, newerRelease = false;
+    (Array.isArray(episodes) ? episodes : []).forEach(function (ep) {
+      if (!ep) return;
+      var season = Number(ep.season_number), number = Number(ep.episode_number), aired = Date.parse(ep.air_date || ''), key = season + ':' + number;
+      if (!(season > 0 && number > 0 && season % 1 === 0 && number % 1 === 0) || !isFinite(aired) || aired > now || seen[key]) return;
+      seen[key] = true; count++; if (aired > record.t) newerRelease = true;
+    });
+    if (!newerRelease && count <= record.aired) return false;
+    try {
+      progressPath(item); record.homeCheckedAt = now;
+      progressPending[id] = true;
+      progressQueue.push({ id: id, item: item, sig: record.sig, epoch: sessionEpoch, homeCheckedAt: now, cancel: sessionCancel(sessionEpoch, readEpoch) });
+      pumpProgress(); return true;
+    } catch (e) { return false; }
   }
 
   function acceptWatched(movies, shows, stamp, missingMovies) {
@@ -2140,6 +2163,7 @@
   window.TraktPlus.isWatched = watchStatus;
   window.TraktPlus.cachedWatched = cachedWatch;
   window.TraktPlus.cachedHomeProgress = cachedHomeProgress;
+  window.TraktPlus.refreshHomeProgress = refreshHomeProgress;
   window.TraktPlus.cachedViewing = cachedViewing;
   window.TraktPlus.cachedFilmography = function(person){var cached=personCache[personCacheKey({id:person.id,source:person.source||'tmdb'})];return cached&&Date.now()-cached.time<PERSON_TTL?filmography(cached.data,'all','year'):null;};
   window.TraktPlus.detailsProgress = detailsProgress;
