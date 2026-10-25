@@ -35,6 +35,9 @@ jobs:
       - name: Check JavaScript syntax and first-party links
         working-directory: main-checkout
         run: node scripts/check-repository.mjs
+      - name: Header menu and Hybrid interaction regressions
+        working-directory: main-checkout
+        run: node --test --test-timeout=15000 tests/header-menu.cjs tests/hybrid-ui.cjs
       - name: Trakt and YDesign regressions
         working-directory: main-checkout
         run: node --test --test-timeout=15000 tests/trakt-watched-sync.cjs tests/trakt-account-isolation.cjs tests/ydesign.cjs
