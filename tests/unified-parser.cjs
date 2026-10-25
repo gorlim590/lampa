@@ -71,3 +71,33 @@ test('missing endpoint fails closed without legacy parser fallback', () => {
   assert.equal(app.legacy, 0);
   assert.equal(app.calls.length, 0);
 });
+
+test('maps live JacRed fields and uses magnet instead of tracker page URL', () => {
+  const magnet = 'magnet:?xt=urn:btih:' + 'b'.repeat(40);
+  const app = load({results:[{
+    title:'Монолог травниці', source:'Toloka',
+    magnet, url:'https://toloka.to/t12345',
+    page_url:'https://toloka.to/t12345',
+    pir:7, voices:['UA studio'], quality:'1080p', size:2300000000,
+    createTime:'2026-10-25'
+  }]});
+  let result;
+  app.Lampa.Parser.get({search:'Монолог травниці',movie:{}}, r => {result=r}, e => {throw Error(e)});
+  const row = result.Results[0];
+  assert.equal(row.Link, magnet);
+  assert.equal(row.MagnetUri, magnet);
+  assert.equal(row.Peers, 7);
+  assert.equal(row.Seeders, null);
+  assert.equal(row.Quality, '1080p');
+  assert.equal(row.Voices[0], 'UA studio');
+});
+
+test('rejects tracker topic pages without a magnet or torrent download', () => {
+  const app = load({results:[{
+    title:'Topic page only',source:'Toloka',
+    url:'https://toloka.to/t12345'
+  }]});
+  let result;
+  app.Lampa.Parser.get({search:'Topic page',movie:{}}, r=>{result=r}, e=>{throw Error(e)});
+  assert.equal(result.Results.length, 0);
+});
