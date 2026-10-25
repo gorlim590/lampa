@@ -39,19 +39,24 @@
     function mapRow(item, i) {
         var title = str(item.title || item.name || item.Title);
         var magnet = str(item.magnet || item.magnet_uri || item.MagnetUri);
-        var link = str(item.torrent_url || item.download_url || item.Link || item.url);
+        // A tracker topic page is not a torrent download. Prefer magnet for playback.
+        var direct = str(item.torrent_url || item.download_url || item.Link);
+        var link = magnet || (/^(magnet:|https?:\\/\\/[^\\s]+\\.torrent(?:[?#]|$))/i.test(direct) ? direct : '');
         var source = str(item.source || item.tracker || item.Tracker || 'Unified');
         var infoHash = hash(magnet, item.infohash || item.info_hash || item.InfoHash);
-        if (!title || (!magnet && !link)) return null;
+        if (!title || !link) return null;
         var row = {
-            Title: title, Tracker: source, MagnetUri: magnet, Link: link || magnet,
+            Title: title, Tracker: source, MagnetUri: magnet, Link: link,
             Size: number(item.size_bytes != null ? item.size_bytes : item.size),
-            Seeders: number(item.seeds != null ? item.seeds : item.seeders),
-            Peers: number(item.peers != null ? item.peers : item.leechers),
+            // The live JacRed schema exposes 'pir' (peer count); it has no verified seed count.
+            Seeders: item.seeds != null ? number(item.seeds) : item.seeders != null ? number(item.seeders) : null,
+            Peers: number(item.peers != null ? item.peers : item.pir != null ? item.pir : item.leechers),
             InfoHash: infoHash,
-            PublishDate: item.publish_date || item.date || item.created_at || null,
+            PublishDate: item.publish_date || item.date || item.created_at || item.createTime || null,
             Type: item.type === 'series' || item.type === 'anime' || item.type === 'dorama' ? 'tv' : item.type,
             AudioLanguages: item.audio_languages || item.AudioLanguages,
+            Voices: item.voices || item.Voices,
+            Quality: item.quality || item.Quality,
             SubtitleLanguages: item.subtitle_languages || item.SubtitleLanguages,
             Resolution: item.resolution || item.Resolution,
             Season: item.season != null ? item.season : item.Season,
@@ -60,7 +65,7 @@
             parser_sources: [{ id: 'unified', label: source, type: 'unified' }],
             parser_original: item,
             hash: L.Utils && L.Utils.hash ? L.Utils.hash(title) : title.toLowerCase(),
-            parser_release_key: infoHash ? 'hash:' + infoHash : 'link:' + (link || magnet || i)
+            parser_release_key: infoHash ? 'hash:' + infoHash : 'link:' + link
         };
         if (L.Storage && L.Storage.cache) {
             try { row.viewed = L.Storage.cache('torrents_view', 5000, []).indexOf(row.hash) >= 0; } catch (e) {}
@@ -163,7 +168,7 @@
         }
         ownGet = null;
     }
-    window.LampaUnifiedParser = { version: '0.1.0', install: install, destroy: destroy, endpoint: endpoint, toNative: toNative };
+    window.LampaUnifiedParser = { version: '0.1.1', install: install, destroy: destroy, endpoint: endpoint, toNative: toNative };
     if (L.Parser) install();
     else if (L.Listener && L.Listener.follow) L.Listener.follow('app', function(e) { if (e.type === 'ready') install(); });
 })();
