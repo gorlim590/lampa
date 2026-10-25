@@ -170,6 +170,9 @@ body.stremio-hybrid .sh-movie .full-start-new__rate-line { order:2; margin:0 0 .
 body.stremio-hybrid .sh-movie .full-start-new__details { order:3; }
 /* Movie-only Cardify adapter: backdrop + one information column, no right description card. */
 body.stremio-hybrid .activity.sh-movie-page { --sm-bg:#0c0c16; --sm-text:#f4f4f7; --sm-muted:#b8b8c6; }
+/* Native activity translate3d changes the containing block of fixed backdrop/mask layers.
+   Keep that entry animation off only for this full-viewport details composition. */
+body.stremio-hybrid .activity.sh-movie-page > .activity__body { -webkit-animation:none !important; animation:none !important; }
 body.stremio-hybrid .sh-movie-page .full-start__background { opacity:.78; transition:opacity 800ms ease-in-out !important; mask-image:none !important; -webkit-mask-image:none !important; filter:none !important; }
 body.stremio-hybrid .sh-movie-page .cardify-effects-overlay { background:linear-gradient(90deg,rgba(8,9,17,.92) 0%,rgba(8,9,17,.72) 37%,rgba(8,9,17,.12) 76%),linear-gradient(0deg,#0c0c16 0%,transparent 34%) !important; }
 body.stremio-hybrid .sh-movie-page .cardify-effects-overlay.cardify-scrolled { background-color:rgba(8,9,17,.7) !important; }
