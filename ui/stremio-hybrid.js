@@ -300,8 +300,8 @@ body.stremio-hybrid .sh-streams .ctr-release-info { min-width:0; }
 
 body.stremio-hybrid .sh-movie-page .scroll--mask { mask-image:none !important; -webkit-mask-image:none !important; }
 /* Full-height Stremio source rail; remains inside the movie scroll, so lower rows are unobstructed. */
-body.stremio-hybrid .sh-movie-hero { position:relative; }
-body.stremio-hybrid .sh-streams { top:-2.8em; right:0; width:30vw; height:calc(100vh - 3.7em); max-height:none; padding:.8em; border-radius:0; border:0; border-left:1px solid #ffffff10; background:rgba(9,10,18,.94); }
+body.stremio-hybrid .sh-movie-hero { position:relative; --sh-stream-width:42%; --sh-stream-gap:1.2em; }
+body.stremio-hybrid .sh-streams { top:-2.8em; right:0; width:var(--sh-stream-width); box-sizing:border-box; height:calc(100vh - 3.7em); max-height:none; padding:.8em; border-radius:0; border:0; border-left:1px solid #ffffff10; background:rgba(9,10,18,.94); }
 body.stremio-hybrid.sh-movie-active { --sh-bg:#0c0c16; }
 body.stremio-hybrid.sh-movie-active .head { background:var(--sh-header) !important; border:0 !important; box-shadow:none !important; }
 body.stremio-hybrid.sh-movie-active .head .open--search,body.stremio-hybrid.sh-movie-active .head .sh-head-more { background:transparent !important; background-image:none !important; }
@@ -332,7 +332,12 @@ body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; 
 
 `;
     css += `
-body.stremio-hybrid .sh-has-streams .sh-movie-column{width:calc(100% - 32vw)!important;max-width:calc(100% - 32vw)!important}
+body.stremio-hybrid .sh-has-streams .sh-movie-column{width:calc(100% - var(--sh-stream-width) - var(--sh-stream-gap))!important;max-width:calc(100% - var(--sh-stream-width) - var(--sh-stream-gap))!important;min-width:0}
+body.stremio-hybrid .sh-streams .ctr-name,body.stremio-hybrid .sh-streams .torrent-item__title{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;-webkit-line-clamp:unset!important;max-height:none!important;overflow-wrap:anywhere}
+body.stremio-hybrid .sh-streams .ctr-row{grid-template-columns:3em minmax(0,1fr) minmax(4.5em,auto)}
+body.stremio-hybrid .sh-streams .ctr-release-info,body.stremio-hybrid .sh-streams .ctr-metrics{min-width:0}
+body.stremio-hybrid .sh-streams .ctr-size{white-space:normal;overflow-wrap:anywhere}
+@media(max-width:900px){body.stremio-hybrid .sh-movie-hero{--sh-stream-width:100%}body.stremio-hybrid .sh-has-streams .sh-movie-column{width:100%!important;max-width:100%!important}body.stremio-hybrid .sh-streams{position:relative;top:auto;right:auto;width:100%;height:60vh;border-left:0}}
 body.stremio-hybrid .sh-movie .full-descr__text{display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:3;max-height:4.95em!important;overflow:hidden;white-space:normal!important}
 body.stremio-hybrid .sh-movie.sh-description-expanded .full-descr__text{display:block!important;-webkit-line-clamp:unset;max-height:none!important;overflow:visible;white-space:pre-line!important}
 body.stremio-hybrid .sh-movie .sh-description-toggle{display:flex;align-items:center;justify-content:center;width:auto;min-width:0;min-height:2.9em;flex:0 0 auto;font-size:.85em!important;color:var(--sm-text);padding:0 .8em!important;border-radius:.55em;background:#ffffff12;border:1px solid #ffffff18}\nbody.stremio-hybrid .sh-movie .sh-description-toggle.focus{background:var(--sh-focus-soft);box-shadow:0 0 0 .12em var(--sh-accent-soft)}
@@ -359,7 +364,7 @@ body.stremio-hybrid .tp-person-unknown{font-size:.8em;color:var(--sh-muted)}
 @media(prefers-reduced-motion:reduce){body.stremio-hybrid .full-person{transition:none!important;transform:none!important}}
 `;
     // Cardify owns the native template/data. Move nodes with their handlers, never clone them.
-    var movieRecords=[], movieFrame=0, movieTimers=[], movieModal=null;
+    var movieRecords=[], movieFrame=0, movieTimers=[];
     function restoreMovie(record) {
         (record.castLines||[]).forEach(function(entry){entry.line.unuse(entry.hook);delete entry.line._shCastHook;var rendered=entry.line.render(),node=rendered&&(rendered[0]||rendered);if(node&&node.querySelectorAll)node.querySelectorAll('.sh-cast-watched').forEach(function(n){n.remove();});});
         record.root.querySelectorAll('.sh-generated-description').forEach(function(n){n.remove();});
@@ -373,8 +378,8 @@ body.stremio-hybrid .tp-person-unknown{font-size:.8em;color:var(--sh-muted)}
             if(move.parent) move.parent.insertBefore(move.node,move.next && move.next.parentNode===move.parent ? move.next : null);
         });
         record.column.classList.remove('sh-movie-column');record.root.querySelectorAll('.sh-metadata-rich,.sh-metadata-shadow').forEach(function(n){n.classList.remove('sh-metadata-rich','sh-metadata-shadow');});record.root.classList.remove('sh-movie','sh-movie-native','sh-series'); record.page.classList.remove('sh-movie-page');
-        if(record.description){record.description.removeEventListener('hover:enter',movieDescriptionEnter,true);record.description.classList.remove('sh-movie-description');}
-        if(movieModal===record.root){movieModal=null;Lampa.Modal.close();if(Lampa.Activity.active() && Lampa.Activity.active().activity===record.activity)Lampa.Controller.toggle('full_start');}
+        if(record.description)record.description.classList.remove('sh-movie-description');
+        (record.plainDescriptions||[]).forEach(function(pair){if(pair.plain.parentNode)pair.plain.parentNode.replaceChild(pair.original,pair.plain);});record.plainDescriptions=[];
         record.root.querySelectorAll('.sh-movie-primary,.sh-movie-description').forEach(function(n){n.classList.remove('sh-movie-primary','sh-movie-description');});
         record.labels.forEach(function(item){if(item.node.getAttribute('title')===item.title)item.node.removeAttribute('title');});
     }
@@ -393,7 +398,7 @@ body.stremio-hybrid .tp-person-unknown{font-size:.8em;color:var(--sh-muted)}
         record.descriptionToggle=button;
         record.toggleDescription=function(){
             var expanded=button.getAttribute("aria-expanded")!=="true";
-            button.setAttribute("aria-expanded",String(expanded));button.textContent=expanded?"Згорнути опис":"Показати більше";
+            button.setAttribute("aria-expanded",String(expanded));button.textContent=expanded?"Показати менше":"Показати більше";
             record.root.classList.toggle("sh-description-expanded",expanded);
         };
         $(button).on("hover:enter.shDescription",record.toggleDescription);
@@ -403,18 +408,31 @@ body.stremio-hybrid .tp-person-unknown{font-size:.8em;color:var(--sh-muted)}
         if(record.descriptionToggle){$(record.descriptionToggle).off(".shDescription").remove();record.descriptionToggle=null;record.toggleDescription=null;}
         record.root.classList.remove("sh-description-expanded");
     }
-    function movieDescriptionEnter(event) {
-        var root=event.currentTarget.closest('.sh-movie');if(!root)return;
-        var text=root.querySelector('.full-descr__text');if(!text)return;
-        movieModal=root;
-        Lampa.Modal.open({title:root.querySelector('.full-start-new__title').textContent,html:$('<div></div>').text(text.textContent.trim()).css({lineHeight:'1.65',whiteSpace:'pre-line'}),onBack:function(){
-            movieModal=null;Lampa.Modal.close();
-            if(root.isConnected && root.closest('.activity--active')){Lampa.Controller.toggle('full_start');Lampa.Controller.collectionFocus(text,root);}
-            else Lampa.Controller.toggle('content');
-        }});
+    function plainDescription(record, description) {
+        if(description.classList.contains('sh-generated-description'))return description;
+        var nodes=description.matches('.full-descr__text')?[description]:Array.prototype.slice.call(description.querySelectorAll('.full-descr__text'));
+        nodes.forEach(function(node){
+            if(node.hasAttribute('data-sh-plain-description'))return;
+            var plain=document.createElement('div');plain.className='full-descr__text';plain.setAttribute('data-sh-plain-description','');plain.textContent=node.textContent;
+            if(node.parentNode)node.parentNode.replaceChild(plain,node);
+            record.plainDescriptions=record.plainDescriptions||[];record.plainDescriptions.push({original:node,plain:plain});
+            if(description===node)description=plain;
+        });
+        return description;
+    }
+    function focusMovieActions(record, visible) {
+        var controller=Lampa.Controller.enabled(),link=controller.controller&&controller.controller.link;
+        if(controller.name!=='full_start'||!link||!visible.length)return;
+        var primary=visible.filter(function(node){return node.classList.contains('view--torrent');})[0]||visible[0];
+        var focus=record.root.querySelector('.selector.focus'),last=link.last&&(link.last[0]||link.last);
+        if(!record.initialFocusDone||!focus||(last&&!record.root.contains(last))){
+            var target=record.initialFocusDone&&focus?focus:primary;
+            link.last=target;Lampa.Controller.collectionSet(record.root);Lampa.Controller.collectionFocus(target,record.root);
+        }
+        record.initialFocusDone=true;
     }
     function movieButtonFocus(event) {
-        var row=event.currentTarget, button=event.target.closest('.full-start__button');
+        var row=event.currentTarget, button=event.target.closest('.full-start__button,.sh-description-toggle');
         if(button && row.contains(button)) {
             row.setAttribute('data-sh-action',button.classList.contains('sh-movie-primary')?'':button.getAttribute('title') || button.textContent.trim());
             var box=button.getBoundingClientRect(), bounds=row.getBoundingClientRect();
@@ -469,11 +487,12 @@ body.stremio-hybrid .tp-person-unknown{font-size:.8em;color:var(--sh-muted)}
         var description=root.querySelector('.custom-ghost-main') || page.querySelector('.full-descr__text');
         var movie=streamMovie(record);
         if(!description&&movie._tp_omit_details&&movie.overview){description=document.createElement('div');description.className='full-descr__text sh-generated-description';description.textContent=movie.overview;}
-        if(description){move(description);record.description=description;description.classList.add('sh-movie-description');setupDescription(record,description);description.addEventListener('hover:enter',movieDescriptionEnter,true);}
+        if(description){description=plainDescription(record,description);move(description);record.description=description;description.classList.add('sh-movie-description');if(description.textContent.trim()&&typeof movie.overview==='string'&&movie.overview.trim())setupDescription(record,description);}
         move(root.querySelector('.cardify__right-box'));
         root.querySelectorAll('.sh-movie-primary').forEach(function(n){n.classList.remove('sh-movie-primary');});
-        var visible=Array.prototype.filter.call(buttons.querySelectorAll('.full-start__button'),function(n){return !n.classList.contains('hide')&&!n.classList.contains('hidden')&&getComputedStyle(n).display!=='none';});
-        if(visible[0])visible[0].classList.add('sh-movie-primary');
+        var visible=Array.prototype.filter.call(buttons.querySelectorAll('.full-start__button'),function(n){return n.classList.contains('selector')&&!n.classList.contains('hide')&&!n.classList.contains('hidden')&&n.getAttribute('aria-disabled')!=='true'&&!n.disabled&&n.getClientRects().length>0&&getComputedStyle(n).visibility!=='hidden';});
+        var primary=visible.filter(function(n){return n.classList.contains('view--torrent');})[0]||visible[0];
+        if(primary)primary.classList.add('sh-movie-primary');
         visible.forEach(function(node){
             if(!node.hasAttribute('title')){var title=node.textContent.trim() || (node.classList.contains('button--edit-order')?'Порядок дій':'Дія плагіна');node.setAttribute('title',title);record.labels.push({node:node,title:title});}
         });
@@ -483,10 +502,7 @@ body.stremio-hybrid .tp-person-unknown{font-size:.8em;color:var(--sh-muted)}
         movieButtonFocus({currentTarget:buttons,target:buttons.querySelector('.focus')||visible[0]||buttons});
         (record.castLines||[]).forEach(function(entry){(entry.line.items||[]).forEach(decoratePerson);});
         // Interface+ can replace a button after core FullStart cached it as last focus.
-        var controller=Lampa.Controller.enabled(), link=controller.controller && controller.controller.link;
-        if(controller.name==='full_start' && link && visible[0] && (!root.querySelector('.selector.focus') || (link.last && !root.contains(link.last)))) {
-            link.last=visible[0];Lampa.Controller.collectionSet(root);Lampa.Controller.collectionFocus(visible[0],root);
-        }
+        focusMovieActions(record,visible);
     }
     function scheduleMovie() {
         stopMovieQueue();var active=Lampa.Activity.active();if(!active || active.component!=='full'||(active.method!=='movie'&&active.method!=='tv'))return;
@@ -1314,7 +1330,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         apply(enabled());
     }
     window.StremioHybrid = {
-        version: '2.8.1-details',
+        version: '2.8.2-details-ux',
         setEnabled: setEnabled,
         refresh: function () { if (ready) apply(enabled()); },
         destroy: function () {
