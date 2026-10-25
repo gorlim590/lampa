@@ -123,7 +123,7 @@ body.stremio-hybrid .menu__item, body.stremio-hybrid .head__action, body.stremio
  /* The transparent Hybrid header does not reserve a row above the desktop/TV rail.
     Keep native Scroll full-height and retain device safe-area padding. */
  body.stremio-hybrid .wrap__left { padding-top:0; }
- body.stremio-hybrid .wrap__left > .scroll { height:100% !important; }
+ body.stremio-hybrid .wrap__left > .scroll { height:100% !important; -webkit-mask-image:linear-gradient(to bottom,transparent,#fff .5em,#fff calc(100% - .5em),transparent); mask-image:linear-gradient(to bottom,transparent,#fff .5em,#fff calc(100% - .5em),transparent); }
  body.stremio-hybrid .wrap__left > .scroll > .scroll__content { padding-top:.5em; padding-bottom:.5em; padding-top:max(.5em,env(safe-area-inset-top,0px)); padding-bottom:max(.5em,env(safe-area-inset-bottom,0px)); }
  body.stremio-hybrid .wrap__content { flex:1; min-width:0; width:calc(100% - 4.4em) !important; }
  body.stremio-hybrid .activity { width:100% !important; }
