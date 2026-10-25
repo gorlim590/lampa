@@ -333,6 +333,7 @@ body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; 
 `;
     css += `
 body.stremio-hybrid .sh-has-streams .sh-movie-column{width:calc(100% - var(--sh-stream-width) - var(--sh-stream-gap))!important;max-width:calc(100% - var(--sh-stream-width) - var(--sh-stream-gap))!important;min-width:0}
+body.stremio-hybrid .sh-streams .torrent-item{font-size:.9em}
 body.stremio-hybrid .sh-streams .ctr-name,body.stremio-hybrid .sh-streams .torrent-item__title{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;-webkit-line-clamp:unset!important;max-height:none!important;overflow-wrap:anywhere}
 body.stremio-hybrid .sh-streams .ctr-row{grid-template-columns:3em minmax(0,1fr) minmax(4.5em,auto)}
 body.stremio-hybrid .sh-streams .ctr-release-info,body.stremio-hybrid .sh-streams .ctr-metrics{min-width:0}
