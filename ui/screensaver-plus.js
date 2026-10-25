@@ -1,5 +1,5 @@
 /*
- * Screensaver Plus v2.1 — відео-заставка для Lampa: папка з відео + годинник + погода.
+ * Screensaver Plus v2.1.1 — відео-заставка для Lampa: папка з відео + годинник + погода.
  *
  * «Папка з відео» (Налаштування → Скрінсейвер+) приймає:
  *   • локальний шлях:  /storage/emulated/0/Movies/wallpapers   (пробуємо file://, потім сервер на 127.0.0.1:8000/8080)
@@ -20,6 +20,7 @@
   var active = false, starting = false, runGeneration = 0, booted = false;
   var lastAct = Date.now();
   var sources = [], sourcesT = 0, sourcesErr = '', sourcesVia = '';
+  var sourcesKey = null, sourceGeneration = 0, sourceRequest = null;
   var order = [], pos = -1, failStreak = 0;
   var timers = { clock: null, sw: null, weather: null, corner: null, sleep: null, watch: null };
   var weather = null, weatherT = 0, lastWeatherHtml = '';
@@ -138,24 +139,40 @@
     return ['http://' + f];
   }
 
-  function tryCandidates(list, i) {
+  function tryCandidates(list, i, valid) {
+    if (valid && !valid()) return Promise.resolve({ list: [], via: '' });
     if (i >= list.length) return Promise.resolve({ list: [], via: '' });
     var base = list[i];
     return http(base, false).then(function (txt) {
+      if (valid && !valid()) return { list: [], via: '' };
       var l = parseListing(txt, base);
       if (l.length) return { list: l, via: base };
-      return tryCandidates(list, i + 1);
-    }, function () { return tryCandidates(list, i + 1); });
+      return tryCandidates(list, i + 1, valid);
+    }, function () { return tryCandidates(list, i + 1, valid); });
   }
 
   function cacheKey(c) { return c.folder + '|' + c.urls; }
 
+  function clearSources() {
+    sourceGeneration++;
+    sourceRequest = null;
+    sources = []; sourcesT = 0; sourcesKey = null;
+    sourcesErr = ''; sourcesVia = '';
+  }
+
   function loadSources(force) {
-    var c = cfg();
+    var c = cfg(), key = cacheKey(c);
+    if (sourcesKey !== key) { clearSources(); sourcesKey = key; }
+    if (sourceRequest && sourceRequest.key === key) return sourceRequest.promise;
     if (!force && sources.length && Date.now() - sourcesT < 10 * 60000) return Promise.resolve(sources);
     var manual = c.urls.split(/[,;\s]+/).filter(function (u) { return /^(https?|file):\/\//i.test(u); });
+    var generation = ++sourceGeneration;
+    var request = { key: key, promise: null };
+    sourceRequest = request;
+    function valid() { return generation === sourceGeneration && key === cacheKey(cfg()); }
     sourcesErr = '';
-    return tryCandidates(candidates(c.folder), 0).then(function (r) {
+    request.promise = tryCandidates(candidates(c.folder), 0, valid).then(function (r) {
+      if (!valid()) return [];
       if (c.folder && !r.list.length) {
         sourcesErr = /^(file:|\/)/i.test(c.folder)
           ? tr('Lampa не може прочитати цю папку напряму. Запустіть serve.py (на приставці через Termux або на ПК) і вкажіть http://IP:8000/',
@@ -167,17 +184,29 @@
       sourcesVia = r.via;
       if (all.length) {
         sources = all; sourcesT = Date.now();
-        try { Lampa.Storage.set('ssp_cache', { k: cacheKey(c), l: all }); } catch (e) {}
+        try { Lampa.Storage.set('ssp_cache', { k: key, l: all }); } catch (e) {}
       }
       return sources;
+    }).then(function (list) {
+      if (sourceRequest === request) sourceRequest = null;
+      return list;
+    }, function () {
+      if (sourceRequest === request) sourceRequest = null;
+      return valid() ? sources : [];
     });
+    return request.promise;
   }
 
   // миттєвий старт зі збереженого списку, оновлення — у фоні
   function warmSources() {
+    var c = cfg(), key = cacheKey(c);
+    if (sourcesKey !== key) { clearSources(); sourcesKey = key; }
     if (sources.length) return;
-    var c = cfg(), ch = Lampa.Storage.get('ssp_cache');
-    if (ch && ch.k === cacheKey(c) && ch.l && ch.l.length) { sources = ch.l; sourcesT = 0; }
+    var ch = Lampa.Storage.get('ssp_cache');
+    if (ch && ch.k === key && Array.isArray(ch.l)) {
+      sources = ch.l.filter(function (u) { return typeof u === 'string' && /^(https?|file):\/\//i.test(u); });
+      sourcesT = 0;
+    }
   }
 
   function makeOrder(shuffle) {
@@ -580,6 +609,7 @@
   }
   function nativeSettingsChanged(event){if(event&&/^ssp_/.test(event.name)){if(!cfg().enable)stopSaver();patchNative();}}
   function destroy(){
+    clearSources();
     stopSaver();Object.keys(timers).forEach(function(k){clearTimeout(timers[k]);clearInterval(timers[k]);});
     inputBindings.forEach(function(b){b.target.removeEventListener(b.event,b.handler,true);b.target.removeEventListener(b.event,b.handler,false);});inputBindings=[];
     Lampa.Storage.listener.remove('change',nativeSettingsChanged);restoreNative();
@@ -602,7 +632,7 @@
       });
     }
     function head(t) { add({ name: 'ssp_h_' + t.length + t.charCodeAt(0), type: 'title' }, t); }
-    function reset() { sources = []; sourcesT = 0; weather = null; weatherT = 0; Lampa.Storage.set('ssp_loc', null); Lampa.Storage.set('ssp_cache', null); }
+    function reset() { clearSources(); weather = null; weatherT = 0; Lampa.Storage.set('ssp_loc', null); Lampa.Storage.set('ssp_cache', null); }
     var S = tr('с', 's'), M = tr('хв', 'min'), H = tr('год', 'h');
 
     add({ name: 'ssp_enable', type: 'trigger', 'default': true }, tr('Увімкнути Скрінсейвер+', 'Enable Screensaver+'));
@@ -689,7 +719,7 @@
     try { patchNative(); } catch (e) {}
     timers.patch = setTimeout(patchNative, 3000);
     timers.warm = setTimeout(function () { warmSources(); if (cfg().enable && (cfg().folder || cfg().urls)) loadSources(false); }, 4000);
-    window.ScreensaverPlus = { version:'2.1.0', destroy:destroy, state:function(){return {active:active,starting:starting,nativeOwned:!!nativeOwner};}, start: function () { startSaver(true); }, stop: stopSaver, reload: function () { return loadSources(true); } };
+    window.ScreensaverPlus = { version:'2.1.1', destroy:destroy, state:function(){return {active:active,starting:starting,nativeOwned:!!nativeOwner};}, start: function () { startSaver(true); }, stop: stopSaver, reload: function () { return loadSources(true); } };
   }
 
   function onAppReady(e){if(e.type==='ready')boot();}
