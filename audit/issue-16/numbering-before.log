@@ -1,0 +1,61 @@
+✔ verified metadata plan includes UA EN romanized original RU; equivalent punctuation/case aliases are unique (4.944194ms)
+✔ ordinary EN movie and free/manual search preserve native parameters/results exactly with one call (0.989792ms)
+✔ anime original script matches intact and returns immediately (2.622645ms)
+✔ dorama original script matches intact and returns immediately (1.269436ms)
+✔ anime missing primary uses verified EN alias within bounded sequential fallback (1.494068ms)
+✔ dorama missing primary uses verified EN alias within bounded sequential fallback (1.718929ms)
+✔ romanized anime alias works when EN primary returns nothing; display metadata unchanged (1.28601ms)
+✔ metadata is lazy, typed-ID verified, cached; success never waits for optional aliases (2.088265ms)
+✔ wrong-ID metadata never supplies aliases; empty/error metadata has no persistent negative cache (1.126004ms)
+✔ exact title/year/type disambiguation blocks more popular partial-title/remake/film collisions (1.068158ms)
+✔ season/episode mismatches, movie-series conflicts and absolute anime episodes are checked (1.031784ms)
+✔ canonical infohash dedup retains the original transport row and distinct release versions (0.58862ms)
+✔ no results is bounded to three attempts; API error does not hammer an unavailable parser (1.871065ms)
+✔ fallback deadline clears native request and ignores its late response (1.391786ms)
+✔ new search and native clear invalidate delayed results and abort optional metadata (0.979547ms)
+✔ idempotent install/destroy has no DOM listeners/observers or polling (0.648558ms)
+✔ Russian alias is search-only and Chinese metadata can use EN without UI-language writes (1.762684ms)
+✔ later season release year is not confused with first-air year; known wrong first season still rejected (0.735587ms)
+✔ native manual clarification remains unchanged (0.61631ms)
+✔ native search_two English title is reused without metadata calls and reaches the UI matcher (1.20494ms)
+✔ Korean romanized metadata works as a third query without inventing a transliteration (0.811269ms)
+✔ equivalent base32/hex infohashes deduplicate while malformed/different magnets remain distinct (0.798781ms)
+✔ season packs include the requested season but do not admit an absent season (0.737059ms)
+✔ wrapper remains inert after destroy even when another consumer retained it; reinstall is idempotent (0.597323ms)
+✔ ordinary search completion cannot arrive on a newer anime search (0.909544ms)
+✔ anonymous card metadata is never shared with a different anonymous card (0.705262ms)
+✔ metadata TTL expires and movie/TV caches do not cross the same numeric ID (0.979537ms)
+✔ optional metadata request is aborted on clear and cannot populate a different screen (0.612425ms)
+✔ Korean spacing variants deduplicate and bilingual releases require two known complete aliases (0.663621ms)
+✖ native 1x03 and Cyrillic season/episode ranges retain identity without allowing the wrong season (6.764064ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 29
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 121.560826
+
+✖ failing tests:
+
+test at tests/torrent-search.cjs:39:1
+✖ native 1x03 and Cyrillic season/episode ranges retain identity without allowing the wrong season (6.764064ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert(f.api.match(row('Attack on Titan 1x03 1080p'),fixtureData.anime,{season:1,episode:3}).eligible)
+  
+      at TestContext.<anonymous> (/workspace/lampa/tests/torrent-search.cjs:39:134)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

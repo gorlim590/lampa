@@ -1,0 +1,73 @@
+{
+  "date": "2026-10-25",
+  "environment": "Existing Linux Chromium CDP; not the physical Google TV runtime",
+  "readOnly": true,
+  "activeCloudHistoryCount": 0,
+  "homeHistoryActive": false,
+  "inactiveStandaloneStorageHistoryCount": 100,
+  "currentTimelineOwnership": {
+    "own": 1147,
+    "other": 0,
+    "unknown": 260
+  },
+  "titles": [
+    {
+      "title": "Witchboard",
+      "year": 2025,
+      "tmdb": 1107325,
+      "trakt": 890864,
+      "imdb": "tt2256055",
+      "metadataMapping": "Confirmed through native TMDB search and Trakt TMDB-ID search",
+      "timeline": {
+        "lookup": "legacy hash of original_title Witchboard",
+        "hash": "321464223",
+        "percent": 21,
+        "time": 1388.541,
+        "duration": 6771.04,
+        "updated": null,
+        "stableContentLink": null,
+        "ownerMatchesActiveCDPProfile": true
+      },
+      "actualGoogleTV27PercentSource": "NOT VERIFIED",
+      "actualPlaybackOfThisSpecificTitle": "NOT VERIFIED",
+      "rowMembership": "NOT VERIFIED: no active CDP Home History or cloud candidate record; no stable movie ID in this legacy Timeline record",
+      "inclusionRule": "Only a current-profile candidate and unambiguous real partial native position can enter; reject percent-only, completed or ID/title-colliding evidence",
+      "risk": "Witchboard (1986) TMDB17994 has the same original title; title hash alone cannot identify the remake"
+    },
+    {
+      "title": "Salem’s Lot",
+      "year": 2024,
+      "tmdb": 748230,
+      "trakt": 588276,
+      "imdb": "tt10245072",
+      "metadataMapping": "Confirmed through native TMDB search and Trakt TMDB-ID search",
+      "timeline": {
+        "lookup": "legacy hash of original_title Salem’s Lot (ASCII apostrophe)",
+        "hash": "765975203",
+        "percent": 23,
+        "time": 1593.401,
+        "duration": 6812.258,
+        "updated": null,
+        "stableContentLink": null,
+        "ownerMatchesActiveCDPProfile": true
+      },
+      "actualPlaybackOfThisSpecificTitle": "NOT VERIFIED",
+      "rowMembership": "NOT VERIFIED: no active CDP Home History or cloud candidate record; no stable movie ID in this legacy Timeline record",
+      "inclusionRule": "Same current-profile, actual-position and unambiguous media-ID rules",
+      "risk": "Same English original title also belongs to older TV adaptations; no movie/TV mapping may be inferred from the hash"
+    },
+    {
+      "title": null,
+      "tmdb": null,
+      "trakt": null,
+      "progressSource": null,
+      "actualPlayback": "NOT VERIFIED",
+      "rowMembership": "NOT VERIFIED",
+      "reason": "Physical Google TV row/runtime unavailable; do not guess the third film from unrelated Timeline records or poster appearance"
+    }
+  ],
+  "whyExactlyThree": "NOT VERIFIED for the physical row. Both YDesign and Home History put the computed eligible count in the title, not a hardcoded three. Current active cloud candidate lists are empty. Native cached/standalone storage must not replace the active cloud profile.",
+  "missingExpectedTitles": "NOT VERIFIED without concrete missing examples and their source/player. Current CDP excludes unidentifiable Timeline-only hashes because no active candidate metadata exists.",
+  "confirmedCodeDefect": "YDesign max percentage across title/provider hashes could override the authoritative Home selected position. Scoped fix makes managed Home cards use home_history_resume and invalidates the same-DOM mark cache on position changes. This is not proof that it caused the photographed 27%.",
+  "noUserDataModified": true
+}

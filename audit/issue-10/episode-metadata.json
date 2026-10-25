@@ -1,0 +1,966 @@
+[
+  {
+    "tv_id": 220542,
+    "id": 329141,
+    "name": "Сезон 1",
+    "season_number": 1,
+    "seasons_count": 3,
+    "episodes": [
+      {
+        "id": 4237712,
+        "season_number": 1,
+        "episode_number": 1,
+        "name": "Маомао",
+        "air_date": "2023-10-22",
+        "runtime": 23,
+        "vote_average": 7.806
+      },
+      {
+        "id": 4680388,
+        "season_number": 1,
+        "episode_number": 2,
+        "name": "Холодна травниця",
+        "air_date": "2023-10-22",
+        "runtime": 23,
+        "vote_average": 7.2
+      },
+      {
+        "id": 4680389,
+        "season_number": 1,
+        "episode_number": 3,
+        "name": "Справа привида в гаремі",
+        "air_date": "2023-10-22",
+        "runtime": 23,
+        "vote_average": 7.115
+      },
+      {
+        "id": 4698615,
+        "season_number": 1,
+        "episode_number": 4,
+        "name": "Загроза",
+        "air_date": "2023-10-29",
+        "runtime": 23,
+        "vote_average": 8
+      },
+      {
+        "id": 4698617,
+        "season_number": 1,
+        "episode_number": 5,
+        "name": "Операція під прикриттям",
+        "air_date": "2023-11-05",
+        "runtime": 23,
+        "vote_average": 7.5
+      },
+      {
+        "id": 4698618,
+        "season_number": 1,
+        "episode_number": 6,
+        "name": "Вечір в саду",
+        "air_date": "2023-11-12",
+        "runtime": 23,
+        "vote_average": 8
+      },
+      {
+        "id": 4698620,
+        "season_number": 1,
+        "episode_number": 7,
+        "name": "Повернення",
+        "air_date": "2023-11-19",
+        "runtime": 23,
+        "vote_average": 7.5
+      },
+      {
+        "id": 4698622,
+        "season_number": 1,
+        "episode_number": 8,
+        "name": "Стеблі пшениці",
+        "air_date": "2023-11-26",
+        "runtime": 23,
+        "vote_average": 7.3
+      },
+      {
+        "id": 4698624,
+        "season_number": 1,
+        "episode_number": 9,
+        "name": "Самогубство чи вбивство?",
+        "air_date": "2023-12-03",
+        "runtime": 23,
+        "vote_average": 7.5
+      },
+      {
+        "id": 4698625,
+        "season_number": 1,
+        "episode_number": 10,
+        "name": "Мед",
+        "air_date": "2023-12-10",
+        "runtime": 23,
+        "vote_average": 8
+      },
+      {
+        "id": 4698626,
+        "season_number": 1,
+        "episode_number": 11,
+        "name": "Один замість двох",
+        "air_date": "2023-12-17",
+        "runtime": 23,
+        "vote_average": 7.1
+      },
+      {
+        "id": 4698629,
+        "season_number": 1,
+        "episode_number": 12,
+        "name": "Євнух і куртизанка",
+        "air_date": "2023-12-24",
+        "runtime": 23,
+        "vote_average": 6.8
+      },
+      {
+        "id": 4835220,
+        "season_number": 1,
+        "episode_number": 13,
+        "name": "Служба при Зовнішньому дворі",
+        "air_date": "2024-01-07",
+        "runtime": 23,
+        "vote_average": 7.5
+      },
+      {
+        "id": 4835221,
+        "season_number": 1,
+        "episode_number": 14,
+        "name": "Нова наложниця «чиста»",
+        "air_date": "2024-01-14",
+        "runtime": 23,
+        "vote_average": 7.5
+      },
+      {
+        "id": 4835222,
+        "season_number": 1,
+        "episode_number": 15,
+        "name": "Сира риба",
+        "air_date": "2024-01-21",
+        "runtime": 23,
+        "vote_average": 7
+      },
+      {
+        "id": 4835223,
+        "season_number": 1,
+        "episode_number": 16,
+        "name": "Свинець",
+        "air_date": "2024-01-28",
+        "runtime": 23,
+        "vote_average": 7.3
+      },
+      {
+        "id": 4835224,
+        "season_number": 1,
+        "episode_number": 17,
+        "name": "Прогулянка містом",
+        "air_date": "2024-02-04",
+        "runtime": 23,
+        "vote_average": 7.8
+      },
+      {
+        "id": 4835225,
+        "season_number": 1,
+        "episode_number": 18,
+        "name": "Лакан",
+        "air_date": "2024-02-11",
+        "runtime": 23,
+        "vote_average": 7.8
+      },
+      {
+        "id": 4835226,
+        "season_number": 1,
+        "episode_number": 19,
+        "name": "Випадковість або дещо більше",
+        "air_date": "2024-02-18",
+        "runtime": 23,
+        "vote_average": 8.2
+      },
+      {
+        "id": 4835227,
+        "season_number": 1,
+        "episode_number": 20,
+        "name": "Дурман",
+        "air_date": "2024-02-25",
+        "runtime": 23,
+        "vote_average": 7.9
+      },
+      {
+        "id": 4835228,
+        "season_number": 1,
+        "episode_number": 21,
+        "name": "Як викупити контракт",
+        "air_date": "2024-03-03",
+        "runtime": 23,
+        "vote_average": 7.7
+      },
+      {
+        "id": 4835229,
+        "season_number": 1,
+        "episode_number": 22,
+        "name": "Сині троянди",
+        "air_date": "2024-03-10",
+        "runtime": 23,
+        "vote_average": 7.8
+      },
+      {
+        "id": 4835230,
+        "season_number": 1,
+        "episode_number": 23,
+        "name": "Бальзамін і квасениця",
+        "air_date": "2024-03-17",
+        "runtime": 23,
+        "vote_average": 8
+      },
+      {
+        "id": 4835231,
+        "season_number": 1,
+        "episode_number": 24,
+        "name": "Джінші й Маомао",
+        "air_date": "2024-03-24",
+        "runtime": 23,
+        "vote_average": 8.1
+      },
+      {
+        "id": 5892111,
+        "season_number": 1,
+        "episode_number": 25,
+        "name": "Маомао та Маомао",
+        "air_date": "2025-01-10",
+        "runtime": 24,
+        "vote_average": 8.2
+      },
+      {
+        "id": 5892112,
+        "season_number": 1,
+        "episode_number": 26,
+        "name": "Караван",
+        "air_date": "2025-01-17",
+        "runtime": 24,
+        "vote_average": 7.9
+      },
+      {
+        "id": 5892113,
+        "season_number": 1,
+        "episode_number": 27,
+        "name": "Трупний гриб",
+        "air_date": "2025-01-24",
+        "runtime": 24,
+        "vote_average": 7.6
+      },
+      {
+        "id": 5892114,
+        "season_number": 1,
+        "episode_number": 28,
+        "name": "Дзеркало",
+        "air_date": "2025-01-31",
+        "runtime": 24,
+        "vote_average": 7.2
+      },
+      {
+        "id": 5892115,
+        "season_number": 1,
+        "episode_number": 29,
+        "name": "Місячна фея",
+        "air_date": "2025-02-07",
+        "runtime": 24,
+        "vote_average": 8.2
+      },
+      {
+        "id": 5892116,
+        "season_number": 1,
+        "episode_number": 30,
+        "name": "Кришталевий павільйон втретє",
+        "air_date": "2025-02-14",
+        "runtime": 24,
+        "vote_average": 8.2
+      },
+      {
+        "id": 5892117,
+        "season_number": 1,
+        "episode_number": 31,
+        "name": "Святиня вибору",
+        "air_date": "2025-02-21",
+        "runtime": 24,
+        "vote_average": 8.1
+      },
+      {
+        "id": 5892118,
+        "season_number": 1,
+        "episode_number": 32,
+        "name": "імператриця-вдова",
+        "air_date": "2025-02-28",
+        "runtime": 24,
+        "vote_average": 8.1
+      },
+      {
+        "id": 5892119,
+        "season_number": 1,
+        "episode_number": 33,
+        "name": "Покійний імператор",
+        "air_date": "2025-03-07",
+        "runtime": 24,
+        "vote_average": 8.5
+      },
+      {
+        "id": 5892120,
+        "season_number": 1,
+        "episode_number": 34,
+        "name": "Історія про привида",
+        "air_date": "2025-03-14",
+        "runtime": 24,
+        "vote_average": 6.8
+      },
+      {
+        "id": 5892121,
+        "season_number": 1,
+        "episode_number": 35,
+        "name": "Полювання",
+        "air_date": "2025-03-21",
+        "runtime": 24,
+        "vote_average": 8.364
+      },
+      {
+        "id": 5892122,
+        "season_number": 1,
+        "episode_number": 36,
+        "name": "Місячний принц",
+        "air_date": "2025-03-28",
+        "runtime": 24,
+        "vote_average": 7.9
+      },
+      {
+        "id": 5892123,
+        "season_number": 1,
+        "episode_number": 37,
+        "name": "Лазні",
+        "air_date": "2025-04-04",
+        "runtime": 24,
+        "vote_average": 6.9
+      },
+      {
+        "id": 5892124,
+        "season_number": 1,
+        "episode_number": 38,
+        "name": "Танцюючий привид",
+        "air_date": "2025-04-11",
+        "runtime": 24,
+        "vote_average": 7.6
+      },
+      {
+        "id": 5892125,
+        "season_number": 1,
+        "episode_number": 39,
+        "name": "Лід",
+        "air_date": "2025-04-18",
+        "runtime": 24,
+        "vote_average": 8.1
+      },
+      {
+        "id": 5892126,
+        "season_number": 1,
+        "episode_number": 40,
+        "name": "Прихована злість",
+        "air_date": "2025-04-25",
+        "runtime": 24,
+        "vote_average": 8.2
+      },
+      {
+        "id": 5892127,
+        "season_number": 1,
+        "episode_number": 41,
+        "name": "Село лисиць",
+        "air_date": "2025-05-02",
+        "runtime": 24,
+        "vote_average": 8.1
+      },
+      {
+        "id": 5892128,
+        "season_number": 1,
+        "episode_number": 42,
+        "name": "Ліхтарик",
+        "air_date": "2025-05-09",
+        "runtime": 24,
+        "vote_average": 8.5
+      },
+      {
+        "id": 5892129,
+        "season_number": 1,
+        "episode_number": 43,
+        "name": "Фестиваль",
+        "air_date": "2025-05-23",
+        "runtime": 24,
+        "vote_average": 7.8
+      },
+      {
+        "id": 5892130,
+        "season_number": 1,
+        "episode_number": 44,
+        "name": "Цитадель",
+        "air_date": "2025-05-30",
+        "runtime": 24,
+        "vote_average": 8.2
+      },
+      {
+        "id": 5892131,
+        "season_number": 1,
+        "episode_number": 45,
+        "name": "Яма",
+        "air_date": "2025-06-06",
+        "runtime": 24,
+        "vote_average": 7.1
+      },
+      {
+        "id": 5892132,
+        "season_number": 1,
+        "episode_number": 46,
+        "name": "Імператорська гвардія",
+        "air_date": "2025-06-13",
+        "runtime": 24,
+        "vote_average": 8.4
+      },
+      {
+        "id": 5892133,
+        "season_number": 1,
+        "episode_number": 47,
+        "name": "Клан Ші",
+        "air_date": "2025-06-27",
+        "runtime": 24,
+        "vote_average": 8.1
+      },
+      {
+        "id": 5892134,
+        "season_number": 1,
+        "episode_number": 48,
+        "name": "Початок",
+        "air_date": "2025-07-04",
+        "runtime": 24,
+        "vote_average": 8.3
+      },
+      {
+        "id": 7810328,
+        "season_number": 1,
+        "episode_number": 49,
+        "name": "Сарана",
+        "air_date": "2026-10-02",
+        "runtime": 24,
+        "vote_average": 7.5
+      },
+      {
+        "id": 7810338,
+        "season_number": 1,
+        "episode_number": 50,
+        "name": "Вбрання Вогняного Щура",
+        "air_date": "2026-10-09",
+        "runtime": 24,
+        "vote_average": 7.5
+      },
+      {
+        "id": 7810340,
+        "season_number": 1,
+        "episode_number": 51,
+        "name": "Якщо нема хліба...",
+        "air_date": "2026-10-16",
+        "runtime": 24,
+        "vote_average": 7.5
+      },
+      {
+        "id": 7810341,
+        "season_number": 1,
+        "episode_number": 52,
+        "name": "Серія 52",
+        "air_date": "2026-10-23",
+        "runtime": 24,
+        "vote_average": 7.667
+      },
+      {
+        "id": 7810342,
+        "season_number": 1,
+        "episode_number": 53,
+        "name": "Серія 53",
+        "air_date": "2026-10-30",
+        "runtime": null,
+        "vote_average": 0
+      },
+      {
+        "id": 7810343,
+        "season_number": 1,
+        "episode_number": 54,
+        "name": "Серія 54",
+        "air_date": "2026-11-06",
+        "runtime": null,
+        "vote_average": 0
+      },
+      {
+        "id": 7810345,
+        "season_number": 1,
+        "episode_number": 55,
+        "name": "Серія 55",
+        "air_date": "2026-11-13",
+        "runtime": null,
+        "vote_average": 0
+      },
+      {
+        "id": 7810349,
+        "season_number": 1,
+        "episode_number": 56,
+        "name": "Серія 56",
+        "air_date": "2026-11-20",
+        "runtime": null,
+        "vote_average": 0
+      },
+      {
+        "id": 7810357,
+        "season_number": 1,
+        "episode_number": 57,
+        "name": "Серія 57",
+        "air_date": "2026-11-27",
+        "runtime": null,
+        "vote_average": 0
+      },
+      {
+        "id": 7810361,
+        "season_number": 1,
+        "episode_number": 58,
+        "name": "Серія 58",
+        "air_date": "2026-12-04",
+        "runtime": null,
+        "vote_average": 0
+      },
+      {
+        "id": 7810363,
+        "season_number": 1,
+        "episode_number": 59,
+        "name": "Серія 59",
+        "air_date": "2026-12-11",
+        "runtime": null,
+        "vote_average": 0
+      },
+      {
+        "id": 7810366,
+        "season_number": 1,
+        "episode_number": 60,
+        "name": "Серія 60",
+        "air_date": "2026-12-18",
+        "runtime": null,
+        "vote_average": 0
+      }
+    ],
+    "native_episode_count": 24
+  },
+  {
+    "tv_id": 1396,
+    "id": 3578,
+    "name": "Сезон 5",
+    "season_number": 5,
+    "episodes": [
+      {
+        "id": 62147,
+        "season_number": 5,
+        "episode_number": 1,
+        "name": "Живи вільним або помри",
+        "air_date": "2012-07-15",
+        "runtime": 43,
+        "vote_average": 8.6
+      },
+      {
+        "id": 62148,
+        "season_number": 5,
+        "episode_number": 2,
+        "name": "Мадригал",
+        "air_date": "2012-07-22",
+        "runtime": 48,
+        "vote_average": 8.4
+      },
+      {
+        "id": 62149,
+        "season_number": 5,
+        "episode_number": 3,
+        "name": "Плата за ризик",
+        "air_date": "2012-07-29",
+        "runtime": 48,
+        "vote_average": 8.4
+      },
+      {
+        "id": 62150,
+        "season_number": 5,
+        "episode_number": 4,
+        "name": "П'ятдесят один",
+        "air_date": "2012-08-05",
+        "runtime": 48,
+        "vote_average": 8.3
+      },
+      {
+        "id": 62151,
+        "season_number": 5,
+        "episode_number": 5,
+        "name": "Мертвий вантаж",
+        "air_date": "2012-08-12",
+        "runtime": 49,
+        "vote_average": 9.2
+      },
+      {
+        "id": 62152,
+        "season_number": 5,
+        "episode_number": 6,
+        "name": "Відступні",
+        "air_date": "2012-08-19",
+        "runtime": 48,
+        "vote_average": 8.6
+      },
+      {
+        "id": 62153,
+        "season_number": 5,
+        "episode_number": 7,
+        "name": "Назви моє ім'я",
+        "air_date": "2012-08-26",
+        "runtime": 48,
+        "vote_average": 9.1
+      },
+      {
+        "id": 62154,
+        "season_number": 5,
+        "episode_number": 8,
+        "name": "Ковзаючи через все",
+        "air_date": "2012-09-02",
+        "runtime": 48,
+        "vote_average": 9.1
+      },
+      {
+        "id": 62155,
+        "season_number": 5,
+        "episode_number": 9,
+        "name": "Криваві гроші",
+        "air_date": "2013-08-11",
+        "runtime": 48,
+        "vote_average": 9
+      },
+      {
+        "id": 62156,
+        "season_number": 5,
+        "episode_number": 10,
+        "name": "Закопане",
+        "air_date": "2013-08-18",
+        "runtime": 48,
+        "vote_average": 8.7
+      },
+      {
+        "id": 62159,
+        "season_number": 5,
+        "episode_number": 11,
+        "name": "Зізнання",
+        "air_date": "2013-08-25",
+        "runtime": 48,
+        "vote_average": 9.2
+      },
+      {
+        "id": 62158,
+        "season_number": 5,
+        "episode_number": 12,
+        "name": "Скажений пес",
+        "air_date": "2013-09-01",
+        "runtime": 48,
+        "vote_average": 8.8
+      },
+      {
+        "id": 62157,
+        "season_number": 5,
+        "episode_number": 13,
+        "name": "To'хаджілі",
+        "air_date": "2013-09-08",
+        "runtime": 47,
+        "vote_average": 9.4
+      },
+      {
+        "id": 62162,
+        "season_number": 5,
+        "episode_number": 14,
+        "name": "Озимандія",
+        "air_date": "2013-09-15",
+        "runtime": 48,
+        "vote_average": 9.3
+      },
+      {
+        "id": 62160,
+        "season_number": 5,
+        "episode_number": 15,
+        "name": "Гранітний штат",
+        "air_date": "2013-09-22",
+        "runtime": 54,
+        "vote_average": 9.2
+      },
+      {
+        "id": 62161,
+        "season_number": 5,
+        "episode_number": 16,
+        "name": "Феліна",
+        "air_date": "2013-09-29",
+        "runtime": 56,
+        "vote_average": 9.3
+      }
+    ],
+    "native_episode_count": 16
+  },
+  {
+    "tv_id": 1429,
+    "id": 126952,
+    "name": "Фінальний сезон",
+    "season_number": 4,
+    "episodes": [
+      {
+        "id": 1840420,
+        "season_number": 4,
+        "episode_number": 1,
+        "name": "По той бік моря",
+        "air_date": "2020-12-07",
+        "runtime": 24,
+        "vote_average": 8.585
+      },
+      {
+        "id": 2440181,
+        "season_number": 4,
+        "episode_number": 2,
+        "name": "Опівнічний поїзд",
+        "air_date": "2020-12-14",
+        "runtime": 24,
+        "vote_average": 8
+      },
+      {
+        "id": 2548771,
+        "season_number": 4,
+        "episode_number": 3,
+        "name": "Двері надії",
+        "air_date": "2020-12-21",
+        "runtime": 24,
+        "vote_average": 8.574
+      },
+      {
+        "id": 2548772,
+        "season_number": 4,
+        "episode_number": 4,
+        "name": "З рук у руки",
+        "air_date": "2020-12-28",
+        "runtime": 24,
+        "vote_average": 8.27
+      },
+      {
+        "id": 2548773,
+        "season_number": 4,
+        "episode_number": 5,
+        "name": "Оголошення війни",
+        "air_date": "2021-01-11",
+        "runtime": 24,
+        "vote_average": 9.167
+      },
+      {
+        "id": 2548774,
+        "season_number": 4,
+        "episode_number": 6,
+        "name": "Титан-молотоборець",
+        "air_date": "2021-01-18",
+        "runtime": 24,
+        "vote_average": 9.077
+      },
+      {
+        "id": 2548775,
+        "season_number": 4,
+        "episode_number": 7,
+        "name": "Напад",
+        "air_date": "2021-01-25",
+        "runtime": 24,
+        "vote_average": 8.929
+      },
+      {
+        "id": 2548776,
+        "season_number": 4,
+        "episode_number": 8,
+        "name": "Куля вбивці",
+        "air_date": "2021-02-01",
+        "runtime": 24,
+        "vote_average": 8.797
+      },
+      {
+        "id": 2548777,
+        "season_number": 4,
+        "episode_number": 9,
+        "name": "Добровольці",
+        "air_date": "2021-02-08",
+        "runtime": 24,
+        "vote_average": 8.542
+      },
+      {
+        "id": 2548778,
+        "season_number": 4,
+        "episode_number": 10,
+        "name": "Справедливий аргумент",
+        "air_date": "2021-02-15",
+        "runtime": 24,
+        "vote_average": 8.138
+      },
+      {
+        "id": 2548779,
+        "season_number": 4,
+        "episode_number": 11,
+        "name": "Брехуни",
+        "air_date": "2021-02-22",
+        "runtime": 24,
+        "vote_average": 8.246
+      },
+      {
+        "id": 2548780,
+        "season_number": 4,
+        "episode_number": 12,
+        "name": "Ті, хто вказують шлях",
+        "air_date": "2021-03-01",
+        "runtime": 24,
+        "vote_average": 8.439
+      },
+      {
+        "id": 2548781,
+        "season_number": 4,
+        "episode_number": 13,
+        "name": "Діти лісу",
+        "air_date": "2021-03-08",
+        "runtime": 24,
+        "vote_average": 8.871
+      },
+      {
+        "id": 2548782,
+        "season_number": 4,
+        "episode_number": 14,
+        "name": "Жорстокість",
+        "air_date": "2021-03-22",
+        "runtime": 24,
+        "vote_average": 9
+      },
+      {
+        "id": 2548783,
+        "season_number": 4,
+        "episode_number": 15,
+        "name": "Єдиний порятунок",
+        "air_date": "2021-03-22",
+        "runtime": 24,
+        "vote_average": 8.797
+      },
+      {
+        "id": 2548784,
+        "season_number": 4,
+        "episode_number": 16,
+        "name": "Небо і земля",
+        "air_date": "2021-03-29",
+        "runtime": 24,
+        "vote_average": 8.78
+      },
+      {
+        "id": 2833844,
+        "season_number": 4,
+        "episode_number": 17,
+        "name": "Засудження",
+        "air_date": "2022-01-10",
+        "runtime": 24,
+        "vote_average": 8.574
+      },
+      {
+        "id": 3411711,
+        "season_number": 4,
+        "episode_number": 18,
+        "name": "Несподіваний напад",
+        "air_date": "2022-01-17",
+        "runtime": 24,
+        "vote_average": 8.843
+      },
+      {
+        "id": 3416103,
+        "season_number": 4,
+        "episode_number": 19,
+        "name": "Брати",
+        "air_date": "2022-01-24",
+        "runtime": 24,
+        "vote_average": 9.164
+      },
+      {
+        "id": 3416104,
+        "season_number": 4,
+        "episode_number": 20,
+        "name": "Спогади про майбутнє",
+        "air_date": "2022-01-31",
+        "runtime": 24,
+        "vote_average": 9
+      },
+      {
+        "id": 3416105,
+        "season_number": 4,
+        "episode_number": 21,
+        "name": "Від тебе, що жила дві тисячі років тому",
+        "air_date": "2022-02-07",
+        "runtime": 24,
+        "vote_average": 8.902
+      },
+      {
+        "id": 3416106,
+        "season_number": 4,
+        "episode_number": 22,
+        "name": "Розморожування",
+        "air_date": "2022-02-14",
+        "runtime": 24,
+        "vote_average": 8.583
+      },
+      {
+        "id": 3416107,
+        "season_number": 4,
+        "episode_number": 23,
+        "name": "Багряний захід",
+        "air_date": "2022-02-21",
+        "runtime": 24,
+        "vote_average": 8.067
+      },
+      {
+        "id": 3416108,
+        "season_number": 4,
+        "episode_number": 24,
+        "name": "Гордість",
+        "air_date": "2022-02-27",
+        "runtime": 24,
+        "vote_average": 7.979
+      },
+      {
+        "id": 3416109,
+        "season_number": 4,
+        "episode_number": 25,
+        "name": "Ніч кінця",
+        "air_date": "2022-03-07",
+        "runtime": 24,
+        "vote_average": 8.217
+      },
+      {
+        "id": 3416110,
+        "season_number": 4,
+        "episode_number": 26,
+        "name": "Зрадник",
+        "air_date": "2022-03-14",
+        "runtime": 24,
+        "vote_average": 8.565
+      },
+      {
+        "id": 3508325,
+        "season_number": 4,
+        "episode_number": 27,
+        "name": "Відлуння минулого",
+        "air_date": "2022-03-21",
+        "runtime": 24,
+        "vote_average": 8.813
+      },
+      {
+        "id": 3508327,
+        "season_number": 4,
+        "episode_number": 28,
+        "name": "Світанок людства",
+        "air_date": "2022-04-04",
+        "runtime": 23,
+        "vote_average": 8.981
+      }
+    ],
+    "native_episode_count": 28
+  }
+]

@@ -212,6 +212,11 @@
     "author": "@lme_chat"
   },
   {
+    "url": "https://gorlim590.github.io/lampa/providers/torrent-search.js",
+    "status": 1,
+    "name": "Anime / Dorama torrent aliases"
+  },
+  {
     "url": "https://gorlim590.github.io/lampa/torrents-redesign.js",
     "status": 1,
     "name": "Torrents Cinema"

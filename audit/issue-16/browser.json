@@ -1,0 +1,261 @@
+{
+  "commit": "7bcf32903eff6c2c65dc34490dcf52536fd5bf49",
+  "sources": {
+    "loader.js": {
+      "expected": "0b9aa4a81f89ddd196a660d766400f29fc31744434f433bde39014e2e7f1993c",
+      "received": "0b9aa4a81f89ddd196a660d766400f29fc31744434f433bde39014e2e7f1993c",
+      "commit": "7bcf32903eff6c2c65dc34490dcf52536fd5bf49"
+    },
+    "trakt/trakt.js": {
+      "expected": "4e5316729db4e0a9f9247dd0713a6cc067007dc2dbe50b21fda892f700c99e1f",
+      "received": "4e5316729db4e0a9f9247dd0713a6cc067007dc2dbe50b21fda892f700c99e1f",
+      "commit": "7bcf32903eff6c2c65dc34490dcf52536fd5bf49"
+    },
+    "trakt/trakt-plus.js": {
+      "expected": "770846b84e900086f4ce6d5512f2a267e0d3da7c7cde587423d0941f86fd1522",
+      "received": "770846b84e900086f4ce6d5512f2a267e0d3da7c7cde587423d0941f86fd1522",
+      "commit": "7bcf32903eff6c2c65dc34490dcf52536fd5bf49"
+    },
+    "providers/torrent-search.js": {
+      "expected": "d95a14fcebf789e77a27b07dc0e502fc9b798aff1301c20de7150773e93d3434",
+      "received": "d95a14fcebf789e77a27b07dc0e502fc9b798aff1301c20de7150773e93d3434",
+      "commit": "7bcf32903eff6c2c65dc34490dcf52536fd5bf49"
+    },
+    "ui/interface-plus.js": {
+      "expected": "2b1997a7489087d157f3e5e5e8f60f573f8720752ea8aed283c532831ed7abff",
+      "received": "2b1997a7489087d157f3e5e5e8f60f573f8720752ea8aed283c532831ed7abff",
+      "commit": "7bcf32903eff6c2c65dc34490dcf52536fd5bf49"
+    },
+    "ui/design-optimized.js": {
+      "expected": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6",
+      "received": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6",
+      "commit": "7bcf32903eff6c2c65dc34490dcf52536fd5bf49"
+    },
+    "ui/cardify-plus.js": {
+      "expected": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+      "received": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+      "commit": "7bcf32903eff6c2c65dc34490dcf52536fd5bf49"
+    },
+    "torrents-redesign.js": {
+      "expected": "b312119033c05d4f0b05ed8ac8083f2cdc05cebcdcbebf0807e91d1f02e9b8de",
+      "received": "b312119033c05d4f0b05ed8ac8083f2cdc05cebcdcbebf0807e91d1f02e9b8de",
+      "commit": "7bcf32903eff6c2c65dc34490dcf52536fd5bf49"
+    },
+    "ui/stremio-hybrid.js": {
+      "expected": "cf843770f3fe5fe39f115c25e866c7bb9d091d2c81116d8b3a485717ece31f17",
+      "received": "cf843770f3fe5fe39f115c25e866c7bb9d091d2c81116d8b3a485717ece31f17",
+      "commit": "7bcf32903eff6c2c65dc34490dcf52536fd5bf49"
+    }
+  },
+  "checks": [
+    {
+      "name": "Actual modified adapter/loader/Cinema and unchanged compatibility owners loaded by exact hash",
+      "status": "PASS",
+      "data": {
+        "loader.js": {
+          "expected": "0b9aa4a81f89ddd196a660d766400f29fc31744434f433bde39014e2e7f1993c",
+          "received": "0b9aa4a81f89ddd196a660d766400f29fc31744434f433bde39014e2e7f1993c",
+          "commit": "7bcf32903eff6c2c65dc34490dcf52536fd5bf49"
+        },
+        "trakt/trakt.js": {
+          "expected": "4e5316729db4e0a9f9247dd0713a6cc067007dc2dbe50b21fda892f700c99e1f",
+          "received": "4e5316729db4e0a9f9247dd0713a6cc067007dc2dbe50b21fda892f700c99e1f",
+          "commit": "7bcf32903eff6c2c65dc34490dcf52536fd5bf49"
+        },
+        "trakt/trakt-plus.js": {
+          "expected": "770846b84e900086f4ce6d5512f2a267e0d3da7c7cde587423d0941f86fd1522",
+          "received": "770846b84e900086f4ce6d5512f2a267e0d3da7c7cde587423d0941f86fd1522",
+          "commit": "7bcf32903eff6c2c65dc34490dcf52536fd5bf49"
+        },
+        "providers/torrent-search.js": {
+          "expected": "d95a14fcebf789e77a27b07dc0e502fc9b798aff1301c20de7150773e93d3434",
+          "received": "d95a14fcebf789e77a27b07dc0e502fc9b798aff1301c20de7150773e93d3434",
+          "commit": "7bcf32903eff6c2c65dc34490dcf52536fd5bf49"
+        },
+        "ui/interface-plus.js": {
+          "expected": "2b1997a7489087d157f3e5e5e8f60f573f8720752ea8aed283c532831ed7abff",
+          "received": "2b1997a7489087d157f3e5e5e8f60f573f8720752ea8aed283c532831ed7abff",
+          "commit": "7bcf32903eff6c2c65dc34490dcf52536fd5bf49"
+        },
+        "ui/design-optimized.js": {
+          "expected": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6",
+          "received": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6",
+          "commit": "7bcf32903eff6c2c65dc34490dcf52536fd5bf49"
+        },
+        "ui/cardify-plus.js": {
+          "expected": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+          "received": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+          "commit": "7bcf32903eff6c2c65dc34490dcf52536fd5bf49"
+        },
+        "torrents-redesign.js": {
+          "expected": "b312119033c05d4f0b05ed8ac8083f2cdc05cebcdcbebf0807e91d1f02e9b8de",
+          "received": "b312119033c05d4f0b05ed8ac8083f2cdc05cebcdcbebf0807e91d1f02e9b8de",
+          "commit": "7bcf32903eff6c2c65dc34490dcf52536fd5bf49"
+        },
+        "ui/stremio-hybrid.js": {
+          "expected": "cf843770f3fe5fe39f115c25e866c7bb9d091d2c81116d8b3a485717ece31f17",
+          "received": "cf843770f3fe5fe39f115c25e866c7bb9d091d2c81116d8b3a485717ece31f17",
+          "commit": "7bcf32903eff6c2c65dc34490dcf52536fd5bf49"
+        }
+      }
+    },
+    {
+      "name": "Native Jackett before/after: Korean-only empty becomes two unique relevant EN releases",
+      "status": "PASS",
+      "data": {
+        "before": {
+          "results": 0,
+          "requests": 1,
+          "ms": 44
+        },
+        "after": {
+          "results": 2,
+          "requests": 3,
+          "ms": 101
+        }
+      }
+    },
+    {
+      "name": "No unrelated high-seed show or wrong season; magnet/quality variants preserved",
+      "status": "PASS"
+    },
+    {
+      "name": "Native torrent UI, filters and remote focus show alias results",
+      "status": "PASS"
+    },
+    {
+      "name": "Native release selection retains transport fields for Torrent/TorrServer boundary",
+      "status": "PASS"
+    },
+    {
+      "name": "Native Prowlarr uses verified romanized anime fallback, at most three requests",
+      "status": "PASS",
+      "data": {
+        "results": 1,
+        "requests": 3
+      }
+    },
+    {
+      "name": "Native TorrServer ordinary movie remains one request and retains magnet",
+      "status": "PASS"
+    },
+    {
+      "name": "Exhausted local aliases add no optional metadata request",
+      "status": "PASS"
+    },
+    {
+      "name": "Hashless structured audio variants remain distinct",
+      "status": "PASS"
+    },
+    {
+      "name": "Repeated installation does not add another parser wrapper",
+      "status": "PASS"
+    },
+    {
+      "name": "No JS exceptions and no real backend requests",
+      "status": "PASS",
+      "data": []
+    }
+  ],
+  "errors": [],
+  "requests": [
+    {
+      "scenario": "dorama",
+      "path": "/api/v2.0/indexers/all/results",
+      "query": "오징어 게임"
+    },
+    {
+      "scenario": "dorama",
+      "path": "/api/v2.0/indexers/all/results",
+      "query": "오징어 게임"
+    },
+    {
+      "scenario": "dorama",
+      "path": "/api/v2.0/indexers/all/results",
+      "query": "Гра в кальмара"
+    },
+    {
+      "scenario": "dorama",
+      "path": "/api/v2.0/indexers/all/results",
+      "query": "Squid Game"
+    },
+    {
+      "scenario": "dorama",
+      "path": "/api/v2.0/indexers/all/results",
+      "query": "오징어 게임"
+    },
+    {
+      "scenario": "dorama",
+      "path": "/api/v2.0/indexers/all/results",
+      "query": "Гра в кальмара"
+    },
+    {
+      "scenario": "dorama",
+      "path": "/api/v2.0/indexers/all/results",
+      "query": "Squid Game"
+    },
+    {
+      "scenario": "anime",
+      "path": "/api/v1/search",
+      "query": "Attack on Titan"
+    },
+    {
+      "scenario": "anime",
+      "path": "/api/v1/search",
+      "query": "Атака титанів"
+    },
+    {
+      "scenario": "anime",
+      "path": "/api/v1/search",
+      "query": "Shingeki no Kyojin"
+    },
+    {
+      "scenario": "ordinary",
+      "path": "/search/",
+      "query": "Fight Club"
+    },
+    {
+      "scenario": "local-miss",
+      "path": "/api/v2.0/indexers/all/results",
+      "query": "Squid Game"
+    },
+    {
+      "scenario": "local-miss",
+      "path": "/api/v2.0/indexers/all/results",
+      "query": "Гра в кальмара"
+    },
+    {
+      "scenario": "local-miss",
+      "path": "/api/v2.0/indexers/all/results",
+      "query": "오징어 게임"
+    }
+  ],
+  "configurationProbes": [
+    {
+      "scenario": "ordinary",
+      "path": "/",
+      "query": ""
+    },
+    {
+      "scenario": "ordinary",
+      "path": "/",
+      "query": ""
+    }
+  ],
+  "beforeAfter": {
+    "before": {
+      "results": 0,
+      "requests": 1,
+      "ms": 44
+    },
+    "after": {
+      "results": 2,
+      "requests": 3,
+      "ms": 101
+    }
+  },
+  "limits": [
+    "Synthetic parser responses; no live parser health or torrent availability claim",
+    "No real TorrServer writes/playback or physical Google TV/older WebView certification"
+  ]
+}

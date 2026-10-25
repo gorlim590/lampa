@@ -1,0 +1,10 @@
+{
+  "provenance": {
+    "anime": "https://en.wikipedia.org/wiki/Attack_on_Titan_(TV_series)",
+    "dorama": "https://en.wikipedia.org/wiki/Squid_Game",
+    "note": "Canonical titles/romanizations verified against public articles; TMDB IDs identify test metadata. Parser releases/hashes/timing below are synthetic, not live backend evidence."
+  },
+  "anime": {"id":1429,"source":"tmdb","media_type":"tv","name":"Атака титанів","original_name":"進撃の巨人","original_language":"ja","first_air_date":"2013-04-07","genres":[{"id":16,"name":"Animation"}],"translations":{"translations":[{"iso_639_1":"en","data":{"name":"Attack on Titan"}},{"iso_639_1":"uk","data":{"name":"Атака титанів"}},{"iso_639_1":"ru","data":{"name":"Атака титанов"}}]},"alternative_titles":{"results":[{"title":"Shingeki no Kyojin","type":"Romaji","iso_3166_1":"JP"}]}},
+  "dorama": {"id":93405,"source":"tmdb","media_type":"tv","name":"Гра в кальмара","original_name":"오징어 게임","original_language":"ko","first_air_date":"2021-09-17","genres":[],"translations":{"translations":[{"iso_639_1":"en","data":{"name":"Squid Game"}}]},"alternative_titles":{"results":[{"title":"Ojingeo geim","type":"Romanized","iso_3166_1":"KR"}]}},
+  "movie": {"id":550,"source":"tmdb","media_type":"movie","title":"Fight Club","original_title":"Fight Club","original_language":"en","release_date":"1999-10-15","genres":[]}
+}

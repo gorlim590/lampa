@@ -1,0 +1,19 @@
+name: Season integrity regressions
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  seasons:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Native seasons and upper details ownership
+        run: node --test --test-timeout=15000 tests/seasons-info.cjs tests/details-info.cjs tests/hybrid-ui.cjs tests/details-cast.cjs tests/trakt-watched-sync.cjs tests/trakt-account-isolation.cjs

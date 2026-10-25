@@ -1,0 +1,60 @@
+{
+  "baseline": "bec69f0d3de60c7ea32f7187a0203de86e9736e2",
+  "checks": [
+    {
+      "name": "Disabled Trakt keeps sparse Full overview and omits empty/removed Details fields",
+      "status": "PASS"
+    },
+    {
+      "name": "Focused cast name remains readable on its dark surface",
+      "status": "PASS"
+    },
+    {
+      "name": "Disabled Trakt retains native person information and filmography",
+      "status": "PASS"
+    },
+    {
+      "name": "Unavailable Trakt keeps credits usable with unknown rather than unwatched status",
+      "status": "PASS"
+    },
+    {
+      "name": "Unknown works are excluded from confirmed unwatched filter",
+      "status": "PASS"
+    },
+    {
+      "name": "Changed source hashes match",
+      "status": "PASS",
+      "data": {
+        "ui/stremio-hybrid.js": "70ff404b8034dcd19d23fd772285b92c480b556687445d42ae56745fdc3e3ab8",
+        "trakt/trakt.js": "8e2c13227c1bde2893da47d57015da9b86d8795079cc7273d198cbd15166911d",
+        "trakt/trakt-plus.js": "17643ce3c907ae99b93c23066abf3af0c3405cb0dddf6268777327ec0c5ac68c",
+        "ui/interface-plus.js": "3d84de325be4f9c09578caa604ac16c1d0c9da67574fc52ad571f4cc9a0ef979",
+        "ui/design-optimized.js": "1c0fb026155d411599f7f303ca2926512a890500892fe0aeb02593117a9a4d1d",
+        "ui/cardify-plus.js": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb"
+      }
+    },
+    {
+      "name": "No JavaScript exceptions",
+      "status": "PASS",
+      "data": []
+    }
+  ],
+  "errors": [],
+  "sources": {
+    "ui/stremio-hybrid.js": "70ff404b8034dcd19d23fd772285b92c480b556687445d42ae56745fdc3e3ab8",
+    "trakt/trakt.js": "8e2c13227c1bde2893da47d57015da9b86d8795079cc7273d198cbd15166911d",
+    "trakt/trakt-plus.js": "17643ce3c907ae99b93c23066abf3af0c3405cb0dddf6268777327ec0c5ac68c",
+    "ui/interface-plus.js": "3d84de325be4f9c09578caa604ac16c1d0c9da67574fc52ad571f4cc9a0ef979",
+    "ui/design-optimized.js": "1c0fb026155d411599f7f303ca2926512a890500892fe0aeb02593117a9a4d1d",
+    "ui/cardify-plus.js": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb"
+  },
+  "limitations": [
+    "Synthetic Trakt/metadata; no real account writes or live Trakt confirmation",
+    "Physical Google TV NOT TESTED"
+  ],
+  "testedProductCommit": "bec69f0d3de60c7ea32f7187a0203de86e9736e2",
+  "sourceVerification": "Response bytes SHA-256 equal git show testedProductCommit:path. Base Trakt executes the complete source followed by a test-only public API transport override; other plugins execute unmodified.",
+  "publishedProductCommit": "c61cfbb0924cfb6416ba65b34c1dfc6d467ed2c8",
+  "testedTree": "2545cdc789f6f53e036c64e893d0a74ccb6fefef",
+  "publicationProof": "Connector-created commits have different commit metadata; Git tree and all product blobs are exactly equal."
+}

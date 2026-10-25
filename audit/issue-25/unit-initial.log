@@ -1,0 +1,31 @@
+✔ baseline reproducer: old YDesign excludes75% and starves history behind90 bookmark candidates (10.613066ms)
+✔ real incomplete positions include25%,75%,95%; zero, completed and percent-only movies excluded (8.183944ms)
+✔ more than three resumes and history beyond90 unrelated candidates are retained (8.160394ms)
+✔ confirmed Trakt watched is separate from stale local partial and never local viewed inference (2.593036ms)
+✔ movie/TV/anime watched requires provider true; one completed episode is not completed series (2.57131ms)
+✔ dedup joins explicit TMDB/Trakt/IMDb aliases transitively without changing input cards (1.968366ms)
+✔ same numeric movie/TV/source IDs are not merged without mapping (1.721177ms)
+✔ latest position beats an older completed hash and preserves exact hash/time for native source (1.821983ms)
+✔ latest reset or completion removes resume; tied unknown timestamps prefer completion (4.555631ms)
+✔ restart rebuilds from native data, with no Home cache or writes (3.897795ms)
+✔ active Lampa profile namespace and current Trakt provider are reevaluated on every build (2.402069ms)
+✔ offline or missing Trakt never invents watched/unwatched or blocks genuine local progress (4.348635ms)
+✔ title collisions reject ambiguous legacy hashes while explicit content links remain usable (2.227402ms)
+✔ renamed title finds a linked source hash; incompatible linked legacy collision rejected (1.82057ms)
+✔ legacy title records with real time work; percentages and malformed data alone do not (1.914199ms)
+✔ TV next aired episode uses completed predecessor, excludes specials/unaired, labels no exact position (4.033772ms)
+✔ TV/anime partial episode position and legacy season>10 hash are preserved (1.784791ms)
+✔ TV percentage without seconds is explicitly labelled, not fabricated as a seek position (1.905405ms)
+✔ latest episode reset wins over older partial; new aired episode reappears after completed cached set (2.347769ms)
+✔ ContentRows replaces legacy Home payloads without ever replacing Storage.get; category/unrelated rows retained (3.106806ms)
+✔ queued own callback reads new profile data rather than retaining earlier cards (2.072584ms)
+✔ events coalesce into one timeout and repeat initialization does not duplicate rows/listeners (1.848188ms)
+✔ local progress records and playback handlers are never overwritten by building rows (1.763983ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 222.903844

@@ -6444,10 +6444,13 @@
   var TraktHistory = {
     // Функція для відображення прогресу перегляду серіалу
     showWatchProgress: function showWatchProgress(data, element) {
+      // Interface+ owns the single details section when available.
+      if (window.LampaSeriesDetails && window.LampaSeriesDetails.owns(data.movie)) return;
       // Перевіряємо чи це серіал
       if (data.movie && data.movie.first_air_date && element.object.method === 'tv') {
         // Отримуємо історію серіалу
         getShowHistory(data.movie.id).then(function (historyData) {
+          if (window.LampaSeriesDetails && window.LampaSeriesDetails.owns(data.movie)) return;
           if (historyData && historyData.length > 0) {
             // Отримуємо останній переглянутий епізод
             var lastWatched = historyData[0];
@@ -6499,15 +6502,12 @@
               progressElement.className = 'full-start-new__details trakt';
               progressElement.innerHTML = "\n                                <div class=\"trakt-icon\">".concat(icons.TRAKT_ICON, "</div>\n                                <span>").concat(Lampa.Lang.translate('full_season'), ": ").concat(season, "</span><span class=\"full-start-new__split\">\u25CF</span>\n                                <span>").concat(Lampa.Lang.translate('full_episode'), ": ").concat(episode, "</span>\n                            ");
 
-              // Знаходимо елемент після якого вставити прогрес
-              var taglineElement = renderRoot.find('.full-start-new__rate-line');
-              if (taglineElement.length) {
-                // Перевіряємо чи вже є елемент прогресу
-                var existingProgress = renderRoot.find('.full-start-new__details.trakt');
-                if (existingProgress.length) {
-                  existingProgress.remove();
-                }
-                taglineElement.after(progressElement);
+              var host = renderRoot.find('.full-start-new__details:not(.trakt), .full-start__details:not(.trakt)').first();
+              if (host.length) {
+                renderRoot.find('.full-start-new__details.trakt, .trakt-details-progress').remove();
+                progressElement.className = 'trakt-details-progress';
+                progressElement.setAttribute('aria-label', 'Остання переглянута серія · нумерація Trakt');
+                host.append(progressElement);
               }
             }
           }
@@ -10647,6 +10647,13 @@
         logDebugOnce(API_MISSING_LOG_KEY, 'API bridge is unavailable in events');
         return;
       }
+      var relatedOwner = e.object && e.object.activity;
+      var relatedSession = window.TraktPlus && window.TraktPlus.detailsSession ? window.TraktPlus.detailsSession() : null;
+      var relatedProfile = Lampa.Account && Lampa.Account.Permit && Lampa.Account.Permit.account && Lampa.Account.Permit.account.profile;
+      var relatedProfileId = String(relatedProfile && relatedProfile.id || 'default');
+      var relatedScope = params.method + ':' + params.id + ':' + relatedSession + ':' + relatedProfileId;
+      if (relatedOwner && relatedOwner._traktRelatedPending === relatedScope) return;
+      if (relatedOwner) relatedOwner._traktRelatedPending = relatedScope;
       Promise.all([Api && Api.getMediaLists(params), Api && Api.likesLists({
         page: 1,
         limit: 1000
@@ -10656,6 +10663,9 @@
           mediaListsResponse = _ref2[0],
           likedListsResponse = _ref2[1];
         var formattedMediaLists = mediaListsResponse; // getMediaLists вже повертає відформатовані дані
+        if (window.TraktPlus && window.TraktPlus.detailsSession && window.TraktPlus.detailsSession() !== relatedSession) return;
+        var currentProfile = Lampa.Account && Lampa.Account.Permit && Lampa.Account.Permit.account && Lampa.Account.Permit.account.profile;
+        if (String(currentProfile && currentProfile.id || 'default') !== relatedProfileId) return;
         var likedListIds = likedListsResponse.results.map(function (list) {
           return list.id;
         });
@@ -10671,8 +10681,8 @@
         }
 
         // Знаходимо блок з тегами
-        var tagsBlock = e.object.activity.render().find('.full-descr__tags');
-        if (tagsBlock.length === 0) {
+        var tagsBlock = e.object.activity.render().find('.full-descr__tags').first();
+        if (tagsBlock.length === 0 || tagsBlock.find('.tag-count.trakttv-lists').length) {
           return;
         }
 
@@ -10729,7 +10739,7 @@
         logWarn('Related lists loading failed', error, {
           debugOnly: true
         });
-      });
+      }).then(function () { if (relatedOwner && relatedOwner._traktRelatedPending === relatedScope) delete relatedOwner._traktRelatedPending; });
     },
     /**
      * Обробник події готовності картки фільму/серіалу
@@ -11267,6 +11277,8 @@
   function attachOnMore(line, config) {
     if (!line) return null;
     var payload = Object.assign({}, line);
+    payload.home_row_id = config.name;
+    payload.home_row_origin = 'trakt';
     payload.onMore = createOnMoreHandler(config);
     return payload;
   }

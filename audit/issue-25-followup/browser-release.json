@@ -1,0 +1,98 @@
+{
+  "commit": "afec022cb43620bb5898ae04679210d10cf07196",
+  "checks": [
+    {
+      "name": "Exact changed source and loader loaded by hash/commit",
+      "status": "PASS",
+      "data": {
+        "/loader.js": {
+          "received": "7fc40aed131e0955eb1f48876227c30f303b93efe994ca6949ac4d3f87ccc508",
+          "expected": "7fc40aed131e0955eb1f48876227c30f303b93efe994ca6949ac4d3f87ccc508",
+          "commit": "afec022cb43620bb5898ae04679210d10cf07196"
+        },
+        "/ui/stremio-hybrid.js": {
+          "received": "70ff404b8034dcd19d23fd772285b92c480b556687445d42ae56745fdc3e3ab8",
+          "expected": "70ff404b8034dcd19d23fd772285b92c480b556687445d42ae56745fdc3e3ab8",
+          "commit": "afec022cb43620bb5898ae04679210d10cf07196"
+        },
+        "/trakt/trakt-plus.js": {
+          "received": "706e6192a5e3a7d22704d03cc7f6b834e7e4e5692a0b08e97d38aa66fbc173eb",
+          "expected": "706e6192a5e3a7d22704d03cc7f6b834e7e4e5692a0b08e97d38aa66fbc173eb",
+          "commit": "afec022cb43620bb5898ae04679210d10cf07196"
+        },
+        "/ui/design-optimized.js": {
+          "received": "1c0fb026155d411599f7f303ca2926512a890500892fe0aeb02593117a9a4d1d",
+          "expected": "1c0fb026155d411599f7f303ca2926512a890500892fe0aeb02593117a9a4d1d",
+          "commit": "afec022cb43620bb5898ae04679210d10cf07196"
+        },
+        "/plugins-to-enable/home-history.js": {
+          "received": "d64565aaa77666123ba5e5538a08f4e7cd9df117d17015c4587ddf1547a1d839",
+          "expected": "d64565aaa77666123ba5e5538a08f4e7cd9df117d17015c4587ddf1547a1d839",
+          "commit": "afec022cb43620bb5898ae04679210d10cf07196"
+        },
+        "/plugins-to-enable/home-policy.js": {
+          "received": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+          "expected": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+          "commit": "afec022cb43620bb5898ae04679210d10cf07196"
+        }
+      }
+    },
+    {
+      "name": "Before release, cached complete show is watched and absent from Continue",
+      "status": "PASS"
+    },
+    {
+      "name": "New aired episode refreshes Trakt cache and mounted Home without fake resume seconds",
+      "status": "PASS"
+    },
+    {
+      "name": "One progress request; no full sync or duplicate search on repeated Home builds",
+      "status": "PASS"
+    },
+    {
+      "name": "Original page/methods restored with no fixture globals",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "sources": {
+    "/loader.js": {
+      "received": "7fc40aed131e0955eb1f48876227c30f303b93efe994ca6949ac4d3f87ccc508",
+      "expected": "7fc40aed131e0955eb1f48876227c30f303b93efe994ca6949ac4d3f87ccc508",
+      "commit": "afec022cb43620bb5898ae04679210d10cf07196"
+    },
+    "/ui/stremio-hybrid.js": {
+      "received": "70ff404b8034dcd19d23fd772285b92c480b556687445d42ae56745fdc3e3ab8",
+      "expected": "70ff404b8034dcd19d23fd772285b92c480b556687445d42ae56745fdc3e3ab8",
+      "commit": "afec022cb43620bb5898ae04679210d10cf07196"
+    },
+    "/trakt/trakt-plus.js": {
+      "received": "706e6192a5e3a7d22704d03cc7f6b834e7e4e5692a0b08e97d38aa66fbc173eb",
+      "expected": "706e6192a5e3a7d22704d03cc7f6b834e7e4e5692a0b08e97d38aa66fbc173eb",
+      "commit": "afec022cb43620bb5898ae04679210d10cf07196"
+    },
+    "/ui/design-optimized.js": {
+      "received": "1c0fb026155d411599f7f303ca2926512a890500892fe0aeb02593117a9a4d1d",
+      "expected": "1c0fb026155d411599f7f303ca2926512a890500892fe0aeb02593117a9a4d1d",
+      "commit": "afec022cb43620bb5898ae04679210d10cf07196"
+    },
+    "/plugins-to-enable/home-history.js": {
+      "received": "d64565aaa77666123ba5e5538a08f4e7cd9df117d17015c4587ddf1547a1d839",
+      "expected": "d64565aaa77666123ba5e5538a08f4e7cd9df117d17015c4587ddf1547a1d839",
+      "commit": "afec022cb43620bb5898ae04679210d10cf07196"
+    },
+    "/plugins-to-enable/home-policy.js": {
+      "received": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+      "expected": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+      "commit": "afec022cb43620bb5898ae04679210d10cf07196"
+    }
+  },
+  "blocked": [
+    "Physical Google TV",
+    "Actual user three titles/missing examples not available in this test profile",
+    "External player/provider backend"
+  ],
+  "publishedProductCommit": "f3729331f0ec86ef2f38e163a4b248d2ebbb0da4",
+  "testedTree": "5e7aa94492dff57e9fee48dcf99d85f85f51df6a",
+  "publicationProof": "Exact Git tree/blob equality; connector publication changes commit metadata only."
+}

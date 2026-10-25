@@ -1,5 +1,23 @@
 (function () {
     'use strict';
+    if (window.__ifx_plugin_initialized) return;
+    window.__ifx_plugin_initialized = true;
+
+    // One static header rule applies before app-ready and across native routes.
+    // Keep the native localized minute clock; no second clock or DOM tick loop.
+    (function injectHeaderCss() {
+        if (document.getElementById('ifx_header_css')) return;
+        var style = document.createElement('style');
+        style.id = 'ifx_header_css';
+        style.textContent = [
+            'body .head { background:#15171c !important; background-image:none !important; color:#f4f4f7; }',
+            'body .head .head__time { align-items:center; -webkit-align-items:center; margin-top:0; flex-shrink:0; }',
+            'body .head .head__time-now { font-size:1.5em; line-height:1.15; margin:0 .55em 0 0; font-variant-numeric:tabular-nums; font-feature-settings:"tnum"; }',
+            'body .head .head__time > div:last-child { text-align:left; }',
+            'body .head .head__time-date, body .head .head__time-week { font-size:.72em; line-height:1.3; white-space:nowrap; }'
+        ].join('\n');
+        document.head.appendChild(style);
+    })();
 
     var IFX_TITLE_SIZE_DEFAULT = 0.75;
     var IFX_TMDB_UA_TTL_MS = 1000 * 60 * 60 * 24 * 2;
@@ -1175,7 +1193,65 @@
         }
     }
 
-    function buildInfoPanel(details, movie, isTvShow, originalDetails) {
+    // One renderer owns TV details. Counts/progress come only from verified Trakt+.
+    // Progress.seasons describes aired/progress coverage, not a complete season catalogue.
+    // Never turn it (or TMDB's merged anime seasons) into a total season count.
+    function seriesInfoModel(movie, episodes, progress, today) {
+        progress = progress || {};
+        function number(value) { return typeof value === 'number' && isFinite(value) && value >= 0 && value % 1 === 0; }
+        function date(value) { return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && isFinite(Date.parse(value)) ? value : ''; }
+        var personal = progress.confirmed === true && number(progress.completed) && number(progress.aired) && progress.completed <= progress.aired;
+        var fields = [];
+        if (personal) fields.push({ key: 'watched', text: 'Trakt · Переглянуто: ' + progress.completed + '/' + progress.aired + ' в ефірі' });
+        else if (progress.phase === 'loading') fields.push({ key: 'watched', text: 'Trakt · Завантаження…' });
+        else if (progress.phase === 'error') fields.push({ key: 'watched', text: 'Trakt · Дані недоступні' });
+        var runtime = calculateAverageEpisodeDuration(movie);
+        if (runtime > 0) fields.push({ key: 'runtime', text: '≈' + formatDurationMinutes(runtime) });
+        function episode(ep, label) {
+            // Titles identify the actual Trakt episode without inventing broadcast S/E
+            // coordinates from an absolute/merged source season. No TMDB fallback.
+            if (!personal || !ep || !ep.title) return '';
+            return label + ' (Trakt): ' + ep.title + (date(ep.date) ? ' · ' + date(ep.date) : '');
+        }
+        return { fields: fields, phase: progress.phase || 'unavailable',
+            last: episode(progress.last, 'Остання переглянута'), next: episode(progress.next, 'Наступна непереглянута') };
+    }
+    function seriesOwns(movie) {
+        return !!movie && !!(movie.first_air_date || movie.number_of_seasons || Array.isArray(movie.seasons)) && getBool('interface_mod_new_info_panel', true);
+    }
+    function seriesRecord(details, movie, episodes, root) {
+        var node = details[0], record = node.__seriesInfo;
+        if (!record || String(record.movie.id) !== String(movie.id)) record = node.__seriesInfo = { details: details, movie: movie, episodes: episodes || [], root: root, originalHTML: details.html(), serial: 0, progress: { phase: 'loading' } };
+        if (episodes) record.episodes = episodes; return record;
+    }
+    function refreshSeries(record, force, clear) {
+        if (!record || !record.details[0].isConnected || !seriesOwns(record.movie)) return;
+        var provider = window.TraktPlus, serial = ++record.serial;
+        if (clear) record.progress = { phase: 'loading' };
+        function render() { record.details.empty(); buildInfoPanel(record.details, record.movie, true, '', record); }
+        render();
+        if (!provider || !provider.detailsProgress || Lampa.Storage.field('trakttv_show_tv_progress') === false) { record.progress = { phase: 'unavailable' }; render(); return; }
+        provider.detailsProgress(record.movie, force).then(function (progress) {
+            var active = Lampa.Activity.active();
+            if (record.serial !== serial || window.TraktPlus !== provider || !record.details[0].isConnected || active.component !== 'full' || String(active.id || active.card && active.card.id) !== String(record.movie.id) || provider.detailsSession() !== progress.session) return;
+            record.progress = progress; render();
+        });
+    }
+    function refreshActiveSeries(force, clear) {
+        var a = Lampa.Activity.active(); if (!a || a.component !== 'full' || !a.activity) return;
+        var root = $(a.activity.render()), comp = a.activity.component, movie = comp && comp.props && comp.props.get('movie');
+        if (!seriesOwns(movie)) return;
+        var details = root.find('.cardify__details .full-start-new__details:not(.trakt)').first();
+        if (!details.length) details = root.find('.full-start-new__details:not(.trakt), .full-start__details:not(.trakt)').first();
+        if (!details.length) return;
+        root.find('.full-start-new__details.trakt, .trakt-applecation-progress, .trakt-details-progress').remove();
+        var data = comp.props.get('episodes'), record = seriesRecord(details, movie, data && data.episodes, root);
+        __ifx_last.details = details; __ifx_last.movie = movie; __ifx_last.isTv = true; __ifx_last.fullRoot = root; __ifx_last.originalHTML = record.originalHTML;
+        refreshSeries(record, force, clear);
+    }
+    window.LampaSeriesDetails = { owns: seriesOwns, model: seriesInfoModel };
+
+    function buildInfoPanel(details, movie, isTvShow, originalDetails, series) {
         var mono = isMonoFor('interface_mod_new_info_panel');
         var container = $('<div>').css({
             display: 'flex',
@@ -1264,47 +1340,13 @@
                 color: text
             });
         }
-        if (isTvShow && Array.isArray(movie.seasons)) {
-            var totalEps = 0, airedEps = 0, now = new Date(), hasEpisodes = false;
-            movie.seasons.forEach(function (s) {
-                if (s.season_number === 0) return;
-                if (s.episode_count) totalEps += s.episode_count;
-                if (Array.isArray(s.episodes) && s.episodes.length) {
-                    hasEpisodes = true;
-                    s.episodes.forEach(function (e) {
-                        if (e.air_date && new Date(e.air_date) <= now) airedEps++;
-                    });
-                } else if (s.air_date && new Date(s.air_date) <= now && s.episode_count) {
-                    airedEps += s.episode_count;
-                }
-            });
-            if (!hasEpisodes && movie.next_episode_to_air && movie.next_episode_to_air.season_number && movie.next_episode_to_air.episode_number) {
-                var nextS = movie.next_episode_to_air.season_number, nextE = movie.next_episode_to_air.episode_number, rem = 0;
-                movie.seasons.forEach(function (s) {
-                    if (s.season_number === nextS) rem += (s.episode_count || 0) - nextE + 1;
-                    else if (s.season_number > nextS) rem += s.episode_count || 0;
-                });
-                if (rem > 0 && totalEps > 0) airedEps = Math.max(0, totalEps - rem);
-            }
-            var epsText = '';
-            if (totalEps > 0 && airedEps > 0 && airedEps < totalEps) epsText = airedEps + ' ' + plural(airedEps, 'Серія', 'Серії', 'Серій') + ' з ' + totalEps;
-            else if (totalEps > 0) epsText = totalEps + ' ' + plural(totalEps, 'Серія', 'Серії', 'Серій');
-            if (epsText) row1.append(
-                $('<span>').text(epsText).css(badgeCss(colors.episodes.bg, colors.episodes.text))
-            );
-        }
-        if (isTvShow && movie.next_episode_to_air && movie.next_episode_to_air.air_date) {
-            var nextDate = new Date(movie.next_episode_to_air.air_date), today = new Date();
-            nextDate.setHours(0, 0, 0, 0);
-            today.setHours(0, 0, 0, 0);
-            var diff = Math.floor((nextDate - today) / (1000 * 60 * 60 * 24));
-            var txt = diff === 0 ? 'Наступна серія вже сьогодні'
-                : diff === 1 ? 'Наступна серія вже завтра'
-                    : diff > 1 ? ('Наступна серія через ' + diff + ' ' + plural(diff, 'день', 'дні', 'днів'))
-                        : '';
-            if (txt) row2.append(
-                $('<span>').text(txt).css(badgeCss(colors.next.bg, colors.next.text))
-            );
+        if (isTvShow) {
+            details.attr('data-series-info', 'true'); container.addClass('ifx-series-info').css({ margin: '0 0 .5em', gap: '.4em' });
+            var view = seriesInfoModel(movie, series && series.episodes, series && series.progress);
+            details.attr('data-series-phase', view.phase); row1.css({ gap: '.55em' }); row2.css({ gap: '.55em' });
+            view.fields.forEach(function (field) { row1.append($('<span>').attr('data-series-field', field.key).text(field.text)); });
+            if (view.last) row2.append($('<span>').attr('data-series-field', 'last').text(view.last));
+            if (view.next) row2.append($('<span>').attr('data-series-field', 'next').text(view.next));
         }
         if (!isTvShow && movie.runtime > 0) {
             var mins = movie.runtime, h = Math.floor(mins / 60), m = mins % 60;
@@ -1313,20 +1355,6 @@
             if (m > 0) tt += (h > 0 ? ' ' : '') + m + ' хв.';
             row3.append(
                 $('<span>').text(tt).css(badgeCss(colors.duration.bg, colors.duration.text))
-            );
-        } else if (isTvShow) {
-            var avg = calculateAverageEpisodeDuration(movie);
-            if (avg > 0) row3.append(
-                $('<span>').text('Тривалість серії ≈ ' + formatDurationMinutes(avg))
-                    .css(badgeCss(colors.duration.bg, colors.duration.text))
-            );
-        }
-        var seasonsCount = (movie.season_count || movie.number_of_seasons || (movie.seasons ? movie.seasons.filter(function (s) {
-            return s.season_number !== 0;
-        }).length : 0)) || 0;
-        if (isTvShow && seasonsCount > 0) {
-            row4.append(
-                $('<span>').text('Сезони: ' + seasonsCount).css(badgeCss(colors.seasons.bg, colors.seasons.text))
             );
         }
         var genreList = [];
@@ -1353,33 +1381,26 @@
             __ifx_last.details.html(__ifx_last.originalHTML);
         } else {
             __ifx_last.details.empty();
-            buildInfoPanel(__ifx_last.details, __ifx_last.movie, __ifx_last.isTv, __ifx_last.originalHTML);
+            buildInfoPanel(__ifx_last.details, __ifx_last.movie, __ifx_last.isTv, __ifx_last.originalHTML, __ifx_last.details[0].__seriesInfo);
         }
     }
     function newInfoPanel() {
         Lampa.Listener.follow('full', function (data) {
             if (data.type !== 'complite') return;
             setTimeout(function () {
-                var root = $(data.object.activity.render());
-                // Preserve Trakt progress nodes: decorate only the native information block.
-                var details = root.find('.full-start-new__details, .full-start__details').not('.trakt').first();
-                if (!details.length) return;
-                var movie = data.data.movie || {};
-                var isTvShow = (movie && (
-                    movie.number_of_seasons > 0 ||
-                    (movie.seasons && movie.seasons.length > 0) ||
-                    movie.type === 'tv' || movie.type === 'serial'
-                ));
-                __ifx_last.details = details;
-                __ifx_last.movie = movie;
-                __ifx_last.isTv = isTvShow;
-                __ifx_last.originalHTML = details.html();
-                __ifx_last.fullRoot = root;
-                if (!getBool('interface_mod_new_info_panel', true)) return;
-                details.empty();
-                buildInfoPanel(details, movie, isTvShow, __ifx_last.originalHTML);
+                var root = $(data.object.activity.render()), movie = data.data.movie || {};
+                if (seriesOwns(movie)) { refreshActiveSeries(false, false); return; }
+                var details = root.find('.full-start-new__details, .full-start__details').not('.trakt').first(); if (!details.length) return;
+                __ifx_last.details = details; __ifx_last.movie = movie; __ifx_last.isTv = false; __ifx_last.originalHTML = details.html(); __ifx_last.fullRoot = root;
+                if (getBool('interface_mod_new_info_panel', true)) { details.empty(); buildInfoPanel(details, movie, false, __ifx_last.originalHTML); }
             }, 100);
         });
+        var queued = false, forceQueued = false, clearQueued = false;
+        function queue(force, clear) { forceQueued = forceQueued || force; clearQueued = clearQueued || clear; if (queued) return; queued = true; Promise.resolve().then(function () { var force = forceQueued, clear = clearQueued; queued = forceQueued = clearQueued = false; refreshActiveSeries(force, clear); }); }
+        document.addEventListener('traktplus:watched', function () { queue(true, false); });
+        if (Lampa.Storage.listener) Lampa.Storage.listener.follow('change', function (event) { if (event && /^(trakt_token|trakt_plus_enable|trakttv_show_tv_progress)$/.test(event.name)) queue(false, true); });
+        Lampa.Listener.follow('activity', function () { queue(false, false); });
+        setTimeout(function () { refreshActiveSeries(false, false); }, 0);
     }
 
     function updateVoteColors() {

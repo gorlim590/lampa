@@ -1,0 +1,17 @@
+name: Home history regressions
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  home-history:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Focused Home history checks
+        run: node --test --test-timeout=15000 tests/home-history.cjs tests/home-trakt-progress.cjs tests/home-progress-display.cjs

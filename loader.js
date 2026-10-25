@@ -20,13 +20,14 @@
   window.LampaLoaderStarted = true;
 
   var BASE = String(window.LAMPA_PLUGINS_BASE || 'https://gorlim590.github.io/lampa/').replace(/\/?$/, '/');
-  var VERSION = String(window.LAMPA_PLUGINS_VERSION || '20261023-ydesign-3.4.0');
+  var VERSION = String(window.LAMPA_PLUGINS_VERSION || '20261025-integration-3.4.1');
   var TIMEOUT_MS = 8000;
 
   // Базовий порядок з README: Trakt → Trakt+ → Interface+ → YDesign → решта за потреби.
   var DEFAULT_LIST = [
     'trakt/trakt.js',
     'trakt/trakt-plus.js',
+    'providers/torrent-search.js',
     'ui/interface-plus.js',
     'ui/design-optimized.js',
     'media/average-rating.js',

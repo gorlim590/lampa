@@ -8,7 +8,7 @@
 
     if (window.YDesignLoaded) return;
     window.YDesignLoaded = true;
-    window.YDesignVersion = '3.4.0';
+    window.YDesignVersion = '3.4.1';
 
     // =========================================================================
     // 1. КОНФІГУРАЦІЯ ТА ВЕКТОРНІ ІКОНКИ РЕЙТИНГІВ
@@ -1497,6 +1497,12 @@
 
     // Відсоток перегляду фільму: хеш за кількома назвами + власна функція Lampa
     function moviePercent(data) {
+        // Managed Home cards already carry the selected native position. Do not
+        // replace it with a larger percentage from another title/provider hash.
+        if (data && data.home_history_resume) {
+            var resume = data.home_history_resume, percent = Number(resume.percent);
+            return resume.mode === 'position' && Number(resume.time) > 0 && isFinite(percent) && percent >= 0 && percent <= 100 ? percent : 0;
+        }
         var best = 0, seen = {};
         var names = [data.original_title, data.original_name, data.title, data.name];
         for (var i = 0; i < names.length; i++) {
@@ -1551,13 +1557,7 @@
         return null;
     }
 
-    /*
-     * Фільм:  позначка «Переглянуто» в Lampa  АБО  фільм є в «Історії перегляду» (налаштування «усі з Історії»)
-     *         АБО  прогрес ≥ 90%.  Усередині рядка «Продовжити перегляд» фільм не вважається переглянутим.
-     * Серіал / аніме:  переглянута ОСТАННЯ вийшла серія (прогрес ≥ 90%).
-     *   Позначка «Переглянуто» враховується лише для завершених серіалів.
-     */
-    // Міст до плагіна Trakt+ (window.TraktPlus.isWatched) — єдина позначка «Переглянуто» без дублювання
+    // Confirmed Trakt evidence owns watched; local Timeline remains playback progress.
 
     // власний (повний URL) постер картки, якщо немає TMDB-шляху — наприклад, картки Trakt+
     function ownImg(d) {
@@ -1706,9 +1706,11 @@
         var day = new Date().getDate();
         var parts = type === 'tv' ? null : getCollParts(el, ext);
         var mk = el._ydesign_mk;
-        if (mk && mk.epoch === MarksEpoch && mk.ext === ext && mk.day === day && mk.coll === !!parts) { mk.watched = isWatched(data, mk); return mk; }
+        var homeProgress = data && data.home_history_resume ? [data.home_history_resume.mode, data.home_history_resume.percent, data.home_history_resume.time, data.home_history_resume.updated].join('|') : null;
+        var traktSession = data && data._trakt_cached_only && window.TraktPlus && typeof TraktPlus.detailsSession === 'function' ? TraktPlus.detailsSession() : null;
+        if (mk && mk.epoch === MarksEpoch && mk.ext === ext && mk.day === day && mk.coll === !!parts && mk.traktSession === traktSession && mk.homeProgress === homeProgress) { mk.watched = isWatched(data, mk); return mk; }
 
-        mk = { epoch: MarksEpoch, ext: ext, day: day, coll: !!parts, pct: 0, tv: null, seq: false };
+        mk = { epoch: MarksEpoch, ext: ext, day: day, coll: !!parts, traktSession: traktSession, homeProgress: homeProgress, pct: 0, tv: null, seq: false };
         mk.info = releaseInfo(data, type, ext);
         mk.watched = isWatched(data, mk);
         if (type === 'tv') {
@@ -1747,6 +1749,10 @@
         var view = el.querySelector ? el.querySelector('.card__view') : null;
         if (!view) return;
         var mk = computeMarks(el, data, type, ext);
+        if (data && data._trakt_cached_only) {
+            var cachedProgress = window.TraktPlus && TraktPlus.cachedViewing ? TraktPlus.cachedViewing(data) : null;
+            syncNode(view, 'tp-person-watch', 'tp-person-watch', cachedProgress && cachedProgress.partial ? 'Trakt · ' + cachedProgress.completed + '/' + cachedProgress.aired + ' еп.' : null);
+        }
 
         // зліва зверху: «Новинка» / «Нова серія · Завтра» / «Скоро» + «Продовження»
         var tl = view.querySelector('.ydesign-tl');
@@ -1925,9 +1931,9 @@
         try {
             if (!window.Lampa || !Lampa.ContentRows || typeof Lampa.ContentRows.add !== 'function') return;
             RowsStore.registered = true;
-            Lampa.ContentRows.add({
+            if (!(window.LampaHomeHistory && window.LampaHomeHistory.active)) Lampa.ContentRows.add({
                 index: 1, name: 'ydesign_continue', title: 'Продовжити перегляд', screen: ['main'],
-                call: function () { return makeRowCall('cont', 'Продовжити перегляд'); }
+                call: function () { if (!(window.LampaHomeHistory && window.LampaHomeHistory.active)) return makeRowCall('cont', 'Продовжити перегляд'); }
             });
             Lampa.ContentRows.add({
                 index: 2, name: 'ydesign_week', title: 'Виходять цього тижня', screen: ['main'],

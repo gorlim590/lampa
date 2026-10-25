@@ -1,0 +1,265 @@
+{
+  "commit": "bb1a45acf5ac53d97dcdfc46c3bb1c242e35aa29",
+  "checks": [
+    {
+      "name": "Exact changed JS and helper auto-loaded by commit/hash",
+      "status": "PASS",
+      "data": {
+        "/loader.js": {
+          "received": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
+          "expected": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
+          "commit": "bb1a45acf5ac53d97dcdfc46c3bb1c242e35aa29"
+        },
+        "/ui/stremio-hybrid.js": {
+          "received": "c95d4ab5fed670419a001af85a7d9c76f995568eff52dac1fcb7f518c7f54c22",
+          "expected": "c95d4ab5fed670419a001af85a7d9c76f995568eff52dac1fcb7f518c7f54c22",
+          "commit": "bb1a45acf5ac53d97dcdfc46c3bb1c242e35aa29"
+        },
+        "/trakt/trakt.js": {
+          "received": "4e5316729db4e0a9f9247dd0713a6cc067007dc2dbe50b21fda892f700c99e1f",
+          "expected": "4e5316729db4e0a9f9247dd0713a6cc067007dc2dbe50b21fda892f700c99e1f",
+          "commit": "bb1a45acf5ac53d97dcdfc46c3bb1c242e35aa29"
+        },
+        "/trakt/trakt-plus.js": {
+          "received": "770846b84e900086f4ce6d5512f2a267e0d3da7c7cde587423d0941f86fd1522",
+          "expected": "770846b84e900086f4ce6d5512f2a267e0d3da7c7cde587423d0941f86fd1522",
+          "commit": "bb1a45acf5ac53d97dcdfc46c3bb1c242e35aa29"
+        },
+        "/plugins-to-enable/home-history.js": {
+          "received": "c79849c43e01428537871c9d09a2526e9e327113fa060f1be27133f9ea502d0d",
+          "expected": "c79849c43e01428537871c9d09a2526e9e327113fa060f1be27133f9ea502d0d",
+          "commit": "bb1a45acf5ac53d97dcdfc46c3bb1c242e35aa29"
+        },
+        "/plugins-to-enable/home-policy.js": {
+          "received": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+          "expected": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+          "commit": "bb1a45acf5ac53d97dcdfc46c3bb1c242e35aa29"
+        }
+      }
+    },
+    {
+      "name": "Native TMDB Home keeps actual Trakt+ rows, both History rows and title-identical plugin; native recommendations absent",
+      "status": "PASS",
+      "data": {
+        "ids": [
+          "TraktPlusTrend_movies",
+          "TraktPlusTrend_shows",
+          "home_history_resume",
+          "home_history_watched",
+          "issue30_third_party"
+        ],
+        "active": 0,
+        "dom": [
+          {
+            "sameParent": true,
+            "title": "Зараз дивляться: фільми"
+          },
+          {
+            "sameParent": true,
+            "title": "Зараз дивляться: серіали"
+          },
+          {
+            "sameParent": true,
+            "title": "Продовжити перегляд (1)"
+          },
+          {
+            "sameParent": true,
+            "title": "Переглянуто (1)"
+          },
+          {
+            "sameParent": true,
+            "title": "Топ фільми"
+          }
+        ],
+        "inventory": [
+          {
+            "id": "core:tmdb:tv/top_rated",
+            "origin": "core",
+            "action": "hidden",
+            "kind": "recommendation"
+          },
+          {
+            "id": "core:tmdb:movie/top_rated",
+            "origin": "core",
+            "action": "hidden",
+            "kind": "recommendation"
+          },
+          {
+            "id": "core:tmdb:trending/tv/week",
+            "origin": "core",
+            "action": "hidden",
+            "kind": "recommendation"
+          },
+          {
+            "id": "core:tmdb:movie/popular",
+            "origin": "core",
+            "action": "hidden",
+            "kind": "recommendation"
+          },
+          {
+            "id": "core:tmdb:movie/upcoming",
+            "origin": "core",
+            "action": "hidden",
+            "kind": "recommendation"
+          },
+          {
+            "id": "core:tmdb:trending/movie/week",
+            "origin": "core",
+            "action": "hidden",
+            "kind": "recommendation"
+          },
+          {
+            "id": "core:tmdb:trending/movie/day",
+            "origin": "core",
+            "action": "hidden",
+            "kind": "recommendation"
+          },
+          {
+            "id": "core:tmdb:movie/now_playing",
+            "origin": "core",
+            "action": "hidden",
+            "kind": "recommendation"
+          },
+          {
+            "id": "core:tmdb:discover/movie?with_genres=",
+            "origin": "core",
+            "action": "hidden",
+            "kind": "recommendation"
+          },
+          {
+            "id": "core:tmdb:builder-dd55f4e44543",
+            "origin": "core",
+            "action": "hidden",
+            "kind": "recommendation"
+          },
+          {
+            "id": "core:tmdb:builder-65740c249aa5",
+            "origin": "core",
+            "action": "hidden",
+            "kind": "recommendation"
+          },
+          {
+            "id": "TraktPlusTrend_movies",
+            "origin": "trakt",
+            "action": "kept",
+            "editable": true
+          },
+          {
+            "id": "TraktPlusTrend_shows",
+            "origin": "trakt",
+            "action": "kept",
+            "editable": true
+          },
+          {
+            "id": "home_history_resume",
+            "origin": "history",
+            "action": "kept",
+            "editable": true
+          },
+          {
+            "id": "home_history_watched",
+            "origin": "history",
+            "action": "kept",
+            "editable": true
+          },
+          {
+            "id": "issue30_third_party",
+            "origin": "registered-plugin",
+            "action": "kept",
+            "editable": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "Native Select keyboard OK moves first row down",
+      "status": "PASS",
+      "data": [
+        "TraktPlusTrend_shows",
+        "TraktPlusTrend_movies",
+        "home_history_resume",
+        "home_history_watched",
+        "issue30_third_party"
+      ]
+    },
+    {
+      "name": "Reorder preserves row/card nodes, native selected index and adds no Trakt calls",
+      "status": "PASS"
+    },
+    {
+      "name": "Back returns to native Home",
+      "status": "PASS",
+      "data": {
+        "component": "main",
+        "select": false,
+        "controller": "items_line"
+      }
+    },
+    {
+      "name": "Arrows retain native Home focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Async append lifecycle keeps saved prefix and synchronizes item/DOM order",
+      "status": "PASS"
+    },
+    {
+      "name": "Hybrid off/on respects custom Home order",
+      "status": "PASS"
+    },
+    {
+      "name": "Persisted native setting restores order after page restart with temporarily missing rows",
+      "status": "PASS",
+      "data": [
+        "TraktPlusTrend_shows",
+        "TraktPlusTrend_movies"
+      ]
+    },
+    {
+      "name": "No JavaScript exceptions in changed-code pass",
+      "status": "PASS",
+      "data": []
+    },
+    {
+      "name": "Original page restored; no fixture globals or browser closure",
+      "status": "PASS"
+    }
+  ],
+  "sources": {
+    "/loader.js": {
+      "received": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
+      "expected": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
+      "commit": "bb1a45acf5ac53d97dcdfc46c3bb1c242e35aa29"
+    },
+    "/ui/stremio-hybrid.js": {
+      "received": "c95d4ab5fed670419a001af85a7d9c76f995568eff52dac1fcb7f518c7f54c22",
+      "expected": "c95d4ab5fed670419a001af85a7d9c76f995568eff52dac1fcb7f518c7f54c22",
+      "commit": "bb1a45acf5ac53d97dcdfc46c3bb1c242e35aa29"
+    },
+    "/trakt/trakt.js": {
+      "received": "4e5316729db4e0a9f9247dd0713a6cc067007dc2dbe50b21fda892f700c99e1f",
+      "expected": "4e5316729db4e0a9f9247dd0713a6cc067007dc2dbe50b21fda892f700c99e1f",
+      "commit": "bb1a45acf5ac53d97dcdfc46c3bb1c242e35aa29"
+    },
+    "/trakt/trakt-plus.js": {
+      "received": "770846b84e900086f4ce6d5512f2a267e0d3da7c7cde587423d0941f86fd1522",
+      "expected": "770846b84e900086f4ce6d5512f2a267e0d3da7c7cde587423d0941f86fd1522",
+      "commit": "bb1a45acf5ac53d97dcdfc46c3bb1c242e35aa29"
+    },
+    "/plugins-to-enable/home-history.js": {
+      "received": "c79849c43e01428537871c9d09a2526e9e327113fa060f1be27133f9ea502d0d",
+      "expected": "c79849c43e01428537871c9d09a2526e9e327113fa060f1be27133f9ea502d0d",
+      "commit": "bb1a45acf5ac53d97dcdfc46c3bb1c242e35aa29"
+    },
+    "/plugins-to-enable/home-policy.js": {
+      "received": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+      "expected": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+      "commit": "bb1a45acf5ac53d97dcdfc46c3bb1c242e35aa29"
+    }
+  },
+  "errors": [],
+  "blocked": [
+    "Physical Google TV Streamer 4K",
+    "Live Trakt API: synthetic read-only responses used"
+  ]
+}

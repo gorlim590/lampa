@@ -4,9 +4,9 @@
     if (window.StremioHybrid) return;
     var style, ready = false, destroyed = false, waiting = false, watching = false, moreButton = null, menuOpen = false, searchNode = null, searchReturn = false, settingsRail = null, settingsFrame = 0, settingsParameter = null, settingsCategory = 'interface', settingsLeftConsumed = false, searchSources = null, searchRoots = [];
     var css = `
-body.stremio-hybrid { --sh-bg:#121023; --sh-panel:#211d35; --sh-accent:#9775fa; --sh-muted:#aba7bd; --sh-rail:#0c0b16; --sh-text:#f0eef8; --sh-border:#ffffff16; --sh-radius:.7em; --sh-pill:2em; --sh-gap:1.1em; --sh-speed:160ms; --sh-ring:#9775fa66; --sh-focus:#7960c9; --sh-focus-soft:#3e315b; --sh-header:#151127; --sh-panel-raised:#29233e; --sh-accent-soft:#b79bff; --sh-focus-text:#e9e0ff; --sh-focus-ink:#201536; --sh-inactive:#726d86; --sh-secondary:#d0cadf; --sh-inset:1.8em; --sh-ease:ease-out; background:#121023 !important; color:#f0eef8; }
+body.stremio-hybrid { --sh-bg:#121023; --sh-panel:#211d35; --sh-accent:#9775fa; --sh-muted:#aba7bd; --sh-rail:#0c0b16; --sh-text:#f0eef8; --sh-border:#ffffff16; --sh-radius:.7em; --sh-pill:2em; --sh-gap:1.1em; --sh-speed:160ms; --sh-ring:#9775fa66; --sh-focus:#7960c9; --sh-focus-soft:#3e315b; --sh-header:transparent; --sh-panel-raised:#29233e; --sh-accent-soft:#b79bff; --sh-focus-text:#e9e0ff; --sh-focus-ink:#201536; --sh-inactive:#726d86; --sh-secondary:#d0cadf; --sh-inset:1.8em; --sh-ease:ease-out; background:#121023 !important; color:#f0eef8; }
 body.stremio-hybrid .background { opacity:.12 !important; }
-body.stremio-hybrid .head { background:var(--sh-header) !important; border-bottom:1px solid #ffffff09; }
+body.stremio-hybrid .head { background:transparent !important; background-image:none !important; border:0 !important; box-shadow:none !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
 body.stremio-hybrid .head__body { padding-left:1.8em; padding-right:var(--sh-inset); }
 body.stremio-hybrid .head__action { border-radius:50%; }
 body.stremio-hybrid .head__action.focus { background:var(--sh-focus) !important; color:white !important; }
@@ -29,7 +29,7 @@ body.stremio-hybrid .ydesign-card.focus::after, body.stremio-hybrid .ydesign-car
 body.stremio-hybrid .ydesign-card .card__view::before { animation:none !important; }
 body.stremio-hybrid .ydesign-badge, body.stremio-hybrid .ydesign-genre-badge, body.stremio-hybrid .ydesign-rating, body.stremio-hybrid .ydesign-series-pill, body.stremio-hybrid .ydesign-card-notch { backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
 body.stremio-hybrid .ydesign-content-layer { transition:opacity var(--sh-speed) var(--sh-ease) !important; }
-body.stremio-hybrid .selectbox__content, body.stremio-hybrid .settings__content, body.stremio-hybrid .modal__content { background:var(--sh-panel) !important; border-radius:1em; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
+body.stremio-hybrid .selectbox__content, body.stremio-hybrid .settings__content, body.stremio-hybrid .modal__content { background:rgba(17,18,29,.96) !important; border-radius:1em; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
 body.stremio-hybrid .selectbox-item { border-radius:var(--sh-radius); }
 body.stremio-hybrid .mapping--grid { padding:.6em .8em; }
 body.stremio-hybrid .mapping--grid .card { padding:0 .65em 1.8em; }
@@ -229,7 +229,7 @@ body.stremio-hybrid .sh-streams .filter__item { min-width:0; }
 body.stremio-hybrid .sh-streams .explorer__files-head { margin:0 0 .5em !important; padding:0 !important; }
 body.stremio-hybrid .sh-streams .explorer__files-body .scroll__body,body.stremio-hybrid .sh-streams .scroll__content { padding:0 !important; }
 body.stremio-hybrid .sh-streams .torrent-item { display:grid; grid-template-columns:3.5em minmax(0,1fr); gap:.3em .55em; padding:.55em !important; border:1px solid transparent !important; box-shadow:none !important; animation:none !important; transform:none !important; }
-body.stremio-hybrid .sh-streams .torrent-item__title { grid-column:2; grid-row:1; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+body.stremio-hybrid .sh-streams .torrent-item__title { grid-column:2; grid-row:1; display:block; -webkit-line-clamp:unset; white-space:normal; overflow:visible; }
 body.stremio-hybrid .sh-streams .torrent-item__ffprobe { grid-column:1; grid-row:1 / 3; display:flex; flex-direction:row; flex-wrap:wrap; padding:0 !important; align-items:flex-start; align-content:flex-start; gap:.2em; margin:0 !important; }
 body.stremio-hybrid .sh-streams .torrent-item__details { grid-column:2; grid-row:2; display:flex !important; flex-wrap:wrap; justify-content:flex-start; gap:.25em .7em; margin:0 !important; }
 body.stremio-hybrid .sh-streams .torrent-item__details > * { width:auto !important; margin:0 !important; padding:0 !important; font-size:inherit !important; }
@@ -299,10 +299,10 @@ body.stremio-hybrid .sh-streams .ctr-release-info { min-width:0; }
 
 body.stremio-hybrid .sh-movie-page .scroll--mask { mask-image:none !important; -webkit-mask-image:none !important; }
 /* Full-height Stremio source rail; remains inside the movie scroll, so lower rows are unobstructed. */
-body.stremio-hybrid .sh-movie-hero { position:relative; }
-body.stremio-hybrid .sh-streams { top:-2.8em; right:0; width:25vw; height:calc(100vh - 3.7em); max-height:none; padding:.8em; border-radius:0; border:0; border-left:1px solid #ffffff10; background:rgba(9,10,18,.94); }
+body.stremio-hybrid .sh-movie-hero { position:relative; --sh-stream-width:42%; --sh-stream-gap:1.2em; }
+body.stremio-hybrid .sh-streams { top:-2.8em; right:0; width:var(--sh-stream-width); box-sizing:border-box; height:calc(100vh - 3.7em); max-height:none; padding:.8em; border-radius:0; border:0; border-left:1px solid #ffffff10; background:rgba(9,10,18,.94); }
 body.stremio-hybrid.sh-movie-active { --sh-bg:#0c0c16; }
-body.stremio-hybrid.sh-movie-active .head { background:transparent !important; border:0 !important; box-shadow:none !important; }
+body.stremio-hybrid.sh-movie-active .head { background:var(--sh-header) !important; border:0 !important; box-shadow:none !important; }
 body.stremio-hybrid.sh-movie-active .head .open--search,body.stremio-hybrid.sh-movie-active .head .sh-head-more { background:transparent !important; background-image:none !important; }
 body.stremio-hybrid.sh-movie-active .head .open--search::after { color:#f4f4f7; text-shadow:0 1px 3px #000; }
 body.stremio-hybrid.sh-movie-active .head .sh-head-more.focus { box-shadow:0 0 0 .1em var(--sh-accent-soft); }
@@ -330,11 +330,47 @@ body.stremio-hybrid .sh-movie .sh-metadata-rich span { color:#b8b8c6 !important;
 body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; }
 
 `;
+    css += `
+body.stremio-hybrid .sh-has-streams .sh-movie-column{width:calc(100% - var(--sh-stream-width) - var(--sh-stream-gap))!important;max-width:calc(100% - var(--sh-stream-width) - var(--sh-stream-gap))!important;min-width:0}
+body.stremio-hybrid .sh-streams .torrent-item{font-size:.9em}
+body.stremio-hybrid .sh-streams .ctr-name,body.stremio-hybrid .sh-streams .torrent-item__title{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;-webkit-line-clamp:unset!important;max-height:none!important;overflow-wrap:anywhere}
+body.stremio-hybrid .sh-streams .ctr-row{grid-template-columns:3em minmax(0,1fr) minmax(4.5em,auto)}
+body.stremio-hybrid .sh-streams .ctr-release-info,body.stremio-hybrid .sh-streams .ctr-metrics{min-width:0}
+body.stremio-hybrid .sh-streams .ctr-size{white-space:normal;overflow-wrap:anywhere}
+@media(max-width:900px){body.stremio-hybrid .sh-movie-hero{--sh-stream-width:100%}body.stremio-hybrid .sh-has-streams .sh-movie-column{width:100%!important;max-width:100%!important}body.stremio-hybrid .sh-streams{position:relative;top:auto;right:auto;width:100%;height:60vh;border-left:0}}
+body.stremio-hybrid .sh-movie .full-descr__text{display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:3;max-height:4.95em!important;overflow:hidden;white-space:normal!important}
+body.stremio-hybrid .sh-movie.sh-description-expanded .full-descr__text{display:block!important;-webkit-line-clamp:unset;max-height:none!important;overflow:visible;white-space:pre-line!important}
+body.stremio-hybrid .sh-movie .sh-description-toggle{display:flex;align-items:center;justify-content:center;width:auto;min-width:0;min-height:2.9em;flex:0 0 auto;font-size:.85em!important;color:var(--sm-text);padding:0 .8em!important;border-radius:.55em;background:#ffffff12;border:1px solid #ffffff18}\nbody.stremio-hybrid .sh-movie .sh-description-toggle.focus{background:var(--sh-focus-soft);box-shadow:0 0 0 .12em var(--sh-accent-soft)}
+body.stremio-hybrid .head .head__title{max-width:20vw}
+body.stremio-hybrid .sh-profile-menu .selectbox__content{position:absolute;right:1.8em;top:5em;bottom:auto;left:auto;width:23em;max-width:90vw;max-height:calc(100vh - 7em);border:1px solid var(--sh-border);box-shadow:0 .7em 2em #0005}
+body.stremio-hybrid .selectbox-item{transition:opacity var(--sh-speed) var(--sh-ease)!important}
+body.stremio-hybrid .selectbox-item__title{white-space:normal;overflow-wrap:anywhere}
+body.stremio-hybrid .wrap__left{background:#090a12!important}
+@media(prefers-reduced-motion:reduce){body.stremio-hybrid .selectbox,body.stremio-hybrid .selectbox-item,body.stremio-hybrid .sh-movie-page .full-start__background{transition:none!important;animation:none!important}}
+`;
+    css += `
+body.stremio-hybrid .full-person:not(.full-person--small){width:9.5em;display:flex;flex-direction:column;align-items:stretch;gap:.55em;padding:.45em;border-radius:.75em;background:#ffffff06;transition:transform var(--sh-speed) ease-out}
+body.stremio-hybrid .full-person:not(.full-person--small) .full-person__photo{width:100%;height:11em;flex-shrink:0;overflow:hidden;border-radius:.6em}
+body.stremio-hybrid .full-person__photo img{width:100%;height:100%;object-fit:cover}
+body.stremio-hybrid .full-person:not(.full-person--small) .full-person__body{padding:0;min-width:0}
+body.stremio-hybrid .full-person__name{color:var(--sh-text);font-size:.95em;line-height:1.3;white-space:normal}
+body.stremio-hybrid .full-person__role{font-size:.8em;line-height:1.3;color:var(--sh-muted);white-space:normal}
+body.stremio-hybrid .full-person.focus{transform:scale(1.025);box-shadow:0 0 0 .12em var(--sh-accent-soft)}
+body.stremio-hybrid .tp-person-watch{position:absolute;bottom:.5em;left:.5em;right:.5em;z-index:8;font-size:.8em;color:#d3c4ff;background:#10111be8;border-radius:.4em;padding:.3em .5em;pointer-events:none}\nbody.stremio-hybrid .sh-cast-watched{font-size:.75em;color:var(--sh-accent-soft);margin-top:.4em}
+body.stremio-hybrid .tp-person-tools{display:flex;flex-wrap:wrap;align-items:center;gap:.6em}
+body.stremio-hybrid .tp-person-tool{padding:.65em 1em;background:var(--sh-panel);border-radius:var(--sh-pill);color:var(--sh-text)}
+body.stremio-hybrid .tp-person-tool.focus{box-shadow:0 0 0 .12em var(--sh-accent-soft)}
+body.stremio-hybrid .tp-person-unknown{font-size:.8em;color:var(--sh-muted)}
+@media(prefers-reduced-motion:reduce){body.stremio-hybrid .full-person{transition:none!important;transform:none!important}}
+`;
     // Cardify owns the native template/data. Move nodes with their handlers, never clone them.
-    var movieRecords=[], movieFrame=0, movieTimers=[], movieModal=null;
+    var movieRecords=[], movieFrame=0, movieTimers=[];
     function restoreMovie(record) {
+        (record.castLines||[]).forEach(function(entry){entry.line.unuse(entry.hook);delete entry.line._shCastHook;var rendered=entry.line.render(),node=rendered&&(rendered[0]||rendered);if(node&&node.querySelectorAll)node.querySelectorAll('.sh-cast-watched').forEach(function(n){n.remove();});});
+        record.root.querySelectorAll('.sh-generated-description').forEach(function(n){n.remove();});
         (record.seriesFields||[]).forEach(function(n){n.remove();});
         (record.ratingRepairs||[]).forEach(function(item){delete item.img.dataset.shRatingFallback;if(item.img.getAttribute('src')===item.fallback)item.img.setAttribute('src',item.src);});
+        clearDescription(record);
         removeMovieBrand(record);
         removeStreams(record);
         if(record.buttons){record.buttons.removeEventListener('hover:focus',movieButtonFocus,true);record.buttons.removeAttribute('data-sh-action');}
@@ -342,8 +378,8 @@ body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; 
             if(move.parent) move.parent.insertBefore(move.node,move.next && move.next.parentNode===move.parent ? move.next : null);
         });
         record.column.classList.remove('sh-movie-column');record.root.querySelectorAll('.sh-metadata-rich,.sh-metadata-shadow').forEach(function(n){n.classList.remove('sh-metadata-rich','sh-metadata-shadow');});record.root.classList.remove('sh-movie','sh-movie-native','sh-series'); record.page.classList.remove('sh-movie-page');
-        if(record.description){record.description.removeEventListener('hover:enter',movieDescriptionEnter,true);record.description.classList.remove('sh-movie-description');}
-        if(movieModal===record.root){movieModal=null;Lampa.Modal.close();if(Lampa.Activity.active() && Lampa.Activity.active().activity===record.activity)Lampa.Controller.toggle('full_start');}
+        if(record.description)record.description.classList.remove('sh-movie-description');
+        (record.plainDescriptions||[]).forEach(function(pair){if(pair.plain.parentNode)pair.plain.parentNode.replaceChild(pair.original,pair.plain);});record.plainDescriptions=[];
         record.root.querySelectorAll('.sh-movie-primary,.sh-movie-description').forEach(function(n){n.classList.remove('sh-movie-primary','sh-movie-description');});
         record.labels.forEach(function(item){if(item.node.getAttribute('title')===item.title)item.node.removeAttribute('title');});
     }
@@ -354,18 +390,49 @@ body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; 
     function removeMovies() {
         stopMovieQueue(); movieRecords.forEach(restoreMovie); movieRecords=[];
     }
-    function movieDescriptionEnter(event) {
-        var root=event.currentTarget.closest('.sh-movie');if(!root)return;
-        var text=root.querySelector('.full-descr__text');if(!text)return;
-        movieModal=root;
-        Lampa.Modal.open({title:root.querySelector('.full-start-new__title').textContent,html:$('<div></div>').text(text.textContent.trim()).css({lineHeight:'1.65',whiteSpace:'pre-line'}),onBack:function(){
-            movieModal=null;Lampa.Modal.close();
-            if(root.isConnected && root.closest('.activity--active')){Lampa.Controller.toggle('full_start');Lampa.Controller.collectionFocus(text,root);}
-            else Lampa.Controller.toggle('content');
-        }});
+    function setupDescription(record, description) {
+        if(record.descriptionToggle&&record.descriptionToggle.isConnected)return;
+        clearDescription(record);
+        var button=document.createElement("div");button.className="selector sh-description-toggle";
+        button.setAttribute("role","button");button.setAttribute("aria-expanded","false");button.textContent="Показати більше";
+        record.descriptionToggle=button;
+        record.toggleDescription=function(){
+            var expanded=button.getAttribute("aria-expanded")!=="true";
+            button.setAttribute("aria-expanded",String(expanded));button.textContent=expanded?"Показати менше":"Показати більше";
+            record.root.classList.toggle("sh-description-expanded",expanded);
+        };
+        $(button).on("hover:enter.shDescription",record.toggleDescription);
+        record.root.querySelector(".full-start-new__buttons").appendChild(button);
+    }
+    function clearDescription(record) {
+        if(record.descriptionToggle){$(record.descriptionToggle).off(".shDescription").remove();record.descriptionToggle=null;record.toggleDescription=null;}
+        record.root.classList.remove("sh-description-expanded");
+    }
+    function plainDescription(record, description) {
+        if(description.classList.contains('sh-generated-description'))return description;
+        var nodes=description.matches('.full-descr__text')?[description]:Array.prototype.slice.call(description.querySelectorAll('.full-descr__text'));
+        nodes.forEach(function(node){
+            if(node.hasAttribute('data-sh-plain-description'))return;
+            var plain=document.createElement('div');plain.className='full-descr__text';plain.setAttribute('data-sh-plain-description','');plain.textContent=node.textContent;
+            if(node.parentNode)node.parentNode.replaceChild(plain,node);
+            record.plainDescriptions=record.plainDescriptions||[];record.plainDescriptions.push({original:node,plain:plain});
+            if(description===node)description=plain;
+        });
+        return description;
+    }
+    function focusMovieActions(record, visible) {
+        var controller=Lampa.Controller.enabled(),link=controller.controller&&controller.controller.link;
+        if(controller.name!=='full_start'||!link||!visible.length)return;
+        var primary=visible.filter(function(node){return node.classList.contains('view--torrent');})[0]||visible[0];
+        var focus=record.root.querySelector('.selector.focus'),last=link.last&&(link.last[0]||link.last);
+        if(!record.initialFocusDone||!focus||(last&&!record.root.contains(last))){
+            var target=record.initialFocusDone&&focus?focus:primary;
+            link.last=target;Lampa.Controller.collectionSet(record.root);Lampa.Controller.collectionFocus(target,record.root);
+        }
+        record.initialFocusDone=true;
     }
     function movieButtonFocus(event) {
-        var row=event.currentTarget, button=event.target.closest('.full-start__button');
+        var row=event.currentTarget, button=event.target.closest('.full-start__button,.sh-description-toggle');
         if(button && row.contains(button)) {
             row.setAttribute('data-sh-action',button.classList.contains('sh-movie-primary')?'':button.getAttribute('title') || button.textContent.trim());
             var box=button.getBoundingClientRect(), bounds=row.getBoundingClientRect();
@@ -394,14 +461,13 @@ body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; 
         if(rich.parentNode!==plain.parentNode){record.moves.push({node:rich,parent:rich.parentNode,next:rich.nextSibling});plain.parentNode.insertBefore(rich,plain);}
     }
     function updateSeriesMetadata(record){
-        if(record.kind!=='tv')return;
+        if(record.kind!=='tv'||record.root.querySelector('[data-series-info]'))return;
         var movie=streamMovie(record),details=record.root.querySelector('.sh-metadata-rich')||record.root.querySelector('.cardify__details .full-start-new__details:not(.trakt)')||record.root.querySelector('.full-start-new__details:not(.trakt)');if(!details)return;
         (record.seriesFields||[]).forEach(function(n){n.remove();});record.seriesFields=[];
         function add(key,value){if(!value||record.seriesFields.some(function(n){return n.dataset.shField===key;}))return;var n=document.createElement('span');n.className='sh-series-field';n.dataset.shField=key;n.textContent=value;details.appendChild(n);record.seriesFields.push(n);}
         var text=details.textContent;
-        if(movie.number_of_seasons>0&&!/сезон|season/i.test(text))add('seasons','Сезони: '+movie.number_of_seasons);
-        if(movie.number_of_episodes>0&&!/сері[йїя]|епізод|episode/i.test(text))add('episodes','Епізоди: '+movie.number_of_episodes);
-        var next=movie.next_episode_to_air;if(next&&next.air_date&&!text.includes(next.air_date))add('next','Наступна: S'+next.season_number+' · E'+next.episode_number+' · '+next.air_date);
+        // Series/episode counts and next-episode numbering belong to Trakt+.
+        // Keep only the pre-existing runtime fallback when Interface+ is absent.
         if(Array.isArray(movie.episode_run_time)&&movie.episode_run_time.length&&!/тривалість|runtime|хв|mins/i.test(text)){var times=movie.episode_run_time.filter(function(n){return n>0;});if(times.length)add('runtime','Тривалість серії: '+Math.min.apply(Math,times)+(times.length>1?'–'+Math.max.apply(Math,times):'')+' хв');}
     }
     function adaptMovie() {
@@ -414,15 +480,19 @@ body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; 
         if(!left || !buttons)return;
         var record=movieRecords.filter(function(r){return r.root===root;})[0];
         if(!record){record={root:root,page:page,column:left,activity:active.activity,kind:active.method==='tv'?'tv':'movie',moves:[],labels:[]};movieRecords.push(record);}
+        page.querySelectorAll('.full-descr__details').forEach(function(fields){if(fields.parentNode){record.moves.push({node:fields,parent:fields.parentNode,next:fields.nextSibling});fields.remove();}});
         function move(node){if(node && node.parentNode!==left){record.moves.push({node:node,parent:node.parentNode,next:node.nextSibling});left.insertBefore(node,buttons);}}
         setupStreams(record);setupMovieBrand(record);
         root.classList.add('sh-movie');root.classList.toggle('sh-series',record.kind==='tv');consolidateMetadata(record);updateSeriesMetadata(record);root.classList.toggle('sh-movie-native',!page.querySelector('.cardify-effects-overlay')); page.classList.add('sh-movie-page');left.classList.add('sh-movie-column');
         var description=root.querySelector('.custom-ghost-main') || page.querySelector('.full-descr__text');
-        if(description){move(description);record.description=description;description.classList.add('sh-movie-description');description.addEventListener('hover:enter',movieDescriptionEnter,true);}
+        var movie=streamMovie(record);
+        if(!description&&movie._tp_omit_details&&movie.overview){description=document.createElement('div');description.className='full-descr__text sh-generated-description';description.textContent=movie.overview;}
+        if(description){description=plainDescription(record,description);move(description);record.description=description;description.classList.add('sh-movie-description');if(description.textContent.trim()&&typeof movie.overview==='string'&&movie.overview.trim())setupDescription(record,description);}
         move(root.querySelector('.cardify__right-box'));
         root.querySelectorAll('.sh-movie-primary').forEach(function(n){n.classList.remove('sh-movie-primary');});
-        var visible=Array.prototype.filter.call(buttons.querySelectorAll('.full-start__button'),function(n){return !n.classList.contains('hide')&&!n.classList.contains('hidden')&&getComputedStyle(n).display!=='none';});
-        if(visible[0])visible[0].classList.add('sh-movie-primary');
+        var visible=Array.prototype.filter.call(buttons.querySelectorAll('.full-start__button'),function(n){return n.classList.contains('selector')&&!n.classList.contains('hide')&&!n.classList.contains('hidden')&&n.getAttribute('aria-disabled')!=='true'&&!n.disabled&&n.getClientRects().length>0&&getComputedStyle(n).visibility!=='hidden';});
+        var primary=visible.filter(function(n){return n.classList.contains('view--torrent');})[0]||visible[0];
+        if(primary)primary.classList.add('sh-movie-primary');
         visible.forEach(function(node){
             if(!node.hasAttribute('title')){var title=node.textContent.trim() || (node.classList.contains('button--edit-order')?'Порядок дій':'Дія плагіна');node.setAttribute('title',title);record.labels.push({node:node,title:title});}
         });
@@ -430,11 +500,9 @@ body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; 
         record.buttons=buttons;buttons.addEventListener('hover:focus',movieButtonFocus,true);
         page.querySelectorAll('.custom-rating img').forEach(function(img){if(img.complete&&!img.naturalWidth)repairRatingImage(img);});
         movieButtonFocus({currentTarget:buttons,target:buttons.querySelector('.focus')||visible[0]||buttons});
+        (record.castLines||[]).forEach(function(entry){(entry.line.items||[]).forEach(decoratePerson);});
         // Interface+ can replace a button after core FullStart cached it as last focus.
-        var controller=Lampa.Controller.enabled(), link=controller.controller && controller.controller.link;
-        if(controller.name==='full_start' && link && visible[0] && (!root.querySelector('.selector.focus') || (link.last && !root.contains(link.last)))) {
-            link.last=visible[0];Lampa.Controller.collectionSet(root);Lampa.Controller.collectionFocus(visible[0],root);
-        }
+        focusMovieActions(record,visible);
     }
     function scheduleMovie() {
         stopMovieQueue();var active=Lampa.Activity.active();if(!active || active.component!=='full'||(active.method!=='movie'&&active.method!=='tv'))return;
@@ -443,7 +511,29 @@ body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; 
         // Two bounded passes accommodate that work; no observer or recurring polling.
         [180,650].forEach(function(delay){movieTimers.push(setTimeout(adaptMovie,delay));});
     }
-    function onMovieFull(event) { if(event && (event.type==='complite'||event.type==='archive'))scheduleMovie(); }
+    function decoratePerson(person) {
+        if(!watching||!person||!person.render)return;
+        var rendered=person.render(),node=rendered&&(rendered[0]||rendered);if(!node||!node.querySelector)return;
+        var api=window.TraktPlus,data=person.data||{},view=api&&api.cachedFilmography&&api.cachedFilmography(data),badge=node.querySelector('.sh-cast-watched');
+        if(!view||!view.complete||!view.all.length){if(badge)badge.remove();return;}
+        if(!badge){badge=document.createElement('div');badge.className='sh-cast-watched';(node.querySelector('.full-person__body')||node).appendChild(badge);}
+        badge.textContent='Trakt · '+view.watched.length+' переглянуто';
+    }
+    function onCastWatched(){movieRecords.forEach(function(record){if(record.page.isConnected)(record.castLines||[]).forEach(function(entry){(entry.line.items||[]).forEach(decoratePerson);});});}
+    function onMovieFull(event) {
+        if(!watching||!event)return;
+        if(event.type==='build'&&(event.name==='description'||event.name==='persons')){
+            adaptMovie();var record=movieRecords.filter(function(r){return r.activity.component===event.link;})[0];if(!record)return;
+            if(event.name==='description'){
+                var fields=event.item.render()[0].querySelector('.full-descr__details');
+                if(fields&&fields.parentNode){record.moves.push({node:fields,parent:fields.parentNode,next:fields.nextSibling});fields.remove();}
+            }else if(!event.item._shCastHook){
+                var hook={onInstance:function(person){person.use({onCreate:function(){decoratePerson(this);}});}};
+                event.item._shCastHook=hook;event.item.use(hook);record.castLines=record.castLines||[];record.castLines.push({line:event.item,hook:hook});(event.item.items||[]).forEach(decoratePerson);
+            }
+        }
+        if(event.type==='complite'||event.type==='archive')scheduleMovie();
+    }
 
     // Native torrent Component hosted inside Full. Parser, rows, filters and playback stay native.
 
@@ -693,11 +783,13 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
 
     var streamSelectOwner=null;
     function clearStreamSelect(){
+        document.querySelectorAll('.sh-profile-menu').forEach(function(n){n.classList.remove('sh-profile-menu');});
         var st=streamSelectOwner;if(!st)return;streamSelectOwner=null;
         if(st.selectNode){st.selectNode.classList.remove('sh-cinema-select');Object.keys(st.selectTokens||{}).forEach(function(key){var entry=st.selectTokens[key];if(st.selectNode.style.getPropertyValue(key)===entry.ours){if(entry.before)st.selectNode.style.setProperty(key,entry.before);else st.selectNode.style.removeProperty(key);}});st.selectNode=null;st.selectTokens=null;}
     }
     function onStreamSelect(event){
         clearStreamSelect();
+        if(menuOpen)return; // Profile owns its compact native Select surface.
         var record=movieRecords.filter(function(r){return r.streamFocused&&r.streamChild&&!r.streamChild.dead&&r.page.classList.contains('activity--active');})[0];
         if(!record)return;var st=record.streamChild,node=event&&event.html&&(event.html[0]||event.html)||Lampa.Select.render()[0];if(!node)return;
         streamSelectOwner=st;st.selectNode=node;st.selectTokens={};node.classList.add('sh-cinema-select');
@@ -814,7 +906,7 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
                 streamCache=streamCache.filter(function(item){return item.expires>Date.now();});var cached=streamCache.filter(function(item){return item.key===key;})[0];
                 if(cached){record.streamPane.dataset.cacheHit='true';st.total=cached.data.Results.length;var data=JSON.parse(JSON.stringify(cached.data)),viewed=Lampa.Storage.cache('torrents_view',5000,[]);data.Results.forEach(function(item){item.viewed=viewed.indexOf(item.hash)>-1;});done(data);return;}
                 record.streamPane.dataset.cacheHit='false';
-                return originalGet.call(this,query,function(data){if(st.dead)return;st.total=data.Results.length;var serialized=JSON.stringify(data);if(serialized.length<2000000){streamCache=streamCache.filter(function(item){return item.key!==key;});streamCache.push({key:key,data:JSON.parse(serialized),expires:Date.now()+(data.Results.length?300000:60000)});while(streamCache.length>4)streamCache.shift();}done(data);},function(error){if(st.dead)return;st.error=true;fail(error);});
+                return originalGet.call(this,query,function(data){if(st.dead)return;st.total=data.Results.length;var serialized=JSON.stringify(data);if(!data.parser_pending&&!(data.parser_status||[]).some(function(s){return s.status!=='ready'&&s.status!=='empty';})&&serialized.length<2000000){streamCache=streamCache.filter(function(item){return item.key!==key;});streamCache.push({key:key,data:JSON.parse(serialized),expires:Date.now()+(data.Results.length?300000:60000)});while(streamCache.length>4)streamCache.shift();}done(data);},function(error){if(st.dead)return;st.error=true;fail(error);});
             };
             var parse=st.child.parse;st.child.parse=function(){if(st.dead)return;originalGet=Lampa.Parser.get;Lampa.Parser.get=getForChild;try{return parse.apply(st.child,arguments);}finally{Lampa.Parser.get=originalGet;}};st.child.initialize();streamSyncRows(st);
             if(st.loading)streamActivate(record);
@@ -876,15 +968,15 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         });
     }
     css += `
-body.stremio-hybrid .head .head__time{display:flex!important;position:static;transform:none;margin:0!important;gap:.6em;max-width:16vw;color:#d5d2df;pointer-events:none}
-body.stremio-hybrid .head .head__actions{display:flex;align-items:center;gap:.8em}
-body.stremio-hybrid .head .head__time-now{font-size:1.1em!important}
-body.stremio-hybrid .head .head__time-date{font-size:.65em!important;white-space:nowrap}
-body.stremio-hybrid .head .head__time-week{display:none}
+body.stremio-hybrid .head .head__time{display:flex!important;position:static;transform:none;margin:0!important;gap:0;max-width:none;color:#f4f4f7;pointer-events:none}
+body.stremio-hybrid .head .head__actions{display:flex;align-items:center;gap:.8em;flex:1;min-width:0;justify-content:flex-end}
+body.stremio-hybrid .head .head__time-now{font-size:1.5em!important;line-height:1.15;margin:0 .55em 0 0;font-variant-numeric:tabular-nums}
+body.stremio-hybrid .head .head__time-date,body.stremio-hybrid .head .head__time-week{font-size:.72em!important;line-height:1.3;white-space:nowrap}
+body.stremio-hybrid .head .head__time-week{display:block}
 body.stremio-hybrid .head .head__logo-icon,body.stremio-hybrid .head .head__backward{display:none!important}
 body.stremio-hybrid .head .sh-head-more{position:relative;right:auto;top:auto;transform:none!important;flex-shrink:0;border-radius:.8em!important;overflow:hidden}
 body.stremio-hybrid .head .open--search,body.stremio-hybrid.sh-movie-active .head .open--search,body.stremio-hybrid .head .sh-head-more,body.stremio-hybrid.sh-movie-active .head .sh-head-more{background:rgba(255,255,255,.055)!important;background-image:none!important;border:1px solid #ffffff14}
-body.stremio-hybrid .head .open--search{left:45%;width:clamp(12em,26vw,24em)!important;border-radius:.8em!important}
+body.stremio-hybrid .head .head__body,body.stremio-hybrid .head .head__actions{position:static!important;background:transparent!important;background-image:none!important;box-shadow:none!important}\nbody.stremio-hybrid .head::before,body.stremio-hybrid .head::after{background:none!important;box-shadow:none!important;backdrop-filter:none!important}\nbody.stremio-hybrid .head .open--search{position:absolute;left:50%;transform:translateX(-50%)!important;margin:0!important;width:clamp(12em,30vw,26em)!important;max-width:36vw;border-radius:var(--sh-pill)!important}
 body.stremio-hybrid .head .sh-profile-avatar{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit}
 body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-accent-soft)}
 `;
@@ -912,9 +1004,10 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
             restoreHead(moreButton);
             if(item.shAction)item.shAction();else if (item.shNode && item.shNode.isConnected) $(item.shNode).trigger('hover:enter');
         }});
+        var panel=Lampa.Select.render()[0];if(panel)panel.classList.add('sh-profile-menu');
     }
     function onSearchEnter() { searchReturn = true; }
-    function onSearchClose() { clearSearchSources(); if (searchReturn) { searchReturn=false;restoreHead(searchNode); } }
+    function onSearchClose() { clearSearchSources();scheduleMovie(); if (searchReturn) { searchReturn=false;restoreHead(searchNode); } }
     function clearSearchSources() {
         if(searchSources) searchSources.listener.remove('finded',onSearchFound);
         searchSources=null;
@@ -973,8 +1066,15 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
     css += '\nbody.stremio-hybrid .sh-home-duplicate{display:none!important}';
     var homePolicies=[],headTimeMove=null;
     function continueLine(item){var data=item.data||{};if(!data.results||!data.results.length)return false;return /^Продовжити перегляд(?:\s|\(|$)|^Continue watching(?:\s|\(|$)/i.test(data.title||'')||(data.results||[]).some(function(c){return c.ydesign_row==='cont';});}
+    function pruneHome(record){
+        // A managed history row can disappear while Home stays mounted.
+        record.original=record.original.filter(function(item){return !!item.render(true).parentNode;});
+        record.hidden=record.hidden.filter(function(item){return !!item.render(true).parentNode;});
+    }
     function orderHome(record){
         var component=record.component;if(record.dead)return;
+        if(window.LampaHomeHistory&&window.LampaHomeHistory.policyReady){window.LampaHomeHistory.applyOrder(component);return;}
+        pruneHome(record);
         component.items.forEach(function(item){if(record.original.indexOf(item)<0)record.original.push(item);});
         var selected=component.items[component.active],rows=record.original.slice(),resumes=rows.filter(continueLine),resume=resumes[0];
         if(!resume)return;
@@ -989,7 +1089,8 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
     function releaseHome(record,destroying){
         if(record.dead)return;record.dead=true;if(record.frame)cancelAnimationFrame(record.frame);record.component.unuse(record.hook);
         if(destroying){record.hidden.forEach(function(item){item.destroy();});}
-        else{var selected=record.component.items[record.component.active];record.component.items=record.original;record.original.forEach(function(item){var node=item.render(true);node.classList.remove('sh-home-duplicate');if(node.parentNode)node.parentNode.appendChild(node);});record.component.active=Math.max(0,record.original.indexOf(selected));}
+        else if(window.LampaHomeHistory&&window.LampaHomeHistory.policyReady){window.LampaHomeHistory.applyOrder(record.component);}
+        else{pruneHome(record);var selected=record.component.items[record.component.active];record.component.items=record.original;record.original.forEach(function(item){var node=item.render(true);node.classList.remove('sh-home-duplicate');if(node.parentNode)node.parentNode.appendChild(node);});record.component.active=Math.max(0,record.original.indexOf(selected));}
         homePolicies=homePolicies.filter(function(r){return r!==record;});
     }
     function setupHome(){
@@ -997,7 +1098,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         if(!active||active.component!=='main'||!component||typeof component.use!=='function'||typeof component.unuse!=='function'||!Array.isArray(component.items)||homePolicies.some(function(r){return r.component===component;}))return;
         var record={component:component,original:component.items.slice(),hidden:[],dead:false,frame:0};
         function queue(){if(record.dead||record.frame)return;record.frame=requestAnimationFrame(function(){record.frame=0;orderHome(record);});}
-        record.hook={shHomePolicy:true,onAppend:queue,onBuild:queue,onDestroy:function(){releaseHome(record,true);}};homePolicies.push(record);component.use(record.hook);queue();
+        record.hook={shHomePolicy:true,onAppend:queue,onBuild:queue,onHomeHistoryChanged:queue,onDestroy:function(){releaseHome(record,true);}};homePolicies.push(record);component.use(record.hook);queue();
     }
     function onActivity(event) {
         if (!event || event.type === 'start') {setupHeader();scheduleMovie();setupHome();}
@@ -1044,18 +1145,18 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         backdropApi=null;backdropGet=null;backdropWrapper=null;backdropRotation=null;
     }
     function setupUI() {
-        if (!watching) { Lampa.Listener.follow('activity', onActivity); Lampa.Listener.follow('full',onMovieFull); Lampa.Controller.listener.follow('toggle',onStreamController); Lampa.Modal.listener.follow('fullshow',onStreamFiles); Lampa.Modal.listener.follow('update',onStreamFiles); Lampa.Modal.listener.follow('close',clearStreamFiles); Lampa.Listener.follow('torrent_file',onStreamFile); Lampa.Select.listener.follow('fullshow',onStreamSelect); Lampa.Select.listener.follow('hide',clearStreamSelect); Lampa.Storage.listener.follow('change',onStreamSettings); Lampa.Search.listener.follow('close', onSearchClose); Lampa.Search.listener.follow('sources',onSearchSources); Lampa.Settings.listener.follow('open',onSettingsOpen); Lampa.Settings.listener.follow('close',onSettingsClose); document.addEventListener('error',onRatingError,true); document.addEventListener('keydown',onSettingsKey,true); document.addEventListener('keyup',onSettingsKey,true); installSettingsController(); watching=true; installBackdropPacing(); }
+        if (!watching) { Lampa.Listener.follow('activity', onActivity); Lampa.Listener.follow('full',onMovieFull); Lampa.Controller.listener.follow('toggle',onStreamController); Lampa.Modal.listener.follow('fullshow',onStreamFiles); Lampa.Modal.listener.follow('update',onStreamFiles); Lampa.Modal.listener.follow('close',clearStreamFiles); Lampa.Listener.follow('torrent_file',onStreamFile); Lampa.Select.listener.follow('fullshow',onStreamSelect); Lampa.Select.listener.follow('hide',clearStreamSelect); Lampa.Storage.listener.follow('change',onStreamSettings); Lampa.Search.listener.follow('close', onSearchClose); Lampa.Search.listener.follow('sources',onSearchSources); Lampa.Settings.listener.follow('open',onSettingsOpen); Lampa.Settings.listener.follow('close',onSettingsClose); document.addEventListener('error',onRatingError,true); document.addEventListener('traktplus:watched',onCastWatched); document.addEventListener('keydown',onSettingsKey,true); document.addEventListener('keyup',onSettingsKey,true); installSettingsController(); watching=true; installBackdropPacing(); }
         setupHeader(); scheduleMovie();setupHome();
         if(document.body.classList.contains('settings--open')) onSettingsOpen({name:'resume'});
     }
     function removeUI() {
         removeBackdropPacing();
-        if (watching) { Lampa.Listener.remove('activity', onActivity); Lampa.Listener.remove('full',onMovieFull); Lampa.Controller.listener.remove('toggle',onStreamController); Lampa.Modal.listener.remove('fullshow',onStreamFiles); Lampa.Modal.listener.remove('update',onStreamFiles); Lampa.Modal.listener.remove('close',clearStreamFiles); Lampa.Listener.remove('torrent_file',onStreamFile); clearStreamFiles(); Lampa.Select.listener.remove('fullshow',onStreamSelect); Lampa.Select.listener.remove('hide',clearStreamSelect); Lampa.Storage.listener.remove('change',onStreamSettings); streamCache=[]; brandPending={}; Lampa.Search.listener.remove('close', onSearchClose); Lampa.Search.listener.remove('sources',onSearchSources); Lampa.Settings.listener.remove('open',onSettingsOpen); Lampa.Settings.listener.remove('close',onSettingsClose); document.removeEventListener('error',onRatingError,true); document.removeEventListener('keydown',onSettingsKey,true); document.removeEventListener('keyup',onSettingsKey,true); settingsLeftConsumed=false; watching=false; }
+        if (watching) { Lampa.Listener.remove('activity', onActivity); Lampa.Listener.remove('full',onMovieFull); Lampa.Controller.listener.remove('toggle',onStreamController); Lampa.Modal.listener.remove('fullshow',onStreamFiles); Lampa.Modal.listener.remove('update',onStreamFiles); Lampa.Modal.listener.remove('close',clearStreamFiles); Lampa.Listener.remove('torrent_file',onStreamFile); clearStreamFiles(); Lampa.Select.listener.remove('fullshow',onStreamSelect); Lampa.Select.listener.remove('hide',clearStreamSelect); Lampa.Storage.listener.remove('change',onStreamSettings); streamCache=[]; brandPending={}; Lampa.Search.listener.remove('close', onSearchClose); Lampa.Search.listener.remove('sources',onSearchSources); Lampa.Settings.listener.remove('open',onSettingsOpen); Lampa.Settings.listener.remove('close',onSettingsClose); document.removeEventListener('error',onRatingError,true); document.removeEventListener('traktplus:watched',onCastWatched); document.removeEventListener('keydown',onSettingsKey,true); document.removeEventListener('keyup',onSettingsKey,true); settingsLeftConsumed=false; watching=false; }
         homePolicies.slice().forEach(function(r){releaseHome(r,false);});
         removeSettingsUI();
         removeMovies();clearStreamSelect();
         clearSearchSources();
-        searchReturn=false;
+        searchReturn=false;document.querySelectorAll('.sh-profile-menu').forEach(function(n){n.classList.remove('sh-profile-menu');});
         if (searchNode) { $(searchNode).off('hover:enter.shHybrid', onSearchEnter); searchNode=null; }
         if (menuOpen) { menuOpen=false; Lampa.Select.close(); }
         if(headTimeMove){var t=headTimeMove;headTimeMove=null;t.parent.insertBefore(t.node,t.next&&t.next.parentNode===t.parent?t.next:null);}
@@ -1229,7 +1330,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         apply(enabled());
     }
     window.StremioHybrid = {
-        version: '2.7.0',
+        version: '2.8.2-details-ux',
         setEnabled: setEnabled,
         refresh: function () { if (ready) apply(enabled()); },
         destroy: function () {

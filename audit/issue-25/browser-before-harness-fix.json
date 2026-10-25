@@ -1,0 +1,131 @@
+{
+  "commit": "818935e7d95ae3cce60e049716e8d2e91a9e8908",
+  "checks": [
+    {
+      "name": "Exact changed source and loader loaded by hash/commit",
+      "status": "PASS",
+      "data": {
+        "/loader.js": {
+          "received": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
+          "expected": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
+          "commit": "818935e7d95ae3cce60e049716e8d2e91a9e8908"
+        },
+        "/ui/stremio-hybrid.js": {
+          "received": "2ea5f597463f8d1ad4bb919e42853cce9dc90406a7300426257426c20d61ec39",
+          "expected": "2ea5f597463f8d1ad4bb919e42853cce9dc90406a7300426257426c20d61ec39",
+          "commit": "818935e7d95ae3cce60e049716e8d2e91a9e8908"
+        },
+        "/ui/design-optimized.js": {
+          "received": "0e1375316ef0767c6d1e49dd00ee60bada94845efd973a8339b14e62bc2d7930",
+          "expected": "0e1375316ef0767c6d1e49dd00ee60bada94845efd973a8339b14e62bc2d7930",
+          "commit": "818935e7d95ae3cce60e049716e8d2e91a9e8908"
+        },
+        "/plugins-to-enable/home-history.js": {
+          "received": "c9e1e86aafdb55ca4af528fa7f9408fc9877826b3471426cc8bb7b67182caa61",
+          "expected": "c9e1e86aafdb55ca4af528fa7f9408fc9877826b3471426cc8bb7b67182caa61",
+          "commit": "818935e7d95ae3cce60e049716e8d2e91a9e8908"
+        }
+      }
+    },
+    {
+      "name": "More than3 real-position/episode fixtures and confirmed watched are distinct/deduplicated",
+      "status": "PASS",
+      "data": [
+        {
+          "kind": "resume",
+          "ids": [
+            8,
+            7,
+            5,
+            4,
+            3,
+            2,
+            1
+          ],
+          "count": 7
+        },
+        {
+          "kind": "watched",
+          "ids": [
+            6
+          ],
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "Next episode without position is visibly labelled",
+      "status": "PASS"
+    },
+    {
+      "name": "Timeline completion updates mounted Home row",
+      "status": "PASS"
+    },
+    {
+      "name": "New empty profile removes old datasets without reusing a Home cache",
+      "status": "PASS"
+    },
+    {
+      "name": "Returning profile restores native positions and no duplicate rows",
+      "status": "PASS"
+    },
+    {
+      "name": "Hybrid off does not restore destroyed profile/history rows",
+      "status": "PASS"
+    },
+    {
+      "name": "Hybrid on retains one of each managed row",
+      "status": "PASS"
+    },
+    {
+      "name": "Native directional focus survives refresh",
+      "status": "FAIL"
+    },
+    {
+      "name": "Native Timeline resolves provider hash to actual playable position/handler",
+      "status": "PASS",
+      "data": {
+        "time": 20,
+        "duration": 60,
+        "percent": 33.333333333333336,
+        "handler": "function",
+        "customHash": "provider-1",
+        "nativeHash": "1386623199"
+      }
+    },
+    {
+      "name": "Original page/methods restored with no fixture globals",
+      "status": "PASS"
+    }
+  ],
+  "errors": [
+    "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#issue25-play')\u001b[22m\n\u001b[2m    - locator resolved to <button id=\"issue25-play\">Controlled resume test</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - element is outside of the viewport\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - element is outside of the viewport\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    58 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - element is outside of the viewport\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n"
+  ],
+  "sources": {
+    "/loader.js": {
+      "received": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
+      "expected": "f4d45c03011fb0ebaab230ac2e03094c92c8732a334e65ea7a1a1e0de9b6da7c",
+      "commit": "818935e7d95ae3cce60e049716e8d2e91a9e8908"
+    },
+    "/ui/stremio-hybrid.js": {
+      "received": "2ea5f597463f8d1ad4bb919e42853cce9dc90406a7300426257426c20d61ec39",
+      "expected": "2ea5f597463f8d1ad4bb919e42853cce9dc90406a7300426257426c20d61ec39",
+      "commit": "818935e7d95ae3cce60e049716e8d2e91a9e8908"
+    },
+    "/ui/design-optimized.js": {
+      "received": "0e1375316ef0767c6d1e49dd00ee60bada94845efd973a8339b14e62bc2d7930",
+      "expected": "0e1375316ef0767c6d1e49dd00ee60bada94845efd973a8339b14e62bc2d7930",
+      "commit": "818935e7d95ae3cce60e049716e8d2e91a9e8908"
+    },
+    "/plugins-to-enable/home-history.js": {
+      "received": "c9e1e86aafdb55ca4af528fa7f9408fc9877826b3471426cc8bb7b67182caa61",
+      "expected": "c9e1e86aafdb55ca4af528fa7f9408fc9877826b3471426cc8bb7b67182caa61",
+      "commit": "818935e7d95ae3cce60e049716e8d2e91a9e8908"
+    }
+  },
+  "blocked": [
+    "Physical Google TV",
+    "Actual user three titles/missing examples not available in this test profile",
+    "External player/provider backend"
+  ]
+}

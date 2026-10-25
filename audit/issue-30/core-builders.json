@@ -1,0 +1,138 @@
+{
+  "source": "https://siaivo.isroot.in/app.min.js",
+  "sourceSha256": "aaf8d5b5e0a3fdaedd3899ba3a2999189c64be2c327152143d5516064225b0d8",
+  "entries": [
+    {
+      "id": "core:tmdb:builder-65740c249aa5",
+      "kind": "recommendation",
+      "signature": "function(call){if(['movie','tv'].indexOf(type)==-1)returncall();TMDB.get('person/popular',{},function(json){call();if(!json.results)return;json.results.sort(function(a,b){returna.popularity-b.popularity;});varfiltred=json.results.filter(function(p){returnp.known_for_department&&p.known_for;});varpersons=filtred.filter(function(p){return(p.known_for_department||'').toLowerCase()=='acting'&&p.known_for.length;}).slice(0,10);persons.forEach(function(person_data,index){varevent=functionevent(call_inner){person({only_credits:type,id:person_data.id},function(result){if(!result.credits)returncall_inner();varitems=(result.credits[type]||[]).filter(function(m){returnm.backdrop_path&&m.vote_count>20;});if(type=='tv')items=items.filter(function(m){return!(m.genre_ids.indexOf(10767)>=0||m.genre_ids.indexOf(10763)>=0);});items.sort(function(a,b){varda=a.release_date||a.first_air_date;vardb=b.release_date||b.first_air_date;if(db>da)return1;elseif(db<da)return-1;elsereturn0;});varsrc=person_data.profile_path?TMDB.img(person_data.profile_path,'w90_and_h90_face'):person_data.img||'./img/actor.svg';call_inner({title:person_data.name,icon_img:src,results:items.length>5?items.slice(0,20):[],params:{module:Helper$b.toggle(Helper$b.MASK.base,'Icon','More')}});});};parts.push(event);});Arrays.shuffleArrayFromIndex(parts,shift);},call,{life:60*24*3});}",
+      "code": "function (call) {\n\t    if (['movie', 'tv'].indexOf(type) == -1) return call();\n\t    TMDB.get('person/popular', {}, function (json) {\n\t      call();\n\t      if (!json.results) return;\n\t      json.results.sort(function (a, b) {\n\t        return a.popularity - b.popularity;\n\t      });\n\t      var filtred = json.results.filter(function (p) {\n\t        return p.known_for_department && p.known_for;\n\t      });\n\t      var persons = filtred.filter(function (p) {\n\t        return (p.known_for_department || '').toLowerCase() == 'acting' && p.known_for.length;\n\t      }).slice(0, 10);\n\t      persons.forEach(function (person_data, index) {\n\t        var event = function event(call_inner) {\n\t          person({\n\t            only_credits: type,\n\t            id: person_data.id\n\t          }, function (result) {\n\t            if (!result.credits) return call_inner();\n\t            var items = (result.credits[type] || []).filter(function (m) {\n\t              return m.backdrop_path && m.vote_count > 20;\n\t            });\n\t            if (type == 'tv') items = items.filter(function (m) {\n\t              return !(m.genre_ids.indexOf(10767) >= 0 || m.genre_ids.indexOf(10763) >= 0);\n\t            });\n\t            items.sort(function (a, b) {\n\t              var da = a.release_date || a.first_air_date;\n\t              var db = b.release_date || b.first_air_date;\n\t              if (db > da) return 1;else if (db < da) return -1;else return 0;\n\t            });\n\t            var src = person_data.profile_path ? TMDB.img(person_data.profile_path, 'w90_and_h90_face') : person_data.img || './img/actor.svg';\n\t            call_inner({\n\t              title: person_data.name,\n\t              icon_img: src,\n\t              results: items.length > 5 ? items.slice(0, 20) : [],\n\t              params: {\n\t                module: Helper$b.toggle(Helper$b.MASK.base, 'Icon', 'More')\n\t              }\n\t            });\n\t          });\n\t        };\n\t        parts.push(event);\n\t      });\n\t      Arrays.shuffleArrayFromIndex(parts, shift);\n\t    }, call, {\n\t      life: 60 * 24 * 3\n\t    });\n\t  }"
+    },
+    {
+      "id": "core:tmdb:builder-dd55f4e44543",
+      "kind": "recommendation",
+      "signature": "function(call){if(['movie','tv'].indexOf(type)==-1)returncall();call();TMDB.keywords[type].filter(function(keyword){returnfilter.indexOf(keyword.id)==-1;}).forEach(function(keyword){parts.push(partKeyword(keyword,type,req_params));});Arrays.shuffleArrayFromIndex(parts,shift);}",
+      "code": "function (call) {\n\t    if (['movie', 'tv'].indexOf(type) == -1) return call();\n\t    call();\n\t    TMDB.keywords[type].filter(function (keyword) {\n\t      return filter.indexOf(keyword.id) == -1;\n\t    }).forEach(function (keyword) {\n\t      parts.push(partKeyword(keyword, type, req_params));\n\t    });\n\t    Arrays.shuffleArrayFromIndex(parts, shift);\n\t  }"
+    },
+    {
+      "id": "core:tmdb:movie/now_playing",
+      "kind": "recommendation",
+      "signature": "function(call){get$e(nowPlaying('movie/now_playing'),params,function(json){json.title=Lang.translate('title_now_watch');call(json);},call,{life:day$4*2});}",
+      "code": "function (call) {\n\t    get$e(nowPlaying('movie/now_playing'), params, function (json) {\n\t      json.title = Lang.translate('title_now_watch');\n\t      call(json);\n\t    }, call, {\n\t      life: day$4 * 2\n\t    });\n\t  }"
+    },
+    {
+      "id": "core:tmdb:trending/movie/day",
+      "kind": "recommendation",
+      "signature": "function(call){get$e('trending/movie/day',params,function(json){json.title=Lang.translate('title_trend_day');call(json);},call,{life:day$4*2});}",
+      "code": "function (call) {\n\t    get$e('trending/movie/day', params, function (json) {\n\t      json.title = Lang.translate('title_trend_day');\n\t      call(json);\n\t    }, call, {\n\t      life: day$4 * 2\n\t    });\n\t  }"
+    },
+    {
+      "id": "core:tmdb:trending/movie/week",
+      "kind": "recommendation",
+      "signature": "function(call){get$e('trending/movie/week',params,function(json){json.title=Lang.translate('title_trend_week');call(json);},call,{life:day$4*3});}",
+      "code": "function (call) {\n\t    get$e('trending/movie/week', params, function (json) {\n\t      json.title = Lang.translate('title_trend_week');\n\t      call(json);\n\t    }, call, {\n\t      life: day$4 * 3\n\t    });\n\t  }"
+    },
+    {
+      "id": "core:tmdb:movie/upcoming",
+      "kind": "recommendation",
+      "signature": "function(call){get$e('movie/upcoming',params,function(json){json.title=Lang.translate('title_upcoming');call(json);},call,{life:day$4*7});}",
+      "code": "function (call) {\n\t    get$e('movie/upcoming', params, function (json) {\n\t      json.title = Lang.translate('title_upcoming');\n\t      call(json);\n\t    }, call, {\n\t      life: day$4 * 7\n\t    });\n\t  }"
+    },
+    {
+      "id": "core:tmdb:movie/popular",
+      "kind": "recommendation",
+      "signature": "function(call){get$e('movie/popular',params,function(json){json.title=Lang.translate('title_popular_movie');json.icon_svg=Template.string('icon_fire');json.icon_bgcolor='#fff';json.icon_color='#fd4518';json.params={module:Helper$b.toggle(Helper$b.MASK.base,'Icon')};call(json);},call,{life:day$4*3});}",
+      "code": "function (call) {\n\t    get$e('movie/popular', params, function (json) {\n\t      json.title = Lang.translate('title_popular_movie');\n\t      json.icon_svg = Template.string('icon_fire');\n\t      json.icon_bgcolor = '#fff';\n\t      json.icon_color = '#fd4518';\n\t      json.params = {\n\t        module: Helper$b.toggle(Helper$b.MASK.base, 'Icon')\n\t      };\n\t      call(json);\n\t    }, call, {\n\t      life: day$4 * 3\n\t    });\n\t  }"
+    },
+    {
+      "id": "core:tmdb:trending/tv/week",
+      "kind": "recommendation",
+      "signature": "function(call){get$e('trending/tv/week',params,function(json){json.title=Lang.translate('title_popular_tv');json.icon_svg=Template.string('icon_fire');json.icon_bgcolor='#fff';json.icon_color='#fd4518';json.params={module:Helper$b.toggle(Helper$b.MASK.base,'Icon')};call(json);},call,{life:day$4*3});}",
+      "code": "function (call) {\n\t    get$e('trending/tv/week', params, function (json) {\n\t      json.title = Lang.translate('title_popular_tv');\n\t      json.icon_svg = Template.string('icon_fire');\n\t      json.icon_bgcolor = '#fff';\n\t      json.icon_color = '#fd4518';\n\t      json.params = {\n\t        module: Helper$b.toggle(Helper$b.MASK.base, 'Icon')\n\t      };\n\t      call(json);\n\t    }, call, {\n\t      life: day$4 * 3\n\t    });\n\t  }"
+    },
+    {
+      "id": "core:tmdb:movie/top_rated",
+      "kind": "recommendation",
+      "signature": "function(call){get$e('movie/top_rated',params,function(json){json.title=Lang.translate('title_top_movie');json.icon_svg=Template.string('icon_top');json.icon_bgcolor='#e02129';json.params={module:Helper$b.toggle(Helper$b.MASK.base,'Icon')};call(json);},call,{life:day$4*7});}",
+      "code": "function (call) {\n\t    get$e('movie/top_rated', params, function (json) {\n\t      json.title = Lang.translate('title_top_movie');\n\t      json.icon_svg = Template.string('icon_top');\n\t      json.icon_bgcolor = '#e02129';\n\t      json.params = {\n\t        module: Helper$b.toggle(Helper$b.MASK.base, 'Icon')\n\t      };\n\t      call(json);\n\t    }, call, {\n\t      life: day$4 * 7\n\t    });\n\t  }"
+    },
+    {
+      "id": "core:tmdb:tv/top_rated",
+      "kind": "recommendation",
+      "signature": "function(call){get$e('tv/top_rated',params,function(json){json.title=Lang.translate('title_top_tv');json.icon_svg=Template.string('icon_top');json.icon_bgcolor='#e02129';json.params={module:Helper$b.toggle(Helper$b.MASK.base,'Icon')};call(json);},call,{life:day$4*7});}",
+      "code": "function (call) {\n\t    get$e('tv/top_rated', params, function (json) {\n\t      json.title = Lang.translate('title_top_tv');\n\t      json.icon_svg = Template.string('icon_top');\n\t      json.icon_bgcolor = '#e02129';\n\t      json.params = {\n\t        module: Helper$b.toggle(Helper$b.MASK.base, 'Icon')\n\t      };\n\t      call(json);\n\t    }, call, {\n\t      life: day$4 * 7\n\t    });\n\t  }"
+    },
+    {
+      "id": "core:tmdb:discover/movie?with_genres=",
+      "kind": "recommendation",
+      "signature": "functionevent(call){get$e('discover/movie?with_genres='+genre.id,params,function(json){json.title=Lang.translate(genre.title.replace(/[^a-z_]/g,''));call(json);},call,{life:day$4*7});}",
+      "code": "function event(call) {\n\t      get$e('discover/movie?with_genres=' + genre.id, params, function (json) {\n\t        json.title = Lang.translate(genre.title.replace(/[^a-z_]/g, ''));\n\t        call(json);\n\t      }, call, {\n\t        life: day$4 * 7\n\t      });\n\t    }"
+    },
+    {
+      "id": "core:cub:?sort=now_playing",
+      "kind": "recommendation",
+      "signature": "function(call){get$9('?sort=now_playing',params,function(json){json.title=Lang.translate('title_now_watch');call(json);},call,{life:day$3*2});}",
+      "code": "function (call) {\n\t    get$9('?sort=now_playing', params, function (json) {\n\t      json.title = Lang.translate('title_now_watch');\n\t      call(json);\n\t    }, call, {\n\t      life: day$3 * 2\n\t    });\n\t  }"
+    },
+    {
+      "id": "core:cub:?sort=latest",
+      "kind": "recommendation",
+      "signature": "function(call){get$9('?sort=latest',params,function(json){json.title=Lang.translate('title_latest');call(json);},call,{life:day$3*2});}",
+      "code": "function (call) {\n\t    get$9('?sort=latest', params, function (json) {\n\t      json.title = Lang.translate('title_latest');\n\t      call(json);\n\t    }, call, {\n\t      life: day$3 * 2\n\t    });\n\t  }"
+    },
+    {
+      "id": "core:cub:top/fire/movie",
+      "kind": "recommendation",
+      "signature": "function(call){if(permit.child_small)returncall();get$9('top/fire/movie',params,function(json){json.title=Lang.translate('title_fire');json.icon_svg=Template.string('icon_fire');json.icon_bgcolor='#fff';json.icon_color='#fd4518';json.params={module:Helper$b.toggle(Helper$b.MASK.base,'Icon')};call(json);},call,{life:day$3*7});}",
+      "code": "function (call) {\n\t    if (permit.child_small) return call();\n\t    get$9('top/fire/movie', params, function (json) {\n\t      json.title = Lang.translate('title_fire');\n\t      json.icon_svg = Template.string('icon_fire');\n\t      json.icon_bgcolor = '#fff';\n\t      json.icon_color = '#fd4518';\n\t      json.params = {\n\t        module: Helper$b.toggle(Helper$b.MASK.base, 'Icon')\n\t      };\n\t      call(json);\n\t    }, call, {\n\t      life: day$3 * 7\n\t    });\n\t  }"
+    },
+    {
+      "id": "core:cub:?cat=",
+      "kind": "recommendation",
+      "signature": "function(call){get$9('?cat='+params.url+'&sort=latest&uhd=true',params,function(json){json.title=Lang.translate('title_in_high_quality');json.results.forEach(function(card){card.params={style:{name:'wide'}};});json.params={items:{view:3}};call(json);},call,{life:day$3*3});}",
+      "code": "function (call) {\n\t    get$9('?cat=' + params.url + '&sort=latest&uhd=true', params, function (json) {\n\t      json.title = Lang.translate('title_in_high_quality');\n\t      json.results.forEach(function (card) {\n\t        card.params = {\n\t          style: {\n\t            name: 'wide'\n\t          }\n\t        };\n\t      });\n\t      json.params = {\n\t        items: {\n\t          view: 3\n\t        }\n\t      };\n\t      call(json);\n\t    }, call, {\n\t      life: day$3 * 3\n\t    });\n\t  }"
+    },
+    {
+      "id": "core:cub:top/hundred/movie",
+      "kind": "recommendation",
+      "signature": "function(call){if(permit.child_small)returncall();get$9('top/hundred/movie',params,function(json){json.title=Lang.translate('title_top_100')+'-'+Lang.translate('menu_movies');json.icon_svg=Template.string('icon_top');json.icon_bgcolor='#e02129';json.params={module:Helper$b.toggle(Helper$b.MASK.base,'Icon')};call(json);},call,{life:day$3*7});}",
+      "code": "function (call) {\n\t    if (permit.child_small) return call();\n\t    get$9('top/hundred/movie', params, function (json) {\n\t      json.title = Lang.translate('title_top_100') + ' - ' + Lang.translate('menu_movies');\n\t      json.icon_svg = Template.string('icon_top');\n\t      json.icon_bgcolor = '#e02129';\n\t      json.params = {\n\t        module: Helper$b.toggle(Helper$b.MASK.base, 'Icon')\n\t      };\n\t      call(json);\n\t    }, call, {\n\t      life: day$3 * 7\n\t    });\n\t  }"
+    },
+    {
+      "id": "core:cub:top/hundred/tv",
+      "kind": "recommendation",
+      "signature": "function(call){if(permit.child_small)returncall();get$9('top/hundred/tv',params,function(json){json.title=Lang.translate('title_top_100')+'-'+Lang.translate('menu_tv');json.icon_svg=Template.string('icon_top');json.icon_bgcolor='#e02129';json.params={module:Helper$b.toggle(Helper$b.MASK.base,'Icon')};call(json);},call,{life:day$3*7});}",
+      "code": "function (call) {\n\t    if (permit.child_small) return call();\n\t    get$9('top/hundred/tv', params, function (json) {\n\t      json.title = Lang.translate('title_top_100') + ' - ' + Lang.translate('menu_tv');\n\t      json.icon_svg = Template.string('icon_top');\n\t      json.icon_bgcolor = '#e02129';\n\t      json.params = {\n\t        module: Helper$b.toggle(Helper$b.MASK.base, 'Icon')\n\t      };\n\t      call(json);\n\t    }, call, {\n\t      life: day$3 * 7\n\t    });\n\t  }"
+    },
+    {
+      "id": "core:cub:builder-329afe2c458f",
+      "kind": "recommendation",
+      "signature": "function(call){if(permit.child)returncall();trailers('added',call);}",
+      "code": "function (call) {\n\t    if (permit.child) return call();\n\t    trailers('added', call);\n\t  }"
+    },
+    {
+      "id": "core:cub:?sort=top&genre=",
+      "kind": "recommendation",
+      "signature": "functionevent(call){get$9('?sort=top&genre='+genre.id+(permit.child_small?',16':''),params,function(json){json.title=Lang.translate(genre.title.replace(/[^a-z_]/g,''));call(json);},call,{life:day$3*7});}",
+      "code": "function event(call) {\n\t      get$9('?sort=top&genre=' + genre.id + (permit.child_small ? ',16' : ''), params, function (json) {\n\t        json.title = Lang.translate(genre.title.replace(/[^a-z_]/g, ''));\n\t        call(json);\n\t      }, call, {\n\t        life: day$3 * 7\n\t      });\n\t    }"
+    },
+    {
+      "id": "core:native:init$19",
+      "kind": "legacy-history",
+      "signature": "function(call){//Смотриместьлиновыесерииспереводомif(media=='tv'||media=='anime'){varcub_notices=Notice$1.get('cub').items();cub_notices=cub_notices.filter(function(n){returnn.item.method=='tv-voice';});//Получаемизисториитолькотекарточкикоторыеестьвуведомленияхvarhistory=get$c({type:'history'}).filter(function(h){returncub_notices.find(function(n){returnn.item.card_id==h.id;});});//Фильтруемтолькотекарточкиукоторыхестьновыесерииvarnew_episode=history.map(function(h){varnoty=cub_notices.find(function(n){returnn.item.card_id==h.id;});varcard=Arrays.clone(h);card.params={module:Helper$9.toggle(Helper$9.MASK.base,'Subscribe')};card.subscribe={status:1,season:noty.item.season,episode:noty.item.episode,voice:noty.data.voice};card.viewed=Timeline$1.watchedEpisode(h,noty.item.season,noty.item.episode);returncard;});//Оставляемтолькотеукоторыхпросмотрменьше10%new_episode=new_episode.filter(function(n){returnn.viewed<10;});new_episode=new_episode.filter(function(e){varjpan=Utils$1.containsJapanese(e.original_name||e.name||'')||e.original_language=='ja';returnmedia=='anime'?jpan:!jpan;});if(new_episode.length){//Убираемизосновногоспискакарточкиукоторыхестьновыесерииresults=results.filter(function(r){return!new_episode.find(function(h){returnh.id==r.id;});});results=[].concat(new_episode,results);//Оставляемнеболее20карточекresults=results.slice(0,19);}}call({results:results,title:media=='tv'||media=='anime'?Lang.translate('title_continue'):Lang.translate('title_watched')});}",
+      "code": "function (call) {\n\t        // Смотрим есть ли новые серии с переводом\n\t        if (media == 'tv' || media == 'anime') {\n\t          var cub_notices = Notice$1.get('cub').items();\n\t          cub_notices = cub_notices.filter(function (n) {\n\t            return n.item.method == 'tv-voice';\n\t          });\n\n\t          // Получаем из истории только те карточки которые есть в уведомлениях\n\t          var history = get$c({\n\t            type: 'history'\n\t          }).filter(function (h) {\n\t            return cub_notices.find(function (n) {\n\t              return n.item.card_id == h.id;\n\t            });\n\t          });\n\n\t          // Фильтруем только те карточки у которых есть новые серии\n\t          var new_episode = history.map(function (h) {\n\t            var noty = cub_notices.find(function (n) {\n\t              return n.item.card_id == h.id;\n\t            });\n\t            var card = Arrays.clone(h);\n\t            card.params = {\n\t              module: Helper$9.toggle(Helper$9.MASK.base, 'Subscribe')\n\t            };\n\t            card.subscribe = {\n\t              status: 1,\n\t              season: noty.item.season,\n\t              episode: noty.item.episode,\n\t              voice: noty.data.voice\n\t            };\n\t            card.viewed = Timeline$1.watchedEpisode(h, noty.item.season, noty.item.episode);\n\t            return card;\n\t          });\n\n\t          // Оставляем только те у которых просмотр меньше 10%\n\t          new_episode = new_episode.filter(function (n) {\n\t            return n.viewed < 10;\n\t          });\n\t          new_episode = new_episode.filter(function (e) {\n\t            var jpan = Utils$1.containsJapanese(e.original_name || e.name || '') || e.original_language == 'ja';\n\t            return media == 'anime' ? jpan : !jpan;\n\t          });\n\t          if (new_episode.length) {\n\t            // Убираем из основного списка карточки у которых есть новые серии\n\t            results = results.filter(function (r) {\n\t              return !new_episode.find(function (h) {\n\t                return h.id == r.id;\n\t              });\n\t            });\n\t            results = [].concat(new_episode, results);\n\n\t            // Оставляем не более 20 карточек\n\t            results = results.slice(0, 19);\n\t          }\n\t        }\n\t        call({\n\t          results: results,\n\t          title: media == 'tv' || media == 'anime' ? Lang.translate('title_continue') : Lang.translate('title_watched')\n\t        });\n\t      }"
+    },
+    {
+      "id": "core:native:add$2",
+      "kind": "legacy-history",
+      "signature": "function(call){call({results:results,title:Lang.translate('title_continue')});}",
+      "code": "function (call) {\n\t          call({\n\t            results: results,\n\t            title: Lang.translate('title_continue')\n\t          });\n\t        }"
+    },
+    {
+      "id": "core:native:add$2",
+      "kind": "legacy-history",
+      "signature": "function(call){vardone=functiondone(results){call({results:results,title:Lang.translate('title_continue')});};TimeTable.getMany(candidates.slice(0,pool_size$1)).then(function(found){done(build$1(candidates,found));}).catch(function(){done(Favorite.continues(media));});}",
+      "code": "function (call) {\n\t        var done = function done(results) {\n\t          call({\n\t            results: results,\n\t            title: Lang.translate('title_continue')\n\t          });\n\t        };\n\t        TimeTable.getMany(candidates.slice(0, pool_size$1)).then(function (found) {\n\t          done(build$1(candidates, found));\n\t        }).catch(function () {\n\t          done(Favorite.continues(media));\n\t        });\n\t      }"
+    }
+  ]
+}

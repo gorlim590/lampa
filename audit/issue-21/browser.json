@@ -1,0 +1,738 @@
+{
+  "commit": "786a47f0eff4b28bb12ab3b79cb48beb4352a642",
+  "checks": [
+    {
+      "name": "Actual source hashes match all seven requested files",
+      "status": "PASS",
+      "data": {
+        "loader.js": {
+          "expected": "f24adfda2bfb3d069edb48a66e3210abda8a306301404a43c6e1f2b3c5b77afa",
+          "received": "f24adfda2bfb3d069edb48a66e3210abda8a306301404a43c6e1f2b3c5b77afa",
+          "commit": "786a47f0eff4b28bb12ab3b79cb48beb4352a642"
+        },
+        "trakt/trakt.js": {
+          "expected": "4e5316729db4e0a9f9247dd0713a6cc067007dc2dbe50b21fda892f700c99e1f",
+          "received": "4e5316729db4e0a9f9247dd0713a6cc067007dc2dbe50b21fda892f700c99e1f",
+          "commit": "786a47f0eff4b28bb12ab3b79cb48beb4352a642"
+        },
+        "trakt/trakt-plus.js": {
+          "expected": "770846b84e900086f4ce6d5512f2a267e0d3da7c7cde587423d0941f86fd1522",
+          "received": "770846b84e900086f4ce6d5512f2a267e0d3da7c7cde587423d0941f86fd1522",
+          "commit": "786a47f0eff4b28bb12ab3b79cb48beb4352a642"
+        },
+        "ui/interface-plus.js": {
+          "expected": "2b1997a7489087d157f3e5e5e8f60f573f8720752ea8aed283c532831ed7abff",
+          "received": "2b1997a7489087d157f3e5e5e8f60f573f8720752ea8aed283c532831ed7abff",
+          "commit": "786a47f0eff4b28bb12ab3b79cb48beb4352a642"
+        },
+        "ui/design-optimized.js": {
+          "expected": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6",
+          "received": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6",
+          "commit": "786a47f0eff4b28bb12ab3b79cb48beb4352a642"
+        },
+        "ui/cardify-plus.js": {
+          "expected": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+          "received": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+          "commit": "786a47f0eff4b28bb12ab3b79cb48beb4352a642"
+        },
+        "ui/stremio-hybrid.js": {
+          "expected": "cf843770f3fe5fe39f115c25e866c7bb9d091d2c81116d8b3a485717ece31f17",
+          "received": "cf843770f3fe5fe39f115c25e866c7bb9d091d2c81116d8b3a485717ece31f17",
+          "commit": "786a47f0eff4b28bb12ab3b79cb48beb4352a642"
+        }
+      }
+    },
+    {
+      "name": "Home neutral header without route flicker",
+      "status": "PASS",
+      "data": [
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)"
+      ]
+    },
+    {
+      "name": "1920x1080 readable UA clock and full weekday without clipping/overlap",
+      "status": "PASS",
+      "data": {
+        "background": "rgb(21, 23, 28)",
+        "image": "none",
+        "color": "rgb(244, 244, 247)",
+        "clock": {
+          "x": 1532.703125,
+          "y": 20.265625,
+          "width": 267.578125,
+          "height": 42.6875,
+          "top": 20.265625,
+          "right": 1800.28125,
+          "bottom": 62.953125,
+          "left": 1532.703125
+        },
+        "time": {
+          "x": 1532.703125,
+          "y": 21.9375,
+          "width": 96.671875,
+          "height": 39.34375,
+          "top": 21.9375,
+          "right": 1629.375,
+          "bottom": 61.28125,
+          "left": 1532.703125
+        },
+        "date": {
+          "x": 1648.1875,
+          "y": 20.265625,
+          "width": 152.09375,
+          "height": 21.34375,
+          "top": 20.265625,
+          "right": 1800.28125,
+          "bottom": 41.609375,
+          "left": 1648.1875
+        },
+        "week": {
+          "x": 1648.1875,
+          "y": 41.609375,
+          "width": 152.09375,
+          "height": 21.34375,
+          "top": 41.609375,
+          "right": 1800.28125,
+          "bottom": 62.953125,
+          "left": 1648.1875
+        },
+        "search": {
+          "x": 63.84375,
+          "y": 11.390625,
+          "width": 499.1875,
+          "height": 60.4375,
+          "top": 11.390625,
+          "right": 563.03125,
+          "bottom": 71.828125,
+          "left": 63.84375
+        },
+        "profile": {
+          "x": 1818.515625,
+          "y": 11.390625,
+          "width": 60.4375,
+          "height": 60.4375,
+          "top": 11.390625,
+          "right": 1878.953125,
+          "bottom": 71.828125,
+          "left": 1818.515625
+        },
+        "text": "\n            20:40\n            \n                16 Листопада 2026\n                Понеділок\n            \n        ",
+        "weekDisplay": "block",
+        "route": "main",
+        "body": "platform--noname mouse--controll orientation--portrait size--normal ifx-colored-bookmarks ydesign-active ydesign-theme-default ydesign-style-classic ydesign-focus-scale ydesign-series-active ydesign-series-glass-pill ydesign-series-shape-pill ydesign-hide-left-column ydesign-border-year ydesign-border-age ydesign-border-seasons ydesign-border-ua ydesign-border-genres ydesign-border-ratings ydesign-color-age ydesign-color-ua ydesign-glass-pill ydesign-shape-pill ydesign-notch-bg ydesign-notch-border ydesign-v-uniform-badges ydesign-h-uniform-badges ydesign--font cardify-ratings-card stremio-hybrid"
+      }
+    },
+    {
+      "name": "Remote arrows retain native focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Details neutral header without route flicker",
+      "status": "PASS",
+      "data": [
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)"
+      ]
+    },
+    {
+      "name": "Details readable UA clock and full weekday without clipping/overlap",
+      "status": "PASS",
+      "data": {
+        "background": "rgb(21, 23, 28)",
+        "image": "none",
+        "color": "rgb(244, 244, 247)",
+        "clock": {
+          "x": 1532.703125,
+          "y": 20.265625,
+          "width": 267.578125,
+          "height": 42.6875,
+          "top": 20.265625,
+          "right": 1800.28125,
+          "bottom": 62.953125,
+          "left": 1532.703125
+        },
+        "time": {
+          "x": 1532.703125,
+          "y": 21.9375,
+          "width": 96.671875,
+          "height": 39.34375,
+          "top": 21.9375,
+          "right": 1629.375,
+          "bottom": 61.28125,
+          "left": 1532.703125
+        },
+        "date": {
+          "x": 1648.1875,
+          "y": 20.265625,
+          "width": 152.09375,
+          "height": 21.34375,
+          "top": 20.265625,
+          "right": 1800.28125,
+          "bottom": 41.609375,
+          "left": 1648.1875
+        },
+        "week": {
+          "x": 1648.1875,
+          "y": 41.609375,
+          "width": 152.09375,
+          "height": 21.34375,
+          "top": 41.609375,
+          "right": 1800.28125,
+          "bottom": 62.953125,
+          "left": 1648.1875
+        },
+        "search": {
+          "x": 63.84375,
+          "y": 11.390625,
+          "width": 499.1875,
+          "height": 60.4375,
+          "top": 11.390625,
+          "right": 563.03125,
+          "bottom": 71.828125,
+          "left": 63.84375
+        },
+        "profile": {
+          "x": 1818.515625,
+          "y": 11.390625,
+          "width": 60.4375,
+          "height": 60.4375,
+          "top": 11.390625,
+          "right": 1878.953125,
+          "bottom": 71.828125,
+          "left": 1818.515625
+        },
+        "text": "\n            20:40\n            \n                16 Листопада 2026\n                Понеділок\n            \n        ",
+        "weekDisplay": "block",
+        "route": "full",
+        "body": "platform--noname mouse--controll orientation--portrait size--normal ifx-colored-bookmarks ydesign-active ydesign-theme-default ydesign-style-classic ydesign-focus-scale ydesign-series-active ydesign-series-glass-pill ydesign-series-shape-pill ydesign-hide-left-column ydesign-border-year ydesign-border-age ydesign-border-seasons ydesign-border-ua ydesign-border-genres ydesign-border-ratings ydesign-color-age ydesign-color-ua ydesign-glass-pill ydesign-shape-pill ydesign-notch-bg ydesign-notch-border ydesign-v-uniform-badges ydesign-h-uniform-badges ydesign--font cardify-ratings-card stremio-hybrid sh-movie-active"
+      }
+    },
+    {
+      "name": "Settings neutral header without route flicker",
+      "status": "PASS",
+      "data": [
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)"
+      ]
+    },
+    {
+      "name": "Settings focus and Back remain native",
+      "status": "PASS"
+    },
+    {
+      "name": "Catalog neutral header without route flicker",
+      "status": "PASS",
+      "data": [
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)"
+      ]
+    },
+    {
+      "name": "Catalog remote focus and scroll remain functional",
+      "status": "PASS"
+    },
+    {
+      "name": "1280x720 readable UA clock and full weekday without clipping/overlap",
+      "status": "PASS",
+      "data": {
+        "background": "rgb(21, 23, 28)",
+        "image": "none",
+        "color": "rgb(244, 244, 247)",
+        "clock": {
+          "x": 892.703125,
+          "y": 20.265625,
+          "width": 267.578125,
+          "height": 42.6875,
+          "top": 20.265625,
+          "right": 1160.28125,
+          "bottom": 62.953125,
+          "left": 892.703125
+        },
+        "time": {
+          "x": 892.703125,
+          "y": 21.9375,
+          "width": 96.671875,
+          "height": 39.34375,
+          "top": 21.9375,
+          "right": 989.375,
+          "bottom": 61.28125,
+          "left": 892.703125
+        },
+        "date": {
+          "x": 1008.1875,
+          "y": 20.265625,
+          "width": 152.09375,
+          "height": 21.34375,
+          "top": 20.265625,
+          "right": 1160.28125,
+          "bottom": 41.609375,
+          "left": 1008.1875
+        },
+        "week": {
+          "x": 1008.1875,
+          "y": 41.609375,
+          "width": 152.09375,
+          "height": 21.34375,
+          "top": 41.609375,
+          "right": 1160.28125,
+          "bottom": 62.953125,
+          "left": 1008.1875
+        },
+        "search": {
+          "x": 153.328125,
+          "y": 11.390625,
+          "width": 332.796875,
+          "height": 60.4375,
+          "top": 11.390625,
+          "right": 486.125,
+          "bottom": 71.828125,
+          "left": 153.328125
+        },
+        "profile": {
+          "x": 1178.515625,
+          "y": 11.390625,
+          "width": 60.4375,
+          "height": 60.4375,
+          "top": 11.390625,
+          "right": 1238.953125,
+          "bottom": 71.828125,
+          "left": 1178.515625
+        },
+        "text": "\n            20:40\n            \n                16 Листопада 2026\n                Понеділок\n            \n        ",
+        "weekDisplay": "block",
+        "route": "category_full",
+        "body": "platform--noname mouse--controll orientation--portrait size--normal ifx-colored-bookmarks ydesign-active ydesign-theme-default ydesign-style-classic ydesign-focus-scale ydesign-series-active ydesign-series-glass-pill ydesign-series-shape-pill ydesign-hide-left-column ydesign-border-year ydesign-border-age ydesign-border-seasons ydesign-border-ua ydesign-border-genres ydesign-border-ratings ydesign-color-age ydesign-color-ua ydesign-glass-pill ydesign-shape-pill ydesign-notch-bg ydesign-notch-border ydesign-v-uniform-badges ydesign-h-uniform-badges ydesign--font cardify-ratings-card stremio-hybrid mouse-pc"
+      }
+    },
+    {
+      "name": "3840x2160 readable UA clock and full weekday without clipping/overlap",
+      "status": "PASS",
+      "data": {
+        "background": "rgb(21, 23, 28)",
+        "image": "none",
+        "color": "rgb(244, 244, 247)",
+        "clock": {
+          "x": 3581.828125,
+          "y": 13.5,
+          "width": 178.359375,
+          "height": 28.46875,
+          "top": 13.5,
+          "right": 3760.1875,
+          "bottom": 41.96875,
+          "left": 3581.828125
+        },
+        "time": {
+          "x": 3581.828125,
+          "y": 14.609375,
+          "width": 64.4375,
+          "height": 26.234375,
+          "top": 14.609375,
+          "right": 3646.265625,
+          "bottom": 40.84375,
+          "left": 3581.828125
+        },
+        "date": {
+          "x": 3658.796875,
+          "y": 13.5,
+          "width": 101.390625,
+          "height": 14.234375,
+          "top": 13.5,
+          "right": 3760.1875,
+          "bottom": 27.734375,
+          "left": 3658.796875
+        },
+        "week": {
+          "x": 3658.796875,
+          "y": 27.734375,
+          "width": 101.390625,
+          "height": 14.234375,
+          "top": 27.734375,
+          "right": 3760.1875,
+          "bottom": 41.96875,
+          "left": 3658.796875
+        },
+        "search": {
+          "x": 102.1875,
+          "y": 7.59375,
+          "width": 364.96875,
+          "height": 40.296875,
+          "top": 7.59375,
+          "right": 467.15625,
+          "bottom": 47.890625,
+          "left": 102.1875
+        },
+        "profile": {
+          "x": 3772.34375,
+          "y": 7.59375,
+          "width": 40.296875,
+          "height": 40.296875,
+          "top": 7.59375,
+          "right": 3812.640625,
+          "bottom": 47.890625,
+          "left": 3772.34375
+        },
+        "text": "\n            20:40\n            \n                16 Листопада 2026\n                Понеділок\n            \n        ",
+        "weekDisplay": "block",
+        "route": "category_full",
+        "body": "platform--noname mouse--controll ifx-colored-bookmarks ydesign-active ydesign-theme-default ydesign-style-classic ydesign-focus-scale ydesign-series-active ydesign-series-glass-pill ydesign-series-shape-pill ydesign-hide-left-column ydesign-border-year ydesign-border-age ydesign-border-seasons ydesign-border-ua ydesign-border-genres ydesign-border-ratings ydesign-color-age ydesign-color-ua ydesign-glass-pill ydesign-shape-pill ydesign-notch-bg ydesign-notch-border ydesign-v-uniform-badges ydesign-h-uniform-badges ydesign--font cardify-ratings-card stremio-hybrid mouse-pc orientation--landscape size--normal"
+      }
+    },
+    {
+      "name": "Theme twitch neutral header without route flicker",
+      "status": "PASS",
+      "data": [
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)"
+      ]
+    },
+    {
+      "name": "Theme amoled neutral header without route flicker",
+      "status": "PASS",
+      "data": [
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)"
+      ]
+    },
+    {
+      "name": "Theme default neutral header without route flicker",
+      "status": "PASS",
+      "data": [
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)"
+      ]
+    },
+    {
+      "name": "Hybrid off restores the same native clock",
+      "status": "PASS"
+    },
+    {
+      "name": "Native with YDesign/Cardify neutral header without route flicker",
+      "status": "PASS",
+      "data": [
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)"
+      ]
+    },
+    {
+      "name": "Native clock readable UA clock and full weekday without clipping/overlap",
+      "status": "PASS",
+      "data": {
+        "background": "rgb(21, 23, 28)",
+        "image": "none",
+        "color": "rgb(244, 244, 247)",
+        "clock": {
+          "x": 1618.21875,
+          "y": 21.96875,
+          "width": 267.578125,
+          "height": 42.6875,
+          "top": 21.96875,
+          "right": 1885.796875,
+          "bottom": 64.65625,
+          "left": 1618.21875
+        },
+        "time": {
+          "x": 1618.21875,
+          "y": 23.640625,
+          "width": 96.671875,
+          "height": 39.34375,
+          "top": 23.640625,
+          "right": 1714.890625,
+          "bottom": 62.984375,
+          "left": 1618.21875
+        },
+        "date": {
+          "x": 1733.703125,
+          "y": 21.96875,
+          "width": 152.09375,
+          "height": 21.34375,
+          "top": 21.96875,
+          "right": 1885.796875,
+          "bottom": 43.3125,
+          "left": 1733.703125
+        },
+        "week": {
+          "x": 1733.703125,
+          "y": 43.3125,
+          "width": 152.09375,
+          "height": 21.34375,
+          "top": 43.3125,
+          "right": 1885.796875,
+          "bottom": 64.65625,
+          "left": 1733.703125
+        },
+        "search": {
+          "x": 1093.71875,
+          "y": 11.390625,
+          "width": 63.859375,
+          "height": 63.859375,
+          "top": 11.390625,
+          "right": 1157.578125,
+          "bottom": 75.25,
+          "left": 1093.71875
+        },
+        "profile": null,
+        "text": "\n            20:40\n            \n                16 Листопада 2026\n                Понеділок\n            \n        ",
+        "weekDisplay": "block",
+        "route": "category_full",
+        "body": "platform--noname mouse--controll ifx-colored-bookmarks ydesign-active ydesign-theme-default ydesign-style-classic ydesign-focus-scale ydesign-series-active ydesign-series-glass-pill ydesign-series-shape-pill ydesign-hide-left-column ydesign-border-year ydesign-border-age ydesign-border-seasons ydesign-border-ua ydesign-border-genres ydesign-border-ratings ydesign-color-age ydesign-color-ua ydesign-glass-pill ydesign-shape-pill ydesign-notch-bg ydesign-notch-border ydesign-v-uniform-badges ydesign-h-uniform-badges ydesign--font cardify-ratings-card mouse-pc orientation--portrait size--normal"
+      }
+    },
+    {
+      "name": "Native 1280x720 readable UA clock and full weekday without clipping/overlap",
+      "status": "PASS",
+      "data": {
+        "background": "rgb(21, 23, 28)",
+        "image": "none",
+        "color": "rgb(244, 244, 247)",
+        "clock": {
+          "x": 978.21875,
+          "y": 21.96875,
+          "width": 267.578125,
+          "height": 42.6875,
+          "top": 21.96875,
+          "right": 1245.796875,
+          "bottom": 64.65625,
+          "left": 978.21875
+        },
+        "time": {
+          "x": 978.21875,
+          "y": 23.640625,
+          "width": 96.671875,
+          "height": 39.34375,
+          "top": 23.640625,
+          "right": 1074.890625,
+          "bottom": 62.984375,
+          "left": 978.21875
+        },
+        "date": {
+          "x": 1093.703125,
+          "y": 21.96875,
+          "width": 152.09375,
+          "height": 21.34375,
+          "top": 21.96875,
+          "right": 1245.796875,
+          "bottom": 43.3125,
+          "left": 1093.703125
+        },
+        "week": {
+          "x": 1093.703125,
+          "y": 43.3125,
+          "width": 152.09375,
+          "height": 21.34375,
+          "top": 43.3125,
+          "right": 1245.796875,
+          "bottom": 64.65625,
+          "left": 1093.703125
+        },
+        "search": {
+          "x": 453.71875,
+          "y": 11.390625,
+          "width": 63.859375,
+          "height": 63.859375,
+          "top": 11.390625,
+          "right": 517.578125,
+          "bottom": 75.25,
+          "left": 453.71875
+        },
+        "profile": null,
+        "text": "\n            20:40\n            \n                16 Листопада 2026\n                Понеділок\n            \n        ",
+        "weekDisplay": "block",
+        "route": "category_full",
+        "body": "platform--noname mouse--controll ifx-colored-bookmarks ydesign-active ydesign-theme-default ydesign-style-classic ydesign-focus-scale ydesign-series-active ydesign-series-glass-pill ydesign-series-shape-pill ydesign-hide-left-column ydesign-border-year ydesign-border-age ydesign-border-seasons ydesign-border-ua ydesign-border-genres ydesign-border-ratings ydesign-color-age ydesign-color-ua ydesign-glass-pill ydesign-shape-pill ydesign-notch-bg ydesign-notch-border ydesign-v-uniform-badges ydesign-h-uniform-badges ydesign--font cardify-ratings-card mouse-pc orientation--portrait size--normal"
+      }
+    },
+    {
+      "name": "Theme toggles retain one clock, profile and shared style",
+      "status": "PASS"
+    },
+    {
+      "name": "No per-second clock DOM writes",
+      "status": "PASS",
+      "data": 0
+    },
+    {
+      "name": "Normal reload neutral header without route flicker",
+      "status": "PASS",
+      "data": [
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)",
+        "rgb(21, 23, 28)"
+      ]
+    },
+    {
+      "name": "Reload readable UA clock and full weekday without clipping/overlap",
+      "status": "PASS",
+      "data": {
+        "background": "rgb(21, 23, 28)",
+        "image": "none",
+        "color": "rgb(244, 244, 247)",
+        "clock": {
+          "x": 1532.703125,
+          "y": 20.265625,
+          "width": 267.578125,
+          "height": 42.6875,
+          "top": 20.265625,
+          "right": 1800.28125,
+          "bottom": 62.953125,
+          "left": 1532.703125
+        },
+        "time": {
+          "x": 1532.703125,
+          "y": 21.9375,
+          "width": 96.671875,
+          "height": 39.34375,
+          "top": 21.9375,
+          "right": 1629.375,
+          "bottom": 61.28125,
+          "left": 1532.703125
+        },
+        "date": {
+          "x": 1648.1875,
+          "y": 20.265625,
+          "width": 152.09375,
+          "height": 21.34375,
+          "top": 20.265625,
+          "right": 1800.28125,
+          "bottom": 41.609375,
+          "left": 1648.1875
+        },
+        "week": {
+          "x": 1648.1875,
+          "y": 41.609375,
+          "width": 152.09375,
+          "height": 21.34375,
+          "top": 41.609375,
+          "right": 1800.28125,
+          "bottom": 62.953125,
+          "left": 1648.1875
+        },
+        "search": {
+          "x": 153.328125,
+          "y": 11.390625,
+          "width": 499.1875,
+          "height": 60.4375,
+          "top": 11.390625,
+          "right": 652.515625,
+          "bottom": 71.828125,
+          "left": 153.328125
+        },
+        "profile": {
+          "x": 1818.515625,
+          "y": 11.390625,
+          "width": 60.4375,
+          "height": 60.4375,
+          "top": 11.390625,
+          "right": 1878.953125,
+          "bottom": 71.828125,
+          "left": 1818.515625
+        },
+        "text": "\n            20:40\n            \n                16 Листопада 2026\n                Понеділок\n            \n        ",
+        "weekDisplay": "block",
+        "route": "category_full",
+        "body": "platform--noname mouse--controll orientation--portrait size--normal ifx-colored-bookmarks ydesign-active ydesign-theme-default ydesign-style-classic ydesign-focus-scale ydesign-series-active ydesign-series-glass-pill ydesign-series-shape-pill ydesign-hide-left-column ydesign-border-year ydesign-border-age ydesign-border-seasons ydesign-border-ua ydesign-border-genres ydesign-border-ratings ydesign-color-age ydesign-color-ua ydesign-glass-pill ydesign-shape-pill ydesign-notch-bg ydesign-notch-border ydesign-v-uniform-badges ydesign-h-uniform-badges ydesign--font cardify-ratings-card stremio-hybrid"
+      }
+    },
+    {
+      "name": "No JavaScript exceptions",
+      "status": "PASS",
+      "data": []
+    }
+  ],
+  "sources": {
+    "loader.js": {
+      "expected": "f24adfda2bfb3d069edb48a66e3210abda8a306301404a43c6e1f2b3c5b77afa",
+      "received": "f24adfda2bfb3d069edb48a66e3210abda8a306301404a43c6e1f2b3c5b77afa",
+      "commit": "786a47f0eff4b28bb12ab3b79cb48beb4352a642"
+    },
+    "trakt/trakt.js": {
+      "expected": "4e5316729db4e0a9f9247dd0713a6cc067007dc2dbe50b21fda892f700c99e1f",
+      "received": "4e5316729db4e0a9f9247dd0713a6cc067007dc2dbe50b21fda892f700c99e1f",
+      "commit": "786a47f0eff4b28bb12ab3b79cb48beb4352a642"
+    },
+    "trakt/trakt-plus.js": {
+      "expected": "770846b84e900086f4ce6d5512f2a267e0d3da7c7cde587423d0941f86fd1522",
+      "received": "770846b84e900086f4ce6d5512f2a267e0d3da7c7cde587423d0941f86fd1522",
+      "commit": "786a47f0eff4b28bb12ab3b79cb48beb4352a642"
+    },
+    "ui/interface-plus.js": {
+      "expected": "2b1997a7489087d157f3e5e5e8f60f573f8720752ea8aed283c532831ed7abff",
+      "received": "2b1997a7489087d157f3e5e5e8f60f573f8720752ea8aed283c532831ed7abff",
+      "commit": "786a47f0eff4b28bb12ab3b79cb48beb4352a642"
+    },
+    "ui/design-optimized.js": {
+      "expected": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6",
+      "received": "649a09aab852b974fc995fd43c80afaa6353a8c64ed9132aeaeff8440dc0b4c6",
+      "commit": "786a47f0eff4b28bb12ab3b79cb48beb4352a642"
+    },
+    "ui/cardify-plus.js": {
+      "expected": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+      "received": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+      "commit": "786a47f0eff4b28bb12ab3b79cb48beb4352a642"
+    },
+    "ui/stremio-hybrid.js": {
+      "expected": "cf843770f3fe5fe39f115c25e866c7bb9d091d2c81116d8b3a485717ece31f17",
+      "received": "cf843770f3fe5fe39f115c25e866c7bb9d091d2c81116d8b3a485717ece31f17",
+      "commit": "786a47f0eff4b28bb12ab3b79cb48beb4352a642"
+    }
+  },
+  "errors": [],
+  "network": [],
+  "limitations": [
+    "Physical Google TV and older WebViews untested",
+    "Synthetic metadata; no authenticated backend or playback claims"
+  ]
+}
