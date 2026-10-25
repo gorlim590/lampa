@@ -39,7 +39,7 @@
     function mapRow(item, i) {
         var title = str(item.title || item.name || item.Title);
         var magnet = str(item.magnet || item.magnet_uri || item.MagnetUri);
-        var link = str(item.torrent_url || item.download_url || item.Link || item.url || item.page_url);
+        var link = str(item.torrent_url || item.download_url || item.Link || item.url);
         var source = str(item.source || item.tracker || item.Tracker || 'Unified');
         var infoHash = hash(magnet, item.infohash || item.info_hash || item.InfoHash);
         if (!title || (!magnet && !link)) return null;
