@@ -113,6 +113,7 @@
     var memoryCache = new Map();
     var inFlightPromises = new Map();
     var engineFailures = new Map(); // id -> timestamp
+    var translationRetry = new Map(); // bounded temporary failures, never confirmed translations
 
     function getSet(key) {
         if (!window.Lampa || !Lampa.Storage) return DefaultSettings[key];
@@ -256,7 +257,7 @@
         // 2. Постійний L2 кеш у Lampa.Storage
         var cacheKey = 'ytrans_' + hashStr(text);
         var cached = (window.Lampa && Lampa.Storage) ? Lampa.Storage.get(cacheKey) : null;
-        if (cached) {
+        if (typeof cached === 'string' && cached.trim() && cached !== text) {
             memoryCache.set(text, cached);
             return cached;
         }
@@ -265,6 +266,8 @@
         if (inFlightPromises.has(text)) {
             return inFlightPromises.get(text);
         }
+        if ((translationRetry.get(text) || 0) > Date.now()) return text;
+        translationRetry.delete(text);
 
         var translatePromise = (async function() {
             var proxiesStr = getSet('ytranslate_proxies') || '';
@@ -286,11 +289,12 @@
                         var res = await sendRequest(backend, text, proxy);
                         var translatedText = backend.parse(res);
                         
-                        if (translatedText && typeof translatedText === 'string' && translatedText.trim()) {
+                        if (translatedText && typeof translatedText === 'string' && translatedText.trim() && translatedText.trim() !== text) {
                             var cleanResult = translatedText.trim();
                             
                             // Зберігаємо в кеш RAM та Storage
                             memoryCache.set(text, cleanResult);
+                            translationRetry.delete(text);
                             if (window.Lampa && Lampa.Storage) {
                                 Lampa.Storage.set(cacheKey, cleanResult);
                             }
@@ -305,8 +309,9 @@
                 }
             }
 
-            // Якщо всі бекенди не відповіли — повертаємо оригінал та кешуємо в RAM
-            memoryCache.set(text, text);
+            // Failure is temporary; retry on a later scan/reopen without a request storm.
+            translationRetry.set(text, Date.now() + 30000);
+            while (translationRetry.size > 128) translationRetry.delete(translationRetry.keys().next().value);
             return text;
         })();
 
@@ -351,18 +356,20 @@
         doTranslate(origText).then(function(translatedText) {
             $el.data('ytranslate-loading', false);
             $el.removeClass('ytrans-loading');
-            $el.attr('data-ytrans-done', '1');
+            if (!$el[0] || $el[0].isConnected === false || $el.text().trim() !== origText) return;
             
             if (translatedText && translatedText !== origText) {
+                $el.attr('data-ytrans-done', '1');
                 $el.text(translatedText);
                 $el.data('ytranslate-orig-text', translatedText); 
             } else {
+                $el.removeAttr('data-ytrans-done');
                 $el.data('ytranslate-orig-text', origText);
             }
         }).catch(function() {
             $el.data('ytranslate-loading', false);
             $el.removeClass('ytrans-loading');
-            $el.attr('data-ytrans-done', '1');
+            $el.removeAttr('data-ytrans-done');
         });
     }
 

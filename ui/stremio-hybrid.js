@@ -19,11 +19,12 @@ body.stremio-hybrid .items-line { padding-bottom:2.4em; }
 body.stremio-hybrid .items-line__head { padding:0 1.8em 1em; }
 body.stremio-hybrid .items-line__title { font-size:1.2em; font-weight:500; letter-spacing:.01em; }
 body.stremio-hybrid .items-line .scroll__content { padding-left:1.8em; padding-right:var(--sh-inset); }
-body.stremio-hybrid .items-line:not(.vinyl-line) .scroll__body { gap:var(--sh-gap); }
+body.stremio-hybrid .items-line:not(.vinyl-line) .scroll__body { gap:var(--ydesign-card-gap,var(--sh-gap)); }
 body.stremio-hybrid .card { transition:transform var(--sh-speed) var(--sh-ease) !important; backface-visibility:visible !important; transform:none; }
 body.stremio-hybrid .ydesign-card, body.stremio-hybrid .ydesign-card.focus { animation:none !important; }
 body.stremio-hybrid .card.focus { transform:scale(1.035) !important; z-index:20; }
 body.stremio-hybrid .card .card__view { border-radius:var(--sh-radius) !important; transition:none !important; }
+body.stremio-hybrid .card.ydesign-card .card__view { border-radius:var(--yd-r,var(--sh-radius)) !important; }
 body.stremio-hybrid .card.focus .card__view { box-shadow:0 0 0 .14em var(--sh-text),0 0 0 .27em var(--sh-ring) !important; }
 body.stremio-hybrid .ydesign-card.focus::after, body.stremio-hybrid .ydesign-card .ydesign-content-layer::after { display:none !important; }
 body.stremio-hybrid .ydesign-card .card__view::before { animation:none !important; }
@@ -133,8 +134,8 @@ body.stremio-hybrid .menu__item, body.stremio-hybrid .head__action, body.stremio
  body.stremio-hybrid .wrap__left--hidden .menu__ico { margin:0; }
  body.stremio-hybrid .wrap__left--hidden .menu__text { display:none; }
  body.stremio-hybrid .wrap__left--hidden .menu__version { font-size:.45em; }
- body.stremio-hybrid .items-line:not(.vinyl-line) .card.ydesign-vertical { width:13.2vw !important; }
- body.stremio-hybrid .mapping--grid .card.ydesign-vertical { width:calc(100% / 6) !important; }
+ body.stremio-hybrid .items-line:not(.vinyl-line) .card.ydesign-vertical { width:calc((100% + var(--ydesign-card-gap,var(--sh-gap))) / var(--ydesign-grid-items-v,5) - var(--ydesign-card-gap,var(--sh-gap))) !important; margin-left:0 !important; margin-right:0 !important; }
+ body.stremio-hybrid .mapping--grid .card.ydesign-vertical { width:calc(100% / var(--ydesign-grid-items-v,5)) !important; }
 }
 @media(max-width:768px) {
  body.stremio-hybrid .cardify .full-start-new__left { display:none !important; }
@@ -1007,6 +1008,14 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         for (var i=0;i<keys.length;i++) if (node.classList.contains(keys[i])) return map[keys[i]];
         return node.getAttribute('aria-label') || node.getAttribute('title') || node.textContent.trim();
     }
+    function headerUtility(node) {
+        return ['notice--icon','open--profile','trakt-head-action'].some(function(name){return node.classList.contains(name);});
+    }
+    function headerItems(utilities) {
+        var items=secondaryActions().filter(function(node){return headerUtility(node)===utilities;}).map(function(node){return {title:actionLabel(node),shNode:node};});
+        if(utilities)items.push({title:'Навігація',shAction:function(){Lampa.Controller.toggle('menu');}});
+        return items;
+    }
     function secondaryActions() {
         return Array.prototype.filter.call(document.querySelectorAll('.head__actions > .head__action'), function (node) {
             if (node === moreButton || node.classList.contains('open--search') || node.classList.contains('hide') || node.classList.contains('hidden') || node.style.display === 'none' || node.querySelector('input,select,textarea')) return false;
@@ -1040,19 +1049,33 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         if (target && target.isConnected) Lampa.Controller.collectionFocus($(target), Lampa.Head.render());
     }
     function openActions() {
-        var nodes = secondaryActions();
-        var items = nodes.map(function (node) { return {title:actionLabel(node), shNode:node}; });
-        items.push({title:'Навігація',shAction:function(){Lampa.Controller.toggle('menu');}});
+        var items = headerItems(false), panel;
         items.push({title:'Назад',shAction:function(){Lampa.Controller.back();}});
         menuOpen = true;
-        Lampa.Select.show({title:'Профіль', items:items, onBack:function () { menuOpen=false;restoreHead(moreButton); }, onSelect:function (item) {
+        Lampa.Select.show({title:'Профіль', items:items, onBack:function () { menuOpen=false;if(panel)panel.classList.remove('sh-profile-menu');restoreHead(moreButton); }, onSelect:function (item) {
             menuOpen=false;
+            if(panel)panel.classList.remove('sh-profile-menu');
             Lampa.Select.hide();
             Lampa.Activity.mixState();
             restoreHead(moreButton);
             if(item.shAction)item.shAction();else if (item.shNode && item.shNode.isConnected) $(item.shNode).trigger('hover:enter');
         }});
-        var panel=Lampa.Select.render()[0];if(panel)panel.classList.add('sh-profile-menu');
+        panel=Lampa.Select.render()[0];if(panel)panel.classList.add('sh-profile-menu');
+    }
+    function openHeaderUtilities() {
+        var current=Lampa.Controller.enabled(),previous=current&&current.name||'settings_component';
+        function restore(){Lampa.Controller.toggle(previous);}
+        menuOpen=true;
+        Lampa.Select.show({title:'Додаткові дії панелі',items:headerItems(true),onBack:function(){menuOpen=false;Lampa.Select.hide();restore();},onSelect:function(item){
+            menuOpen=false;Lampa.Select.hide();Lampa.Activity.mixState();restore();
+            if(item.shAction)item.shAction();else if(item.shNode&&item.shNode.isConnected)$(item.shNode).trigger('hover:enter');
+        }});
+    }
+    function onHeaderUtilitiesSetting(){if(window.StremioHybrid)window.StremioHybrid.openUtilities();}
+    function removeHeaderUtilitiesSetting(){
+        if(!window.Lampa||!Lampa.SettingsApi||!Lampa.SettingsApi.getParam)return;
+        var params=Lampa.SettingsApi.getParam('interface')||[];
+        for(var i=params.length-1;i>=0;i--)if(params[i].param&&params[i].param.name==='sh_header_utilities'&&params[i].onChange===onHeaderUtilitiesSetting)params.splice(i,1);
     }
     function onSearchEnter() { searchReturn = true; }
     function onSearchClose() { clearSearchSources();scheduleMovie(); if (searchReturn) { searchReturn=false;restoreHead(searchNode); } }
@@ -1376,14 +1399,17 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
             });
         }
         if(!params.some(function(item){return item.param&&item.param.name==='sh_profile_avatar';}))Lampa.SettingsApi.addParam({component:'interface',param:{name:'sh_profile_avatar',type:'input',values:'',placeholder:'https://example.org/avatar.jpg',default:''},field:{name:'Фото профілю · URL',description:'Адреса HTTP(S) зображення. Порожнє поле повертає стандартний значок; саме фото не зберігається в localStorage.'},onChange:function(){if(window.StremioHybrid)window.StremioHybrid.refresh();}});
+        if(!params.some(function(item){return item.param&&item.param.name==='sh_header_utilities';}))Lampa.SettingsApi.addParam({component:'interface',param:{name:'sh_header_utilities',type:'button'},field:{name:'Додаткові дії панелі',description:'Сповіщення, профіль, Trakt і перехід до навігації. Використовує чинні дії Lampa.'},onChange:onHeaderUtilitiesSetting});
         apply(enabled());
     }
     window.StremioHybrid = {
-        version: '2.8.2-details-ux',
+        version: '2.8.4-header-menu',
+        openUtilities: openHeaderUtilities,
         setEnabled: setEnabled,
         refresh: function () { if (ready) apply(enabled()); },
         destroy: function () {
             apply(false);
+            removeHeaderUtilitiesSetting();
             backdropResume=null;movieBrands=[];movieEnglish=[];paletteCache=[];
             destroyed = true;
             stopWaiting();

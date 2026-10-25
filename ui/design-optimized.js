@@ -8,7 +8,7 @@
 
     if (window.YDesignLoaded) return;
     window.YDesignLoaded = true;
-    window.YDesignVersion = '3.4.1';
+    window.YDesignVersion = '3.4.2';
 
     // =========================================================================
     // 1. КОНФІГУРАЦІЯ ТА ВЕКТОРНІ ІКОНКИ РЕЙТИНГІВ
@@ -2302,7 +2302,7 @@
             "body:not(.stremio-hybrid).ydesign-active .ydesign-card .card__view {width: 100%;height: 0 !important;border-radius: 0.85em !important;box-shadow: 0 0 0 4px transparent;transition: background-color 0.4s ease, box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);}",
             "body:not(.stremio-hybrid).ydesign-active .ydesign-card.ydesign-vertical .card__view {padding-bottom: 177.77% !important;}",
             "@media (min-width: 769px) {.ydesign-active .card.ydesign-vertical {width: calc(100% / var(--ydesign-grid-items-v, 5));height: auto !important;}",
-            ".ydesign-active .items-line:not(.vinyl-line) .card.ydesign-vertical {width: 18.5vw;}}",
+            ".ydesign-active .items-line:not(.vinyl-line) .card.ydesign-vertical {width: calc((100% + var(--ydesign-card-gap, .8em)) / var(--ydesign-grid-items-v, 5) - var(--ydesign-card-gap, .8em));margin-left:0 !important;margin-right:0 !important;}}",
             "@media (max-width: 768px) {.ydesign-active .card.ydesign-vertical {width: calc(100% / 2);height: auto !important;}",
             ".ydesign-active .items-line:not(.vinyl-line) .card.ydesign-vertical {width: 46vw;}}",
             ".ydesign-img-layer {position: absolute;top: 0;left: 0;width: 100%;height: 100%;background-color: #1a1a1a;background-image: url(\"./img/img_load.svg\");background-size: cover !important;background-repeat: no-repeat;background-position: center center !important;}",
@@ -2736,7 +2736,7 @@
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_perf_mode', type: 'select', values: { 'auto': 'Авто (на ТВ — економний)', 'lite': 'Економний (без blur, для ТВ)', 'fx': 'Повні ефекти (blur, тіні, блиск)' }, default: DefaultSettings.ydesign_perf_mode }, field: { name: 'Режим продуктивності', description: 'Економний режим прибирає blur і важкі фільтри — скролінг стає плавнішим на приставках і ТВ' } });
 
 
-        Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_grid_items_v', type: 'select', values: { '4': '4', '5': '5', '6': '6', '7': '7', '8': '8' }, default: DefaultSettings.ydesign_grid_items_v }, field: { name: 'Кількість карток у сітці (Вертикальні)' } });
+        Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_grid_items_v', type: 'select', values: { '4': '4', '5': '5', '6': '6', '7': '7', '8': '8' }, default: DefaultSettings.ydesign_grid_items_v }, field: { name: 'Кількість карток у рядку (Вертикальні)' } });
 
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_card_gap', type: 'select', values: gaps, default: DefaultSettings.ydesign_card_gap }, field: { name: 'Відстань між картками' } });
 
