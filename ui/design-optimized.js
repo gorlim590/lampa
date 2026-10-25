@@ -1563,6 +1563,12 @@
 
     // Відсоток перегляду фільму: хеш за кількома назвами + власна функція Lampa
     function moviePercent(data) {
+        // Managed Home cards already carry the selected native position. Do not
+        // replace it with a larger percentage from another title/provider hash.
+        if (data && data.home_history_resume) {
+            var resume = data.home_history_resume, percent = Number(resume.percent);
+            return resume.mode === 'position' && Number(resume.time) > 0 && isFinite(percent) && percent >= 0 && percent <= 100 ? percent : 0;
+        }
         var best = 0, seen = {};
         var names = [data.original_title, data.original_name, data.title, data.name];
         for (var i = 0; i < names.length; i++) {
@@ -1764,10 +1770,11 @@
         var day = new Date().getDate();
         var parts = type === 'tv' ? null : getCollParts(el, ext);
         var mk = el._ydesign_mk;
+        var homeProgress = data && data.home_history_resume ? [data.home_history_resume.mode, data.home_history_resume.percent, data.home_history_resume.time, data.home_history_resume.updated].join('|') : null;
         var traktSession = data && data._trakt_cached_only && window.TraktPlus && typeof TraktPlus.detailsSession === 'function' ? TraktPlus.detailsSession() : null;
-        if (mk && mk.epoch === MarksEpoch && mk.ext === ext && mk.day === day && mk.coll === !!parts && mk.traktSession === traktSession) return mk;
+        if (mk && mk.epoch === MarksEpoch && mk.ext === ext && mk.day === day && mk.coll === !!parts && mk.traktSession === traktSession && mk.homeProgress === homeProgress) return mk;
 
-        mk = { epoch: MarksEpoch, ext: ext, day: day, coll: !!parts, traktSession: traktSession, pct: 0, tv: null, seq: false };
+        mk = { epoch: MarksEpoch, ext: ext, day: day, coll: !!parts, traktSession: traktSession, homeProgress: homeProgress, pct: 0, tv: null, seq: false };
         mk.info = releaseInfo(data, type, ext);
         mk.watched = isWatched(data, type, ext, !!el._ydesign_inHistory);
         if (type === 'tv') {
