@@ -46,7 +46,7 @@ test('passes TMDB ID and maps Ukrainian torrent rows to native schema without le
   assert.equal(url.pathname, '/api/search/unified');
   assert.equal(url.searchParams.get('tmdb_id'), '220542');
   assert.equal(url.searchParams.get('tmdb_type'), 'tv');
-  assert.equal(url.searchParams.get('type'), 'anime');
+  assert.equal(url.searchParams.get('type'), 'all');
   assert.equal(received.Results.length, 1);
   assert.equal(received.Results[0].Tracker, 'Toloka');
   assert.equal(received.Results[0].Seeders, 9);
@@ -100,4 +100,17 @@ test('rejects tracker topic pages without a magnet or torrent download', () => {
   let result;
   app.Lampa.Parser.get({search:'Topic page',movie:{}}, r=>{result=r}, e=>{throw Error(e)});
   assert.equal(result.Results.length, 0);
+});
+
+test('does not server-filter movie and dorama releases by type', () => {
+  for (const movie of [
+    { id: 927, source: 'tmdb', title: 'Gremlins' },
+    { name: '100 Days of Deception', original_name: '100 Days of Deception', media_type: 'tv' }
+  ]) {
+    const app = load({results:[]});
+    app.Lampa.Parser.get({search:movie.title || movie.name,movie}, () => {}, e => {throw Error(e)});
+    const url = new URL(app.calls[0]);
+    assert.equal(url.searchParams.get('type'), 'all');
+    assert.equal(url.searchParams.get('q'), movie.title || movie.name);
+  }
 });

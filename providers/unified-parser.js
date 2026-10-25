@@ -20,12 +20,6 @@
         return value.replace(/\/api\/search\/unified$/i, '') + '/api/search/unified';
     }
     function isSeries(m) { return !!m && (m.media_type === 'tv' || m.method === 'tv' || !!m.original_name || !!m.number_of_seasons || !!m.first_air_date); }
-    function mediaType(m) {
-        if (!m) return 'all';
-        if (!isSeries(m)) return 'movie';
-        if (/^(ja|ko|zh|cn)$/i.test(str(m.original_language)) && (m.genres || []).some(function(g) { return g && g.id === 16; })) return 'anime';
-        return 'series';
-    }
     function number(v) { var n = Number(v); return isFinite(n) && n >= 0 ? n : 0; }
     function hash(magnet, direct) {
         var m = /(?:^|[?&])xt=urn:btih:([A-Fa-f0-9]{40})(?:&|$)/i.exec(str(magnet));
@@ -102,7 +96,10 @@
         var movie = params && params.movie || {};
         var q = str(params && (params.search || params.search_one) || movie.title || movie.name).trim();
         if (q.length < 2) { if (typeof done === 'function') done({ Results: [] }); return; }
-        var query = { q: q, type: mediaType(movie), language: str(setting('unified_parser_language', 'all')), limit: 100 };
+        // The VPS backend filters results by release type before native UI matching.
+        // 'movie' drops Toloka Gremlins; 'series'/'anime' drop AniDUB doramas.
+        // Request all sources, then let the Lampa torrent UI narrow the releases.
+        var query = { q: q, type: 'all', language: str(setting('unified_parser_language', 'all')), limit: 100 };
         var id = str(movie.tmdb_id || movie.id);
         if (/^\d+$/.test(id) && (!movie.source || /^(tmdb|cub)$/i.test(str(movie.source)))) {
             query.tmdb_id = id;
@@ -168,7 +165,7 @@
         }
         ownGet = null;
     }
-    window.LampaUnifiedParser = { version: '0.1.1', install: install, destroy: destroy, endpoint: endpoint, toNative: toNative };
+    window.LampaUnifiedParser = { version: '0.1.2', install: install, destroy: destroy, endpoint: endpoint, toNative: toNative };
     if (L.Parser) install();
     else if (L.Listener && L.Listener.follow) L.Listener.follow('app', function(e) { if (e.type === 'ready') install(); });
 })();
