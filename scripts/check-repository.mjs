@@ -79,6 +79,66 @@ walkText(ROOT);
 
 const urlPattern = /https?:\/\/[^\s"'<>\\)\]]+/g;
 let urlCount = 0;
+function checkUrl(raw, reference) {
+  let parsed;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    failures.push('Malformed URL in ' + reference);
+    return;
+  }
+  if (!['http:', 'https:'].includes(parsed.protocol)) {
+    failures.push('Unsupported URL protocol in ' + reference);
+    return;
+  }
+  urlCount++;
+  if (parsed.hostname !== 'gorlim590.github.io') return;
+  // Diagnostics intentionally omit query/fragment/credentials.
+  const display = parsed.origin + parsed.pathname;
+  const prefix = '/lampa/';
+  if (!parsed.pathname.startsWith(prefix)) {
+    failures.push('First-party URL has unexpected path in ' + reference + ': ' + display);
+    return;
+  }
+  let target;
+  try {
+    target = decodeURIComponent(parsed.pathname.slice(prefix.length)).replace(/^\/+|\/+$/g, '');
+  } catch {
+    failures.push('Invalid URL encoding in ' + reference);
+    return;
+  }
+  if (!target) return;
+  const exists = allPaths.has(target) || [...allPaths].some((p) => p.startsWith(target + '/'));
+  if (!exists) failures.push('First-party URL target is not present in main or third-party branch: ' + display + ' (referenced by ' + reference + ')');
+}
+
+function checkManifest() {
+  let entries;
+  try {
+    entries = JSON.parse(fs.readFileSync(path.join(ROOT, 'plugins.json'), 'utf8').replace(/^\uFEFF/, ''));
+  } catch {
+    failures.push('Missing or invalid JSON in plugins.json');
+    return;
+  }
+  if (!Array.isArray(entries)) {
+    failures.push('plugins.json must contain an array');
+    return;
+  }
+  entries.forEach((entry, index) => {
+    const reference = 'plugins.json[' + index + ']';
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+      failures.push(reference + ' must be a plugin object');
+      return;
+    }
+    if (typeof entry.url !== 'string' || !entry.url.trim()) failures.push(reference + '.url must be a nonempty URL');
+    else checkUrl(entry.url, reference + '.url');
+    if (entry.status !== 0 && entry.status !== 1) failures.push(reference + '.status must be 0 or 1');
+    if ('name' in entry && typeof entry.name !== 'string') failures.push(reference + '.name must be a string when provided');
+  });
+  console.log('Checked plugins.json manifest (' + entries.length + ' entries).');
+}
+
+checkManifest();
 for (const file of textFiles) {
   if (file.startsWith(THIRD_PARTY_DIR + path.sep)) continue;
   const content = fs.readFileSync(file, 'utf8');
@@ -86,30 +146,7 @@ for (const file of textFiles) {
     const raw = match[0].replace(/[.,;:!?]+$/, '');
     // Ignore illustrative URLs such as http://…/file.mp4 in documentation/comments.
     if (raw.includes('…') || raw.includes('...')) continue;
-    let parsed;
-    try {
-      parsed = new URL(raw);
-    } catch {
-      failures.push('Malformed URL in ' + path.relative(ROOT, file) + ': ' + raw);
-      continue;
-    }
-    urlCount++;
-    if (parsed.hostname !== 'gorlim590.github.io') continue;
-    const prefix = '/lampa/';
-    if (!parsed.pathname.startsWith(prefix)) {
-      failures.push('First-party URL has unexpected path in ' + path.relative(ROOT, file) + ': ' + raw);
-      continue;
-    }
-    let target;
-    try {
-      target = decodeURIComponent(parsed.pathname.slice(prefix.length)).replace(/^\/+|\/+$/g, '');
-    } catch {
-      failures.push('Invalid URL encoding in ' + path.relative(ROOT, file) + ': ' + raw);
-      continue;
-    }
-    if (!target) continue;
-    const exists = allPaths.has(target) || [...allPaths].some((p) => p.startsWith(target + '/'));
-    if (!exists) failures.push('First-party URL target is not present in main or third-party branch: ' + raw + ' (referenced by ' + path.relative(ROOT, file) + ')');
+    checkUrl(raw, path.relative(ROOT, file));
   }
 }
 console.log('Parsed ' + urlCount + ' URLs; checked first-party GitHub Pages paths against both branches.');
