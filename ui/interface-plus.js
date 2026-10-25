@@ -21,7 +21,7 @@
 
     var IFX_TITLE_SIZE_DEFAULT = 0.75;
     var IFX_TMDB_UA_TTL_MS = 1000 * 60 * 60 * 24 * 2;
-    var IFX_TMDB_UA_CACHE_PREFIX = 'ifx_tmdb_ua_title_v1.7:';
+    var IFX_TMDB_UA_CACHE_PREFIX = 'ifx_tmdb_ua_title_v1.8:';
     if (!String.prototype.startsWith) {
         String.prototype.startsWith = function (searchString, position) {
             position = position || 0;
@@ -62,7 +62,7 @@
         var id = movie.tmdb_id || movie.id;
         if (!id) return '';
         var isTvShow = (
-            /tv|serial/i.test(movie.type || movie.media_type) ||
+            /tv|serial|anime/i.test(movie.type || movie.media_type) ||
             movie.number_of_seasons > 0 ||
             (movie.seasons && movie.seasons.length > 0) ||
             movie.first_air_date
@@ -424,23 +424,39 @@
         st.textContent = '.full-start-new__details, .full-start__details { margin-top: ' + mt + ' !important; margin-bottom: ' + mb + ' !important; }';
     }
     Lampa.Template.add('settings_ifx_margins', '<div></div>');
+    function titleTranslations(res) {
+        var list=res&&res.translations;
+        if(list&&!Array.isArray(list))list=list.translations;
+        return Array.isArray(list)?list:[];
+    }
     function pickUaFromTranslations(res, type) {
-        try {
-            var tr = res && res.translations && res.translations.translations;
-            if (!tr || !tr.length) return '';
-            var ua = null;
-            for (var i = 0; i < tr.length; i++) {
-                var t = tr[i];
-                if (!t) continue;
-                if (String(t.iso_639_1 || '').toLowerCase() === 'uk') { ua = t; break; }
-                if (String(t.iso_3166_1 || '').toUpperCase() === 'UA') { ua = t; }
-            }
-            if (!ua || !ua.data) return '';
-            var s = (type === 'tv') ? (ua.data.name || ua.data.title) : (ua.data.title || ua.data.name);
-            return String(s || '').trim();
-        } catch (e) {
-            return '';
+        var list=titleTranslations(res);
+        for(var i=0;i<list.length;i++){
+            var entry=list[i],data=entry&&entry.data;
+            if(!entry||String(entry.iso_639_1||'').toLowerCase()!=='uk'||!data)continue;
+            var name=type==='tv'?(data.name||data.title):(data.title||data.name);
+            if(typeof name==='string'&&name.trim())return name.trim();
         }
+        return '';
+    }
+    function pickDisplayTitle(res, type) {
+        var ua=pickUaFromTranslations(res,type);
+        if(ua)return ua;
+        var translations=titleTranslations(res);
+        for(var i=0;i<translations.length;i++){
+            var entry=translations[i],data=entry&&entry.data;
+            if(entry&&String(entry.iso_639_1||'').toLowerCase()==='en'&&data){
+                var english=type==='tv'?(data.name||data.title):(data.title||data.name);
+                if(typeof english==='string'&&english.trim())return english.trim();
+            }
+        }
+        var original=res&&(type==='tv'?(res.original_name||res.original_title):(res.original_title||res.original_name));
+        if(typeof original==='string'&&original.trim())return original.trim();
+        if(res&&(res.original_language==='uk'||res.original_language==='en')){
+            var local=type==='tv'?res.name:res.title;
+            if(typeof local==='string')return local.trim();
+        }
+        return '';
     }
     function fetchTmdbUaTitle(movie, cb) {
         try {
@@ -448,7 +464,7 @@
             var id = movie.tmdb_id || movie.id;
             if (!id) return cb('');
             var isTvShow = (
-                /tv|serial/i.test(movie.type || movie.media_type) ||
+                /tv|serial|anime/i.test(movie.type || movie.media_type) ||
                 movie.number_of_seasons > 0 ||
                 (movie.seasons && movie.seasons.length > 0) ||
                 movie.first_air_date
@@ -474,8 +490,7 @@
                     type: 'GET',
                     dataType: 'json',
                     success: function (res) {
-                        var title = pickUaFromTranslations(res, type);
-                        if (!title) title = (type === 'tv') ? res.name : res.title;
+                        var title = pickDisplayTitle(res, type);
                         if (title) {
                             onSuccess(title);
                         } else {
@@ -493,8 +508,7 @@
                 if (Lampa.Api && typeof Lampa.Api.tmdb === 'function') {
                     var bust = Date.now();
                     Lampa.Api.tmdb(type + '/' + id, { language: 'uk-UA', append_to_response: 'translations', _ifx: bust }, function (res) {
-                        var title = pickUaFromTranslations(res, type);
-                        if (!title) title = (type === 'tv') ? res.name : res.title;
+                        var title = pickDisplayTitle(res, type);
                         onSuccess(title);
                     }, function () {
                         fallbackTMDB();
@@ -506,8 +520,7 @@
             function fallbackTMDB() {
                 if (Lampa.TMDB && typeof Lampa.TMDB.get === 'function') {
                     Lampa.TMDB.get(type, id, { language: 'uk-UA', append_to_response: 'translations' }, function (res) {
-                        var title = pickUaFromTranslations(res, type);
-                        if (!title) title = (type === 'tv') ? res.name : res.title;
+                        var title = pickDisplayTitle(res, type);
                         onSuccess(title);
                     }, function () {
                         cb('');
@@ -527,7 +540,7 @@
                 return cb(uaTitle);
             }
             var uiLoc = String((movie && (movie.title || movie.name)) || '').trim();
-            cb(uiLoc);
+            cb(pickDisplayTitle(movie, movie.first_air_date || movie.media_type === 'tv' ? 'tv' : 'movie') || uiLoc);
         });
     }
     function getOriginalTitleEnabled() {
