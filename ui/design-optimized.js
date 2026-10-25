@@ -1,27 +1,14 @@
 /*
- * YDesign (оптимізована збірка для ТВ-приставок)
- * Оригінальний плагін: yarikrazor-star/lmp (ydes.js). Це змінена копія для особистого використання.
- *
- * v3.3: сумісність із Trakt+ (єдина позначка «Переглянуто» + чіп Trakt, постери Trakt-карток, без подвійного затемнення),
- *       нові стилі карток (Скло / Неон / Кінотеатр / М'який), ефекти фокуса (підйом / світіння), анімація появи карток,
- *       скелетон-завантаження, пресети одним натиском, debounce застосування CSS, обмеження кешу кольорів, preconnect до TMDB.
- * v3.2: рядки «Продовжити перегляд» і «Виходять цього тижня», смужка прогресу, «Далі SxEy», кільце сезону, «Продовження», теми, усі фільми з Історії = переглянуто, кеш позначок.
- * v3.1: «Переглянуто» тепер реально затемнює картку (фільм ≥90% або ≥50% з Історії; серіал — якщо переглянуто останню серію), «Скоро» лише для серіалів/аніме з новою серією в найближчі 14 днів.
- * v3: позначки «Новинка/Скоро», «Переглянуто» та фон екрана під колір постера (налаштування в розділі YDesign).
- * Що змінено (v2: додано необов'язкову перевірку UA через парсер торентів, виправлено кеш «немає UA»):
- *  - режим продуктивності (Авто / Економний / Повні ефекти): на ТВ без blur та важких фільтрів;
- *  - черга мережевих запитів (макс. 4 одночасно, найновіші картки першими);
- *  - один запис кешу замість сотень ключів у localStorage, з відкладеним збереженням;
- *  - запит external_ids не робиться, якщо немає ключів OMDb/MDBList;
- *  - пакетна перевірка переповнення бейджів замість ResizeObserver на кожній картці;
- *  - легший MutationObserver та інтервал у блоці серій;
- *  - плавна поява контенту картки, підсвітка кольором постера, блиск при фокусі (у режимі ефектів).
+ * YDesign v3.4 — вертикальні TV-картки та наповнення для Stremio Hybrid.
+ * Оригінальний плагін: yarikrazor-star/lmp (ydes.js); змінена збірка.
+ * Постери, логотипи, внутрішні градієнти, метадані та локальний прогрес збережені.
  */
 (function () {
     'use strict';
 
     if (window.YDesignLoaded) return;
     window.YDesignLoaded = true;
+    window.YDesignVersion = '3.4.1';
 
     // =========================================================================
     // 1. КОНФІГУРАЦІЯ ТА ВЕКТОРНІ ІКОНКИ РЕЙТИНГІВ
@@ -49,37 +36,17 @@
         letterboxd: 'https://upload.wikimedia.org/wikipedia/commons/9/9b/Letterboxd_2023_logo.png'
     };
 
-    var IconCache = {};
-    function preloadIcon(key, url) {
-        return new Promise(function (resolve) {
-            if (IconCache[key] || !url || url.indexOf('data:') === 0) {
-                IconCache[key] = true;
-                return resolve();
-            }
-            var img = new Image();
-            img.onload = function () { IconCache[key] = true; resolve(); };
-            img.onerror = function () { IconCache[key] = true; resolve(); };
-            img.src = url;
-            setTimeout(resolve, 1500);
-        });
-    }
-
     // =========================================================================
     // 2. ДЕФОЛТНІ НАЛАШТУВАННЯ
     // =========================================================================
     var DefaultSettings = {
-        ydesign_card_type_main: 'horizontal',
-        ydesign_card_type_other: 'vertical',
         ydesign_grid_items_v: '5',
-        ydesign_grid_items_h: '3',
         ydesign_card_gap: '0.8',
         ydesign_lazy_load: false,
         ydesign_perf_mode: 'auto',
         ydesign_ua_torrents: false,
         ydesign_ribbons: true,
         ydesign_watched_mark: true,
-        ydesign_ambient: true,
-        ydesign_history_watched: true,
         ydesign_progress_marks: true,
         ydesign_collection_mark: true,
         ydesign_row_continue: true,
@@ -125,10 +92,8 @@
         ydesign_logo_type: 'logo',
         ydesign_lang: 'uk_en',
         ydesign_slogan_lang: 'uk_en',
-        ydesign_desc_lang: 'uk_en',
         ydesign_add_title_lang: 'auto',
         ydesign_poster_quality: 'w300',
-        ydesign_backdrop_quality: 'w500',
         ydesign_logo_quality: 'w500',
 
         // Вертикальні
@@ -167,43 +132,6 @@
         ydesign_v_logo_mb: '1.0',
         ydesign_v_add_title_mb: '0.3',
 
-        // Горизонтальні
-        ydesign_h_logo_max_h: '35',
-        ydesign_h_logo_max_w: '80',
-        ydesign_h_title_size: '1.8',
-        ydesign_h_add_title_size: '0.9',
-        ydesign_h_slogan_size: '0.7',
-        ydesign_h_desc_size: '1.0',
-        ydesign_h_badge_size: '0.8',
-        ydesign_h_year_size: '0.8',
-        ydesign_h_age_size: '0.8',
-        ydesign_h_seasons_size: '0.8',
-        ydesign_h_ua_size: '0.8',
-        ydesign_h_genres_size: '0.8',
-        ydesign_h_rating_size: '0.8',
-        ydesign_h_uniform_badges: true,
-        ydesign_h_ratings_row: false,
-        ydesign_h_show_desc: true,
-        ydesign_h_show_year: true,
-        ydesign_h_show_seasons: true,
-        ydesign_h_show_ua: true,
-        ydesign_h_show_age: true,
-        ydesign_h_show_genres: true,
-        ydesign_h_show_slogan: true,
-        ydesign_h_show_add_title: true,
-        ydesign_h_align_logo: 'center',
-        ydesign_h_align_add_title: 'left',
-        ydesign_h_align_badges: 'left',
-        ydesign_h_align_slogan: 'left',
-        ydesign_h_uniform_v_gaps: false,
-        ydesign_h_uniform_v_gap_val: '0.00',
-        ydesign_h_badges_gap: '0.15',
-        ydesign_h_badge_rows_gap: '-0.3',
-        ydesign_h_genres_gap: '0.0',
-        ydesign_h_content_pb: '0.3',
-        ydesign_h_slogan_padding: '0.3',
-        ydesign_h_logo_mb: '1.2',
-        ydesign_h_add_title_mb: '0.3',
 
         // Серії
         ydesign_series_redesign: true,
@@ -224,6 +152,14 @@
     };
 
     var SettingsMemo = {};
+
+    function migrateVertical(el) {
+        // Legacy orientation keys/classes are migration-only, never render controls.
+        if (el) { el.classList.remove('ydesign-horizontal'); el.classList.add('ydesign-vertical'); return; }
+        ['ydesign_card_type_main', 'ydesign_card_type_other'].forEach(function (key) {
+            if (window.Lampa && Lampa.Storage && Lampa.Storage.get(key) === 'horizontal') Lampa.Storage.set(key, 'vertical');
+        });
+    }
 
     function getSet(key, fallbackKey) {
         var mk = key + '\u0001' + (fallbackKey || '');
@@ -538,7 +474,8 @@
             styleEl.id = 'ydesign-font-css';
             document.head.appendChild(styleEl);
         }
-        styleEl.textContent = cssFont(font);
+        var fontCss = cssFont(font);
+        if (styleEl.textContent !== fontCss) styleEl.textContent = fontCss;
         document.body.classList.add('ydesign--font');
     }
 
@@ -593,7 +530,7 @@
                 };
                 for (var i = 0; i < markKeys.length; i++) {
                     var mk = markKeys[i];
-                    if (favStatus[mk]) {
+                    if (mk === 'viewed' ? isWatched(data) === true : favStatus[mk]) {
                         var markTitle = (window.Lampa && Lampa.Lang && Lampa.Lang.translate) ? Lampa.Lang.translate('title_' + mk) : '';
                         if (!markTitle || markTitle.indexOf('title_') === 0) {
                             markTitle = markDict[mk] || mk;
@@ -644,12 +581,7 @@
         var iconsHtml = '';
         try {
             var favStatus = (window.Lampa && Lampa.Favorite && Lampa.Favorite.check) ? Lampa.Favorite.check(data) : {};
-            var isWatched = false;
-            try {
-                if (window.Lampa && Lampa.Timeline && Lampa.Timeline.watched) {
-                    isWatched = Lampa.Timeline.watched(data);
-                }
-            } catch (e) {}
+            var hasProgress = moviePercent(data) > 0;
 
             // 1. Закладки (book)
             if (favStatus.book) {
@@ -664,7 +596,7 @@
                 iconsHtml += '<svg class="ydesign-notch-icon ydesign-notch-icon-wath" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm.5 13H11V7h1.5v6.2l3.75 2.25-.75 1.23-4-2.48z"/></svg>';
             }
             // 4. Історія перегляду (history / watched)
-            if (favStatus.history || isWatched) {
+            if (favStatus.history || hasProgress) {
                 iconsHtml += '<svg class="ydesign-notch-icon ydesign-notch-icon-history" viewBox="0 0 24 24" fill="currentColor"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>';
             }
         } catch (e) {}
@@ -839,11 +771,15 @@
 
     var ApiCache = {
         get: function (key) {
-            if (MemoryCache.has(key)) return MemoryCache.get(key);
+            if (MemoryCache.has(key)) {
+                var memory = MemoryCache.get(key), age = Date.now() - Number(memory.t);
+                if (isFinite(age) && age >= 0 && age < CONFIG.cacheTime) return memory.v;
+                MemoryCache.delete(key);
+            }
             persistLoad();
             var rec = persistData[key];
-            if (rec && rec.t && (Date.now() - rec.t < CONFIG.cacheTime)) {
-                MemoryCache.set(key, rec.v);
+            if (rec && rec.t && Date.now() >= rec.t && (Date.now() - rec.t < CONFIG.cacheTime)) {
+                MemoryCache.set(key, rec);
                 return rec.v;
             }
             return null;
@@ -853,7 +789,7 @@
                 var keys = MemoryCache.keys();
                 if (keys.length > 0) MemoryCache.delete(keys[0]);
             }
-            MemoryCache.set(key, val);
+            MemoryCache.set(key, { v: val, t: Date.now() });
             persistLoad();
             persistData[key] = { v: val, t: Date.now() };
             persistSchedule();
@@ -1010,30 +946,40 @@
 
     var UA_NEG_TTL = 12 * 60 * 60 * 1000; // «немає UA» перевіряємо знову через 12 годин (раніше — 7 діб)
 
+    var UaRequests = {};
+    function parseUaResponse(value) {
+        if (value === true || value === false) return value;
+        if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+        if (value.error || value.status === 'error' || value.success === false || value.ok === false) return null;
+        // Observed WH schema: {play: absolute HTTP(S) URL}. A generic success
+        // object is not audio evidence. Errors/unknown shapes are never cached.
+        if (Object.prototype.hasOwnProperty.call(value, 'play')) {
+            if (typeof value.play === 'string' && /^https?:\/\/[^\s]+$/i.test(value.play)) return true;
+            if (value.play === null || value.play === '') return false;
+        }
+        return null;
+    }
     function checkUaVoiceover(tmdbId, type) {
-        return new Promise(function (resolve) {
-            var cacheKey = 'ua_' + tmdbId;
-            var cached = ApiCache.get(cacheKey);
-            if (cached === true) return resolve(true);
-            if (cached && typeof cached === 'object' && cached.n && (Date.now() - cached.n < UA_NEG_TTL)) return resolve(false);
-
-            var isSerial = (type === 'tv' || type === 'tv_series') ? 1 : 0;
-            var url = 'https://wh.lme.isroot.in/?tmdb_id=' + encodeURIComponent(tmdbId) + '&serial=' + isSerial + '&silent=true';
-
+        var media = type === 'tv' || type === 'tv_series' || type === 'anime' ? 'tv' : 'movie';
+        var id = Number(tmdbId);
+        if (!(id > 0 && id % 1 === 0)) return Promise.resolve(null);
+        var cacheKey = 'ua_v2_' + media + '_' + id, cached = ApiCache.get(cacheKey);
+        if (cached && cached.v === 2 && typeof cached.value === 'boolean' && cached.t > 0 && Date.now() >= cached.t && Date.now() - cached.t < (cached.value ? CONFIG.cacheTime : UA_NEG_TTL)) return Promise.resolve(cached.value);
+        if (UaRequests[cacheKey]) return UaRequests[cacheKey];
+        var request = new Promise(function (resolve) {
             qajax({
-                url: url,
+                url: 'https://wh.lme.isroot.in/?tmdb_id=' + encodeURIComponent(id) + '&serial=' + (media === 'tv' ? 1 : 0) + '&silent=true',
                 timeout: 5000,
-                success: function (r) {
-                    var hasUa = (r === true || (r && (r.success === true || r.status === 'success' || r.ok === true || (typeof r === 'object' && Object.keys(r).length > 0 && !r.error))));
-                    ApiCache.set(cacheKey, hasUa ? true : { n: Date.now() });
-                    resolve(hasUa);
+                success: function (value) {
+                    var answer = parseUaResponse(value);
+                    if (answer !== null) ApiCache.set(cacheKey, { v: 2, value: answer, t: Date.now() });
+                    resolve(answer);
                 },
-                error: function () {
-                    // збій мережі/таймаут не кешуємо — інакше плашка не з'являлась би тиждень
-                    resolve(false);
-                }
+                error: function () { resolve(null); }
             });
         });
+        UaRequests[cacheKey] = request.then(function (value) { delete UaRequests[cacheKey]; return value; }, function () { delete UaRequests[cacheKey]; return null; });
+        return UaRequests[cacheKey];
     }
 
     // =========================================================================
@@ -1246,17 +1192,18 @@
         });
     }
 
+    var ExtendedRequests = {};
     function fetchExtendedData(id, type) {
         var langPref = getSet('ydesign_lang');
         var sloganLang = getSet('ydesign_slogan_lang');
-        var descLang = getSet('ydesign_desc_lang');
 
-        var cacheKey = 'ext_' + type + '_' + id + '_' + langPref + '_' + sloganLang + '_' + descLang + '_v7';
+        var cacheKey = extCacheKey(id, type);
         var cached = ApiCache.get(cacheKey);
         // дані серіалів (остання/наступна серія) швидко старіють — оновлюємо раз на 12 годин
         if (cached && !(type === 'tv' && (!cached.fetched || Date.now() - cached.fetched > 43200000))) return Promise.resolve(cached);
 
-        return new Promise(function (resolve) {
+        if (ExtendedRequests[cacheKey]) return ExtendedRequests[cacheKey];
+        var request = new Promise(function (resolve) {
             var langQuery = 'uk-UA'; // Always keep a Ukrainian text title, independently of the logo language.
             var url = 'https://api.themoviedb.org/3/' + type + '/' + id +
                 '?api_key=' + CONFIG.tmdbKey() +
@@ -1268,22 +1215,17 @@
                 url: url,
                 timeout: 4500,
                 success: function(data) {
+                    if (!data || typeof data !== 'object' || Number(data.id) !== Number(id)) { resolve(null); return; }
                     var enData = null;
                     var needEn = false;
-                    if (sloganLang === 'en' || descLang === 'en' || langPref === 'en_orig') needEn = true;
+                    if (sloganLang === 'en' || langPref === 'en_orig') needEn = true;
                     if (sloganLang === 'uk_en' && (!data.tagline || !data.tagline.trim())) needEn = true;
-                    if (descLang === 'uk_en' && (!data.overview || !data.overview.trim())) needEn = true;
 
                     function processData() {
                         var finalTagline = '';
                         if (sloganLang === 'uk') finalTagline = data.tagline || '';
                         else if (sloganLang === 'en') finalTagline = enData ? enData.tagline : '';
                         else finalTagline = data.tagline || (enData ? enData.tagline : '');
-
-                        var finalOverview = '';
-                        if (descLang === 'uk') finalOverview = data.overview || '';
-                        else if (descLang === 'en') finalOverview = enData ? enData.overview : '';
-                        else finalOverview = data.overview || (enData ? enData.overview : '');
 
                         var se_str = '';
                         if (type === 'tv') {
@@ -1308,10 +1250,8 @@
 
                         var result = {
                             tagline: finalTagline || '',
-                            overview: finalOverview || '',
                             genres: data.genres || (enData ? enData.genres : []),
                             clean_poster: null,
-                            clean_backdrop: null,
                             logo: null,
                             logo_lang: null,
                             age: null,
@@ -1337,8 +1277,6 @@
                             var cpArr = posters.filter(function (p) { return p.iso_639_1 === null; });
                             result.clean_poster = cpArr.length > 0 ? cpArr[0].file_path : (posters.length ? posters[0].file_path : null);
 
-                            var cbArr = backdrops.filter(function (p) { return p.iso_639_1 === null; });
-                            result.clean_backdrop = cbArr.length > 0 ? cbArr[0].file_path : (backdrops.length ? backdrops[0].file_path : null);
 
                             var logo = null;
                             if (langPref === 'uk') {
@@ -1406,7 +1344,8 @@
                     resolve(null);
                 }
             });
-        });
+        });        ExtendedRequests[cacheKey] = request.then(function (value) { delete ExtendedRequests[cacheKey]; return value; }, function () { delete ExtendedRequests[cacheKey]; return null; });
+        return ExtendedRequests[cacheKey];
     }
 
     // =========================================================================
@@ -1437,17 +1376,10 @@
                 letterboxd: (extRatings && extRatings.letterboxd) ? formatR(parseFloat(extRatings.letterboxd) * 2, false) : null
             };
 
-            var iconsToLoad = [];
-            order.forEach(function (key) {
-                if (available[key] && key !== 'kp' && rateIcons[key]) {
-                    iconsToLoad.push(preloadIcon(key, rateIcons[key]));
-                }
-            });
-
-            Promise.all(iconsToLoad).then(function() {
+            // Render values immediately; remote logo availability must never gate metadata.
                 var rhtml = '';
                 order.forEach(function (key) {
-                    if (available[key]) {
+                    if (Object.prototype.hasOwnProperty.call(available, key) && available[key]) {
                         if (key === 'kp') {
                             rhtml += '<span class="ydesign-rating"><b style="color:#f60; font-weight:800; font-size:1.1em; line-height:1; display:flex; align-items:center;">Kp</b> ' + available[key] + '</span>';
                         } else {
@@ -1457,8 +1389,16 @@
                     }
                 });
                 container.innerHTML = rhtml;
+                container.querySelectorAll('img').forEach(function (img) {
+                    img.onerror = function () {
+                        img.onerror = null;
+                        if (!img.parentNode) return;
+                        var fallback = document.createElement('b');
+                        fallback.textContent = (img.alt || 'rating').toUpperCase();
+                        img.parentNode.replaceChild(fallback, img);
+                    };
+                });
                 resolve();
-            });
         });
     }
 
@@ -1482,10 +1422,7 @@
             if (card) {
                 if (card._ydesign_updateMarks) card._ydesign_updateMarks();
                 if (card._ydesign_lazyMarks) card._ydesign_lazyMarks();
-                ambientFocus(card);
                 if (card._ydesign_onFocus) card._ydesign_onFocus();
-            } else {
-                ambientLater();
             }
         }, true);
     }
@@ -1494,16 +1431,13 @@
     var NEW_DAYS = 14;          // «Новинка»: вийшло не раніше ніж 14 днів тому
     var SOON_DAYS = 14;         // «Нова серія» / «Скоро»: у найближчі 14 днів
     var WEEK_DAYS = 7;          // рядок «Виходять цього тижня»
-    var WATCHED_MOVIE = 90;     // фільм вважається переглянутим від 90%
-    var WATCHED_HISTORY = 50;   // запасне правило для фільму з Історії (якщо вимкнено «усі з Історії»)
-    var WATCHED_EPISODE = 90;   // серія вважається переглянутою від 90%
+    var EPISODE_PROGRESS_DONE = 90;   // серія вважається переглянутою від 90%
     var CONT_MIN = 3;           // від скількох % фільм вважається «розпочатим»
     var EXT_FAILED = { failed: true };
 
     // «епоха» позначок: збільшуємо, коли змінились таймлайн/історія — тоді кеш карток недійсний
     var MarksEpoch = 0;
-    var HistoryIdx = { t: 0, map: {} };
-    function bumpMarks() { MarksEpoch++; HistoryIdx.t = 0; }
+    function bumpMarks() { MarksEpoch++; }
 
     function parseYmd(s) {
         var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s || ''));
@@ -1563,6 +1497,12 @@
 
     // Відсоток перегляду фільму: хеш за кількома назвами + власна функція Lampa
     function moviePercent(data) {
+        // Managed Home cards already carry the selected native position. Do not
+        // replace it with a larger percentage from another title/provider hash.
+        if (data && data.home_history_resume) {
+            var resume = data.home_history_resume, percent = Number(resume.percent);
+            return resume.mode === 'position' && Number(resume.time) > 0 && isFinite(percent) && percent >= 0 && percent <= 100 ? percent : 0;
+        }
         var best = 0, seen = {};
         var names = [data.original_title, data.original_name, data.title, data.name];
         for (var i = 0; i < names.length; i++) {
@@ -1587,23 +1527,7 @@
     }
 
     // Чи є картка в списку «Історія перегляду» (індекс кешується на кілька секунд)
-    function inHistoryList(card) {
-        var now = Date.now();
-        if (now - HistoryIdx.t > 4000) {
-            var map = {};
-            try {
-                var list = (Lampa.Favorite && Lampa.Favorite.get({ type: 'history' })) || [];
-                for (var i = 0; i < list.length; i++) {
-                    var c = list[i];
-                    if (c && c.id) map[c.id] = (map[c.id] || 0) | (isTvMedia(c) ? 1 : 2);
-                }
-            } catch (e) {}
-            HistoryIdx.map = map;
-            HistoryIdx.t = now;
-        }
-        var m = HistoryIdx.map[card.id];
-        return !!(m && (m & (isTvMedia(card) ? 1 : 2)));
-    }
+
 
     // Прогрес серіалу/аніме: скільки серій переглянуто, яка наступна, прогрес поточного сезону
     function tvProgress(data, ext) {
@@ -1621,7 +1545,7 @@
                 var ss = 0;
                 for (var e = 1; e <= max && guard < 4000; e++, guard++) {
                     aired++;
-                    if (tlPercent(episodeHash(title, s.n, e)) >= WATCHED_EPISODE) { seen++; ss++; }
+                    if (tlPercent(episodeHash(title, s.n, e)) >= EPISODE_PROGRESS_DONE) { seen++; ss++; }
                     else if (!next) next = { s: s.n, e: e };
                 }
                 per[s.n] = { seen: ss, total: s.c || max };
@@ -1633,57 +1557,83 @@
         return null;
     }
 
-    /*
-     * Фільм:  позначка «Переглянуто» в Lampa  АБО  фільм є в «Історії перегляду» (налаштування «усі з Історії»)
-     *         АБО  прогрес ≥ 90%.  Усередині рядка «Продовжити перегляд» фільм не вважається переглянутим.
-     * Серіал / аніме:  переглянута ОСТАННЯ вийшла серія (прогрес ≥ 90%).
-     *   Позначка «Переглянуто» враховується лише для завершених серіалів.
-     */
-    // Міст до плагіна Trakt+ (window.TraktPlus.isWatched) — єдина позначка «Переглянуто» без дублювання
-    function traktWatched(d) {
-        try { return !!(d && window.TraktPlus && typeof window.TraktPlus.isWatched === 'function' && window.TraktPlus.isWatched(d)); }
-        catch (e) { return false; }
-    }
+    // Confirmed Trakt evidence owns watched; local Timeline remains playback progress.
+
     // власний (повний URL) постер картки, якщо немає TMDB-шляху — наприклад, картки Trakt+
     function ownImg(d) {
         var u = d && (d.poster || d.img || d.image || '');
         return (typeof u === 'string' && u.indexOf('http') === 0) ? u : '';
     }
 
-    function isWatched(data, type, ext, inHistory) {
+    // Presentation remembers only confirmed Trakt evidence, partitioned by account,
+    // normalized media type and TMDB ID. Local playback progress is unrelated.
+    var WatchPresentation = { loaded: false, accounts: {}, timer: null, dirty: false };
+    var WATCH_PRESENT_KEY = 'ydesign_trakt_status_v1';
+    function watchMetadata(data) {
         try {
-            if (data && data._lib) return false; // папка «Trakt: Переглянуті» — там усе переглянуте, не затемнюємо
-            if (!window.Lampa || !Lampa.Utils || typeof Lampa.Utils.hash !== 'function' ||
-                !Lampa.Timeline || typeof Lampa.Timeline.view !== 'function') return false;
-
-            var fav = {};
-            try { fav = (Lampa.Favorite && Lampa.Favorite.check(data)) || {}; } catch (e1) {}
-            var title = data.original_title || data.original_name || data.title || data.name || '';
-
-            if (type !== 'tv') {
-                if (data.ydesign_row === 'cont') return false;
-                if (fav.viewed) return true;
-                if (traktWatched(data)) return true;
-                var hist = !!(fav.history || inHistory || inHistoryList(data));
-                if (hist && getSet('ydesign_history_watched')) return true;
-                var p = moviePercent(data);
-                if (p >= WATCHED_MOVIE) return true;
-                return hist && p >= WATCHED_HISTORY;
+            var provider = window.TraktPlus;
+            if (!provider || typeof provider.watchedStatus !== 'function') return null;
+            var state = provider.watchedStatus(data);
+            if (!state || state.source !== 'trakt' || typeof state.owner !== 'string' || !/^(?:uuid|slug):[a-zA-Z0-9_-]{1,128}$/.test(state.owner) ||
+                typeof state.session !== 'number' || !isFinite(state.session)) return null;
+            return state;
+        } catch (e) { return null; }
+    }
+    function presentationLoad() {
+        if (WatchPresentation.loaded) return;
+        WatchPresentation.loaded = true;
+        try {
+            var raw = Lampa.Storage.get(WATCH_PRESENT_KEY);
+            if (raw && raw.v === 1 && raw.accounts && typeof raw.accounts === 'object' && !Array.isArray(raw.accounts)) {
+                WatchPresentation.accounts = JSON.parse(JSON.stringify(raw.accounts));
             }
-
-            // Trakt має пріоритет і не залежить від завантаження додаткових даних TMDB.
-            if (traktWatched(data)) return true;
-            if (!ext) return false;                 // дані серіалу ще вантажаться — не мигаємо позначкою
-            if (ext.failed) return !!fav.viewed;    // TMDB недоступний — лишаємо тільки позначку Lampa
-            if (!title) return false;
-
-            var last = ext.last_ep;
-            if (last && last.season !== undefined && last.episode !== undefined) {
-                if (tlPercent(episodeHash(title, last.season, last.episode)) >= WATCHED_EPISODE) return true;
+        } catch (e) { WatchPresentation.accounts = {}; }
+    }
+    function presentationSave(data, state) {
+        if (WatchPresentation.timer) return;
+        var owner = state.owner, session = state.session;
+        WatchPresentation.timer = setTimeout(function () {
+            WatchPresentation.timer = null;
+            var current = watchMetadata(data);
+            if (!current || current.owner !== owner || current.session !== session) {
+                if (current && WatchPresentation.dirty) presentationSave(data, current);
+                return;
             }
-            return !!(fav.viewed && ext.ended);
-        } catch (e) {}
-        return false;
+            var accounts = WatchPresentation.accounts;
+            Object.keys(accounts).forEach(function (key) {
+                var account = accounts[key];
+                if (!account || !account.items || typeof account.items !== 'object') { delete accounts[key]; return; }
+                var ids = Object.keys(account.items).sort(function (a, b) { return (account.items[b].t || 0) - (account.items[a].t || 0); });
+                ids.slice(1500).forEach(function (id) { delete account.items[id]; });
+            });
+            Object.keys(accounts).sort(function (a, b) { return (accounts[b].t || 0) - (accounts[a].t || 0); }).slice(3).forEach(function (key) { delete accounts[key]; });
+            try { Lampa.Storage.set(WATCH_PRESENT_KEY, { v: 1, accounts: JSON.parse(JSON.stringify(accounts)) }); WatchPresentation.dirty = false; } catch (e) {}
+        }, 300);
+    }
+    function isWatched(data, output) {
+        var state = watchMetadata(data);
+        if (output) output.watchPhase = state ? state.phase : 'unavailable';
+        if (!state) return null; // No plugin/authenticated owner is never negative evidence.
+        var id = Number(state.tmdbId), media = state.mediaType;
+        var expected = data && data.ids && data.ids.tmdb || data && data.tmdb_id || (data && data.source !== 'trakt' && data.id);
+        if (!data || !(id > 0 && id % 1 === 0) || Number(expected) !== id ||
+            (media !== 'movie' && media !== 'tv') || media !== (isTvMedia(data) ? 'tv' : 'movie')) return null;
+        presentationLoad();
+        var account = WatchPresentation.accounts[state.owner], key = media + ':' + id;
+        var old = account && account.items && account.items[key];
+        if (state.phase === 'ready' && typeof state.value === 'boolean' &&
+            typeof state.updatedAt === 'number' && state.updatedAt > 0 && state.updatedAt <= Date.now()) {
+            if (old && old.confirmedAt > state.updatedAt && typeof old.value === 'boolean') return old.value;
+            if (!account || !account.items || Array.isArray(account.items)) account = WatchPresentation.accounts[state.owner] = { items: {}, t: 0 };
+            if (!old || old.value !== state.value || old.confirmedAt !== state.updatedAt) {
+                account.items[key] = { value: state.value, confirmedAt: state.updatedAt, t: Date.now() };
+                account.t = Date.now(); WatchPresentation.dirty = true;
+            }
+            if (WatchPresentation.dirty) presentationSave(data, state);
+            return state.value;
+        }
+        if (WatchPresentation.dirty) presentationSave(data, state);
+        return old && typeof old.value === 'boolean' && old.confirmedAt > 0 && old.confirmedAt <= Date.now() ? old.value : null;
     }
 
     // ---- «Продовження»: чи бачили попередню частину франшизи ----
@@ -1731,10 +1681,7 @@
         for (var i = 0; i < parts.length; i++) {
             var p = parts[i];
             if (p.id == data.id || !p.d || (mine && p.d >= mine)) continue;
-            if (moviePercent({ original_title: p.o, title: p.t }) >= WATCHED_HISTORY) return true;
-            if (inHistoryList({ id: p.id, title: p.t })) return true;
-            try { var f = Lampa.Favorite.check({ id: p.id }) || {}; if (f.viewed) return true; } catch (e) {}
-            try { if (window.TraktPlus && TraktPlus.isWatched && TraktPlus.isWatched({ id: p.id, method: 'movie' })) return true; } catch (e) {}
+            if (isWatched({id:p.id,media_type:'movie',source:'tmdb'}) === true) return true;
         }
         return false;
     }
@@ -1759,11 +1706,13 @@
         var day = new Date().getDate();
         var parts = type === 'tv' ? null : getCollParts(el, ext);
         var mk = el._ydesign_mk;
-        if (mk && mk.epoch === MarksEpoch && mk.ext === ext && mk.day === day && mk.coll === !!parts) return mk;
+        var homeProgress = data && data.home_history_resume ? [data.home_history_resume.mode, data.home_history_resume.percent, data.home_history_resume.time, data.home_history_resume.updated].join('|') : null;
+        var traktSession = data && data._trakt_cached_only && window.TraktPlus && typeof TraktPlus.detailsSession === 'function' ? TraktPlus.detailsSession() : null;
+        if (mk && mk.epoch === MarksEpoch && mk.ext === ext && mk.day === day && mk.coll === !!parts && mk.traktSession === traktSession && mk.homeProgress === homeProgress) { mk.watched = isWatched(data, mk); return mk; }
 
-        mk = { epoch: MarksEpoch, ext: ext, day: day, coll: !!parts, pct: 0, tv: null, seq: false };
+        mk = { epoch: MarksEpoch, ext: ext, day: day, coll: !!parts, traktSession: traktSession, homeProgress: homeProgress, pct: 0, tv: null, seq: false };
         mk.info = releaseInfo(data, type, ext);
-        mk.watched = isWatched(data, type, ext, !!el._ydesign_inHistory);
+        mk.watched = isWatched(data, mk);
         if (type === 'tv') {
             if (ext && !ext.failed) mk.tv = tvProgress(data, ext);
         } else {
@@ -1800,6 +1749,10 @@
         var view = el.querySelector ? el.querySelector('.card__view') : null;
         if (!view) return;
         var mk = computeMarks(el, data, type, ext);
+        if (data && data._trakt_cached_only) {
+            var cachedProgress = window.TraktPlus && TraktPlus.cachedViewing ? TraktPlus.cachedViewing(data) : null;
+            syncNode(view, 'tp-person-watch', 'tp-person-watch', cachedProgress && cachedProgress.partial ? 'Trakt · ' + cachedProgress.completed + '/' + cachedProgress.aired + ' еп.' : null);
+        }
 
         // зліва зверху: «Новинка» / «Нова серія · Завтра» / «Скоро» + «Продовження»
         var tl = view.querySelector('.ydesign-tl');
@@ -1838,7 +1791,7 @@
         }
 
         // знизу (фільми): смужка прогресу, відсоток видно у фокусі
-        var showBar = progressOn && type !== 'tv' && mk.pct >= CONT_MIN && mk.pct < WATCHED_MOVIE;
+        var showBar = progressOn && type !== 'tv' && mk.pct >= CONT_MIN && mk.pct < 100;
         var bar = view.querySelector('.ydesign-pbar');
         if (showBar) {
             var pct = Math.min(100, Math.round(mk.pct));
@@ -1869,28 +1822,33 @@
             chk.innerHTML = CHECK_SVG;
             view.appendChild(chk);
         }
-        if (el.classList.contains('ydesign-is-watched') !== mk.watched) el.classList.toggle('ydesign-is-watched', mk.watched);
-        var fromTrakt = !!(mk.watched && traktWatched(data));
-        if (el.classList.contains('ydesign-from-trakt') !== fromTrakt) el.classList.toggle('ydesign-from-trakt', fromTrakt);
+        var confirmed = mk.watched === true;
+        if (!confirmed) { removeNode(view, 'ydesign-watched-dim'); removeNode(view, 'ydesign-watched-check'); }
+        if (el.classList.contains('ydesign-is-watched') !== confirmed) el.classList.toggle('ydesign-is-watched', confirmed);
+        if (el.classList.contains('ydesign-from-trakt') !== confirmed) el.classList.toggle('ydesign-from-trakt', confirmed);
+        el.setAttribute('data-ydesign-watched', mk.watched === null ? 'unknown' : confirmed ? 'watched' : 'unwatched');
+        el.setAttribute('data-ydesign-watch-phase', mk.watchPhase);
+
     }
 
     // Оновлення позначок на видимих картках після змін у таймлайні/історії (порціями, без фризів)
     var RefreshT = null;
     function scheduleRefreshMarks() {
-        bumpMarks();
-        clearTimeout(RefreshT);
+        if (RefreshT) return;
         RefreshT = setTimeout(function () {
+            RefreshT = null;
+            bumpMarks();
             var list = document.querySelectorAll('.activity--active .ydesign-card');
             var i = 0;
             (function step() {
                 var end = Math.min(i + 10, list.length);
                 for (; i < end; i++) {
                     var c = list[i];
-                    if (c._ydesign_updateMarks) c._ydesign_updateMarks();
+                    if (c.offsetParent !== null && c._ydesign_updateNotch) c._ydesign_updateNotch();
                 }
                 if (i < list.length) requestAnimationFrame(step);
             })();
-        }, 1200);
+        }, 120);
     }
 
     // =========================================================================
@@ -1900,7 +1858,7 @@
     var ROW_LISTS = ['look', 'continued', 'scheduled', 'book', 'like', 'wath', 'history'];
 
     function extCacheKey(id, type) {
-        return 'ext_' + type + '_' + id + '_' + getSet('ydesign_lang') + '_' + getSet('ydesign_slogan_lang') + '_' + getSet('ydesign_desc_lang') + '_v6';
+        return 'ext_' + type + '_' + id + '_' + getSet('ydesign_lang') + '_' + getSet('ydesign_slogan_lang') + '_v8';
     }
 
     function rowCandidates() {
@@ -1924,7 +1882,7 @@
     // Рахуємо тільки з кешу (без мережі): якщо даних серіалу ще немає — їх підтягне warmRows
     function computeRows() {
         var up = [], cont = [], cands = rowCandidates();
-        for (var i = 0; i < cands.length; i++) {
+        for (var i = 0; i < cands.length && jobs.length < 24; i++) {
             var c = cands[i];
             if (isTvMedia(c)) {
                 var ext = ApiCache.get(extCacheKey(c.id, 'tv'));
@@ -1940,7 +1898,7 @@
                 if (pr && pr.seen > 0 && pr.unseen > 0) cont.push(c);
             } else {
                 var p = moviePercent(c);
-                if (p >= CONT_MIN && p < WATCHED_HISTORY) cont.push(c);
+                if (p >= CONT_MIN && p < 100) cont.push(c);
             }
         }
         up.sort(function (a, b) { return a.d - b.d; });
@@ -1987,13 +1945,15 @@
     // Фонове підтягування даних серіалів зі списків користувача (з кешем 12 год., через чергу запитів)
     function warmRows(force) {
         try {
+            var active = Lampa.Activity && Lampa.Activity.active();
+            if (!active || active.component !== 'main') return;
             if (!getSet('ydesign_row_continue') && !getSet('ydesign_row_week')) return;
             var now = Date.now();
             if (RowsStore.busy || (!force && now - RowsStore.last < 20 * 60 * 1000)) return;
             RowsStore.busy = true;
             RowsStore.last = now;
             var cands = rowCandidates(), jobs = [];
-            for (var i = 0; i < cands.length; i++) {
+            for (var i = 0; i < cands.length && jobs.length < 24; i++) {
                 if (isTvMedia(cands[i])) jobs.push(fetchExtendedData(cands[i].id, 'tv'));
             }
             var done = function () { RowsStore.busy = false; };
@@ -2001,82 +1961,6 @@
         } catch (e) { RowsStore.busy = false; }
     }
 
-    // ---- Ambient: фон усього екрана під колір постера у фокусі (без blur, лише градієнти) ----
-    var Ambient = { wrap: null, layers: [], front: 1, z: 1, key: '', timer: null, retry: 0 };
-
-    function ambientEnsure() {
-        if (Ambient.wrap) return true;
-        if (!document.body) return false;
-        var w = document.createElement('div');
-        w.id = 'ydesign-ambient';
-        w.innerHTML = '<div class="ydesign-amb-layer"></div><div class="ydesign-amb-layer"></div>';
-        var bg = document.querySelector('.background');
-        if (bg && bg.parentNode) bg.parentNode.insertBefore(w, bg.nextSibling);
-        else document.body.insertBefore(w, document.body.firstChild);
-        Ambient.wrap = w;
-        Ambient.layers = [w.children[0], w.children[1]];
-        return true;
-    }
-
-    function ambientGradient(color) {
-        var m = /rgba?\(\s*(\d+)[^\d]+(\d+)[^\d]+(\d+)/.exec(color || '');
-        if (!m) return null;
-        var r = +m[1], g = +m[2], b = +m[3];
-        var lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-        var k = lum > 120 ? 120 / lum : 1; // надто світлі кольори приглушуємо, щоб білий текст лишався читабельним
-        r = Math.round(r * k); g = Math.round(g * k); b = Math.round(b * k);
-        function sh(f, a) {
-            return 'rgba(' + Math.min(255, Math.round(r * f)) + ',' + Math.min(255, Math.round(g * f)) + ',' + Math.min(255, Math.round(b * f)) + ',' + a + ')';
-        }
-        return {
-            key: r + ',' + g + ',' + b,
-            css: 'radial-gradient(120% 80% at 18% 0%, ' + sh(1.15, 0.9) + ' 0%, ' + sh(1, 0) + ' 72%), ' +
-                 'linear-gradient(180deg, ' + sh(0.62, 0.94) + ' 0%, ' + sh(0.34, 0.97) + ' 100%)'
-        };
-    }
-
-    function ambientShow(color) {
-        if (!getSet('ydesign_ambient')) return;
-        var c = ambientGradient(color);
-        if (!c || !ambientEnsure()) return;
-        Ambient.wrap.classList.add('on');
-        if (Ambient.key === c.key) return;
-        Ambient.key = c.key;
-        // нова кольорова плівка вище за стару і плавно проявляється (лише opacity — дешево для GPU)
-        var next = 1 - Ambient.front;
-        var layer = Ambient.layers[next];
-        layer.style.transition = 'none';
-        layer.style.opacity = '0';
-        layer.style.backgroundImage = c.css;
-        layer.style.zIndex = String(++Ambient.z);
-        void layer.offsetWidth;
-        layer.style.transition = '';
-        layer.style.opacity = '1';
-        Ambient.front = next;
-    }
-
-    function ambientHide() {
-        Ambient.key = '';
-        if (Ambient.wrap) Ambient.wrap.classList.remove('on');
-    }
-
-    function ambientFocus(card) {
-        if (!getSet('ydesign_ambient')) return;
-        clearTimeout(Ambient.timer);
-        Ambient.retry = 0;
-        function tick() {
-            if (FocusState.el !== card) return; // фокус уже пішов далі
-            var col = card._ydesign_color;
-            if (col) { ambientShow(col); return; }
-            if (++Ambient.retry < 8) Ambient.timer = setTimeout(tick, 250); // колір ще рахується
-        }
-        Ambient.timer = setTimeout(tick, 160);
-    }
-
-    function ambientLater() {
-        clearTimeout(Ambient.timer);
-        Ambient.timer = setTimeout(ambientHide, 350);
-    }
 
     function logoQuality() {
         var q = String(getSet('ydesign_logo_quality') || 'w500');
@@ -2097,7 +1981,7 @@
             for (li = 0; li < layers.length; li++) {
                 var layer = layers[li];
                 if (!layer || !layer.isConnected) continue;
-                var containers = layer.querySelectorAll('.ydesign-info-wrap, .ydesign-info-wrap-2, .ydesign-badges, .ydesign-genres, .ydesign-ratings');
+                var containers = layer.querySelectorAll('.ydesign-info-wrap, .ydesign-badges, .ydesign-genres, .ydesign-ratings');
                 for (ci = 0; ci < containers.length; ci++) {
                     var cont = containers[ci], children = cont.children;
                     if (children.length < 2) continue;
@@ -2118,18 +2002,19 @@
 
     function buildCardCustomDOM(cardHtml, data) {
         var el = cardHtml[0] || cardHtml;
-        var isMain = el._ydesign_isMain !== undefined ? el._ydesign_isMain : (Lampa.Activity.active() ? Lampa.Activity.active().component === 'main' : true);
-        var isHorz = isMain ? getSet('ydesign_card_type_main') === 'horizontal' : getSet('ydesign_card_type_other') === 'horizontal';
 
         el.classList.add('ydesign-card');
-        el.classList.remove('ydesign-vertical', 'ydesign-horizontal');
-        el.classList.add(isHorz ? 'ydesign-horizontal' : 'ydesign-vertical');
+        migrateVertical(el);
 
+        var render = el._ydesign_render = (el._ydesign_render || 0) + 1;
+        el._ydesign_data = data;
+        el._ydesign_settingsEpoch = CardSettingsEpoch;
+        function current() { return el.isConnected && el._ydesign_render === render && el._ydesign_data === data; }
+        var prefix = 'ydesign_v_';
         var type = isTvMedia(data, el) ? 'tv' : (data.media_type || 'movie');
         if (!data.media_type) data.media_type = type;
         if (!data.id) return;
 
-        var prefix = isHorz ? 'ydesign_h_' : 'ydesign_v_';
 
         var refreshMarks = function () {
             updateCardMarks(el, data, type, el._ydesign_extData || (el._ydesign_extFailed ? EXT_FAILED : null));
@@ -2146,6 +2031,7 @@
             var view = el.querySelector('.card__view');
             if (!view) return;
             view.innerHTML = '';
+            el._ydesign_bg_applied = null;
 
             var imgLayer = document.createElement('div'); imgLayer.className = 'ydesign-img-layer';
             var gradientLayer = document.createElement('div'); gradientLayer.className = 'ydesign-gradient-layer';
@@ -2157,7 +2043,7 @@
             updateCardNotch(el, data, el._ydesign_extData);
             refreshMarks();
 
-            var bgQuality = isHorz ? getSet('ydesign_backdrop_quality') : getSet('ydesign_poster_quality');
+            var bgQuality = getSet('ydesign_poster_quality');
 
             var applyBg = function (path) {
                 if (!path) return;
@@ -2166,11 +2052,11 @@
                 el._ydesign_bg_applied = fullUrl;
 
                 getProminentColorAsync(path).then(function (color) {
+                    if (!current()) return;
                     if (color) {
                         view.style.backgroundColor = color;
                         el.style.setProperty('--yd-glow', color);
                         el._ydesign_color = color;
-                        if (FocusState.el === el) ambientFocus(el);
                         var rgba95 = color.replace('rgb', 'rgba').replace(')', ', 0.95)');
                         gradientLayer.style.background = 'linear-gradient(to top, ' + color + ' 0%, ' + rgba95 + ' 45%, transparent 100%)';
                         contentLayer.style.background = 'linear-gradient(to top, ' + color + ' 10%, transparent 100%)';
@@ -2179,6 +2065,7 @@
                     var img = new Image();
                     img.decoding = 'async';
                     img.onload = function () {
+                        if (!current()) return;
                         imgLayer.style.setProperty('--loaded-bg', 'url(' + fullUrl + ')');
                         imgLayer.classList.add('loaded');
                     };
@@ -2187,9 +2074,9 @@
             };
 
             fetchExtendedData(data.id, type).then(function (extData) {
+                if (!current()) return;
                 if (extData) {
                     // Якщо детальна відповідь не містить опису/жанрів, використовуємо дані картки.
-                    if (!extData.overview) extData.overview = data.overview || data.description || '';
                     if (!Array.isArray(extData.genres) || !extData.genres.length) extData.genres = fallbackGenres(data, type);
                     el._ydesign_extData = extData;
                     updateCardNotch(el, data, extData);
@@ -2197,7 +2084,6 @@
                     // Не відмовляємося від усієї картки через помилку додаткового запиту TMDB.
                     el._ydesign_extFailed = true;
                     extData = {
-                        overview: data.overview || data.description || '',
                         tagline: data.tagline || '',
                         genres: fallbackGenres(data, type),
                         title_uk: data.title || data.name || '',
@@ -2206,7 +2092,6 @@
                         episodes: data.number_of_episodes || 0,
                         tmdb_rating: data.vote_average,
                         clean_poster: null,
-                        clean_backdrop: null,
                         logo: null,
                         logo_lang: null,
                         age: null,
@@ -2218,9 +2103,9 @@
                 refreshMarks();
                 var bgToLoad = null;
                 if (extData) {
-                    bgToLoad = isHorz ? (extData.clean_backdrop || data.backdrop_path || data.poster_path || ownImg(data)) : (extData.clean_poster || data.poster_path || data.backdrop_path || ownImg(data));
+                    bgToLoad = extData.clean_poster || data.poster_path || data.backdrop_path || ownImg(data);
                 } else {
-                    bgToLoad = isHorz ? (data.backdrop_path || data.poster_path || ownImg(data)) : (data.poster_path || data.backdrop_path || ownImg(data));
+                    bgToLoad = data.poster_path || data.backdrop_path || ownImg(data);
                 }
 
                 if (bgToLoad) applyBg(bgToLoad);
@@ -2300,13 +2185,14 @@
                     if (cached === true) { addUaBadge('Є в торентах'); return; }
                     if (cached === false) return;
                     checkTorrentsUa(data, type).then(function (found) {
-                        if (found && el.isConnected) addUaBadge('Є в торентах');
+                        if (found && current()) addUaBadge('Є в торентах');
                     });
                 }
 
                 if (torrentUaCached(data.id, type) === true) addUaBadge('Є в торентах');
                 checkUaVoiceover(data.id, type).then(function (hasUa) {
-                    if (hasUa) addUaBadge();
+                    if (!current()) return;
+                    if (hasUa === true) addUaBadge();
                     else armTorrentUa();
                 });
 
@@ -2333,64 +2219,35 @@
 
                 renderRatingsAsync(ratingsWrap, data, extData, null).then(function() {
                     scheduleOverflowFix(contentLayer);
+                    if (!current()) return;
                     fetchExternalRatings(data.id, type).then(function (extRatings) {
+                        if (!current()) return;
                         if (extRatings && Object.keys(extRatings).length > 0) {
                             renderRatingsAsync(ratingsWrap, data, extData, extRatings).then(function () { scheduleOverflowFix(contentLayer); });
                         }
                     });
                 });
 
-                if (isHorz) {
-                    if (getSet('ydesign_h_ratings_row', 'ydesign_horz_ratings_row')) {
-                        contentLayer.appendChild(infoWrap);
-                        var infoWrap2 = document.createElement('div');
-                        infoWrap2.className = 'ydesign-info-wrap ydesign-info-wrap-2';
-                        infoWrap2.appendChild(ratingsWrap);
-                        contentLayer.appendChild(infoWrap2);
-                        if (genresWrap) contentLayer.appendChild(genresWrap);
-                    } else {
-                        infoWrap.appendChild(ratingsWrap);
-                        contentLayer.appendChild(infoWrap);
-                        if (genresWrap) contentLayer.appendChild(genresWrap);
-                    }
-                } else {
-                    // Вертикальна картка: жанри мають бути окремим блоком,
-                    // а не всередині контейнера рейтингу/бейджів, який може обрізати вміст.
-                    infoWrap.appendChild(ratingsWrap);
-                    contentLayer.appendChild(infoWrap);
-                    if (genresWrap && genresWrap.children.length) contentLayer.appendChild(genresWrap);
-                }
+                infoWrap.appendChild(ratingsWrap);
+                contentLayer.appendChild(infoWrap);
+                if (genresWrap && genresWrap.children.length) contentLayer.appendChild(genresWrap);
 
                 var oldSlogan = contentLayer.querySelector('.ydesign-slogan');
                 if (oldSlogan) oldSlogan.remove();
-                var oldDesc = el.querySelector('.ydesign-desc-under');
-                if (oldDesc) oldDesc.remove();
 
                 if (getSet(prefix + 'show_slogan', 'ydesign_show_slogan')) {
                     var slogan = document.createElement('div');
                     slogan.className = 'ydesign-slogan ydesign-slogan-text';
                     var sText = extData.tagline || ' ';
-                    if (!isHorz && sText.trim() !== '' && sText.length > 46) {
+                    if (sText.trim() !== '' && sText.length > 46) {
                         sText = sText.substring(0, 44) + '...';
                     }
                     slogan.innerText = sText;
                     contentLayer.appendChild(slogan);
                 }
 
-                if (isHorz && getSet('ydesign_h_show_desc', 'ydesign_show_desc_horz')) {
-                    var overviewText = (extData && (extData.overview || extData.description))
-                        || (data && (data.overview || data.description))
-                        || '';
-                    if (overviewText) {
-                        var desc = document.createElement('div');
-                        desc.className = 'ydesign-desc-under';
-                        desc.innerText = overviewText;
-                        el.appendChild(desc);
-                    }
-                }
-
                 scheduleOverflowFix(contentLayer);
-                setTimeout(function () { scheduleOverflowFix(contentLayer); }, 1500);
+                setTimeout(function () { if (current()) scheduleOverflowFix(contentLayer); }, 1500);
                 el.classList.add('ydesign-ready');
             });
         };
@@ -2405,136 +2262,17 @@
     // =========================================================================
     // 10. CSS СТИЛІ
     // =========================================================================
-    var YD_EXTRA_CSS = "\n/* ===== YDesign: оптимізації та ефекти ===== */\n/* рейтинги: фільтр лише якщо задано насиченість != 100% */\n.ydesign-active .ydesign-rating img { filter: none !important; }\nbody.ydesign-sat-on .ydesign-rating img { filter: saturate(var(--ydesign-ratings-saturate, 100%)) !important; }\n\n/* картка: без постійних composited-шарів, ізоляція верстки */\n.ydesign-active .ydesign-card {\n    contain: layout;\n    transform: none;\n    backface-visibility: visible;\n    transition: transform .2s cubic-bezier(.2,.8,.2,1);\n}\n.ydesign-active .ydesign-card.focus { transform: scale(1.045); will-change: transform; }\n.ydesign-active .ydesign-card .card__view { transition: none !important; }\n\n/* плавна поява контенту після завантаження даних */\n.ydesign-active .ydesign-content-layer,\n.ydesign-active .ydesign-desc-under { opacity: 0; transition: opacity .4s ease-out; }\n.ydesign-active .ydesign-card.ydesign-ready .ydesign-content-layer,\n.ydesign-active .ydesign-card.ydesign-ready .ydesign-desc-under { opacity: 1; }\n\n/* підсвітка кольором постера під карткою у фокусі */\n.ydesign-active .ydesign-card.focus::after {\n    content: ''; position: absolute; left: -7%; right: -7%; top: -5%; bottom: -5%;\n    background: radial-gradient(closest-side, var(--yd-glow, transparent) 0%, transparent 100%);\n    opacity: 0; z-index: -1; pointer-events: none;\n    animation: ydGlow .35s ease-out .05s forwards;\n}\n@keyframes ydGlow { to { opacity: .6; } }\nbody.is--touch .ydesign-active .ydesign-card.focus::after { display: none; }\n\n/* ефекти для потужних пристроїв */\nbody.ydesign-fx.ydesign-glass-pill .ydesign-badge,\nbody.ydesign-fx.ydesign-glass-pill .ydesign-genre-badge,\nbody.ydesign-fx.ydesign-glass-pill .ydesign-rating,\nbody.ydesign-fx.ydesign-notch-bg .ydesign-card-notch,\nbody.ydesign-fx.ydesign-series-glass-pill .ydesign-series-pill {\n    backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important;\n}\nbody.ydesign-fx .ydesign-series-active .online-prestige.online-prestige--full .online-prestige__timeline {\n    backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important;\n}\nbody.ydesign-fx .ydesign-logo-container img { filter: drop-shadow(0 2px 6px rgba(0,0,0,0.85)); }\nbody.ydesign-fx .ydesign-card.focus .ydesign-content-layer::after {\n    content: ''; position: absolute; top: 0; left: 0; width: 55%; height: 100%;\n    background: linear-gradient(100deg, transparent 0%, rgba(255,255,255,.14) 50%, transparent 100%);\n    transform: translateX(-130%) skewX(-12deg);\n    animation: ydShine .9s ease-out .12s 1 both; pointer-events: none;\n}\n@keyframes ydShine { to { transform: translateX(280%) skewX(-12deg); } }\n\n/* економний режим: трохи світліші «скляні» плашки замість blur */\nbody:not(.ydesign-fx).ydesign-glass-pill .ydesign-badge:not(.ydesign-badge-ua),\nbody:not(.ydesign-fx).ydesign-glass-pill .ydesign-genre-badge,\nbody:not(.ydesign-fx).ydesign-glass-pill .ydesign-rating { background: rgba(255,255,255,0.16) !important; }\nbody:not(.ydesign-fx).ydesign-notch-bg .ydesign-card-notch { background: rgba(30,30,40,0.55) !important; }\nbody:not(.ydesign-fx).ydesign-series-glass-pill .ydesign-series-pill { background: rgba(255,255,255,0.18) !important; }\n";
+    var YD_EXTRA_CSS = ".ydesign-active .ydesign-rating img {filter: none !important;}\nbody.ydesign-sat-on .ydesign-rating img {filter: saturate(var(--ydesign-ratings-saturate, 100%)) !important;}\n.ydesign-active .ydesign-card {contain: layout;}\nbody:not(.stremio-hybrid).ydesign-active .ydesign-card {transform: none;backface-visibility: visible;transition: transform .2s cubic-bezier(.2,.8,.2,1);}\nbody:not(.stremio-hybrid).ydesign-active .ydesign-card.focus {transform: scale(1.045);will-change: transform;}\nbody:not(.stremio-hybrid).ydesign-active .ydesign-card .card__view {transition: none !important;}\n.ydesign-active .ydesign-content-layer {opacity: 0;}\nbody:not(.stremio-hybrid).ydesign-active .ydesign-content-layer {transition: opacity .4s ease-out;}\n.ydesign-active .ydesign-card.ydesign-ready .ydesign-content-layer {opacity: 1;}\nbody:not(.stremio-hybrid).ydesign-active .ydesign-card.focus::after {content: \"\";position: absolute;left: -7%;right: -7%;top: -5%;bottom: -5%;background: radial-gradient(closest-side, var(--yd-glow, transparent) 0%, transparent 100%);opacity: 0;z-index: -1;pointer-events: none;animation: ydGlow .35s ease-out .05s forwards;}\n@keyframes ydGlow { to { opacity: .6; } }\nbody:not(.stremio-hybrid).is--touch .ydesign-active .ydesign-card.focus::after {display: none;}\nbody:not(.stremio-hybrid).ydesign-fx.ydesign-glass-pill .ydesign-badge {backdrop-filter: blur(6px) !important;-webkit-backdrop-filter: blur(6px) !important;}\nbody:not(.stremio-hybrid).ydesign-fx.ydesign-glass-pill .ydesign-genre-badge {backdrop-filter: blur(6px) !important;-webkit-backdrop-filter: blur(6px) !important;}\nbody:not(.stremio-hybrid).ydesign-fx.ydesign-glass-pill .ydesign-rating {backdrop-filter: blur(6px) !important;-webkit-backdrop-filter: blur(6px) !important;}\nbody:not(.stremio-hybrid).ydesign-fx.ydesign-notch-bg .ydesign-card-notch {backdrop-filter: blur(6px) !important;-webkit-backdrop-filter: blur(6px) !important;}\nbody:not(.stremio-hybrid).ydesign-fx.ydesign-series-glass-pill .ydesign-series-pill {backdrop-filter: blur(6px) !important;-webkit-backdrop-filter: blur(6px) !important;}\nbody:not(.stremio-hybrid).ydesign-fx .ydesign-series-active .online-prestige.online-prestige--full .online-prestige__timeline {backdrop-filter: blur(6px) !important;-webkit-backdrop-filter: blur(6px) !important;}\nbody.ydesign-fx .ydesign-logo-container img {filter: drop-shadow(0 2px 6px rgba(0,0,0,0.85));}\nbody:not(.stremio-hybrid).ydesign-fx .ydesign-card.focus .ydesign-content-layer::after {content: \"\";position: absolute;top: 0;left: 0;width: 55%;height: 100%;background: linear-gradient(100deg, transparent 0%, rgba(255,255,255,.14) 50%, transparent 100%);transform: translateX(-130%) skewX(-12deg);animation: ydShine .9s ease-out .12s 1 both;pointer-events: none;}\n@keyframes ydShine { to { transform: translateX(280%) skewX(-12deg); } }\nbody:not(.ydesign-fx).ydesign-glass-pill .ydesign-badge:not(.ydesign-badge-ua) {background: rgba(255,255,255,0.16) !important;}\nbody:not(.ydesign-fx).ydesign-glass-pill .ydesign-genre-badge {background: rgba(255,255,255,0.16) !important;}\nbody:not(.ydesign-fx).ydesign-glass-pill .ydesign-rating {background: rgba(255,255,255,0.16) !important;}\nbody:not(.ydesign-fx).ydesign-notch-bg .ydesign-card-notch {background: rgba(30,30,40,0.55) !important;}\nbody:not(.ydesign-fx).ydesign-series-glass-pill .ydesign-series-pill {background: rgba(255,255,255,0.18) !important;}";
 
-    var YD_MARKS_CSS = [
-        '/* ===== YDesign: позначки та ambient ===== */',
-        '.ydesign-tl { position: absolute; top: 2.4em; left: .6em; z-index: 24; display: flex; flex-direction: column; align-items: flex-start; gap: .3em; pointer-events: none; }',
-        '.ydesign-ribbon { padding: .32em .8em; border-radius: 2em;',
-        '  font-size: .72em; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; line-height: 1.1; color: #fff;',
-        '  white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,.35); animation: ydRibbonIn .35s ease-out both; }',
-        '.ydesign-ribbon-new { background: linear-gradient(135deg, #ff5f6d, #ff9966); }',
-        '.ydesign-ribbon-soon { background: linear-gradient(135deg, #5b7cfa, #9b59ff); }',
-        '.ydesign-ribbon-episode { background: linear-gradient(135deg, #00b8a9, #2dd4bf); color: #06201d; }',
-        '.ydesign-seq { padding: .3em .75em; border-radius: 2em; font-size: .66em; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;',
-        '  color: #fff; background: rgba(20,22,32,.78); border: 1px solid rgba(255,255,255,.35); white-space: nowrap; animation: ydRibbonIn .35s ease-out both; }',
-        '@keyframes ydRibbonIn { from { opacity: 0; transform: translateY(-.4em); } to { opacity: 1; transform: none; } }',
-        'body.ydesign-ribbons-off .ydesign-tl { display: none !important; }',
-        'body.ydesign-seq-off .ydesign-seq { display: none !important; }',
+    var YD_MARKS_CSS = ".ydesign-tl {position: absolute;top: 2.4em;left: .6em;z-index: 24;display: flex;flex-direction: column;align-items: flex-start;gap: .3em;pointer-events: none;}\n.ydesign-ribbon {padding: .32em .8em;border-radius: 2em;font-size: .72em;font-weight: 800;letter-spacing: .06em;text-transform: uppercase;line-height: 1.1;color: #fff;white-space: nowrap;}\nbody:not(.stremio-hybrid) .ydesign-ribbon {box-shadow: 0 2px 8px rgba(0,0,0,.35);animation: ydRibbonIn .35s ease-out both;}\n.ydesign-ribbon-new {background: linear-gradient(135deg, #ff5f6d, #ff9966);}\n.ydesign-ribbon-soon {background: linear-gradient(135deg, #5b7cfa, #9b59ff);}\n.ydesign-ribbon-episode {background: linear-gradient(135deg, #00b8a9, #2dd4bf);color: #06201d;}\n.ydesign-seq {padding: .3em .75em;border-radius: 2em;font-size: .66em;font-weight: 800;letter-spacing: .06em;text-transform: uppercase;color: #fff;background: rgba(20,22,32,.78);border: 1px solid rgba(255,255,255,.35);white-space: nowrap;}\nbody:not(.stremio-hybrid) .ydesign-seq {animation: ydRibbonIn .35s ease-out both;}\n@keyframes ydRibbonIn { from { opacity: 0; transform: translateY(-.4em); } to { opacity: 1; transform: none; } }\nbody.ydesign-ribbons-off .ydesign-tl {display: none !important;}\nbody.ydesign-seq-off .ydesign-seq {display: none !important;}\n.ydesign-watched-dim {position: absolute;left: 0;top: 0;right: 0;bottom: 0;z-index: 5;background: rgba(6,8,16,.62);opacity: 0;pointer-events: none;}\nbody:not(.stremio-hybrid) .ydesign-watched-dim {transition: opacity .45s ease;}\n.ydesign-watched-check {position: absolute;top: .7em;right: .7em;z-index: 26;width: 2.1em;height: 2.1em;font-size: .8em;box-sizing: border-box;padding: .34em;border-radius: 50%;background: linear-gradient(135deg, #34d27b, #1fa85a);opacity: 0;pointer-events: none;}\nbody:not(.stremio-hybrid) .ydesign-watched-check {box-shadow: 0 2px 10px rgba(0,0,0,.45);transform: scale(.6);transition: opacity .35s ease, transform .35s cubic-bezier(.2,1.4,.4,1);}\n.ydesign-is-watched .ydesign-watched-dim {opacity: 1;}\n.ydesign-is-watched .ydesign-watched-check {opacity: 1;}\nbody:not(.stremio-hybrid) .ydesign-is-watched .ydesign-watched-check {transform: scale(1);}\n.ydesign-is-watched.focus .ydesign-watched-dim {opacity: .5;}\nbody.ydesign-watched-off .ydesign-watched-dim {display: none !important;}\nbody.ydesign-watched-off .ydesign-watched-check {display: none !important;}\n.ydesign-tr {position: absolute;top: .7em;right: .7em;z-index: 26;display: flex;flex-direction: column;align-items: flex-end;gap: .3em;font-size: .8em;pointer-events: none;}\nbody:not(.stremio-hybrid) .ydesign-tr {animation: ydRibbonIn .35s ease-out both;}\n.ydesign-next {display: flex;align-items: center;gap: .35em;padding: .28em .3em .28em .7em;border-radius: 2em;background: rgba(20,22,32,.8);color: #fff;font-weight: 800;font-size: .85em;white-space: nowrap;border: 1px solid rgba(255,255,255,.3);}\n.ydesign-next-n {padding: .05em .5em;border-radius: 2em;background: var(--yd-acc, #34d27b);color: #04210f;font-size: .9em;}\n.ydesign-next-n:empty {display: none;}\n.ydesign-next:has(.ydesign-next-n:empty) {padding-right: .7em;}\n.ydesign-ring {display: flex;align-items: center;gap: .35em;padding: .2em .65em .2em .25em;border-radius: 2em;background: rgba(20,22,32,.8);color: #fff;font-size: .72em;font-weight: 700;white-space: nowrap;}\n.ydesign-ring svg {width: 1.7em;height: 1.7em;flex-shrink: 0;}\nbody:not(.stremio-hybrid) .ydesign-ring svg {transform: rotate(-90deg);}\n.ydesign-ring circle {fill: none;stroke-width: 3.4;}\n.ydesign-ring .yr-t {stroke: rgba(255,255,255,.22);}\n.ydesign-ring .yr-a {stroke: var(--yd-acc, #34d27b);stroke-linecap: round;stroke-dasharray: 0 56.55;}\nbody:not(.stremio-hybrid) .ydesign-ring .yr-a {transition: stroke-dasharray .5s ease;}\n.ydesign-pbar {position: absolute;left: 0;right: 0;bottom: 0;height: .32em;z-index: 27;background: rgba(255,255,255,.22);pointer-events: none;}\n.ydesign-pbar i {display: block;height: 100%;width: 0;background: var(--yd-acc, #34d27b);}\nbody:not(.stremio-hybrid) .ydesign-pbar i {transition: width .5s ease;}\n.ydesign-pbar b {position: absolute;right: .6em;bottom: .6em;font-size: .62em;font-weight: 800;color: #fff;text-shadow: 0 1px 4px rgba(0,0,0,.95);opacity: 0;}\nbody:not(.stremio-hybrid) .ydesign-pbar b {transition: opacity .25s ease;}\n.ydesign-card.focus .ydesign-pbar b {opacity: 1;}\nbody.ydesign-progress-off .ydesign-pbar {display: none !important;}\nbody.ydesign-progress-off .ydesign-tr {display: none !important;}\nbody:not(.stremio-hybrid) .ydesign-card-notch {transition: opacity .2s ease !important;}\n@media (prefers-reduced-motion: reduce) {body:not(.stremio-hybrid) .ydesign-ribbon {animation: none !important;}\nbody:not(.stremio-hybrid) .ydesign-seq {animation: none !important;}\nbody:not(.stremio-hybrid) .ydesign-tr {animation: none !important;}\nbody:not(.stremio-hybrid) .ydesign-card {transition: none !important;}}\nbody:not(.stremio-hybrid).ydesign-active .ydesign-card .card__view {border-radius: var(--yd-r, .85em) !important;}\nbody:not(.stremio-hybrid).ydesign-active .ydesign-card.focus .card__view {box-shadow: 0 0 0 var(--yd-rw, 4px) var(--yd-ring, #fff) !important;}\nbody.ydesign-theme-netflix {--yd-ring: #fff;--yd-rw: 3px;--yd-r: .35em;--yd-acc: #e50914;}\nbody.ydesign-theme-minimal {--yd-ring: rgba(255,255,255,.9);--yd-rw: 2px;--yd-r: .6em;--yd-acc: #ffffff;}\nbody.ydesign-theme-warm {--yd-ring: #ffb454;--yd-rw: 4px;--yd-r: 1.15em;--yd-acc: #ffb454;}\nbody.ydesign-theme-oled {--yd-ring: #fff;--yd-rw: 3px;--yd-r: .8em;--yd-acc: #34d27b;}\nbody:not(.stremio-hybrid).ydesign-theme-oled {background: #000;}\nbody.ydesign-theme-minimal .ydesign-ribbon-new {background: rgba(20,22,32,.8) !important;color: #fff !important;border: 1px solid rgba(255,255,255,.4);}\nbody:not(.stremio-hybrid).ydesign-theme-minimal .ydesign-ribbon-new {box-shadow: none;}\nbody.ydesign-theme-minimal .ydesign-ribbon-soon {background: rgba(20,22,32,.8) !important;color: #fff !important;border: 1px solid rgba(255,255,255,.4);}\nbody:not(.stremio-hybrid).ydesign-theme-minimal .ydesign-ribbon-soon {box-shadow: none;}\nbody.ydesign-theme-minimal .ydesign-ribbon-episode {background: rgba(20,22,32,.8) !important;color: #fff !important;border: 1px solid rgba(255,255,255,.4);}\nbody:not(.stremio-hybrid).ydesign-theme-minimal .ydesign-ribbon-episode {box-shadow: none;}\nbody:not(.stremio-hybrid).ydesign-theme-minimal .ydesign-card.focus::after {display: none;}";
 
-        /* затемнення лежить ВИЩЕ за постер, градієнт і текст (z-index 5), інакше постер перекриває його */
-        '.ydesign-watched-dim { position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 5; background: rgba(6,8,16,.62);',
-        '  opacity: 0; transition: opacity .45s ease; pointer-events: none; }',
-        '.ydesign-watched-check { position: absolute; top: .7em; right: .7em; z-index: 26; width: 2.1em; height: 2.1em; font-size: .8em;',
-        '  box-sizing: border-box; padding: .34em; border-radius: 50%; background: linear-gradient(135deg, #34d27b, #1fa85a);',
-        '  box-shadow: 0 2px 10px rgba(0,0,0,.45); opacity: 0; transform: scale(.6);',
-        '  transition: opacity .35s ease, transform .35s cubic-bezier(.2,1.4,.4,1); pointer-events: none; }',
-        '.ydesign-is-watched .ydesign-watched-dim { opacity: 1; }',
-        '.ydesign-is-watched .ydesign-watched-check { opacity: 1; transform: scale(1); }',
-        '.ydesign-is-watched.focus .ydesign-watched-dim { opacity: .5; }',
-        'body.ydesign-watched-off .ydesign-watched-dim, body.ydesign-watched-off .ydesign-watched-check { display: none !important; }',
-
-        /* прогрес: «Далі S2E5», «+3», кільце сезону, смужка для фільмів */
-        '.ydesign-tr { position: absolute; top: .7em; right: .7em; z-index: 26; display: flex; flex-direction: column; align-items: flex-end; gap: .3em;',
-        '  font-size: .8em; pointer-events: none; animation: ydRibbonIn .35s ease-out both; }',
-        '.ydesign-next { display: flex; align-items: center; gap: .35em; padding: .28em .3em .28em .7em; border-radius: 2em; background: rgba(20,22,32,.8);',
-        '  color: #fff; font-weight: 800; font-size: .85em; white-space: nowrap; border: 1px solid rgba(255,255,255,.3); }',
-        '.ydesign-next-n { padding: .05em .5em; border-radius: 2em; background: var(--yd-acc, #34d27b); color: #04210f; font-size: .9em; }',
-        '.ydesign-next-n:empty { display: none; }',
-        '.ydesign-next:has(.ydesign-next-n:empty) { padding-right: .7em; }',
-        '.ydesign-ring { display: flex; align-items: center; gap: .35em; padding: .2em .65em .2em .25em; border-radius: 2em; background: rgba(20,22,32,.8);',
-        '  color: #fff; font-size: .72em; font-weight: 700; white-space: nowrap; }',
-        '.ydesign-ring svg { width: 1.7em; height: 1.7em; transform: rotate(-90deg); flex-shrink: 0; }',
-        '.ydesign-ring circle { fill: none; stroke-width: 3.4; }',
-        '.ydesign-ring .yr-t { stroke: rgba(255,255,255,.22); }',
-        '.ydesign-ring .yr-a { stroke: var(--yd-acc, #34d27b); stroke-linecap: round; stroke-dasharray: 0 56.55; transition: stroke-dasharray .5s ease; }',
-        '.ydesign-pbar { position: absolute; left: 0; right: 0; bottom: 0; height: .32em; z-index: 27; background: rgba(255,255,255,.22); pointer-events: none; }',
-        '.ydesign-pbar i { display: block; height: 100%; width: 0; background: var(--yd-acc, #34d27b); transition: width .5s ease; }',
-        '.ydesign-pbar b { position: absolute; right: .6em; bottom: .6em; font-size: .62em; font-weight: 800; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.95); opacity: 0; transition: opacity .25s ease; }',
-        '.ydesign-card.focus .ydesign-pbar b { opacity: 1; }',
-        'body.ydesign-progress-off .ydesign-pbar, body.ydesign-progress-off .ydesign-tr { display: none !important; }',
-
-        '#ydesign-ambient { position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 1; pointer-events: none;',
-        '  opacity: 0; transition: opacity .6s ease; }',
-        '#ydesign-ambient.on { opacity: 1; }',
-        '#ydesign-ambient .ydesign-amb-layer { position: absolute; left: 0; top: 0; right: 0; bottom: 0; opacity: 0; transition: opacity .7s ease; }',
-        'body.ydesign-ambient-off #ydesign-ambient { display: none !important; }',
-
-        /* оптимізація: сповіщення-«чолка» анімує лише прозорість замість all */
-        '.ydesign-card-notch { transition: opacity .2s ease !important; }',
-        '@media (prefers-reduced-motion: reduce) { .ydesign-ribbon, .ydesign-seq, .ydesign-tr { animation: none !important; } .ydesign-card { transition: none !important; } }',
-
-        /* теми оформлення */
-        '.ydesign-active .ydesign-card .card__view { border-radius: var(--yd-r, .85em) !important; }',
-        '.ydesign-active .ydesign-card.focus .card__view { box-shadow: 0 0 0 var(--yd-rw, 4px) var(--yd-ring, #fff) !important; }',
-        'body.ydesign-theme-netflix { --yd-ring: #fff; --yd-rw: 3px; --yd-r: .35em; --yd-acc: #e50914; }',
-        'body.ydesign-theme-minimal { --yd-ring: rgba(255,255,255,.9); --yd-rw: 2px; --yd-r: .6em; --yd-acc: #ffffff; }',
-        'body.ydesign-theme-warm { --yd-ring: #ffb454; --yd-rw: 4px; --yd-r: 1.15em; --yd-acc: #ffb454; }',
-        'body.ydesign-theme-oled { --yd-ring: #fff; --yd-rw: 3px; --yd-r: .8em; --yd-acc: #34d27b; background: #000; }',
-        'body.ydesign-theme-oled #ydesign-ambient.on { opacity: .4; }',
-        'body.ydesign-theme-minimal #ydesign-ambient { display: none !important; }',
-        'body.ydesign-theme-minimal .ydesign-ribbon-new, body.ydesign-theme-minimal .ydesign-ribbon-soon, body.ydesign-theme-minimal .ydesign-ribbon-episode',
-        '  { background: rgba(20,22,32,.8) !important; color: #fff !important; border: 1px solid rgba(255,255,255,.4); box-shadow: none; }',
-        'body.ydesign-theme-minimal .ydesign-card.focus::after { display: none; }',
-        ''
-    ].join('\n');
-
-    var YD_PLUS_CSS = [
-        "/* ===== YDesign v3.3: стилі карток, ефекти фокуса, анімації ===== */",
-        "@keyframes ydCardIn { from { opacity: 0; translate: 0 .6em; } to { opacity: 1; translate: 0 0; } }",
-        "@keyframes ydSkel { to { transform: translateX(100%); } }",
-        "body.ydesign-active:not(.ydesign-anim-off) .ydesign-card.ydesign-ready { animation: ydCardIn .45s ease-out both; }",
-        "body.ydesign-fx.ydesign-active:not(.ydesign-anim-off) .ydesign-card:not(.ydesign-ready) .card__view::before {",
-        "    content: \"\"; position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 1; pointer-events: none;",
-        "    background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,.08) 50%, transparent 80%);",
-        "    transform: translateX(-100%); animation: ydSkel 1.3s ease-in-out 4;",
-        "}",
-        "@media (prefers-reduced-motion: reduce) {",
-        "    .ydesign-card.ydesign-ready { animation: none !important; }",
-        "    .ydesign-card:not(.ydesign-ready) .card__view::before { display: none !important; }",
-        "}",
-        "",
-        "/* рамка фокуса + «ореол» через змінну --yd-halo (задається у фокус-ефектах і стилях, лише в режимі ефектів) */",
-        ".ydesign-active .ydesign-card.focus .card__view {",
-        "    box-shadow: 0 0 0 var(--yd-rw, 4px) var(--yd-ring, #fff), var(--yd-halo, 0 0 0 0 rgba(0,0,0,0)) !important;",
-        "}",
-        "body.ydesign-active:not(.is--touch).ydesign-focus-lift .ydesign-card.focus { transform: translateY(-.35em) scale(1.06) translateZ(0) !important; }",
-        "body.ydesign-fx.ydesign-active:not(.is--touch).ydesign-focus-lift .ydesign-card.focus { --yd-halo: 0 1em 1.8em -.5em rgba(0,0,0,.8); }",
-        "body.ydesign-fx.ydesign-active:not(.is--touch).ydesign-focus-glow .ydesign-card.focus { --yd-halo: 0 0 1.5em var(--yd-glow, rgba(255,255,255,.4)); }",
-        "body.ydesign-active:not(.is--touch).ydesign-focus-none .ydesign-card.focus { transform: none !important; will-change: auto; }",
-        "",
-        "/* стилі карток */",
-        "body.ydesign-style-glass { --yd-r: 1.2em; --yd-rw: 2px; --yd-ring: rgba(255,255,255,.9); }",
-        "body.ydesign-fx.ydesign-style-glass .ydesign-content-layer {",
-        "    backdrop-filter: blur(10px) saturate(1.25) !important; -webkit-backdrop-filter: blur(10px) saturate(1.25) !important;",
-        "    background: linear-gradient(to top, rgba(12,14,24,.62), rgba(12,14,24,.12)) !important;",
-        "}",
-        "body:not(.ydesign-fx).ydesign-style-glass .ydesign-content-layer { background: linear-gradient(to top, rgba(12,14,24,.82), transparent) !important; }",
-        "",
-        "body.ydesign-style-neon { --yd-r: .5em; --yd-rw: 3px; --yd-ring: #00e5ff; --yd-acc: #00e5ff; }",
-        "body.ydesign-fx.ydesign-style-neon .ydesign-card.focus { --yd-halo: 0 0 1.3em rgba(0,229,255,.55); }",
-        "",
-        "body.ydesign-style-cinema { --yd-r: .25em; --yd-rw: 2px; --yd-ring: #f5c542; --yd-acc: #f5c542; }",
-        "body.ydesign-style-cinema .ydesign-text-title { letter-spacing: .06em; text-transform: uppercase; }",
-        "body.ydesign-fx.ydesign-style-cinema .ydesign-card.focus { --yd-halo: 0 0 1.2em rgba(245,197,66,.45); }",
-        "",
-        "body.ydesign-style-soft { --yd-r: 1.6em; --yd-rw: 2px; --yd-ring: rgba(255,255,255,.6); }",
-        "body.ydesign-fx.ydesign-style-soft .ydesign-card.focus { --yd-halo: 0 .8em 1.6em -.4em rgba(0,0,0,.6); }",
-        "",
-        "/* чіп «Trakt» біля зеленої галочки (фільм позначено переглянутим на Trakt) */",
-        ".ydesign-from-trakt.ydesign-is-watched .ydesign-watched-check::after {",
-        "    content: \"Trakt\"; position: absolute; right: 0; top: 118%; padding: .18em .55em; border-radius: 2em;",
-        "    background: #ed1c24; color: #fff; font-size: .55em; font-weight: 800; letter-spacing: .04em; line-height: 1.1;",
-        "    box-shadow: 0 2px 6px rgba(0,0,0,.4);",
-        "}",
-        "body.ydesign-trakt-chip-off .ydesign-watched-check::after { display: none !important; }"
-    ].join('\n');
+    var YD_PLUS_CSS = "@keyframes ydCardIn { from { opacity: 0; translate: 0 .6em; } to { opacity: 1; translate: 0 0; } }\n@keyframes ydSkel { to { transform: translateX(100%); } }\nbody:not(.stremio-hybrid).ydesign-active:not(.ydesign-anim-off) .ydesign-card.ydesign-ready {animation: ydCardIn .45s ease-out both;}\nbody:not(.stremio-hybrid).ydesign-fx.ydesign-active:not(.ydesign-anim-off) .ydesign-card:not(.ydesign-ready) .card__view::before {content: \"\";position: absolute;left: 0;top: 0;right: 0;bottom: 0;z-index: 1;pointer-events: none;background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,.08) 50%, transparent 80%);transform: translateX(-100%);animation: ydSkel 1.3s ease-in-out 4;}\n@media (prefers-reduced-motion: reduce) {body:not(.stremio-hybrid) .ydesign-card.ydesign-ready {animation: none !important;}\nbody:not(.stremio-hybrid) .ydesign-card:not(.ydesign-ready) .card__view::before {display: none !important;}}\nbody:not(.stremio-hybrid).ydesign-active .ydesign-card.focus .card__view {box-shadow: 0 0 0 var(--yd-rw, 4px) var(--yd-ring, #fff), var(--yd-halo, 0 0 0 0 rgba(0,0,0,0)) !important;}\nbody:not(.stremio-hybrid).ydesign-active:not(.is--touch).ydesign-focus-lift .ydesign-card.focus {transform: translateY(-.35em) scale(1.06) translateZ(0) !important;}\nbody.ydesign-fx.ydesign-active:not(.is--touch).ydesign-focus-lift .ydesign-card.focus {--yd-halo: 0 1em 1.8em -.5em rgba(0,0,0,.8);}\nbody.ydesign-fx.ydesign-active:not(.is--touch).ydesign-focus-glow .ydesign-card.focus {--yd-halo: 0 0 1.5em var(--yd-glow, rgba(255,255,255,.4));}\nbody:not(.stremio-hybrid).ydesign-active:not(.is--touch).ydesign-focus-none .ydesign-card.focus {transform: none !important;will-change: auto;}\nbody.ydesign-style-glass {--yd-r: 1.2em;--yd-rw: 2px;--yd-ring: rgba(255,255,255,.9);}\nbody.ydesign-fx.ydesign-style-glass .ydesign-content-layer {background: linear-gradient(to top, rgba(12,14,24,.62), rgba(12,14,24,.12)) !important;}\nbody:not(.stremio-hybrid).ydesign-fx.ydesign-style-glass .ydesign-content-layer {backdrop-filter: blur(10px) saturate(1.25) !important;-webkit-backdrop-filter: blur(10px) saturate(1.25) !important;}\nbody:not(.ydesign-fx).ydesign-style-glass .ydesign-content-layer {background: linear-gradient(to top, rgba(12,14,24,.82), transparent) !important;}\nbody.ydesign-style-neon {--yd-r: .5em;--yd-rw: 3px;--yd-ring: #00e5ff;--yd-acc: #00e5ff;}\nbody.ydesign-fx.ydesign-style-neon .ydesign-card.focus {--yd-halo: 0 0 1.3em rgba(0,229,255,.55);}\nbody.ydesign-style-cinema {--yd-r: .25em;--yd-rw: 2px;--yd-ring: #f5c542;--yd-acc: #f5c542;}\nbody.ydesign-style-cinema .ydesign-text-title {letter-spacing: .06em;text-transform: uppercase;}\nbody.ydesign-fx.ydesign-style-cinema .ydesign-card.focus {--yd-halo: 0 0 1.2em rgba(245,197,66,.45);}\nbody.ydesign-style-soft {--yd-r: 1.6em;--yd-rw: 2px;--yd-ring: rgba(255,255,255,.6);}\nbody.ydesign-fx.ydesign-style-soft .ydesign-card.focus {--yd-halo: 0 .8em 1.6em -.4em rgba(0,0,0,.6);}\n.ydesign-from-trakt.ydesign-is-watched .ydesign-watched-check::after {content: \"Trakt\";position: absolute;right: 0;top: 118%;padding: .18em .55em;border-radius: 2em;background: #ed1c24;color: #fff;font-size: .55em;font-weight: 800;letter-spacing: .04em;line-height: 1.1;}\nbody:not(.stremio-hybrid) .ydesign-from-trakt.ydesign-is-watched .ydesign-watched-check::after {box-shadow: 0 2px 6px rgba(0,0,0,.4);}\nbody.ydesign-trakt-chip-off .ydesign-watched-check::after {display: none !important;}";
 
     function ydPostCss(css) {
         // Важкі декларації прибираємо з базового CSS; у режимі ефектів вони повертаються правилами з YD_EXTRA_CSS
         css = css.replace(/(?:-webkit-)?backdrop-filter\s*:[^;]*;/g, '');
         css = css.replace(/filter\s*:\s*drop-shadow\([^;]*;/g, '');
-        return css + '\n' + YD_EXTRA_CSS + '\n' + YD_MARKS_CSS + '\n' + YD_PLUS_CSS;
+        return css + '\n@media (prefers-reduced-motion: reduce) { .ydesign-card, .ydesign-card *, .ydesign-card::after, .ydesign-card *::before, .ydesign-card *::after { animation: none !important; transition: none !important; } }\n' + YD_EXTRA_CSS + '\n' + YD_MARKS_CSS + '\n' + YD_PLUS_CSS;
     }
 
     function injectCSS() {
@@ -2546,616 +2284,186 @@
         }
 
         var __ydCss = [
-            ".ydesign-active .ydesign-card .card__title,",
-            ".ydesign-active .ydesign-card .card__age,",
-            ".ydesign-active .ydesign-card .card__vote { display: none !important; }",
-            "",
-            ".ydesign-active .items-line:not(.vinyl-line) .items-cards,",
-            ".ydesign-active .items-line:not(.vinyl-line) .scroll__body {",
-            "    display: flex; flex-wrap: nowrap; ",
-            "    gap: var(--ydesign-card-gap, 0.8em); ",
-            "    padding-bottom: 0; ",
-            "}",
-            "",
-            ".ydesign-active .ydesign-card {",
-            "    position: relative; overflow: visible;",
-            "    background-color: transparent !important;",
-            "    border: none !important; ",
-            "    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);",
-            "    flex: 0 0 auto; cursor: pointer;",
-            "    transform: translateZ(0);",
-            "    backface-visibility: hidden;",
-            "    box-shadow: none !important;",
-            "}",
-            "",
-            "/* ВИДІЛЕННЯ КАРТКИ БЕЗ ЧОРНОЇ ТІНІ */",
-            ".ydesign-active .ydesign-card.focus {",
-            "    transform: scale(1.045) translateZ(0); ",
-            "    z-index: 20;",
-            "    box-shadow: none !important;",
-            "}",
-            "",
-            ".ydesign-active .ydesign-card.focus .card__view {",
-            "    box-shadow: 0 0 0 4px #ffffff !important;",
-            "}",
-            "",
-            "body.is--touch .ydesign-active .ydesign-card.focus {",
-            "    transform: none !important; ",
-            "}",
-            "body.is--touch .ydesign-active .ydesign-card.focus .card__view {",
-            "    box-shadow: none !important;",
-            "}",
-            "",
-            ".ydesign-active .ydesign-card .card__view {",
-            "    position: relative; top: 0; left: 0; right: 0; bottom: 0;",
-            "    width: 100%; height: 0 !important;",
-            "    border-radius: 0.85em !important;",
-            "    background-color: #1a1a1a; ",
-            "    overflow: hidden;",
-            "    box-shadow: 0 0 0 4px transparent;",
-            "    transition: background-color 0.4s ease, box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);",
-            "}",
-            "",
-            ".ydesign-active .ydesign-card.ydesign-vertical .card__view { padding-bottom: 177.77% !important; } ",
-            ".ydesign-active .ydesign-card.ydesign-horizontal .card__view { padding-bottom: 68.75% !important; } ",
-            "",
-            "@media (min-width: 769px) {",
-            "    .ydesign-active .card.ydesign-vertical { width: calc(100% / var(--ydesign-grid-items-v, 5)); height: auto !important; }   ",
-            "    .ydesign-active .card.ydesign-horizontal { width: calc(100% / var(--ydesign-grid-items-h, 3)); height: auto !important; } ",
-            "    .ydesign-active .items-line:not(.vinyl-line) .card.ydesign-vertical { width: 18.5vw; }   ",
-            "    .ydesign-active .items-line:not(.vinyl-line) .card.ydesign-horizontal { width: 31.5vw; } ",
-            "}",
-            "",
-            "@media (max-width: 768px) {",
-            "    .ydesign-active .card.ydesign-vertical { width: calc(100% / 2); height: auto !important; }    ",
-            "    .ydesign-active .card.ydesign-horizontal { width: 100%; height: auto !important; }  ",
-            "    .ydesign-active .items-line:not(.vinyl-line) .card.ydesign-vertical { width: 46vw; }    ",
-            "    .ydesign-active .items-line:not(.vinyl-line) .card.ydesign-horizontal { width: 94vw; }  ",
-            "}",
-            "",
-            "/* ЗОБРАЖЕННЯ КАРТОК */",
-            ".ydesign-img-layer {",
-            "    position: absolute; top: 0; left: 0; width: 100%; height: 100%;",
-            "    background-color: #1a1a1a;",
-            "    background-image: url('./img/img_load.svg');",
-            "    background-size: cover !important; background-repeat: no-repeat; background-position: center center !important;",
-            "}",
-            ".ydesign-img-layer::after {",
-            "    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;",
-            "    background-image: var(--loaded-bg, none);",
-            "    background-size: cover !important; background-repeat: no-repeat; background-position: center center !important;",
-            "    opacity: 0; transition: opacity 0.25s ease-in-out; z-index: 1;",
-            "}",
-            ".ydesign-img-layer.loaded::after { opacity: 1; }",
-            "",
-            ".ydesign-gradient-layer {",
-            "    position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;",
-            "    pointer-events: none; z-index: 2;",
-            "}",
-            "",
-            ".ydesign-content-layer {",
-            "    position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;",
-            "    display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch;",
-            "    padding: 1.2em 0.8em var(--ydesign-content-pb, 0.3em) 0.8em;",
-            "    box-sizing: border-box; z-index: 3; pointer-events: none;",
-            "}",
-            "",
-            ".ydesign-logo-container {",
-            "    display: flex; align-items: flex-end;",
-            "    margin-bottom: var(--ydesign-logo-mb, 1.2em) !important; ",
-            "    width: 100%; height: var(--ydesign-logo-h, 35%); max-height: var(--ydesign-logo-h, 35%); ",
-            "    flex-shrink: 0; justify-content: var(--ydesign-align-logo, center);",
-            "    position: relative; z-index: 10;",
-            "}",
-            ".ydesign-logo-container img {",
-            "    max-width: var(--ydesign-logo-w, 80%); max-height: 100%; height: auto; width: auto;",
-            "    object-fit: contain; object-position: bottom var(--ydesign-text-logo, center);",
-            "    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.85));",
-            "}",
-            ".ydesign-text-title {",
-            "    width: var(--ydesign-logo-w, 100%); max-height: 100%;",
-            "    display: flex; align-items: flex-end; justify-content: var(--ydesign-align-logo, center);",
-            "    font-size: calc(var(--ydesign-title-size-val, 1.2) * 1em) !important; font-weight: 800; color: #fff; ",
-            "    text-align: var(--ydesign-text-logo, center); text-shadow: 0 2px 4px rgba(0,0,0,0.95);",
-            "    line-height: 1.25; padding-bottom: 0.15em; ",
-            "}",
-            "",
-            "body .ydesign-card.ydesign-vertical .ydesign-add-title.ydesign-local-title, body .ydesign-card.ydesign-horizontal .ydesign-add-title.ydesign-local-title { display: -webkit-box !important; -webkit-line-clamp: 2; -webkit-box-orient: vertical; white-space: normal !important; overflow: hidden; font-size: .9em !important; font-weight: 700; line-height: 1.3 !important; min-height: 0 !important; text-align: left !important; margin: 0 0 .4em !important; text-shadow: 0 1px 6px rgba(0,0,0,.4) !important; }",
-            ".ydesign-add-title {",
-            "    width: 100%;",
-            "    font-size: calc(var(--ydesign-add-title-size-eff, 0.9) * 1em) !important;",
-            "    color: rgba(255, 255, 255, 0.9); font-weight: 600; font-style: italic;",
-            "    text-align: var(--ydesign-text-add-title, center); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;",
-            "    line-height: 1.35 !important; padding: 0.1em 0 0.25em 0 !important; margin-left: 0 !important; box-sizing: border-box !important;",
-            "    min-height: calc(var(--ydesign-add-title-size-eff, 0.9) * 1.55em); margin-top: 0 !important;",
-            "    margin-bottom: var(--ydesign-add-title-mb, 0.3em) !important; text-shadow: none !important;",
-            "}",
-            "",
-            ".ydesign-slogan {",
-            "    width: 100%;",
-            "    font-size: calc(var(--ydesign-slogan-size-eff, 0.85) * 1em) !important; color: #fff;",
-            "    text-align: var(--ydesign-text-slogan, center); ",
-            "    margin: var(--ydesign-slogan-padding, 0.3em) 0 0 0 !important;",
-            "    padding: 0.1em 0.35em !important; box-sizing: border-box !important; line-height: 1.35 !important; font-weight: 500;",
-            "    text-shadow: none !important; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;",
-            "    min-height: calc(var(--ydesign-slogan-size-eff, 0.85) * 1.45em);",
-            "}",
-            "",
-            ".ydesign-info-wrap {",
-            "    display: flex; width: 100%; overflow: visible !important; padding: 0 !important; margin: 0 !important;",
-            "}",
-            "",
-            "/* КОНТЕЙНЕРИ БЕЙДЖІВ */",
-            ".ydesign-horizontal .ydesign-info-wrap,",
-            ".ydesign-horizontal .ydesign-info-wrap-2,",
-            "body.ydesign-v-badges-one-row .ydesign-vertical .ydesign-info-wrap {",
-            "    display: flex; flex-direction: row; flex-wrap: wrap !important;",
-            "    align-content: flex-start !important; align-items: center !important;",
-            "    justify-content: var(--ydesign-align-badges, center);",
-            "    column-gap: var(--ydesign-badges-gap, 0.15em) !important; row-gap: 50em !important;",
-            "    height: 2.15em !important; max-height: 2.15em !important; min-height: 2.15em !important; line-height: 2.15em !important;",
-            "    padding: 2px 0 !important; box-sizing: border-box !important; margin: 0 !important; overflow: hidden !important; clip-path: none !important;",
-            "}",
-            ".ydesign-horizontal .ydesign-info-wrap-2 { margin-top: var(--ydesign-badge-rows-gap, 0.3em) !important; }",
-            "",
-            ".ydesign-vertical .ydesign-info-wrap {",
-            "    flex-direction: column; align-items: var(--ydesign-align-badges, center) !important;",
-            "    height: auto !important; max-height: none !important; overflow: visible !important;",
-            "    gap: var(--ydesign-badge-rows-gap, 0.3em) !important; padding: 0 !important; margin: 0 !important;",
-            "}",
-            "",
-            ".ydesign-vertical .ydesign-badges, ",
-            ".ydesign-vertical .ydesign-ratings,",
-            ".ydesign-vertical .ydesign-genres {",
-            "    display: flex !important; flex: 0 0 auto !important; flex-wrap: wrap !important; align-content: flex-start !important; align-items: center !important;",
-            "    column-gap: var(--ydesign-badges-gap, 0.15em) !important; row-gap: var(--ydesign-v-badge-rows-gap, 0.3em) !important;",
-            "    justify-content: var(--ydesign-align-badges, center) !important; width: 100% !important; ",
-            "    height: auto !important; max-height: none !important; min-height: 1.85em !important; line-height: normal !important;",
-            "    padding: 2px 0 !important; box-sizing: border-box !important; margin: 0 !important; overflow: visible !important; clip-path: none !important;",
-            "    position: relative !important; z-index: 12 !important; visibility: visible !important; opacity: 1 !important;",
-            "}",
-            "",
-            "/* ВІДСТУПИ ЖАНРІВ (РУЧНИЙ РЕЖИМ) */",
-            ".ydesign-vertical .ydesign-genres,",
-            ".ydesign-horizontal .ydesign-genres {",
-            "    margin-top: var(--ydesign-genres-gap, 0em) !important;",
-            "    margin-bottom: var(--ydesign-genres-gap, 0em) !important;",
-            "}",
-            "",
-            "body.ydesign-v-badges-one-row .ydesign-vertical .ydesign-ratings,",
-            ".ydesign-horizontal .ydesign-badges,",
-            ".ydesign-horizontal .ydesign-ratings { ",
-            "    display: flex !important; flex-wrap: wrap !important; align-content: flex-start !important;",
-            "    width: auto !important; height: 2.15em !important; max-height: 2.15em !important; min-height: 2.15em !important; line-height: 2.15em !important;",
-            "    margin: 0 !important; padding: 2px 0 !important; box-sizing: border-box !important; flex-shrink: 0 !important; ",
-            "    column-gap: var(--ydesign-badges-gap, 0.15em) !important; row-gap: 50em !important; overflow: hidden !important;",
-            "}",
-            "",
-            ".ydesign-horizontal .ydesign-genres {",
-            "    display: flex !important; flex-wrap: wrap !important; align-content: flex-start !important; align-items: center !important;",
-            "    column-gap: var(--ydesign-badges-gap, 0.15em) !important; row-gap: 50em !important; width: 100% !important; ",
-            "    justify-content: var(--ydesign-align-badges, center) !important; height: 2.15em !important; max-height: 2.15em !important; min-height: 2.15em !important;",
-            "    line-height: 2.15em !important; padding: 2px 0 !important; box-sizing: border-box !important; overflow: hidden !important; clip-path: none !important;",
-            "}",
-            "",
-            ".ydesign-badges, .ydesign-ratings, .ydesign-genres { font-size: 1em !important; }",
-            "",
-            "/* ГЕОМЕТРІЯ ПІГУЛОК */",
-            ".ydesign-badge, .ydesign-genre-badge, .ydesign-rating {",
-            "    display: inline-flex !important; align-items: center !important; justify-content: center !important;",
-            "    box-sizing: border-box !important; height: 1.85em !important; min-height: 1.85em !important; max-height: 1.85em !important; line-height: 1.1 !important; ",
-            "    border: 1px solid transparent !important; background: transparent !important; padding: 0 0.50em !important; ",
-            "    text-shadow: none !important; box-shadow: none !important; white-space: nowrap !important; flex-shrink: 0 !important; ",
-            "    text-align: center !important; vertical-align: middle !important; border-radius: var(--ydesign-badge-radius, 50px) !important; ",
-            "    max-width: 100% !important; overflow: visible !important;",
-            "}",
-            "",
-            "/* РОЗМІРИ ШРИФТІВ У БЕЙДЖАХ */",
-            ".ydesign-badge-year { font-size: calc(var(--ydesign-year-size-val, 0.8) * 1em) !important; font-weight: 700 !important; color: #fff !important; }",
-            ".ydesign-badge-age { font-size: calc(var(--ydesign-age-size-val, 0.8) * 1em) !important; font-weight: 700 !important; color: #fff !important; }",
-            ".ydesign-badge-seasons { font-size: calc(var(--ydesign-seasons-size-val, 0.8) * 1em) !important; font-weight: 700 !important; color: #fff !important; }",
-            ".ydesign-badge-ua { font-size: calc(var(--ydesign-ua-size-val, 0.8) * 1em) !important; font-weight: 700 !important; color: #fff !important; }",
-            ".ydesign-genre-badge { font-size: calc(var(--ydesign-genres-size-val, 0.8) * 1em) !important; font-weight: 600 !important; color: rgba(255,255,255,0.95) !important; }",
-            ".ydesign-rating { font-size: calc(var(--ydesign-rating-size-val, 0.8) * 1em) !important; font-weight: 700 !important; color: #fff !important; gap: 0.25em !important; }",
-            "",
-            "/* ОДНАКОВИЙ РОЗМІР БЕЙДЖІВ */",
-            "body.ydesign-v-uniform-badges .ydesign-vertical .ydesign-badge,",
-            "body.ydesign-v-uniform-badges .ydesign-vertical .ydesign-genre-badge,",
-            "body.ydesign-v-uniform-badges .ydesign-vertical .ydesign-rating {",
-            "    font-size: calc(var(--ydesign-badge-size-val, 0.8) * 1em) !important;",
-            "}",
-            "body.ydesign-h-uniform-badges .ydesign-horizontal .ydesign-badge,",
-            "body.ydesign-h-uniform-badges .ydesign-horizontal .ydesign-genre-badge,",
-            "body.ydesign-h-uniform-badges .ydesign-horizontal .ydesign-rating {",
-            "    font-size: calc(var(--ydesign-badge-size-val, 0.8) * 1em) !important;",
-            "}",
-            "",
-            "body.ydesign-shape-pill { --ydesign-badge-radius: 50px; }",
-            "body.ydesign-shape-rounded { --ydesign-badge-radius: 0.35em; }",
-            "body.ydesign-shape-square { --ydesign-badge-radius: 0.15em; }",
-            "",
-            "body.ydesign-glass-pill .ydesign-badge,",
-            "body.ydesign-glass-pill .ydesign-genre-badge,",
-            "body.ydesign-glass-pill .ydesign-rating {",
-            "    background: rgba(255, 255, 255, 0.1) !important;",
-            "    backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important; box-shadow: none !important;",
-            "}",
-            "",
-            "/* UA завжди має синьо-жовтий фон, зокрема у скляному стилі */",
-            "body.ydesign-active .ydesign-glass-pill .ydesign-badge-ua,",
-            "body.ydesign-active .ydesign-badge-ua {",
-            "    background: linear-gradient(135deg, #0057b7 0%, #0057b7 49%, #ffd700 51%, #ffd700 100%) !important;",
-            "    background-color: #0057b7 !important; background-image: linear-gradient(135deg, #0057b7 0%, #0057b7 49%, #ffd700 51%, #ffd700 100%) !important;",
-            "    color: #ffffff !important; font-weight: 800 !important; box-shadow: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important;",
-            "}",
-            "",
-            ".ydesign-rating img {",
-            "    width: 1.15em !important; height: 1.15em !important; object-fit: contain !important; display: block !important; ",
-            "    filter: saturate(var(--ydesign-ratings-saturate, 100%)) !important; ",
-            "}",
-            "",
-            "body.ydesign-color-age .ydesign-age-18 { color: #ff5252 !important; }",
-            "body.ydesign-color-age .ydesign-age-16 { color: #ffab40 !important; }",
-            "body.ydesign-color-age .ydesign-age-14, body.ydesign-color-age .ydesign-age-13 { color: #ffd740 !important; }",
-            "body.ydesign-color-age .ydesign-age-6, body.ydesign-color-age .ydesign-age-0 { color: #69f0ae !important; }",
-            "",
-            "body.ydesign-color-ua .ydesign-badge-ua,",
-            ".ydesign-vertical .ydesign-badge-ua,",
-            ".ydesign-horizontal .ydesign-badge-ua {",
-            "    background: linear-gradient(135deg, #0057b7 0%, #0057b7 49%, #ffd700 51%, #ffd700 100%) !important;",
-            "    background-color: #0057b7 !important; color: #ffffff !important; font-weight: 800 !important; box-shadow: none !important;",
-            "}",
-            "",
-            "/* РАМКИ БЕЙДЖІВ */",
-            "body.ydesign-border-year .ydesign-badge-year { border-color: rgba(255,255,255,0.6) !important; }",
-            "body.ydesign-border-seasons .ydesign-badge-seasons { border-color: rgba(255,255,255,0.6) !important; }",
-            "body.ydesign-border-ua .ydesign-badge-ua { border-color: rgba(255,255,255,0.6) !important; }",
-            "body.ydesign-border-genres .ydesign-genre-badge { border-color: rgba(255,255,255,0.4) !important; }",
-            "body.ydesign-border-ratings .ydesign-rating { border-color: rgba(255,255,255,0.6) !important; }",
-            "body.ydesign-border-age .ydesign-badge-age { border-color: rgba(255,255,255,0.6) !important; }",
-            "body.ydesign-border-age.ydesign-color-age .ydesign-age-18 { border-color: rgba(244, 67, 54, 0.85) !important; }",
-            "body.ydesign-border-age.ydesign-color-age .ydesign-age-16 { border-color: rgba(255, 152, 0, 0.85) !important; }",
-            "body.ydesign-border-age.ydesign-color-age .ydesign-age-14, body.ydesign-border-age.ydesign-color-age .ydesign-age-13 { border-color: rgba(255, 215, 64, 0.85) !important; }",
-            "body.ydesign-border-age.ydesign-color-age .ydesign-age-6, body.ydesign-border-age.ydesign-color-age .ydesign-age-0 { border-color: rgba(105, 240, 174, 0.85) !important; }",
-            "",
-            "/* ВЕРХНІЙ БЛОК БЕЙДЖІВ КАРТКИ */",
-            ".ydesign-card-notch {",
-            "    position: absolute !important; top: 0 !important; left: 50% !important;",
-            "    transform: translateX(-50%) !important; z-index: 25 !important;",
-            "    display: inline-flex !important; align-items: center !important; justify-content: center !important;",
-            "    gap: 0.4em !important; padding: 0.18em 0.6em !important;",
-            "    box-sizing: border-box !important; white-space: nowrap !important; pointer-events: none !important;",
-            "    max-width: 92% !important; overflow: hidden !important;",
-            "    margin: 0 !important; margin-top: 0 !important;",
-            "    border-top: none !important; border-radius: 0 0 0.65em 0.65em !important;",
-            "    border-top-left-radius: 0 !important; border-top-right-radius: 0 !important;",
-            "    border-bottom-left-radius: 0.65em !important; border-bottom-right-radius: 0.65em !important;",
-            "    transition: all 0.2s ease !important;",
-            "}",
-            "body.ydesign-notch-hide .ydesign-card-notch { display: none !important; }",
-            "body.ydesign-notch-bg .ydesign-card-notch {",
-            "    background: rgba(255, 255, 255, 0.12) !important;",
-            "    backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important;",
-            "}",
-            "body:not(.ydesign-notch-bg) .ydesign-card-notch {",
-            "    background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;",
-            "}",
-            "body.ydesign-notch-border .ydesign-card-notch {",
-            "    border-left: 1px solid rgba(255, 255, 255, 0.6) !important;",
-            "    border-right: 1px solid rgba(255, 255, 255, 0.6) !important;",
-            "    border-bottom: 1px solid rgba(255, 255, 255, 0.6) !important;",
-            "    border-top: none !important;",
-            "}",
-            "body:not(.ydesign-notch-border) .ydesign-card-notch { border: none !important; }",
-            ".ydesign-notch-type {",
-            "    font-size: var(--ydesign-notch-type-size, 0.5em) !important;",
-            "    font-weight: 400 !important; color: #ffffff !important;",
-            "    text-transform: uppercase !important; letter-spacing: 0.04em !important;",
-            "    line-height: 1 !important; white-space: nowrap !important; flex-shrink: 0 !important;",
-            "}",
-            ".ydesign-notch-std-list {",
-            "    display: inline-flex !important; align-items: center !important; gap: 0.25em !important; flex-shrink: 0 !important;",
-            "}",
-            ".ydesign-notch-icon {",
-            "    display: inline-block !important;",
-            "    width: var(--ydesign-notch-std-size, 0.5em) !important; height: var(--ydesign-notch-std-size, 0.5em) !important;",
-            "    vertical-align: middle !important; flex-shrink: 0 !important;",
-            "}",
-            "body.ydesign-notch-mono .ydesign-notch-icon,",
-            ".ydesign-notch-mono .ydesign-notch-icon {",
-            "    color: rgba(255, 255, 255, 0.92) !important;",
-            "}",
-            "body:not(.ydesign-notch-mono) .ydesign-notch-icon-book { color: #ffd166 !important; }",
-            "body:not(.ydesign-notch-mono) .ydesign-notch-icon-like { color: #ff4757 !important; }",
-            "body:not(.ydesign-notch-mono) .ydesign-notch-icon-wath { color: #00d2d3 !important; }",
-            "body:not(.ydesign-notch-mono) .ydesign-notch-icon-history { color: #be95ff !important; }",
-            ".ydesign-notch-custom {",
-            "    font-size: var(--ydesign-notch-custom-size, 0.5em) !important;",
-            "    font-weight: 400 !important; color: #ffffff !important;",
-            "    text-transform: uppercase !important; letter-spacing: 0.04em !important;",
-            "    background: transparent !important; padding: 0 !important; border: none !important; border-radius: 0 !important;",
-            "    line-height: 1 !important; white-space: nowrap !important; flex-shrink: 0 !important;",
-            "}",
-            "",
-            "/* ВЕРТИКАЛЬНІ КАРТКИ CSS ЗМІННІ */",
-            ".ydesign-active .ydesign-card.ydesign-vertical {",
-            "    --ydesign-logo-h: calc(var(--ydesign-v-logo-max-h, 35) * 1%);",
-            "    --ydesign-logo-w: calc(var(--ydesign-v-logo-max-w, 80) * 1%);",
-            "    --ydesign-title-size-val: var(--ydesign-v-title-size, 1.5);",
-            "    --ydesign-add-title-size-eff: var(--ydesign-v-add-title-size, 0.9);",
-            "    --ydesign-slogan-size-eff: var(--ydesign-v-slogan-size, 0.7);",
-            "    --ydesign-badge-size-val: var(--ydesign-v-badge-size, 0.8);",
-            "    --ydesign-year-size-val: var(--ydesign-v-year-size, 0.8);",
-            "    --ydesign-age-size-val: var(--ydesign-v-age-size, 0.8);",
-            "    --ydesign-seasons-size-val: var(--ydesign-v-seasons-size, 0.8);",
-            "    --ydesign-ua-size-val: var(--ydesign-v-ua-size, 0.8);",
-            "    --ydesign-genres-size-val: var(--ydesign-v-genres-size, 0.8);",
-            "    --ydesign-rating-size-val: var(--ydesign-v-rating-size, 0.8);",
-            "    --ydesign-logo-mb: var(--ydesign-v-logo-mb, 1.2em);",
-            "    --ydesign-add-title-mb: var(--ydesign-v-add-title-mb, 0.3em);",
-            "    --ydesign-badge-rows-gap: var(--ydesign-v-badge-rows-gap, 0.3em);",
-            "    --ydesign-badges-gap: var(--ydesign-v-badges-gap, 0.15em);",
-            "    --ydesign-genres-gap: var(--ydesign-v-genres-gap, 0em);",
-            "    --ydesign-content-pb: var(--ydesign-v-content-pb, 0.3em);",
-            "    --ydesign-slogan-padding: var(--ydesign-v-slogan-padding, 0.3em);",
-            "    --ydesign-uniform-v-gap: var(--ydesign-v-uniform-v-gap-val, 0.25em);",
-            "    --ydesign-align-logo: var(--ydesign-v-align-logo-flex, center);",
-            "    --ydesign-text-logo: var(--ydesign-v-align-logo, center);",
-            "    --ydesign-text-add-title: var(--ydesign-v-align-add-title, left);",
-            "    --ydesign-align-badges: var(--ydesign-v-align-badges-flex, flex-start);",
-            "    --ydesign-align-slogan: var(--ydesign-v-align-slogan-flex, flex-start);",
-            "    --ydesign-text-slogan: var(--ydesign-v-align-slogan, left);",
-            "}",
-            "",
-            "/* ГОРИЗОНТАЛЬНІ КАРТКИ CSS ЗМІННІ */",
-            ".ydesign-active .ydesign-card.ydesign-horizontal {",
-            "    --ydesign-logo-h: calc(var(--ydesign-h-logo-max-h, 35) * 1%);",
-            "    --ydesign-logo-w: calc(var(--ydesign-h-logo-max-w, 80) * 1%);",
-            "    --ydesign-title-size-val: var(--ydesign-h-title-size, 1.5);",
-            "    --ydesign-add-title-size-eff: var(--ydesign-h-add-title-size, 0.9);",
-            "    --ydesign-slogan-size-eff: var(--ydesign-h-slogan-size, 0.7);",
-            "    --ydesign-desc-size-val: var(--ydesign-h-desc-size, 1.0);",
-            "    --ydesign-badge-size-val: var(--ydesign-h-badge-size, 0.8);",
-            "    --ydesign-year-size-val: var(--ydesign-h-year-size, 0.8);",
-            "    --ydesign-age-size-val: var(--ydesign-h-age-size, 0.8);",
-            "    --ydesign-seasons-size-val: var(--ydesign-h-seasons-size, 0.8);",
-            "    --ydesign-ua-size-val: var(--ydesign-h-ua-size, 0.8);",
-            "    --ydesign-genres-size-val: var(--ydesign-h-genres-size, 0.8);",
-            "    --ydesign-rating-size-val: var(--ydesign-h-rating-size, 0.8);",
-            "    --ydesign-logo-mb: var(--ydesign-h-logo-mb, 1.2em);",
-            "    --ydesign-add-title-mb: var(--ydesign-h-add-title-mb, 0.3em);",
-            "    --ydesign-badge-rows-gap: var(--ydesign-h-badge-rows-gap, 0.3em);",
-            "    --ydesign-badges-gap: var(--ydesign-h-badges-gap, 0.15em);",
-            "    --ydesign-genres-gap: var(--ydesign-h-genres-gap, 0em);",
-            "    --ydesign-content-pb: var(--ydesign-h-content-pb, 0.3em);",
-            "    --ydesign-slogan-padding: var(--ydesign-h-slogan-padding, 0.3em);",
-            "    --ydesign-uniform-v-gap: var(--ydesign-h-uniform-v-gap-val, 0.25em);",
-            "    --ydesign-align-logo: var(--ydesign-h-align-logo-flex, center);",
-            "    --ydesign-text-logo: var(--ydesign-h-align-logo, center);",
-            "    --ydesign-text-add-title: var(--ydesign-h-align-add-title, left);",
-            "    --ydesign-align-badges: var(--ydesign-h-align-badges-flex, flex-start);",
-            "    --ydesign-align-slogan: var(--ydesign-h-align-slogan-flex, flex-start);",
-            "    --ydesign-text-slogan: var(--ydesign-h-align-slogan, left);",
-            "}",
-            "",
-            "/* МАТЕМАТИЧНО РІВНІ ВІДСТУПИ ДЛЯ V ТА H */",
-            "body.ydesign-v-uniform-gaps .ydesign-vertical .ydesign-add-title { margin-top: var(--ydesign-uniform-v-gap, 0.25em) !important; margin-bottom: 0 !important; }",
-            "body.ydesign-v-uniform-gaps .ydesign-vertical .ydesign-info-wrap { margin-top: var(--ydesign-uniform-v-gap, 0.25em) !important; margin-bottom: 0 !important; }",
-            "body.ydesign-v-uniform-gaps .ydesign-vertical .ydesign-genres { margin-top: var(--ydesign-uniform-v-gap, 0.25em) !important; margin-bottom: 0 !important; }",
-            "body.ydesign-v-uniform-gaps:not(.ydesign-v-badges-one-row) .ydesign-vertical .ydesign-info-wrap { gap: var(--ydesign-uniform-v-gap, 0.25em) !important; }",
-            "body.ydesign-v-uniform-gaps:not(.ydesign-v-badges-one-row) .ydesign-vertical .ydesign-info-wrap > * + * { margin-top: 0 !important; margin-bottom: 0 !important; }",
-            "body.ydesign-v-uniform-gaps .ydesign-vertical .ydesign-slogan { margin-top: var(--ydesign-uniform-v-gap, 0.25em) !important; margin-bottom: 0 !important; }",
-            "",
-            "body.ydesign-h-uniform-gaps .ydesign-horizontal .ydesign-add-title { margin-top: var(--ydesign-uniform-v-gap, 0.25em) !important; margin-bottom: 0 !important; }",
-            "body.ydesign-h-uniform-gaps .ydesign-horizontal .ydesign-info-wrap,",
-            "body.ydesign-h-uniform-gaps .ydesign-horizontal .ydesign-info-wrap-2 { margin-top: var(--ydesign-uniform-v-gap, 0.25em) !important; margin-bottom: 0 !important; }",
-            "body.ydesign-h-uniform-gaps .ydesign-horizontal .ydesign-genres { margin-top: var(--ydesign-uniform-v-gap, 0.25em) !important; margin-bottom: 0 !important; }",
-            "body.ydesign-h-uniform-gaps .ydesign-horizontal .ydesign-slogan { margin-top: var(--ydesign-uniform-v-gap, 0.25em) !important; margin-bottom: 0 !important; }",
-            "",
-            "/* ОПИС ПІД ГОРИЗОНТАЛЬНОЮ КАРТКОЮ */",
-            ".ydesign-desc-under {",
-            "    position: relative; z-index: 10; width: 100%;",
-            "    font-size: calc(var(--ydesign-desc-size-val, 0.85) * 1em) !important;",
-            "    color: rgba(255,255,255,0.75); margin-top: 0.5em; text-align: left; line-height: 1.35;",
-            "    text-shadow: 0 1px 3px rgba(0,0,0,0.8); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;",
-            "    height: calc(1.35em * 3) !important; ",
-            "}",
-            "",
-            "/* ВИДИМІСТЬ ЕЛЕМЕНТІВ (V) */",
-            "body.ydesign-v-hide-year .ydesign-vertical .ydesign-badge-year { display: none !important; }",
-            "body.ydesign-v-hide-seasons .ydesign-vertical .ydesign-badge-seasons { display: none !important; }",
-            "body.ydesign-v-hide-ua .ydesign-vertical .ydesign-badge-ua { display: none !important; }",
-            "body.ydesign-v-hide-age .ydesign-vertical .ydesign-badge-age { display: none !important; }",
-            "body.ydesign-v-hide-slogan .ydesign-vertical .ydesign-slogan { display: none !important; }",
-            "body.ydesign-v-hide-add-title .ydesign-vertical .ydesign-add-title { display: none !important; }",
-            "body.ydesign-v-hide-genres .ydesign-vertical .ydesign-genres { display: none !important; }",
-            "",
-            "/* ВИДИМІСТЬ ЕЛЕМЕНТІВ (H) */",
-            "body.ydesign-h-hide-year .ydesign-horizontal .ydesign-badge-year { display: none !important; }",
-            "body.ydesign-h-hide-seasons .ydesign-horizontal .ydesign-badge-seasons { display: none !important; }",
-            "body.ydesign-h-hide-ua .ydesign-horizontal .ydesign-badge-ua { display: none !important; }",
-            "body.ydesign-h-hide-age .ydesign-horizontal .ydesign-badge-age { display: none !important; }",
-            "body.ydesign-h-hide-slogan .ydesign-horizontal .ydesign-slogan { display: none !important; }",
-            "body.ydesign-h-hide-add-title .ydesign-horizontal .ydesign-add-title { display: none !important; }",
-            "body.ydesign-h-hide-genres .ydesign-horizontal .ydesign-genres { display: none !important; }",
-            "body.ydesign-h-hide-desc .ydesign-horizontal .ydesign-desc-under { display: none !important; }",
-            "",
-            "body[data-ydesign-logo='text'] .ydesign-logo-img { display: none !important; }",
-            "body[data-ydesign-logo='text'] .ydesign-fallback-text { display: flex !important; }",
-            "body[data-ydesign-logo='logo'] .ydesign-fallback-text { display: none !important; }",
-            "",
-            "/* =========================================================================",
-            "   РЕДИЗАЙН СЕРІЙ: БЕЗПЕЧНІ ВІДСТУПИ, ВІДСУТНІСТЬ ЗРІЗАННЯ ТА ТІНЕЙ",
-            "   ========================================================================= */",
-            ".explorer.ydesign-has-series .online-prestige.online-prestige-watched.ydesign-empty-history {",
-            "    display: none !important; pointer-events: none !important; visibility: hidden !important;",
-            "    height: 0 !important; margin: 0 !important; padding: 0 !important;",
-            "}",
-            "",
-            "/* ВИМКНЕННЯ ГРАДІЄНТІВ ТА МАСОК СКРОЛУ */",
-            ".explorer.ydesign-has-series .scroll--mask {",
-            "    -webkit-mask-image: none !important;",
-            "    mask-image: none !important;",
-            "}",
-            ".explorer.ydesign-has-series .scroll--mask::before,",
-            ".explorer.ydesign-has-series .scroll--mask::after,",
-            ".explorer.ydesign-has-series .scroll::before,",
-            ".explorer.ydesign-has-series .scroll::after {",
-            "    display: none !important; content: none !important;",
-            "}",
-            "",
-            "body.ydesign-hide-left-column .explorer.ydesign-has-series .explorer__left {",
-            "    display: none !important;",
-            "}",
-            "",
-            "body.ydesign-hide-left-column .explorer.ydesign-has-series .explorer__files,",
-            ".explorer.ydesign-has-series .explorer__files {",
-            "    width: 100% !important; flex: 1 1 100% !important; max-width: 100% !important;",
-            "    padding: 0 !important;",
-            "    box-sizing: border-box !important;",
-            "}",
-            ".explorer.ydesign-has-series .explorer__files-head {",
-            "    padding: 8px 28px 0 28px !important;",
-            "    margin: 0 !important;",
-            "    display: flex !important;",
-            "    align-items: center !important;",
-            "    flex-wrap: wrap !important;",
-            "    gap: 10px !important;",
-            "    width: 100% !important;",
-            "    box-sizing: border-box !important;",
-            "}",
-            ".explorer.ydesign-has-series .explorer__files-body {",
-            "    margin: 0 !important; padding: 0 !important;",
-            "}",
-            ".explorer.ydesign-has-series .scroll {",
-            "    overflow-x: visible !important;",
-            "    margin: 0 !important; padding: 0 !important;",
-            "}",
-            ".explorer.ydesign-has-series .scroll .scroll__content,",
-            ".explorer.ydesign-has-series .scroll--mask .scroll__content,",
-            ".explorer.ydesign-has-series .scroll__content {",
-            "    padding-top: 6px !important;",
-            "    padding-bottom: 0px !important; /* Мінімальний відступ знизу */",
-            "    padding-left: 10px !important;   /* Безпечний бічний відступ проти зрізання */",
-            "    padding-right: 10px !important;  /* Безпечний бічний відступ проти зрізання */",
-            "    margin: 0 !important;",
-            "    box-sizing: border-box !important;",
-            "}",
-            ".explorer.ydesign-has-series .explorer__files .scroll__body {",
-            "    padding: 0 !important; margin: 0 !important;",
-            "}",
-            "",
-            ".ydesign-series-active .online-prestige.online-prestige--full {",
-            "    display: inline-block !important; vertical-align: top !important;",
-            "    margin: 8px 12px !important; position: relative !important; height: auto !important;",
-            "    border-radius: 0.85em !important; overflow: hidden !important; background-color: #1a1a1a !important;",
-            "    box-sizing: border-box !important;",
-            "    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;",
-            "    border: none !important; outline: none !important; ",
-            "    box-shadow: none !important; /* Прибрано тінь з неактивних карток */",
-            "    width: calc(var(--ydesign-series-width, 50%) - 24px) !important; cursor: pointer !important; pointer-events: auto !important;",
-            "}",
-            ".ydesign-series-active .online-prestige.online-prestige--full::before {",
-            "    content: ''; display: block !important; padding-top: 56.25% !important; ",
-            "}",
-            "",
-            "/* ФОКУС КАРТКИ СЕРІЇ: ЧИСТА БІЛА РАМКА БЕЗ ЧОРНОЇ ТІНІ */",
-            ".ydesign-series-active .online-prestige.online-prestige--full.focus {",
-            "    transform: scale(1.035) translateZ(0) !important;",
-            "    box-shadow: 0 0 0 3.5px #ffffff !important; /* Тільки біла рамка */",
-            "    z-index: 50 !important;",
-            "}",
-            "body.is--touch .ydesign-series-active .online-prestige.online-prestige--full.focus {",
-            "    transform: none !important;",
-            "    box-shadow: none !important;",
-            "}",
-            "",
-            ".ydesign-series-active .online-prestige.online-prestige--full .online-prestige__img {",
-            "    position: absolute !important; top: 0 !important; left: 0 !important;",
-            "    width: 100% !important; height: 100% !important; z-index: 1 !important; border-radius: 0 !important; pointer-events: none !important;",
-            "}",
-            ".ydesign-series-active .online-prestige.online-prestige--full .online-prestige__img img {",
-            "    width: 100% !important; height: 100% !important; object-fit: cover !important; opacity: 1 !important; pointer-events: none !important;",
-            "}",
-            "",
-            "/* СВІТЛИЙ ГРАДІЄНТ ТІЛЬКИ ЗНИЗУ */",
-            ".ydesign-series-active .online-prestige.online-prestige--full .ydesign-series-shade {",
-            "    position: absolute !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;",
-            "    background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 35%, transparent 65%) !important;",
-            "    z-index: 2 !important; pointer-events: none !important; transition: background 0.3s ease !important;",
-            "}",
-            "",
-            ".ydesign-series-pill {",
-            "    display: inline-flex !important; align-items: center !important; justify-content: center !important;",
-            "    height: 1.85em !important; min-height: 1.85em !important; max-height: 1.85em !important; padding: 0 0.55em !important;",
-            "    box-sizing: border-box !important; font-size: calc(var(--ydesign-series-badge-size-val, 0.8) * 1em) !important;",
-            "    font-weight: 600 !important; color: #ffffff !important; text-shadow: none !important; box-shadow: none !important;",
-            "    white-space: nowrap !important; line-height: 1.1 !important; text-align: center !important; vertical-align: middle !important;",
-            "    border: 1px solid transparent !important; background: transparent !important;",
-            "    border-radius: var(--ydesign-series-badge-radius, 50px) !important; pointer-events: none !important; overflow: visible !important;",
-            "}",
-            "",
-            "body.ydesign-series-shape-pill { --ydesign-series-badge-radius: 50px; }",
-            "body.ydesign-series-shape-rounded { --ydesign-series-badge-radius: 0.35em; }",
-            "body.ydesign-series-shape-square { --ydesign-series-badge-radius: 0.15em; }",
-            "",
-            "body.ydesign-series-glass-pill .ydesign-series-pill {",
-            "    background: rgba(255, 255, 255, 0.12) !important;",
-            "    backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important; box-shadow: none !important;",
-            "}",
-            "body.ydesign-series-border-badges .ydesign-series-pill { border-color: rgba(255, 255, 255, 0.45) !important; }",
-            "",
-            ".ydesign-series-top-left {",
-            "    position: absolute !important; top: 10px !important; left: 12px !important; z-index: 5 !important;",
-            "    display: flex !important; align-items: center !important; gap: 6px !important; pointer-events: none !important; overflow: visible !important;",
-            "}",
-            ".ydesign-series-top-right {",
-            "    position: absolute !important; top: 10px !important; right: 12px !important; z-index: 5 !important;",
-            "    display: flex !important; align-items: center !important; gap: 6px !important; pointer-events: none !important; overflow: visible !important;",
-            "}",
-            ".ydesign-series-bottom-left {",
-            "    position: absolute !important; bottom: calc(1.15em + 8px) !important; left: 12px !important; right: 80px !important; z-index: 5 !important;",
-            "    display: flex !important; flex-direction: column !important; align-items: flex-start !important; gap: 5px !important;",
-            "    max-width: calc(100% - 92px) !important; overflow: visible !important; pointer-events: none !important;",
-            "}",
-            ".ydesign-series-bottom-right {",
-            "    position: absolute !important; bottom: calc(1.15em + 8px) !important; right: 12px !important; z-index: 5 !important;",
-            "    display: flex !important; align-items: center !important; pointer-events: none !important; overflow: visible !important;",
-            "}",
-            "",
-            ".ydesign-series-voice-wrap { max-width: 100% !important; display: flex !important; overflow: visible !important; pointer-events: none !important; }",
-            ".ydesign-series-voice-badge {",
-            "    color: #ffffff !important; font-weight: 600 !important; max-width: 100% !important;",
-            "    overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; pointer-events: none !important;",
-            "}",
-            ".ydesign-series-date { font-weight: 500 !important; color: #ffffff !important; opacity: 0.95 !important; pointer-events: none !important; }",
-            ".ydesign-series-rate { color: #ffffff !important; font-weight: 700 !important; pointer-events: none !important; }",
-            "",
-            ".ydesign-series-active .online-prestige.online-prestige--full .online-prestige__title {",
-            "    font-size: calc(var(--ydesign-series-title-size-val, 0.9) * 1em) !important; font-weight: 600 !important; line-height: 1.25 !important;",
-            "    color: #ffffff !important; text-shadow: 0 2px 4px rgba(0,0,0,0.95) !important; margin: 0 !important; padding: 0 !important;",
-            "    white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; width: 100% !important; pointer-events: none !important;",
-            "}",
-            "",
-            ".ydesign-series-active .online-prestige.online-prestige--full .online-prestige__timeline {",
-            "    position: absolute !important; bottom: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important;",
-            "    height: 1.15em !important; margin: 0 !important; z-index: 12 !important;",
-            "    background: rgba(255, 255, 255, 0.22) !important; backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important;",
-            "    border-radius: 0 0 0.85em 0.85em !important; overflow: hidden !important; display: block !important; pointer-events: none !important;",
-            "}",
-            ".ydesign-series-active .online-prestige.online-prestige--full .online-prestige__timeline .time-line {",
-            "    width: 100% !important; height: 100% !important; background: transparent !important; margin: 0 !important; border-radius: 0 !important;",
-            "    position: absolute !important; top: 0 !important; left: 0 !important; z-index: 1 !important; pointer-events: none !important;",
-            "}",
-            ".ydesign-series-active .online-prestige.online-prestige--full .online-prestige__timeline .time-line > div {",
-            "    height: 100% !important; border-radius: 0 !important; background: #ffffff !important;",
-            "    box-shadow: 0 0 8px rgba(255,255,255,0.7) !important; transition: width 0.3s ease !important; pointer-events: none !important;",
-            "}",
-            ".ydesign-series-percent-text {",
-            "    position: absolute !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;",
-            "    width: 100% !important; height: 100% !important; display: flex !important; align-items: center !important; justify-content: center !important;",
-            "    font-size: 0.8em !important; font-weight: 500 !important; color: #000000 !important; text-shadow: none !important; z-index: 20 !important; pointer-events: none !important; line-height: 1 !important;",
-            "}"
+            ".ydesign-active .ydesign-card .card__title {display: none !important;}",
+            ".ydesign-active .ydesign-card .card__age {display: none !important;}",
+            ".ydesign-active .ydesign-card .card__vote {display: none !important;}",
+            ".ydesign-active .items-line:not(.vinyl-line) .items-cards {display: flex;flex-wrap: nowrap;}",
+            "body:not(.stremio-hybrid).ydesign-active .items-line:not(.vinyl-line) .items-cards {gap: var(--ydesign-card-gap, 0.8em);padding-bottom: 0;}",
+            ".ydesign-active .items-line:not(.vinyl-line) .scroll__body {display: flex;flex-wrap: nowrap;}",
+            "body:not(.stremio-hybrid).ydesign-active .items-line:not(.vinyl-line) .scroll__body {gap: var(--ydesign-card-gap, 0.8em);padding-bottom: 0;}",
+            ".ydesign-active .ydesign-card {position: relative;overflow: visible;background-color: transparent !important;border: none !important;flex: 0 0 auto;cursor: pointer;}",
+            "body:not(.stremio-hybrid).ydesign-active .ydesign-card {transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);transform: translateZ(0);backface-visibility: hidden;box-shadow: none !important;}",
+            ".ydesign-active .ydesign-card.focus {z-index: 20;}",
+            "body:not(.stremio-hybrid).ydesign-active .ydesign-card.focus {transform: scale(1.045) translateZ(0);box-shadow: none !important;}",
+            "body:not(.stremio-hybrid).ydesign-active .ydesign-card.focus .card__view {box-shadow: 0 0 0 4px #ffffff !important;}",
+            "body:not(.stremio-hybrid).is--touch .ydesign-active .ydesign-card.focus {transform: none !important;}",
+            "body:not(.stremio-hybrid).is--touch .ydesign-active .ydesign-card.focus .card__view {box-shadow: none !important;}",
+            ".ydesign-active .ydesign-card .card__view {position: relative;top: 0;left: 0;right: 0;bottom: 0;background-color: #1a1a1a;overflow: hidden;}",
+            "body:not(.stremio-hybrid).ydesign-active .ydesign-card .card__view {width: 100%;height: 0 !important;border-radius: 0.85em !important;box-shadow: 0 0 0 4px transparent;transition: background-color 0.4s ease, box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);}",
+            "body:not(.stremio-hybrid).ydesign-active .ydesign-card.ydesign-vertical .card__view {padding-bottom: 177.77% !important;}",
+            "@media (min-width: 769px) {.ydesign-active .card.ydesign-vertical {width: calc(100% / var(--ydesign-grid-items-v, 5));height: auto !important;}",
+            ".ydesign-active .items-line:not(.vinyl-line) .card.ydesign-vertical {width: 18.5vw;}}",
+            "@media (max-width: 768px) {.ydesign-active .card.ydesign-vertical {width: calc(100% / 2);height: auto !important;}",
+            ".ydesign-active .items-line:not(.vinyl-line) .card.ydesign-vertical {width: 46vw;}}",
+            ".ydesign-img-layer {position: absolute;top: 0;left: 0;width: 100%;height: 100%;background-color: #1a1a1a;background-image: url(\"./img/img_load.svg\");background-size: cover !important;background-repeat: no-repeat;background-position: center center !important;}",
+            ".ydesign-img-layer::after {content: \"\";position: absolute;top: 0;left: 0;width: 100%;height: 100%;background-image: var(--loaded-bg, none);background-size: cover !important;background-repeat: no-repeat;background-position: center center !important;opacity: 0;z-index: 1;}",
+            "body:not(.stremio-hybrid) .ydesign-img-layer::after {transition: opacity 0.25s ease-in-out;}",
+            ".ydesign-img-layer.loaded::after {opacity: 1;}",
+            ".ydesign-gradient-layer {position: absolute;bottom: 0;left: 0;width: 100%;height: 60%;pointer-events: none;z-index: 2;}",
+            ".ydesign-content-layer {position: absolute;bottom: 0;left: 0;width: 100%;height: 100%;display: flex;flex-direction: column;justify-content: flex-end;align-items: stretch;padding: 1.2em 0.8em var(--ydesign-content-pb, 0.3em) 0.8em;box-sizing: border-box;z-index: 3;pointer-events: none;}",
+            ".ydesign-logo-container {display: flex;align-items: flex-end;margin-bottom: var(--ydesign-logo-mb, 1.2em) !important;width: 100%;height: var(--ydesign-logo-h, 35%);max-height: var(--ydesign-logo-h, 35%);flex-shrink: 0;justify-content: var(--ydesign-align-logo, center);position: relative;z-index: 10;}",
+            ".ydesign-logo-container img {max-width: var(--ydesign-logo-w, 80%);max-height: 100%;height: auto;width: auto;object-fit: contain;object-position: bottom var(--ydesign-text-logo, center);filter: drop-shadow(0 2px 6px rgba(0,0,0,0.85));}",
+            ".ydesign-text-title {width: var(--ydesign-logo-w, 100%);max-height: 100%;display: flex;align-items: flex-end;justify-content: var(--ydesign-align-logo, center);font-size: calc(var(--ydesign-title-size-val, 1.2) * 1em) !important;font-weight: 800;color: #fff;text-align: var(--ydesign-text-logo, center);text-shadow: 0 2px 4px rgba(0,0,0,0.95);line-height: 1.25;padding-bottom: 0.15em;}",
+            "body .ydesign-card.ydesign-vertical .ydesign-add-title.ydesign-local-title {display: -webkit-box !important;-webkit-line-clamp: 2;-webkit-box-orient: vertical;white-space: normal !important;overflow: hidden;font-size: .9em !important;font-weight: 700;line-height: 1.3 !important;min-height: 0 !important;text-align: left !important;margin: 0 0 .4em !important;text-shadow: 0 1px 6px rgba(0,0,0,.4) !important;}",
+            ".ydesign-add-title {width: 100%;font-size: calc(var(--ydesign-add-title-size-eff, 0.9) * 1em) !important;color: rgba(255, 255, 255, 0.9);font-weight: 600;font-style: italic;text-align: var(--ydesign-text-add-title, center);white-space: nowrap;overflow: hidden;text-overflow: ellipsis;line-height: 1.35 !important;padding: 0.1em 0 0.25em 0 !important;margin-left: 0 !important;box-sizing: border-box !important;min-height: calc(var(--ydesign-add-title-size-eff, 0.9) * 1.55em);margin-top: 0 !important;margin-bottom: var(--ydesign-add-title-mb, 0.3em) !important;text-shadow: none !important;}",
+            ".ydesign-slogan {width: 100%;font-size: calc(var(--ydesign-slogan-size-eff, 0.85) * 1em) !important;color: #fff;text-align: var(--ydesign-text-slogan, center);margin: var(--ydesign-slogan-padding, 0.3em) 0 0 0 !important;padding: 0.1em 0.35em !important;box-sizing: border-box !important;line-height: 1.35 !important;font-weight: 500;text-shadow: none !important;display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;min-height: calc(var(--ydesign-slogan-size-eff, 0.85) * 1.45em);}",
+            ".ydesign-info-wrap {display: flex;width: 100%;overflow: visible !important;padding: 0 !important;margin: 0 !important;}",
+            "body.ydesign-v-badges-one-row .ydesign-vertical .ydesign-info-wrap {display: flex;flex-direction: row;flex-wrap: wrap !important;align-content: flex-start !important;align-items: center !important;justify-content: var(--ydesign-align-badges, center);column-gap: var(--ydesign-badges-gap, 0.15em) !important;row-gap: 50em !important;height: 2.15em !important;max-height: 2.15em !important;min-height: 2.15em !important;line-height: 2.15em !important;padding: 2px 0 !important;box-sizing: border-box !important;margin: 0 !important;overflow: hidden !important;clip-path: none !important;}",
+            ".ydesign-vertical .ydesign-info-wrap {flex-direction: column;align-items: var(--ydesign-align-badges, center) !important;height: auto !important;max-height: none !important;overflow: visible !important;gap: var(--ydesign-badge-rows-gap, 0.3em) !important;padding: 0 !important;margin: 0 !important;}",
+            ".ydesign-vertical .ydesign-badges {display: flex !important;flex: 0 0 auto !important;flex-wrap: wrap !important;align-content: flex-start !important;align-items: center !important;column-gap: var(--ydesign-badges-gap, 0.15em) !important;row-gap: var(--ydesign-v-badge-rows-gap, 0.3em) !important;justify-content: var(--ydesign-align-badges, center) !important;width: 100% !important;height: auto !important;max-height: none !important;min-height: 1.85em !important;line-height: normal !important;padding: 2px 0 !important;box-sizing: border-box !important;margin: 0 !important;overflow: visible !important;clip-path: none !important;position: relative !important;z-index: 12 !important;visibility: visible !important;opacity: 1 !important;}",
+            ".ydesign-vertical .ydesign-ratings {display: flex !important;flex: 0 0 auto !important;flex-wrap: wrap !important;align-content: flex-start !important;align-items: center !important;column-gap: var(--ydesign-badges-gap, 0.15em) !important;row-gap: var(--ydesign-v-badge-rows-gap, 0.3em) !important;justify-content: var(--ydesign-align-badges, center) !important;width: 100% !important;height: auto !important;max-height: none !important;min-height: 1.85em !important;line-height: normal !important;padding: 2px 0 !important;box-sizing: border-box !important;margin: 0 !important;overflow: visible !important;clip-path: none !important;position: relative !important;z-index: 12 !important;visibility: visible !important;opacity: 1 !important;}",
+            ".ydesign-vertical .ydesign-genres {display: flex !important;flex: 0 0 auto !important;flex-wrap: wrap !important;align-content: flex-start !important;align-items: center !important;column-gap: var(--ydesign-badges-gap, 0.15em) !important;row-gap: var(--ydesign-v-badge-rows-gap, 0.3em) !important;justify-content: var(--ydesign-align-badges, center) !important;width: 100% !important;height: auto !important;max-height: none !important;min-height: 1.85em !important;line-height: normal !important;padding: 2px 0 !important;box-sizing: border-box !important;margin: 0 !important;overflow: visible !important;clip-path: none !important;position: relative !important;z-index: 12 !important;visibility: visible !important;opacity: 1 !important;}",
+            ".ydesign-vertical .ydesign-genres {margin-top: var(--ydesign-genres-gap, 0em) !important;margin-bottom: var(--ydesign-genres-gap, 0em) !important;}",
+            "body.ydesign-v-badges-one-row .ydesign-vertical .ydesign-ratings {display: flex !important;flex-wrap: wrap !important;align-content: flex-start !important;width: auto !important;height: 2.15em !important;max-height: 2.15em !important;min-height: 2.15em !important;line-height: 2.15em !important;margin: 0 !important;padding: 2px 0 !important;box-sizing: border-box !important;flex-shrink: 0 !important;column-gap: var(--ydesign-badges-gap, 0.15em) !important;row-gap: 50em !important;overflow: hidden !important;}",
+            ".ydesign-badges {font-size: 1em !important;}",
+            ".ydesign-ratings {font-size: 1em !important;}",
+            ".ydesign-genres {font-size: 1em !important;}",
+            ".ydesign-badge {display: inline-flex !important;align-items: center !important;justify-content: center !important;box-sizing: border-box !important;height: 1.85em !important;min-height: 1.85em !important;max-height: 1.85em !important;line-height: 1.1 !important;border: 1px solid transparent !important;background: transparent !important;padding: 0 0.50em !important;text-shadow: none !important;white-space: nowrap !important;flex-shrink: 0 !important;text-align: center !important;vertical-align: middle !important;border-radius: var(--ydesign-badge-radius, 50px) !important;max-width: 100% !important;overflow: visible !important;}",
+            "body:not(.stremio-hybrid) .ydesign-badge {box-shadow: none !important;}",
+            ".ydesign-genre-badge {display: inline-flex !important;align-items: center !important;justify-content: center !important;box-sizing: border-box !important;height: 1.85em !important;min-height: 1.85em !important;max-height: 1.85em !important;line-height: 1.1 !important;border: 1px solid transparent !important;background: transparent !important;padding: 0 0.50em !important;text-shadow: none !important;white-space: nowrap !important;flex-shrink: 0 !important;text-align: center !important;vertical-align: middle !important;border-radius: var(--ydesign-badge-radius, 50px) !important;max-width: 100% !important;overflow: visible !important;}",
+            "body:not(.stremio-hybrid) .ydesign-genre-badge {box-shadow: none !important;}",
+            ".ydesign-rating {display: inline-flex !important;align-items: center !important;justify-content: center !important;box-sizing: border-box !important;height: 1.85em !important;min-height: 1.85em !important;max-height: 1.85em !important;line-height: 1.1 !important;border: 1px solid transparent !important;background: transparent !important;padding: 0 0.50em !important;text-shadow: none !important;white-space: nowrap !important;flex-shrink: 0 !important;text-align: center !important;vertical-align: middle !important;border-radius: var(--ydesign-badge-radius, 50px) !important;max-width: 100% !important;overflow: visible !important;}",
+            "body:not(.stremio-hybrid) .ydesign-rating {box-shadow: none !important;}",
+            ".ydesign-badge-year {font-size: calc(var(--ydesign-year-size-val, 0.8) * 1em) !important;font-weight: 700 !important;color: #fff !important;}",
+            ".ydesign-badge-age {font-size: calc(var(--ydesign-age-size-val, 0.8) * 1em) !important;font-weight: 700 !important;color: #fff !important;}",
+            ".ydesign-badge-seasons {font-size: calc(var(--ydesign-seasons-size-val, 0.8) * 1em) !important;font-weight: 700 !important;color: #fff !important;}",
+            ".ydesign-badge-ua {font-size: calc(var(--ydesign-ua-size-val, 0.8) * 1em) !important;font-weight: 700 !important;color: #fff !important;}",
+            ".ydesign-genre-badge {font-size: calc(var(--ydesign-genres-size-val, 0.8) * 1em) !important;font-weight: 600 !important;color: rgba(255,255,255,0.95) !important;}",
+            ".ydesign-rating {font-size: calc(var(--ydesign-rating-size-val, 0.8) * 1em) !important;font-weight: 700 !important;color: #fff !important;gap: 0.25em !important;}",
+            "body.ydesign-v-uniform-badges .ydesign-vertical .ydesign-badge {font-size: calc(var(--ydesign-badge-size-val, 0.8) * 1em) !important;}",
+            "body.ydesign-v-uniform-badges .ydesign-vertical .ydesign-genre-badge {font-size: calc(var(--ydesign-badge-size-val, 0.8) * 1em) !important;}",
+            "body.ydesign-v-uniform-badges .ydesign-vertical .ydesign-rating {font-size: calc(var(--ydesign-badge-size-val, 0.8) * 1em) !important;}",
+            "body.ydesign-shape-pill {--ydesign-badge-radius: 50px;}",
+            "body.ydesign-shape-rounded {--ydesign-badge-radius: 0.35em;}",
+            "body.ydesign-shape-square {--ydesign-badge-radius: 0.15em;}",
+            "body.ydesign-glass-pill .ydesign-badge {background: rgba(255, 255, 255, 0.1) !important;}",
+            "body:not(.stremio-hybrid).ydesign-glass-pill .ydesign-badge {backdrop-filter: blur(6px) !important;-webkit-backdrop-filter: blur(6px) !important;box-shadow: none !important;}",
+            "body.ydesign-glass-pill .ydesign-genre-badge {background: rgba(255, 255, 255, 0.1) !important;}",
+            "body:not(.stremio-hybrid).ydesign-glass-pill .ydesign-genre-badge {backdrop-filter: blur(6px) !important;-webkit-backdrop-filter: blur(6px) !important;box-shadow: none !important;}",
+            "body.ydesign-glass-pill .ydesign-rating {background: rgba(255, 255, 255, 0.1) !important;}",
+            "body:not(.stremio-hybrid).ydesign-glass-pill .ydesign-rating {backdrop-filter: blur(6px) !important;-webkit-backdrop-filter: blur(6px) !important;box-shadow: none !important;}",
+            "body.ydesign-active .ydesign-glass-pill .ydesign-badge-ua {background: linear-gradient(135deg, #0057b7 0%, #0057b7 49%, #ffd700 51%, #ffd700 100%) !important;background-color: #0057b7 !important;background-image: linear-gradient(135deg, #0057b7 0%, #0057b7 49%, #ffd700 51%, #ffd700 100%) !important;color: #ffffff !important;font-weight: 800 !important;}",
+            "body:not(.stremio-hybrid).ydesign-active .ydesign-glass-pill .ydesign-badge-ua {box-shadow: none !important;-webkit-backdrop-filter: none !important;backdrop-filter: none !important;}",
+            "body.ydesign-active .ydesign-badge-ua {background: linear-gradient(135deg, #0057b7 0%, #0057b7 49%, #ffd700 51%, #ffd700 100%) !important;background-color: #0057b7 !important;background-image: linear-gradient(135deg, #0057b7 0%, #0057b7 49%, #ffd700 51%, #ffd700 100%) !important;color: #ffffff !important;font-weight: 800 !important;}",
+            "body:not(.stremio-hybrid).ydesign-active .ydesign-badge-ua {box-shadow: none !important;-webkit-backdrop-filter: none !important;backdrop-filter: none !important;}",
+            ".ydesign-rating img {width: 1.15em !important;height: 1.15em !important;object-fit: contain !important;display: block !important;filter: saturate(var(--ydesign-ratings-saturate, 100%)) !important;}",
+            "body.ydesign-color-age .ydesign-age-18 {color: #ff5252 !important;}",
+            "body.ydesign-color-age .ydesign-age-16 {color: #ffab40 !important;}",
+            "body.ydesign-color-age .ydesign-age-14 {color: #ffd740 !important;}",
+            "body.ydesign-color-age .ydesign-age-13 {color: #ffd740 !important;}",
+            "body.ydesign-color-age .ydesign-age-6 {color: #69f0ae !important;}",
+            "body.ydesign-color-age .ydesign-age-0 {color: #69f0ae !important;}",
+            "body.ydesign-color-ua .ydesign-badge-ua {background: linear-gradient(135deg, #0057b7 0%, #0057b7 49%, #ffd700 51%, #ffd700 100%) !important;background-color: #0057b7 !important;color: #ffffff !important;font-weight: 800 !important;}",
+            "body:not(.stremio-hybrid).ydesign-color-ua .ydesign-badge-ua {box-shadow: none !important;}",
+            ".ydesign-vertical .ydesign-badge-ua {background: linear-gradient(135deg, #0057b7 0%, #0057b7 49%, #ffd700 51%, #ffd700 100%) !important;background-color: #0057b7 !important;color: #ffffff !important;font-weight: 800 !important;}",
+            "body:not(.stremio-hybrid) .ydesign-vertical .ydesign-badge-ua {box-shadow: none !important;}",
+            "body.ydesign-border-year .ydesign-badge-year {border-color: rgba(255,255,255,0.6) !important;}",
+            "body.ydesign-border-seasons .ydesign-badge-seasons {border-color: rgba(255,255,255,0.6) !important;}",
+            "body.ydesign-border-ua .ydesign-badge-ua {border-color: rgba(255,255,255,0.6) !important;}",
+            "body.ydesign-border-genres .ydesign-genre-badge {border-color: rgba(255,255,255,0.4) !important;}",
+            "body.ydesign-border-ratings .ydesign-rating {border-color: rgba(255,255,255,0.6) !important;}",
+            "body.ydesign-border-age .ydesign-badge-age {border-color: rgba(255,255,255,0.6) !important;}",
+            "body.ydesign-border-age.ydesign-color-age .ydesign-age-18 {border-color: rgba(244, 67, 54, 0.85) !important;}",
+            "body.ydesign-border-age.ydesign-color-age .ydesign-age-16 {border-color: rgba(255, 152, 0, 0.85) !important;}",
+            "body.ydesign-border-age.ydesign-color-age .ydesign-age-14 {border-color: rgba(255, 215, 64, 0.85) !important;}",
+            "body.ydesign-border-age.ydesign-color-age .ydesign-age-13 {border-color: rgba(255, 215, 64, 0.85) !important;}",
+            "body.ydesign-border-age.ydesign-color-age .ydesign-age-6 {border-color: rgba(105, 240, 174, 0.85) !important;}",
+            "body.ydesign-border-age.ydesign-color-age .ydesign-age-0 {border-color: rgba(105, 240, 174, 0.85) !important;}",
+            ".ydesign-card-notch {position: absolute !important;top: 0 !important;left: 50% !important;z-index: 25 !important;display: inline-flex !important;align-items: center !important;justify-content: center !important;gap: 0.4em !important;padding: 0.18em 0.6em !important;box-sizing: border-box !important;white-space: nowrap !important;pointer-events: none !important;max-width: 92% !important;overflow: hidden !important;margin: 0 !important;margin-top: 0 !important;border-top: none !important;border-radius: 0 0 0.65em 0.65em !important;border-top-left-radius: 0 !important;border-top-right-radius: 0 !important;border-bottom-left-radius: 0.65em !important;border-bottom-right-radius: 0.65em !important;}",
+            "body:not(.stremio-hybrid) .ydesign-card-notch {transform: translateX(-50%) !important;transition: all 0.2s ease !important;}",
+            "body.ydesign-notch-hide .ydesign-card-notch {display: none !important;}",
+            "body.ydesign-notch-bg .ydesign-card-notch {background: rgba(255, 255, 255, 0.12) !important;}",
+            "body:not(.stremio-hybrid).ydesign-notch-bg .ydesign-card-notch {backdrop-filter: blur(6px) !important;-webkit-backdrop-filter: blur(6px) !important;}",
+            "body:not(.ydesign-notch-bg) .ydesign-card-notch {background: transparent !important;}",
+            "body:not(.stremio-hybrid):not(.ydesign-notch-bg) .ydesign-card-notch {backdrop-filter: none !important;-webkit-backdrop-filter: none !important;}",
+            "body.ydesign-notch-border .ydesign-card-notch {border-left: 1px solid rgba(255, 255, 255, 0.6) !important;border-right: 1px solid rgba(255, 255, 255, 0.6) !important;border-bottom: 1px solid rgba(255, 255, 255, 0.6) !important;border-top: none !important;}",
+            "body:not(.ydesign-notch-border) .ydesign-card-notch {border: none !important;}",
+            ".ydesign-notch-type {font-size: var(--ydesign-notch-type-size, 0.5em) !important;font-weight: 400 !important;color: #ffffff !important;text-transform: uppercase !important;letter-spacing: 0.04em !important;line-height: 1 !important;white-space: nowrap !important;flex-shrink: 0 !important;}",
+            ".ydesign-notch-std-list {display: inline-flex !important;align-items: center !important;gap: 0.25em !important;flex-shrink: 0 !important;}",
+            ".ydesign-notch-icon {display: inline-block !important;width: var(--ydesign-notch-std-size, 0.5em) !important;height: var(--ydesign-notch-std-size, 0.5em) !important;vertical-align: middle !important;flex-shrink: 0 !important;}",
+            "body.ydesign-notch-mono .ydesign-notch-icon {color: rgba(255, 255, 255, 0.92) !important;}",
+            ".ydesign-notch-mono .ydesign-notch-icon {color: rgba(255, 255, 255, 0.92) !important;}",
+            "body:not(.ydesign-notch-mono) .ydesign-notch-icon-book {color: #ffd166 !important;}",
+            "body:not(.ydesign-notch-mono) .ydesign-notch-icon-like {color: #ff4757 !important;}",
+            "body:not(.ydesign-notch-mono) .ydesign-notch-icon-wath {color: #00d2d3 !important;}",
+            "body:not(.ydesign-notch-mono) .ydesign-notch-icon-history {color: #be95ff !important;}",
+            ".ydesign-notch-custom {font-size: var(--ydesign-notch-custom-size, 0.5em) !important;font-weight: 400 !important;color: #ffffff !important;text-transform: uppercase !important;letter-spacing: 0.04em !important;background: transparent !important;padding: 0 !important;border: none !important;border-radius: 0 !important;line-height: 1 !important;white-space: nowrap !important;flex-shrink: 0 !important;}",
+            ".ydesign-active .ydesign-card.ydesign-vertical {--ydesign-logo-h: calc(var(--ydesign-v-logo-max-h, 35) * 1%);--ydesign-logo-w: calc(var(--ydesign-v-logo-max-w, 80) * 1%);--ydesign-title-size-val: var(--ydesign-v-title-size, 1.5);--ydesign-add-title-size-eff: var(--ydesign-v-add-title-size, 0.9);--ydesign-slogan-size-eff: var(--ydesign-v-slogan-size, 0.7);--ydesign-badge-size-val: var(--ydesign-v-badge-size, 0.8);--ydesign-year-size-val: var(--ydesign-v-year-size, 0.8);--ydesign-age-size-val: var(--ydesign-v-age-size, 0.8);--ydesign-seasons-size-val: var(--ydesign-v-seasons-size, 0.8);--ydesign-ua-size-val: var(--ydesign-v-ua-size, 0.8);--ydesign-genres-size-val: var(--ydesign-v-genres-size, 0.8);--ydesign-rating-size-val: var(--ydesign-v-rating-size, 0.8);--ydesign-logo-mb: var(--ydesign-v-logo-mb, 1.2em);--ydesign-add-title-mb: var(--ydesign-v-add-title-mb, 0.3em);--ydesign-badge-rows-gap: var(--ydesign-v-badge-rows-gap, 0.3em);--ydesign-badges-gap: var(--ydesign-v-badges-gap, 0.15em);--ydesign-genres-gap: var(--ydesign-v-genres-gap, 0em);--ydesign-content-pb: var(--ydesign-v-content-pb, 0.3em);--ydesign-slogan-padding: var(--ydesign-v-slogan-padding, 0.3em);--ydesign-uniform-v-gap: var(--ydesign-v-uniform-v-gap-val, 0.25em);--ydesign-align-logo: var(--ydesign-v-align-logo-flex, center);--ydesign-text-logo: var(--ydesign-v-align-logo, center);--ydesign-text-add-title: var(--ydesign-v-align-add-title, left);--ydesign-align-badges: var(--ydesign-v-align-badges-flex, flex-start);--ydesign-align-slogan: var(--ydesign-v-align-slogan-flex, flex-start);--ydesign-text-slogan: var(--ydesign-v-align-slogan, left);}",
+            "body.ydesign-v-uniform-gaps .ydesign-vertical .ydesign-add-title {margin-top: var(--ydesign-uniform-v-gap, 0.25em) !important;margin-bottom: 0 !important;}",
+            "body.ydesign-v-uniform-gaps .ydesign-vertical .ydesign-info-wrap {margin-top: var(--ydesign-uniform-v-gap, 0.25em) !important;margin-bottom: 0 !important;}",
+            "body.ydesign-v-uniform-gaps .ydesign-vertical .ydesign-genres {margin-top: var(--ydesign-uniform-v-gap, 0.25em) !important;margin-bottom: 0 !important;}",
+            "body.ydesign-v-uniform-gaps:not(.ydesign-v-badges-one-row) .ydesign-vertical .ydesign-info-wrap {gap: var(--ydesign-uniform-v-gap, 0.25em) !important;}",
+            "body.ydesign-v-uniform-gaps:not(.ydesign-v-badges-one-row) .ydesign-vertical .ydesign-info-wrap > * + * {margin-top: 0 !important;margin-bottom: 0 !important;}",
+            "body.ydesign-v-uniform-gaps .ydesign-vertical .ydesign-slogan {margin-top: var(--ydesign-uniform-v-gap, 0.25em) !important;margin-bottom: 0 !important;}",
+            "body.ydesign-v-hide-year .ydesign-vertical .ydesign-badge-year {display: none !important;}",
+            "body.ydesign-v-hide-seasons .ydesign-vertical .ydesign-badge-seasons {display: none !important;}",
+            "body.ydesign-v-hide-ua .ydesign-vertical .ydesign-badge-ua {display: none !important;}",
+            "body.ydesign-v-hide-age .ydesign-vertical .ydesign-badge-age {display: none !important;}",
+            "body.ydesign-v-hide-slogan .ydesign-vertical .ydesign-slogan {display: none !important;}",
+            "body.ydesign-v-hide-add-title .ydesign-vertical .ydesign-add-title {display: none !important;}",
+            "body.ydesign-v-hide-genres .ydesign-vertical .ydesign-genres {display: none !important;}",
+            "body[data-ydesign-logo=\"text\"] .ydesign-logo-img {display: none !important;}",
+            "body[data-ydesign-logo=\"text\"] .ydesign-fallback-text {display: flex !important;}",
+            "body[data-ydesign-logo=\"logo\"] .ydesign-fallback-text {display: none !important;}",
+            ".explorer.ydesign-has-series .online-prestige.online-prestige-watched.ydesign-empty-history {display: none !important;pointer-events: none !important;visibility: hidden !important;height: 0 !important;margin: 0 !important;padding: 0 !important;}",
+            ".explorer.ydesign-has-series .scroll--mask {-webkit-mask-image: none !important;mask-image: none !important;}",
+            ".explorer.ydesign-has-series .scroll--mask::before {display: none !important;content: none !important;}",
+            ".explorer.ydesign-has-series .scroll--mask::after {display: none !important;content: none !important;}",
+            ".explorer.ydesign-has-series .scroll::before {display: none !important;content: none !important;}",
+            ".explorer.ydesign-has-series .scroll::after {display: none !important;content: none !important;}",
+            "body.ydesign-hide-left-column .explorer.ydesign-has-series .explorer__left {display: none !important;}",
+            "body.ydesign-hide-left-column .explorer.ydesign-has-series .explorer__files {width: 100% !important;flex: 1 1 100% !important;max-width: 100% !important;padding: 0 !important;box-sizing: border-box !important;}",
+            ".explorer.ydesign-has-series .explorer__files {width: 100% !important;flex: 1 1 100% !important;max-width: 100% !important;padding: 0 !important;box-sizing: border-box !important;}",
+            ".explorer.ydesign-has-series .explorer__files-head {padding: 8px 28px 0 28px !important;margin: 0 !important;display: flex !important;align-items: center !important;flex-wrap: wrap !important;gap: 10px !important;width: 100% !important;box-sizing: border-box !important;}",
+            ".explorer.ydesign-has-series .explorer__files-body {margin: 0 !important;padding: 0 !important;}",
+            ".explorer.ydesign-has-series .scroll {overflow-x: visible !important;margin: 0 !important;padding: 0 !important;}",
+            ".explorer.ydesign-has-series .scroll .scroll__content {padding-top: 6px !important;padding-bottom: 0px !important;padding-left: 10px !important;padding-right: 10px !important;margin: 0 !important;box-sizing: border-box !important;}",
+            ".explorer.ydesign-has-series .scroll--mask .scroll__content {padding-top: 6px !important;padding-bottom: 0px !important;padding-left: 10px !important;padding-right: 10px !important;margin: 0 !important;box-sizing: border-box !important;}",
+            ".explorer.ydesign-has-series .scroll__content {padding-top: 6px !important;padding-bottom: 0px !important;padding-left: 10px !important;padding-right: 10px !important;margin: 0 !important;box-sizing: border-box !important;}",
+            "body:not(.stremio-hybrid) .explorer.ydesign-has-series .explorer__files .scroll__body {padding: 0 !important;margin: 0 !important;}",
+            ".ydesign-series-active .online-prestige.online-prestige--full {display: inline-block !important;vertical-align: top !important;margin: 8px 12px !important;position: relative !important;height: auto !important;border-radius: 0.85em !important;overflow: hidden !important;background-color: #1a1a1a !important;box-sizing: border-box !important;border: none !important;outline: none !important;width: calc(var(--ydesign-series-width, 50%) - 24px) !important;cursor: pointer !important;pointer-events: auto !important;}",
+            "body:not(.stremio-hybrid) .ydesign-series-active .online-prestige.online-prestige--full {transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;box-shadow: none !important;}",
+            ".ydesign-series-active .online-prestige.online-prestige--full::before {content: \"\";display: block !important;padding-top: 56.25% !important;}",
+            ".ydesign-series-active .online-prestige.online-prestige--full.focus {z-index: 50 !important;}",
+            "body:not(.stremio-hybrid) .ydesign-series-active .online-prestige.online-prestige--full.focus {transform: scale(1.035) translateZ(0) !important;box-shadow: 0 0 0 3.5px #ffffff !important;}",
+            "body:not(.stremio-hybrid).is--touch .ydesign-series-active .online-prestige.online-prestige--full.focus {transform: none !important;box-shadow: none !important;}",
+            ".ydesign-series-active .online-prestige.online-prestige--full .online-prestige__img {position: absolute !important;top: 0 !important;left: 0 !important;width: 100% !important;height: 100% !important;z-index: 1 !important;border-radius: 0 !important;pointer-events: none !important;}",
+            ".ydesign-series-active .online-prestige.online-prestige--full .online-prestige__img img {width: 100% !important;height: 100% !important;object-fit: cover !important;opacity: 1 !important;pointer-events: none !important;}",
+            ".ydesign-series-active .online-prestige.online-prestige--full .ydesign-series-shade {position: absolute !important;top: 0 !important;left: 0 !important;right: 0 !important;bottom: 0 !important;background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 35%, transparent 65%) !important;z-index: 2 !important;pointer-events: none !important;}",
+            "body:not(.stremio-hybrid) .ydesign-series-active .online-prestige.online-prestige--full .ydesign-series-shade {transition: background 0.3s ease !important;}",
+            ".ydesign-series-pill {display: inline-flex !important;align-items: center !important;justify-content: center !important;height: 1.85em !important;min-height: 1.85em !important;max-height: 1.85em !important;padding: 0 0.55em !important;box-sizing: border-box !important;font-size: calc(var(--ydesign-series-badge-size-val, 0.8) * 1em) !important;font-weight: 600 !important;color: #ffffff !important;text-shadow: none !important;white-space: nowrap !important;line-height: 1.1 !important;text-align: center !important;vertical-align: middle !important;border: 1px solid transparent !important;background: transparent !important;border-radius: var(--ydesign-series-badge-radius, 50px) !important;pointer-events: none !important;overflow: visible !important;}",
+            "body:not(.stremio-hybrid) .ydesign-series-pill {box-shadow: none !important;}",
+            "body.ydesign-series-shape-pill {--ydesign-series-badge-radius: 50px;}",
+            "body.ydesign-series-shape-rounded {--ydesign-series-badge-radius: 0.35em;}",
+            "body.ydesign-series-shape-square {--ydesign-series-badge-radius: 0.15em;}",
+            "body.ydesign-series-glass-pill .ydesign-series-pill {background: rgba(255, 255, 255, 0.12) !important;}",
+            "body:not(.stremio-hybrid).ydesign-series-glass-pill .ydesign-series-pill {backdrop-filter: blur(6px) !important;-webkit-backdrop-filter: blur(6px) !important;box-shadow: none !important;}",
+            "body.ydesign-series-border-badges .ydesign-series-pill {border-color: rgba(255, 255, 255, 0.45) !important;}",
+            ".ydesign-series-top-left {position: absolute !important;top: 10px !important;left: 12px !important;z-index: 5 !important;display: flex !important;align-items: center !important;gap: 6px !important;pointer-events: none !important;overflow: visible !important;}",
+            ".ydesign-series-top-right {position: absolute !important;top: 10px !important;right: 12px !important;z-index: 5 !important;display: flex !important;align-items: center !important;gap: 6px !important;pointer-events: none !important;overflow: visible !important;}",
+            ".ydesign-series-bottom-left {position: absolute !important;bottom: calc(1.15em + 8px) !important;left: 12px !important;right: 80px !important;z-index: 5 !important;display: flex !important;flex-direction: column !important;align-items: flex-start !important;gap: 5px !important;max-width: calc(100% - 92px) !important;overflow: visible !important;pointer-events: none !important;}",
+            ".ydesign-series-bottom-right {position: absolute !important;bottom: calc(1.15em + 8px) !important;right: 12px !important;z-index: 5 !important;display: flex !important;align-items: center !important;pointer-events: none !important;overflow: visible !important;}",
+            ".ydesign-series-voice-wrap {max-width: 100% !important;display: flex !important;overflow: visible !important;pointer-events: none !important;}",
+            ".ydesign-series-voice-badge {color: #ffffff !important;font-weight: 600 !important;max-width: 100% !important;overflow: hidden !important;text-overflow: ellipsis !important;white-space: nowrap !important;pointer-events: none !important;}",
+            ".ydesign-series-date {font-weight: 500 !important;color: #ffffff !important;opacity: 0.95 !important;pointer-events: none !important;}",
+            ".ydesign-series-rate {color: #ffffff !important;font-weight: 700 !important;pointer-events: none !important;}",
+            ".ydesign-series-active .online-prestige.online-prestige--full .online-prestige__title {font-size: calc(var(--ydesign-series-title-size-val, 0.9) * 1em) !important;font-weight: 600 !important;line-height: 1.25 !important;color: #ffffff !important;text-shadow: 0 2px 4px rgba(0,0,0,0.95) !important;margin: 0 !important;padding: 0 !important;white-space: nowrap !important;overflow: hidden !important;text-overflow: ellipsis !important;width: 100% !important;pointer-events: none !important;}",
+            ".ydesign-series-active .online-prestige.online-prestige--full .online-prestige__timeline {position: absolute !important;bottom: 0 !important;left: 0 !important;right: 0 !important;width: 100% !important;height: 1.15em !important;margin: 0 !important;z-index: 12 !important;background: rgba(255, 255, 255, 0.22) !important;border-radius: 0 0 0.85em 0.85em !important;overflow: hidden !important;display: block !important;pointer-events: none !important;}",
+            "body:not(.stremio-hybrid) .ydesign-series-active .online-prestige.online-prestige--full .online-prestige__timeline {backdrop-filter: blur(6px) !important;-webkit-backdrop-filter: blur(6px) !important;}",
+            ".ydesign-series-active .online-prestige.online-prestige--full .online-prestige__timeline .time-line {width: 100% !important;height: 100% !important;background: transparent !important;margin: 0 !important;border-radius: 0 !important;position: absolute !important;top: 0 !important;left: 0 !important;z-index: 1 !important;pointer-events: none !important;}",
+            ".ydesign-series-active .online-prestige.online-prestige--full .online-prestige__timeline .time-line > div {height: 100% !important;border-radius: 0 !important;background: #ffffff !important;pointer-events: none !important;}",
+            "body:not(.stremio-hybrid) .ydesign-series-active .online-prestige.online-prestige--full .online-prestige__timeline .time-line > div {box-shadow: 0 0 8px rgba(255,255,255,0.7) !important;transition: width 0.3s ease !important;}",
+            ".ydesign-series-percent-text {position: absolute !important;top: 0 !important;left: 0 !important;right: 0 !important;bottom: 0 !important;width: 100% !important;height: 100% !important;display: flex !important;align-items: center !important;justify-content: center !important;font-size: 0.8em !important;font-weight: 500 !important;color: #000000 !important;text-shadow: none !important;z-index: 20 !important;pointer-events: none !important;line-height: 1 !important;}"
         ].join('\n');
         style.innerHTML = ydPostCss(__ydCss);
     }
@@ -3181,7 +2489,6 @@
             document.body.classList.toggle('ydesign-fx', !isLite());
             document.body.classList.toggle('ydesign-ribbons-off', !getSet('ydesign_ribbons'));
             document.body.classList.toggle('ydesign-watched-off', !getSet('ydesign_watched_mark'));
-            document.body.classList.toggle('ydesign-ambient-off', !getSet('ydesign_ambient'));
             document.body.classList.toggle('ydesign-progress-off', !getSet('ydesign_progress_marks'));
             document.body.classList.toggle('ydesign-seq-off', !getSet('ydesign_collection_mark'));
             ['default', 'netflix', 'minimal', 'warm', 'oled'].forEach(function (th) { document.body.classList.remove('ydesign-theme-' + th); });
@@ -3192,7 +2499,6 @@
             document.body.classList.add('ydesign-focus-' + (getSet('ydesign_focus_fx') || 'scale'));
             document.body.classList.toggle('ydesign-anim-off', !getSet('ydesign_card_anim'));
             document.body.classList.toggle('ydesign-trakt-chip-off', !getSet('ydesign_trakt_chip'));
-            bumpMarks();
             document.body.classList.toggle('ydesign-series-active', getSet('ydesign_series_redesign'));
             document.body.classList.toggle('ydesign-series-glass-pill', getSet('ydesign_series_glass_pill'));
             document.body.classList.toggle('ydesign-series-border-badges', getSet('ydesign_series_border_badges'));
@@ -3229,7 +2535,6 @@
 
             // Сітка
             document.documentElement.style.setProperty('--ydesign-grid-items-v', getSet('ydesign_grid_items_v'));
-            document.documentElement.style.setProperty('--ydesign-grid-items-h', getSet('ydesign_grid_items_h'));
             document.documentElement.style.setProperty('--ydesign-card-gap', getSet('ydesign_card_gap') + 'em');
             document.documentElement.style.setProperty('--ydesign-ratings-saturate', getSet('ydesign_ratings_saturate') + '%');
             document.body.classList.toggle('ydesign-sat-on', String(getSet('ydesign_ratings_saturate')) !== '100');
@@ -3296,50 +2601,8 @@
             document.documentElement.style.setProperty('--ydesign-v-align-slogan', vAlignSlogan);
 
             // ----------------- ГОРИЗОНТАЛЬНІ ПАРАМЕТРИ -----------------
-            document.body.classList.toggle('ydesign-h-uniform-badges', getSet('ydesign_h_uniform_badges', 'ydesign_uniform_badges'));
-            document.body.classList.toggle('ydesign-h-uniform-gaps', getSet('ydesign_h_uniform_v_gaps', 'ydesign_uniform_v_gaps_horz'));
 
-            document.body.classList.toggle('ydesign-h-hide-desc', !getSet('ydesign_h_show_desc', 'ydesign_show_desc_horz'));
-            document.body.classList.toggle('ydesign-h-hide-year', !getSet('ydesign_h_show_year', 'ydesign_show_year'));
-            document.body.classList.toggle('ydesign-h-hide-seasons', !getSet('ydesign_h_show_seasons', 'ydesign_show_seasons'));
-            document.body.classList.toggle('ydesign-h-hide-ua', !getSet('ydesign_h_show_ua', 'ydesign_show_ua'));
-            document.body.classList.toggle('ydesign-h-hide-age', !getSet('ydesign_h_show_age', 'ydesign_show_age'));
-            document.body.classList.toggle('ydesign-h-hide-genres', !getSet('ydesign_h_show_genres', 'ydesign_show_genres'));
-            document.body.classList.toggle('ydesign-h-hide-slogan', !getSet('ydesign_h_show_slogan', 'ydesign_show_slogan'));
-            document.body.classList.toggle('ydesign-h-hide-add-title', !getSet('ydesign_h_show_add_title', 'ydesign_show_add_title'));
 
-            document.documentElement.style.setProperty('--ydesign-h-logo-max-h', getSet('ydesign_h_logo_max_h', 'ydesign_logo_max_h'));
-            document.documentElement.style.setProperty('--ydesign-h-logo-max-w', getSet('ydesign_h_logo_max_w', 'ydesign_logo_max_w'));
-            document.documentElement.style.setProperty('--ydesign-h-title-size', getSet('ydesign_h_title_size', 'ydesign_text_title_size'));
-            document.documentElement.style.setProperty('--ydesign-h-add-title-size', getSet('ydesign_h_add_title_size', 'ydesign_text_add_title_size'));
-            document.documentElement.style.setProperty('--ydesign-h-slogan-size', getSet('ydesign_h_slogan_size', 'ydesign_text_slogan_size'));
-            document.documentElement.style.setProperty('--ydesign-h-desc-size', getSet('ydesign_h_desc_size', 'ydesign_desc_size'));
-            document.documentElement.style.setProperty('--ydesign-h-badge-size', getSet('ydesign_h_badge_size', 'ydesign_text_badge_size'));
-            document.documentElement.style.setProperty('--ydesign-h-year-size', getSet('ydesign_h_year_size', 'ydesign_text_year_size'));
-            document.documentElement.style.setProperty('--ydesign-h-age-size', getSet('ydesign_h_age_size', 'ydesign_text_age_size'));
-            document.documentElement.style.setProperty('--ydesign-h-seasons-size', getSet('ydesign_h_seasons_size', 'ydesign_text_seasons_size'));
-            document.documentElement.style.setProperty('--ydesign-h-ua-size', getSet('ydesign_h_ua_size', 'ydesign_text_ua_size'));
-            document.documentElement.style.setProperty('--ydesign-h-genres-size', getSet('ydesign_h_genres_size', 'ydesign_text_genres_size'));
-            document.documentElement.style.setProperty('--ydesign-h-rating-size', getSet('ydesign_h_rating_size', 'ydesign_text_rating_size'));
-            
-            document.documentElement.style.setProperty('--ydesign-h-logo-mb', getSet('ydesign_h_logo_mb', 'ydesign_logo_mb') + 'em');
-            document.documentElement.style.setProperty('--ydesign-h-add-title-mb', getSet('ydesign_h_add_title_mb', 'ydesign_add_title_mb') + 'em');
-            document.documentElement.style.setProperty('--ydesign-h-badge-rows-gap', getSet('ydesign_h_badge_rows_gap', 'ydesign_badge_rows_gap') + 'em');
-            document.documentElement.style.setProperty('--ydesign-h-badges-gap', getSet('ydesign_h_badges_gap', 'ydesign_badges_gap_horz') + 'em');
-            document.documentElement.style.setProperty('--ydesign-h-genres-gap', getSet('ydesign_h_genres_gap', 'ydesign_genres_gap') + 'em');
-            document.documentElement.style.setProperty('--ydesign-h-content-pb', getSet('ydesign_h_content_pb', 'ydesign_content_pb') + 'em');
-            document.documentElement.style.setProperty('--ydesign-h-slogan-padding', getSet('ydesign_h_slogan_padding', 'ydesign_slogan_padding') + 'em');
-            document.documentElement.style.setProperty('--ydesign-h-uniform-v-gap-val', getSet('ydesign_h_uniform_v_gap_val', 'ydesign_uniform_v_gap_val_horz') + 'em');
-
-            var hAlignLogo = getSet('ydesign_h_align_logo', 'ydesign_align_logo');
-            document.documentElement.style.setProperty('--ydesign-h-align-logo-flex', getFlexAlign(hAlignLogo));
-            document.documentElement.style.setProperty('--ydesign-h-align-logo', hAlignLogo);
-            document.documentElement.style.setProperty('--ydesign-h-align-add-title', getSet('ydesign_h_align_add_title', 'ydesign_align_add_title'));
-            var hAlignBadges = getSet('ydesign_h_align_badges', 'ydesign_align_badges');
-            document.documentElement.style.setProperty('--ydesign-h-align-badges-flex', getFlexAlign(hAlignBadges));
-            var hAlignSlogan = getSet('ydesign_h_align_slogan', 'ydesign_align_slogan');
-            document.documentElement.style.setProperty('--ydesign-h-align-slogan-flex', getFlexAlign(hAlignSlogan));
-            document.documentElement.style.setProperty('--ydesign-h-align-slogan', hAlignSlogan);
         } catch (e) {}
     }
 
@@ -3402,7 +2665,7 @@
         var aligns = { 'left': 'Ліворуч', 'center': 'По центру', 'right': 'Праворуч' };
         var shapes = { 'pill': 'Пігулка (Сучасний Pill Capsule)', 'rounded': 'Прямокутний скруглений (4px)', 'square': 'Прямокутний (2px)' };
 
-        var sectionKeys = ['ydesign_styles', 'ydesign_grid', 'ydesign_vertical', 'ydesign_horizontal', 'ydesign_notch', 'ydesign_badges_style', 'ydesign_fonts', 'ydesign_texts', 'ydesign_series', 'ydesign_perf'];
+        var sectionKeys = ['ydesign_styles', 'ydesign_grid', 'ydesign_vertical', 'ydesign_notch', 'ydesign_badges_style', 'ydesign_fonts', 'ydesign_texts', 'ydesign_series', 'ydesign_perf'];
         sectionKeys.forEach(function (compKey) {
             Lampa.Template.add('settings_' + compKey, '<div></div>');
         });
@@ -3431,9 +2694,8 @@
 
         var subSections = [
             { id: 'ydesign_styles', name: '🎨 Стилі, ефекти та Пресети', desc: 'Скло / Неон / Кінотеатр, ефект фокуса, анімації, готові пресети дизайну одним натиском' },
-            { id: 'ydesign_grid', name: '🎬 Відображення карток та Сітка', desc: 'Формат карток на головній/інших сторінках, кількість колонок та ліниве завантаження' },
+            { id: 'ydesign_grid', name: '🎬 Відображення карток та Сітка', desc: 'Вертикальні картки: кількість колонок та ліниве завантаження' },
             { id: 'ydesign_vertical', name: '📱 Вертикальні картки', desc: 'Окремі налаштування розмірів, логотипу, слогану, бейджів, відступів та вирівнювання' },
-            { id: 'ydesign_horizontal', name: '💻 Горизонтальні картки', desc: 'Окремі налаштування розмірів, логотипу, опису під карткою, бейджів, відступів та вирівнювання' },
             { id: 'ydesign_notch', name: '✂️ Верхні бейджі', desc: 'Верхній блок вирізу: тип (Фільм/Серіал), стандартні мітки, статус перегляду' },
             { id: 'ydesign_badges_style', name: '🏷️ Стилі бейджів та Рейтинги', desc: 'Форма пігулок, скляна підложка, рамки бейджів, кольори віку/UA, вибір рейтингів' },
             { id: 'ydesign_fonts', name: '🔤 Шрифти', desc: 'Вибір шрифтів Google Fonts для всієї програми' },
@@ -3464,19 +2726,18 @@
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_lazy_load', type: 'trigger', default: DefaultSettings.ydesign_lazy_load }, field: { name: 'Ліниве завантаження', description: 'Завантажувати додаткові дані (лого, рейтинги) тільки при появі картки на екрані' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_ua_torrents', type: 'trigger', default: DefaultSettings.ydesign_ua_torrents }, field: { name: 'UA-плашка за торентами', description: 'Додатково шукати українську озвучку через парсер Lampa (Jackett/Prowlarr/JacRed з Толокою тощо). Видимі картки перевіряються у фоні без наведення. Потрібен налаштований парсер' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_ribbons', type: 'trigger', default: DefaultSettings.ydesign_ribbons }, field: { name: 'Позначки «Новинка» / «Скоро»', description: 'Новинка — вийшло менше ніж 14 днів тому; Нова серія — серіал/аніме з серією в найближчі 14 днів; Скоро — прем’єра серіалу' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_watched_mark', type: 'trigger', default: DefaultSettings.ydesign_watched_mark }, field: { name: 'Позначка «Переглянуто»', description: 'Постер тьмяніє й отримує галочку (фільм з Історії, від 90% перегляду або за відміткою Lampa; серіал — якщо переглянуто останню серію)' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_ambient', type: 'trigger', default: DefaultSettings.ydesign_ambient }, field: { name: 'Фон під колір постера', description: 'Фон усього екрана плавно змінюється під колір картки у фокусі (без blur)' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_history_watched', type: 'trigger', default: DefaultSettings.ydesign_history_watched }, field: { name: 'Усі фільми з Історії — переглянуто', description: 'Фільм з «Історії перегляду» тьмяніє й отримує галочку. Вимкнено — лише від 50% перегляду' } });
+        Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_watched_mark', type: 'trigger', default: DefaultSettings.ydesign_watched_mark }, field: { name: 'Позначка «Переглянуто»', description: 'Підтверджений статус Trakt+ для поточного акаунта; локальна історія зберігає лише прогрес' } });
+
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_progress_marks', type: 'trigger', default: DefaultSettings.ydesign_progress_marks }, field: { name: 'Прогрес на картках', description: 'Смужка для розпочатих фільмів; для серіалів — «Далі S2E5», «+3» непереглянутих і кільце сезону «7/12»' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_collection_mark', type: 'trigger', default: DefaultSettings.ydesign_collection_mark }, field: { name: 'Мітка «Продовження»', description: 'Для фільму з франшизи, попередню частину якого ви вже дивились' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_row_continue', type: 'trigger', default: DefaultSettings.ydesign_row_continue }, field: { name: 'Рядок «Продовжити перегляд»', description: 'На головній: розпочаті серіали та фільми з лічильником. Дані з’являються після першого фонового завантаження' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_row_week', type: 'trigger', default: DefaultSettings.ydesign_row_week }, field: { name: 'Рядок «Виходять цього тижня»', description: 'На головній: серіали й аніме з вашого списку, у яких цього тижня вийде нова серія' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_theme', type: 'select', values: { 'default': 'Стандартна', 'netflix': 'Netflix (червоний акцент)', 'minimal': 'Мінімалістична', 'warm': 'Тепла (бурштин)', 'oled': 'OLED (чорний фон)' }, default: DefaultSettings.ydesign_theme }, field: { name: 'Тема оформлення', description: 'Колір рамки фокуса й акценту, заокруглення карток' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_perf_mode', type: 'select', values: { 'auto': 'Авто (на ТВ — економний)', 'lite': 'Економний (без blur, для ТВ)', 'fx': 'Повні ефекти (blur, тіні, блиск)' }, default: DefaultSettings.ydesign_perf_mode }, field: { name: 'Режим продуктивності', description: 'Економний режим прибирає blur і важкі фільтри — скролінг стає плавнішим на приставках і ТВ' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_card_type_main', type: 'select', values: { 'vertical': 'Вертикальні (9:16)', 'horizontal': 'Горизонтальні (16:11)' }, default: DefaultSettings.ydesign_card_type_main }, field: { name: 'Тип карток (Головна)' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_card_type_other', type: 'select', values: { 'vertical': 'Вертикальні (9:16)', 'horizontal': 'Горизонтальні (16:11)' }, default: DefaultSettings.ydesign_card_type_other }, field: { name: 'Тип карток (Інші сторінки)' } });
+
+
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_grid_items_v', type: 'select', values: { '4': '4', '5': '5', '6': '6', '7': '7', '8': '8' }, default: DefaultSettings.ydesign_grid_items_v }, field: { name: 'Кількість карток у сітці (Вертикальні)' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_grid_items_h', type: 'select', values: { '2': '2', '3': '3', '4': '4', '5': '5' }, default: DefaultSettings.ydesign_grid_items_h }, field: { name: 'Кількість карток у сітці (Горизонтальні)' } });
+
         Lampa.SettingsApi.addParam({ component: 'ydesign_grid', param: { name: 'ydesign_card_gap', type: 'select', values: gaps, default: DefaultSettings.ydesign_card_gap }, field: { name: 'Відстань між картками' } });
 
         // -------------------------------------------------------------
@@ -3525,51 +2786,8 @@
         Lampa.SettingsApi.addParam({ component: 'ydesign_vertical', param: { name: 'ydesign_v_add_title_mb', type: 'select', values: gaps, default: DefaultSettings.ydesign_v_add_title_mb }, field: { name: 'Відступ додаткової назви від бейджів' } });
 
         // -------------------------------------------------------------
-        // ПІДКАТЕГОРІЯ 3: ГОРИЗОНТАЛЬНІ КАРТКИ (ydesign_horizontal)
         // -------------------------------------------------------------
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { type: 'title' }, field: { name: 'Розміри логотипу та назви' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_logo_max_h', type: 'select', values: logoSizes, default: DefaultSettings.ydesign_h_logo_max_h }, field: { name: 'Макс. висота логотипу/тексту' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_logo_max_w', type: 'select', values: logoSizes, default: DefaultSettings.ydesign_h_logo_max_w }, field: { name: 'Макс. ширина логотипу/тексту' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_title_size', type: 'select', values: textSizesExt, default: DefaultSettings.ydesign_h_title_size }, field: { name: 'Розмір тексту основної назви' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_show_add_title', type: 'trigger', default: DefaultSettings.ydesign_h_show_add_title }, field: { name: 'Показувати додаткову назву' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_add_title_size', type: 'select', values: textSizesExt, default: DefaultSettings.ydesign_h_add_title_size }, field: { name: 'Розмір додаткової назви' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_show_slogan', type: 'trigger', default: DefaultSettings.ydesign_h_show_slogan }, field: { name: 'Показувати слоган' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_slogan_size', type: 'select', values: textSizesExt, default: DefaultSettings.ydesign_h_slogan_size }, field: { name: 'Розмір слогану' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_show_desc', type: 'trigger', default: DefaultSettings.ydesign_h_show_desc }, field: { name: 'Показувати опис під карткою' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_desc_size', type: 'select', values: textSizesExt, default: DefaultSettings.ydesign_h_desc_size }, field: { name: 'Розмір тексту опису' } });
 
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { type: 'title' }, field: { name: 'Видимість та розміри бейджів' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_show_year', type: 'trigger', default: DefaultSettings.ydesign_h_show_year }, field: { name: 'Показувати Рік' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_show_seasons', type: 'trigger', default: DefaultSettings.ydesign_h_show_seasons }, field: { name: 'Показувати Сезони/Серії' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_show_age', type: 'trigger', default: DefaultSettings.ydesign_h_show_age }, field: { name: 'Показувати віковий рейтинг' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_show_ua', type: 'trigger', default: DefaultSettings.ydesign_h_show_ua }, field: { name: 'Показувати плашку UA' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_show_genres', type: 'trigger', default: DefaultSettings.ydesign_h_show_genres }, field: { name: 'Показувати Жанри' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_ratings_row', type: 'trigger', default: DefaultSettings.ydesign_h_ratings_row }, field: { name: 'Рейтинги з нового рядка' } });
-
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_uniform_badges', type: 'trigger', default: DefaultSettings.ydesign_h_uniform_badges }, field: { name: 'Усі бейджі одного розміру' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_badge_size', type: 'select', values: textSizesExt, default: DefaultSettings.ydesign_h_badge_size }, field: { name: 'Базовий розмір бейджів' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_year_size', type: 'select', values: textSizesExt, default: DefaultSettings.ydesign_h_year_size }, field: { name: 'Розмір бейджу Року' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_age_size', type: 'select', values: textSizesExt, default: DefaultSettings.ydesign_h_age_size }, field: { name: 'Розмір бейджу Віку' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_seasons_size', type: 'select', values: textSizesExt, default: DefaultSettings.ydesign_h_seasons_size }, field: { name: 'Розмір бейджу Сезонів/Серій' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_ua_size', type: 'select', values: textSizesExt, default: DefaultSettings.ydesign_h_ua_size }, field: { name: 'Розмір бейджу UA озвучки' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_genres_size', type: 'select', values: textSizesExt, default: DefaultSettings.ydesign_h_genres_size }, field: { name: 'Розмір бейджів Жанрів' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_rating_size', type: 'select', values: textSizesExt, default: DefaultSettings.ydesign_h_rating_size }, field: { name: 'Розмір бейджів Рейтингів' } });
-
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { type: 'title' }, field: { name: 'Вирівнювання та Відступи' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_align_logo', type: 'select', values: aligns, default: DefaultSettings.ydesign_h_align_logo }, field: { name: 'Центрування: Логотип/Назва' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_align_add_title', type: 'select', values: aligns, default: DefaultSettings.ydesign_h_align_add_title }, field: { name: 'Центрування: Додаткова назва' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_align_badges', type: 'select', values: aligns, default: DefaultSettings.ydesign_h_align_badges }, field: { name: 'Центрування: Бейджі/Рейтинги' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_align_slogan', type: 'select', values: aligns, default: DefaultSettings.ydesign_h_align_slogan }, field: { name: 'Центрування: Слоган' } });
-
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_uniform_v_gaps', type: 'trigger', default: DefaultSettings.ydesign_h_uniform_v_gaps }, field: { name: 'Математично однакові вертикальні відступи' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_uniform_v_gap_val', type: 'select', values: microGaps, default: DefaultSettings.ydesign_h_uniform_v_gap_val }, field: { name: 'Значення вертикального відступу' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_badges_gap', type: 'select', values: tinyGaps, default: DefaultSettings.ydesign_h_badges_gap }, field: { name: 'Відстань між бейджами по горизонталі' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_badge_rows_gap', type: 'select', values: gaps, default: DefaultSettings.ydesign_h_badge_rows_gap }, field: { name: 'Відступ між рядками бейджів' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_genres_gap', type: 'select', values: tinyGaps, default: DefaultSettings.ydesign_h_genres_gap }, field: { name: 'Відступ для блоку Жанрів (Ручний режим)' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_content_pb', type: 'select', values: gaps, default: DefaultSettings.ydesign_h_content_pb }, field: { name: 'Відступ контенту знизу' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_slogan_padding', type: 'select', values: gaps, default: DefaultSettings.ydesign_h_slogan_padding }, field: { name: 'Відступ слогану зверху' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_logo_mb', type: 'select', values: gaps, default: DefaultSettings.ydesign_h_logo_mb }, field: { name: 'Відступ назви/лого від бейджів' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_horizontal', param: { name: 'ydesign_h_add_title_mb', type: 'select', values: gaps, default: DefaultSettings.ydesign_h_add_title_mb }, field: { name: 'Відступ додаткової назви від бейджів' } });
 
         // -------------------------------------------------------------
         // ПІДКАТЕГОРІЯ: ВЕРХНІ БЕЙДЖІ (ydesign_notch)
@@ -3729,11 +2947,11 @@
         Lampa.SettingsApi.addParam({ component: 'ydesign_texts', param: { name: 'ydesign_logo_type', type: 'select', values: { 'logo': 'Логотип (зображення)', 'text': 'Текст' }, default: DefaultSettings.ydesign_logo_type }, field: { name: 'Відображення назви' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_texts', param: { name: 'ydesign_lang', type: 'select', values: { 'uk': 'Тільки Українська', 'uk_en': 'Укр -> Англ -> Ориг', 'en_orig': 'Англ -> Ориг' }, default: DefaultSettings.ydesign_lang }, field: { name: 'Мова логотипу/назви' } });
         Lampa.SettingsApi.addParam({ component: 'ydesign_texts', param: { name: 'ydesign_slogan_lang', type: 'select', values: { 'uk': 'Тільки Українська', 'uk_en': 'Укр (Англ. якщо немає)', 'en': 'Тільки Англійська' }, default: DefaultSettings.ydesign_slogan_lang }, field: { name: 'Мова слогану' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_texts', param: { name: 'ydesign_desc_lang', type: 'select', values: { 'uk': 'Тільки Українська', 'uk_en': 'Укр (Англ. якщо немає)', 'en': 'Тільки Англійська' }, default: DefaultSettings.ydesign_desc_lang }, field: { name: 'Мова опису під карткою' } });
+
         Lampa.SettingsApi.addParam({ component: 'ydesign_texts', param: { name: 'ydesign_add_title_lang', type: 'select', values: { 'uk': 'Завжди Українська', 'en': 'Завжди Англійська', 'auto': 'Залежить від логотипу' }, default: DefaultSettings.ydesign_add_title_lang }, field: { name: 'Мова додаткової назви' } });
 
         Lampa.SettingsApi.addParam({ component: 'ydesign_texts', param: { name: 'ydesign_poster_quality', type: 'select', values: qualities, default: DefaultSettings.ydesign_poster_quality }, field: { name: 'Якість постерів' } });
-        Lampa.SettingsApi.addParam({ component: 'ydesign_texts', param: { name: 'ydesign_backdrop_quality', type: 'select', values: qualities, default: DefaultSettings.ydesign_backdrop_quality }, field: { name: 'Якість бекдропів' } });
+
         Lampa.SettingsApi.addParam({ component: 'ydesign_texts', param: { name: 'ydesign_logo_quality', type: 'select', values: qualities, default: DefaultSettings.ydesign_logo_quality }, field: { name: 'Якість логотипів' } });
 
         // -------------------------------------------------------------
@@ -3806,46 +3024,35 @@
             onChange: function () { window.open('https://ymods.donatik.ua/', '_blank'); }
         });
 
-        Lampa.Settings.listener.follow('change', function (e) {
-            if (e && e.name && e.name.indexOf('ydesign_') !== -1) {
-                if (e.name === 'ydesign_font' || e.name === 'ydesign_font_family' || e.name === 'ydesign_font_css') {
-                    fontApply();
-                }
+        Lampa.Settings.listener.follow('change', onSettingChange);
+    }
 
-                applyDynamicCSS();
-
-                var notchCardParams = [
-                    'ydesign_notch_show', 'ydesign_notch_show_type',
-                    'ydesign_notch_show_standard', 'ydesign_notch_show_custom',
-                    'ydesign_notch_std_monochrome'
-                ];
-                if (notchCardParams.indexOf(e.name) !== -1) {
-                    document.querySelectorAll('.ydesign-card').forEach(function (c) {
-                        if (c._ydesign_updateNotch) c._ydesign_updateNotch();
-                    });
-                }
-
-                var nonCssParams = [
-                    'ydesign_lang', 'ydesign_slogan_lang', 'ydesign_desc_lang', 'ydesign_add_title_lang',
-                    'ydesign_poster_quality', 'ydesign_backdrop_quality', 'ydesign_logo_quality',
-                    'ydesign_ratings_order', 'ydesign_omdb_key', 'ydesign_mdblist_key',
-                    'ydesign_v_show_genres', 'ydesign_h_show_genres',
-                    'ydesign_v_show_add_title', 'ydesign_h_show_add_title',
-                    'ydesign_v_show_slogan', 'ydesign_h_show_slogan',
-                    'ydesign_h_show_desc'
-                ];
-
-                if (nonCssParams.indexOf(e.name) !== -1) {
-                    document.querySelectorAll('.ydesign-card').forEach(function (c) {
-                        if (c._ydesign_data) buildCardCustomDOM(c, c._ydesign_data);
-                    });
-                    document.querySelectorAll('.online-prestige--full').forEach(function (c) {
-                        c.dataset.fixedLayout = "false";
-                        formatPrestigeCard(c);
-                    });
-                }
+    var CardSettingsEpoch = 0, SettingRefresh = null, SettingChanges = {};
+    function onSettingChange(e) {
+        if (!e || !e.name) return;
+        if (/^ydesign_card_type_/.test(e.name)) { migrateVertical(); return; }
+        // Ignore data caches and settings from removed features.
+        if (!Object.prototype.hasOwnProperty.call(DefaultSettings, e.name)) return;
+        SettingsMemo = {}; LiteCache.t = 0;
+        SettingChanges[e.name] = true;
+        if (SettingRefresh) return;
+        SettingRefresh = setTimeout(function () {
+            SettingRefresh = null;
+            var changes = SettingChanges; SettingChanges = {};
+            applyDynamicCSS();
+            if (changes.ydesign_font || changes.ydesign_font_family || changes.ydesign_font_css) fontApply();
+            if (changes.ydesign_series_redesign) bindSeriesLogic();
+            var rebuild = Object.keys(changes).some(function (name) {
+                return /lang|quality|ratings_order|omdb_key|mdblist_key|show_genres|show_slogan|show_add_title/.test(name);
+            });
+            if (rebuild) {
+                CardSettingsEpoch++;
+                document.querySelectorAll('.activity--active .ydesign-card').forEach(function (c) {
+                    if (c.offsetParent !== null && c._ydesign_data) buildCardCustomDOM(c, c._ydesign_data);
+                });
             }
-        });
+            if (Object.keys(changes).some(function (name) { return /notch_|watched_mark|progress_marks|collection_mark/.test(name); })) scheduleRefreshMarks();
+        }, 60);
     }
 
     // =========================================================================
@@ -3913,12 +3120,10 @@
 
                 if (isMovieCard(this.data, this.html)) {
                     var cardEl = this.html[0] || this.html;
-                    if (!cardEl._ydesign_built) {
+                    if (!cardEl._ydesign_built || cardEl._ydesign_settingsEpoch !== CardSettingsEpoch) {
                         cardEl._ydesign_built = true;
                         cardEl._ydesign_data = this.data;
 
-                        var activeComp = (Lampa.Activity && Lampa.Activity.active()) ? Lampa.Activity.active().component : 'main';
-                        cardEl._ydesign_isMain = (activeComp === 'main');
                         try {
                             var act = Lampa.Activity.active() || {};
                             cardEl._ydesign_inHistory = (act.component === 'favorite' && (act.type === 'history' || (act.params && act.params.type === 'history')));
@@ -4348,20 +3553,22 @@
             }
 
             var cardData = card.data || card._online_data;
-            if (percent === null && cardData && cardData.timeline && cardData.timeline.percent) {
+            if (cardData && cardData.timeline && (percent === null || card._ydesign_dataPercent !== cardData.timeline.percent)) {
+                card._ydesign_dataPercent = cardData.timeline.percent;
                 var dp = parseFloat(cardData.timeline.percent);
-                if (!isNaN(dp) && dp > 0 && dp <= 100) {
+                if (!isNaN(dp) && dp >= 0 && dp <= 100) {
                     percent = Math.round(dp);
                 }
             }
 
             if (percent === null || percent <= 0) {
+                if (percent === 0 && innerLine) { innerLine._ydesign_appliedWidth = '0%'; if (innerLine.style.width !== '0%') innerLine.style.width = '0%'; }
                 if (existingTimeline) {
                     var oldText = existingTimeline.querySelector('.ydesign-series-percent-text');
                     if (oldText) oldText.remove();
-                    existingTimeline.removeAttribute('data-percent');
+                    if (existingTimeline.hasAttribute('data-percent')) existingTimeline.removeAttribute('data-percent');
                     if (!innerLine || !innerLine.style.width || innerLine.style.width === '0%' || innerLine.style.width === '0px') {
-                        existingTimeline.style.display = 'none';
+                        if (existingTimeline.style.display !== 'none') existingTimeline.style.display = 'none';
                     }
                 }
                 return;
@@ -4383,12 +3590,13 @@
                 card.appendChild(timeline);
             }
 
-            timeline.style.display = 'block';
-            timeline.setAttribute('data-percent', percent + '%');
+            if (timeline.style.display !== 'block') timeline.style.display = 'block';
+            if (timeline.getAttribute('data-percent') !== percent + '%') timeline.setAttribute('data-percent', percent + '%');
 
             var actualInnerLine = timeline.querySelector('.time-line > div');
             if (actualInnerLine) {
-                actualInnerLine.style.width = percent + '%';
+                actualInnerLine._ydesign_appliedWidth = percent + '%';
+                if (actualInnerLine.style.width !== percent + '%') actualInnerLine.style.width = percent + '%';
             }
 
             var percentTextEl = timeline.querySelector('.ydesign-series-percent-text');
@@ -4397,7 +3605,7 @@
                 percentTextEl.className = 'ydesign-series-percent-text';
                 timeline.appendChild(percentTextEl);
             }
-            percentTextEl.innerText = percent + '%';
+            if (percentTextEl.innerText !== percent + '%') percentTextEl.innerText = percent + '%';
         } catch (e) {}
     }
 
@@ -4427,9 +3635,6 @@
             explorer.classList.add('ydesign-has-series');
         }
 
-        if (card.classList.contains('online-prestige-watched')) {
-            card.style.opacity = '0.55';
-        }
 
         var shade = card.querySelector('.ydesign-series-shade');
         if (!shade) {
@@ -4572,7 +3777,7 @@
         bottomRight.innerHTML = ''; 
 
         getTmdbMetadata(movieObj, sNum, eNum).then(function (tmdb) {
-            if (!tmdb) return;
+            if (!tmdb || !card.isConnected || card.dataset.fixedLayout !== 'true') return;
 
             if (tmdb.date && getSet('ydesign_series_show_date')) {
                 topLeft.innerHTML = '<span class="ydesign-series-pill ydesign-series-date">' + tmdb.date + '</span>';
@@ -4609,119 +3814,103 @@
         return false;
     }
 
-    function initSeriesLogic() {
-        try {
-            var pageJustLoaded = false;
-            if (window.Lampa && Lampa.Listener) {
-                Lampa.Listener.follow('activity', function (e) {
-                    if (!getSet('ydesign_series_redesign')) return;
-                    if (e.type === 'start' || e.type === 'build') {
-                        pageJustLoaded = true;
-                    }
-                });
-            }
+    // Discovery is scoped to a potentially episodic activity, never document.body.
+    // A bounded progress fallback exists only while episode cards are mounted.
+    var SeriesLife = { initialized: false, root: null, observer: null, timer: null, queued: false };
+    function stopSeriesLogic() {
+        if (SeriesLife.observer) SeriesLife.observer.disconnect();
+        SeriesLife.observer = null;
+        if (SeriesLife.timer) clearInterval(SeriesLife.timer);
+        SeriesLife.timer = null;
+        SeriesLife.root = null;
+    }
 
-            var seriesObserver = new MutationObserver(function (mutations) {
-                if (!document.getElementsByClassName('online-prestige').length) return;
-                if (!getSet('ydesign_series_redesign')) return;
+    function refreshSeries() {
+        SeriesLife.queued = false;
+        var root = SeriesLife.root;
+        if (!root || !root.isConnected || !getSet('ydesign_series_redesign')) { stopSeriesLogic(); return; }
+        var cards = root.querySelectorAll('.online-prestige');
+        for (var i = 0; i < cards.length; i++) {
+            formatPrestigeCard(cards[i]);
+            updateCardTimeline(cards[i]);
+        }
+        if (cards.length && !SeriesLife.timer) SeriesLife.timer = setInterval(refreshSeries, 1000);
+        if (!cards.length && SeriesLife.timer) { clearInterval(SeriesLife.timer); SeriesLife.timer = null; }
+        // Do not steal focus from menus, search, settings, or a valid episode.
+        var controller = Lampa.Controller && Lampa.Controller.enabled && Lampa.Controller.enabled().name;
+        if (controller && /menu|head|select|settings|search/.test(controller)) return;
+        var focus = root.querySelector('.focus');
+        if (focus && focus.offsetParent !== null && focus.style.display !== 'none') return;
+        var first = root.querySelector('.online-prestige--full.selector:not(.ydesign-empty-history)');
+        if (first && first.offsetParent !== null && Lampa.Controller && Lampa.Controller.collectionFocus) {
+            Lampa.Controller.collectionFocus(first, root);
+        }
+    }
 
-                var hasNewCards = false;
+    function queueSeries() {
+        if (SeriesLife.queued) return;
+        SeriesLife.queued = true;
+        requestAnimationFrame(refreshSeries);
+    }
+
+    function bindSeriesLogic() {
+        var activity = Lampa.Activity && Lampa.Activity.active();
+        // Home/catalog rows do not need an episode discovery observer.
+        if (!getSet('ydesign_series_redesign') || !activity ||
+            /^(main|category|catalog|search|favorite|bookmarks|discovery)$/.test(activity.component || '')) {
+            stopSeriesLogic(); return;
+        }
+        var root = document.querySelector('.modal:not(.hide)') || document.querySelector('.activity--active');
+        if (!root) { stopSeriesLogic(); return; }
+        if (SeriesLife.root !== root) {
+            stopSeriesLogic();
+            SeriesLife.root = root;
+            SeriesLife.observer = new MutationObserver(function (mutations) {
                 for (var i = 0; i < mutations.length; i++) {
-                    var mutation = mutations[i];
-                    for (var j = 0; j < mutation.addedNodes.length; j++) {
-                        var node = mutation.addedNodes[j];
-                        if (node.nodeType === 1) {
-                            if (node.classList && node.classList.contains('online-prestige')) {
-                                formatPrestigeCard(node);
-                                hasNewCards = true;
-                            }
-                            if (node.querySelectorAll) {
-                                var cards = node.querySelectorAll('.online-prestige');
-                                if (cards.length > 0) {
-                                    for (var k = 0; k < cards.length; k++) {
-                                        formatPrestigeCard(cards[k]);
-                                    }
-                                    hasNewCards = true;
-                                }
-                            }
-                        }
+                    var m = mutations[i];
+                    if (m.type === 'attributes') {
+                        if (m.target.matches && m.target.matches('.time-line > div') &&
+                            m.target.style.width !== m.target._ydesign_appliedWidth) { queueSeries(); return; }
+                        continue;
                     }
-                }
-
-                if (hasNewCards) {
-                    var active = document.querySelector('.activity--active');
-                    if (active) {
-                        var currentFocus = active.querySelector('.focus');
-                        if (!currentFocus || currentFocus.offsetParent === null || currentFocus.classList.contains('ydesign-empty-history')) {
-                            var firstCard = active.querySelector('.online-prestige.online-prestige--full.selector');
-                            if (firstCard && firstCard.offsetParent !== null && firstCard.style.display !== 'none') {
-                                if (window.Lampa && window.Lampa.Controller) {
-                                    window.Lampa.Controller.collectionFocus(firstCard, active);
-                                }
-                                if (currentFocus && currentFocus !== firstCard) currentFocus.classList.remove('focus');
-                                firstCard.classList.add('focus');
-                                if (firstCard.scrollIntoViewIfNeeded) {
-                                    firstCard.scrollIntoViewIfNeeded(false);
-                                } else if (firstCard.scrollIntoView) {
-                                    firstCard.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-                                }
-                                pageJustLoaded = false;
-                            }
+                    // Ignore the renderer's text/badge mutations; discover replaced/late containers.
+                    var nodes = Array.prototype.slice.call(m.addedNodes).concat(Array.prototype.slice.call(m.removedNodes));
+                    for (var j = 0; j < nodes.length; j++) {
+                        var node = nodes[j];
+                        if (node.nodeType === 1 && (node.matches('.online-prestige') || node.querySelector('.online-prestige'))) {
+                            queueSeries(); return;
                         }
                     }
                 }
             });
+            SeriesLife.observer.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
+        }
+        queueSeries();
+    }
 
-            seriesObserver.observe(document.body, { childList: true, subtree: true });
-
-            setInterval(function () {
-                // швидкий вихід, коли відкрита не сторінка серій (інтервал тоді майже нічого не коштує)
-                if (!pageJustLoaded && !document.getElementsByClassName('online-prestige--full').length) return;
-                if (!getSet('ydesign_series_redesign')) return;
-
-                if (document.querySelector('.online-prestige--full')) {
-                    var activeCards = document.querySelectorAll('.online-prestige--full');
-                    for (var cIdx = 0; cIdx < activeCards.length; cIdx++) {
-                        updateCardTimeline(activeCards[cIdx]);
-                    }
-                }
-
-                if (pageJustLoaded) {
-                    var active = document.querySelector('.activity--active');
-                    if (active) {
-                        var currentFocus = active.querySelector('.focus');
-                        var isBrokenFocus = !currentFocus || currentFocus.offsetParent === null || currentFocus.style.display === 'none' || currentFocus.classList.contains('ydesign-empty-history');
-                        
-                        if (isBrokenFocus) {
-                            var firstValid = active.querySelector('.online-prestige.online-prestige--full.selector') || active.querySelector('.selector');
-                            if (firstValid && firstValid.offsetParent !== null && firstValid.style.display !== 'none') {
-                                if (window.Lampa && window.Lampa.Controller) {
-                                    window.Lampa.Controller.collectionFocus(firstValid, active);
-                                }
-                                if (currentFocus && currentFocus !== firstValid) currentFocus.classList.remove('focus');
-                                firstValid.classList.add('focus');
-                                if (firstValid.scrollIntoViewIfNeeded) {
-                                    firstValid.scrollIntoViewIfNeeded(false);
-                                } else if (firstValid.scrollIntoView) {
-                                    firstValid.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-                                }
-                                pageJustLoaded = false;
-                            }
-                        } else if (currentFocus && currentFocus.classList.contains('online-prestige--full')) {
-                            pageJustLoaded = false;
-                        }
-                    }
-                }
-            }, 400);
-        } catch (e) {}
+    function initSeriesLogic() {
+        if (SeriesLife.initialized) return;
+        SeriesLife.initialized = true;
+        if (Lampa.Listener) Lampa.Listener.follow('activity', function (e) {
+            if (e && e.type && !/^(start|build|create|destroy|archive)$/.test(e.type)) return;
+            // The native activity event can precede attaching its rendered container.
+            stopSeriesLogic();
+            requestAnimationFrame(bindSeriesLogic);
+        });
+        if (Lampa.Timeline && Lampa.Timeline.listener) Lampa.Timeline.listener.follow('update', queueSeries);
+        bindSeriesLogic();
     }
 
     // =========================================================================
     // 14. ГОЛОВНИЙ СТАРТ ТА ПЕРЕВІРКА ДЖЕРЕЛА
     // =========================================================================
+    var initialized = false;
     function init() {
+        if (initialized) return;
+        initialized = true;
         try {
             hookTemplates();
+            migrateVertical();
             createSettings();
 
             var currentSource = 'tmdb';
@@ -4742,14 +3931,7 @@
             addPreconnect();
 
             if (window.Lampa && Lampa.Storage && Lampa.Storage.listener) {
-                Lampa.Storage.listener.follow('change', function (e) {
-                    if (e && e.name && e.name.indexOf('ydesign_') === 0) {
-                        applyDynamicCSS();
-                        if (e.name === 'ydesign_font' || e.name === 'ydesign_font_family' || e.name === 'ydesign_font_css') {
-                            fontApply();
-                        }
-                    }
-                });
+                Lampa.Storage.listener.follow('change', onSettingChange);
             }
 
             if (window.Lampa && Lampa.Listener) {

@@ -35,9 +35,9 @@ jobs:
       - name: Check JavaScript syntax and first-party links
         working-directory: main-checkout
         run: node scripts/check-repository.mjs
-      - name: Trakt watched sync regressions
+      - name: Trakt and YDesign regressions
         working-directory: main-checkout
-        run: node --test --test-timeout=15000 tests/trakt-watched-sync.cjs tests/trakt-account-isolation.cjs
+        run: node --test --test-timeout=15000 tests/trakt-watched-sync.cjs tests/trakt-account-isolation.cjs tests/ydesign.cjs
       - name: Anime and dorama torrent search regressions
         working-directory: main-checkout
         run: node --test --test-timeout=15000 tests/torrent-search.cjs

@@ -1,0 +1,352 @@
+{
+  "commit": "e0fd00569bb826bc4080cb5b82af9b262388929c",
+  "checks": [
+    {
+      "name": "Shared responsive columns visibly widen the rail and retain screen bounds at1080p",
+      "status": "PASS",
+      "data": {
+        "before": {
+          "width": 1920,
+          "height": 1080,
+          "pane": {
+            "left": 1344,
+            "right": 1920,
+            "width": 576
+          },
+          "column": {
+            "left": 133.375,
+            "right": 1262.5,
+            "width": 1129.125
+          },
+          "host": {
+            "left": 90.3125,
+            "right": 1920,
+            "width": 1829.6875
+          },
+          "overflow": false
+        },
+        "after": {
+          "width": 1920,
+          "height": 1080,
+          "pane": {
+            "left": 1151.5625,
+            "right": 1920,
+            "width": 768.4375
+          },
+          "column": {
+            "left": 133.375,
+            "right": 1120,
+            "width": 986.625
+          },
+          "host": {
+            "left": 90.3125,
+            "right": 1920,
+            "width": 1829.6875
+          },
+          "overflow": false
+        }
+      }
+    },
+    {
+      "name": "ButtonsPlus OFF plain collapsed synopsis and one action",
+      "status": "PASS",
+      "data": {
+        "plain": true,
+        "collapsed": true,
+        "toggles": 1,
+        "torrentAvailable": true,
+        "torrentFocused": true,
+        "searches": 0
+      }
+    },
+    {
+      "name": "ButtonsPlus OFF initial focus uses available Torrents without triggering search",
+      "status": "PASS",
+      "data": {
+        "plain": true,
+        "collapsed": true,
+        "toggles": 1,
+        "torrentAvailable": true,
+        "torrentFocused": true,
+        "searches": 0
+      }
+    },
+    {
+      "name": "ButtonsPlus OFF clicking text cannot open synopsis dialog",
+      "status": "PASS"
+    },
+    {
+      "name": "ButtonsPlus OFF explicit OK expands on same focus",
+      "status": "PASS"
+    },
+    {
+      "name": "ButtonsPlus OFF explicit OK collapses without focus loss",
+      "status": "PASS"
+    },
+    {
+      "name": "Native Torrent OK retains actual Full owner and populates embedded results",
+      "status": "PASS"
+    },
+    {
+      "name": "ButtonsPlus ON / series plain collapsed synopsis and one action",
+      "status": "PASS",
+      "data": {
+        "plain": true,
+        "collapsed": true,
+        "toggles": 1,
+        "torrentAvailable": true,
+        "torrentFocused": true,
+        "searches": 0
+      }
+    },
+    {
+      "name": "ButtonsPlus ON / series initial focus uses available Torrents without triggering search",
+      "status": "PASS",
+      "data": {
+        "plain": true,
+        "collapsed": true,
+        "toggles": 1,
+        "torrentAvailable": true,
+        "torrentFocused": true,
+        "searches": 0
+      }
+    },
+    {
+      "name": "ButtonsPlus ON / series clicking text cannot open synopsis dialog",
+      "status": "PASS"
+    },
+    {
+      "name": "ButtonsPlus ON / series explicit OK expands on same focus",
+      "status": "PASS"
+    },
+    {
+      "name": "ButtonsPlus ON / series explicit OK collapses without focus loss",
+      "status": "PASS"
+    },
+    {
+      "name": "Native Torrent OK retains actual Full owner and populates embedded results",
+      "status": "PASS"
+    },
+    {
+      "name": "Anime plain collapsed synopsis and one action",
+      "status": "PASS",
+      "data": {
+        "plain": true,
+        "collapsed": true,
+        "toggles": 1,
+        "torrentAvailable": true,
+        "torrentFocused": true,
+        "searches": 0
+      }
+    },
+    {
+      "name": "Anime initial focus uses available Torrents without triggering search",
+      "status": "PASS",
+      "data": {
+        "plain": true,
+        "collapsed": true,
+        "toggles": 1,
+        "torrentAvailable": true,
+        "torrentFocused": true,
+        "searches": 0
+      }
+    },
+    {
+      "name": "Anime clicking text cannot open synopsis dialog",
+      "status": "PASS"
+    },
+    {
+      "name": "Anime explicit OK expands on same focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Anime explicit OK collapses without focus loss",
+      "status": "PASS"
+    },
+    {
+      "name": "Native Torrent OK retains actual Full owner and populates embedded results",
+      "status": "PASS"
+    },
+    {
+      "name": "Native embedded source list renders controlled parser results",
+      "status": "PASS"
+    },
+    {
+      "name": "Complete long release keeps season/HDR/codec/audio and wraps without ellipsis",
+      "status": "PASS",
+      "data": {
+        "text": "Fixture.Movie.2024.S02E01-E12.2160p.UHD.BluRay.Remux.Dolby.Vision.HDR10Plus.HEVC.x265.10bit.Ukrainian.English.Multi.Audio.Release.Group.Extended.Edition.mkv",
+        "overflow": false,
+        "whiteSpace": "normal",
+        "clamp": "none",
+        "font": "18.4769px"
+      }
+    },
+    {
+      "name": "Embedded source Back returns to actual Full without changing title owner",
+      "status": "PASS"
+    },
+    {
+      "name": "No page overflow/column overlap at CSS 1920",
+      "status": "PASS",
+      "data": {
+        "css": {
+          "width": 1920,
+          "height": 1080,
+          "dpr": 1
+        },
+        "layout": {
+          "width": 1920,
+          "height": 1080,
+          "pane": {
+            "left": 1151.5625,
+            "right": 1920,
+            "width": 768.4375
+          },
+          "column": {
+            "left": 133.375,
+            "right": 1120,
+            "width": 986.625
+          },
+          "host": {
+            "left": 90.3125,
+            "right": 1920,
+            "width": 1829.6875
+          },
+          "overflow": false
+        }
+      }
+    },
+    {
+      "name": "No page overflow/column overlap at CSS 3840",
+      "status": "PASS",
+      "data": {
+        "css": {
+          "width": 3840,
+          "height": 2160,
+          "dpr": 1
+        },
+        "layout": {
+          "width": 3840,
+          "height": 2160,
+          "pane": {
+            "left": 2303.0625,
+            "right": 3840,
+            "width": 1536.9375
+          },
+          "column": {
+            "left": 266.8125,
+            "right": 2240,
+            "width": 1973.1875
+          },
+          "host": {
+            "left": 180.625,
+            "right": 3840,
+            "width": 3659.375
+          },
+          "overflow": false
+        }
+      }
+    },
+    {
+      "name": "Absent synopsis has no redundant expand action",
+      "status": "PASS"
+    },
+    {
+      "name": "Theme off restores original native selectable synopsis and removes owned action",
+      "status": "PASS"
+    },
+    {
+      "name": "Changed Hybrid source bytes verified",
+      "status": "PASS",
+      "data": {
+        "torrents-redesign.js": "a66598bac58370ccb2e1b211283dd3c2e76cbfbb9643494e47ef9b2424cf7384",
+        "trakt/trakt-plus.js": "25924dc4fe27d35cc54e89c170fb981d4c88999bbf58b5eec6468a3e8a6a05a4",
+        "ui/interface-plus.js": "3d84de325be4f9c09578caa604ac16c1d0c9da67574fc52ad571f4cc9a0ef979",
+        "ui/design-optimized.js": "85e043eab85ba27b75057380d0937e7948159011297b6fca90cff3972a3f59ee",
+        "ui/cardify-plus.js": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+        "ui/stremio-hybrid.js": "dc1679e919aca66473cfe0b0c224b59ce941b3d36cda85d1addda7f03a96c302",
+        "ui/buttons-plus.js": "d8f36832b021642758fa57dd0020fd347413aabd50562b1bdad16e6329873915"
+      }
+    },
+    {
+      "name": "Integrated YDesign and Trakt source bytes verified",
+      "status": "PASS",
+      "data": {
+        "torrents-redesign.js": "a66598bac58370ccb2e1b211283dd3c2e76cbfbb9643494e47ef9b2424cf7384",
+        "trakt/trakt-plus.js": "25924dc4fe27d35cc54e89c170fb981d4c88999bbf58b5eec6468a3e8a6a05a4",
+        "ui/interface-plus.js": "3d84de325be4f9c09578caa604ac16c1d0c9da67574fc52ad571f4cc9a0ef979",
+        "ui/design-optimized.js": "85e043eab85ba27b75057380d0937e7948159011297b6fca90cff3972a3f59ee",
+        "ui/cardify-plus.js": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+        "ui/stremio-hybrid.js": "dc1679e919aca66473cfe0b0c224b59ce941b3d36cda85d1addda7f03a96c302",
+        "ui/buttons-plus.js": "d8f36832b021642758fa57dd0020fd347413aabd50562b1bdad16e6329873915"
+      }
+    },
+    {
+      "name": "No JavaScript exceptions",
+      "status": "PASS",
+      "data": []
+    }
+  ],
+  "blocked": [],
+  "sources": {
+    "torrents-redesign.js": "a66598bac58370ccb2e1b211283dd3c2e76cbfbb9643494e47ef9b2424cf7384",
+    "trakt/trakt-plus.js": "25924dc4fe27d35cc54e89c170fb981d4c88999bbf58b5eec6468a3e8a6a05a4",
+    "ui/interface-plus.js": "3d84de325be4f9c09578caa604ac16c1d0c9da67574fc52ad571f4cc9a0ef979",
+    "ui/design-optimized.js": "85e043eab85ba27b75057380d0937e7948159011297b6fca90cff3972a3f59ee",
+    "ui/cardify-plus.js": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+    "ui/stremio-hybrid.js": "dc1679e919aca66473cfe0b0c224b59ce941b3d36cda85d1addda7f03a96c302",
+    "ui/buttons-plus.js": "d8f36832b021642758fa57dd0020fd347413aabd50562b1bdad16e6329873915"
+  },
+  "errors": [],
+  "limits": [
+    "Synthetic metadata/parser responses; no real account or TorrServer writes",
+    "Physical Google TV NOT TESTED; native Files/playback #14/#42 not certified"
+  ],
+  "css1080": {
+    "width": 1920,
+    "height": 1080,
+    "dpr": 1
+  },
+  "before": {
+    "width": 1920,
+    "height": 1080,
+    "pane": {
+      "left": 1344,
+      "right": 1920,
+      "width": 576
+    },
+    "column": {
+      "left": 133.375,
+      "right": 1262.5,
+      "width": 1129.125
+    },
+    "host": {
+      "left": 90.3125,
+      "right": 1920,
+      "width": 1829.6875
+    },
+    "overflow": false
+  },
+  "after": {
+    "width": 1920,
+    "height": 1080,
+    "pane": {
+      "left": 1151.5625,
+      "right": 1920,
+      "width": 768.4375
+    },
+    "column": {
+      "left": 133.375,
+      "right": 1120,
+      "width": 986.625
+    },
+    "host": {
+      "left": 90.3125,
+      "right": 1920,
+      "width": 1829.6875
+    },
+    "overflow": false
+  },
+  "revisionNote": "commit is pre-merge checkpoint; runtime also contains PR42 overlay. Exact tested source SHA256 values identify the delivered product files; public product commit is mapped in the PR comment."
+}

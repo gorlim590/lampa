@@ -91,3 +91,7 @@ break the new block. No shared API, legacy route or fallback was deleted.
 Do not close #14 or merge this entire change automatically while the critical
 runtime checks above remain unconfirmed. Revert this PR to restore baseline
 ownership; no user storage migration or credentials changes are involved.
+
+## 2026-10-25 — open PR integration acceptance
+Native Full movie/TV/anime now passes actual Torrent OK entry with ButtonsPlus off/on, correct owner ID, embedded fixture results and Back; 29 integrated details checks PASS, no new JS exceptions. Exact Hybrid/Cinema/Trakt/YDesign hashes are in audit/open-prs/browser.json. YDesign has 26 PASS; one error on restoring the untouched user page reproduces independently in native app.min.js and is retained in audit/open-prs/ydesign.json. 351 combined release units PASS plus 21 overlapping torrent/Hybrid tests PASS; repository62JS459URLs PASS.
+Legacy component/routes/APIs are deliberately retained. Real native Files/audio/subtitle/TorrServer playback/player-return and physical Google TV remain NOT TESTED. This releases the independently verified entry/lifecycle/guard fixes only; Issue14 stays open for real playback and legacy removal. No server credentials, watched states or personal history changed.

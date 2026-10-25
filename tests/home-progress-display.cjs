@@ -1,0 +1,8 @@
+'use strict';
+const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict'),{test}=require('node:test');
+const source=fs.readFileSync(__dirname+'/../ui/design-optimized.js','utf8');
+function model(){const c={Lampa:{Utils:{hash:x=>x},Timeline:{watched:()=>({percent:21})}},tlPercent:key=>key==='Відьомська дошка'?27:21,window:{},Date,MarksEpoch:1,getCollParts:()=>null,releaseInfo:()=>({}),isWatched:()=>false,collectionSeen:()=>false};vm.createContext(c);vm.runInContext(source.slice(source.indexOf('    function moviePercent('),source.indexOf('    // такий самий хеш серії')),c);vm.runInContext(source.slice(source.indexOf('    function computeMarks('),source.indexOf('    var CHECK_SVG')),c);return c;}
+const card={id:1107325,original_title:'Witchboard',title:'Відьомська дошка'};
+test('legacy max-hash badge can be27 while selected native Home position is21; managed cards use actual selection',()=>{const c=model();assert.equal(c.moviePercent(card),27);assert.equal(c.moviePercent({...card,home_history_resume:{mode:'position',time:1388.541,percent:21}}),21);});
+test('percent-only or next-episode metadata does not manufacture a position badge',()=>{const c=model();for(const resume of [{mode:'next_episode'},{mode:'position',time:0,percent:27},{mode:'position',time:10,percent:NaN}])assert.equal(c.moviePercent({...card,home_history_resume:resume}),0);});
+test('same-DOM mark cache invalidates when the authoritative Home position changes',()=>{const c=model(),node={},data={...card,home_history_resume:{mode:'position',time:1388,percent:21,updated:1}};assert.equal(c.computeMarks(node,data,'movie',null).pct,21);data.home_history_resume={mode:'position',time:1828,percent:27,updated:2};assert.equal(c.computeMarks(node,data,'movie',null).pct,27);});

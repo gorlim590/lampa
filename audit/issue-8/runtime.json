@@ -1,0 +1,272 @@
+{
+  "baseline": false,
+  "commit": "f58d52f605d43652a105b5f43351fdb0d998b815",
+  "checks": [
+    {
+      "name": "Three native cards render without preset switching",
+      "status": "PASS"
+    },
+    {
+      "name": "Exact changed sources loaded by hash",
+      "status": "FAIL",
+      "data": {
+        "/trakt/trakt-plus.js": {
+          "expected": "5486bed73a7ba5c2f61138f14b50d775fef7afbb7d960cccbd0404c854d5d50c",
+          "received": "5486bed73a7ba5c2f61138f14b50d775fef7afbb7d960cccbd0404c854d5d50c",
+          "commit": "f58d52f605d43652a105b5f43351fdb0d998b815"
+        },
+        "/ui/design-optimized.js": {
+          "expected": "8b407ccbd26d644df73774220bb7fff8650e447269e3209bdae0300c800e3017",
+          "received": "8b407ccbd26d644df73774220bb7fff8650e447269e3209bdae0300c800e3017",
+          "commit": "f58d52f605d43652a105b5f43351fdb0d998b815"
+        }
+      }
+    },
+    {
+      "name": "First-open genre/age/rating/logo/slogan and TV/anime episodes",
+      "status": "PASS",
+      "data": [
+        {
+          "genres": true,
+          "age": true,
+          "rating": true,
+          "logo": true,
+          "slogan": true,
+          "series": false
+        },
+        {
+          "genres": true,
+          "age": true,
+          "rating": true,
+          "logo": true,
+          "slogan": true,
+          "series": true
+        },
+        {
+          "genres": true,
+          "age": true,
+          "rating": true,
+          "logo": true,
+          "slogan": true,
+          "series": true
+        }
+      ]
+    },
+    {
+      "name": "UA only from supported movie payload; errors create no badge",
+      "status": "PASS"
+    },
+    {
+      "name": "No Ambient/horizontal cards/global episode observer/poll on Home",
+      "status": "PASS"
+    },
+    {
+      "name": "Hybrid owns outer card animation/glow while YDesign lift is selected",
+      "status": "PASS",
+      "data": {
+        "transform": "matrix(1.035, 0, 0, 1.035, 0, 0)",
+        "animation": "none",
+        "width": "168.953px",
+        "shadow": "rgb(240, 238, 248) 0px 0px 0px 1.91612px, rgba(151, 117, 250, 0.4) 0px 0px 0px 3.69538px",
+        "border": "9.58061px",
+        "styles": 1,
+        "fonts": 1,
+        "glow": "none",
+        "hybrid": true
+      }
+    },
+    {
+      "name": "YDesign standalone restores its own focus with Hybrid object still present",
+      "status": "PASS",
+      "data": {
+        "transform": "matrix(1.06, 0, 0, 1.06, 0, -4.79031)",
+        "animation": "ydCardIn",
+        "width": "236.797px",
+        "shadow": "rgb(255, 255, 255) 0px 0px 0px 4px, rgba(0, 0, 0, 0.8) 0px 13.6866px 24.6359px -6.84329px",
+        "border": "11.6336px",
+        "styles": 1,
+        "fonts": 1,
+        "glow": "\"\"",
+        "hybrid": false
+      }
+    },
+    {
+      "name": "Hybrid on/off reuses singleton styles/fonts",
+      "status": "PASS",
+      "data": {
+        "transform": "matrix(1.035, 0, 0, 1.035, 0, 0)",
+        "animation": "none",
+        "width": "168.953px",
+        "shadow": "rgb(240, 238, 248) 0px 0px 0px 1.91612px, rgba(151, 117, 250, 0.4) 0px 0px 0px 3.69538px",
+        "border": "9.58061px",
+        "styles": 1,
+        "fonts": 1,
+        "glow": "none",
+        "hybrid": true
+      }
+    },
+    {
+      "name": "Reduced motion disables card transitions and animations",
+      "status": "PASS"
+    },
+    {
+      "name": "Vertical cards 1280x720",
+      "status": "PASS",
+      "data": [
+        {
+          "w": 174.86647033691406,
+          "h": 262.2916259765625
+        },
+        {
+          "w": 168.953125,
+          "h": 253.421875
+        },
+        {
+          "w": 168.953125,
+          "h": 253.421875
+        }
+      ]
+    },
+    {
+      "name": "Vertical cards 1920x1080",
+      "status": "PASS",
+      "data": [
+        {
+          "w": 262.30780029296875,
+          "h": 393.4617004394531
+        },
+        {
+          "w": 253.4375,
+          "h": 380.15625
+        },
+        {
+          "w": 253.4375,
+          "h": 380.15625
+        }
+      ]
+    },
+    {
+      "name": "Vertical cards 3840x2160",
+      "status": "PASS",
+      "data": [
+        {
+          "w": 524.6156005859375,
+          "h": 786.9234619140625
+        },
+        {
+          "w": 506.875,
+          "h": 760.3125
+        },
+        {
+          "w": 506.875,
+          "h": 760.3125
+        }
+      ]
+    },
+    {
+      "name": "Imported old orientation migrates without changing other preferences",
+      "status": "PASS"
+    },
+    {
+      "name": "Native local watched95% never overrides confirmed Trakt false",
+      "status": "PASS",
+      "data": [
+        "unwatched",
+        "unwatched",
+        "unwatched"
+      ]
+    },
+    {
+      "name": "Confirmed Trakt change updates movie dim/check/notch",
+      "status": "PASS"
+    },
+    {
+      "name": "API failure retains same-account last confirmed movie",
+      "status": "PASS",
+      "data": [
+        "watched",
+        "unwatched",
+        "unwatched"
+      ]
+    },
+    {
+      "name": "New account with failed API never reuses A evidence",
+      "status": "PASS",
+      "data": [
+        "unknown",
+        "unknown",
+        "unknown"
+      ]
+    },
+    {
+      "name": "Account B confirmed negative replaces unknown",
+      "status": "PASS",
+      "data": [
+        "unwatched",
+        "unwatched",
+        "unwatched"
+      ]
+    },
+    {
+      "name": "Directional navigation retains native focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Original native page restored without fixture globals",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "sources": {
+    "/trakt/trakt-plus.js": {
+      "expected": "5486bed73a7ba5c2f61138f14b50d775fef7afbb7d960cccbd0404c854d5d50c",
+      "received": "5486bed73a7ba5c2f61138f14b50d775fef7afbb7d960cccbd0404c854d5d50c",
+      "commit": "f58d52f605d43652a105b5f43351fdb0d998b815"
+    },
+    "/ui/design-optimized.js": {
+      "expected": "8b407ccbd26d644df73774220bb7fff8650e447269e3209bdae0300c800e3017",
+      "received": "8b407ccbd26d644df73774220bb7fff8650e447269e3209bdae0300c800e3017",
+      "commit": "f58d52f605d43652a105b5f43351fdb0d998b815"
+    }
+  },
+  "metrics": {
+    "tmdbRequests": 3,
+    "uaRequests": 3,
+    "readyMs": 106,
+    "sampleMs": 3480,
+    "queries": 63,
+    "timerTicks": 4,
+    "activeTimers": [
+      {
+        "ms": 4000,
+        "repeat": false
+      }
+    ],
+    "observers": [],
+    "callbacks": 0,
+    "listeners": 2,
+    "dom": 100,
+    "longTasks": [
+      66,
+      101,
+      334
+    ],
+    "heap": 31122003,
+    "ambient": false,
+    "horizontal": 0,
+    "watched": 0,
+    "ua": 1,
+    "genres": 3
+  },
+  "blocked": [
+    "Physical Google TV",
+    "Real player return/live accounts"
+  ],
+  "environment": {
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+    "width": 1280,
+    "height": 720,
+    "preset": "controlled vertical / full effects",
+    "hybrid": true
+  }
+}
