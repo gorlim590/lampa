@@ -1,0 +1,80 @@
+{
+  "baseline": "0d66952e8612e6e85a76da0879017d93802313b7",
+  "scenarios": [
+    {
+      "mode": "movie-off",
+      "buttons": false,
+      "before": {
+        "component": "full",
+        "torrentButtons": [
+          {
+            "visible": true,
+            "classes": "full-start__button view--torrent selector",
+            "insideHero": true,
+            "events": [
+              "hover:enter"
+            ]
+          }
+        ],
+        "focus": "full_start"
+      },
+      "after": {
+        "component": "full",
+        "embedded": true,
+        "rows": 1,
+        "focus": "sh_movie_streams"
+      },
+      "back": {
+        "component": "full",
+        "focus": "full_start"
+      }
+    },
+    {
+      "mode": "movie-on",
+      "buttons": true,
+      "before": {
+        "component": "full",
+        "torrentButtons": [
+          {
+            "visible": true,
+            "classes": "full-start__button view--torrent selector button-mode-2 sh-movie-primary focus",
+            "insideHero": true,
+            "events": [
+              "hover:enter"
+            ]
+          }
+        ],
+        "focus": "full_start"
+      },
+      "after": {
+        "component": "full",
+        "embedded": true,
+        "rows": 1,
+        "focus": "sh_movie_streams"
+      },
+      "back": {
+        "component": "full",
+        "focus": "full_start"
+      }
+    }
+  ],
+  "errors": [
+    "Embedded entry acceptance failed: anime-off"
+  ],
+  "sourceHashes": {
+    "ui/interface-plus.js": "3d84de325be4f9c09578caa604ac16c1d0c9da67574fc52ad571f4cc9a0ef979",
+    "ui/cardify-plus.js": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+    "ui/stremio-hybrid.js": "babf845a9d9287605f9cfcb82e59b7f6c858a10cacd787da57b5889deff164be",
+    "torrents-redesign.js": "a66598bac58370ccb2e1b211283dd3c2e76cbfbb9643494e47ef9b2424cf7384",
+    "ui/buttons-plus.js": "d8f36832b021642758fa57dd0020fd347413aabd50562b1bdad16e6329873915",
+    "providers/parsers.js": "d3496f227af0e70a1d3e03e90591f1b8d1f2da670761f72f09160b6db165ffbf",
+    "providers/parser-search.js": "8c6488065b193d8d6547935cef4cf79c2995280442c0562d5175edb6c96f42c4",
+    "providers/torrent-search.js": "6b0530d01bcb14a151a1519cd29adcf1f3ba029b065d19bc5b0eb6dee3a5d453"
+  },
+  "diagnostic": {
+    "component": "full",
+    "hybrid": true,
+    "hero": 2,
+    "html": "\n    \n    \n        \n            \n        \n        \n            \n                \n                    \n                TV\n            \n\n            \n                \n                \n                    2023, Японія薬屋のひとりごと\n                    Монолог травниці薬屋のひとりごと\n\n                    \n                        8.7TMDB\n                        IMDB"
+  }
+}

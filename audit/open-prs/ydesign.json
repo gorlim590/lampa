@@ -1,0 +1,301 @@
+{
+  "baseline": false,
+  "commit": "e0fd00569bb826bc4080cb5b82af9b262388929c",
+  "checks": [
+    {
+      "name": "Three native cards render without preset switching",
+      "status": "PASS"
+    },
+    {
+      "name": "Exact changed sources loaded by hash",
+      "status": "PASS",
+      "data": {
+        "/ui/stremio-hybrid.js": {
+          "expected": "dc1679e919aca66473cfe0b0c224b59ce941b3d36cda85d1addda7f03a96c302",
+          "received": "dc1679e919aca66473cfe0b0c224b59ce941b3d36cda85d1addda7f03a96c302",
+          "commit": "e0fd00569bb826bc4080cb5b82af9b262388929c"
+        },
+        "/trakt/trakt-plus.js": {
+          "expected": "25924dc4fe27d35cc54e89c170fb981d4c88999bbf58b5eec6468a3e8a6a05a4",
+          "received": "25924dc4fe27d35cc54e89c170fb981d4c88999bbf58b5eec6468a3e8a6a05a4",
+          "commit": "e0fd00569bb826bc4080cb5b82af9b262388929c"
+        },
+        "/ui/design-optimized.js": {
+          "expected": "85e043eab85ba27b75057380d0937e7948159011297b6fca90cff3972a3f59ee",
+          "received": "85e043eab85ba27b75057380d0937e7948159011297b6fca90cff3972a3f59ee",
+          "commit": "e0fd00569bb826bc4080cb5b82af9b262388929c"
+        }
+      }
+    },
+    {
+      "name": "First-open genre/age/rating/logo/slogan and TV/anime episodes",
+      "status": "PASS",
+      "data": [
+        {
+          "genres": true,
+          "age": true,
+          "rating": true,
+          "logo": true,
+          "slogan": true,
+          "series": false
+        },
+        {
+          "genres": true,
+          "age": true,
+          "rating": true,
+          "logo": true,
+          "slogan": true,
+          "series": true
+        },
+        {
+          "genres": true,
+          "age": true,
+          "rating": true,
+          "logo": true,
+          "slogan": true,
+          "series": true
+        }
+      ]
+    },
+    {
+      "name": "UA only from supported movie payload; errors create no badge",
+      "status": "PASS"
+    },
+    {
+      "name": "No Ambient/horizontal cards/global episode observer/poll on Home",
+      "status": "PASS"
+    },
+    {
+      "name": "Hybrid owns outer card animation/glow while YDesign lift is selected",
+      "status": "PASS",
+      "data": {
+        "transform": "matrix(1.035, 0, 0, 1.035, 0, 0)",
+        "animation": "none",
+        "width": "675.812px",
+        "shadow": "rgb(240, 238, 248) 0px 0px 0px 7.66449px, rgba(151, 117, 250, 0.4) 0px 0px 0px 14.7815px",
+        "border": "38.3224px",
+        "styles": 1,
+        "fonts": 1,
+        "glow": "none",
+        "hybrid": true
+      }
+    },
+    {
+      "name": "YDesign standalone restores its own focus with Hybrid object still present",
+      "status": "PASS",
+      "data": {
+        "transform": "matrix(1.06, 0, 0, 1.06, 0, -19.1612)",
+        "animation": "ydCardIn",
+        "width": "947.188px",
+        "shadow": "rgb(255, 255, 255) 0px 0px 0px 4px, rgba(0, 0, 0, 0.8) 0px 54.7463px 98.5434px -27.3732px",
+        "border": "46.5344px",
+        "styles": 1,
+        "fonts": 1,
+        "glow": "\"\"",
+        "hybrid": false
+      }
+    },
+    {
+      "name": "Hybrid on/off reuses singleton styles/fonts",
+      "status": "PASS",
+      "data": {
+        "transform": "matrix(1.035, 0, 0, 1.035, 0, 0)",
+        "animation": "none",
+        "width": "675.812px",
+        "shadow": "rgb(240, 238, 248) 0px 0px 0px 7.66449px, rgba(151, 117, 250, 0.4) 0px 0px 0px 14.7815px",
+        "border": "38.3224px",
+        "styles": 1,
+        "fonts": 1,
+        "glow": "none",
+        "hybrid": true
+      }
+    },
+    {
+      "name": "Reduced motion disables card transitions and animations",
+      "status": "PASS"
+    },
+    {
+      "name": "Imported old orientation migrates without changing other preferences",
+      "status": "PASS"
+    },
+    {
+      "name": "Native local watched95% never overrides confirmed Trakt false",
+      "status": "PASS",
+      "data": [
+        "unwatched",
+        "unwatched",
+        "unwatched"
+      ]
+    },
+    {
+      "name": "Confirmed Trakt change updates movie dim/check/notch",
+      "status": "PASS"
+    },
+    {
+      "name": "API failure retains same-account last confirmed movie",
+      "status": "PASS",
+      "data": [
+        "watched",
+        "unwatched",
+        "unwatched"
+      ]
+    },
+    {
+      "name": "New account with failed API never reuses A evidence",
+      "status": "PASS",
+      "data": [
+        "unknown",
+        "unknown",
+        "unknown"
+      ]
+    },
+    {
+      "name": "Account B confirmed negative replaces unknown",
+      "status": "PASS",
+      "data": [
+        "unwatched",
+        "unwatched",
+        "unwatched"
+      ]
+    },
+    {
+      "name": "Directional navigation retains native focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Episode lifecycle mount 1",
+      "status": "PASS",
+      "data": {
+        "timers": 1,
+        "observers": 1
+      }
+    },
+    {
+      "name": "Episode JS timeline progress updates without new render",
+      "status": "PASS"
+    },
+    {
+      "name": "OK reaches existing episode action without playback",
+      "status": "PASS"
+    },
+    {
+      "name": "Episode progress reset is retained",
+      "status": "PASS"
+    },
+    {
+      "name": "Back cleans episode resources 1",
+      "status": "PASS",
+      "data": {
+        "timers": 0,
+        "observers": 0,
+        "focus": true
+      }
+    },
+    {
+      "name": "Episode lifecycle mount 2",
+      "status": "PASS",
+      "data": {
+        "timers": 1,
+        "observers": 1
+      }
+    },
+    {
+      "name": "Back cleans episode resources 2",
+      "status": "PASS",
+      "data": {
+        "timers": 0,
+        "observers": 0,
+        "focus": true
+      }
+    },
+    {
+      "name": "Episode lifecycle mount 3",
+      "status": "PASS",
+      "data": {
+        "timers": 1,
+        "observers": 1
+      }
+    },
+    {
+      "name": "Back cleans episode resources 3",
+      "status": "PASS",
+      "data": {
+        "timers": 0,
+        "observers": 0,
+        "focus": true
+      }
+    },
+    {
+      "name": "Original native page restored without fixture globals",
+      "status": "PASS"
+    }
+  ],
+  "errors": [
+    "Failed to execute 'appendChild' on 'Node': Unexpected token '&'"
+  ],
+  "sources": {
+    "/ui/stremio-hybrid.js": {
+      "expected": "dc1679e919aca66473cfe0b0c224b59ce941b3d36cda85d1addda7f03a96c302",
+      "received": "dc1679e919aca66473cfe0b0c224b59ce941b3d36cda85d1addda7f03a96c302",
+      "commit": "e0fd00569bb826bc4080cb5b82af9b262388929c"
+    },
+    "/trakt/trakt-plus.js": {
+      "expected": "25924dc4fe27d35cc54e89c170fb981d4c88999bbf58b5eec6468a3e8a6a05a4",
+      "received": "25924dc4fe27d35cc54e89c170fb981d4c88999bbf58b5eec6468a3e8a6a05a4",
+      "commit": "e0fd00569bb826bc4080cb5b82af9b262388929c"
+    },
+    "/ui/design-optimized.js": {
+      "expected": "85e043eab85ba27b75057380d0937e7948159011297b6fca90cff3972a3f59ee",
+      "received": "85e043eab85ba27b75057380d0937e7948159011297b6fca90cff3972a3f59ee",
+      "commit": "e0fd00569bb826bc4080cb5b82af9b262388929c"
+    }
+  },
+  "metrics": {
+    "uaRequests": 11,
+    "tmdbRequests": 5,
+    "readyMs": 199.40000000596046,
+    "sampleMs": 160,
+    "queries": 0,
+    "timerTicks": 2,
+    "activeTimers": [
+      {
+        "ms": 4000,
+        "repeat": false
+      },
+      {
+        "ms": 3000,
+        "repeat": false
+      }
+    ],
+    "observers": [],
+    "callbacks": 0,
+    "listeners": 0,
+    "dom": 106,
+    "longTasks": [],
+    "heap": 36839111,
+    "ambient": false,
+    "horizontal": 0,
+    "watched": 0,
+    "ua": 1,
+    "genres": 3
+  },
+  "blocked": [
+    "Physical Google TV",
+    "Real player return/live accounts"
+  ],
+  "environment": {
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+    "width": 5120,
+    "height": 2880,
+    "preset": "controlled vertical / full effects",
+    "hybrid": true
+  },
+  "revisionNote": "commit/header identify pre-merge checkpoint plus PR42 overlay; exact tested source SHA256 values are recorded. Public product commit mapping is recorded in the PR integration comment.",
+  "restoredEnvironmentError": {
+    "reproducedWithoutFixture": true,
+    "phase": "unmodified original user page reload",
+    "message": "SyntaxError: Failed to execute appendChild on Node: Unexpected token &",
+    "stackOwner": "https://siaivo.isroot.in/app.min.js",
+    "acceptance": "All 26 YDesign checks passed; this existing restore-phase error is not a new product exception claim."
+  }
+}
