@@ -1,0 +1,202 @@
+{
+  "commit": "1d981dc2f12892505f9a3e7bd2e6d550755d94e0",
+  "checks": [
+    {
+      "name": "Shared responsive columns visibly widen the rail and retain screen bounds at1080p",
+      "status": "PASS",
+      "data": {
+        "before": {
+          "width": 1920,
+          "height": 1080,
+          "pane": {
+            "left": 1344,
+            "right": 1920,
+            "width": 576
+          },
+          "column": {
+            "left": 133.375,
+            "right": 1262.5,
+            "width": 1129.125
+          },
+          "host": {
+            "left": 90.3125,
+            "right": 1920,
+            "width": 1829.6875
+          },
+          "overflow": false
+        },
+        "after": {
+          "width": 1920,
+          "height": 1080,
+          "pane": {
+            "left": 1151.5625,
+            "right": 1920,
+            "width": 768.4375
+          },
+          "column": {
+            "left": 133.375,
+            "right": 1120,
+            "width": 986.625
+          },
+          "host": {
+            "left": 90.3125,
+            "right": 1920,
+            "width": 1829.6875
+          },
+          "overflow": false
+        }
+      }
+    },
+    {
+      "name": "Wider rail increases readable release type without shrinking it",
+      "status": "PASS",
+      "data": {
+        "before": 15.3974,
+        "after": 18.4769
+      }
+    },
+    {
+      "name": "Real native fixture row retains complete raw release name",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual source/filter menu accepts remote OK",
+      "status": "PASS"
+    },
+    {
+      "name": "Filter menu Back retains actual media owner",
+      "status": "PASS"
+    },
+    {
+      "name": "Settled full-width native layout at CSS 1920",
+      "status": "PASS",
+      "data": {
+        "css": {
+          "width": 1920,
+          "height": 1080,
+          "dpr": 1
+        },
+        "layout": {
+          "width": 1920,
+          "height": 1080,
+          "pane": {
+            "left": 1151.5625,
+            "right": 1920,
+            "width": 768.4375
+          },
+          "column": {
+            "left": 133.375,
+            "right": 1120,
+            "width": 986.625
+          },
+          "host": {
+            "left": 90.3125,
+            "right": 1920,
+            "width": 1829.6875
+          },
+          "overflow": false
+        }
+      }
+    },
+    {
+      "name": "Settled full-width native layout at CSS 3840",
+      "status": "PASS",
+      "data": {
+        "css": {
+          "width": 3840,
+          "height": 2160,
+          "dpr": 1
+        },
+        "layout": {
+          "width": 3840,
+          "height": 2160,
+          "pane": {
+            "left": 2303.0625,
+            "right": 3840,
+            "width": 1536.9375
+          },
+          "column": {
+            "left": 266.8125,
+            "right": 2240,
+            "width": 1973.1875
+          },
+          "host": {
+            "left": 180.625,
+            "right": 3840,
+            "width": 3659.375
+          },
+          "overflow": false
+        }
+      }
+    },
+    {
+      "name": "Changed Hybrid source bytes verified",
+      "status": "PASS",
+      "data": {
+        "ui/stremio-hybrid.js": "aeed0d289818af4e9c949e5934b037974a995cc7c1c2902f699d32bc9f9bd604"
+      }
+    },
+    {
+      "name": "No JavaScript exceptions",
+      "status": "PASS",
+      "data": []
+    }
+  ],
+  "blocked": [],
+  "sources": {
+    "ui/stremio-hybrid.js": "aeed0d289818af4e9c949e5934b037974a995cc7c1c2902f699d32bc9f9bd604"
+  },
+  "errors": [],
+  "limits": [
+    "Synthetic metadata/parser responses; no real account or TorrServer writes",
+    "Physical Google TV NOT TESTED; native Files/playback #14/#42 not certified"
+  ],
+  "css1080": {
+    "width": 1920,
+    "height": 1080,
+    "dpr": 1
+  },
+  "before": {
+    "width": 1920,
+    "height": 1080,
+    "pane": {
+      "left": 1344,
+      "right": 1920,
+      "width": 576
+    },
+    "column": {
+      "left": 133.375,
+      "right": 1262.5,
+      "width": 1129.125
+    },
+    "host": {
+      "left": 90.3125,
+      "right": 1920,
+      "width": 1829.6875
+    },
+    "overflow": false
+  },
+  "beforeFont": 15.3974,
+  "after": {
+    "width": 1920,
+    "height": 1080,
+    "pane": {
+      "left": 1151.5625,
+      "right": 1920,
+      "width": 768.4375
+    },
+    "column": {
+      "left": 133.375,
+      "right": 1120,
+      "width": 986.625
+    },
+    "host": {
+      "left": 90.3125,
+      "right": 1920,
+      "width": 1829.6875
+    },
+    "overflow": false
+  },
+  "afterFont": 18.4769,
+  "testedTree": "5d21ac22f0e653e7d0f1896ca5c579e8da39abf5"
+}
