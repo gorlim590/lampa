@@ -114,3 +114,31 @@ test('does not server-filter movie and dorama releases by type', () => {
     assert.equal(url.searchParams.get('q'), movie.title || movie.name);
   }
 });
+
+test('retains AniDUB dynamic torrent download endpoint alongside RuTor magnet', () => {
+  const direct = 'https://tr.anidub.com/engine/download.php?id=123';
+  const magnet = 'magnet:?xt=urn:btih:' + 'c'.repeat(40);
+  const app = load({results:[
+    {title:'100 дней под прикрытием / 100 Days of Deception',source:'AniDUB',type:'dorama',torrent_url:direct,page_url:'https://tr.anidub.com/topic/123'},
+    {title:'100 дней лжи / 100 Days of Deception',source:'RuTor',magnet,type:'unknown'}
+  ]});
+  const rows = app.context.window.LampaUnifiedParser.toNative({results:[
+    {title:'100 дней под прикрытием',source:'AniDUB',torrent_url:direct},
+    {title:'100 дней лжи',source:'RuTor',magnet}
+  ]}).Results;
+  assert.equal(rows.length,2);
+  assert.equal(rows[0].Tracker,'AniDUB');
+  assert.equal(rows[0].Link,direct);
+  assert.equal(rows[1].MagnetUri,magnet);
+});
+
+test('rejects spoofed AniDUB dynamic links and foreign tracker topic pages', () => {
+  const app = load();
+  const rows = app.context.window.LampaUnifiedParser.toNative({results:[
+    {title:'Spoof',source:'AniDUB',torrent_url:'https://tr.anidub.com.attacker.example/engine/download.php?id=1'},
+    {title:'Wrong host',source:'AniDUB',torrent_url:'https://elsewhere.example/engine/download.php?id=1'},
+    {title:'Wrong path',source:'AniDUB',torrent_url:'https://tr.anidub.com/engine/topic.php?id=1'},
+    {title:'No trusted source',source:'RuTor',torrent_url:'https://tr.anidub.com/engine/download.php?id=1'}
+  ]}).Results;
+  assert.equal(rows.length,0);
+});

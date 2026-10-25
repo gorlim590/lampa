@@ -30,13 +30,23 @@
             return encodeURIComponent(k) + '=' + encodeURIComponent(str(params[k]));
         }).join('&');
     }
+    function playableLink(direct, source) {
+        // Keep topic pages excluded. AniDUB provides torrents through its download.php endpoint.
+        // Only trust that exact path on the known AniDUB host family.
+        if (/^https?:\/\//i.test(direct) && /\.torrent(?:[?#]|$)/i.test(direct)) return direct;
+        if (source === 'AniDUB') {
+            var m = /^https:\/\/([^\/:?#]+)(\/[^?#]*)(?:[?#]|$)/i.exec(direct);
+            if (m && /(?:^|\.)anidub\.com$/i.test(m[1]) && m[2].toLowerCase() === '/engine/download.php') return direct;
+        }
+        return '';
+    }
     function mapRow(item, i) {
         var title = str(item.title || item.name || item.Title);
         var magnet = str(item.magnet || item.magnet_uri || item.MagnetUri);
         // A tracker topic page is not a torrent download. Prefer magnet for playback.
         var direct = str(item.torrent_url || item.download_url || item.Link);
-        var link = magnet || (/^https?:/i.test(direct) && /\.torrent(?:[?#]|$)/i.test(direct) ? direct : '');
         var source = str(item.source || item.tracker || item.Tracker || 'Unified');
+        var link = magnet || playableLink(direct, source);
         var infoHash = hash(magnet, item.infohash || item.info_hash || item.InfoHash);
         if (!title || !link) return null;
         var row = {
@@ -165,7 +175,7 @@
         }
         ownGet = null;
     }
-    window.LampaUnifiedParser = { version: '0.1.2', install: install, destroy: destroy, endpoint: endpoint, toNative: toNative };
+    window.LampaUnifiedParser = { version: '0.1.3', install: install, destroy: destroy, endpoint: endpoint, toNative: toNative };
     if (L.Parser) install();
     else if (L.Listener && L.Listener.follow) L.Listener.follow('app', function(e) { if (e.type === 'ready') install(); });
 })();
