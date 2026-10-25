@@ -99,7 +99,7 @@
     if (activeSync && activeSync.manual && Lampa.Loading) Lampa.Loading.stop();
     activeSync = null; syncing = false; watchedVer++;
     jobs.forEach(function (cancel) { cancel.listeners.slice().forEach(function (abort) { abort(); }); });
-    clearRowCaches();
+    clearRowCaches(); emitWatched();
   }
 
   function sessionCancel(epoch, operation, stopped) {
@@ -148,7 +148,7 @@
       checkCancelled(cancel); return getRetry('/users/me', 0, cancel);
     }).then(function (data) {
       checkCancelled(cancel); accountOwner = verifiedOwner(data);
-      hydrateWatched(); return accountOwner;
+      hydrateWatched(); emitWatched(); return accountOwner;
     });
     identityPromise = pending.then(function (owner) {
       releaseSession(cancel); if (epoch === sessionEpoch) identityPromise = null; return owner;
@@ -2157,7 +2157,7 @@
   window.TraktPlus = window.TraktPlus || {};
   // Status is independent of UI mark/hide preferences and local Favorite/Timeline.
   // null = not known (loading/error/stale/insufficient completion evidence).
-  window.TraktPlus.version = '3.3.1-home';
+  window.TraktPlus.version = '3.3.2-ydesign';
   window.TraktPlus.syncWatched = function () { return syncWatched(true); };
   window.TraktPlus.syncStatus = function () { return lastSyncResult; };
   window.TraktPlus.isWatched = watchStatus;
@@ -2178,7 +2178,9 @@
       var id = tmdbId(card), r = showStates[id];
       phase = cardKind(card) === 'show' && r && r.error ? 'error' : progressPending[id] ? 'loading' : 'unknown';
     }
-    return { value: value, source: 'trakt', phase: phase, updatedAt: statusAt || null };
+    return { value: value, source: 'trakt', phase: phase, updatedAt: statusAt || null,
+      owner: accountOwner || null, session: sessionEpoch,
+      mediaType: cardKind(card) === 'show' ? 'tv' : 'movie', tmdbId: tmdbId(card) || null };
   };
 
   // One auth subscription for this plugin lifetime (the module guard prevents

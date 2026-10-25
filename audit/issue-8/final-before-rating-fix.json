@@ -1,0 +1,307 @@
+{
+  "baseline": false,
+  "commit": "e86964f9bec1701fdb470ea820f5d49188ad14f0",
+  "checks": [
+    {
+      "name": "Three native cards render without preset switching",
+      "status": "PASS"
+    },
+    {
+      "name": "Exact changed sources loaded by hash",
+      "status": "PASS",
+      "data": {
+        "/ui/stremio-hybrid.js": {
+          "expected": "c53f6bd89a427a6f5c32f4f9c6d7c772900be9664abb337e614b8001a24c3639",
+          "received": "c53f6bd89a427a6f5c32f4f9c6d7c772900be9664abb337e614b8001a24c3639",
+          "commit": "e86964f9bec1701fdb470ea820f5d49188ad14f0"
+        },
+        "/trakt/trakt-plus.js": {
+          "expected": "5486bed73a7ba5c2f61138f14b50d775fef7afbb7d960cccbd0404c854d5d50c",
+          "received": "5486bed73a7ba5c2f61138f14b50d775fef7afbb7d960cccbd0404c854d5d50c",
+          "commit": "e86964f9bec1701fdb470ea820f5d49188ad14f0"
+        },
+        "/ui/design-optimized.js": {
+          "expected": "8b407ccbd26d644df73774220bb7fff8650e447269e3209bdae0300c800e3017",
+          "received": "8b407ccbd26d644df73774220bb7fff8650e447269e3209bdae0300c800e3017",
+          "commit": "e86964f9bec1701fdb470ea820f5d49188ad14f0"
+        }
+      }
+    },
+    {
+      "name": "First-open genre/age/rating/logo/slogan and TV/anime episodes",
+      "status": "FAIL",
+      "data": [
+        {
+          "genres": true,
+          "age": true,
+          "rating": false,
+          "logo": true,
+          "slogan": true,
+          "series": false
+        },
+        {
+          "genres": true,
+          "age": true,
+          "rating": false,
+          "logo": true,
+          "slogan": true,
+          "series": true
+        },
+        {
+          "genres": true,
+          "age": true,
+          "rating": false,
+          "logo": true,
+          "slogan": true,
+          "series": true
+        }
+      ]
+    },
+    {
+      "name": "UA only from supported movie payload; errors create no badge",
+      "status": "PASS"
+    },
+    {
+      "name": "No Ambient/horizontal cards/global episode observer/poll on Home",
+      "status": "PASS"
+    },
+    {
+      "name": "Hybrid owns outer card animation/glow while YDesign lift is selected",
+      "status": "PASS",
+      "data": {
+        "transform": "matrix(1.035, 0, 0, 1.035, 0, 0)",
+        "animation": "none",
+        "width": "168.953px",
+        "shadow": "rgb(240, 238, 248) 0px 0px 0px 1.91612px, rgba(151, 117, 250, 0.4) 0px 0px 0px 3.69538px",
+        "border": "9.58061px",
+        "styles": 1,
+        "fonts": 1,
+        "glow": "none",
+        "hybrid": true
+      }
+    },
+    {
+      "name": "YDesign standalone restores its own focus with Hybrid object still present",
+      "status": "PASS",
+      "data": {
+        "transform": "matrix(1.06, 0, 0, 1.06, 0, -4.79031)",
+        "animation": "ydCardIn",
+        "width": "236.797px",
+        "shadow": "rgb(255, 255, 255) 0px 0px 0px 4px, rgba(0, 0, 0, 0.8) 0px 13.6866px 24.6359px -6.84329px",
+        "border": "11.6336px",
+        "styles": 1,
+        "fonts": 1,
+        "glow": "\"\"",
+        "hybrid": false
+      }
+    },
+    {
+      "name": "Hybrid on/off reuses singleton styles/fonts",
+      "status": "PASS",
+      "data": {
+        "transform": "matrix(1.035, 0, 0, 1.035, 0, 0)",
+        "animation": "none",
+        "width": "168.953px",
+        "shadow": "rgb(240, 238, 248) 0px 0px 0px 1.91612px, rgba(151, 117, 250, 0.4) 0px 0px 0px 3.69538px",
+        "border": "9.58061px",
+        "styles": 1,
+        "fonts": 1,
+        "glow": "none",
+        "hybrid": true
+      }
+    },
+    {
+      "name": "Reduced motion disables card transitions and animations",
+      "status": "PASS"
+    },
+    {
+      "name": "Imported old orientation migrates without changing other preferences",
+      "status": "PASS"
+    },
+    {
+      "name": "Native local watched95% never overrides confirmed Trakt false",
+      "status": "PASS",
+      "data": [
+        "unwatched",
+        "unwatched",
+        "unwatched"
+      ]
+    },
+    {
+      "name": "Confirmed Trakt change updates movie dim/check/notch",
+      "status": "PASS"
+    },
+    {
+      "name": "API failure retains same-account last confirmed movie",
+      "status": "PASS",
+      "data": [
+        "watched",
+        "unwatched",
+        "unwatched"
+      ]
+    },
+    {
+      "name": "New account with failed API never reuses A evidence",
+      "status": "PASS",
+      "data": [
+        "unknown",
+        "unknown",
+        "unknown"
+      ]
+    },
+    {
+      "name": "Account B confirmed negative replaces unknown",
+      "status": "PASS",
+      "data": [
+        "unwatched",
+        "unwatched",
+        "unwatched"
+      ]
+    },
+    {
+      "name": "Directional navigation retains native focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Episode lifecycle mount 1",
+      "status": "PASS",
+      "data": {
+        "timers": 1,
+        "observers": 1
+      }
+    },
+    {
+      "name": "Episode JS timeline progress updates without new render",
+      "status": "PASS"
+    },
+    {
+      "name": "OK reaches existing episode action without playback",
+      "status": "PASS"
+    },
+    {
+      "name": "Episode progress reset is retained",
+      "status": "PASS"
+    },
+    {
+      "name": "Back cleans episode resources 1",
+      "status": "PASS",
+      "data": {
+        "timers": 0,
+        "observers": 0,
+        "focus": true
+      }
+    },
+    {
+      "name": "Episode lifecycle mount 2",
+      "status": "PASS",
+      "data": {
+        "timers": 1,
+        "observers": 1
+      }
+    },
+    {
+      "name": "Back cleans episode resources 2",
+      "status": "PASS",
+      "data": {
+        "timers": 0,
+        "observers": 0,
+        "focus": true
+      }
+    },
+    {
+      "name": "Episode lifecycle mount 3",
+      "status": "PASS",
+      "data": {
+        "timers": 1,
+        "observers": 1
+      }
+    },
+    {
+      "name": "Back cleans episode resources 3",
+      "status": "PASS",
+      "data": {
+        "timers": 0,
+        "observers": 0,
+        "focus": true
+      }
+    },
+    {
+      "name": "Original native page restored without fixture globals",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "sources": {
+    "/ui/stremio-hybrid.js": {
+      "expected": "c53f6bd89a427a6f5c32f4f9c6d7c772900be9664abb337e614b8001a24c3639",
+      "received": "c53f6bd89a427a6f5c32f4f9c6d7c772900be9664abb337e614b8001a24c3639",
+      "commit": "e86964f9bec1701fdb470ea820f5d49188ad14f0"
+    },
+    "/trakt/trakt-plus.js": {
+      "expected": "5486bed73a7ba5c2f61138f14b50d775fef7afbb7d960cccbd0404c854d5d50c",
+      "received": "5486bed73a7ba5c2f61138f14b50d775fef7afbb7d960cccbd0404c854d5d50c",
+      "commit": "e86964f9bec1701fdb470ea820f5d49188ad14f0"
+    },
+    "/ui/design-optimized.js": {
+      "expected": "8b407ccbd26d644df73774220bb7fff8650e447269e3209bdae0300c800e3017",
+      "received": "8b407ccbd26d644df73774220bb7fff8650e447269e3209bdae0300c800e3017",
+      "commit": "e86964f9bec1701fdb470ea820f5d49188ad14f0"
+    }
+  },
+  "metrics": {
+    "uaRequests": 9,
+    "tmdbRequests": 4,
+    "readyMs": 155.69999998807907,
+    "sampleMs": 160,
+    "queries": 0,
+    "timerTicks": 1,
+    "activeTimers": [
+      {
+        "ms": 4000,
+        "repeat": false
+      },
+      {
+        "ms": 3000,
+        "repeat": false
+      },
+      {
+        "ms": 1500,
+        "repeat": false
+      },
+      {
+        "ms": 350,
+        "repeat": false
+      },
+      {
+        "ms": 1500,
+        "repeat": false
+      },
+      {
+        "ms": 1500,
+        "repeat": false
+      }
+    ],
+    "observers": [],
+    "callbacks": 0,
+    "listeners": 0,
+    "dom": 94,
+    "longTasks": [],
+    "heap": 28652651,
+    "ambient": false,
+    "horizontal": 0,
+    "watched": 0,
+    "ua": 1,
+    "genres": 3
+  },
+  "blocked": [
+    "Physical Google TV",
+    "Real player return/live accounts"
+  ],
+  "environment": {
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+    "width": 1280,
+    "height": 720,
+    "preset": "controlled vertical / full effects",
+    "hybrid": true
+  }
+}

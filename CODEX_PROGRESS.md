@@ -445,6 +445,46 @@
 - Evidence and caveats: docs/issue-10-details.md, audit/issue-10-details/{before.png,after-full.png,owners-before.json,browser.json}.
 - Next: publish scoped follow-up PR, required CI, authorized merge if green; verify main/postmerge; report #10 without premature closure/user acceptance.
 
+## 2026-10-24 — Issue21 final UI follow-up
+Worktree audit/issue-21-final-ui; branch fix/issue-21-final-ui from main67bad5f. Issue21/comments + #20/#25/#28/#30 and open PRs read. No main AGENTS/CLAUDE, RTK followed; #41 draft instructions not imported. #14 Draft42 and #29 remain separate.
+Hybrid2.8.0: transparent header/layers, screen-centered pill search, compact native profile Select, darker shared surfaces/rail, reversible inline three-line description action,30vw torrent rail/full title wrap. Preserve native clock, avatars, action callbacks, parsers/watch state/Home/Screensaver. ButtonsPlus generic-label conflict avoided via owned selector class; detached action rebind + profile/filter Select ownership guarded.
+Product local commits20aa5d2 and010fd56.7newunitsPASS;11existingdetails/TraktPASS;repository62JS454URLs/syntax/diffPASS. FinalexistingCDP15PASS0FAIL/noJSexceptions; loadedcodehashes match010fd56 product bytes. RealactiveFull105248 tested, longdescriptiontext+ torrentrow/menu werepresentationfixtures; not playback/parser proof. Inheritedzoom yieldedinnerWidths5120/7680/15360 for requestedwindows1280/1920/3840; no1:1CSSorphysicalTVclaim. No useraccount/profile/browserdata changed/closed.
+Docs/evidence docs/issue-21-final-ui.md, tests/hybrid-ui{,-browser}.cjs, audit/issue-21-final/browser.json + JPEG screenshots. OriginalPNG/failedattemptJSON retainedlocallyuncommitted. CItest integratedexistingseasonworkflow. No merge untilfunctionaldependencies#14/nativeFiles+filter/playback validated; #20buttonbehaviorunchanged, #25/#30Home untouched, #28futureDorama unknown. Main unchanged, #21 staysopen.
+Next: publish3logicalcommits/DraftPR, verifyCI, commentIssue21 precisePARTIAL statuses and save PR/head here. Do not repeat passing tests withoutchangedcode; continue pendingfunctionalruntime only on explicit task.
+
+## 2026-10-25 — Issue #44 final acceptance checkpoint
+- Worktree audit/details-cast-trakt, branch feat/details-cast-trakt; baseline418b90e. Previous implementation retained; no repeated full audit. Local product commits1b7bb68,a761b52,daef877,15138cc,a3e9db4,4cb4efa,2416f37,bec69f0.
+- Native Full/Actor adapters, official collection and existing Trakt Similar, compact reversible Hybrid Details/Cast, cache-only filmography/filters/sort/profile guards; scoped YDesign mark/badge ownership. Final gates reject invalid/empty/single/contradictory collections, keep basic disabled/offline Trakt pages, prevent unknown->unwatched, restore sparse layout on theme toggle. Focused cast color corrected after screenshot review.
+-209targeted unitsPASS/0FAIL; repository62JS454URLs/syntax/diffPASS. ExistingCDP17+7final checksPASS/noexceptions, exact response bytes tied to productSHAs in sanitized reports. Complete changed base Trakt executes with test-only mocked transport. No real account writes or physicalTV claim. Home regressions preserved; no torrent/player changes.
+- Committed browser harness tests/details-cast-browser.cjs and target tests/CI; docs/issue-44-details-cast.md explains ownership, commands, cache/native request caveats and limits. Only synthetic evidence under audit/issue-44; transient logs/raw screenshots remain untracked. No copied changes from Draft29/41/42.
+- Next: publish exact-tree logical commits, scopedPR#44 reference, wait requiredCI, authorizednormalmerge ifgreen, verify main/postmergeCI/Pages, commentIssue44. Do not claim merge/deployment before verified. LiveTrakt/TorrServer/physicalGoogleTV remainNOTTESTED.
+
+## 2026-10-25 — Issue25 Home follow-up
+- Worktree audit/issue-25-home-completion; branch fix/issue-25-home-completion from mainf87edf3 after44. CurrentIssue25/comments/PRstate read, previous32 evidence reused;29notimported. No AGENTS/CLAUDE inmain; RTK followed.
+- Read-only CDP aggregate: History0, Timeline1407/98timestamped/0linked,4Traktrecommendationrows, HomeHistoryinactive, restoredTraktPlus3.2.1. Original3titles/missingexamples unavailable: no invented attribution/privatehistoryexport.
+- Confirmed replay early-return and local-only episode predecessor defects fixed. Existing owner-bound Trakt cache gains optional timestamp/episode facts +cache-only getter; Home explicit newer replay/remote predecessor/sortedwatched/cache-onlymarkers. Existing lazyprogress preservesfacts. No newAPIrequests/timers/observers/playerwrites; opt-inpluginlocationandloaderorderkept.
+-191targetedunitsPASS;syntax/repository62JS454URLs/diffPASS. Browser finalreport/hashes tobeattachedaftercompletion; no fabricatedPASS. Harness source-policy-loadrace and hidden-activity query corrected; provisionalunneededDOMcleanup reverted. Currentcommits2c64ddd/93532b0/5ebd010/6365ad6; finaldiff contains no DOMcleanup change.
+- Remainingcritical: actual3titles/missingnativebindings unavailable; remote-onlycandidate discovery/Traktplaybackexactseek and release-onlystalecomplete invalidation remainPartial. PhysicalTV/liveTrakt/TorrServerNOTTESTED. PublishDraftPR+greenCI/report; DO NOTMERGE/CLOSE25 until criticalacceptance established. Do not start anotherIssue.
+
+Final CDP at6365ad6:17PASS/0FAIL/noexceptions, sixexactsourcehashes; native20splayerresume/Back,7resumes, explicitreplay, profile/DOMscope/Hybrid/offlinePASS. No remainingbrowserfailure; previousfalseglobalDOMassertioncorrected. Draft publication pending; physical/originaldata blockers remain.
+
+### Issue25 bounded release refresh / latest merge authorization
+- Newshowreleaseproof triggers onlymappedshowprogress viaexisting2slotqueue, dedup+5mincooldown+session/readEpochcancellation; validatedcachedstatus+Homeupdatedbyexistingevent. NofullsyncperHome, no newtimers/observers. Invalid/future/special/duplicateepisodes ignored. Missingverifiedmapping/timetable conservativelywaitsexistingproviderrefresh.
+-143affectedtestsPASS inclrestartmapping; focusedreleaseCDP5PASS/noexceptions/exact6sourcehashes at localafec022/publishedf3729331f0ec86ef2f38e163a4b248d2ebbb0da4. Prior17browser/native20sreplay/profilepassedresultsreused. Original3titlesNOTVERIFIED, no personaldatawrites.
+- Ordinarygitpushdryrunfailedonce(noUsernamecredentials); nosecretaccess. PublishonlydeltaAPIbatch+exacttreeproof. Latestuser explicitly saysafterchecksmergeallowed; mergeverifiedscopeifnewheadCIgreen, keepIssue25openforunverifiedpersonal/remote-onlycases. Do not claim merge beforeverified; finalCI/deploymentfollowsinIssue/rootcheckpoint.
+
+### Issue25 physical-example update — latest strict merge gate
+ReadnewIssue25GoogleTV25Octsection; no photoattachment/runtime provided. ConfirmedpublicIDs Witchboard2025 TMDB1107325/Trakt890864/IMDbtt2256055; Salem2024 TMDB748230/Trakt588276/IMDbtt10245072 viaexistingnativeTMDB/Traktreadonlysearch. ActiveCDPlegacyoriginaltitlehashes:Witchboard21%,1388.541/6771.04s;Salem23%,1593.401/6812.258s. BothprofilematchcurrentCDP; no stablecardID/updated. ActualTV27%, specific-titleplayback/owner/rowmembership andthirdtitleNOTVERIFIED. CurrentcloudFavoriteHistory0 vsinactiveStoragefavoriteHistory100; doNOTfallbackcrosssource. No realwatched/historywrites.
+ConfirmedseparateUIdefect:maxalternativehashpercentcanoverrideHomeverifiedposition; scopedYDesignfix+sameDOMcacheinvalidator. Latest78targettestsPASS;displayCDP3PASS/exact6hashes/noexceptions local2a73657/public96554724072f9dbb214e0ee61c3245d82d9d6f63. Release5/oldnative17successesreused. Realcaseprivacyreport + syntheticdisplayreportcommitted; no fullpersonalhistory/IDs/photos/secrets.
+Latestuserstrictconditionoverridespreviousmergepermission: KEEPPR46DRAFT/OPEN, NO MERGE/CLOSE25 untilcriticalphysicalprovenanceconfirmed; original3-case andmissingexpectedtitlesrequireTVruntime/minimaluserexport. Boundednewreleasefixdone; main/Pagesnotchanged. FinalCIonupdatedheadpending.
+
+## 2026-10-25 — Issue35 Details UX checkpoint
+Worktree audit/issue-35-details-ux; branch fix/issue-35-details-ux from mainffa1d41. Current35+43+14comments/42read; latestplaincollapseddescription/Torrentfocus overridesoldautoexpand. No fullaudit, no42import/parser/TorrServer/Trakt/search/sort changes.
+Hybrid2.8.2-details-ux: sharedhero42% rail +1.2emgap/remaininginfocolumn, <=900stack, rawtitleswrap/noellipsis, .9emrowfont. Native synopsis temporarily plain-copy presentation, originalnode/handlers restored; removeoldSynopsisModal path; explicitMore/Lessselector, missingoverviewnoextraaction; once-per-detail visibleTorrentfocus preservinglater/Back/nativecontrollers; actionrowautoscroll includesMore.
+51targetunitsPASS; repo62JS455URLs/syntax/diffPASS. ExistingCDPacceptedUI23 +layout9 +nativequalityfilters8 checksPASS/noexceptions (overlap, notsummed).6? onlymodifiedHybrid+optionalButtonsPlussourcehashesrecorded; latestHybridexactbytesat1d981dc, earlierUIruntimeunchangedfromf8708d8exceptfont. CSS1920 rail576->768px/font15.4->18.5; settled3840rail1537, nooverlap/pagescroll. Earlyresize4Ksnapshotdiscarded; native180msdebounce respected; no furtherpassingchecksrepeatneeded.
+Known42blockerconfirmed: ButtonsPlusOFFnativeTorrenthiddenpool, so initialfocusfallsback onlywhenactionunavailable; withPlusTV/animeactualTorrentfocusPASS. Paneownentry/nativelist/filters/BackPASSwithcontrolledparser; actualFiles/TorrServer/player/physicalTVNOTTESTED. Preserve42Draft; don'tclaimcompleteIssue35broadernormalizer/language/sort/settings.
+Evidence docs/issue-35-details-ux.md + audit/issue-35/browser-ui/layout/filters.json & before/after.jpg; rawPNG/browser.json/failedattemptsremainuntracked. UserexplicitNO MERGE. Nextpublishscopedlogicalcommits+DraftPRrefs35, awaitCI, reportexactSHA/limitations. Do notstartotherIssues.
+
 
 
 ## 2026-10-24 — AI agent workflow preparation (documentation only)
@@ -456,3 +496,48 @@
 - Next: publish documentation branch, Draft PR only; no merge. Claude/other-agent skill auto-discovery is client-dependent; no claim of behavioral certification or physicalTV testing.
 
 - DraftPR41 created, no merge. CI exposed a documentation-only URL formatting issue: existing checker captured a closing backtick after the localhost port. Changed CDP address to a Markdown autolink; no checker/workflow/runtime change. Reran repository checker only to verify this concrete failure; no repeated product/browser suite.
+
+
+## Issue #8 — baseline and retired card modes
+- New isolated branch fix/issue-8-ydesign-vertical from current main fcc148f88257daab6ce56681c51ecc7903274d94. No open PR conflicts. Read #8/#7/#22/#9 and comments; prior5119195 audit is historical, #7 fixes are already in main. No AGENTS.md found in applicable ancestors/repository. Issue #7 description will not be modified.
+- Controlled existing-CDP baseline captured before product edits: audit/issue-8/baseline.json/png,1280x720, vertical/full-effects/Hybrid-on,3 native cards, synthetic storage/Trakt/metadata. Deliberate local watched95% conflicts with Trakt false; baseline incorrectly marks3 cards. UA error objects incorrectly produce3 badges (only1 fixture actually supported). One body-wide observer and active400ms interval remain on Home. Settled3.48s sample:45 attributed queries,13 timer callbacks,3 TMDB/3UA requests,114 active-view elements; ready1020ms and long-task/heap samples are single desktop observations, not a speed/FPS claim. Unsettled diagnostic retained separately, not the comparison baseline.
+- Removed horizontal render/settings/defaults/CSS and description-only metadata requests; vertical is unconditional. Legacy orientation values migrate without resetting other preferences; remaining old orientation strings are migration-only. Removed screen-background functions/state/focus retries/CSS/default/settings. Internal poster colors/gradients remain. Hybrid's obsolete horizontal width/description selector removed; horizontal rows/hero/details retained.
+- Targeted unit4PASS, JS syntax and diff whitespace PASS. Next: authoritative account/type/ID presentation cache, UA strict schema/dedup, metadata key mismatch/in-flight guards, then scoped series lifecycle/Hybrid shell ownership and full runtime matrix. No Draft/main merge yet.
+
+### Issue #8 — authoritative presentation and first-open metadata
+- YDesign now consumes only TraktPlus.watchedStatus with verified owner/session/mediaType/TMDB ID. Bounded presentation cache (3 accounts ×1500 records) retains last confirmed true/false during pending/error and restart after identity verification; no local watched fallback. Unknown/unmapped/unverified owner stays unknown. Delayed persistence guards session, older confirmations cannot override newer data, and all dim/check/classes now remove together after confirmed false.
+- Minimum compatible Trakt+3.2.2 API extension adds owner/session/content identity metadata and owner-change/verified-identity events; existing sync/completion truth unchanged. Issue #7 description untouched. Loader cache tag advanced; order retained. Legacy Trakt+ without owner context safely yields unknown.
+- UA: directly observed public WH movie/TV responses use {play:HTTPS URL}; new strict typed response parser, version/media/ID key, bounded TTL and in-flight dedup ignore legacy id-only values/errors instead of false positives. Full #22 localization work remains out of scope.
+- Corrected extCacheKey v6 vs actual v7 mismatch to one v8 key, shared in-flight details, malformed-response rejection, memory TTL checks and stale/disconnected render guards. Description-only English requests removed; rebuilt poster layers can no longer reuse a detached prior-image flag.
+-151 unit checks PASS (50 YDesign +101 Trakt, including2 metadata-contract regressions); JS syntax/diff checks PASS. Next: scoped episode lifecycle, Hybrid-owned shell and full browser matrix/profiling. No main merge.
+
+### Issue #8 — paused by user; resumable lifecycle/ownership checkpoint
+- Worktree `/home/gostrimchik/lampa-testing/audit/issue-8-ydesign`, branch `fix/issue-8-ydesign-vertical`, baseline main fcc148f. Earlier local5435b97/f58d52f retained; current commit saves all further work/evidence. LOCAL ONLY; no PR/merge/close.
+- Scoped episode lifecycle/cleanup, idempotent timeline writes, Hybrid shell CSS ownership/reduced-motion, restored shared mark styles, guarded init/font, coalesced settings/mark updates and bounded Home warmup implemented.161 unit checks PASS, repository58JS/449URLs PASS, diff check PASS.
+- Browser last run19PASS/1FAIL, exceptions=[]: only failure source coverage due Hybrid delivery alias. Alias fixed in harness, rerun pending. Exact YDesign body hash matches saved source; browser header still parent f58d52f. Final cleanup independently verified native Main/no fixture globals.
+- Before/after fixture route methodology differs; no speed/FPS claim. Full isolated mode/load-order/episode/provider/reload/browser checks and publication remain unfinished. Physical Google TV untested.
+- **Resume from `audit/issue-8/CONTINUE.md`** for exact commands, evidence, risks, missing tests and safe Draft publication path; no repeat broad audit. Do not continue until user resumes.
+
+### Issue #8 — resumed with agreed reduced validation scope
+- Read the updated opening section of #8. main remains fcc148f; no open PR conflicts. Existing results retained without a repeated audit.
+- Full load-order/multi-screen/profile matrix is no longer required.161 focused tests and repository checks PASS at resumption. Existing harness now supports --final: exact source alias proof, short card/Hybrid smoke plus3 episode Activity transitions and resource cleanup; no additional detailed profiling. Final browser run follows this commit.
+
+### Issue #8 — focused runtime caught first-open rating dependency
+- First reduced final run:25PASS/1FAIL, exceptions=[]; exact source proof now covers Hybrid alias correctly.3 episode mounts/Back exits had exactly1 active observer/interval mounted and0 on Home; synthetic OK/timeline70%/reset PASS.
+- Failure reproduced: card-ready preceded remote rating-icon preload, leaving first-open values temporarily empty. Removed the icon preload gate/timers; values now render immediately and failed logos become readable labels.3 targeted regressions added;164 total tests PASS; repository/diff checks PASS.
+- Final focused runtime rerun is justified by this functional fix; no new baseline/profile/full matrix. Initial report preserved at audit/issue-8/final-before-rating-fix.json.
+
+### Issue #8 — reduced final acceptance complete; publish Draft next
+- Exact product source1e0ae2423d7eeb95acd87ef97757979f39b89923:164 unit regressions PASS; repository syntax/links and diff checks PASS; final existing-CDP26PASS/0FAIL, exceptions=[]; SHA256/header verified for all3 product plugins including Hybrid alias.
+- Native cards/movie-TV-anime metadata/strict UA, no Ambient, Hybrid on/off/reduced-motion, migration, Trakt truth/unknown/account/error behaviors PASS on fixtures.3 synthetic provider episode Activity round trips:1timer/1observer mounted,0/0 after native Back; progress70%/reset/OK and focus retained. Native Main/no fixture globals restored.
+- No new baseline/profile/full load-order matrix per updated #8 scope. Reuse earlier viewport evidence; no speed/FPS claim. Physical TV/live provider/player/authenticated backend NOT tested. Limits in docs/issue-8-ydesign.md.
+- Source/evidence saved; remaining authorized workflow: publish isolated branch/Draft PR, add CI YDesign regressions, check CI and report #8 with only verified boxes. No main merge/Issue close/next Issue.
+
+### Issue #8 — feature history published; Draft/CI finalization
+- Feature branch fix/issue-8-ydesign-vertical published at a5a6e337dc28a2646ece6a275d8176d74e3a9b4a, preserving all7 local commits. Verified archive transport run https://github.com/gorlim590/lampa/actions/runs/39960773838 succeeded; temporary transport branch self-deleted. main unchanged.
+- Final runtime product commit1e0ae24,26PASS/0FAIL;164 unit checks PASS. Adding YDesign regressions to the existing repository CI command through the authorized GitHub connector (no runtime change). Draft PR/report follow; do not merge or close #8.
+
+## 2026-10-25 — authorized open-PR integration
+- User authorized merging all ready open PRs after conflict checks. #48 merged at 4bc46e0; docs #41 merged at ddd0845 after retaining progress histories.
+- #29 conflict resolution preserves current Trakt account/Home/details APIs, eight-plugin loader order, native torrent-search CI, Home resume cache and actor badges. Adds vertical-only YDesign without reverting newer Hybrid details.
+- Integrated targeted release regressions: 351 PASS / 0 FAIL. Updated old test seams to the nullable confirmed-status API; no backend writes. Product browser integration remains pending before publishing/merging #29/#42.

@@ -123,3 +123,12 @@ test('native authenticated profile response supplies direct ids without a settin
  const options={transport:p=>p==='/users/me'?{username:'fixture-name',ids:{uuid:'fixture-profile'}}:transportFor({},p)},f=fixture(options);
  assert.equal((await f.api.syncWatched()).status,'complete');assert.equal(f.store.trakt_plus_watched_cache.owner,'uuid:fixture-profile');
 });
+test('watched metadata exposes verified owner/session and normalized content for presentation consumers',async()=>{
+ const f=fixture({shows:[show(5,3,[1])]});let meta=f.api.watchedStatus({id:99,ids:{tmdb:1,trakt:99},method:'movie'});assert.equal(meta.owner,null);assert.equal(meta.tmdbId,'1');assert.equal(meta.mediaType,'movie');
+ await f.api.syncWatched();meta=f.api.watchedStatus(card);assert.equal(meta.owner,'uuid:fixture-a');assert.equal(typeof meta.session,'number');assert.equal(meta.value,true);
+ const series=f.api.watchedStatus({id:5,type:'anime'});assert.equal(series.mediaType,'tv');assert.equal(series.tmdbId,'5');assert.equal(series.value,false);
+ f.options.failMovies=true;await f.api.syncWatched();const failed=f.api.watchedStatus(card);assert.equal(failed.owner,meta.owner);assert.equal(failed.session,meta.session);assert.equal(failed.phase,'error');assert.equal(failed.value,null);
+});
+test('presentation metadata cannot expose the previous owner across a credential boundary',async()=>{
+ const f=fixture();await f.api.syncWatched();const a=f.api.watchedStatus(card);switchTo(f,'fixture-b',[]);const pending=f.api.watchedStatus(card);assert.equal(pending.owner,null);assert(pending.session>a.session);assert.equal(pending.value,null);await f.api.syncWatched();assert.equal(f.api.watchedStatus(card).owner,'uuid:fixture-b');
+});
