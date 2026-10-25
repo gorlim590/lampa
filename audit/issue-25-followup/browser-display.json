@@ -1,0 +1,89 @@
+{
+  "commit": "2a73657f4d4f3b99e8b5cefd0dc41881c60bddc7",
+  "checks": [
+    {
+      "name": "Exact changed source and loader loaded by hash/commit",
+      "status": "PASS",
+      "data": {
+        "/loader.js": {
+          "received": "7fc40aed131e0955eb1f48876227c30f303b93efe994ca6949ac4d3f87ccc508",
+          "expected": "7fc40aed131e0955eb1f48876227c30f303b93efe994ca6949ac4d3f87ccc508",
+          "commit": "2a73657f4d4f3b99e8b5cefd0dc41881c60bddc7"
+        },
+        "/ui/stremio-hybrid.js": {
+          "received": "70ff404b8034dcd19d23fd772285b92c480b556687445d42ae56745fdc3e3ab8",
+          "expected": "70ff404b8034dcd19d23fd772285b92c480b556687445d42ae56745fdc3e3ab8",
+          "commit": "2a73657f4d4f3b99e8b5cefd0dc41881c60bddc7"
+        },
+        "/trakt/trakt-plus.js": {
+          "received": "706e6192a5e3a7d22704d03cc7f6b834e7e4e5692a0b08e97d38aa66fbc173eb",
+          "expected": "706e6192a5e3a7d22704d03cc7f6b834e7e4e5692a0b08e97d38aa66fbc173eb",
+          "commit": "2a73657f4d4f3b99e8b5cefd0dc41881c60bddc7"
+        },
+        "/ui/design-optimized.js": {
+          "received": "cdf46b6af02df6528f13a9c4c4aa0444a33236da18cf46d0ad2d4d42424d7042",
+          "expected": "cdf46b6af02df6528f13a9c4c4aa0444a33236da18cf46d0ad2d4d42424d7042",
+          "commit": "2a73657f4d4f3b99e8b5cefd0dc41881c60bddc7"
+        },
+        "/plugins-to-enable/home-history.js": {
+          "received": "d64565aaa77666123ba5e5538a08f4e7cd9df117d17015c4587ddf1547a1d839",
+          "expected": "d64565aaa77666123ba5e5538a08f4e7cd9df117d17015c4587ddf1547a1d839",
+          "commit": "2a73657f4d4f3b99e8b5cefd0dc41881c60bddc7"
+        },
+        "/plugins-to-enable/home-policy.js": {
+          "received": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+          "expected": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+          "commit": "2a73657f4d4f3b99e8b5cefd0dc41881c60bddc7"
+        }
+      }
+    },
+    {
+      "name": "Home YDesign badge uses selected native33% rather than unrelated legacy88%",
+      "status": "PASS"
+    },
+    {
+      "name": "Original page/methods restored with no fixture globals",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "sources": {
+    "/loader.js": {
+      "received": "7fc40aed131e0955eb1f48876227c30f303b93efe994ca6949ac4d3f87ccc508",
+      "expected": "7fc40aed131e0955eb1f48876227c30f303b93efe994ca6949ac4d3f87ccc508",
+      "commit": "2a73657f4d4f3b99e8b5cefd0dc41881c60bddc7"
+    },
+    "/ui/stremio-hybrid.js": {
+      "received": "70ff404b8034dcd19d23fd772285b92c480b556687445d42ae56745fdc3e3ab8",
+      "expected": "70ff404b8034dcd19d23fd772285b92c480b556687445d42ae56745fdc3e3ab8",
+      "commit": "2a73657f4d4f3b99e8b5cefd0dc41881c60bddc7"
+    },
+    "/trakt/trakt-plus.js": {
+      "received": "706e6192a5e3a7d22704d03cc7f6b834e7e4e5692a0b08e97d38aa66fbc173eb",
+      "expected": "706e6192a5e3a7d22704d03cc7f6b834e7e4e5692a0b08e97d38aa66fbc173eb",
+      "commit": "2a73657f4d4f3b99e8b5cefd0dc41881c60bddc7"
+    },
+    "/ui/design-optimized.js": {
+      "received": "cdf46b6af02df6528f13a9c4c4aa0444a33236da18cf46d0ad2d4d42424d7042",
+      "expected": "cdf46b6af02df6528f13a9c4c4aa0444a33236da18cf46d0ad2d4d42424d7042",
+      "commit": "2a73657f4d4f3b99e8b5cefd0dc41881c60bddc7"
+    },
+    "/plugins-to-enable/home-history.js": {
+      "received": "d64565aaa77666123ba5e5538a08f4e7cd9df117d17015c4587ddf1547a1d839",
+      "expected": "d64565aaa77666123ba5e5538a08f4e7cd9df117d17015c4587ddf1547a1d839",
+      "commit": "2a73657f4d4f3b99e8b5cefd0dc41881c60bddc7"
+    },
+    "/plugins-to-enable/home-policy.js": {
+      "received": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+      "expected": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+      "commit": "2a73657f4d4f3b99e8b5cefd0dc41881c60bddc7"
+    }
+  },
+  "blocked": [
+    "Physical Google TV",
+    "Actual user three titles/missing examples not available in this test profile",
+    "External player/provider backend"
+  ],
+  "publishedProductCommit": "96554724072f9dbb214e0ee61c3245d82d9d6f63",
+  "testedTree": "7cc3299f197cdd691f6eb0b9b84a1de01ef2b5eb"
+}

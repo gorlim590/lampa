@@ -57,6 +57,7 @@
 
   var api = null;
   var watchedMovies = {};
+  var homeActivity = {};
   var watchedShows = {};
   var showStates = {};
   var showSources = {};
@@ -89,7 +90,7 @@
     var jobs = sessionJobs; sessionJobs = [];
     accountOwner = null; identityPromise = null; identityRetryAt = 0;
     hydrated = false; watchedPromise = null; lastCheck = 0; watchedStamp = '';
-    watchedMovies = {}; watchedShows = {}; showStates = {}; showSources = {};
+    watchedMovies = {}; watchedShows = {}; showStates = {}; showSources = {}; homeActivity = {};
     verifiedMovies = {}; movieStatusReady = showStatusReady = false;
     statusAt = 0; statusPhase = credential ? 'idle' : 'unavailable';
     unmappedMovies = unmappedShows = 0; lastSyncResult = null;
@@ -433,7 +434,11 @@
           checkCancelled(job.cancel);
           var evidence = progressEvidence(data);
           if (showSources[job.id] !== job.item) return;
-          evidence.sig = job.sig; evidence.trakt = job.item.show.ids.trakt; showStates[job.id] = evidence;
+          evidence.sig = job.sig; evidence.trakt = job.item.show.ids.trakt;
+          evidence.episodes = showStates[job.id] && showStates[job.id].episodes || [];
+          evidence.lastWatchedAt = showStates[job.id] && showStates[job.id].lastWatchedAt || 0;
+          evidence.homeCheckedAt = job.homeCheckedAt || showStates[job.id] && showStates[job.id].homeCheckedAt || 0;
+          showStates[job.id] = evidence;
           watchedShows = completedShows(); watchedVer++;
           clearTimeout(progressNotifyTimer);
           progressNotifyTimer = setTimeout(function () {
@@ -488,11 +493,63 @@
     return !!record.complete;
   }
 
+  function positiveDate(value) { var time = validActivityTime(value) ? Date.parse(value) : NaN; return isFinite(time) && time > 0 && time <= Date.now() ? time : 0; }
+  function homeEpisodes(seasons) {
+    var out = [], seen = {};
+    (Array.isArray(seasons) ? seasons : []).forEach(function (season) {
+      var s = Number(season.number); if (!(s > 0 && s % 1 === 0)) return;
+      (Array.isArray(season.episodes) ? season.episodes : []).forEach(function (ep) {
+        var e = Number(ep.number), key = s + ':' + e;
+        if (!(e > 0 && e % 1 === 0 && Number(ep.plays) > 0) || seen[key] || (ep.first_aired && (!isFinite(Date.parse(ep.first_aired)) || Date.parse(ep.first_aired) > Date.now()))) return;
+        seen[key] = true; out.push({ season: s, episode: e, watchedAt: positiveDate(ep.last_watched_at) });
+      });
+    });
+    return out;
+  }
+  // Read the existing verified owner-bound cache only. No API calls or guessed playback seconds.
+  function cachedHomeProgress(card) {
+    var value = cachedWatch(card), id = tmdbId(card), result = { watched: value, lastWatchedAt: 0, episodes: [] };
+    if (value === null || !id) return result;
+    if (cardKind(card) === 'movie') {
+      var time = Number(homeActivity[id]); result.lastWatchedAt = isFinite(time) && time > 0 && time <= Date.now() ? time : 0;
+    } else {
+      var state = showStates[id];
+      if (state && state.known && !state.error && freshStatus(state.t)) {
+        result.lastWatchedAt = Number(state.lastWatchedAt) || 0;
+        result.episodes = (Array.isArray(state.episodes) ? state.episodes : []).filter(function (ep) { return ep && ep.season > 0 && ep.episode > 0 && ep.season % 1 === 0 && ep.episode % 1 === 0; }).map(function (ep) { return { season: ep.season, episode: ep.episode, watchedAt: Number(ep.watchedAt) || 0 }; });
+      }
+    }
+    return result;
+  }
+
+  // Home may request a single verified show's progress when cached aired metadata
+  // proves a release newer than its snapshot. Reuse the existing two-slot queue.
+  function refreshHomeProgress(card, episodes) {
+    observeSession(); hydrateWatched();
+    var id = tmdbId(card), record = showStates[id], item = showSources[id], now = Date.now();
+    if (!bool('trakt_plus_enable', true) || cardKind(card) !== 'show' || !accountOwner || !token() || syncing || statusPhase !== 'ready' || !freshStatus(statusAt) || !record || !record.known || !freshStatus(record.t) || !item || progressPending[id] || progressQueue.length >= 128 || record.retryAfter > now || now - (record.homeCheckedAt || 0) < 300000) return false;
+    var seen = {}, count = 0, newerRelease = false;
+    (Array.isArray(episodes) ? episodes : []).forEach(function (ep) {
+      if (!ep) return;
+      var season = Number(ep.season_number), number = Number(ep.episode_number), aired = Date.parse(ep.air_date || ''), key = season + ':' + number;
+      if (!(season > 0 && number > 0 && season % 1 === 0 && number % 1 === 0) || !isFinite(aired) || aired > now || seen[key]) return;
+      seen[key] = true; count++; if (aired > record.t) newerRelease = true;
+    });
+    if (!newerRelease && count <= record.aired) return false;
+    try {
+      progressPath(item); record.homeCheckedAt = now;
+      progressPending[id] = true;
+      progressQueue.push({ id: id, item: item, sig: record.sig, epoch: sessionEpoch, homeCheckedAt: now, cancel: sessionCancel(sessionEpoch, readEpoch) });
+      pumpProgress(); return true;
+    } catch (e) { return false; }
+  }
+
   function acceptWatched(movies, shows, stamp, missingMovies) {
     // Read-only imports are additive: even a silently truncated HTTP 200 cannot
     // delete an earlier known movie. Explicit unwatch reconciliation is separate.
     verifiedMovies = collectIds(movies, 'movie');
     watchedMovies = unionIds(watchedMovies, verifiedMovies);
+    movies.forEach(function (item) { var id = item.movie.ids.tmdb, time = positiveDate(item.last_watched_at); if (id && isFinite(time) && time > 0) homeActivity[id] = Math.max(homeActivity[id] || 0, time); });
     movieStatusReady = showStatusReady = true;
     statusPhase = 'ready'; statusAt = Date.now();
     unmappedMovies = missingMovies || 0;
@@ -505,6 +562,8 @@
       var sig = [it.last_updated_at || it.last_watched_at || '', it.show.aired_episodes || ''].join('|');
       evidence.sig = sig; evidence.trakt = it.show.ids.trakt; currentSources[id] = it;
       currentStates[id] = !evidence.known && !it.progress && old && old.sig === sig && freshStatus(old.t) ? old : evidence;
+      currentStates[id].episodes = homeEpisodes(it.seasons);
+      currentStates[id].lastWatchedAt = positiveDate(it.last_watched_at);
     });
     showStates = currentStates; showSources = currentSources;
     watchedShows = completedShows();
@@ -517,7 +576,7 @@
     if (!accountOwner) throw cancelledError();
     Lampa.Storage.set('trakt_plus_watched_cache', {
       v: CACHE_VER, owner: accountOwner, t: Date.now(), stamp: watchedStamp, m: Object.keys(watchedMovies),
-      s: Object.keys(completedShows()), shows: showStates,
+      s: Object.keys(completedShows()), shows: showStates, activity: homeActivity,
       status: { t: statusAt, phase: statusPhase, movies: movieStatusReady, shows: showStatusReady,
         ids: Object.keys(verifiedMovies), missingMovies: unmappedMovies, missingShows: unmappedShows }
     });
@@ -529,6 +588,7 @@
     var c = Lampa.Storage.get('trakt_plus_watched_cache');
     if (c && c.t && c.v === CACHE_VER && c.owner === accountOwner) {
       watchedMovies = arrToSet(c.m);
+      homeActivity = c.activity && typeof c.activity === 'object' && !Array.isArray(c.activity) ? c.activity : {};
       // v4 s[] meant started shows: it is never valid completion evidence.
       showStates = c.v === CACHE_VER && c.shows && typeof c.shows === 'object' ? c.shows : {};
       watchedShows = completedShows();
@@ -2001,7 +2061,7 @@
       function () {
         Lampa.Storage.set('trakt_plus_watched_cache', null);
         watchedPromise = null;
-        watchedMovies = {};
+        watchedMovies = {}; homeActivity = {};
         watchedShows = {};
         showStates = {}; showSources = {}; verifiedMovies = {}; movieStatusReady = showStatusReady = false; statusPhase = 'idle'; statusAt = 0; progressQueue = []; clearTimeout(progressNotifyTimer); readEpoch++;
         watchedStamp = '';
@@ -2097,11 +2157,13 @@
   window.TraktPlus = window.TraktPlus || {};
   // Status is independent of UI mark/hide preferences and local Favorite/Timeline.
   // null = not known (loading/error/stale/insufficient completion evidence).
-  window.TraktPlus.version = '3.3.0-details';
+  window.TraktPlus.version = '3.3.1-home';
   window.TraktPlus.syncWatched = function () { return syncWatched(true); };
   window.TraktPlus.syncStatus = function () { return lastSyncResult; };
   window.TraktPlus.isWatched = watchStatus;
   window.TraktPlus.cachedWatched = cachedWatch;
+  window.TraktPlus.cachedHomeProgress = cachedHomeProgress;
+  window.TraktPlus.refreshHomeProgress = refreshHomeProgress;
   window.TraktPlus.cachedViewing = cachedViewing;
   window.TraktPlus.cachedFilmography = function(person){var cached=personCache[personCacheKey({id:person.id,source:person.source||'tmdb'})];return cached&&Date.now()-cached.time<PERSON_TTL?filmography(cached.data,'all','year'):null;};
   window.TraktPlus.detailsProgress = detailsProgress;

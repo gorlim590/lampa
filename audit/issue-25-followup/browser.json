@@ -1,0 +1,189 @@
+{
+  "commit": "6365ad617620a4ffe911aa55a488f50c6fa3ff30",
+  "checks": [
+    {
+      "name": "Exact changed source and loader loaded by hash/commit",
+      "status": "PASS",
+      "data": {
+        "/loader.js": {
+          "received": "7fc40aed131e0955eb1f48876227c30f303b93efe994ca6949ac4d3f87ccc508",
+          "expected": "7fc40aed131e0955eb1f48876227c30f303b93efe994ca6949ac4d3f87ccc508",
+          "commit": "6365ad617620a4ffe911aa55a488f50c6fa3ff30"
+        },
+        "/ui/stremio-hybrid.js": {
+          "received": "70ff404b8034dcd19d23fd772285b92c480b556687445d42ae56745fdc3e3ab8",
+          "expected": "70ff404b8034dcd19d23fd772285b92c480b556687445d42ae56745fdc3e3ab8",
+          "commit": "6365ad617620a4ffe911aa55a488f50c6fa3ff30"
+        },
+        "/trakt/trakt-plus.js": {
+          "received": "7f46ae11e0456115a12635cbb4011a6a22ae5f3c0d976b22baac06da2e4698eb",
+          "expected": "7f46ae11e0456115a12635cbb4011a6a22ae5f3c0d976b22baac06da2e4698eb",
+          "commit": "6365ad617620a4ffe911aa55a488f50c6fa3ff30"
+        },
+        "/ui/design-optimized.js": {
+          "received": "1c0fb026155d411599f7f303ca2926512a890500892fe0aeb02593117a9a4d1d",
+          "expected": "1c0fb026155d411599f7f303ca2926512a890500892fe0aeb02593117a9a4d1d",
+          "commit": "6365ad617620a4ffe911aa55a488f50c6fa3ff30"
+        },
+        "/plugins-to-enable/home-history.js": {
+          "received": "9893bdb9cdd7487035339eb34428e88317d590fb5712b7905f20db56335f1a84",
+          "expected": "9893bdb9cdd7487035339eb34428e88317d590fb5712b7905f20db56335f1a84",
+          "commit": "6365ad617620a4ffe911aa55a488f50c6fa3ff30"
+        },
+        "/plugins-to-enable/home-policy.js": {
+          "received": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+          "expected": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+          "commit": "6365ad617620a4ffe911aa55a488f50c6fa3ff30"
+        }
+      }
+    },
+    {
+      "name": "More than3 real-position/episode fixtures and confirmed watched are distinct/deduplicated",
+      "status": "PASS",
+      "data": [
+        {
+          "kind": "watched",
+          "ids": [
+            6
+          ],
+          "count": 1
+        },
+        {
+          "kind": "resume",
+          "ids": [
+            8,
+            7,
+            5,
+            4,
+            3,
+            2,
+            1
+          ],
+          "count": 7
+        }
+      ]
+    },
+    {
+      "name": "Next episode without position is visibly labelled",
+      "status": "PASS"
+    },
+    {
+      "name": "Timeline completion updates mounted Home row",
+      "status": "PASS"
+    },
+    {
+      "name": "Updated native row has no leftover duplicate card DOM",
+      "status": "PASS"
+    },
+    {
+      "name": "New empty profile removes old datasets without reusing a Home cache",
+      "status": "PASS"
+    },
+    {
+      "name": "Returning profile restores native positions and no duplicate rows",
+      "status": "PASS"
+    },
+    {
+      "name": "Newer actual position supports explicit replay while confirmed watched history remains",
+      "status": "PASS"
+    },
+    {
+      "name": "Repeated Home builds use cache-only Trakt status and progress with no API calls",
+      "status": "PASS"
+    },
+    {
+      "name": "Hybrid off does not restore destroyed profile/history rows",
+      "status": "PASS"
+    },
+    {
+      "name": "Hybrid on retains one of each managed row",
+      "status": "PASS"
+    },
+    {
+      "name": "Native directional focus survives refresh",
+      "status": "PASS"
+    },
+    {
+      "name": "Native Timeline resolves provider hash to actual playable position/handler",
+      "status": "PASS",
+      "data": {
+        "time": 20,
+        "duration": 60,
+        "percent": 33.333333333333336,
+        "handler": "function",
+        "customHash": "provider-1",
+        "nativeHash": "1386623199"
+      }
+    },
+    {
+      "name": "Real built-in player resumes controlled PCM media near20s",
+      "status": "PASS",
+      "data": {
+        "currentTime": 20,
+        "duration": 60
+      }
+    },
+    {
+      "name": "Player Back returns to Home and saves only fixture progress",
+      "status": "PASS"
+    },
+    {
+      "name": "Unavailable Trakt removes unconfirmed watched row but preserves real local resume",
+      "status": "PASS"
+    },
+    {
+      "name": "Original page/methods restored with no fixture globals",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "sources": {
+    "/loader.js": {
+      "received": "7fc40aed131e0955eb1f48876227c30f303b93efe994ca6949ac4d3f87ccc508",
+      "expected": "7fc40aed131e0955eb1f48876227c30f303b93efe994ca6949ac4d3f87ccc508",
+      "commit": "6365ad617620a4ffe911aa55a488f50c6fa3ff30"
+    },
+    "/ui/stremio-hybrid.js": {
+      "received": "70ff404b8034dcd19d23fd772285b92c480b556687445d42ae56745fdc3e3ab8",
+      "expected": "70ff404b8034dcd19d23fd772285b92c480b556687445d42ae56745fdc3e3ab8",
+      "commit": "6365ad617620a4ffe911aa55a488f50c6fa3ff30"
+    },
+    "/trakt/trakt-plus.js": {
+      "received": "7f46ae11e0456115a12635cbb4011a6a22ae5f3c0d976b22baac06da2e4698eb",
+      "expected": "7f46ae11e0456115a12635cbb4011a6a22ae5f3c0d976b22baac06da2e4698eb",
+      "commit": "6365ad617620a4ffe911aa55a488f50c6fa3ff30"
+    },
+    "/ui/design-optimized.js": {
+      "received": "1c0fb026155d411599f7f303ca2926512a890500892fe0aeb02593117a9a4d1d",
+      "expected": "1c0fb026155d411599f7f303ca2926512a890500892fe0aeb02593117a9a4d1d",
+      "commit": "6365ad617620a4ffe911aa55a488f50c6fa3ff30"
+    },
+    "/plugins-to-enable/home-history.js": {
+      "received": "9893bdb9cdd7487035339eb34428e88317d590fb5712b7905f20db56335f1a84",
+      "expected": "9893bdb9cdd7487035339eb34428e88317d590fb5712b7905f20db56335f1a84",
+      "commit": "6365ad617620a4ffe911aa55a488f50c6fa3ff30"
+    },
+    "/plugins-to-enable/home-policy.js": {
+      "received": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+      "expected": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+      "commit": "6365ad617620a4ffe911aa55a488f50c6fa3ff30"
+    }
+  },
+  "blocked": [
+    "Physical Google TV",
+    "Actual user three titles/missing examples not available in this test profile",
+    "External player/provider backend"
+  ],
+  "player": {
+    "currentTime": 20,
+    "duration": 60
+  },
+  "limitations": [
+    "Native UI/player and real modified plugins, mocked service data and memory-only account/profile/Timeline writes",
+    "No physical Google TV/live Trakt/external player/TorrServer acceptance",
+    "Original three titles unavailable in the accessible profile"
+  ],
+  "publishedProductCommit": "5d300535a4d06a88b54548372e14b6fd87e842bf",
+  "testedTree": "af70b9427fd00a2ce3658c24969bd862c28fc899",
+  "publicationProof": "GitHub connector publication preserves the exact tested Git tree and product blobs; commit metadata differs."
+}
