@@ -442,6 +442,8 @@
     function pickDisplayTitle(res, type) {
         var ua=pickUaFromTranslations(res,type);
         if(ua)return ua;
+        var original=res&&(type==='tv'?(res.original_name||res.original_title):(res.original_title||res.original_name));
+        if(res&&res.original_language==='uk'&&typeof original==='string'&&original.trim())return original.trim();
         var translations=titleTranslations(res);
         for(var i=0;i<translations.length;i++){
             var entry=translations[i],data=entry&&entry.data;
@@ -450,7 +452,6 @@
                 if(typeof english==='string'&&english.trim())return english.trim();
             }
         }
-        var original=res&&(type==='tv'?(res.original_name||res.original_title):(res.original_title||res.original_name));
         if(typeof original==='string'&&original.trim())return original.trim();
         if(res&&(res.original_language==='uk'||res.original_language==='en')){
             var local=type==='tv'?res.name:res.title;
