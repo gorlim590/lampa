@@ -121,6 +121,11 @@ body.stremio-hybrid .settings-param.focus .settings-param__descr, body.stremio-h
 body.stremio-hybrid .settings-param.focus, body.stremio-hybrid .settings-folder.focus, body.stremio-hybrid .selectbox-item.focus { box-shadow:inset .18em 0 var(--sh-accent-soft); }
 body.stremio-hybrid .menu__item, body.stremio-hybrid .head__action, body.stremio-hybrid .selectbox-item, body.stremio-hybrid .settings-param, body.stremio-hybrid .settings-folder { transition:transform var(--sh-speed) var(--sh-ease),opacity var(--sh-speed) var(--sh-ease) !important; }
 @media(min-width:769px) {
+ /* The transparent Hybrid header does not reserve a row above the desktop/TV rail.
+    Keep native Scroll full-height and retain device safe-area padding. */
+ body.stremio-hybrid .wrap__left { padding-top:0; }
+ body.stremio-hybrid .wrap__left > .scroll { height:100% !important; -webkit-mask-image:linear-gradient(to bottom,transparent,#fff .5em,#fff calc(100% - .5em),transparent); mask-image:linear-gradient(to bottom,transparent,#fff .5em,#fff calc(100% - .5em),transparent); }
+ body.stremio-hybrid .wrap__left > .scroll > .scroll__content { padding-top:.5em; padding-bottom:.5em; padding-top:max(.5em,env(safe-area-inset-top,0px)); padding-bottom:max(.5em,env(safe-area-inset-bottom,0px)); }
  body.stremio-hybrid .wrap__content { flex:1; min-width:0; width:calc(100% - 4.4em) !important; }
  body.stremio-hybrid .activity { width:100% !important; }
  body.stremio-hybrid .wrap__left.wrap__left--hidden { margin-left:0 !important; width:4.4em !important; min-width:4.4em; }
@@ -129,7 +134,7 @@ body.stremio-hybrid .menu__item, body.stremio-hybrid .head__action, body.stremio
  body.stremio-hybrid .wrap__left--hidden .menu__ico { margin:0; }
  body.stremio-hybrid .wrap__left--hidden .menu__text { display:none; }
  body.stremio-hybrid .wrap__left--hidden .menu__version { font-size:.45em; }
- body.stremio-hybrid .items-line:not(.vinyl-line) .card.ydesign-vertical { width:calc((100% + var(--ydesign-card-gap,var(--sh-gap))) / var(--ydesign-grid-items-v,5) - var(--ydesign-card-gap,var(--sh-gap))) !important; }
+ body.stremio-hybrid .items-line:not(.vinyl-line) .card.ydesign-vertical { width:calc((100% + var(--ydesign-card-gap,var(--sh-gap))) / var(--ydesign-grid-items-v,5) - var(--ydesign-card-gap,var(--sh-gap))) !important; margin-left:0 !important; margin-right:0 !important; }
  body.stremio-hybrid .mapping--grid .card.ydesign-vertical { width:calc(100% / var(--ydesign-grid-items-v,5)) !important; }
 }
 @media(max-width:768px) {
@@ -171,6 +176,9 @@ body.stremio-hybrid .sh-movie .full-start-new__rate-line { order:2; margin:0 0 .
 body.stremio-hybrid .sh-movie .full-start-new__details { order:3; }
 /* Movie-only Cardify adapter: backdrop + one information column, no right description card. */
 body.stremio-hybrid .activity.sh-movie-page { --sm-bg:#0c0c16; --sm-text:#f4f4f7; --sm-muted:#b8b8c6; }
+/* Native activity translate3d changes the containing block of fixed backdrop/mask layers.
+   Keep that entry animation off only for this full-viewport details composition. */
+body.stremio-hybrid .activity.sh-movie-page > .activity__body { -webkit-animation:none !important; animation:none !important; }
 body.stremio-hybrid .sh-movie-page .full-start__background { opacity:.78; transition:opacity 800ms ease-in-out !important; mask-image:none !important; -webkit-mask-image:none !important; filter:none !important; }
 body.stremio-hybrid .sh-movie-page .cardify-effects-overlay { background:linear-gradient(90deg,rgba(8,9,17,.92) 0%,rgba(8,9,17,.72) 37%,rgba(8,9,17,.12) 76%),linear-gradient(0deg,#0c0c16 0%,transparent 34%) !important; }
 body.stremio-hybrid .sh-movie-page .cardify-effects-overlay.cardify-scrolled { background-color:rgba(8,9,17,.7) !important; }
@@ -1000,6 +1008,14 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         for (var i=0;i<keys.length;i++) if (node.classList.contains(keys[i])) return map[keys[i]];
         return node.getAttribute('aria-label') || node.getAttribute('title') || node.textContent.trim();
     }
+    function headerUtility(node) {
+        return ['notice--icon','open--profile','trakt-head-action'].some(function(name){return node.classList.contains(name);});
+    }
+    function headerItems(utilities) {
+        var items=secondaryActions().filter(function(node){return headerUtility(node)===utilities;}).map(function(node){return {title:actionLabel(node),shNode:node};});
+        if(utilities)items.push({title:'Навігація',shAction:function(){Lampa.Controller.toggle('menu');}});
+        return items;
+    }
     function secondaryActions() {
         return Array.prototype.filter.call(document.querySelectorAll('.head__actions > .head__action'), function (node) {
             if (node === moreButton || node.classList.contains('open--search') || node.classList.contains('hide') || node.classList.contains('hidden') || node.style.display === 'none' || node.querySelector('input,select,textarea')) return false;
@@ -1033,19 +1049,33 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         if (target && target.isConnected) Lampa.Controller.collectionFocus($(target), Lampa.Head.render());
     }
     function openActions() {
-        var nodes = secondaryActions();
-        var items = nodes.map(function (node) { return {title:actionLabel(node), shNode:node}; });
-        items.push({title:'Навігація',shAction:function(){Lampa.Controller.toggle('menu');}});
+        var items = headerItems(false), panel;
         items.push({title:'Назад',shAction:function(){Lampa.Controller.back();}});
         menuOpen = true;
-        Lampa.Select.show({title:'Профіль', items:items, onBack:function () { menuOpen=false;restoreHead(moreButton); }, onSelect:function (item) {
+        Lampa.Select.show({title:'Профіль', items:items, onBack:function () { menuOpen=false;if(panel)panel.classList.remove('sh-profile-menu');restoreHead(moreButton); }, onSelect:function (item) {
             menuOpen=false;
+            if(panel)panel.classList.remove('sh-profile-menu');
             Lampa.Select.hide();
             Lampa.Activity.mixState();
             restoreHead(moreButton);
             if(item.shAction)item.shAction();else if (item.shNode && item.shNode.isConnected) $(item.shNode).trigger('hover:enter');
         }});
-        var panel=Lampa.Select.render()[0];if(panel)panel.classList.add('sh-profile-menu');
+        panel=Lampa.Select.render()[0];if(panel)panel.classList.add('sh-profile-menu');
+    }
+    function openHeaderUtilities() {
+        var current=Lampa.Controller.enabled(),previous=current&&current.name||'settings_component';
+        function restore(){Lampa.Controller.toggle(previous);}
+        menuOpen=true;
+        Lampa.Select.show({title:'Додаткові дії панелі',items:headerItems(true),onBack:function(){menuOpen=false;Lampa.Select.hide();restore();},onSelect:function(item){
+            menuOpen=false;Lampa.Select.hide();Lampa.Activity.mixState();restore();
+            if(item.shAction)item.shAction();else if(item.shNode&&item.shNode.isConnected)$(item.shNode).trigger('hover:enter');
+        }});
+    }
+    function onHeaderUtilitiesSetting(){if(window.StremioHybrid)window.StremioHybrid.openUtilities();}
+    function removeHeaderUtilitiesSetting(){
+        if(!window.Lampa||!Lampa.SettingsApi||!Lampa.SettingsApi.getParam)return;
+        var params=Lampa.SettingsApi.getParam('interface')||[];
+        for(var i=params.length-1;i>=0;i--)if(params[i].param&&params[i].param.name==='sh_header_utilities'&&params[i].onChange===onHeaderUtilitiesSetting)params.splice(i,1);
     }
     function onSearchEnter() { searchReturn = true; }
     function onSearchClose() { clearSearchSources();scheduleMovie(); if (searchReturn) { searchReturn=false;restoreHead(searchNode); } }
@@ -1369,14 +1399,17 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
             });
         }
         if(!params.some(function(item){return item.param&&item.param.name==='sh_profile_avatar';}))Lampa.SettingsApi.addParam({component:'interface',param:{name:'sh_profile_avatar',type:'input',values:'',placeholder:'https://example.org/avatar.jpg',default:''},field:{name:'Фото профілю · URL',description:'Адреса HTTP(S) зображення. Порожнє поле повертає стандартний значок; саме фото не зберігається в localStorage.'},onChange:function(){if(window.StremioHybrid)window.StremioHybrid.refresh();}});
+        if(!params.some(function(item){return item.param&&item.param.name==='sh_header_utilities';}))Lampa.SettingsApi.addParam({component:'interface',param:{name:'sh_header_utilities',type:'button'},field:{name:'Додаткові дії панелі',description:'Сповіщення, профіль, Trakt і перехід до навігації. Використовує чинні дії Lampa.'},onChange:onHeaderUtilitiesSetting});
         apply(enabled());
     }
     window.StremioHybrid = {
-        version: '2.8.3-card-controls',
+        version: '2.8.4-header-menu',
+        openUtilities: openHeaderUtilities,
         setEnabled: setEnabled,
         refresh: function () { if (ready) apply(enabled()); },
         destroy: function () {
             apply(false);
+            removeHeaderUtilitiesSetting();
             backdropResume=null;movieBrands=[];movieEnglish=[];paletteCache=[];
             destroyed = true;
             stopWaiting();

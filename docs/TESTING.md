@@ -19,6 +19,7 @@ Node20 matches CI. Tests use built-in `node:test`; no `npm install` is required 
 
 | Boundary | Test files (pass to `node --test --test-timeout=15000`) |
 | --- | --- |
+| Repository syntax / manifest / delivery validator | `tests/repository-checker.cjs` (temporary fixture directories; no browser or remote HTTP requests) |
 | Trakt watched/account/cache/snapshots | `tests/trakt-watched-sync.cjs tests/trakt-account-isolation.cjs` |
 | Upper TV/anime info ownership / Trakt details API | `tests/details-info.cjs` (add Trakt tests if sync/session contract changes) |
 | Canonical seasons / aliases / source IDs | `tests/seasons-info.cjs` |
@@ -27,7 +28,7 @@ Node20 matches CI. Tests use built-in `node:test`; no `npm install` is required 
 | Parser roles/progressive results/cache/dedup | `tests/parser-providers.cjs tests/torrent-search.cjs` |
 | Multilingual alias search | `tests/torrent-search.cjs` |
 
-`node scripts/check-repository.mjs` checks JS syntax and first-party delivery paths/URLs. It is appropriate for source/delivery changes and release checks; it is broader than a Markdown-only check. `git diff --check` checks uncommitted changes; use `git diff --check BASE...HEAD` for committed PR changes.
+`node scripts/check-repository.mjs` checks `.js` syntax, first-party delivery paths/URLs and the root `plugins.json` manifest. The manifest must be an array of objects with an absolute HTTP(S) `url` and numeric `status` 0/1; `name` is optional but must be a string when present. Disabled entries are validated too. JSON URL strings are decoded before path checks; query/fragment do not affect target lookup. An optional `third-party-branch/` checkout contributes canonical delivery paths. These are offline static checks, not remote HTTP availability, load-order or plugin runtime certification. Diagnostics omit URL queries/credentials. It is appropriate for source/delivery changes and release checks; it is broader than a Markdown-only check. `git diff --check` checks uncommitted changes; use `git diff --check BASE...HEAD` for committed PR changes.
 
 A deliberate full **non-browser** run is:
 

@@ -2302,7 +2302,7 @@
             "body:not(.stremio-hybrid).ydesign-active .ydesign-card .card__view {width: 100%;height: 0 !important;border-radius: 0.85em !important;box-shadow: 0 0 0 4px transparent;transition: background-color 0.4s ease, box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);}",
             "body:not(.stremio-hybrid).ydesign-active .ydesign-card.ydesign-vertical .card__view {padding-bottom: 177.77% !important;}",
             "@media (min-width: 769px) {.ydesign-active .card.ydesign-vertical {width: calc(100% / var(--ydesign-grid-items-v, 5));height: auto !important;}",
-            ".ydesign-active .items-line:not(.vinyl-line) .card.ydesign-vertical {width: calc(100% / var(--ydesign-grid-items-v, 5));}}",
+            ".ydesign-active .items-line:not(.vinyl-line) .card.ydesign-vertical {width: calc((100% + var(--ydesign-card-gap, .8em)) / var(--ydesign-grid-items-v, 5) - var(--ydesign-card-gap, .8em));margin-left:0 !important;margin-right:0 !important;}}",
             "@media (max-width: 768px) {.ydesign-active .card.ydesign-vertical {width: calc(100% / 2);height: auto !important;}",
             ".ydesign-active .items-line:not(.vinyl-line) .card.ydesign-vertical {width: 46vw;}}",
             ".ydesign-img-layer {position: absolute;top: 0;left: 0;width: 100%;height: 100%;background-color: #1a1a1a;background-image: url(\"./img/img_load.svg\");background-size: cover !important;background-repeat: no-repeat;background-position: center center !important;}",
