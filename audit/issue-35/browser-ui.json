@@ -1,0 +1,258 @@
+{
+  "commit": "f8708d850d00514be1f1f0a04a80d886ab56c776",
+  "checks": [
+    {
+      "name": "Shared responsive columns visibly widen the rail and retain screen bounds at1080p",
+      "status": "PASS",
+      "data": {
+        "before": {
+          "width": 1920,
+          "height": 1080,
+          "pane": {
+            "left": 1344,
+            "right": 1920,
+            "width": 576
+          },
+          "column": {
+            "left": 133.375,
+            "right": 1262.5,
+            "width": 1129.125
+          },
+          "host": {
+            "left": 90.3125,
+            "right": 1920,
+            "width": 1829.6875
+          },
+          "overflow": false
+        },
+        "after": {
+          "width": 1920,
+          "height": 1080,
+          "pane": {
+            "left": 1151.5625,
+            "right": 1920,
+            "width": 768.4375
+          },
+          "column": {
+            "left": 133.375,
+            "right": 1120,
+            "width": 986.625
+          },
+          "host": {
+            "left": 90.3125,
+            "right": 1920,
+            "width": 1829.6875
+          },
+          "overflow": false
+        }
+      }
+    },
+    {
+      "name": "ButtonsPlus OFF plain collapsed synopsis and one action",
+      "status": "PASS",
+      "data": {
+        "plain": true,
+        "collapsed": true,
+        "toggles": 1,
+        "torrentAvailable": false,
+        "torrentFocused": false,
+        "searches": 0
+      }
+    },
+    {
+      "name": "ButtonsPlus OFF initial focus uses available Torrents without triggering search",
+      "status": "PASS",
+      "data": {
+        "plain": true,
+        "collapsed": true,
+        "toggles": 1,
+        "torrentAvailable": false,
+        "torrentFocused": false,
+        "searches": 0
+      }
+    },
+    {
+      "name": "ButtonsPlus OFF clicking text cannot open synopsis dialog",
+      "status": "PASS"
+    },
+    {
+      "name": "ButtonsPlus OFF explicit OK expands on same focus",
+      "status": "PASS"
+    },
+    {
+      "name": "ButtonsPlus OFF explicit OK collapses without focus loss",
+      "status": "PASS"
+    },
+    {
+      "name": "ButtonsPlus ON / series plain collapsed synopsis and one action",
+      "status": "PASS",
+      "data": {
+        "plain": true,
+        "collapsed": true,
+        "toggles": 1,
+        "torrentAvailable": true,
+        "torrentFocused": true,
+        "searches": 0
+      }
+    },
+    {
+      "name": "ButtonsPlus ON / series initial focus uses available Torrents without triggering search",
+      "status": "PASS",
+      "data": {
+        "plain": true,
+        "collapsed": true,
+        "toggles": 1,
+        "torrentAvailable": true,
+        "torrentFocused": true,
+        "searches": 0
+      }
+    },
+    {
+      "name": "ButtonsPlus ON / series clicking text cannot open synopsis dialog",
+      "status": "PASS"
+    },
+    {
+      "name": "ButtonsPlus ON / series explicit OK expands on same focus",
+      "status": "PASS"
+    },
+    {
+      "name": "ButtonsPlus ON / series explicit OK collapses without focus loss",
+      "status": "PASS"
+    },
+    {
+      "name": "Anime plain collapsed synopsis and one action",
+      "status": "PASS",
+      "data": {
+        "plain": true,
+        "collapsed": true,
+        "toggles": 1,
+        "torrentAvailable": true,
+        "torrentFocused": true,
+        "searches": 0
+      }
+    },
+    {
+      "name": "Anime initial focus uses available Torrents without triggering search",
+      "status": "PASS",
+      "data": {
+        "plain": true,
+        "collapsed": true,
+        "toggles": 1,
+        "torrentAvailable": true,
+        "torrentFocused": true,
+        "searches": 0
+      }
+    },
+    {
+      "name": "Anime clicking text cannot open synopsis dialog",
+      "status": "PASS"
+    },
+    {
+      "name": "Anime explicit OK expands on same focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Anime explicit OK collapses without focus loss",
+      "status": "PASS"
+    },
+    {
+      "name": "Native embedded source list renders controlled parser results",
+      "status": "PASS"
+    },
+    {
+      "name": "Complete long release keeps season/HDR/codec/audio and wraps without ellipsis",
+      "status": "PASS",
+      "data": {
+        "text": "Fixture.Movie.2024.S02E01-E12.2160p.UHD.BluRay.Remux.Dolby.Vision.HDR10Plus.HEVC.x265.10bit.Ukrainian.English.Multi.Audio.Release.Group.Extended.Edition.mkv",
+        "overflow": false,
+        "whiteSpace": "normal",
+        "clamp": "none",
+        "font": "15.3974px"
+      }
+    },
+    {
+      "name": "Embedded source Back returns to actual Full without changing title owner",
+      "status": "PASS"
+    },
+    {
+      "name": "Absent synopsis has no redundant expand action",
+      "status": "PASS"
+    },
+    {
+      "name": "Theme off restores original native selectable synopsis and removes owned action",
+      "status": "PASS"
+    },
+    {
+      "name": "Changed Hybrid source bytes verified",
+      "status": "PASS",
+      "data": {
+        "ui/stremio-hybrid.js": "10338d3a996fa2d001b30cfa9d6b6602f93795be8372392b3f440b24c2ce6f3c",
+        "ui/buttons-plus.js": "d8f36832b021642758fa57dd0020fd347413aabd50562b1bdad16e6329873915"
+      }
+    },
+    {
+      "name": "No JavaScript exceptions",
+      "status": "PASS",
+      "data": []
+    }
+  ],
+  "blocked": [
+    "ButtonsPlus OFF: no visible native Torrent action; existing #42 hidden-template integration not imported"
+  ],
+  "sources": {
+    "ui/stremio-hybrid.js": "10338d3a996fa2d001b30cfa9d6b6602f93795be8372392b3f440b24c2ce6f3c",
+    "ui/buttons-plus.js": "d8f36832b021642758fa57dd0020fd347413aabd50562b1bdad16e6329873915"
+  },
+  "errors": [],
+  "limits": [
+    "Synthetic metadata/parser responses; no real account or TorrServer writes",
+    "Physical Google TV NOT TESTED; native Files/playback #14/#42 not certified"
+  ],
+  "css1080": {
+    "width": 1920,
+    "height": 1080,
+    "dpr": 1
+  },
+  "before": {
+    "width": 1920,
+    "height": 1080,
+    "pane": {
+      "left": 1344,
+      "right": 1920,
+      "width": 576
+    },
+    "column": {
+      "left": 133.375,
+      "right": 1262.5,
+      "width": 1129.125
+    },
+    "host": {
+      "left": 90.3125,
+      "right": 1920,
+      "width": 1829.6875
+    },
+    "overflow": false
+  },
+  "after": {
+    "width": 1920,
+    "height": 1080,
+    "pane": {
+      "left": 1151.5625,
+      "right": 1920,
+      "width": 768.4375
+    },
+    "column": {
+      "left": 133.375,
+      "right": 1120,
+      "width": 986.625
+    },
+    "host": {
+      "left": 90.3125,
+      "right": 1920,
+      "width": 1829.6875
+    },
+    "overflow": false
+  },
+  "qualification": "Two early viewport snapshots preceded native resize settling and are superseded by browser-layout.json. The remaining23 UI assertions are unchanged runtime logic; subsequent product change is only row font size.",
+  "testedTree": "da1fb01cd4166445167ee9b56e309f4d5b6ec3cc"
+}

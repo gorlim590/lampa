@@ -446,6 +446,7 @@
 - Next: publish scoped follow-up PR, required CI, authorized merge if green; verify main/postmerge; report #10 without premature closure/user acceptance.
 
 
+
 ## 2026-10-24 — AI agent workflow preparation (documentation only)
 - Baseline main:67bad5f5432022030a93bd1c2b1ceef3bb7c63e6; branch docs/ai-agent-workflow. Existing product/tests/CI inspected only at relevant ownership boundaries, no repeated runtime audit.
 - Added AGENTS.md, shared CLAUDE.md import, docs/ARCHITECTURE.md, docs/TESTING.md, docs/PLUGIN_COMPATIBILITY.md; README links and loader/manual distinction corrected.

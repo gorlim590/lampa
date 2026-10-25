@@ -1,0 +1,182 @@
+{
+  "baseline": "4cb4efa64d4dfb8cfa87624f105d1f4390a5375a",
+  "checks": [
+    {
+      "name": "Official collection/current film unique; only Trakt related, no native recommendation rows",
+      "status": "PASS",
+      "data": {
+        "rows": [
+          "start",
+          "description",
+          {
+            "type": "persons",
+            "title": "Режисер",
+            "ids": [
+              9002
+            ]
+          },
+          {
+            "type": "persons",
+            "title": "Актори",
+            "ids": [
+              9001
+            ]
+          },
+          {
+            "type": "cards",
+            "title": "Колекція Trakt",
+            "ids": [
+              1001,
+              1002
+            ]
+          },
+          {
+            "type": "cards",
+            "title": "Подібні Trakt",
+            "ids": [
+              1003
+            ]
+          }
+        ],
+        "modelBudget": 123,
+        "fields": 0
+      }
+    },
+    {
+      "name": "Lower details fields absent while source budget retained",
+      "status": "PASS",
+      "data": {
+        "rows": [
+          "start",
+          "description",
+          {
+            "type": "persons",
+            "title": "Режисер",
+            "ids": [
+              9002
+            ]
+          },
+          {
+            "type": "persons",
+            "title": "Актори",
+            "ids": [
+              9001
+            ]
+          },
+          {
+            "type": "cards",
+            "title": "Колекція Trakt",
+            "ids": [
+              1001,
+              1002
+            ]
+          },
+          {
+            "type": "cards",
+            "title": "Подібні Trakt",
+            "ids": [
+              1003
+            ]
+          }
+        ],
+        "modelBudget": 123,
+        "fields": 0
+      }
+    },
+    {
+      "name": "Remote Down reaches the actual native cast card",
+      "status": "PASS"
+    },
+    {
+      "name": "Native person has watched section, filters and partial-series evidence",
+      "status": "PASS",
+      "data": {
+        "titles": [],
+        "text": "\n    \n    \n        \n            \n        \n    \n    \n    \n        \n            \n        \n\n    \n        \n            \n                \n            \n        \n\n        \n            \n                \n                     Невідомо\n                \n            \n            \n            Контрольна акторка\n            Невідомо\n\n            \n                \n                    \n                        \n                    \n                \n\n                \n                    \n                        \n                        \n                    \n                    Підписатися\n                \n            Роботи · фільтрСортування\n        \n    \n\n    \n\n\n    \n        Переглянуто з цим актором · Trakt (2)\n    \n    \n    \n        \n            \n        \n    СеріалTrakt · 2/10 еп.\n\n    Частково переглянутий серіал\n    2021\n\n    Фільм\n\n    Контрольний фільм 1001\n    2020\n\n    \n\n\n    \n        Інші роботи (1)\n    \n    \n    \n        \n            \n        \n    \n        \n\n        \n            \n        \n    8.0\n\n    Контрольний фільм 1003\n    2022\n\n    \n\n\n    \n\n    \n",
+        "personCalls": 1,
+        "calls": 9
+      }
+    },
+    {
+      "name": "Partial episode badge is explicit and not a whole-show watched marker",
+      "status": "PASS"
+    },
+    {
+      "name": "Remote watched filter reuses credits without per-card Trakt requests",
+      "status": "PASS"
+    },
+    {
+      "name": "Native Back restores the originating Full page/cast focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Reopen reuses native actor and cached credits",
+      "status": "PASS"
+    },
+    {
+      "name": "Rating sort survives native actor year sorting and restores the Sort action",
+      "status": "PASS"
+    },
+    {
+      "name": "New account cannot retain A watched status; metadata is still cached",
+      "status": "PASS"
+    },
+    {
+      "name": "Logout keeps unknown distinct from confirmed unwatched and preserves cached public credits",
+      "status": "PASS"
+    },
+    {
+      "name": "No franchise creates no collection row",
+      "status": "PASS"
+    },
+    {
+      "name": "Sparse metadata retains overview without an empty lower Details row",
+      "status": "PASS"
+    },
+    {
+      "name": "Theme off restores native sparse overview/Details",
+      "status": "PASS"
+    },
+    {
+      "name": "Theme reactivation omits the empty lower row again",
+      "status": "PASS"
+    },
+    {
+      "name": "Changed source hashes match",
+      "status": "PASS",
+      "data": {
+        "ui/stremio-hybrid.js": "b8997f03b19ae793923b0279c758e0ec146a93ecceab84a928b67aa6f2f7d0a4",
+        "trakt/trakt.js": "8e2c13227c1bde2893da47d57015da9b86d8795079cc7273d198cbd15166911d",
+        "trakt/trakt-plus.js": "17643ce3c907ae99b93c23066abf3af0c3405cb0dddf6268777327ec0c5ac68c",
+        "ui/interface-plus.js": "3d84de325be4f9c09578caa604ac16c1d0c9da67574fc52ad571f4cc9a0ef979",
+        "ui/design-optimized.js": "1c0fb026155d411599f7f303ca2926512a890500892fe0aeb02593117a9a4d1d",
+        "ui/cardify-plus.js": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb"
+      }
+    },
+    {
+      "name": "No JavaScript exceptions",
+      "status": "PASS",
+      "data": []
+    }
+  ],
+  "errors": [],
+  "sources": {
+    "ui/stremio-hybrid.js": "b8997f03b19ae793923b0279c758e0ec146a93ecceab84a928b67aa6f2f7d0a4",
+    "trakt/trakt.js": "8e2c13227c1bde2893da47d57015da9b86d8795079cc7273d198cbd15166911d",
+    "trakt/trakt-plus.js": "17643ce3c907ae99b93c23066abf3af0c3405cb0dddf6268777327ec0c5ac68c",
+    "ui/interface-plus.js": "3d84de325be4f9c09578caa604ac16c1d0c9da67574fc52ad571f4cc9a0ef979",
+    "ui/design-optimized.js": "1c0fb026155d411599f7f303ca2926512a890500892fe0aeb02593117a9a4d1d",
+    "ui/cardify-plus.js": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb"
+  },
+  "limitations": [
+    "Synthetic Trakt/metadata; no real account writes or live Trakt confirmation",
+    "Physical Google TV NOT TESTED",
+    "Inherited unrelated preview-loader/plugin resource failures appeared as a native load-warning banner; not accepted as coverage of those plugins.",
+    "Native real UI, controlled synthetic API fixtures; not a live-service end-to-end test."
+  ],
+  "testedProductCommit": "2416f37c75426520466dbef407ca348ce6daf9dc",
+  "sourceVerification": "Response bytes SHA-256 equal git show testedProductCommit:path. Base Trakt executes the complete source followed by a test-only public API transport override; other plugins execute unmodified.",
+  "publishedProductCommit": "f0dd93f36505b7a336ae5e4ed9151f6ce299dd41",
+  "testedTree": "b6451692a71fc1a640060601d3c9e92a291262e3",
+  "publicationProof": "Connector-created commits have different commit metadata; Git tree and all product blobs are exactly equal."
+}

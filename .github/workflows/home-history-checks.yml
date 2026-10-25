@@ -14,4 +14,4 @@ jobs:
         with:
           node-version: 20
       - name: Focused Home history checks
-        run: node --test --test-timeout=15000 tests/home-history.cjs
+        run: node --test --test-timeout=15000 tests/home-history.cjs tests/home-trakt-progress.cjs tests/home-progress-display.cjs
