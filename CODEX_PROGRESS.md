@@ -467,3 +467,8 @@ Next: publish3logicalcommits/DraftPR, verifyCI, commentIssue21 precisePARTIAL st
 - Remainingcritical: actual3titles/missingnativebindings unavailable; remote-onlycandidate discovery/Traktplaybackexactseek and release-onlystalecomplete invalidation remainPartial. PhysicalTV/liveTrakt/TorrServerNOTTESTED. PublishDraftPR+greenCI/report; DO NOTMERGE/CLOSE25 until criticalacceptance established. Do not start anotherIssue.
 
 Final CDP at6365ad6:17PASS/0FAIL/noexceptions, sixexactsourcehashes; native20splayerresume/Back,7resumes, explicitreplay, profile/DOMscope/Hybrid/offlinePASS. No remainingbrowserfailure; previousfalseglobalDOMassertioncorrected. Draft publication pending; physical/originaldata blockers remain.
+
+### Issue25 bounded release refresh / latest merge authorization
+- Newshowreleaseproof triggers onlymappedshowprogress viaexisting2slotqueue, dedup+5mincooldown+session/readEpochcancellation; validatedcachedstatus+Homeupdatedbyexistingevent. NofullsyncperHome, no newtimers/observers. Invalid/future/special/duplicateepisodes ignored. Missingverifiedmapping/timetable conservativelywaitsexistingproviderrefresh.
+-143affectedtestsPASS inclrestartmapping; focusedreleaseCDP5PASS/noexceptions/exact6sourcehashes at localafec022/publishedf3729331f0ec86ef2f38e163a4b248d2ebbb0da4. Prior17browser/native20sreplay/profilepassedresultsreused. Original3titlesNOTVERIFIED, no personaldatawrites.
+- Ordinarygitpushdryrunfailedonce(noUsernamecredentials); nosecretaccess. PublishonlydeltaAPIbatch+exacttreeproof. Latestuser explicitly saysafterchecksmergeallowed; mergeverifiedscopeifnewheadCIgreen, keepIssue25openforunverifiedpersonal/remote-onlycases. Do not claim merge beforeverified; finalCI/deploymentfollowsinIssue/rootcheckpoint.

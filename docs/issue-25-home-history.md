@@ -1,6 +1,6 @@
 # Issue #25 follow-up — current checkpoint (2026-10-25)
 
-**PARTIAL; do not merge or close #25 yet.** Baseline `main@f87edf3d969b8d91cd019099637e753c70563689` after #44. Branch `fix/issue-25-home-completion`. The historical report below describes the original PR#32; this section supersedes its replay rule and extends its cached episode support. Draft#29 remains unrelated/unmerged.
+**PARTIAL issue acceptance; keep #25 open. Verified fixes may merge after green CI under the latest user authorization.** Baseline `main@f87edf3d969b8d91cd019099637e753c70563689` after #44. Branch `fix/issue-25-home-completion`. The historical report below describes the original PR#32; this section supersedes its replay rule and extends its cached episode support. Draft#29 remains unrelated/unmerged.
 
 ## Current real-data observation
 
@@ -32,13 +32,25 @@ HOME25_PROFILE_ONLY=1 node tests/home-history-browser.cjs
 
 Two harness issues were corrected rather than counted as success: source verification raced async Home Policy loading; profile assertions originally included hidden cached activities. Scoping to `.activity--active` confirmed native cleanup works. An unnecessary provisional DOM-removal change was reverted; no such change remains in the final diff. Repeated expensive scenarios were only rerun after changed source or these concrete failures.
 
+## Bounded new-episode refresh update
+
+Existing verified cached aired counts can stay complete until the next normal Trakt refresh. Home now supplies only already-cached native aired metadata to `TraktPlus.refreshHomeProgress()`. If distinct aired episode count exceeds the verified snapshot, or an aired timestamp is newer than that snapshot, the existing **two-slot progress queue** requests only that mapped show progress endpoint. No full watched/history sync. Requests coalesce per show, are capped by the existing queue, and retry at most once per5minutes; errors retain unknown semantics and use existing backoff. Session/epoch cancellation prevents late-account results. Validated progress updates existing cache and emits the existing notification, refreshing mounted Home. Duplicate/future/special/invalid timetable entries do not trigger requests. No new timer/observer. Old caches without a verified show mapping or missing reliable metadata wait for the normal provider refresh instead of guessing.
+
+**143 affected unit/regression tests PASS** (the142-test affected run plus the added restart case); previous unrelated successes reused. New tests cover new-airing transition, dedup/cooldown, no full sync, metadata rejection, failure/backoff, stale-account callbacks and verified mapping restoration after restart. A focused existing-CDP release-only pass has **5PASS/0FAIL**, no exceptions, six exact source hashes at localafec022 / published exact-tree `f3729331f0ec86ef2f38e163a4b248d2ebbb0da4`. It confirms complete->new episode->one progress HTTP->unwatched cache->next episode in mounted Home, no fabricated seconds, exactly1request/no full sync on repeated builds. Existing replay/native20sresume/profile/dedup evidence remains applicable, with targeted regression tests repeated for the changed code.
+
+```sh
+HOME25_RELEASE_ONLY=1 node tests/home-history-browser.cjs
+```
+
+Normal git push was attempted once with interactive prompts disabled and failed: `could not read Username for https://github.com`. No credentials were read/extracted. Only changed files are published via the connected GitHub API in one logical batch, with exact trees verified; earlier commits are not uploaded again.
+
 ## Remaining acceptance / merge blockers
 
 - **Original three titles and missing personal entries unavailable.** Need the original populated profile or concrete examples, including which source/player produced the progress. The current profile's unlinked Timeline hashes cannot safely be reverse-mapped to invented cards. Do not edit user history to manufacture links.
 - Native-card candidates and cached timetable are still required. This is not a complete download of remote Trakt Watched/Playback. The base Trakt playback endpoint exists, but its percentages are not a verified native provider hash/exact-seconds resume binding. No speculative seek is added.
-- New TV/anime episodes are handled after fresh confirmed Trakt evidence and an aired timetable are available. Automatic release-time invalidation when only an old complete Trakt snapshot is present, missing timetables and full remote library discovery remain **Partial**, not claimed solved. No full watched sync is initiated on each Home visit.
+- New TV/anime episodes are handled after fresh confirmed Trakt evidence and an aired timetable are available. Automatic release-time invalidation is addressed by the bounded refresh update below; missing/unreliable timetables and full remote library discovery remain Partial. No full watched sync is initiated on each Home visit.
 - Physical Google TV, real Trakt account/service, real external-player/TorrServer/provider-return/cloud path are **NOT TESTED**. Controlled native PCM proves native resume only. Existing #7/#44 behavior is covered by relevant regressions, not blanket all-plugin certification.
-- Keep this PR Draft/open and Issue#25 open until the critical personal-data acceptance can be established. No merge/Pages deployment for this follow-up is claimed. Existing published main remains unchanged.
+- Latest user authorization permits merging the verified fixes after all checks. Keep Issue#25 open and the initial three-title case NOT VERIFIED; merge/deployment results are recorded in the Issue and root checkpoint after publication.
 
 ---
 
