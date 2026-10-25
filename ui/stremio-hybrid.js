@@ -733,7 +733,8 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
     function streamDetails(st){
         var row=st.selectedRow;if(!row)return;
         var source=st.sourceData.get(row)||{},raw=source.Title||source.title||row.querySelector('.torrent-item__title')?.textContent||row.title;
-        var text=document.createElement('div');text.className='sh-release-details';text.textContent=raw+'\n\n'+(row.querySelector('.ctr-chips')?.textContent||'')+'\n'+(row.querySelector('.ctr-metrics')?.textContent||'')+'\n\n'+(row.querySelector('.torrent-item__ffprobe')?.textContent||'');
+        function fields(selector){var group=row.querySelector(selector);return group?Array.prototype.map.call(group.children,function(n){return n.textContent.trim();}).filter(Boolean).join(' · '):'';}
+        var text=document.createElement('div');text.className='sh-release-details';text.textContent=raw+'\n\n'+fields('.ctr-chips')+'\n'+fields('.ctr-metrics')+'\n\n'+fields('.torrent-item__ffprobe');
         Lampa.Modal.open({title:'Деталі релізу',html:$(text),size:'large',onBack:function(){Lampa.Modal.close();if(streamAlive(st))streamActivate(st.record);}});
     }
     function streamInfo(record) {

@@ -4,6 +4,7 @@
     if (window.LampaTorrentOverlay) return;
     var css = `
 body.stremio-hybrid .sh-has-streams.sh-overlay-mode .sh-movie-column{width:100%!important;max-width:100%!important}
+body.stremio-hybrid .sh-overlay-mode .sh-movie .full-start-new__buttons{order:2!important;margin:.3em -.2em .6em!important}
 body.stremio-hybrid .sh-torrent-overlay[hidden]{display:none!important}
 body.stremio-hybrid .sh-torrent-overlay{position:fixed!important;inset:5vh 7vw!important;width:86vw!important;height:90vh!important;max-height:none!important;z-index:20;box-sizing:border-box;padding:clamp(14px,1.25vw,48px)!important;border:1px solid #ffffff28!important;border-radius:clamp(14px,1.1vw,36px)!important;background:#11131e!important;box-shadow:0 0 0 100vmax #03050a80;display:flex;flex-direction:column;gap:.65em;font:400 clamp(16px,1.1458vw,44px)/1.4 Manrope,system-ui,sans-serif;color:#eef1f8;isolation:isolate}
 body.stremio-hybrid .sh-torrent-overlay .sh-stream-head{display:flex;align-items:center;gap:.7em;flex:none;padding:0!important;font-size:1em!important}
