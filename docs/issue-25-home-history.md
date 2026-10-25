@@ -1,6 +1,30 @@
 # Issue #25 follow-up — current checkpoint (2026-10-25)
 
-**PARTIAL issue acceptance; keep #25 open. Verified fixes may merge after green CI under the latest user authorization.** Baseline `main@f87edf3d969b8d91cd019099637e753c70563689` after #44. Branch `fix/issue-25-home-completion`. The historical report below describes the original PR#32; this section supersedes its replay rule and extends its cached episode support. Draft#29 remains unrelated/unmerged.
+## Physical Google TV example — read-only follow-up
+
+The newest user instruction restores the strict merge gate: **keep PR#46 Draft/open until the critical physical three-title provenance is confirmed. No merge based only on fixtures.** The earlier authorization to merge verified fixes does not close this new acceptance requirement.
+
+| Title | Confirmed public metadata IDs | Available CDP Timeline | Provenance / inclusion |
+|---|---|---|---|
+| Witchboard(2025) | TMDB1107325 / Trakt890864 / IMDbtt2256055 | Original-title hash321464223:21%,1388.541s/6771.04s; no updated/card | Legacy values exist, match active CDP profile. Movie-ID binding, Google TV27%, real playback and row membership **NOT VERIFIED**. With an active candidate and unambiguous partial position it may enter; percent-only or ambiguous remake evidence must not. |
+| Salem’s Lot(2024) | TMDB748230 / Trakt588276 / IMDbtt10245072 | Original-title hash765975203:23%,1593.401s/6812.258s; no updated/card | Same limitations. Same-name older TV titles cannot be merged with this movie. |
+| Third title | unknown | unknown | **NOT VERIFIED**; no guessing from poster/other records. |
+
+Native TMDB search and existing Trakt TMDB-ID search confirmed the two public ID mappings, **not the association of the old title-only Timeline record with that specific release**. Both saved records explicitly belong to the current CDP profile; no other-profile records were found in its active namespace. This does not verify the profile used on physical Google TV. Native Timeline has persisted seconds/duration but no last-played timestamp or stable content link in these two records; imported/stale values cannot prove actual playback. The observed21% is not the photographed27%.
+
+Active synced Favorite.get delegates to current cloud Bookmarks, which has0History candidates. Standalone Storage.favorite contains100History entries but is a different source, not a substitute. Home History is not active in this Chromium, so the photographed three-row composition cannot be reconstructed there. Both row owners generate `(count)` from eligible cards; no hardcoded3 limit exists. Why exactly those three / why the user's missing titles are absent on TV remains NOT VERIFIED. Read-only, privacy-safe evidence: `audit/issue-25-followup/google-tv-example-readonly.json`. No tokens, raw account IDs, full history or user photo included.
+
+**Additional confirmed defect:** legacy YDesign `moviePercent` takes the largest percent across alternative title/provider hashes, even when Home History has selected another native position. Scoped managed-Home fix uses its selected resume metadata and invalidates same-DOM mark cache when that changes. Unmanaged YDesign behavior is preserved; Draft#29 is not imported. This mechanism is reproduced with21vs27 and movie/TV/remake title collisions; it is **not claimed as the proven cause of the user's photo**.
+
+Latest affected run: **78targeted tests PASS /0FAIL** (Home, new-release provider, progress-display and #44 adapter regressions); **3focused CDP display assertions PASS**, six exact source hashes, no exceptions at local2a73657 / published exact-tree96554724072f9dbb214e0ee61c3245d82d9d6f63. Real modified YDesign uses selected native33% rather than a conflicting legacy88% in the controlled scenario. Earlier5release and17native player/replay/profile assertions are reused for unchanged paths; no full audit/profiling repeated.
+
+```sh
+node --test --test-timeout=15000 tests/home-history.cjs tests/home-trakt-progress.cjs tests/home-progress-display.cjs tests/details-cast.cjs
+HOME25_DISPLAY_ONLY=1 node tests/home-history-browser.cjs
+```
+
+
+**PARTIAL; latest physical-example acceptance is NOT VERIFIED. Keep PR#46 Draft and Issue#25 open.** Baseline `main@f87edf3d969b8d91cd019099637e753c70563689` after #44. Branch `fix/issue-25-home-completion`. The historical report below describes the original PR#32; this section supersedes its replay rule and extends its cached episode support. Draft#29 remains unrelated/unmerged.
 
 ## Current real-data observation
 
