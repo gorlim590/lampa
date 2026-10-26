@@ -12,11 +12,11 @@ test('missing IMDb identity resolves through the native Reguest transport for mo
  for(const [method,seasons,expected] of [['movie',undefined,'movie'],['tv',2,'tv'],['movie',3,'tv']]){
   const sent=[],ids=[];let response;
   const Lampa={Reguest:function(){this.silent=(url,ok)=>{sent.push(url);response=ok;}},TMDB:{api:path=>'fixture/'+path,key:()=>'fixture-key'}};
-  const c={ratingStatus:()=>{},container:{},window:{Lampa},Lampa,imdb_id:'',movie:{id:438631,number_of_seasons:seasons},e:{object:{method}},requestOMDB:id=>ids.push(id)};
+  const c={ratingStatus:()=>{},container:{},window:{Lampa},Lampa,imdb_id:'',movie:{id:438631,number_of_seasons:seasons},e:{object:{method}},requestSources:id=>ids.push(id)};
   vm.runInNewContext(code,c);assert.equal(sent.length,1);assert(sent[0].startsWith('fixture/'+expected+'/438631/external_ids?'));assert.deepEqual(ids,[]);
   response({});assert.deepEqual(ids,[]);response({imdb_id:'tt1160419'});assert.deepEqual(ids,['tt1160419']);
  }
- const ids=[];vm.runInNewContext(code,{ratingStatus:()=>{},container:{},imdb_id:'tt1160419',requestOMDB:id=>ids.push(id)});assert.deepEqual(ids,['tt1160419']);
+ const ids=[];vm.runInNewContext(code,{ratingStatus:()=>{},container:{},imdb_id:'tt1160419',requestSources:id=>ids.push(id)});assert.deepEqual(ids,['tt1160419']);
 });
 
 test('public request diagnostics expose only status codes and bound requests',()=>{
@@ -33,4 +33,23 @@ test('public request diagnostics expose only status codes and bound requests',()
  config.error({status:0},'error');assert.equal(attrs['data-rating-omdb'],'network-error');
  config.complete();assert.equal(completed,1);assert.equal(consumed,2);assert(!JSON.stringify(attrs).includes('private'));
  assert.equal(c.ratingResponseStatus(null),'invalid-response');assert.equal(c.ratingResponseStatus({ratings:[]}),'received');
+});
+
+test('public sources start independently and do not wait for a hanging OMDb callback',()=>{
+ const started=[];const c={requestOMDB:id=>started.push('omdb:'+id),requestMDBList:id=>started.push('mdb:'+id)};
+ const start=source.indexOf('        var requestSources = function('),end=source.indexOf('        // Full completion',start);
+ vm.runInNewContext(source.slice(start,end),c);c.requestSources('tt1160419');assert.deepEqual(started,['omdb:tt1160419','mdb:tt1160419']);
+ const omdb=source.slice(source.indexOf('        var requestOMDB ='),start);assert(!omdb.includes('requestMDBList('));
+});
+test('overlapping public sources cannot append a second IMDb rating',()=>{
+ let appended=0;const c={isRatingEnabled:()=>true};vm.createContext(c);
+ const start=source.indexOf('    function addRatingBlock('),end=source.indexOf('\n    function ',start+10);vm.runInContext(source.slice(start,end),c);
+ const container={find:selector=>({length:selector.includes('data-rating-key=')?1:0}),append:()=>appended++};
+ c.addRatingBlock(container,'rate--omdb-imdb','',8,'imdb');c.addRatingBlock(container,'rate--mdblist-imdb','',8,'imdb');assert.equal(appended,0);
+});
+
+test('repeated Full completion coalesces sources on the same container without mixing movie/show IDs',()=>{
+ const c={};vm.createContext(c);vm.runInContext(source.slice(source.indexOf('    function beginPublicRatings('),source.indexOf('    function getRatingGap(')),c);
+ const host={0:{}};assert.equal(c.beginPublicRatings(host,{id:10},'movie'),true);assert.equal(c.beginPublicRatings(host,{id:10},'movie'),false);
+ assert.equal(c.beginPublicRatings(host,{id:10},'tv'),true);assert.equal(c.beginPublicRatings(host,{id:11},'tv'),true);assert.equal(c.beginPublicRatings({0:{}},{id:10},'movie'),true);
 });

@@ -145,6 +145,14 @@
             }, complete: complete
         });
     }
+    function beginPublicRatings(container, movie, method) {
+        var node = container[0];
+        if (!node) return true;
+        var identity = (method === 'tv' || movie.number_of_seasons ? 'tv:' : 'movie:') + movie.id;
+        if (node._publicRatingIdentity === identity) return false;
+        node._publicRatingIdentity = identity;
+        return true;
+    }
     function getRatingGap() { return Lampa.Storage.get('omdb_rating_gap', '0.5em'); }
     function getRatingMargin() { return Lampa.Storage.get('omdb_rating_margin', '10px'); }
     function getSaturation() { return Lampa.Storage.get('omdb_rating_saturation', '100%'); }
@@ -201,6 +209,9 @@
 
     function addRatingBlock(container, className, iconUrl, rawValue, keyName) {
         if (keyName && !isRatingEnabled(keyName)) return;
+        // OMDb and MDBList can both return IMDb/RT/MC. Keep one public score
+        // regardless of which independent request finishes first.
+        if (keyName && keyName !== 'awards' && container.find('.custom-rating[data-rating-key="' + keyName + '"]').length) return;
         if (container.find('.' + className).length > 0) return; 
         if (!rawValue || rawValue === '0' || rawValue === '0.0' || rawValue === 'N/A' || rawValue === '0%') return;
         
@@ -565,8 +576,7 @@
 
         var requestOMDB = function(id) {
             var key = ratingsApiKey('omdb');
-            var onDone = function() { requestMDBList(id); };
-            if (!key) { ratingStatus(container, 'omdb', 'missing-key'); return onDone(); }
+            if (!key) { ratingStatus(container, 'omdb', 'missing-key'); return; }
 
             requestPublicRating(container, 'omdb', 'https://www.omdbapi.com/?apikey=' + key + '&i=' + id, function(data) {
                 if (data && data.Response !== "False") {
@@ -581,12 +591,20 @@
                     if (rt && isRatingEnabled('rt')) addRatingBlock(container, 'rate--omdb-rt', icons.rt, rt.Value, 'rt');
                     if (data.imdbRating && data.imdbRating !== 'N/A' && isRatingEnabled('imdb')) addRatingBlock(container, 'rate--omdb-imdb', icons.imdb, data.imdbRating, 'imdb');
                 }
-            }, onDone);
+            }, function () {});
         };
 
+        var requestSources = function(id) {
+            requestOMDB(id);
+            requestMDBList(id);
+        };
+
+        // Full completion may be delivered twice; keep layout refreshes cheap
+        // and do not restart the same API requests on its existing container.
+        if (!beginPublicRatings(container, movie, e.object.method)) return;
         requestMAL();
 
-        if (imdb_id) { ratingStatus(container, 'identity', 'provided'); requestOMDB(imdb_id); }
+        if (imdb_id) { ratingStatus(container, 'identity', 'provided'); requestSources(imdb_id); }
         else if (movie.id) {
             ratingStatus(container, 'identity', 'loading');
             var type = (e.object.method === 'tv' || movie.number_of_seasons) ? 'tv' : 'movie';
@@ -594,7 +612,7 @@
                 var externalIdsRequest = new Lampa.Reguest();
                 externalIdsRequest.silent(Lampa.TMDB.api(type + '/' + movie.id + '/external_ids?api_key=' + Lampa.TMDB.key()), function (res) {
                     ratingStatus(container, 'identity', res && res.imdb_id ? 'resolved' : 'missing');
-                    if (res && res.imdb_id) requestOMDB(res.imdb_id);
+                    if (res && res.imdb_id) requestSources(res.imdb_id);
                 }, function () { ratingStatus(container, 'identity', 'request-error'); });
             } else ratingStatus(container, 'identity', 'transport-unavailable');
         }
