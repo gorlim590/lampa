@@ -30,7 +30,6 @@ body.stremio-hybrid .sh-torrent-overlay .scroll{mask-image:none!important;-webki
 body.stremio-hybrid .sh-torrent-overlay .scroll__body{padding:.15em!important;min-width:0}
 body.stremio-hybrid .sh-torrent-overlay .parser-providers-toolbar{font-size:1em;flex-wrap:wrap}
 body.stremio-hybrid .sh-torrent-overlay .parser-search-status{display:none}
-body.stremio-hybrid .sh-release-details{font-size:1.15em;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:900px){body.stremio-hybrid .sh-torrent-overlay{inset:4vh 4vw!important;width:92vw!important;height:92vh!important}body.stremio-hybrid .sh-torrent-overlay .ctr-row{grid-template-columns:3.5em minmax(0,1fr);gap:.65em}body.stremio-hybrid .sh-torrent-overlay .ctr-metrics{grid-column:2;text-align:left;display:flex;flex-wrap:wrap;gap:.8em}}
 `;
     function installStyle() {
@@ -65,13 +64,9 @@ body.stremio-hybrid .sh-release-details{font-size:1.15em;line-height:1.6;white-s
     function releaseView(source,movie,kind) {
         source=source||{};movie=movie||{};var api=window.TorrentsRedesign,raw=String(source.Title||source.title||''),data=api&&api.normalizeRelease?api.normalizeRelease(source):null;
         var match=data&&api.releaseMatch?api.releaseMatch(data,movie,{}):null;
-        var trusted=match&&match.eligible&&match.similarity>=.75;
-        // No existing display-title normalizer in main. Extend Cinema's identity check; never mutate its input.
-        var name=trusted?(movie.title||movie.name||movie.original_title||movie.original_name):raw.split(/(?:[ ._(]+(?:19|20)\d{2}(?:[ ._)]+|$)|\bS\d{1,2}(?:E|\b)|\b(?:2160p|1080p|720p|WEB[ .-]?DL|BluRay)\b)/i)[0].replace(/[._]+/g,' ').trim();
-        var year=trusted?String(movie.release_date||movie.first_air_date||'').slice(0,4):data&&data.year||(/(?:^|[ ._(])((?:19|20)\d{2})(?=[ ._)]|$)/.exec(raw)||[])[1];
-        var title=(name||'Назва не підтверджена')+(year?' ('+year+')':' · рік не визначено');
-        if(kind==='tv')title+=' · '+coverage(raw,source);
-        return {title:title,raw:raw,release:data?data.parsed.name:'',match:match,data:data};
+        // Full parser release names carry edition, voice and pack details needed on TV.
+        // Keep relevance/ranking separate from display; never synthesize a replacement title.
+        return {title:raw||'Назва релізу недоступна',raw:raw,release:data?data.parsed.name:'',match:match,data:data};
     }
     function decorate(row,source,movie,kind) {
         var view=releaseView(source,movie,kind),name=row.querySelector('.ctr-name'),chips=row.querySelector('.ctr-chips');

@@ -733,13 +733,6 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         if(restore)streamInfo(record);
         if(record.streamView)record.streamView.close(restore);
     }
-    function streamDetails(st){
-        var row=st.selectedRow;if(!row)return;
-        var source=st.sourceData.get(row)||{},raw=source.Title||source.title||row.querySelector('.torrent-item__title')?.textContent||row.title;
-        function fields(selector){var group=row.querySelector(selector);return group?Array.prototype.map.call(group.children,function(n){return n.textContent.trim();}).filter(Boolean).join(' · '):'';}
-        var text=document.createElement('div');text.className='sh-release-details';text.textContent=raw+'\n\n'+fields('.ctr-chips')+'\n'+fields('.ctr-metrics')+'\n\n'+fields('.torrent-item__ffprobe');
-        Lampa.Modal.open({title:'Деталі релізу',html:$(text),size:'large',onBack:function(){Lampa.Modal.close();if(streamAlive(st))streamActivate(st.record);}});
-    }
     function streamInfo(record) {
         record.streamFocused=false;
         if(record.streamChild)record.streamChild.wantFocus=false;
@@ -866,7 +859,6 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
             var items=[['filter','Фільтри / трекери'],['parser','Джерело'],['search','Пошук']].filter(function(x){return st.root.querySelector('.filter--'+x[0]);}).map(function(x){return {title:x[1],native:x[0]};});
             Lampa.Select.show({title:'Фільтри та джерела',items:items,onBack:function(){streamActivate(st.record);},onSelect:function(item){streamActivate(st.record);st.root.querySelector('.filter--'+item.native).dispatchEvent(new Event('hover:enter'));}});
         }));
-        menus.appendChild(button('Деталі релізу',function(){streamDetails(st);}));
         st.root.querySelector('.explorer__files').insertBefore(tools,st.root.querySelector('.explorer__files').firstChild);
     }
     function syncStreamTools(st){
@@ -983,7 +975,15 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
             st.child.reset=function(){st.rows.forEach(function(row){$(row).remove();});st.rows=[];st.windowStart=0;return reset.apply(st.child,arguments);};
             st.child.next=function(){if(!streamAlive(st)||st.windowing||!st.wantFocus)return;var focused=st.last;next.apply(st.child,arguments);if(st.rows.length>st.windowStart+40){streamWindow(st,st.windowStart+20);if(focused&&focused.isConnected)streamFocus(st,focused);}};
             st.onFocus=function(event){var node=event.target.closest('.selector');if(node&&st.root.contains(node)){st.last=node;if(node.classList.contains('torrent-item'))st.selectedRow=node;}};
-            st.onEnter=function(event){if(event.target.closest('.torrent-item'))st.started=true;if(event.target.closest('.filter--back')){event.stopImmediatePropagation();closeStreamOverlay(record,true);}else if(event.target.closest('.filter--search,.empty__footer')){event.stopImmediatePropagation();streamQuery(st);}};
+            st.onEnter=function(event){
+                if(event.target.closest('.torrent-item')){
+                    st.started=true;
+                    // Native Torrent.close consumes this callback after each Files session.
+                    // Arm it for every release, including a second selection after playback.
+                    Lampa.Torrent.back(function(){if(streamAlive(st)&&record.streamView.isOpen())streamActivate(record);});
+                }
+                if(event.target.closest('.filter--back')){event.stopImmediatePropagation();closeStreamOverlay(record,true);}else if(event.target.closest('.filter--search,.empty__footer')){event.stopImmediatePropagation();streamQuery(st);}
+            };
             st.root.addEventListener('hover:focus',st.onFocus,true);st.root.addEventListener('hover:enter',st.onEnter,true);
             var originalGet;
             // Scope this wrapper to initialize's synchronous Parser.get dispatch, not to global navigation.
@@ -996,7 +996,6 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
             };
             var parse=st.child.parse;st.child.parse=function(){if(!streamAlive(st))return;originalGet=Lampa.Parser.get;Lampa.Parser.get=getForChild;try{return parse.apply(st.child,arguments);}finally{Lampa.Parser.get=originalGet;}};st.child.initialize();streamSyncRows(st);
             if(st.loading)streamActivate(record);
-            Lampa.Torrent.back(function(){if(streamAlive(st))streamActivate(record);});
         }catch(error){if(st.child&&typeof st.child.destroy==='function')closeStreamChild(record);else record.streamChild=null;streamStatus(record,'Вбудовані джерела недоступні. Спробуйте оновити джерела.');record.streamLoad.hidden=false;streamShellActivate(record);}
     }
     function removeStreams(record) {
@@ -1041,8 +1040,15 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         onStreamController({name:Lampa.Controller.enabled().name});
     }
     function onStreamController(event) {
-        if(!event||event.name!=='full_start')return;
+        if(!event||!['full_start','content'].includes(event.name))return;
         var record=movieRecords.filter(function(r){return r.page.classList.contains('activity--active')&&r.streamPane;})[0];if(!record)return;
+        // Native player/Files return may activate the underlying detail controller.
+        // A visible overlay must retain remote ownership; leave inner menus/player alone.
+        var st=record.streamChild;
+        if(st&&st.wantFocus&&record.streamView&&!record.streamView.inline&&record.streamView.isOpen()&&streamAlive(st)){
+            streamActivate(record);return;
+        }
+        if(event.name!=='full_start')return;
         var controller=Lampa.Controller.enabled().controller;
         if(controller.down===record.streamDown)return;
         record.streamInfoController=controller;record.originalInfoDown=controller.down;
