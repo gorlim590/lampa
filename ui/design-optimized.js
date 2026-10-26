@@ -8,7 +8,7 @@
 
     if (window.YDesignLoaded) return;
     window.YDesignLoaded = true;
-    window.YDesignVersion = '3.4.2';
+    window.YDesignVersion = '3.4.3-ua';
 
     // =========================================================================
     // 1. КОНФІГУРАЦІЯ ТА ВЕКТОРНІ ІКОНКИ РЕЙТИНГІВ
@@ -946,7 +946,50 @@
 
     var UA_NEG_TTL = 12 * 60 * 60 * 1000; // «немає UA» перевіряємо знову через 12 годин (раніше — 7 діб)
 
-    var UaRequests = {};
+    var UaRequests = {}, UaFailures = {}, UaQueue = [], UaActive = 0;
+    function queueUaRequest(options) {
+        UaQueue.push(options);
+        function pump() {
+            while (UaActive < 2 && UaQueue.length) {
+                var item = UaQueue.shift(); UaActive++;
+                (function (request) {
+                    var released = false, ok = request.success, fail = request.error;
+                    function release() { if (!released) { released = true; UaActive--; pump(); } }
+                    request.success = function () { try { ok.apply(this, arguments); } finally { release(); } };
+                    request.error = function () { try { fail.apply(this, arguments); } finally { release(); } };
+                    qajax(request);
+                })(item);
+            }
+        }
+        pump();
+    }
+    function uaFailure(key) {
+        if (Object.keys(UaFailures).length >= 256) UaFailures = {};
+        UaFailures[key] = Date.now();
+    }
+    function uaAudioLabel(value) {
+        var text = String(value || '').toLowerCase();
+        if (/subtit|субт|\bsubs?\b|без\s+укр|no\s+ukr/.test(text)) return false;
+        return /(?:^|[\s,;\/\[(:.])(?:uk|ukr|ua|uk-ua|ukrainian|укр|українська|український|українською)(?=$|[\s,;\/\]):.])/.test(text);
+    }
+    function confirmedUaAudio(data) {
+        if (!data || typeof data !== 'object') return false;
+        if (/^(uk|ukr)$/i.test(data.original_language || '')) return true;
+        function audio(value) {
+            if (Array.isArray(value)) return value.some(audio);
+            if (value && typeof value === 'object') {
+                if (/subtit|субт/i.test(String(value.type || value.kind || ''))) return false;
+                return uaAudioLabel(value.language || value.lang || value.iso_639_1 || value.code || value.name || value.title);
+            }
+            return typeof value === 'string' && uaAudioLabel(value);
+        }
+        return ['audio_languages', 'audio_tracks', 'audio', 'voice_over', 'voices'].some(function (key) { return audio(data[key]); });
+    }
+    function beginUaAudio(data, type) {
+        if (!getSet('ydesign_v_show_ua', 'ydesign_show_ua')) return { enabled: false, known: false, answer: Promise.resolve(null) };
+        var known = confirmedUaAudio(data);
+        return { enabled: true, known: known, answer: known ? Promise.resolve(true) : checkUaVoiceover(data.id, type) };
+    }
     function parseUaResponse(value) {
         if (value === true || value === false) return value;
         if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
@@ -966,16 +1009,19 @@
         var cacheKey = 'ua_v2_' + media + '_' + id, cached = ApiCache.get(cacheKey);
         if (cached && cached.v === 2 && typeof cached.value === 'boolean' && cached.t > 0 && Date.now() >= cached.t && Date.now() - cached.t < (cached.value ? CONFIG.cacheTime : UA_NEG_TTL)) return Promise.resolve(cached.value);
         if (UaRequests[cacheKey]) return UaRequests[cacheKey];
+        var failedAt = UaFailures[cacheKey];
+        if (failedAt && Date.now() >= failedAt && Date.now() - failedAt < 30000) return Promise.resolve(null);
         var request = new Promise(function (resolve) {
-            qajax({
+            queueUaRequest({
                 url: 'https://wh.lme.isroot.in/?tmdb_id=' + encodeURIComponent(id) + '&serial=' + (media === 'tv' ? 1 : 0) + '&silent=true',
                 timeout: 5000,
                 success: function (value) {
                     var answer = parseUaResponse(value);
-                    if (answer !== null) ApiCache.set(cacheKey, { v: 2, value: answer, t: Date.now() });
+                    if (answer !== null) { delete UaFailures[cacheKey]; ApiCache.set(cacheKey, { v: 2, value: answer, t: Date.now() }); }
+                    else uaFailure(cacheKey);
                     resolve(answer);
                 },
-                error: function () { resolve(null); }
+                error: function () { uaFailure(cacheKey); resolve(null); }
             });
         });
         UaRequests[cacheKey] = request.then(function (value) { delete UaRequests[cacheKey]; return value; }, function () { delete UaRequests[cacheKey]; return null; });
@@ -988,7 +1034,7 @@
     // =========================================================================
     var UA_TORR_POS_TTL = 7 * 24 * 60 * 60 * 1000;
     var UA_TORR_NEG_TTL = 24 * 60 * 60 * 1000;
-    var TorrentUaChain = Promise.resolve();
+    var TorrentUaChain = Promise.resolve(), TorrentUaJobs = {};
 
     function torrentUaEnabled() {
         try {
@@ -1003,9 +1049,11 @@
     }
 
     function torrentUaCached(tmdbId, type) {
-        var rec = ApiCache.get('uat_' + type + '_' + tmdbId);
-        if (!rec || typeof rec !== 'object' || !rec.t) return null;
+        type = type === 'tv' || type === 'anime' || type === 'tv_series' ? 'tv' : 'movie';
+        var rec = ApiCache.get('uat_v2_' + type + '_' + tmdbId);
+        if (!rec || typeof rec.r !== 'boolean' || !rec.t) return null;
         var age = Date.now() - rec.t;
+        if (age < 0) return null;
         if (rec.r && age < UA_TORR_POS_TTL) return true;
         if (!rec.r && age < UA_TORR_NEG_TTL) return false;
         return null;
@@ -1019,12 +1067,12 @@
     function titleHasUaVoice(title) {
         var t = String(title || '');
         t = t.replace(/(?:sub(?:s|titles)?|субтитр[а-яі]*|суб)\s*[:=\-]?\s*[^\]\)\|]*/ig, ' ');
-        return /(?:^|[^a-z])(?:ukr|ua)(?:[^a-z]|$)|укр|ukrainian/i.test(t);
+        return /(?:^|[\s.\[\/(|])(?:ukr|ua|укр)(?=$|[\s.\]\/)|])/i.test(t) || /(?:audio|dub|озвуч|дубляж)\s*[:=-]?\s*(?:ukrainian|українськ)/i.test(t);
     }
 
     function runTorrentUaCheck(data, type) {
         return new Promise(function (resolve) {
-            var isTv = (type === 'tv' || type === 'tv_series');
+            var isTv = (type === 'tv' || type === 'tv_series' || type === 'anime');
             var orig = data.original_title || data.original_name || data.title || data.name || '';
             var local = data.title || data.name || orig;
             var year = parseInt(String(data.release_date || data.first_air_date || '').slice(0, 4), 10) || 0;
@@ -1035,13 +1083,15 @@
             if (isTv) { movie.original_name = orig; movie.number_of_seasons = 1; }
 
             var done = false;
-            function finish(v) { if (done) return; done = true; resolve(v); }
-            setTimeout(function () { finish(null); }, 25000); // таймаут: не кешуємо
+            function finish(v) { if (done) return; done = true; clearTimeout(watchdog); resolve(v); }
+            var watchdog = setTimeout(function () { finish(null); }, 25000); // таймаут: не кешуємо
 
             var nOrig = normTitle(orig), nLocal = normTitle(local);
             try {
                 Lampa.Parser.get({ search: orig || local, movie: movie, page: 1 }, function (res) {
-                    var list = (res && res.Results) || [];
+                    if (done) return;
+                    if (!res || !Array.isArray(res.Results)) return finish(null);
+                    var list = res.Results;
                     for (var i = 0; i < list.length; i++) {
                         var it = list[i], title = it.Title || it.title || '';
                         if (!(parseInt(it.Seeders, 10) > 0)) continue;
@@ -1054,7 +1104,7 @@
                             for (var k = 0; k < ys.length; k++) if (Math.abs(ys[k] - year) <= 1) yearOk = true;
                             if (!yearOk) continue;
                         }
-                        if (titleHasUaVoice(title)) return finish(true);
+                        if (confirmedUaAudio(it) || titleHasUaVoice(title)) return finish(true);
                     }
                     finish(false);
                 }, function () { finish(null); });
@@ -1063,16 +1113,22 @@
     }
 
     function checkTorrentsUa(data, type) {
+        if (!data || !(Number(data.id) > 0) || Number(data.id) % 1) return Promise.resolve(null);
+        type = type === 'tv' || type === 'anime' || type === 'tv_series' ? 'tv' : 'movie';
+        var key = (type === 'tv' || type === 'anime' || type === 'tv_series' ? 'tv' : 'movie') + '_' + data.id;
+        if (TorrentUaJobs[key]) return TorrentUaJobs[key];
         // по одному запиту за раз: пошук у парсері важкий
-        TorrentUaChain = TorrentUaChain.then(function () {
+        var job = TorrentUaChain.then(function () {
             var cached = torrentUaCached(data.id, type);
             if (cached !== null) return cached;
             return runTorrentUaCheck(data, type).then(function (r) {
-                if (r === true || r === false) ApiCache.set('uat_' + type + '_' + data.id, { r: r, t: Date.now() });
-                return r === true;
+                if (r === true || r === false) ApiCache.set('uat_v2_' + type + '_' + data.id, { r: r, t: Date.now() });
+                return r;
             });
-        }).catch(function () { return false; });
-        return TorrentUaChain;
+        }).catch(function () { return null; });
+        TorrentUaChain = job;
+        TorrentUaJobs[key] = job.then(function (value) { delete TorrentUaJobs[key]; return value; }, function () { delete TorrentUaJobs[key]; return null; });
+        return TorrentUaJobs[key];
     }
 
     function fetchExternalRatings(tmdbId, type) {
@@ -2013,6 +2069,9 @@
         }, 350);
     }
 
+    function cardRenderCurrent(el, data, render, id) {
+        return el.isConnected && el._ydesign_render === render && el._ydesign_data === data && String(data.id) === id;
+    }
     function buildCardCustomDOM(cardHtml, data) {
         var el = cardHtml[0] || cardHtml;
 
@@ -2021,8 +2080,9 @@
 
         var render = el._ydesign_render = (el._ydesign_render || 0) + 1;
         el._ydesign_data = data;
+        var renderId = el._ydesign_id = String(data.id);
         el._ydesign_settingsEpoch = CardSettingsEpoch;
-        function current() { return el.isConnected && el._ydesign_render === render && el._ydesign_data === data; }
+        function current() { return cardRenderCurrent(el, data, render, renderId); }
         var prefix = 'ydesign_v_';
         var type = isTvMedia(data, el) ? 'tv' : (data.media_type || 'movie');
         if (!data.media_type) data.media_type = type;
@@ -2043,6 +2103,9 @@
         var buildExtendedCard = function () {
             var view = el.querySelector('.card__view');
             if (!view) return;
+            // Audio already supplied by the source wins. Otherwise overlap WH
+            // lookup with extended metadata, rather than serially waiting for it.
+            var ua = beginUaAudio(data, type), knownUa = ua.known, uaAnswer = ua.answer;
             view.innerHTML = '';
             el._ydesign_bg_applied = null;
 
@@ -2180,6 +2243,7 @@
                 if (bh !== '') infoWrap.appendChild(badgesWrap);
 
                 function addUaBadge(source) {
+                    if (!ua.enabled || !current()) return;
                     if (badgesWrap.querySelector('.ydesign-badge-ua')) return;
                     var uaBadge = document.createElement('span');
                     uaBadge.className = 'ydesign-badge ydesign-badge-ua';
@@ -2193,7 +2257,7 @@
                 // buildExtendedCard is already visibility-gated by LazyLoader.
                 // Check visible cards in the existing serial queue, without waiting for focus.
                 function armTorrentUa() {
-                    if (!torrentUaEnabled()) return;
+                    if (!ua.enabled || !torrentUaEnabled()) return;
                     var cached = torrentUaCached(data.id, type);
                     if (cached === true) { addUaBadge('Є в торентах'); return; }
                     if (cached === false) return;
@@ -2203,7 +2267,8 @@
                 }
 
                 if (torrentUaCached(data.id, type) === true) addUaBadge('Є в торентах');
-                checkUaVoiceover(data.id, type).then(function (hasUa) {
+                if (knownUa) addUaBadge('Українська аудіодоріжка');
+                uaAnswer.then(function (hasUa) {
                     if (!current()) return;
                     if (hasUa === true) addUaBadge();
                     else armTorrentUa();
@@ -2351,7 +2416,7 @@
             ".ydesign-badge-year {font-size: calc(var(--ydesign-year-size-val, 0.8) * 1em) !important;font-weight: 700 !important;color: #fff !important;}",
             ".ydesign-badge-age {font-size: calc(var(--ydesign-age-size-val, 0.8) * 1em) !important;font-weight: 700 !important;color: #fff !important;}",
             ".ydesign-badge-seasons {font-size: calc(var(--ydesign-seasons-size-val, 0.8) * 1em) !important;font-weight: 700 !important;color: #fff !important;}",
-            ".ydesign-badge-ua {font-size: calc(var(--ydesign-ua-size-val, 0.8) * 1em) !important;font-weight: 700 !important;color: #fff !important;}",
+            "body.ydesign-active .ydesign-badge-ua {font-size: calc(var(--ydesign-ua-size-val, 0.8) * 1em) !important;font-weight: 800 !important;line-height:1.3;color:#17202a !important;background:#ffd700 !important;background-image:none !important;border:1px solid #ffe566 !important;border-radius:.5em;padding:.12em .42em;white-space:nowrap;}",
             ".ydesign-genre-badge {font-size: calc(var(--ydesign-genres-size-val, 0.8) * 1em) !important;font-weight: 600 !important;color: rgba(255,255,255,0.95) !important;}",
             ".ydesign-rating {font-size: calc(var(--ydesign-rating-size-val, 0.8) * 1em) !important;font-weight: 700 !important;color: #fff !important;gap: 0.25em !important;}",
             "body.ydesign-v-uniform-badges .ydesign-vertical .ydesign-badge {font-size: calc(var(--ydesign-badge-size-val, 0.8) * 1em) !important;}",
@@ -2366,9 +2431,7 @@
             "body:not(.stremio-hybrid).ydesign-glass-pill .ydesign-genre-badge {backdrop-filter: blur(6px) !important;-webkit-backdrop-filter: blur(6px) !important;box-shadow: none !important;}",
             "body.ydesign-glass-pill .ydesign-rating {background: rgba(255, 255, 255, 0.1) !important;}",
             "body:not(.stremio-hybrid).ydesign-glass-pill .ydesign-rating {backdrop-filter: blur(6px) !important;-webkit-backdrop-filter: blur(6px) !important;box-shadow: none !important;}",
-            "body.ydesign-active .ydesign-glass-pill .ydesign-badge-ua {background: linear-gradient(135deg, #0057b7 0%, #0057b7 49%, #ffd700 51%, #ffd700 100%) !important;background-color: #0057b7 !important;background-image: linear-gradient(135deg, #0057b7 0%, #0057b7 49%, #ffd700 51%, #ffd700 100%) !important;color: #ffffff !important;font-weight: 800 !important;}",
             "body:not(.stremio-hybrid).ydesign-active .ydesign-glass-pill .ydesign-badge-ua {box-shadow: none !important;-webkit-backdrop-filter: none !important;backdrop-filter: none !important;}",
-            "body.ydesign-active .ydesign-badge-ua {background: linear-gradient(135deg, #0057b7 0%, #0057b7 49%, #ffd700 51%, #ffd700 100%) !important;background-color: #0057b7 !important;background-image: linear-gradient(135deg, #0057b7 0%, #0057b7 49%, #ffd700 51%, #ffd700 100%) !important;color: #ffffff !important;font-weight: 800 !important;}",
             "body:not(.stremio-hybrid).ydesign-active .ydesign-badge-ua {box-shadow: none !important;-webkit-backdrop-filter: none !important;backdrop-filter: none !important;}",
             ".ydesign-rating img {width: 1.15em !important;height: 1.15em !important;object-fit: contain !important;display: block !important;filter: saturate(var(--ydesign-ratings-saturate, 100%)) !important;}",
             "body.ydesign-color-age .ydesign-age-18 {color: #ff5252 !important;}",
@@ -2377,9 +2440,7 @@
             "body.ydesign-color-age .ydesign-age-13 {color: #ffd740 !important;}",
             "body.ydesign-color-age .ydesign-age-6 {color: #69f0ae !important;}",
             "body.ydesign-color-age .ydesign-age-0 {color: #69f0ae !important;}",
-            "body.ydesign-color-ua .ydesign-badge-ua {background: linear-gradient(135deg, #0057b7 0%, #0057b7 49%, #ffd700 51%, #ffd700 100%) !important;background-color: #0057b7 !important;color: #ffffff !important;font-weight: 800 !important;}",
             "body:not(.stremio-hybrid).ydesign-color-ua .ydesign-badge-ua {box-shadow: none !important;}",
-            ".ydesign-vertical .ydesign-badge-ua {background: linear-gradient(135deg, #0057b7 0%, #0057b7 49%, #ffd700 51%, #ffd700 100%) !important;background-color: #0057b7 !important;color: #ffffff !important;font-weight: 800 !important;}",
             "body:not(.stremio-hybrid) .ydesign-vertical .ydesign-badge-ua {box-shadow: none !important;}",
             "body.ydesign-border-year .ydesign-badge-year {border-color: rgba(255,255,255,0.6) !important;}",
             "body.ydesign-border-seasons .ydesign-badge-seasons {border-color: rgba(255,255,255,0.6) !important;}",
@@ -3134,7 +3195,7 @@
 
                 if (isMovieCard(this.data, this.html)) {
                     var cardEl = this.html[0] || this.html;
-                    if (!cardEl._ydesign_built || cardEl._ydesign_settingsEpoch !== CardSettingsEpoch) {
+                    if (!cardEl._ydesign_built || cardEl._ydesign_settingsEpoch !== CardSettingsEpoch || cardEl._ydesign_data !== this.data || cardEl._ydesign_id !== String(this.data.id)) {
                         cardEl._ydesign_built = true;
                         cardEl._ydesign_data = this.data;
 

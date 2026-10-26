@@ -30,3 +30,7 @@ Source season numbers are not guaranteed broadcast season numbers for anime. Do 
 ## Diagnose only the relevant intersection
 
 Record safe loaded URL/hash, actual enabled flags, selector owner and lifecycle event. Reproduce the specific overlap, fix its owner/registration, and verify disable/reopen where affected. Guards avoid duplicate initialization but do not prove cleanup or compatibility. Avoid global CSS hiding, new permanent observers and mass plugin removal. Preserve author/license notices when touching third-party-derived files (`NOTICE.md`, `licenses/`).
+
+### Ukrainian audio badge (#69)
+
+Nightingale was removed at the user's request. YDesign is the sole card UA indicator owner: one saturated yellow badge in the metadata row. Its WH response schema is explicit; localized titles, interface language and subtitles are not evidence. Explicit original Ukrainian/audio-track data is used first, then typed WH cache/lookup, then optional torrent audio evidence. WH concurrency is bounded at two; unknown failures have a short non-persistent retry cooldown. Old Nightingale storage is left untouched and is not imported. Remove any manually registered Nightingale URL before reloading an existing installation; no other extension needs removal.
