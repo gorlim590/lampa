@@ -721,3 +721,12 @@ Next publishupdatedPR50(mainmerge+marginfixonly),CI/merge;thenPR53retargettothat
 - Targeted Details + watched/loader regression: 57 PASS, 0 FAIL. Syntax, repository checker (65 JS, 44 entries, 509 URLs), diff check PASS.
 - Primary Chrome native OK expands/collapses synopsis under text and retains focus. Earlier actual Trakt CRUD/readback/reload passed and original unrated test title restored; writer unchanged.
 - Loader delivery version 20261026-details-ratings-3.4.3. Pending: publish and verify external scores on primary Chrome. Physical Google TV and real episode writes NOT TESTED.
+
+
+## 2026-10-26 — Details public rating root cause confirmed
+- Primary Chrome (existing browser2/tab833880663), actual version20261026-details-ratings-3.4.4 from merged PR67 main393619c: Dune438631 identity=provided, OMDb=timeout, MDBList=received. IMDb8.0/Trakt8.1/Letterboxd7.8 rendered and visible at30.79px. Screenshot /tmp/lampa-public-ratings-fixed.jpg kept local, not committed. No credential or personal history writes.
+- Root cause: requestMDBList was only invoked after an unbounded OMDb getJSON settled. Hanging OMDb blocked the otherwise working MDBList. Not a confirmed Hybrid CSS conflict; actual current custom score DOM appears correctly. Native ID transport and credential fallback fixes retained. OMDb underlying connectivity failure remains unclassified; do not call its key invalid. Legacy MDBList endpoint actually works in primary Chrome; no speculative migration required.
+- PR67 b8cd009 diagnostics/8s public timeout, merged393619c; all5 checks and postmerge Repository/Parser/Season + Pages40333673649 SUCCESS. Exact published tree equals local28e3914.
+- Final follow-up branch fix/details-rating-independent-sources from393619c: start OMDb/MDBList independently, dedupe overlapping score keys, one source batch per typed title/container despite repeated Full completion. No polling/new observers, no network per focus, no Trakt writer change. Loader delivery20261026-details-ratings-3.4.5.
+- Tests: prior affected suite60PASS; after container coalescing9DetailsPASS (one extraction fixture adjusted after illegal-return failure; no production syntax failure). Unchanged loader/watched52PASS reused. Repository checker65JS44manifest509URLs + diff PASS. Final follow-up delivery/runtime pending.
+- Other Issue5 work still partial: legacy Home rated-card decoration, real episode writes/new-episode transition, physical Google TV NOT TESTED. Do not silently expand into those tasks in this public-score fix.
