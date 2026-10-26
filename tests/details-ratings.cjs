@@ -8,13 +8,29 @@ test('public score replacement becomes ready only after a valid score exists; pe
 test('late-loaded ratings hydrate an already-open Full once, without refreshing the page or polling',()=>{let current={component:'main'},exists=false,calls=0;const movie={id:10,vote_average:8};const c={CONTAINER_CLASS:'omdb-mdb-yarik-rate',Lampa:{Activity:{active:()=>current}},updateRatings:e=>{assert.equal(e.data.movie,movie);calls++;exists=true;}};vm.createContext(c);vm.runInContext(source.slice(source.indexOf('    function hydrateOpenRatings('),source.indexOf('    function startPlugin(')),c);c.hydrateOpenRatings();assert.equal(calls,0);current={component:'full',activity:{component:{props:{get:()=>movie}},render:()=>({find:()=>({length:exists?1:0})})}};c.hydrateOpenRatings();c.hydrateOpenRatings();assert.equal(calls,1);});
 
 test('missing IMDb identity resolves through the native Reguest transport for movies and shows',()=>{
- const code=source.slice(source.indexOf('        if (imdb_id) requestOMDB'),source.indexOf('        refreshAverage(container);',source.indexOf('        if (imdb_id) requestOMDB')));
+ const code=source.slice(source.indexOf('        if (imdb_id) {'),source.indexOf('        refreshAverage(container);',source.indexOf('        if (imdb_id) {')));
  for(const [method,seasons,expected] of [['movie',undefined,'movie'],['tv',2,'tv'],['movie',3,'tv']]){
   const sent=[],ids=[];let response;
   const Lampa={Reguest:function(){this.silent=(url,ok)=>{sent.push(url);response=ok;}},TMDB:{api:path=>'fixture/'+path,key:()=>'fixture-key'}};
-  const c={window:{Lampa},Lampa,imdb_id:'',movie:{id:438631,number_of_seasons:seasons},e:{object:{method}},requestOMDB:id=>ids.push(id)};
+  const c={ratingStatus:()=>{},container:{},window:{Lampa},Lampa,imdb_id:'',movie:{id:438631,number_of_seasons:seasons},e:{object:{method}},requestOMDB:id=>ids.push(id)};
   vm.runInNewContext(code,c);assert.equal(sent.length,1);assert(sent[0].startsWith('fixture/'+expected+'/438631/external_ids?'));assert.deepEqual(ids,[]);
   response({});assert.deepEqual(ids,[]);response({imdb_id:'tt1160419'});assert.deepEqual(ids,['tt1160419']);
  }
- const ids=[];vm.runInNewContext(code,{imdb_id:'tt1160419',requestOMDB:id=>ids.push(id)});assert.deepEqual(ids,['tt1160419']);
+ const ids=[];vm.runInNewContext(code,{ratingStatus:()=>{},container:{},imdb_id:'tt1160419',requestOMDB:id=>ids.push(id)});assert.deepEqual(ids,['tt1160419']);
+});
+
+test('public request diagnostics expose only status codes and bound requests',()=>{
+ const attrs={};let config;
+ const c={$:{ajax:x=>{config=x;return x;}}};vm.createContext(c);
+ vm.runInContext(source.slice(source.indexOf('    function ratingStatus('),source.indexOf('    function getRatingGap(')),c);
+ const container={attr:(key,value)=>attrs[key]=value};let consumed=0,completed=0;
+ c.requestPublicRating(container,'omdb','fixture-private-url',()=>consumed++,()=>completed++);
+ assert.equal(config.timeout,8000);assert.equal(attrs['data-rating-omdb'],'loading');
+ config.success({Response:'False',Error:'Invalid API key! private-value'});assert.equal(attrs['data-rating-omdb'],'authentication-error');
+ config.success({error:'Daily API limit exceeded!'});assert.equal(attrs['data-rating-omdb'],'rate-limited');
+ config.error({status:429},'error');assert.equal(attrs['data-rating-omdb'],'http-429');
+ config.error({status:0},'timeout');assert.equal(attrs['data-rating-omdb'],'timeout');
+ config.error({status:0},'error');assert.equal(attrs['data-rating-omdb'],'network-error');
+ config.complete();assert.equal(completed,1);assert.equal(consumed,2);assert(!JSON.stringify(attrs).includes('private'));
+ assert.equal(c.ratingResponseStatus(null),'invalid-response');assert.equal(c.ratingResponseStatus({ratings:[]}),'received');
 });

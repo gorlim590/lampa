@@ -122,6 +122,29 @@
 
     function getRatingSize() { var size = Lampa.Storage.get('omdb_rating_size', '1.25em'); return /^\d*\.?\d+em$/.test(size) && parseFloat(size) >= 1.25 ? size : '1.25em'; }
     function ratingsApiKey(service) { return String(Lampa.Storage.get(service + '_api_key', '') || Lampa.Storage.get('ydesign_' + service + '_key', '')).trim(); }
+    // Only bounded, non-sensitive status codes are exposed; never request URLs,
+    // credentials, response bodies or account information.
+    function ratingStatus(container, service, status) { container.attr('data-rating-' + service, status); }
+    function ratingResponseStatus(data) {
+        if (!data || typeof data !== 'object') return 'invalid-response';
+        var error = String(data.Error || data.error || '');
+        if (/limit|quota/i.test(error)) return 'rate-limited';
+        if (/key|unauthor|forbidden/i.test(error)) return 'authentication-error';
+        return error || data.Response === 'False' ? 'no-data' : 'received';
+    }
+    function requestPublicRating(container, service, url, consume, complete) {
+        ratingStatus(container, service, 'loading');
+        return $.ajax({ url: url, dataType: 'json', timeout: 8000,
+            success: function (data) {
+                ratingStatus(container, service, ratingResponseStatus(data));
+                consume(data);
+            },
+            error: function (xhr, reason) {
+                var code = Number(xhr && xhr.status) || 0;
+                ratingStatus(container, service, reason === 'timeout' ? 'timeout' : code ? 'http-' + code : 'network-error');
+            }, complete: complete
+        });
+    }
     function getRatingGap() { return Lampa.Storage.get('omdb_rating_gap', '0.5em'); }
     function getRatingMargin() { return Lampa.Storage.get('omdb_rating_margin', '10px'); }
     function getSaturation() { return Lampa.Storage.get('omdb_rating_saturation', '100%'); }
@@ -523,8 +546,8 @@
         var requestMDBList = function(id) {
             var onDone = function() { requestSimkl(id); };
             var key = ratingsApiKey('mdblist');
-            if (!key) return onDone();
-            $.getJSON('https://mdblist.com/api/?apikey=' + key + '&i=' + id, function(data) {
+            if (!key) { ratingStatus(container, 'mdblist', 'missing-key'); return onDone(); }
+            requestPublicRating(container, 'mdblist', 'https://mdblist.com/api/?apikey=' + key + '&i=' + id, function(data) {
                 if (!data) return;
                 if (data.score && isRatingEnabled('mdblist')) addRatingBlock(container, 'rate--mdblist-score', icons.mdblist, data.score, 'mdblist');
                 if (data.ratings && Array.isArray(data.ratings)) {
@@ -537,15 +560,15 @@
                         if (r.source === 'imdb' && isRatingEnabled('imdb') && container.find('.rate--omdb-imdb').length === 0) addRatingBlock(container, 'rate--mdblist-imdb', icons.imdb, r.value, 'imdb');
                     });
                 }
-            }).always(onDone);
+            }, onDone);
         };
 
         var requestOMDB = function(id) {
             var key = ratingsApiKey('omdb');
             var onDone = function() { requestMDBList(id); };
-            if (!key) return onDone();
+            if (!key) { ratingStatus(container, 'omdb', 'missing-key'); return onDone(); }
 
-            $.getJSON('https://www.omdbapi.com/?apikey=' + key + '&i=' + id, function(data) {
+            requestPublicRating(container, 'omdb', 'https://www.omdbapi.com/?apikey=' + key + '&i=' + id, function(data) {
                 if (data && data.Response !== "False") {
                     if (isRatingEnabled('awards') && data.Awards && data.Awards !== "N/A") {
                         var oscars = data.Awards.match(/Won (\d+) Oscar/i);
@@ -558,20 +581,22 @@
                     if (rt && isRatingEnabled('rt')) addRatingBlock(container, 'rate--omdb-rt', icons.rt, rt.Value, 'rt');
                     if (data.imdbRating && data.imdbRating !== 'N/A' && isRatingEnabled('imdb')) addRatingBlock(container, 'rate--omdb-imdb', icons.imdb, data.imdbRating, 'imdb');
                 }
-            }).always(onDone);
+            }, onDone);
         };
 
         requestMAL();
 
-        if (imdb_id) requestOMDB(imdb_id);
+        if (imdb_id) { ratingStatus(container, 'identity', 'provided'); requestOMDB(imdb_id); }
         else if (movie.id) {
+            ratingStatus(container, 'identity', 'loading');
             var type = (e.object.method === 'tv' || movie.number_of_seasons) ? 'tv' : 'movie';
             if (window.Lampa && Lampa.Reguest && Lampa.TMDB) {
                 var externalIdsRequest = new Lampa.Reguest();
                 externalIdsRequest.silent(Lampa.TMDB.api(type + '/' + movie.id + '/external_ids?api_key=' + Lampa.TMDB.key()), function (res) {
+                    ratingStatus(container, 'identity', res && res.imdb_id ? 'resolved' : 'missing');
                     if (res && res.imdb_id) requestOMDB(res.imdb_id);
-                });
-            }
+                }, function () { ratingStatus(container, 'identity', 'request-error'); });
+            } else ratingStatus(container, 'identity', 'transport-unavailable');
         }
 
         refreshAverage(container);
