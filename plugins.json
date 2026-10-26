@@ -122,11 +122,6 @@
     "name": "IMDB Trailers"
   },
   {
-    "url": "https://gorlim590.github.io/lampa/community/nightingale.js",
-    "status": 1,
-    "name": "Nightingale"
-  },
-  {
     "url": "https://gorlim590.github.io/lampa/ui/tv-status.js",
     "status": 1,
     "name": "TV Status"

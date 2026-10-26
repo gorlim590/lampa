@@ -69,7 +69,6 @@
 ### Community
 - community/community-watches.js
 - community/hikka.js
-- community/nightingale.js
 - community/imdb-trailers.js
 - community/new-category.js
 - community/lparty.js
