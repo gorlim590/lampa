@@ -4,7 +4,7 @@
     if (window.LampaHomeHistory) return;
     var L = window.Lampa, timer = null, hooks = [], installed = false, policy = null;
     var entryUrl = document.currentScript && document.currentScript.src;
-    var titles = { resume: 'Продовжити перегляд', watched: 'Переглянуто' };
+    var titles = { resume: 'Продовжити перегляд', watched: 'Переглянуто', rated: 'Мої оцінки · Trakt' };
     var lists = ['history', 'viewed', 'look', 'continued', 'book', 'like', 'scheduled'];
     function tv(c) {
         var type = c.media_type || c.method || c.type;
@@ -220,11 +220,11 @@
     }
     function node(line) { var el = line.render(true); return el && (el[0] || el); }
     function payload(kind, cards) {
-        return { title: titles[kind] + ' (' + cards.length + ')', results: cards, home_history: kind, home_row_id: 'home_history_' + kind, home_row_origin: 'history',
+        return { title: titles[kind] + ' (' + cards.length + ')', results: cards, home_history: kind, home_row_id: kind === 'rated' ? 'TraktPlusRated' : 'home_history_' + kind, home_row_origin: kind === 'rated' ? 'trakt' : 'history',
             params: { emit: { onCreate: function () { node(this).setAttribute('data-home-history', kind); } } } };
     }
     function paint(component, kind, cards) {
-        var line = component.items.find(function (item) { return item.data && item.data.home_history === kind; });
+        var line = component.items.find(function (item) { return item.data && (item.data.home_history === kind || kind === 'rated' && item.data.home_row_id === 'TraktPlusRated'); });
         if (!line) {
             if (!cards.length) return;
             var fragment = component.fragment; component.fragment = document.createDocumentFragment();
@@ -259,6 +259,10 @@
         }
         var rows = buildRows(), changed = false;
         ['resume', 'watched'].forEach(function (kind) { if (paint(component, kind, rows[kind])) changed = true; });
+        if (window.TraktPlus && typeof window.TraktPlus.cachedRatedCards === 'function') {
+            var rated = window.TraktPlus.cachedRatedCards();
+            if (Array.isArray(rated) && paint(component, 'rated', rated)) changed = true;
+        }
         if (policy) policy.apply(component);
         if (changed) component.emit('homeHistoryChanged');
     }
@@ -290,6 +294,7 @@
         if (L.Favorite && L.Favorite.listener) ['add', 'added', 'remove', 'read'].forEach(function (name) { L.Favorite.listener.follow(name, queue); });
         if (L.Storage.listener) L.Storage.listener.follow('change', function (e) { if (e && /^(trakt_|account|profile|file_view)/.test(e.name || '')) queue(); });
         document.addEventListener('traktplus:watched', queue);
+        document.addEventListener('traktplus:ratings', queue);
         if (policy) { policy.install(); policy.bootstrap(); }
         queue();
     }

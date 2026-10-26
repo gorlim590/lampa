@@ -87,6 +87,7 @@
     var credential = token() || null;
     if (credential === credentialSeen) return;
     credentialSeen = credential; sessionEpoch++; readEpoch++;
+    if (typeof ratingPopupClose === 'function') ratingPopupClose(false);
     var jobs = sessionJobs; sessionJobs = [];
     accountOwner = null; identityPromise = null; identityRetryAt = 0;
     hydrated = false; watchedPromise = null; lastCheck = 0; watchedStamp = '';
@@ -172,6 +173,7 @@
     }
     if(event && /^(trakt_token|account|profile)/.test(event.name || event.key || ''))refreshActor();
     if (event && /^(account|profile)/.test(event.name || event.key || '') && typeof ratingCache !== 'undefined') {
+      if (typeof ratingPopupClose === 'function') ratingPopupClose(false);
       ratingGeneration++; ratingCache = {}; ratingJobs = {}; refreshRatingNodes();
     }
     if (!event || (event.name !== 'trakt_token' && event.key !== 'trakt_token')) return;
@@ -301,14 +303,14 @@
   }
 
   // ───────────── КАРТКИ ─────────────
-  function toCard(entry, hint) {
+  function toCard(entry, hint, allowMissingPoster) {
     if (!entry || typeof entry !== 'object') return null;
     var isShow = entry.show ? true : (entry.movie ? false : hint === 'show');
     var m = entry.movie || entry.show || entry;
     var ids = m.ids || {};
     if (!ids.tmdb) return null;
     var poster = img(m, 'poster');
-    if (!poster) return null;
+    if (!poster && !allowMissingPoster) return null;
     var fan = img(m, 'fanart') || poster;
     var title = m.title || '';
     var date = isShow ? String(m.first_aired || '').slice(0, 10) : String(m.released || '');
@@ -915,6 +917,7 @@
   function defTitle(def) { return def.titleFn ? def.titleFn() : tr(def.uk, def.en); }
 
   function getRow(def, force) {
+    if (def.personalRatings) return ratedCards(force).then(function (cards) { return { cards: cards, title: defTitle(def), nextChunk: 1, exhausted: true }; });
     observeSession();
     var rowEpoch = sessionEpoch, rowProfile = ratingProfile();
     var sig = cfgSig();
@@ -1395,6 +1398,12 @@
     var defs = buildDefs();
     defs.sort(function (a, b) { return a.index - b.index; });
     defs.forEach(function (d, i) { d.index = TOP_INDEX + i; registerRow(d); }); // Trakt-рядки — з самого верху
+    var rated = { name: 'TraktPlusRated', uk: 'Мої оцінки · Trakt', en: 'My ratings · Trakt', personalRatings: true, index: TOP_INDEX + defs.length };
+    ROWS[rated.name] = rated;
+    Lampa.ContentRows.add({ name: rated.name, title: defTitle(rated), index: rated.index, screen: ['main'], call: function () {
+      if (!cfg().enable || !token()) return;
+      return function (call) { getRow(rated).then(function (result) { call(result.cards.length ? lineFor(rated, result) : undefined); }, function () { call(); }); };
+    } });
 
     if (Lampa.Maker && Lampa.Maker.map) return; // one canonical native Full owner
     // Блок «Подібні (Trakt)» у картці (якщо ця збірка Lampa підтримує рядки в full)
@@ -2316,13 +2325,16 @@
     var cancel = sessionCancel(ctx.epoch, null), rows = [], page = 1;
     function next() {
       if (!validRatingContext(ctx)) throw cancelledError();
-      return getRetry('/sync/ratings/' + type + 's?extended=full&limit=100&page=' + page, 0, cancel).then(function (data) {
+      return getRetry('/sync/ratings/' + type + 's?extended=full,images&limit=100&page=' + page, 0, cancel).then(function (data) {
         if (!validRatingContext(ctx) || revision !== (ratingRevisions[key] || 0)) throw cancelledError();
         if (!Array.isArray(data) || data.some(function (r) { return !r || !r[type] || !sameRatingIds(r[type].ids, r[type].ids) || ((type === 'episode' || type === 'season') && (!r.show || !sameRatingIds(r.show.ids, r.show.ids))) || typeof r.rating !== 'number' || !isFinite(r.rating) || r.rating < 1 || r.rating > 10 || r.rating % 1; })) throw new Error('Incomplete ratings response');
         rows = rows.concat(data);
         if (data.length === 100) { if (++page > 500) throw new Error('Incomplete ratings pagination'); return next(); }
-        if (!cached || JSON.stringify(cached.rows) !== JSON.stringify(rows)) ratingVersion++;
-        ratingCache[key] = { time: Date.now(), rows: rows }; return rows;
+        var changed = !cached || JSON.stringify(cached.rows) !== JSON.stringify(rows);
+        if (changed) ratingVersion++;
+        ratingCache[key] = { time: Date.now(), rows: rows };
+        if (changed) emitRatings();
+        return rows;
       });
     }
     var job = Promise.resolve().then(next).then(function (data) { releaseSession(cancel); if (ratingJobs[key] === job) delete ratingJobs[key]; return data; }, function (error) { releaseSession(cancel); if (ratingJobs[key] === job) delete ratingJobs[key]; throw error; });
@@ -2344,6 +2356,35 @@
       if (!validRatingContext(ctx)) throw cancelledError();
       return { confirmed: true, value: findRating(rows, target), owner: ctx.owner, session: ctx.epoch, profile: ctx.profile };
     }); });
+  }
+  function cachedPersonalRating(card) {
+    observeSession();
+    if (!accountOwner || !token() || !bool('trakt_plus_enable', true)) return { confirmed: false, value: null, phase: 'unavailable' };
+    try {
+      var target = ratingTarget(card), cached = ratingCache[accountOwner + '|' + ratingProfile() + '|' + target.type];
+      if (!cached) return { confirmed: false, value: null, phase: 'unknown' };
+      return { confirmed: true, value: findRating(cached.rows, target), phase: Date.now() - cached.time < RATING_TTL ? 'ready' : 'stale', owner: accountOwner };
+    } catch (e) { return { confirmed: false, value: null, phase: 'unknown' }; }
+  }
+  function ratedCards(force) {
+    return ratingContext().then(function (ctx) {
+      return Promise.all(['movie', 'show'].map(function (type) { return ratingList(ctx, type, force); })).then(function (groups) {
+        if (!validRatingContext(ctx)) throw cancelledError();
+        return ratingCardsFromRows(groups[0].concat(groups[1]));
+      });
+    });
+  }
+  function ratingCardsFromRows(rows) {
+    return uniq(rows.slice().sort(function (a, b) { return (Date.parse(b.rated_at) || 0) - (Date.parse(a.rated_at) || 0) || b.rating - a.rating; }).map(function (row) { return toCard(row, row.show ? 'show' : 'movie', true); }).filter(Boolean));
+  }
+  function cachedRatedCards() {
+    observeSession();
+    if (!accountOwner || !token() || !bool('trakt_plus_enable', true)) return [];
+    var base = accountOwner + '|' + ratingProfile() + '|', movies = ratingCache[base + 'movie'], shows = ratingCache[base + 'show'];
+    return movies && shows ? ratingCardsFromRows(movies.rows.concat(shows.rows)) : [];
+  }
+  function emitRatings() {
+    try { var event = document.createEvent('Event'); event.initEvent('traktplus:ratings', true, true); document.dispatchEvent(event); } catch (e) {}
   }
   function saveRating(card, value) {
     var target, body;
@@ -2378,7 +2419,7 @@
     });
   }
   function syncRatings() {
-    ratingGeneration++; ratingCache = {}; ratingJobs = {};
+    ratingGeneration++; ratingJobs = {};
     return ratingContext().then(function (ctx) { return Promise.all(['movie', 'show', 'episode'].map(function (type) { return ratingList(ctx, type, true); })); }).then(function () { refreshRatingNodes(); return true; });
   }
   function ratingStars(value) {
@@ -2397,23 +2438,67 @@
   function refreshRatingNodes() {
     Array.prototype.forEach.call(document.querySelectorAll('.tp-personal-rating'), function (node) { if (node._tpRatingCard) updateRatingNode(node, node._tpRatingCard); });
   }
+  var ratingPopupClose = null;
   function ratingDialog(card, node) {
+    var $ = window.$ || window.jQuery;
+    if (!$) return;
     if (node && node._tpRatingOpening) return;
     if (node) node._tpRatingOpening = true;
     var controller = Lampa.Controller.enabled().name;
     function back() { if (node) node._tpRatingOpening = false; if (node && !node.isConnected) return; Lampa.Controller.toggle(controller); if (node) Lampa.Controller.collectionFocus(window.$(node), window.$(node).closest('.full-start-new, .full-start, .items-line')); }
     personalRating(card).then(function (state) {
       if (node && !node.isConnected) { node._tpRatingOpening = false; return; }
-      var items = [], i;
-      for (i = 1; i <= 10; i++) items.push({ title: ratingStars(i) + ' ' + (i / 2) + '/5', rating: i, selected: state.value === i });
-      if (state.value !== null) items.push({ title: tr('Видалити оцінку', 'Remove rating'), rating: null });
-      Lampa.Select.show({ title: tr('Моя оцінка · Trakt', 'My rating · Trakt'), items: items, onBack: back, onSelect: function (item) {
-        Lampa.Select.close(); back(); if (node) node.textContent = tr('Збереження…', 'Saving…');
+      if (ratingPopupClose) ratingPopupClose(false);
+      var popup = document.createElement('div'), options = [], active = (state.value || 8) - 1, closed = false;
+      popup.className = 'tp-rating-dropdown'; popup.setAttribute('role', 'dialog'); popup.setAttribute('aria-label', tr('Моя оцінка · Trakt', 'My rating · Trakt'));
+      var heading = document.createElement('div'); heading.className = 'tp-rating-dropdown-title'; heading.textContent = tr('Моя оцінка · ', 'My rating · ') + ratingText(state.value); popup.appendChild(heading);
+      var value = document.createElement('div'); value.className = 'tp-rating-dropdown-value'; popup.appendChild(value);
+      var stars = document.createElement('div'); stars.className = 'tp-rating-pick-stars'; stars.innerHTML = ratingStars(state.value || 8); popup.appendChild(stars);
+      var targets = document.createElement('div'); targets.className = 'tp-rating-pick-targets'; stars.appendChild(targets);
+      function select(rating) {
+        if (closed) return;
+        close(true); if (node) node.textContent = tr('Збереження…', 'Saving…');
         observeSession();
         if (state.owner !== accountOwner || state.session !== sessionEpoch || state.profile !== ratingProfile()) { refreshRatingNodes(); notify(tr('Акаунт змінився. Відкрийте оцінку знову.', 'Account changed. Open rating again.')); return; }
-        saveRating(card, item.rating).then(function () { notify(tr('Оцінку підтверджено Trakt', 'Rating confirmed by Trakt')); }, function () { notify(tr('Trakt не підтвердив оцінку. Спробуйте знову.', 'Trakt did not confirm the rating. Please retry.')); if (node) updateRatingNode(node, card); });
-      } });
-    }, function () { if (node) node._tpRatingOpening = false; notify(tr('Оцінки Trakt недоступні. Перевірте авторизацію.', 'Trakt ratings unavailable. Check authentication.')); });
+        saveRating(card, rating).then(function () { notify(tr('Оцінку підтверджено Trakt', 'Rating confirmed by Trakt')); }, function () { notify(tr('Trakt не підтвердив оцінку. Спробуйте знову.', 'Trakt did not confirm the rating. Please retry.')); if (node) updateRatingNode(node, card); });
+      }
+      function focus(index) {
+        active = Math.max(0, Math.min(options.length - 1, index));
+        Lampa.Controller.collectionSet(popup); Lampa.Controller.collectionFocus(options[active], popup);
+        if (active < 10) { value.textContent = tr('Вибір: ', 'Selection: ') + ((active + 1) / 2) + ' / 5 · Trakt'; stars.querySelector('.tp-rating-stars > span').style.width = ((active + 1) * 10) + '%'; }
+      }
+      function option(parent, text, rating, className) {
+        var choice = document.createElement('div'), index = options.length;
+        choice.className = 'selector ' + className; choice.setAttribute('role', 'button'); choice.setAttribute('aria-label', text);
+        if (className !== 'tp-rating-half') choice.textContent = text;
+        $(choice).on('hover:enter.tpRating', function (event) { event.stopPropagation(); if (rating === undefined) close(true); else select(rating); });
+        $(choice).on('hover:focus.tpRating', function () { if (index < 10) { active = index; value.textContent = tr('Вибір: ', 'Selection: ') + ((index + 1) / 2) + ' / 5 · Trakt'; stars.querySelector('.tp-rating-stars > span').style.width = ((index + 1) * 10) + '%'; } });
+        parent.appendChild(choice); options.push(choice);
+      }
+      for (var i = 1; i <= 10; i++) option(targets, (i / 2) + ' / 5', i, 'tp-rating-half');
+      var actions = document.createElement('div'); actions.className = 'tp-rating-dropdown-actions'; popup.appendChild(actions);
+      if (state.value !== null) option(actions, tr('Видалити оцінку', 'Remove rating'), null, 'tp-rating-menu-action');
+      option(actions, tr('Закрити', 'Close'), undefined, 'tp-rating-menu-action');
+      function outside(event) { if (!popup.contains(event.target) && !(node && node.contains(event.target))) close(true); }
+      function close(restore) {
+        if (closed) return; closed = true;
+        document.removeEventListener('mousedown', outside, true);
+        options.forEach(function (item) { $(item).off('.tpRating'); }); popup.remove();
+        if (ratingPopupClose === close) ratingPopupClose = null;
+        if (node) node._tpRatingOpening = false;
+        if (Lampa.Controller.enabled().name === 'tp_rating_dropdown') {
+          Lampa.Controller.add('tp_rating_dropdown', {});
+          if (restore) back(); else Lampa.Controller.toggle(node && !node.isConnected ? 'content' : controller);
+        }
+      }
+      document.body.appendChild(popup);
+      var anchor = node && node.getBoundingClientRect(), bounds = popup.getBoundingClientRect();
+      popup.style.left = Math.max(12, Math.min(anchor ? anchor.left : 24, window.innerWidth - bounds.width - 12)) + 'px';
+      popup.style.top = Math.max(12, Math.min(anchor ? anchor.bottom + 10 : 80, window.innerHeight - bounds.height - 12)) + 'px';
+      ratingPopupClose = close; document.addEventListener('mousedown', outside, true);
+      Lampa.Controller.add('tp_rating_dropdown', { toggle: function () { focus(active); }, left: function () { focus(active - 1); }, right: function () { focus(active + 1); }, up: function () { focus(Math.min(9, active)); }, down: function () { focus(active < 10 ? 10 : active + 1); }, back: function () { close(true); } });
+      Lampa.Controller.toggle('tp_rating_dropdown');
+    }).catch(function () { if (node) node._tpRatingOpening = false; if (ratingPopupClose) ratingPopupClose(true); notify(tr('Оцінки Trakt недоступні. Перевірте авторизацію.', 'Trakt ratings unavailable. Check authentication.')); });
   }
   function addRatingNode(host, card) {
     var $ = window.$ || window.jQuery;
@@ -2426,14 +2511,16 @@
   function initRatingsUI() {
     if (!document.getElementById('tp-rating-style')) {
       var style = document.createElement('style'); style.id = 'tp-rating-style';
-      style.textContent = '.tp-personal-rating{display:inline-flex;align-items:center;gap:.5em;padding:.35em .6em;border-radius:.6em;background:rgba(255,255,255,.06);font-size:.85em;cursor:pointer;max-width:100%;white-space:nowrap}.tp-personal-rating.focus{background:#eee;color:#14121c;outline:2px solid #b8a4ed}.tp-rating-stars{display:inline-block;position:relative;color:#777;letter-spacing:.08em;white-space:nowrap}.tp-rating-stars>span{position:absolute;left:0;top:0;overflow:hidden;color:#dec481;white-space:nowrap}.tp-personal-rating>span:last-child{font-size:.85em}@media(prefers-reduced-motion:reduce){.tp-personal-rating{transition:none}}';
+      style.textContent = '.tp-personal-rating{display:inline-flex;align-items:center;gap:.5em;padding:.35em .6em;border-radius:.6em;background:rgba(255,255,255,.06);font-size:var(--sh-details-rating-size,1.25em);cursor:pointer;max-width:100%;white-space:nowrap}.tp-personal-rating.focus{background:#eee;color:#14121c;outline:2px solid #b8a4ed}.tp-rating-stars{display:inline-block;position:relative;color:#777;letter-spacing:.08em;white-space:nowrap}.tp-rating-stars>span{position:absolute;left:0;top:0;overflow:hidden;color:#dec481;white-space:nowrap}.tp-personal-rating>span:last-child{font-size:1em}@media(prefers-reduced-motion:reduce){.tp-personal-rating{transition:none}}';
+      style.textContent += '.tp-rating-dropdown{position:fixed;z-index:20000;width:22em;max-width:calc(100vw - 24px);box-sizing:border-box;padding:1.2em;background:#191820;border:1px solid #ffffff26;border-radius:.9em;box-shadow:0 12px 36px #0009;color:#f2f0f6}.tp-rating-dropdown-title{font-size:1.15em;font-weight:600}.tp-rating-dropdown-value{font-size:1em;color:#d6bf86;margin:.45em 0}.tp-rating-pick-stars{display:inline-block;position:relative;font-size:2.3em;line-height:1.4}.tp-rating-pick-targets{position:absolute;inset:0;display:flex}.tp-rating-half{flex:1;cursor:pointer;border-radius:.15em}.tp-rating-half.focus{outline:2px solid #eee;background:#ffffff12}.tp-rating-dropdown-actions{display:flex;gap:.6em;flex-wrap:wrap;margin-top:.8em}.tp-rating-menu-action{padding:.55em .8em;border-radius:.5em;background:#ffffff0c;font-size:.9em;cursor:pointer}.tp-rating-menu-action.focus{background:#e7deca;color:#191820}';
       document.head.appendChild(style);
     }
     Lampa.Listener.follow('full', function (event) {
       if (!event || event.type !== 'complite') return;
       var card = event.data && (event.data.movie || event.data.card), root = event.object && event.object.activity && event.object.activity.render();
       if (!card || !root) return;
-      var host = root.find('.full-start-new__rate-line, .full-start__rate-line').first();
+      var host = root.find('.omdb-mdb-yarik-rate').first();
+      if (!host.length) host = root.find('.full-start-new__rate-line, .full-start__rate-line').first();
       addRatingNode(host, card);
     });
     // Native episode Maker owns the episode identity and lifecycle. Append one
@@ -2450,6 +2537,9 @@
     }
   }
   window.TraktPlus.rating = personalRating;
+  window.TraktPlus.cachedRating = cachedPersonalRating;
+  window.TraktPlus.ratedCards = ratedCards;
+  window.TraktPlus.cachedRatedCards = cachedRatedCards;
   window.TraktPlus.setRating = saveRating;
   window.TraktPlus.syncRatings = syncRatings;
   window.TraktPlus.openRating = ratingDialog;
@@ -2458,7 +2548,7 @@
     if (cardKind(card) !== 'show' || watched === null || !state || !state.known || state.error || !freshStatus(state.t)) return { phase: 'unknown', newEpisodes: 0, next: null };
     return { phase: watched ? 'complete' : state.newEpisodes > 0 ? 'new' : state.watched > 0 ? 'partial' : 'unwatched', newEpisodes: state.newEpisodes || 0, next: state.next || null };
   };
-  window.TraktPlus.version = '3.4.0-native-ratings';
+  window.TraktPlus.version = '3.4.1-rating-widgets';
   window.TraktPlus.syncWatched = function () { return syncWatched(true); };
   window.TraktPlus.syncStatus = function () { return lastSyncResult; };
   window.TraktPlus.isWatched = watchStatus;

@@ -95,7 +95,7 @@
         }\
         .omdb-api-val { margin-left: auto; font-size: 0.9em; opacity: 0.7; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: 10px; }\
         div[data-component="' + COMPONENT_NAME + '"], div[data-component="omdb_ratings_select"] { display: none !important; }\
-        .rate--tmdb, .rate--imdb, .rate--kp, .full-start__rates { display: none !important; } \
+        .tp-public-ratings-ready .rate--tmdb, .tp-public-ratings-ready .rate--imdb, .tp-public-ratings-ready .rate--kp, .tp-public-ratings-ready .full-start__rates { display: none !important; } \
     </style>');
     $('body').append(style);
 
@@ -120,7 +120,8 @@
         else return '#2ecc71';
     }
 
-    function getRatingSize() { return Lampa.Storage.get('omdb_rating_size', '0.8em'); }
+    function getRatingSize() { var size = Lampa.Storage.get('omdb_rating_size', '1.25em'); return /^\d*\.?\d+em$/.test(size) && parseFloat(size) >= 1.25 ? size : '1.25em'; }
+    function ratingsApiKey(service) { return String(Lampa.Storage.get(service + '_api_key', '') || Lampa.Storage.get('ydesign_' + service + '_key', '')).trim(); }
     function getRatingGap() { return Lampa.Storage.get('omdb_rating_gap', '0.5em'); }
     function getRatingMargin() { return Lampa.Storage.get('omdb_rating_margin', '10px'); }
     function getSaturation() { return Lampa.Storage.get('omdb_rating_saturation', '100%'); }
@@ -193,6 +194,7 @@
 
         var block = createBlock(className, iconUrl, finalValue, color, orderKey);
         container.append(block);
+        container.closest('.full-start-new, .full-start').addClass('tp-public-ratings-ready');
         if (keyName !== 'avg') refreshAverage(container);
     }
 
@@ -228,7 +230,7 @@
         if (target) container = $(target).addClass(CONTAINER_CLASS);
         if (!target) {
         
-        render.find('.rate--tmdb, .rate--imdb, .rate--kp, .full-start__rates').remove();
+        // Native scores remain a fallback until an actual replacement exists.
         container = render.find('.' + CONTAINER_CLASS);
 
         if (container.length > 1) {
@@ -270,10 +272,14 @@
         var marginVal = getRatingMargin();
         var sat = getSaturation();
         container.css({
+            '--sh-details-rating-size': getRatingSize(),
             'gap': getRatingGap(),
             'margin-top': marginVal,
             'margin-bottom': marginVal
         });
+        // Move the existing personal control, preserving its native handlers.
+        // Public averages only inspect .custom-rating children, never this node.
+        if (!target) render.find('.tp-personal-rating').first().appendTo(container);
 
         if (sat === '0%') {
             container.addClass('is-bw-text');
@@ -516,7 +522,7 @@
 
         var requestMDBList = function(id) {
             var onDone = function() { requestSimkl(id); };
-            var key = Lampa.Storage.get('mdblist_api_key', '');
+            var key = ratingsApiKey('mdblist');
             if (!key) return onDone();
             $.getJSON('https://mdblist.com/api/?apikey=' + key + '&i=' + id, function(data) {
                 if (!data) return;
@@ -535,7 +541,7 @@
         };
 
         var requestOMDB = function(id) {
-            var key = Lampa.Storage.get('omdb_api_key', '');
+            var key = ratingsApiKey('omdb');
             var onDone = function() { requestMDBList(id); };
             if (!key) return onDone();
 

@@ -41,7 +41,7 @@ const check=(name,value)=>{report.checks.push({name,status:value?'PASS':'FAIL'})
  await page.route('**/*',route);page.on('response',onResponse);page.on('pageerror',onError);
  try{
   await page.reload({waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>window.TraktPlus?.version==='3.4.0-native-ratings'&&window.TraktTV?.api?.writeRating,{},{timeout:45000});
+  await page.waitForFunction(()=>window.TraktPlus?.version==='3.4.1-rating-widgets'&&window.TraktTV?.api?.writeRating,{},{timeout:45000});
   // Suppress unrelated background Favorite imports; no test writes to history.
   await page.evaluate(()=>{Lampa.Favorite.add=Lampa.Favorite.remove=()=>{};});
   if(live){
@@ -57,9 +57,9 @@ const check=(name,value)=>{report.checks.push({name,status:value?'PASS':'FAIL'})
    await page.waitForSelector('.tp-personal-rating',{timeout:45000});
    check('One personal rating in existing external ratings strip',await page.evaluate(()=>document.querySelectorAll('.activity--active .tp-personal-rating').length===1&&!!document.querySelector('.full-start-new__rate-line .tp-personal-rating')));
    await page.evaluate(()=>{const n=document.querySelector('.tp-personal-rating');Lampa.Controller.toggle('full_start');Lampa.Controller.collectionFocus($(n),$(n).closest('.full-start-new'));});
-   await page.keyboard.press('Enter');await page.waitForSelector('.selectbox-item',{timeout:10000});
-   check('Native OK opens half-star dialog',await page.evaluate(()=>document.querySelectorAll('.selectbox-item').length>=10));
-   await page.keyboard.press('ArrowDown');await page.keyboard.press('Enter');
+   await page.keyboard.press('Enter');await page.waitForSelector('.tp-rating-dropdown .tp-rating-half',{timeout:10000});
+   check('Native OK opens anchored half-star dropdown',await page.evaluate(()=>document.querySelectorAll('.tp-rating-dropdown .tp-rating-half').length>=10));
+   await page.keyboard.press('ArrowRight');await page.keyboard.press('Enter');
    await page.waitForFunction(()=>document.querySelector('.tp-personal-rating')?.textContent.includes('/5'));
    report.focus=await page.evaluate(()=>({controller:Lampa.Controller.enabled().name,focus:document.querySelector('.focus')?.className,personal:document.querySelector('.tp-personal-rating')?.className}));
    check('Remote selection updates rating and returns focus',await page.evaluate(()=>document.querySelector('.tp-personal-rating').classList.contains('focus')));
@@ -69,7 +69,7 @@ const check=(name,value)=>{report.checks.push({name,status:value?'PASS':'FAIL'})
    const episode=await page.evaluate(async()=>{const data={id:901002,card:{id:550,original_name:'Episode fixture',source:'tmdb'},season_number:1,episode_number:2,name:'Episode fixture',vote_average:8.2,air_date:'2025-01-01',runtime:23};const item=Lampa.Maker.make('Episode',data);item.create();const root=item.render();window.$(document.querySelector('.full-start-new')).append(root);window.__ratingEpisode=item;const button=window.$(root).find('.tp-personal-rating')[0];return {control:!!button,publicScore:data.vote_average,value:(await TraktPlus.rating({...data,rating_type:'episode',show:data.card})).value};});
    check('Native episode control preserves public score and personal identity',episode.control&&episode.publicScore===8.2&&episode.value===7);
    fail=true;check('API failure is surfaced without success',await page.evaluate(async()=>{try{await TraktPlus.setRating({id:550},9);return false;}catch(e){return true;}}));fail=false;
-   await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>window.TraktPlus?.version==='3.4.0-native-ratings');
+   await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>window.TraktPlus?.version==='3.4.1-rating-widgets');
    check('Reload reads server state',await page.evaluate(async()=>(await TraktPlus.rating({id:550},true)).value===null));
   }
   await Promise.all(responses);check('Exact changed JS served',files.every(f=>report.sources[f]?.matches));
