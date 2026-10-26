@@ -577,6 +577,13 @@
         if (!target) Lampa.Listener.send('average_rating', {type: 'render', movie: movie});
     }
 
+    function hydrateOpenRatings() {
+        var active = Lampa.Activity && Lampa.Activity.active && Lampa.Activity.active();
+        if (!active || active.component !== 'full' || !active.activity) return;
+        var component = active.activity.component, movie = component && component.props && component.props.get('movie');
+        if (!movie || !movie.id || active.activity.render().find('.' + CONTAINER_CLASS).length) return;
+        updateRatings({ object: active, data: { movie: movie } });
+    }
     function startPlugin() {
         window.lampa_omdb_plugin_loaded = true;
         Lampa.AverageRating = {
@@ -764,6 +771,7 @@
                 setTimeout(function() { updateRatings(e); }, 1000);
             }
         });
+        hydrateOpenRatings();
     }
 
     if (!window.lampa_omdb_plugin_loaded) startPlugin();
