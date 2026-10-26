@@ -1367,6 +1367,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         Lampa.Settings.main().render().detach();
         settingsCategory=name;
         $(target).trigger('hover:enter');
+        if(window.LampaSettingsHub && window.LampaSettingsHub.owns(name)) return;
         if(Lampa.Controller.enabled().name==='settings_component') settingsParameter=Lampa.Controller.enabled().controller;
         updateSettingsRail();
         if(initial) Lampa.Controller.toggle('sh_settings_nav');
@@ -1404,6 +1405,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
     }
     function onSettingsOpen(event) {
         if(settingsFrame) cancelAnimationFrame(settingsFrame);
+        if(window.LampaSettingsHub && window.LampaSettingsHub.owns(event.name)) { settingsCategory=''; onSettingsClose(); return; }
         settingsFrame=requestAnimationFrame(function(){
             settingsFrame=0;
             if(!watching || !document.body.classList.contains('settings--open'))return;
@@ -1484,6 +1486,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
     }
     window.StremioHybrid = {
         version: '2.9.0-torrent-overlay',
+        settingsHubVersion: 1,
         openUtilities: openHeaderUtilities,
         setEnabled: setEnabled,
         refresh: function () { if (ready) apply(enabled()); },

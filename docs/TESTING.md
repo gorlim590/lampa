@@ -54,3 +54,7 @@ Record PASS/FAIL/BLOCKED per scenario, actual code revision, mocks versus real b
 ## CI already present
 
 `.github/workflows/repository-checks.yml` runs syntax/URLs, Trakt and alias tests. `seasons-checks.yml` runs seasons/details; `parser-provider-checks.yml` runs parser/alias tests. `home-history-checks.yml` and `home-order-checks.yml` cover Home on PR/manual dispatch; main-push triggers differ. Pages deployment is separate. Check the actual head/base and run statuses rather than assuming all jobs run on every event. PR green is not post-merge green, and neither proves physical-TV behavior.
+
+## Settings Registry/Hub (#73)
+
+Run `node --test tests/settings-census.cjs tests/settings-registry.cjs tests/settings-hub-lifecycle.cjs tests/settings-sensitive-summaries.cjs`; add `tests/hybrid-ui.cjs` and `tests/details-ratings.cjs` when their owners change. Before acceptance, verify actual delivered hashes in the existing primary Lampa tab: category/search/paging; owner panel with Back/focus; native fallback/reopen. Never open real credential editors or probe/reset accounts for the audit. Physical TV and unexercised owner effects remain unverified.

@@ -38,3 +38,7 @@ For TV/anime distinguish source season/episode coordinates, absolute anime numbe
 ## Reuse existing evidence
 
 Read these only when the boundary is relevant: [Trakt account/snapshots](issue-7-account-isolation.md), [watched sync](issue-7-watched-sync.md), [Home history](issue-25-home-history.md), [Home ordering](issue-30-home-order.md), [parser coordinator](issue-17-parsers.md), [alias search](issue-16-torrent-search.md), [header](issue-21-header-clock.md). Their baseline/PR-era publication notes are historical; current branch files and Git history decide what is present. [Hybrid README](../README-stremio-hybrid.md) and [Torrents README](../README-torrents-redesign.md) contain subsystem details.
+
+## Settings Hub preview (#73)
+
+`ui/settings-hub.js` indexes public native SettingsApi/templates and routes to existing owner panels. It adds no value store or business handler. The default loader remains unchanged; `settings_hub=1` is an explicit preview. Native Settings remains the fallback. See [audit/inventory and limits](../audit/settings/README.md).
