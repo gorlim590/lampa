@@ -1401,8 +1401,11 @@
     var rated = { name: 'TraktPlusRated', uk: 'Мої оцінки · Trakt', en: 'My ratings · Trakt', personalRatings: true, index: TOP_INDEX + defs.length };
     ROWS[rated.name] = rated;
     Lampa.ContentRows.add({ name: rated.name, title: defTitle(rated), index: rated.index, screen: ['main'], call: function () {
-      if (!cfg().enable || !token()) return;
-      return function (call) { getRow(rated).then(function (result) { call(result.cards.length ? lineFor(rated, result) : undefined); }, function () { call(); }); };
+      if (!cfg().enable || !token() || window.LampaHomeHistory && window.LampaHomeHistory.active) return;
+      return function (call) { getRow(rated).then(function (result) {
+        if (window.LampaHomeHistory && window.LampaHomeHistory.active) return call();
+        call(result.cards.length ? lineFor(rated, result) : undefined);
+      }, function () { call(); }); };
     } });
 
     if (Lampa.Maker && Lampa.Maker.map) return; // one canonical native Full owner
