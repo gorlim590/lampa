@@ -4,11 +4,11 @@ function fixture(){
  delete require.cache[require.resolve('../ui/settings-hub.js')];const hub=require('../ui/settings-hub.js');
  const components={},params={},templates={},listeners={},styles=[],warnings=[],classes=new Set();let items=[],enabled={name:'settings',controller:{}},focused=null,destroyed=0,creates=0;
  const bodyNode={},rootNode={attrs:{},setAttribute(k,v){this.attrs[k]=v;}};
- function wrap(nodes){if(!Array.isArray(nodes))nodes=[nodes];const out={length:nodes.length,toArray:()=>nodes,detach:()=>out,
+ function wrap(nodes){if(!Array.isArray(nodes))nodes=[nodes];const out={length:nodes.length,toArray:()=>nodes,detach:()=>out,remove:()=>out,
   find(selector){if(selector==='.settings__body')return wrap(bodyNode);if(selector==='.settings-folder[data-component]')return wrap([]);if(selector==='[data-name]'||selector==='.settings-param.selector')return wrap(items);if(selector==='.settings-param__name')return {text:()=>nodes[0]?.label||''};return wrap([]);},
   filter(fn){return wrap(nodes.filter(n=>fn.call(n)));},first(){return wrap(nodes.slice(0,1));},on(event,fn){nodes.forEach(n=>n.enter=fn);return out;},trigger(event){if(event==='hover:focus')nodes.forEach(n=>n.scrollFocused=true);else nodes[0]?.enter?.();return out;}};
  nodes.forEach((n,i)=>out[i]=n);return out;}
- const $=wrap,L={Template:{add:(name,html)=>templates[name]=html,get:name=>templates[name]||'<div></div>'},SettingsApi:{allParams:()=>params,allComponents:()=>components,addComponent:d=>{components[d.component]=d;templates['settings_'+d.component]='<div></div>';},addParam:d=>(params[d.component]||=[]).push(d),removeParams:id=>delete params[id]},Settings:{main:()=>({render:()=>wrap({})}),render:()=>wrap(rootNode),listener:{follow:(event,fn)=>(listeners[event]||=[]).push(fn)},
+ const $=wrap,L={Template:{add:(name,html)=>templates[name]=html,get:name=>templates[name]||'<div></div>'},SettingsApi:{allParams:()=>params,allComponents:()=>components,addComponent:d=>{components[d.component]=d;templates['settings_'+d.component]='<div></div>';},addParam:d=>(params[d.component]||=[]).push(d),removeParams:id=>delete params[id],removeComponent:id=>{delete components[id];delete params[id];}},Settings:{main:()=>({render:()=>wrap({})}),render:()=>wrap(rootNode),listener:{follow:(event,fn)=>(listeners[event]||=[]).push(fn),remove:(event,fn)=>{listeners[event]=(listeners[event]||[]).filter(x=>x!==fn);}},
   create(name,options={}){creates++;let dead=false;items=(params[name]||[]).map(def=>{const item={label:def.field.name,key:def.param.name,getAttribute:k=>k==='data-name'?def.param.name:null};def.onRender?.(wrap(item));return item;});
    const controller={back(){assert(!dead,'native component destroyed twice');dead=true;destroyed++;items=[];if(options.onBack)options.onBack();else L.Controller.toggle('settings');}};
    // Mirrors native order: build controller, send open, then toggle component.
@@ -28,7 +28,7 @@ test('Paging bounds rendered links, discovers late registrations and does not du
  const f=fixture();f.params.ydesign=Array.from({length:65},(_,i)=>({param:{name:'setting_'+i,type:'select'},field:{name:'Параметр '+i}}));f.hub.install(f.L,f.$,f.doc);
  f.open();f.enter('hub_category_appearance');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,24);f.enter('hub_next');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,24);
  f.back();f.params.ydesign.push({param:{name:'late',type:'select'},field:{name:'Новий'}});f.enter('hub_category_appearance');f.enter('hub_next');f.enter('hub_next');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,18);
- assert.equal(f.hub.install(f.L,f.$,f.doc),false);assert.equal(f.styles.length,1);assert.equal(f.listeners.open.length,1);assert.equal(f.listeners.close.length,1);
+ assert.equal(f.hub.install(f.L,f.$,f.doc),false);assert.equal(f.styles.length,0);assert.equal(f.listeners.open.length,1);assert.equal(f.listeners.close.length,1);
  f.listeners.close[0]();assert.equal(f.hub.owns('ydesign'),false);assert(!f.classes.has('settings-hub-active'));
 });
 test('Unsafe credential owner is never opened from the index and native fallback remains available',()=>{
@@ -40,12 +40,19 @@ test('Hybrid cancels its queued rail and yields before creating a competing navi
  const c={settingsFrame:7,settingsCategory:'settings_hub',window:{LampaSettingsHub:{owns:name=>name==='settings_hub'}},cancelAnimationFrame:id=>calls.push(['cancel',id]),onSettingsClose:()=>calls.push('close'),requestAnimationFrame:()=>{throw Error('Competing rail scheduled');}};
  vm.runInNewContext(source.slice(source.indexOf('    function onSettingsOpen('),source.indexOf('    function onSettingsClose(')),c);c.onSettingsOpen({name:'settings_hub'});assert.deepEqual(calls,[['cancel',7],'close']);assert.equal(c.settingsCategory,'','Native fallback must not auto-reopen Hub');
 });
-test('Branch preview is explicit, replaces Hybrid through its public lifecycle and loads only matching branch assets',()=>{
+test('Audit harness never reloads themes and blocks incompatible active visual ownership',()=>{
  const source=fs.readFileSync(__dirname+'/../audit/settings/preview.js','utf8');
- for(const enabled of [false,true]){
+ for(const [enabled,legacy]of [[false,false],[true,false],[true,true]]){
   const loads=[],calls=[],L={Utils:{putScriptAsync:(urls,ok)=>{loads.push(urls[0]);ok();}},Noty:{show:()=>{}},Storage:{get(){throw Error('No preference access');},set(){throw Error('No preference writes');}}};
-  const c={URL,Lampa:L,window:{appready:true,Lampa:L,StremioHybrid:{destroy:()=>calls.push('destroy')}},document:{currentScript:{src:'https://cdn.jsdelivr.net/gh/gorlim590/lampa@fixture/audit/settings/preview.js?settings_preview='+(enabled?'1':'0')}}};
+  const c={URL,Lampa:L,window:{appready:true,Lampa:L,StremioHybrid:{destroy:()=>calls.push('destroy')},LampaSettingsHub:{install:()=>calls.push('mount')}},document:{body:{classList:{contains:()=>legacy}},currentScript:{src:'https://cdn.jsdelivr.net/gh/gorlim590/lampa@fixture/audit/settings/preview.js?settings_preview='+(enabled?'1':'0')}}};
   vm.runInNewContext(source,c);vm.runInNewContext(source,c);
-  assert.equal(calls.length,enabled?1:0);assert.equal(loads.length,enabled?2:0);if(enabled){assert(loads[0].endsWith('@fixture/ui/stremio-hybrid.js'));assert(loads[1].endsWith('@fixture/ui/settings-hub.js'));}
+  assert(!calls.includes('destroy'));assert.equal(loads.length,enabled&&!legacy?1:0);if(loads.length){assert(loads[0].endsWith('@fixture/ui/settings-hub.js'));assert.deepEqual(calls,['mount']);}
+ }
+});
+test('Single UI owner can unmount/remount functional Settings without retaining listeners, navigation params or changing foreign settings',()=>{
+ const f=fixture(),foreign=[{param:{name:'radius',type:'select'},field:{name:'Радіус'}}];f.params.ydesign=foreign;
+ for(let i=0;i<3;i++){
+  assert.equal(f.hub.install(f.L,f.$,f.doc),true);f.open();f.enter('hub_category_appearance');
+  f.hub.destroy();f.hub.destroy();assert.equal(f.listeners.open.length,0);assert.equal(f.listeners.close.length,0);assert.equal(f.params.settings_hub,undefined);assert.equal(f.params.settings_hub_page,undefined);assert.equal(f.params.ydesign,foreign);assert.equal(f.hub.owns('settings_hub'),false);assert.equal(f.L.Controller.enabled().name,'settings');assert.equal(f.styles.length,0);
  }
 });

@@ -34,10 +34,10 @@ test('loader audit path is explicit and does not change its normal plugin sequen
   assert.equal(loaded.length,8+extra);assert.equal(loaded.some(x=>x.includes('runtime-census.js')),!!extra);
  }
 });
-test('Hub preview is opt-in and completes before a combined audit capture',()=>{
+test('Production loader never installs a second Settings UI entrypoint',()=>{
  const source=fs.readFileSync(__dirname+'/../loader.js','utf8');
- for(const [query,count]of [['?settings_hub=0',8],['?settings_hub=1',9],['?settings_hub=1&settings_audit=1',10]]){
+ for(const [query,count]of [['?settings_hub=0',8],['?settings_hub=1',8],['?settings_hub=1&settings_audit=1',9]]){
   const loaded=[];vm.runInNewContext(source,{window:{appready:true,location:{search:query}},Lampa:{Storage:{get:()=>null},Utils:{putScriptAsync:(urls,ok)=>{loaded.push(urls[0]);ok()}}},setTimeout:()=>1,clearTimeout:()=>{}});
-  assert.equal(loaded.length,count);if(count===10){assert(loaded[8].includes('settings-hub.js'));assert(loaded[9].includes('runtime-census.js'));}
+  assert.equal(loaded.length,count);assert(!loaded.some(x=>x.includes('settings-hub.js')));if(count===9)assert(loaded[8].includes('runtime-census.js'));
  }
 });

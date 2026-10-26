@@ -84,12 +84,8 @@
     var index = 0;
     (function next() {
       if (index >= list.length) {
-        // Explicit previews only; normal startup makes no extra request.
-        function census() {
-          if (window.location && /(?:^|[?&])settings_audit=1(?:&|$)/.test(window.location.search)) loadOne('audit/settings/runtime-census.js?audit_rev=2', function () {});
-        }
-        if (window.location && /(?:^|[?&])settings_hub=1(?:&|$)/.test(window.location.search)) loadOne('ui/settings-hub.js?hub_rev=1', census);
-        else census();
+        // Explicit, read-only audit opt-in; normal startup makes no extra request.
+        if (window.location && /(?:^|[?&])settings_audit=1(?:&|$)/.test(window.location.search)) loadOne('audit/settings/runtime-census.js?audit_rev=2', function () {});
         return;
       }
       var path = list[index++];

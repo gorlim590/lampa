@@ -3,16 +3,11 @@
     'use strict';
     var api = factory();
     if (typeof module === 'object' && module.exports) module.exports = api;
-    else if (root && !root.LampaSettingsHub) {
-        root.LampaSettingsHub = api;
-        if (root.appready) api.install(root.Lampa, root.jQuery || root.$, root.document);
-        else if (root.Lampa && root.Lampa.Listener) root.Lampa.Listener.follow('app', function ready(e) {
-            if (e.type === 'ready') { root.Lampa.Listener.remove('app', ready); api.install(root.Lampa, root.jQuery || root.$, root.document); }
-        });
-    }
+    // #79's single UI entrypoint mounts this internal functional adapter explicitly.
+    else if (root && !root.LampaSettingsHub) root.LampaSettingsHub = api;
 })(typeof window !== 'undefined' ? window : null, function () {
     'use strict';
-    var ROOT = 'settings_hub', PAGE = 'settings_hub_page', installed = false, active = false;
+    var ROOT = 'settings_hub', PAGE = 'settings_hub_page', installed = false, active = false, teardown = null;
     var categories = [
         ['profiles', 'Профілі та облікові записи'], ['home', 'Головна сторінка та рекомендації'],
         ['appearance', 'Зовнішній вигляд'], ['playback', 'Відтворення та плеєр'],
@@ -88,15 +83,19 @@
             rows.slice(before).forEach(function(row){row.panelAvailable=panelAvailable;if(!panelAvailable && row.status==='unverified'){row.status='blocked';row.explanation='Панель ще не зареєстрована власником. Спочатку відкрийте його стандартний розділ налаштувань. #73';}});
             if(rows.length===before && (folders || []).some(function(f){return f.id===component;}))rows.push({id:component+':folder',component:component,key:'',label:title,owner:'Штатна панель або інтеграція',category:category(component,''),route:'folder',status:'unverified',issue:73,explanation:'Не перевірено: спеціальний маршрут відкривається оригінальною кнопкою Lampa.'});
         });
+        var counts = {};
+        rows.forEach(function(row){counts[row.id]=(counts[row.id] || 0)+1;});
+        rows.forEach(function(row,index){row.instanceId=row.id+'@'+(row.registration || 'folder')+':'+(row.ordinal===undefined?index:row.ordinal);row.identityVerified=!!row.key && counts[row.id]===1;});
         return {rows:rows, gaps:gaps, metrics:{records:rows.length, buildMs:Date.now()-started, preferenceReads:0, preferenceWrites:0, serviceProbes:0},
             select:function (group, query) {
                 var q = clean(query).toLowerCase();
                 return rows.filter(function (r) { return (group === 'all' || group === 'unverified' && r.status === 'unverified' || group === 'problems' && ['broken','partial','blocked'].indexOf(r.status) !== -1 || r.category === group) && (!q || (r.label+' '+r.owner+' '+r.key).toLowerCase().indexOf(q) !== -1); });
             }};
     }
-    function owns(name) { return name === ROOT || name === PAGE || active; }
+    function owns(name) { return installed && (name === ROOT || name === PAGE || active); }
+    function destroy() { if(teardown){var cleanup=teardown;teardown=null;cleanup();}installed=false;active=false; }
     function install(L, $, doc) {
-        if (installed || !L || !$ || !L.Template || !L.SettingsApi || !L.SettingsApi.allParams || !L.SettingsApi.allComponents || !L.SettingsApi.removeParams || !L.Settings || !L.Settings.main) return false;
+        if (installed || !L || !$ || !L.Template || !L.SettingsApi || !L.SettingsApi.allParams || !L.SettingsApi.allComponents || !L.SettingsApi.removeParams || !L.SettingsApi.removeComponent || !L.Settings || !L.Settings.main || !L.Settings.listener || !L.Settings.listener.remove) return false;
         installed = true;
         var registry, group = 'all', query = '', page = 0, returning = false, focusId = '', rootFocus = '', limit = 24;
         var metrics = {opens:0, builds:0, renderedRows:0, maxRenderedRows:0, listeners:2, timers:0, observers:0};
@@ -136,7 +135,7 @@
                 return;
             }
             if(row.panelAvailable===false){L.Noty.show(row.explanation);return;}
-            focusId=row.id;nativePage(row.component,showList);
+            focusId=row.instanceId;nativePage(row.component,showList);
             var body=L.Settings.render().find('.settings__body'),nodes=body.find('.settings-param.selector'),exact=nodes.filter(function(){return row.key && this.getAttribute('data-name')===row.key;});
             if(!exact.length)exact=nodes.filter(function(){return $(this).find('.settings-param__name').text().trim()===row.label;});
             if(exact.length===1){L.Controller.collectionFocus(exact[0],body);exact.trigger('hover:focus');}
@@ -155,7 +154,7 @@
             if(page+1<total)button(PAGE,'hub_next','Наступна сторінка',(page+1)+' / '+total,function(){page++;focusId='';showList();focus('hub_next');});
             metrics.renderedRows=Math.min(limit,filtered.length-page*limit);metrics.maxRenderedRows=Math.max(metrics.maxRenderedRows,metrics.renderedRows);
             nativePage(PAGE,openRoot);
-            var index=filtered.slice(page*limit,(page+1)*limit).map(function(r){return r.id;}).indexOf(focusId);if(index>=0)focus('hub_item_'+index);
+            var index=filtered.slice(page*limit,(page+1)*limit).map(function(r){return r.instanceId;}).indexOf(focusId);if(index>=0)focus('hub_item_'+index);
         }
         function choose(id) { rootFocus='hub_category_'+id;group=id;page=0;query='';focusId='';rebuild();showList(); }
         L.SettingsApi.addComponent({component:ROOT,name:'Центр налаштувань',icon:'<span aria-hidden="true">⚙</span>'});
@@ -166,16 +165,23 @@
         button(ROOT,'hub_unverified','Не перевірено','Параметри без підтвердження ефекту та збереження.',function(){choose('unverified');});
         button(ROOT,'hub_all','Усі налаштування та пошук','Оригінальні обробники й значення збережено.',function(){choose('all');});
         button(ROOT,'hub_native','Стандартні налаштування','Повернутися до штатного інтерфейсу Lampa.',function(){leave();active=false;doc.body.classList.remove('settings-hub-active');L.Controller.toggle('settings');});
-        var style=doc.createElement('style');style.id='lampa-settings-hub-style';
-        style.textContent='body.settings-hub-active .settings__content{background:var(--sh-bg,#10121b)!important;border-radius:var(--sh-radius,1em);backdrop-filter:none!important}body.settings-hub-active .settings__body{grid-column:1 / -1!important;max-width:70em;width:100%;margin:auto;box-sizing:border-box}body.settings-hub-active .sh-settings-rail{display:none}body.settings-hub-active .settings-param{border-radius:var(--sh-pill,.7em);padding:.85em 1.1em;margin-bottom:.35em;transition:background-color .12s ease}body.settings-hub-active .settings-param__name{font-size:1.1em;line-height:1.35}body.settings-hub-active .settings-param__descr{font-size:.85em;line-height:1.4;color:var(--sh-muted,#b2b5c4);overflow-wrap:anywhere}body.settings-hub-active .settings-param.focus{background:var(--sh-focus-soft,#353346);box-shadow:inset .2em 0 var(--sh-accent,#aaa4ed)}@media(prefers-reduced-motion:reduce){body.settings-hub-active .settings-param{transition:none}}';
-        doc.head.appendChild(style);
-        L.Settings.listener.follow('open',function(e){
+        // No stylesheet, theme bootstrap or visual controller: those belong to #79.
+        function onOpen(e){
             if(e.name===ROOT){active=true;metrics.opens++;rebuild();mark();}
             else if(e.name===PAGE || active && e.name!=='main')mark();
             else if(e.name==='main'){active=false;doc.body.classList.remove('settings-hub-active');}
-        });
-        L.Settings.listener.follow('close',function(){active=false;registry=null;doc.body.classList.remove('settings-hub-active');});
+        }
+        function onClose(){active=false;registry=null;doc.body.classList.remove('settings-hub-active');}
+        L.Settings.listener.follow('open',onOpen);
+        L.Settings.listener.follow('close',onClose);
+        teardown=function(){
+            L.Settings.listener.remove('open',onOpen);L.Settings.listener.remove('close',onClose);
+            if(active){leave();active=false;doc.body.classList.remove('settings-hub-active');L.Controller.toggle('settings');}
+            L.SettingsApi.removeComponent(ROOT);L.SettingsApi.removeParams(PAGE);
+            L.Settings.main().render().find('[data-component="'+ROOT+'"]').remove();
+            registry=null;
+        };
         return true;
     }
-    return {categories:categories,category:category,fields:fields,createRegistry:createRegistry,owns:owns,install:install};
+    return {contractVersion:1,categories:categories,category:category,fields:fields,createRegistry:createRegistry,owns:owns,install:install,destroy:destroy};
 });

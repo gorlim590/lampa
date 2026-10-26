@@ -36,9 +36,15 @@ test('Missing templates retain an explicit gap and original special-folder route
 });
 test('Presentation wrappers are not controls and duplicate registrations are not silently discarded',()=>{
  assert.deepEqual(hub.fields('<div></div>'),[]);assert.equal(hub.fields('<div class="settings-param-title">Header</div>').length,0);
- const {L,params}=fixture();params.trakt_plus.push(params.trakt_plus[0]);assert.equal(hub.createRegistry(L).select('trakt').length,2);
+ const {L,params}=fixture();params.trakt_plus.push(params.trakt_plus[0]);const rows=hub.createRegistry(L).select('trakt');assert.equal(rows.length,2);assert.notEqual(rows[0].instanceId,rows[1].instanceId);assert(rows.every(r=>r.identityVerified===false));
 });
-test('Missing native capability leaves fallback untouched',()=>{assert.equal(hub.install({},()=>{throw Error('Unexpected DOM');},{}),false);assert.equal(hub.owns('interface'),false);assert.equal(hub.owns('settings_hub'),true);});
+test('Missing native capability leaves fallback untouched',()=>{assert.equal(hub.install({},()=>{throw Error('Unexpected DOM');},{}),false);assert.equal(hub.owns('interface'),false);assert.equal(hub.owns('settings_hub'),false);});
+test('Loading the reusable module has no UI/bootstrap/listener side effect before the single UI owner mounts it',()=>{
+ const fs=require('node:fs'),vm=require('node:vm'),fail=()=>{throw Error('Unexpected bootstrap effect');};
+ const window={appready:true,document:{createElement:fail},Lampa:{Listener:{follow:fail},SettingsApi:{addParam:fail}}};
+ vm.runInNewContext(fs.readFileSync(__dirname+'/../ui/settings-hub.js','utf8'),{window});
+ assert.equal(window.LampaSettingsHub.contractVersion,1);assert.equal(window.LampaSettingsHub.owns('settings_hub'),false);
+});
 test('Info self-navigation is reproduced in isolation and reported separately from a lazy template dependency',()=>{
  const fs=require('node:fs'),vm=require('node:vm'),source=fs.readFileSync(__dirname+'/../community/new-category.js','utf8');
  const marker=source.indexOf('name: "ncInfo",',source.indexOf('//Info\n      Lampa.SettingsApi.addParam')),start=source.lastIndexOf('      Lampa.SettingsApi.addParam({',marker),end=source.indexOf('\n      });',marker)+10;
