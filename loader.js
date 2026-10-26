@@ -83,7 +83,11 @@
     var list = readList();
     var index = 0;
     (function next() {
-      if (index >= list.length) return;
+      if (index >= list.length) {
+        // Explicit, read-only audit opt-in; normal startup makes no extra request.
+        if (window.location && /(?:^|[?&])settings_audit=1(?:&|$)/.test(window.location.search)) loadOne('audit/settings/runtime-census.js', function () {});
+        return;
+      }
       var path = list[index++];
       loadOne(path, next);
     })();
