@@ -2136,6 +2136,7 @@
     var params = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
     var unauthorized = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
     var requestOptions = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : {};
+    if (requestOptions.sessionGuard && !requestOptions.sessionGuard()) return Promise.reject(new Error('Obsolete Trakt rating session'));
     var headers = ensureHeaders({
       unauthorized: unauthorized
     });
@@ -2532,6 +2533,11 @@
       var unauthorized = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
       return requestApi('GET', url, {}, unauthorized, 0, options);
+    },
+    // Narrow authenticated writer: share OAuth, cooldowns and transport retries.
+    // Do not expose a general arbitrary-endpoint POST helper to UI plugins.
+    writeRating: function writeRating(body, remove, sessionGuard) {
+      return requestApi('POST', remove ? '/sync/ratings/remove' : '/sync/ratings', body, false, 0, { cache: false, sessionGuard: sessionGuard });
     },
     // Normalize ids for watchlist/history operations.
     // Prefer params.ids when filled; fall back to tmdb_id/trakt_id when needed.
