@@ -14,7 +14,9 @@
 body.stremio-hybrid { --sh-bg:#121023; --sh-panel:#211d35; --sh-accent:#9775fa; --sh-muted:#aba7bd; --sh-rail:#0c0b16; --sh-text:#f0eef8; --sh-border:#ffffff16; --sh-radius:.7em; --sh-pill:2em; --sh-gap:1.1em; --sh-speed:160ms; --sh-ring:#9775fa66; --sh-focus:#7960c9; --sh-focus-soft:#3e315b; --sh-header:transparent; --sh-panel-raised:#29233e; --sh-accent-soft:#b79bff; --sh-focus-text:#e9e0ff; --sh-focus-ink:#201536; --sh-inactive:#726d86; --sh-secondary:#d0cadf; --sh-inset:1.8em; --sh-ease:ease-out; background:#121023 !important; color:#f0eef8; }
 body.stremio-hybrid .background { opacity:.12 !important; }
 body.stremio-hybrid .head { background:transparent !important; background-image:none !important; border:0 !important; box-shadow:none !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
-body.stremio-hybrid .head__body { padding-left:1.8em; padding-right:var(--sh-inset); }
+/* The native collapsed navigation rail occupies 4.4em. The header itself spans
+   the viewport so search stays centered; reserve the rail only for its content. */
+body.stremio-hybrid .head__body { padding-left:calc(4.4em + var(--sh-inset)); padding-right:var(--sh-inset); }
 body.stremio-hybrid .head__action { border-radius:50%; }
 body.stremio-hybrid .head__action.focus { background:var(--sh-focus) !important; color:white !important; }
 body.stremio-hybrid .wrap { background:var(--sh-bg); }
