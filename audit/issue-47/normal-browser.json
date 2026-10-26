@@ -1,0 +1,267 @@
+{
+  "commit": "a3a0fde",
+  "checks": [
+    {
+      "name": "Initial focus Torrent with closed overlay",
+      "pass": true
+    },
+    {
+      "name": "Real parser results and bounded readable layout",
+      "pass": true,
+      "data": {
+        "focusInside": true,
+        "metadataPx": "20.8994px",
+        "overflow": false,
+        "rect": {
+          "bottom": 890.140625,
+          "height": 843.296875,
+          "left": 134.390625,
+          "right": 1785.578125,
+          "top": 46.84375,
+          "width": 1651.1875,
+          "x": 134.390625,
+          "y": 46.84375
+        },
+        "rows": 15,
+        "status": "Частина парсерів недоступна · Знайдено: 15",
+        "titlePx": "25.9592px",
+        "viewport": {
+          "height": 937,
+          "width": 1920
+        }
+      }
+    },
+    {
+      "name": "Left/Up remain within overlay",
+      "pass": true,
+      "data": {
+        "focus": "Закрити · Back",
+        "inside": true
+      }
+    },
+    {
+      "name": "Back closes sorting before overlay",
+      "pass": true
+    },
+    {
+      "name": "Raw release name accessible through nested Details",
+      "pass": true
+    },
+    {
+      "name": "Back closes Details then overlay and restores Torrent focus",
+      "pass": true,
+      "data": {
+        "closed": true,
+        "torrentFocus": true
+      }
+    },
+    {
+      "name": "720p responsive geometry",
+      "pass": true,
+      "data": {
+        "bodyOverflow": false,
+        "height": 720,
+        "metadata": "15.2px",
+        "overflow": false,
+        "rect": {
+          "bottom": 684,
+          "height": 648,
+          "left": 89.59375,
+          "right": 1190.390625,
+          "top": 36,
+          "width": 1100.796875,
+          "x": 89.59375,
+          "y": 36
+        },
+        "title": "18.88px",
+        "width": 1280
+      }
+    },
+    {
+      "name": "1080p responsive geometry",
+      "pass": true,
+      "data": {
+        "bodyOverflow": false,
+        "height": 1080,
+        "metadata": "20.8994px",
+        "overflow": false,
+        "rect": {
+          "bottom": 1026,
+          "height": 972,
+          "left": 134.390625,
+          "right": 1785.578125,
+          "top": 54,
+          "width": 1651.1875,
+          "x": 134.390625,
+          "y": 54
+        },
+        "title": "25.9592px",
+        "width": 1920
+      }
+    },
+    {
+      "name": "4K responsive geometry",
+      "pass": true,
+      "data": {
+        "bodyOverflow": false,
+        "height": 2160,
+        "metadata": "41.7988px",
+        "overflow": false,
+        "rect": {
+          "bottom": 2052,
+          "height": 1944,
+          "left": 268.796875,
+          "right": 3571.1875,
+          "top": 108,
+          "width": 3302.390625,
+          "x": 268.796875,
+          "y": 108
+        },
+        "title": "51.9185px",
+        "width": 3840
+      }
+    },
+    {
+      "name": "Ten rapid close/reopen cycles keep results and focus inside",
+      "pass": true
+    },
+    {
+      "name": "Movie entry isolates previous anime and focuses Torrent",
+      "pass": true,
+      "data": {
+        "focus": true,
+        "title": "Дюна: Частина другаDune: Part Two",
+        "visibleOverlays": 0
+      }
+    },
+    {
+      "name": "Movie overlay shows its own real releases",
+      "pass": true,
+      "data": {
+        "header": "Торренти · Дюна: Частина друга 2024",
+        "rows": [
+          "Дюна: Частина друга (2024)",
+          "Дюна: Частина друга (2024)",
+          "Дюна: Частина друга (2024)"
+        ]
+      }
+    },
+    {
+      "name": "Final source: focused Torrent is fully visible above verbose metadata",
+      "pass": true,
+      "data": {
+        "focus": true,
+        "overlayClosed": true,
+        "rect": {
+          "bottom": 707.984375,
+          "height": 59.53125,
+          "left": 513.1875,
+          "right": 701.09375,
+          "top": 648.453125,
+          "width": 187.90625,
+          "x": 513.1875,
+          "y": 648.453125
+        },
+        "sources": [
+          "https://cdn.jsdelivr.net/gh/gorlim590/lampa@f9e90225ee15f051a1e39c8fdfef8c6ecc48217e/ui/torrent-overlay.js",
+          "https://cdn.jsdelivr.net/gh/gorlim590/lampa@f9e90225ee15f051a1e39c8fdfef8c6ecc48217e/tests/torrent-overlay-preview.js",
+          "https://cdn.jsdelivr.net/gh/gorlim590/lampa@f9e90225ee15f051a1e39c8fdfef8c6ecc48217e/ui/stremio-hybrid.js"
+        ],
+        "viewport": {
+          "height": 937,
+          "width": 1920
+        }
+      }
+    },
+    {
+      "name": "Final source: readable separators in raw release details",
+      "pass": true
+    },
+    {
+      "name": "Final source: nested Back restores visible Torrent focus",
+      "pass": true
+    },
+    {
+      "name": "Final source: canonical shade outside native transformed scroll body",
+      "pass": true,
+      "data": {
+        "beforeShadeHeightPx": 2926.83,
+        "afterShadePx": [
+          1920,
+          937
+        ],
+        "topPx": 0,
+        "oldNativePseudo": "absent",
+        "cardifyBackground": "none"
+      }
+    },
+    {
+      "name": "Final source: shade matches 720p and 4K viewport without horizontal overflow",
+      "pass": true,
+      "data": {
+        "720p": [
+          1280,
+          720
+        ],
+        "4K": [
+          3840,
+          2160
+        ]
+      }
+    },
+    {
+      "name": "Final source: native scroll translates -665px while shade stays viewport sized",
+      "pass": true
+    },
+    {
+      "name": "Final source: real search returns 15 releases with focus contained and no horizontal overflow",
+      "pass": true
+    },
+    {
+      "name": "Final source: native release selection opens real Files with four MKV episode entries; no file playback selected",
+      "pass": true
+    },
+    {
+      "name": "Final source: Back closes Files before overlay; second Back restores Torrent focus",
+      "pass": true
+    },
+    {
+      "name": "Cleanup: viewport reset, only owned preview removed, page reload uses original published Hybrid without pinned CDN scripts",
+      "pass": true
+    }
+  ],
+  "performance": {
+    "firstResultObservedMs": 7427,
+    "reopenObservedMs": 70,
+    "tenCloseReopenObservedMs": 992,
+    "interpretation": "Automation observation timings, not precise parser latency or FPS/memory measurements"
+  },
+  "sources": [
+    "ui/stremio-hybrid.js",
+    "ui/torrent-overlay.js"
+  ],
+  "limits": [
+    "Real parser searches and native release/Files listing in usual Chrome profile. No file playback selected, no actual TorrServer playback or physical Google TV verification.",
+    "Dorama/multilingual names, pending title/profile isolation, error/empty, and duplicate requests/listeners covered by isolated Node fixtures, not the full live media/device matrix.",
+    "Earlier separate-CDP harness failed setup and is excluded from acceptance; the unverified harness was removed."
+  ],
+  "consoleErrors": [
+    {
+      "message": "[Account] timeline dump error, not loaded",
+      "source": "https://siaivo.isroot.in/app.min.js"
+    },
+    {
+      "message": "[Account] bookmarks full update fail, trying load from cache: message [object]",
+      "source": "https://siaivo.isroot.in/app.min.js"
+    },
+    {
+      "message": "[Account] timeline dump error, not loaded",
+      "source": "https://siaivo.isroot.in/app.min.js"
+    }
+  ],
+  "finalSourceCommit": "ae42a005fb4ee42fc91ecfccd160e4c8e1bb9b8b",
+  "finalSourceSha256": {
+    "ui/stremio-hybrid.js": "27475f75ccfd16df449822ba5cf719e2ea47a6ebf1d63404100aa910a2798b97",
+    "ui/torrent-overlay.js": "cb99a20f92bede8e5699d03181b4191b93ca3b26ab2b129e7330d5d89df136d0"
+  }
+}

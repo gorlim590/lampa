@@ -16,4 +16,4 @@ jobs:
         with:
           node-version: 20
       - name: Independent sources, errors, caches and alias compatibility
-        run: node --test --test-timeout=15000 tests/parser-providers.cjs tests/torrent-search.cjs tests/torrent-details.cjs tests/unified-parser.cjs
+        run: node --test --test-timeout=15000 tests/parser-providers.cjs tests/torrent-search.cjs tests/torrent-details.cjs tests/unified-parser.cjs tests/torrent-overlay.cjs tests/hybrid-ui.cjs
