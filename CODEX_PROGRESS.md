@@ -713,3 +713,11 @@ Next publishupdatedPR50(mainmerge+marginfixonly),CI/merge;thenPR53retargettothat
 - Found first-open lifecycle race: main loader delivered AverageRating after Full completed, so no public custom container despite script presence; native fallbackTMDB remains visible. New scoped branch fix/details-ratings-late-load at worktreeaudit/issue-5-rating-badges: one immediate hydrateOpenRatings of active Full via native props; skip non-Full/notready/already-rendered containers. No polling/refresh.
 - Rated producer now yields while HomeHistory coordinator is active (including late activation), preventing duplicate row callbacks when the coordinator paints cached items before native lazy producer. Scope remains existing owners.
 - Targeted handoff/rating/loader76PASS; preceding Details/localization22PASS. Additive test only; prior298checks and22overlay remain relevant for unchanged code. Loader delivery version3.4.2. Next publish handoff PR, CI/merge as authorized, main Pages hash/primary reload, confirm IMDb/LB actual data and rated widget + collapsed synopsis. Do not repeat live write test unless writer changes. PhysicalTV/real episode-rating write stillNOTTESTED; Issue5 remains open.
+
+
+## 2026-10-26 — Issue #5: Details external identity transport
+- Baseline main: 874b2ce1ab1b2148c511bb287e0f99f5527131fa; branch fix/details-rating-id-transport.
+- Primary Chrome confirmed IMDb/Letterboxd enabled and YDesign service keys installed; Details custom scores absent even on Dune (438631). Identified unsupported Lampa.Network.silent gate; use native Reguest instance for missing IMDb ID resolution. No credentials/history changes.
+- Targeted Details + watched/loader regression: 57 PASS, 0 FAIL. Syntax, repository checker (65 JS, 44 entries, 509 URLs), diff check PASS.
+- Primary Chrome native OK expands/collapses synopsis under text and retains focus. Earlier actual Trakt CRUD/readback/reload passed and original unrated test title restored; writer unchanged.
+- Loader delivery version 20261026-details-ratings-3.4.3. Pending: publish and verify external scores on primary Chrome. Physical Google TV and real episode writes NOT TESTED.

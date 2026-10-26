@@ -566,8 +566,9 @@
         if (imdb_id) requestOMDB(imdb_id);
         else if (movie.id) {
             var type = (e.object.method === 'tv' || movie.number_of_seasons) ? 'tv' : 'movie';
-            if (window.Lampa && Lampa.Network && Lampa.TMDB) {
-                Lampa.Network.silent(Lampa.TMDB.api(type + '/' + movie.id + '/external_ids?api_key=' + Lampa.TMDB.key()), function (res) {
+            if (window.Lampa && Lampa.Reguest && Lampa.TMDB) {
+                var externalIdsRequest = new Lampa.Reguest();
+                externalIdsRequest.silent(Lampa.TMDB.api(type + '/' + movie.id + '/external_ids?api_key=' + Lampa.TMDB.key()), function (res) {
                     if (res && res.imdb_id) requestOMDB(res.imdb_id);
                 });
             }
