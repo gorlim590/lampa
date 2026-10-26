@@ -28,8 +28,20 @@
         for (var i = 0; i < value.length; i++) h = ((h ^ value.charCodeAt(i)) * 16777619) >>> 0;
         return h.toString(16);
     }
+    function sourceFingerprint(value) {
+        // Code identity only: remove string literals/comments before hashing.
+        return hash(String(value).replace(/'(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*"|`(?:\\.|[^`\\])*`/g, '""').replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, '').replace(/\s+/g, ''));
+    }
+    function handlerFingerprint(fn) {
+        return typeof fn === 'function' ? sourceFingerprint(Function.prototype.toString.call(fn)) : '';
+    }
     function htmlFields(html) {
-        var rows = [], parts = String(html || '').split(/(?=<div\b[^>]*class=["'][^"']*\bsettings-param\b)/i);
+        var rows = [], source = String(html || ''), starts = [], tags = /<div\b[^>]*>/ig, match;
+        while ((match = tags.exec(source))) {
+            var classes = match[0].match(/class=["']([^"']*)["']/i);
+            if (classes && classes[1].split(/\s+/).indexOf('settings-param') !== -1) starts.push(match.index);
+        }
+        var parts = starts.map(function (start, index) { return source.slice(start, starts[index + 1] || source.length); });
         parts.forEach(function (part) {
             var tag = part.match(/^<div\b[^>]*>/i);
             if (!tag) return;
@@ -40,7 +52,7 @@
         return rows;
     }
     function capture(L, doc) {
-        var started = Date.now(), result = { schema: 1, generatedAt: new Date().toISOString(), currentValues: '[not read]', settings: [], components: [], scripts: [], gaps: [], metrics: {} };
+        var started = Date.now(), result = { schema: 2, generatedAt: new Date().toISOString(), currentValues: '[not read]', settings: [], components: [], scripts: [], gaps: [], metrics: {} };
         if (!L || !L.SettingsApi || typeof L.SettingsApi.allParams !== 'function' || typeof L.SettingsApi.allComponents !== 'function') {
             result.gaps.push('SettingsApi read-only enumeration unavailable'); return result;
         }
@@ -55,13 +67,13 @@
         } catch (e) { result.gaps.push('Native folder metadata unavailable'); }
         function append(component, row, origin, index) {
             var name = key(row.name), label = text(row.label), id = key(component) + ':' + (name || 'anonymous-' + hash(label + ':' + row.type));
-            result.settings.push({ id: id, component: key(component), key: name || '[handler-owned]', label: label, type: text(row.type), registration: origin, ordinal: index, registeredDefault: row.defaultValue, currentValue: '[not read]', onChange: !!row.onChange, onRender: !!row.onRender, capability: row.capability || 'not inspected', status: 'Not verified' });
+            result.settings.push({ id: id, component: key(component), key: name || '[handler-owned]', label: label, type: text(row.type), registration: origin, ordinal: index, registeredDefault: row.defaultValue, currentValue: '[not read]', onChange: !!row.onChange, onRender: !!row.onRender, onChangeFingerprint: row.onChangeFingerprint || '', onRenderFingerprint: row.onRenderFingerprint || '', capability: row.capability || 'not inspected', status: 'Not verified' });
         }
         Object.keys(all).forEach(function (component) {
             nativeNames[component] = true;
             (Array.isArray(all[component]) ? all[component] : []).forEach(function (def, index) {
                 var p = def.param || {}, f = def.field || {};
-                append(component, { name: p.name, label: f.name, type: p.type, defaultValue: safeDefault(p.default, p.name || f.name || ''), onChange: typeof def.onChange === 'function', onRender: typeof def.onRender === 'function' }, 'SettingsApi', index);
+                append(component, { name: p.name, label: f.name, type: p.type, defaultValue: safeDefault(p.default, p.name || f.name || ''), onChange: typeof def.onChange === 'function', onRender: typeof def.onRender === 'function', onChangeFingerprint: handlerFingerprint(def.onChange), onRenderFingerprint: handlerFingerprint(def.onRender) }, 'SettingsApi', index);
             });
         });
         Object.keys(nativeNames).forEach(function (component) {
@@ -79,5 +91,5 @@
         result.gaps.push('Conditional/onRender DOM, storage-only settings and individual handlers require source attribution and targeted verification');
         return result;
     }
-    return { capture: capture, htmlFields: htmlFields, safeDefault: safeDefault };
+    return { capture: capture, htmlFields: htmlFields, safeDefault: safeDefault, sourceFingerprint: sourceFingerprint };
 });
