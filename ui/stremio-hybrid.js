@@ -177,7 +177,10 @@ body.stremio-hybrid .sh-movie .cardify__right-box > .full-start-new__rate-line {
 body.stremio-hybrid .sh-movie .full-start__status, body.stremio-hybrid .sh-movie .full-start__pg { background:rgba(255,255,255,.05) !important; color:var(--sm-muted) !important; font-size:.8em !important; border:1px solid #ffffff26; padding:.25em .6em; border-radius:.3em; }
 body.stremio-hybrid .sh-movie-page .full-start__background { position:fixed; left:0 !important; top:0 !important; width:100vw !important; height:100vh !important; max-width:none; object-fit:cover; object-position:center; transform:none !important; }
 body.stremio-hybrid .sh-movie-native { position:relative; z-index:0; }
-body.stremio-hybrid .sh-movie-native::before { content:''; position:fixed; inset:0; pointer-events:none; z-index:-1; background:linear-gradient(90deg,rgba(8,9,17,.92),rgba(8,9,17,.72) 37%,rgba(8,9,17,.12) 76%),linear-gradient(0deg,#0c0c16,transparent 34%); }
+/* Own the shade outside native .scroll__body: its transform makes fixed descendants
+   scroll-sized and clips their top edge below the header (Issue #49). The image and
+   shade now share the same viewport containing block, including Cardify layouts. */
+body.stremio-hybrid .activity.sh-movie-page::before { content:''; position:fixed; left:0; top:0; width:100vw; height:100vh; pointer-events:none; z-index:-1; background:linear-gradient(90deg,rgba(8,9,17,.92),rgba(8,9,17,.72) 37%,rgba(8,9,17,.12) 76%),linear-gradient(0deg,#0c0c16,transparent 34%); }
 body.stremio-hybrid .sh-movie .full-start-new__tagline { order:1; font-size:.9em !important; color:var(--sm-muted); margin:0 0 .8em; }
 body.stremio-hybrid .sh-movie .full-start-new__rate-line { order:2; margin:0 0 .8em !important; gap:.8em; }
 body.stremio-hybrid .sh-movie .full-start-new__details { order:3; }
@@ -186,9 +189,8 @@ body.stremio-hybrid .activity.sh-movie-page { --sm-bg:#0c0c16; --sm-text:#f4f4f7
 /* Native activity translate3d changes the containing block of fixed backdrop/mask layers.
    Keep that entry animation off only for this full-viewport details composition. */
 body.stremio-hybrid .activity.sh-movie-page > .activity__body { -webkit-animation:none !important; animation:none !important; }
-body.stremio-hybrid .sh-movie-page .full-start__background { opacity:.78; transition:opacity 800ms ease-in-out !important; mask-image:none !important; -webkit-mask-image:none !important; filter:none !important; }
-body.stremio-hybrid .sh-movie-page .cardify-effects-overlay { background:linear-gradient(90deg,rgba(8,9,17,.92) 0%,rgba(8,9,17,.72) 37%,rgba(8,9,17,.12) 76%),linear-gradient(0deg,#0c0c16 0%,transparent 34%) !important; }
-body.stremio-hybrid .sh-movie-page .cardify-effects-overlay.cardify-scrolled { background-color:rgba(8,9,17,.7) !important; }
+body.stremio-hybrid .sh-movie-page .full-start__background { z-index:-2 !important; opacity:.78; transition:opacity 800ms ease-in-out !important; mask-image:none !important; -webkit-mask-image:none !important; filter:none !important; }
+body.stremio-hybrid .sh-movie-page .cardify-effects-overlay { background:none !important; }
 body.stremio-hybrid .sh-movie { transition:none !important; color:var(--sm-text); }
 body.stremio-hybrid .sh-movie .full-start-new__body { display:block !important; min-height:calc(100vh - 5em); height:auto !important; padding:1.8em .6em 2.8em !important; }
 body.stremio-hybrid .sh-movie .full-start-new__left { display:none !important; }
