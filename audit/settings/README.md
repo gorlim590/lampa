@@ -25,3 +25,7 @@ The related ownership constraints are #31/#18 for shared visuals/entrypoints, #1
 ## Checks
 
 `node --test tests/settings-census.cjs` verifies read-only behavior, redaction, unavailable enumeration, and explicit/default loader paths. This is synthetic audit-tool coverage, not verification of user settings or physical Google TV.
+
+## Census schema 2
+
+Template parsing uses the exact `settings-param` class token: root wrappers and title classes are not options. Schema 1 counts include wrapper artifacts and must not be used as the final option count. Code-only callback fingerprints support offline owner attribution; string literals, comments and whitespace are removed before hashing. No callback bodies or current values are exported. The fingerprint is an attribution hint, not a unique registration identity.

@@ -11,6 +11,17 @@ test('credentials, server URLs and arbitrary string defaults never leave the cen
  assert.equal(census.safeDefault('unclassified-secret','theme'),'[not exported]');assert.equal(census.safeDefault(false,'enabled'),false);
 });
 test('unavailable enumeration remains a gap, never a successful empty audit',()=>{const r=census.capture({});assert.equal(r.settings.length,0);assert(r.gaps.length);assert(!('captureMs' in r.metrics));});
+test('template wrappers and similarly named title classes are not phantom settings',()=>{
+ assert.deepEqual(census.htmlFields('<div></div>'),[]);
+ const rows=census.htmlFields('<div><div class="settings-param-title">Heading</div><div class="settings-param selector" data-name="animation" data-type="toggle"><div class="settings-param__name">Анімація</div></div></div>');
+ assert.equal(rows.length,1);assert.equal(rows[0].name,'animation');
+});
+test('source attribution uses code-only fingerprints without invoking or exporting callbacks',()=>{
+ const one=Function('return "fixture-secret-a"'),two=Function('return "fixture-secret-b"');
+ assert.equal(census.sourceFingerprint(one.toString()),census.sourceFingerprint(two.toString()));
+ const L={SettingsApi:{allParams:()=>({test:[{param:{name:'button',type:'button'},field:{name:'Тест'},onChange:one}]}),allComponents:()=>({})}};
+ const row=census.capture(L).settings[0];assert(row.onChangeFingerprint);assert(!JSON.stringify(row).includes('fixture-secret'));
+});
 test('script inventory strips credentials/query strings and never serializes function bodies',()=>{
  const L={SettingsApi:{allParams:()=>({test:[{param:{name:'api_key_set',default:'fixture-secret'},field:{name:'API key: fixture-secret'},onRender:()=> 'fixture-secret'}]}),allComponents:()=>({})}};
  const doc={querySelectorAll:()=>[{getAttribute:()=> 'https://user:secret@example.org/plugin.js?token=fixture-secret'}]};

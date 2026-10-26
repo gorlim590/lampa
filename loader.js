@@ -85,7 +85,7 @@
     (function next() {
       if (index >= list.length) {
         // Explicit, read-only audit opt-in; normal startup makes no extra request.
-        if (window.location && /(?:^|[?&])settings_audit=1(?:&|$)/.test(window.location.search)) loadOne('audit/settings/runtime-census.js', function () {});
+        if (window.location && /(?:^|[?&])settings_audit=1(?:&|$)/.test(window.location.search)) loadOne('audit/settings/runtime-census.js?audit_rev=2', function () {});
         return;
       }
       var path = list[index++];

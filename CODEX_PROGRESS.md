@@ -753,3 +753,9 @@ Next publishupdatedPR50(mainmerge+marginfixonly),CI/merge;thenPR53retargettothat
 - Audit-only utility audit/settings/runtime-census.js captures definitions/native templates to inert DOM JSON only when settings_audit=1 explicitly requested via loader. Normal loader sequence untouched, no parameter handler/storage value reads/writes/network probes/listeners/observers. Native Template translation can read native language internally; direct call metrics distinguished.
 - 5 census/privacy/loader tests PASS. No settings UI/Registry/Hub implementation yet, no control/preferences/account/server edits. Census collection, source attribution, full inventory and dynamic/conditional gaps remain PENDING, not claimed complete.
 - Follow native API ownership: #31 remains open, reuse Hybrid tokens; Home manager#30 stays on Home; no parser/TorrServer/Trakt rewrites. Native Settings stays fallback. Audit tool is a focused foundational PR with its own read-only acceptance; umbrella#73 stays open.
+
+## Issue #73 — census precision checkpoint (2026-10-26)
+
+- Based on main `202cec09a19c6b390916be40bd5ec878fe8520c2` (PR #74). Schema 2 removes phantom root/template-title records; code-only callback fingerprints enable source attribution of dynamic registrations without invoking callbacks or exporting literals/bodies.
+- Tests: settings-census 7 PASS; repository checks PASS (65 JS, 43 manifest entries); diff check PASS. No setting values read/written and no handler/service probes.
+- Generated inventory is still a local draft from schema 1; do not certify its counts. Next: recapture schema 2 in existing primary Lampa tab, reconcile source owners, publish inventory, fix source-confirmed secret-summary exposure before opening affected panels, then Registry/Hub phases.
