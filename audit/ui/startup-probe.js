@@ -4,7 +4,7 @@
     if (window.LampaStartupProbe) return;
     var perf=window.performance, started=perf.now(), json=document.createElement('script');
     json.id='lampa-startup-probe';json.type='application/json';document.documentElement.appendChild(json);
-    var report={schema:3,probeStartMs:started,firstUsableMs:null,firstHybridPaintMs:null,hybridAlreadyPresent:false,hybridTransitions:0,dpad:[],snapshots:[],errors:[],limitations:['Browser observation, not physical Google TV','HTTP cache is not cleared; cold network state is not guaranteed','Native subscription counts only; browser DOM listener totals are unavailable','Error payloads/messages are intentionally excluded']};
+    var report={schema:4,timeOriginEpochMs:perf.timeOrigin,probeStartMs:started,firstUsableMs:null,firstHybridPaintMs:null,hybridAlreadyPresent:false,hybridTransitions:0,dpad:[],snapshots:[],errors:[],limitations:['Browser observation, not physical Google TV','HTTP cache is not cleared; cold network state is not guaranteed','Native subscription counts only; browser DOM listener totals are unavailable','Error payloads/messages are intentionally excluded','Hybrid frame means stylesheet/class/computed token present on an observed animation frame, not a screenshot-derived paint timestamp']};
     var observer,frame=0,stopped=false,lastHybrid=null,remaining=24,pendingKey=null,deadline;
     function time(){return Math.round(perf.now()*10)/10;}
     function hybrid(){return !!document.body && document.body.classList.contains('stremio-hybrid') && !!document.getElementById('stremio-hybrid-style') && !!getComputedStyle(document.body).getPropertyValue('--sh-bg').trim();}
@@ -19,7 +19,7 @@
     function publish(){
         report.paint=perf.getEntriesByType('paint').map(function(p){return {name:p.name,atMs:Math.round(p.startTime*10)/10};});
         var nav=perf.getEntriesByType('navigation')[0];report.navigation=nav?{type:nav.type,domContentLoadedMs:nav.domContentLoadedEventEnd,loadMs:nav.loadEventEnd}:null;
-        report.uiResources=perf.getEntriesByType('resource').filter(function(r){return /\/lampa\/(?:loader\.js|ui\/(?:stremio-hybrid|lampa-ui|settings-hub|design-optimized|interface-plus|cardify-plus)\.(?:js|css))/.test(r.name);}).map(function(r){return {path:new URL(r.name).pathname,initiator:r.initiatorType,transferBytes:r.transferSize,startMs:Math.round(r.startTime*10)/10,endMs:Math.round(r.responseEnd*10)/10};});
+        report.uiResources=perf.getEntriesByType('resource').filter(function(r){return /\/lampa(?:@[^/]+)?\/(?:loader\.js|ui\/(?:stremio-hybrid|lampa-ui|settings-hub|design-optimized|interface-plus|cardify-plus)\.(?:js|css))/.test(r.name);}).map(function(r){return {path:new URL(r.name).pathname,initiator:r.initiatorType,transferBytes:r.transferSize,startMs:Math.round(r.startTime*10)/10,endMs:Math.round(r.responseEnd*10)/10};});
         report.current=snapshot();json.textContent=JSON.stringify(report);
         if(report.firstUsableMs!==null)json.setAttribute('data-probe-ready','true');
         if(report.dpad.length)json.setAttribute('data-probe-dpad','true');
@@ -41,7 +41,7 @@
         pendingKey={before:focus(),start:perf.now(),at:time()};
         requestAnimationFrame(function(){requestAnimationFrame(function(){inspect();if(report.snapshots.length<16)report.snapshots.push(snapshot());publish();if(--remaining<=0)stop();});});
     }
-    function onError(e){if(report.errors.length<8){var name=e.error&&e.error.name;report.errors.push({atMs:time(),type:/^(TypeError|ReferenceError|SyntaxError|RangeError|URIError|EvalError)$/.test(name)?name:'Error',line:Number(e.lineno)||0});publish();}}
+    function onError(e){if(report.errors.length<8){var name=e.error&&e.error.name,tag=e.target&&e.target.tagName,resource=!e.error&&!e.message&&/^(IMG|SCRIPT|LINK|VIDEO|SOURCE)$/.test(tag);report.errors.push({atMs:time(),kind:resource?'resource':'exception',tag:resource?tag:null,opaque:e.message==='Script error.',type:/^(TypeError|ReferenceError|SyntaxError|RangeError|URIError|EvalError)$/.test(name)?name:'Error',line:Number(e.lineno)||0});publish();}}
     function stop(){if(stopped)return;publish();stopped=true;if(observer)observer.disconnect();if(frame)cancelAnimationFrame(frame);clearTimeout(deadline);document.removeEventListener('keydown',onKey,true);window.removeEventListener('error',onError,true);report.stopped=true;json.textContent=JSON.stringify(report);}
     window.LampaStartupProbe={stop:stop};
     observer=new MutationObserver(function(records){if(records.some(function(r){return r.target!==json && !json.contains(r.target);} ))queue();});
