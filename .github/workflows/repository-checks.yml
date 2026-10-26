@@ -46,7 +46,7 @@ jobs:
         run: node --test --test-timeout=15000 tests/localization.cjs
       - name: Trakt and YDesign regressions
         working-directory: main-checkout
-        run: node --test --test-timeout=15000 tests/trakt-watched-sync.cjs tests/trakt-account-isolation.cjs tests/ydesign.cjs tests/ua-badge.cjs
+        run: node --test --test-timeout=15000 tests/trakt-watched-sync.cjs tests/trakt-account-isolation.cjs tests/ydesign.cjs tests/ua-badge.cjs tests/settings-census.cjs
       - name: Anime and dorama torrent search regressions
         working-directory: main-checkout
         run: node --test --test-timeout=15000 tests/torrent-search.cjs
