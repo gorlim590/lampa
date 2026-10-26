@@ -6,6 +6,11 @@
     function preview() {
         setTimeout(function () {
             if (window.StremioHybrid) window.StremioHybrid.destroy();
+            // Main may already have loaded an older helper. Replace it only after
+            // Hybrid disposed its owners, so the pinned preview tests its own bytes.
+            delete window.LampaTorrentOverlay;
+            var style = document.getElementById('sh-torrent-overlay-style');
+            if (style) style.remove();
             Lampa.Utils.putScriptAsync([source.href]);
         }, 1500);
     }
