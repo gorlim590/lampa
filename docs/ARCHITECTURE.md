@@ -38,3 +38,7 @@ For TV/anime distinguish source season/episode coordinates, absolute anime numbe
 ## Reuse existing evidence
 
 Read these only when the boundary is relevant: [Trakt account/snapshots](issue-7-account-isolation.md), [watched sync](issue-7-watched-sync.md), [Home history](issue-25-home-history.md), [Home ordering](issue-30-home-order.md), [parser coordinator](issue-17-parsers.md), [alias search](issue-16-torrent-search.md), [header](issue-21-header-clock.md). Their baseline/PR-era publication notes are historical; current branch files and Git history decide what is present. [Hybrid README](../README-stremio-hybrid.md) and [Torrents README](../README-torrents-redesign.md) contain subsystem details.
+
+## Functional Settings Registry (#73) / single UI owner (#79)
+
+`ui/settings-hub.js` exports a read-only native SettingsApi/template Registry and an explicitly mounted native navigation adapter (`contractVersion: 1`, `install`, `destroy`). No auto-mount, stylesheet, early UI bootstrap, value store or replacement service handler. #79 owns the single installable visual entrypoint and supplies Settings presentation. The default loader/manifest never activates a second Settings UI; native Settings remains the fallback. See [inventory, integration contract and limits](../audit/settings/README.md).

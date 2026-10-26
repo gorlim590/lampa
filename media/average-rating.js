@@ -631,6 +631,7 @@
     function startPlugin() {
         window.lampa_omdb_plugin_loaded = true;
         Lampa.AverageRating = {
+            settingsPrivacyVersion: 1,
             render: function (movie, target, context) {
                 context = context || {};
                 updateRatings({object: {method: context.method || (movie.name ? 'tv' : 'movie'), source: context.source || movie.source || 'tmdb'}, data: {movie: movie, reactions: context.reactions}}, target);
@@ -660,12 +661,12 @@
             field: { name: "OMDB API Key", description: "Встановити ключ" },
             onRender: function (item) {
                 var currentKey = Lampa.Storage.get('omdb_api_key', '');
-                var valEl = $('<div class="omdb-api-val">' + (currentKey || 'Не встановлено') + '</div>');
+                var valEl = $('<div class="omdb-api-val"></div>').text(currentKey ? 'Встановлено' : 'Не встановлено');
                 item.find('.settings-param__descr').after(valEl);
                 item.on('hover:enter', function() {
                     Lampa.Input.edit({ title: 'OMDB API Key', value: Lampa.Storage.get('omdb_api_key', ''), free: true, nosave: true }, function(newValue) {
                         Lampa.Storage.set('omdb_api_key', newValue);
-                        valEl.text(newValue || 'Не встановлено');
+                        valEl.text(newValue ? 'Встановлено' : 'Не встановлено');
                     });
                 });
             }
@@ -677,12 +678,12 @@
             field: { name: "MDBList API Key", description: "Встановити ключ" },
             onRender: function (item) {
                 var currentKey = Lampa.Storage.get('mdblist_api_key', '');
-                var valEl = $('<div class="omdb-api-val">' + (currentKey || 'Не встановлено') + '</div>');
+                var valEl = $('<div class="omdb-api-val"></div>').text(currentKey ? 'Встановлено' : 'Не встановлено');
                 item.find('.settings-param__descr').after(valEl);
                 item.on('hover:enter', function() {
                     Lampa.Input.edit({ title: 'MDBList API Key', value: Lampa.Storage.get('mdblist_api_key', ''), free: true, nosave: true }, function(newValue) {
                         Lampa.Storage.set('mdblist_api_key', newValue);
-                        valEl.text(newValue || 'Не встановлено');
+                        valEl.text(newValue ? 'Встановлено' : 'Не встановлено');
                     });
                 });
             }
@@ -694,12 +695,12 @@
             field: { name: "Simkl Client ID", description: "Встановити ключ" },
             onRender: function (item) {
                 var currentKey = Lampa.Storage.get('simkl_api_key', '');
-                var valEl = $('<div class="omdb-api-val">' + (currentKey || 'Не встановлено') + '</div>');
+                var valEl = $('<div class="omdb-api-val"></div>').text(currentKey ? 'Встановлено' : 'Не встановлено');
                 item.find('.settings-param__descr').after(valEl);
                 item.on('hover:enter', function() {
                     Lampa.Input.edit({ title: 'Simkl Client ID', value: Lampa.Storage.get('simkl_api_key', ''), free: true, nosave: true }, function(newValue) {
                         Lampa.Storage.set('simkl_api_key', newValue);
-                        valEl.text(newValue || 'Не встановлено');
+                        valEl.text(newValue ? 'Встановлено' : 'Не встановлено');
                     });
                 });
             }
@@ -711,12 +712,12 @@
             field: { name: "MyAnimeList Client ID", description: "Встановити ключ" },
             onRender: function (item) {
                 var currentKey = Lampa.Storage.get('mal_api_key', '');
-                var valEl = $('<div class="omdb-api-val">' + (currentKey || 'Не встановлено') + '</div>');
+                var valEl = $('<div class="omdb-api-val"></div>').text(currentKey ? 'Встановлено' : 'Не встановлено');
                 item.find('.settings-param__descr').after(valEl);
                 item.on('hover:enter', function() {
                     Lampa.Input.edit({ title: 'MyAnimeList Client ID', value: Lampa.Storage.get('mal_api_key', ''), free: true, nosave: true }, function(newValue) {
                         Lampa.Storage.set('mal_api_key', newValue);
-                        valEl.text(newValue || 'Не встановлено');
+                        valEl.text(newValue ? 'Встановлено' : 'Не встановлено');
                     });
                 });
             }
@@ -731,8 +732,7 @@
             },
             onRender: function (item) {
                 var current = Lampa.Storage.get('mal_cors_proxies', '');
-                var short = current ? (current.length > 40 ? current.substring(0, 37) + '...' : current) : 'Немає (лише Shikimori)';
-                var valEl = $('<div class="omdb-api-val">' + short + '</div>');
+                var valEl = $('<div class="omdb-api-val"></div>').text(current ? 'Встановлено' : 'Немає (лише Shikimori)');
                 item.find('.settings-param__descr').after(valEl);
                 item.on('hover:enter', function() {
                     Lampa.Input.edit({ 
@@ -742,8 +742,7 @@
                         nosave: true 
                     }, function(newValue) {
                         Lampa.Storage.set('mal_cors_proxies', (newValue || '').trim());
-                        var s = newValue ? (newValue.length > 40 ? newValue.substring(0, 37) + '...' : newValue) : 'Немає (лише Shikimori)';
-                        valEl.text(s);
+                        valEl.text((newValue || '').trim() ? 'Встановлено' : 'Немає (лише Shikimori)');
                     });
                 });
             }
@@ -752,7 +751,7 @@
         Lampa.SettingsApi.addParam({
             component: COMPONENT_NAME,
             param: { name: 'omdb_rating_size', type: 'select', values: { '0.5em': 'XS', '0.8em': 'S', '1.1em': 'M', '1.5em': 'L', '2.0em': 'XL' }, default: '0.8em' },
-            field: { name: 'Розмір рейтингів' }
+            field: { name: 'Розмір рейтингів', description: 'Мінімум для телевізора — 1,25 em. Збережені XS, S і M відображаються з цим мінімальним розміром.' }
         });
 
         Lampa.SettingsApi.addParam({

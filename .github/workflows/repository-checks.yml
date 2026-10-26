@@ -56,3 +56,6 @@ jobs:
       - name: Native Trakt personal ratings regressions
         working-directory: main-checkout
         run: node --test --test-timeout=15000 tests/trakt-ratings.cjs tests/trakt-personalization.cjs tests/details-ratings.cjs
+      - name: Settings Registry and native Hub lifecycle regressions
+        working-directory: main-checkout
+        run: node --test --test-timeout=15000 tests/settings-registry.cjs tests/settings-hub-lifecycle.cjs tests/settings-sensitive-summaries.cjs tests/settings-inventory.cjs
