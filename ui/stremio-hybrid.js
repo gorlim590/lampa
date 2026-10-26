@@ -1415,7 +1415,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
     }
     function onSettingsOpen(event) {
         if(settingsFrame) cancelAnimationFrame(settingsFrame);
-        if(window.LampaSettingsHub && window.LampaSettingsHub.owns(event.name)) { settingsCategory=''; onSettingsClose(); return; }
+        if(event.name!=='main' && window.LampaSettingsHub && window.LampaSettingsHub.owns(event.name)) { settingsCategory=''; onSettingsClose(); return; }
         settingsFrame=requestAnimationFrame(function(){
             settingsFrame=0;
             if(!watching || !document.body.classList.contains('settings--open'))return;
