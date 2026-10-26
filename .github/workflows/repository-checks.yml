@@ -53,3 +53,6 @@ jobs:
       - name: Screensaver source cache and fallback regressions
         working-directory: main-checkout
         run: node --test --test-timeout=15000 tests/screensaver-sources.cjs
+      - name: Native Trakt personal ratings regressions
+        working-directory: main-checkout
+        run: node --test --test-timeout=15000 tests/trakt-ratings.cjs tests/trakt-personalization.cjs

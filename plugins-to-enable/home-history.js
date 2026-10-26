@@ -195,7 +195,16 @@
                 resume = { mode: 'position', hash: latest.entry.hash, time: p.time, duration: p.duration, percent: p.percent, updated: p.updated,
                     positionKnown: p.time > 0, label: p.time > 0 ? 'Продовжити збережене відтворення' : 'Прогрес відомий · позиція недоступна' };
                 if (card.media_type === 'tv') { resume.season = Number(road.season); resume.episode = Number(road.episode); }
-            } else if (card.media_type === 'tv') resume = nextEpisode(card, evidence);
+            } else if (card.media_type === 'tv') {
+                // A verified Trakt next episode may be newer than the local
+                // timetable. It is an episode choice, never a playback timestamp.
+                var next = remote.next;
+                if (status === false && remote.episodes && remote.episodes.length && next && next.season > 0 && next.episode > 0 && next.airedAt > 0 && next.airedAt <= Date.now()) {
+                    resume = { mode: 'next_episode', season: next.season, episode: next.episode, positionKnown: false,
+                        updated: Math.max(Number(remote.lastWatchedAt) || 0, next.airedAt),
+                        label: remote.newEpisodes > 0 ? '+' + remote.newEpisodes + ' нових · Trakt' : 'Наступний епізод · Trakt' };
+                } else resume = nextEpisode(card, evidence);
+            }
             if (resume) {
                 if (rewatch) { resume.rewatch = true; resume.label = 'Повторний перегляд · збережена позиція'; }
                 if (latest && resume.mode === 'position') {

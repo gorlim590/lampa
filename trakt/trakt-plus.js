@@ -100,6 +100,7 @@
     activeSync = null; syncing = false; watchedVer++;
     jobs.forEach(function (cancel) { cancel.listeners.slice().forEach(function (abort) { abort(); }); });
     clearRowCaches(); emitWatched();
+    if (typeof ratingCache !== 'undefined') { ratingGeneration++; ratingCache = {}; ratingJobs = {}; ratingWrites = {}; ratingRevisions = {}; refreshRatingNodes(); }
   }
 
   function sessionCancel(epoch, operation, stopped) {
@@ -170,9 +171,12 @@
       return;
     }
     if(event && /^(trakt_token|account|profile)/.test(event.name || event.key || ''))refreshActor();
+    if (event && /^(account|profile)/.test(event.name || event.key || '') && typeof ratingCache !== 'undefined') {
+      ratingGeneration++; ratingCache = {}; ratingJobs = {}; refreshRatingNodes();
+    }
     if (!event || (event.name !== 'trakt_token' && event.key !== 'trakt_token')) return;
     observeSession(); clearTimeout(accountTimer);
-    accountTimer = setTimeout(function () { accountTimer = null; loadWatched(true).then(function () { decorateAll(); }); }, 150);
+    accountTimer = setTimeout(function () { accountTimer = null; loadWatched(true).then(function () { decorateAll(); }); syncRatings().catch(function () {}); }, 150);
   }
   function notify(text) { try { Lampa.Bell.push({ text: text }); } catch (e) {} }
   function field(name, def) {
@@ -396,6 +400,40 @@
     return '/shows/' + encodeURIComponent(id) + '/progress/watched?hidden=true&specials=false&count_specials=false';
   }
 
+  // Evidence of an actual caught-up -> new aired episodes transition. Counts
+  // alone cannot distinguish a newly aired episode from a remote unwatch.
+  function completionTransition(previous, current, episodes) {
+    var seen = {}, keys = [];
+    (episodes || []).forEach(function (ep) { var key = ep.season + ':' + ep.episode; if (ep.season > 0 && ep.episode > 0 && !seen[key]) { seen[key] = true; keys.push(key); } });
+    var before = previous && previous.trakt === current.trakt && previous.caughtUp;
+    current.newEpisodes = 0;
+    if (!current.known) { if (before) current.caughtUp = before; return current; }
+    if (current.complete && keys.length === current.aired) {
+      current.caughtUp = { aired: current.aired, keys: keys, at: current.t };
+    } else if (before && keys.length !== current.watched) {
+      current.caughtUp = before; // incomplete episode data cannot prove a transition
+    } else if (before && Array.isArray(before.keys) && before.keys.length === before.aired && before.keys.every(function (key) { return seen[key]; }) && keys.length === current.watched) {
+      current.caughtUp = before;
+      if (current.aired > before.aired) current.newEpisodes = Math.max(0, current.aired - current.watched);
+    }
+    return current;
+  }
+  function progressEpisodes(data) {
+    var out = [];
+    (data && Array.isArray(data.seasons) ? data.seasons : []).forEach(function (season) {
+      if (!(season.number > 0)) return;
+      (Array.isArray(season.episodes) ? season.episodes : []).forEach(function (ep) {
+        if (ep.completed === true && ep.number > 0 && (!ep.first_aired || positiveDate(ep.first_aired))) out.push({ season: season.number, episode: ep.number, watchedAt: positiveDate(ep.last_watched_at) });
+      });
+    });
+    return out;
+  }
+  function airedNext(data) {
+    var ep = data && data.next_episode;
+    if (!ep || !(ep.season > 0 && ep.number > 0) || ep.season % 1 || ep.number % 1 || !positiveDate(ep.first_aired)) return null;
+    return { season: ep.season, episode: ep.number, airedAt: Date.parse(ep.first_aired), title: typeof ep.title === 'string' ? ep.title : '' };
+  }
+
   function showEvidence(item) {
     if (item.progress) return progressEvidence(item.progress);
     var aired = Number(item.show && item.show.aired_episodes), seen = {}, valid = true;
@@ -435,7 +473,9 @@
           var evidence = progressEvidence(data);
           if (showSources[job.id] !== job.item) return;
           evidence.sig = job.sig; evidence.trakt = job.item.show.ids.trakt;
-          evidence.episodes = showStates[job.id] && showStates[job.id].episodes || [];
+          evidence.episodes = Array.isArray(data.seasons) ? progressEpisodes(data) : showStates[job.id] && showStates[job.id].episodes || [];
+          completionTransition(showStates[job.id], evidence, Array.isArray(data.seasons) ? evidence.episodes : []);
+          evidence.next = airedNext(data);
           evidence.lastWatchedAt = showStates[job.id] && showStates[job.id].lastWatchedAt || 0;
           evidence.homeCheckedAt = job.homeCheckedAt || showStates[job.id] && showStates[job.id].homeCheckedAt || 0;
           showStates[job.id] = evidence;
@@ -517,6 +557,8 @@
       if (state && state.known && !state.error && freshStatus(state.t)) {
         result.lastWatchedAt = Number(state.lastWatchedAt) || 0;
         result.episodes = (Array.isArray(state.episodes) ? state.episodes : []).filter(function (ep) { return ep && ep.season > 0 && ep.episode > 0 && ep.season % 1 === 0 && ep.episode % 1 === 0; }).map(function (ep) { return { season: ep.season, episode: ep.episode, watchedAt: Number(ep.watchedAt) || 0 }; });
+        result.next = state.next || null;
+        result.newEpisodes = Number(state.newEpisodes) || 0;
       }
     }
     return result;
@@ -564,6 +606,8 @@
       currentStates[id] = !evidence.known && !it.progress && old && old.sig === sig && freshStatus(old.t) ? old : evidence;
       currentStates[id].episodes = homeEpisodes(it.seasons);
       currentStates[id].lastWatchedAt = positiveDate(it.last_watched_at);
+      completionTransition(old, currentStates[id], currentStates[id].episodes);
+      currentStates[id].next = it.progress ? airedNext(it.progress) : old && old.sig === sig ? old.next || null : null;
     });
     showStates = currentStates; showSources = currentSources;
     watchedShows = completedShows();
@@ -871,6 +915,8 @@
   function defTitle(def) { return def.titleFn ? def.titleFn() : tr(def.uk, def.en); }
 
   function getRow(def, force) {
+    observeSession();
+    var rowEpoch = sessionEpoch, rowProfile = ratingProfile();
     var sig = cfgSig();
     var ttl = cfg().cacheMin * 60000;
     if (!force && def._c && def._sig === sig && Date.now() - def._t < ttl) return Promise.resolve(def._c);
@@ -879,6 +925,8 @@
     for (i = 1; i <= n; i++) jobs.push(loadChunk(def, i));
     def._psig = sig;
     var p = Promise.all(jobs).then(function (res) {
+      observeSession();
+      if (rowEpoch !== sessionEpoch || rowProfile !== ratingProfile()) throw cancelledError();
       var cards = [], raw = 0, errs = 0;
       res.forEach(function (r) { cards = cards.concat(r.cards); raw += r.raw; errs += r.errs || 0; });
       cards = uniq(cards);
@@ -1307,14 +1355,16 @@
       title: 'TraktTV+: ' + defTitle(def),
       index: def.index,
       screen: ['main'],
-      call: function () {
+      call: function (params) {
         rowCalled = true;
         if (!cfg().enable || !token()) return;
         return function (call) {
           function attempt(n) {
             getRow(def, n > 0).then(function (r) {
               if (!r.cards || r.cards.length < 4) return call();
-              call(lineFor(def, r));
+              var unique = homeRecommendationCards(params, def.name, r.cards);
+              if (!unique.length) return call();
+              call(lineFor(def, Object.assign({}, r, { cards: unique })));
             }).catch(function () {
               // тимчасовий збій (ліміт запитів / мережа) — пробуємо ще раз, а не лишаємо рядок порожнім
               if (n < 3) setTimeout(function () { attempt(n + 1); }, 2500 * (n + 1));
@@ -1325,6 +1375,19 @@
         };
       }
     });
+  }
+
+  // The core passes the same Main request object to its producers. Keep claims
+  // with that request only: no DOM scans, extra requests or global seen history.
+  var homeRecommendationClaims = new WeakMap();
+  function homeRecommendationCards(params, name, cards) {
+    if (!params || typeof params !== 'object') return cards;
+    var scope = sessionEpoch + ':' + ratingProfile(), claims = homeRecommendationClaims.get(params);
+    if (!claims || claims.scope !== scope) { claims = { scope: scope, rows: {} }; homeRecommendationClaims.set(params, claims); }
+    var seen = {};
+    Object.keys(claims.rows).forEach(function (row) { if (row !== name) claims.rows[row].forEach(function (key) { seen[key] = true; }); });
+    var out = cards.filter(function (card) { var key = mediaKey(card); if (!key || seen[key]) return false; seen[key] = true; return true; });
+    claims.rows[name] = out.map(mediaKey); return out;
   }
 
   function registerRows() {
@@ -1455,29 +1518,59 @@
   }
 
   // ───────────── РОЗУМНІ РЕКОМЕНДАЦІЇ ─────────────
-  var recCache = { t: 0, key: '', list: null };
+  var recCache = { t: 0, key: '', list: null }, recJobs = {};
+
+  function rankPersonal(cards, ratings) {
+    var genres = {}, low = {};
+    (ratings || []).forEach(function (row) {
+      var item = row.movie || row.show, value = Number(row.rating);
+      if (!item || !(value >= 1 && value <= 10)) return;
+      var weight = value >= 8 ? (value - 7) / 3 : value <= 4 ? (value - 5) / 4 : 0;
+      if (value <= 4 && item.ids && item.ids.tmdb) low[(row.show ? 'tv:' : 'movie:') + item.ids.tmdb] = true;
+      (Array.isArray(item.genres) ? item.genres : []).forEach(function (genre) {
+        if (!genres[genre]) genres[genre] = { sum: 0, count: 0 };
+        genres[genre].sum += weight; genres[genre].count++;
+      });
+    });
+    return cards.map(function (card, index) {
+      var sum = 0, count = 0;
+      (card._genres || []).forEach(function (genre) { if (genres[genre]) { sum += genres[genre].sum / genres[genre].count; count++; } });
+      return { card: card, index: index, affinity: (count ? sum / count : 0) - (low[(cardKind(card) === 'show' ? 'tv:' : 'movie:') + tmdbId(card)] ? 2 : 0) };
+    }).sort(function (a, b) { return b.affinity - a.affinity || a.index - b.index; }).map(function (entry) { return entry.card; });
+  }
 
   function smartRecs() {
+    return ratingContext().then(function (context) {
     var g = cfg();
     var ignoreWl = bool('trakt_source_ignore_watchlisted', false) ? 'true' : 'false';
-    var key = [g.recType, g.minRating, g.minVotes, g.exclude.join(), g.hideWatched, g.hideShows, ignoreWl].join('|');
-    if (recCache.list && recCache.key === key && Date.now() - recCache.t < 20 * 60000) {
+    var scopeKey = [context.owner, context.profile, context.epoch, g.recType, g.minRating, g.minVotes, g.exclude.join(), g.hideWatched, g.hideShows, ignoreWl, watchedVer].join('|');
+    var key = scopeKey + '|' + ratingVersion;
+    if (recCache.list && recCache.key === key && Date.now() - recCache.t < RATING_TTL) {
       return Promise.resolve(recCache.list);
     }
+    if (recJobs[scopeKey]) return recJobs[scopeKey];
     var extra = { ignore_collected: ignoreWl, ignore_watchlisted: ignoreWl };
     var jobs = [];
     function one(path, hint) {
-      return api.get(feed(path, extra)).then(function (a) { return Array.isArray(a) ? a : []; }, function () { return []; })
+      return api.get(feed(path, extra), false, { cache: false, forceFresh: true, dedup: false }).then(function (a) { return Array.isArray(a) ? a : []; }, function () { return []; })
         .then(function (arr) { return arr.map(function (e) { return toCard(e, hint); }).filter(Boolean); });
     }
     if (g.recType !== 'shows') jobs.push(one('/recommendations/movies', 'movie'));
     if (g.recType !== 'movies') jobs.push(one('/recommendations/shows', 'show'));
-    return Promise.all([loadWatched(), Promise.all(jobs)]).then(function (r) {
+    var preferences = Promise.all(['movie', 'show'].map(function (type) { return ratingList(context, type, false); })).then(function (lists) { return lists[0].concat(lists[1]); }, function () { return []; });
+    var pending = Promise.all([loadWatched(), Promise.all(jobs), preferences]).then(function (r) {
+      if (!validRatingContext(context)) throw cancelledError();
       var all = [];
       r[1].forEach(function (a) { all = all.concat(a); });
-      var list = rank(uniq(all).filter(function (c) { return passes(c); }));
-      recCache = { t: Date.now(), key: key, list: list };
+      var list = rankPersonal(rank(uniq(all).filter(function (c) { return passes(c); })), r[2]);
+      // Initial identity/ratings/watched reads may advance their versions while
+      // the recommendation request is pending. Cache the resulting versions.
+      var finalScope = [context.owner, context.profile, context.epoch, g.recType, g.minRating, g.minVotes, g.exclude.join(), g.hideWatched, g.hideShows, ignoreWl, watchedVer].join('|');
+      recCache = { t: Date.now(), key: finalScope + '|' + ratingVersion, list: list };
       return list;
+    });
+    recJobs[scopeKey] = pending;
+    return pending.then(function (value) { delete recJobs[scopeKey]; return value; }, function (error) { delete recJobs[scopeKey]; throw error; });
     });
   }
 
@@ -1498,7 +1591,7 @@
           total_pages: Math.max(1, Math.ceil(total / limit)),
           page: page
         };
-      }).catch(function () { return orig.call(self, options); });
+      }).catch(function (error) { if (error && error.cancelled) throw error; return orig.call(self, options); });
     };
     api.recommendations._tp = true;
   }
@@ -1866,7 +1959,7 @@
       if (manual) notify(r.status === 'complete'
         ? tr('Trakt: додано ', 'Trakt: added ') + r.added + tr(', пропущено ', ', skipped ') + r.skipped + tr('. Видалень немає.', '. No deletions.')
         : tr('Синхронізацію не завершено. Попередні записи збережено.', 'Sync incomplete. Previous entries retained.'));
-      return r;
+      return manual && (r.status === 'complete' || r.status === 'partial') ? syncRatings().then(function () { return r; }, function () { return r; }) : r;
     });
   }
 
@@ -2157,7 +2250,215 @@
   window.TraktPlus = window.TraktPlus || {};
   // Status is independent of UI mark/hide preferences and local Favorite/Timeline.
   // null = not known (loading/error/stale/insufficient completion evidence).
-  window.TraktPlus.version = '3.3.2-ydesign';
+  // Personal ratings are independent of watched/history. No local optimistic
+  // success: publish only an acknowledged write followed by an authenticated read.
+  var ratingCache = {}, ratingJobs = {}, ratingWrites = {}, ratingRevisions = {}, ratingGeneration = 0, ratingVersion = 0;
+  var RATING_TTL = 300000;
+  function ratingProfile() {
+    if (Lampa.Timeline && typeof Lampa.Timeline.filename === 'function') return String(Lampa.Timeline.filename());
+    return String(Lampa.Storage.get('account_use', '') || '') + ':' + String(Lampa.Storage.get('profile', '') || '');
+  }
+  function ratingTarget(card) {
+    if (!card) throw new Error('Missing rating target');
+    var kind = card.rating_type || (cardKind(card) === 'show' ? 'show' : 'movie');
+    var parent = card.show || card.card;
+    var ids = {}, input = card.ids || {};
+    ['trakt', 'tmdb', 'tvdb'].forEach(function (key) { if (/^[1-9]\d*$/.test(String(input[key] || ''))) ids[key] = Number(input[key]); });
+    if (/^tt\d+$/.test(input.imdb || '')) ids.imdb = input.imdb;
+    if (kind === 'episode' || kind === 'season') {
+      // Resolve coordinates within the verified parent, never use Lampa's
+      // synthetic anime episode IDs as TMDB episode identifiers.
+      var show = ratingTarget(Object.assign({}, parent || {}, { rating_type: 'show' }));
+      var season = card.season_number, episode = card.episode_number;
+      if (typeof season !== 'number' || season < 0 || season % 1 || (kind === 'episode' && (typeof episode !== 'number' || episode < 1 || episode % 1))) throw new Error('Unverified episode coordinates');
+      return { type: kind, ids: show.ids, season: season, episode: episode, key: kind + ':' + show.key + ':' + season + (kind === 'episode' ? ':' + episode : '') };
+    }
+    if (kind !== 'movie' && kind !== 'show') throw new Error('Invalid rating type');
+    var id = tmdbId(card);
+    if (!Object.keys(ids).length && id) ids.tmdb = Number(id);
+    if (!Object.keys(ids).length) throw new Error('Unverified rating identity');
+    return { type: kind, ids: ids, key: kind + ':' + JSON.stringify(ids) };
+  }
+  function ratingPayload(target, value) {
+    var item = { ids: target.ids }, body = {}, key = target.type === 'movie' ? 'movies' : target.type === 'show' ? 'shows' : target.type + 's';
+    if (value !== null && (typeof value !== 'number' || !isFinite(value) || value < 1 || value > 10 || value % 1)) throw new Error('Rating must be 1–10');
+    if (target.type === 'episode' || target.type === 'season') {
+      var part = { number: target.type === 'episode' ? target.episode : target.season };
+      if (value !== null) part.rating = value;
+      item.seasons = target.type === 'episode' ? [{ number: target.season, episodes: [part] }] : [part];
+      key = 'shows';
+    } else if (value !== null) item.rating = value;
+    body[key] = [item]; return body;
+  }
+  function sameRatingIds(a, b) {
+    var common = false, conflict = false;
+    ['trakt', 'tmdb', 'imdb', 'tvdb'].forEach(function (key) { if (a && b && a[key] && b[key]) { common = true; if (String(a[key]) !== String(b[key])) conflict = true; } });
+    return common && !conflict;
+  }
+  function ratingContext() {
+    observeSession();
+    if (!bool('trakt_plus_enable', true) || !token()) return Promise.reject(new Error('Trakt unavailable'));
+    var epoch = sessionEpoch, profile = ratingProfile();
+    return whenApi().then(function () { return ensureAccount(); }).then(function (owner) {
+      if (epoch !== sessionEpoch || profile !== ratingProfile()) throw cancelledError();
+      return { owner: owner, epoch: epoch, profile: profile, generation: ratingGeneration };
+    });
+  }
+  function validRatingContext(ctx) {
+    observeSession();
+    return ctx.epoch === sessionEpoch && ctx.owner === accountOwner && ctx.profile === ratingProfile() && ctx.generation === ratingGeneration;
+  }
+  function ratingBucket(ctx, type) { return ctx.owner + '|' + ctx.profile + '|' + type; }
+  function ratingList(ctx, type, force) {
+    var key = ratingBucket(ctx, type), cached = ratingCache[key], revision = ratingRevisions[key] || 0;
+    if (ratingJobs[key]) return ratingJobs[key];
+    if (!force && cached && Date.now() - cached.time < RATING_TTL) return Promise.resolve(cached.rows);
+    var cancel = sessionCancel(ctx.epoch, null), rows = [], page = 1;
+    function next() {
+      if (!validRatingContext(ctx)) throw cancelledError();
+      return getRetry('/sync/ratings/' + type + 's?extended=full&limit=100&page=' + page, 0, cancel).then(function (data) {
+        if (!validRatingContext(ctx) || revision !== (ratingRevisions[key] || 0)) throw cancelledError();
+        if (!Array.isArray(data) || data.some(function (r) { return !r || !r[type] || !sameRatingIds(r[type].ids, r[type].ids) || ((type === 'episode' || type === 'season') && (!r.show || !sameRatingIds(r.show.ids, r.show.ids))) || typeof r.rating !== 'number' || !isFinite(r.rating) || r.rating < 1 || r.rating > 10 || r.rating % 1; })) throw new Error('Incomplete ratings response');
+        rows = rows.concat(data);
+        if (data.length === 100) { if (++page > 500) throw new Error('Incomplete ratings pagination'); return next(); }
+        if (!cached || JSON.stringify(cached.rows) !== JSON.stringify(rows)) ratingVersion++;
+        ratingCache[key] = { time: Date.now(), rows: rows }; return rows;
+      });
+    }
+    var job = Promise.resolve().then(next).then(function (data) { releaseSession(cancel); if (ratingJobs[key] === job) delete ratingJobs[key]; return data; }, function (error) { releaseSession(cancel); if (ratingJobs[key] === job) delete ratingJobs[key]; throw error; });
+    ratingJobs[key] = job; return job;
+  }
+  function findRating(rows, target) {
+    var match = rows.filter(function (r) {
+      if (target.type === 'movie' || target.type === 'show') return sameRatingIds(r[target.type].ids, target.ids);
+      var part = r[target.type];
+      return r.show && sameRatingIds(r.show.ids, target.ids) && (target.type === 'episode' ? part.season : part.number) === target.season && (target.type !== 'episode' || part.number === target.episode);
+    });
+    if (match.length > 1) throw new Error('Ambiguous personal rating');
+    return match.length ? match[0].rating : null;
+  }
+  function personalRating(card, force) {
+    var target;
+    try { target = ratingTarget(card); } catch (error) { return Promise.reject(error); }
+    return ratingContext().then(function (ctx) { return ratingList(ctx, target.type, force).then(function (rows) {
+      if (!validRatingContext(ctx)) throw cancelledError();
+      return { confirmed: true, value: findRating(rows, target), owner: ctx.owner, session: ctx.epoch, profile: ctx.profile };
+    }); });
+  }
+  function saveRating(card, value) {
+    var target, body;
+    try { target = ratingTarget(card); body = ratingPayload(target, value); } catch (error) { return Promise.reject(error); }
+    return ratingContext().then(function (ctx) {
+      var key = ratingBucket(ctx, target.type), writeKey = key;
+      if (ratingWrites[writeKey]) throw new Error('Rating update pending');
+      var work = Promise.resolve().then(function () {
+        if (!validRatingContext(ctx)) throw cancelledError();
+        if (!api.writeRating) throw new Error('Update native Trakt plugin');
+        return api.writeRating(body, value === null, function () { return validRatingContext(ctx); });
+      }).then(function (result) {
+        if (!validRatingContext(ctx)) throw cancelledError();
+        var plural = target.type + 's';
+        var count = value === null ? result && result.deleted && result.deleted[plural] : result && ((result.added && result.added[plural] || 0) + (result.updated && result.updated[plural] || 0));
+        if (!(count > 0)) throw new Error('Trakt did not acknowledge rating');
+        // Do not reuse a pre-write read that could still be in flight.
+        ratingRevisions[key] = (ratingRevisions[key] || 0) + 1;
+        delete ratingCache[key]; delete ratingJobs[key];
+        return ratingList(ctx, target.type, true);
+      }).then(function (rows) {
+        if (!validRatingContext(ctx)) throw cancelledError();
+        var actual = findRating(rows, target);
+        if (actual !== value) throw new Error('Rating not confirmed by Trakt');
+        refreshRatingNodes(); return { confirmed: true, value: actual };
+      });
+      ratingWrites[writeKey] = work;
+      return work.then(function (result) { if (ratingWrites[writeKey] === work) delete ratingWrites[writeKey]; return result; }, function (error) {
+        if (ratingWrites[writeKey] === work) { delete ratingWrites[writeKey]; delete ratingCache[key]; }
+        throw error;
+      });
+    });
+  }
+  function syncRatings() {
+    ratingGeneration++; ratingCache = {}; ratingJobs = {};
+    return ratingContext().then(function (ctx) { return Promise.all(['movie', 'show', 'episode'].map(function (type) { return ratingList(ctx, type, true); })); }).then(function () { refreshRatingNodes(); return true; });
+  }
+  function ratingStars(value) {
+    return '<span class="tp-rating-stars" aria-hidden="true">★★★★★<span style="width:' + (value * 10) + '%">★★★★★</span></span>';
+  }
+  function ratingText(value) { return value === null ? tr('Оцінити', 'Rate') : (value / 2) + '/5'; }
+  function updateRatingNode(node, card) {
+    var stamp = {}, generation = sessionEpoch, profile = ratingProfile(); node._tpRatingStamp = stamp;
+    node.textContent = tr('Моя оцінка · …', 'My rating · …');
+    personalRating(card).then(function (state) {
+      if (!node.isConnected || node._tpRatingStamp !== stamp || generation !== sessionEpoch || profile !== ratingProfile()) return;
+      node.innerHTML = ratingStars(state.value || 0) + '<span>' + tr('Моя оцінка · ', 'My rating · ') + ratingText(state.value) + '</span>';
+      node._tpRatingValue = state.value; node._tpRatingReady = true;
+    }, function () { if (node.isConnected && node._tpRatingStamp === stamp) { node.textContent = tr('Моя оцінка · недоступно', 'My rating · unavailable'); node._tpRatingReady = false; } });
+  }
+  function refreshRatingNodes() {
+    Array.prototype.forEach.call(document.querySelectorAll('.tp-personal-rating'), function (node) { if (node._tpRatingCard) updateRatingNode(node, node._tpRatingCard); });
+  }
+  function ratingDialog(card, node) {
+    if (node && node._tpRatingOpening) return;
+    if (node) node._tpRatingOpening = true;
+    var controller = Lampa.Controller.enabled().name;
+    function back() { if (node) node._tpRatingOpening = false; if (node && !node.isConnected) return; Lampa.Controller.toggle(controller); if (node) Lampa.Controller.collectionFocus(window.$(node), window.$(node).closest('.full-start-new, .full-start, .items-line')); }
+    personalRating(card).then(function (state) {
+      if (node && !node.isConnected) { node._tpRatingOpening = false; return; }
+      var items = [], i;
+      for (i = 1; i <= 10; i++) items.push({ title: ratingStars(i) + ' ' + (i / 2) + '/5', rating: i, selected: state.value === i });
+      if (state.value !== null) items.push({ title: tr('Видалити оцінку', 'Remove rating'), rating: null });
+      Lampa.Select.show({ title: tr('Моя оцінка · Trakt', 'My rating · Trakt'), items: items, onBack: back, onSelect: function (item) {
+        Lampa.Select.close(); back(); if (node) node.textContent = tr('Збереження…', 'Saving…');
+        observeSession();
+        if (state.owner !== accountOwner || state.session !== sessionEpoch || state.profile !== ratingProfile()) { refreshRatingNodes(); notify(tr('Акаунт змінився. Відкрийте оцінку знову.', 'Account changed. Open rating again.')); return; }
+        saveRating(card, item.rating).then(function () { notify(tr('Оцінку підтверджено Trakt', 'Rating confirmed by Trakt')); }, function () { notify(tr('Trakt не підтвердив оцінку. Спробуйте знову.', 'Trakt did not confirm the rating. Please retry.')); if (node) updateRatingNode(node, card); });
+      } });
+    }, function () { if (node) node._tpRatingOpening = false; notify(tr('Оцінки Trakt недоступні. Перевірте авторизацію.', 'Trakt ratings unavailable. Check authentication.')); });
+  }
+  function addRatingNode(host, card) {
+    var $ = window.$ || window.jQuery;
+    if (!$ || !host || !host.length || host.find('.tp-personal-rating').length) return;
+    var node = $('<div class="tp-personal-rating selector" role="button" tabindex="0"></div>')[0];
+    node._tpRatingCard = card;
+    $(node).on('hover:enter', function (event) { event.stopPropagation(); ratingDialog(card, node); });
+    host.append(node); updateRatingNode(node, card);
+  }
+  function initRatingsUI() {
+    if (!document.getElementById('tp-rating-style')) {
+      var style = document.createElement('style'); style.id = 'tp-rating-style';
+      style.textContent = '.tp-personal-rating{display:inline-flex;align-items:center;gap:.5em;padding:.35em .6em;border-radius:.6em;background:rgba(255,255,255,.06);font-size:.85em;cursor:pointer;max-width:100%;white-space:nowrap}.tp-personal-rating.focus{background:#eee;color:#14121c;outline:2px solid #b8a4ed}.tp-rating-stars{display:inline-block;position:relative;color:#777;letter-spacing:.08em;white-space:nowrap}.tp-rating-stars>span{position:absolute;left:0;top:0;overflow:hidden;color:#dec481;white-space:nowrap}.tp-personal-rating>span:last-child{font-size:.85em}@media(prefers-reduced-motion:reduce){.tp-personal-rating{transition:none}}';
+      document.head.appendChild(style);
+    }
+    Lampa.Listener.follow('full', function (event) {
+      if (!event || event.type !== 'complite') return;
+      var card = event.data && (event.data.movie || event.data.card), root = event.object && event.object.activity && event.object.activity.render();
+      if (!card || !root) return;
+      var host = root.find('.full-start-new__rate-line, .full-start__rate-line').first();
+      addRatingNode(host, card);
+    });
+    // Native episode Maker owns the episode identity and lifecycle. Append one
+    // separate personal control; never overwrite its public IMDb/TMDB score.
+    var map = Lampa.Maker && Lampa.Maker.map('Episode');
+    if (map && map.Card && !map.Card._tpRatingHook) {
+      map.Card._tpRatingHook = true;
+      var original = map.Card.onCreate;
+      map.Card.onCreate = function () {
+        if (original) original.apply(this, arguments);
+        var data = this.data;
+        if (data && data.card) addRatingNode(window.$(this.html || this.render()), Object.assign({}, data, { rating_type: 'episode', show: data.card }));
+      };
+    }
+  }
+  window.TraktPlus.rating = personalRating;
+  window.TraktPlus.setRating = saveRating;
+  window.TraktPlus.syncRatings = syncRatings;
+  window.TraktPlus.openRating = ratingDialog;
+  window.TraktPlus.upNextStatus = function (card) {
+    var watched = cachedWatch(card), state = showStates[tmdbId(card)];
+    if (cardKind(card) !== 'show' || watched === null || !state || !state.known || state.error || !freshStatus(state.t)) return { phase: 'unknown', newEpisodes: 0, next: null };
+    return { phase: watched ? 'complete' : state.newEpisodes > 0 ? 'new' : state.watched > 0 ? 'partial' : 'unwatched', newEpisodes: state.newEpisodes || 0, next: state.next || null };
+  };
+  window.TraktPlus.version = '3.4.0-native-ratings';
   window.TraktPlus.syncWatched = function () { return syncWatched(true); };
   window.TraktPlus.syncStatus = function () { return lastSyncResult; };
   window.TraktPlus.isWatched = watchStatus;
@@ -2213,6 +2514,8 @@
     try { hookDetailsApi(); } catch (e) {}
     try { hookFullRows(); } catch (e) {}
     try { hookFull(); } catch (e) {}
+    try { initRatingsUI(); } catch (e) {}
+    syncRatings().catch(function () {});
 
     loadWatched().then(function () { decorateAll(); });
     scheduleAutoSync();

@@ -1749,6 +1749,8 @@
         var view = el.querySelector ? el.querySelector('.card__view') : null;
         if (!view) return;
         var mk = computeMarks(el, data, type, ext);
+        var nextState = window.TraktPlus && typeof TraktPlus.upNextStatus === 'function' ? TraktPlus.upNextStatus(data) : null;
+        var newCount = nextState && nextState.phase === 'new' ? nextState.newEpisodes : 0;
         if (data && data._trakt_cached_only) {
             var cachedProgress = window.TraktPlus && TraktPlus.cachedViewing ? TraktPlus.cachedViewing(data) : null;
             syncNode(view, 'tp-person-watch', 'tp-person-watch', cachedProgress && cachedProgress.partial ? 'Trakt · ' + cachedProgress.completed + '/' + cachedProgress.aired + ' еп.' : null);
@@ -1756,10 +1758,11 @@
 
         // зліва зверху: «Новинка» / «Нова серія · Завтра» / «Скоро» + «Продовження»
         var tl = view.querySelector('.ydesign-tl');
-        if (mk.info || mk.seq) {
+        if (mk.info || mk.seq || newCount > 0) {
             if (!tl) { tl = document.createElement('div'); tl.className = 'ydesign-tl'; view.appendChild(tl); }
             syncNode(tl, 'ydesign-ribbon', mk.info ? 'ydesign-ribbon ydesign-ribbon-' + mk.info.kind : '', mk.info ? mk.info.text : null);
             syncNode(tl, 'ydesign-seq', 'ydesign-seq', mk.seq ? 'Продовження' : null);
+            syncNode(tl, 'ydesign-trakt-new', 'ydesign-trakt-new ydesign-seq', newCount > 0 ? '+' + newCount + ' нових · Trakt' : null);
         } else if (tl && tl.parentNode) {
             tl.parentNode.removeChild(tl);
         }
