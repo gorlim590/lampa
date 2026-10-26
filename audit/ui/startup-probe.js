@@ -4,8 +4,8 @@
     if (window.LampaStartupProbe) return;
     var perf=window.performance, started=perf.now(), json=document.createElement('script');
     json.id='lampa-startup-probe';json.type='application/json';document.documentElement.appendChild(json);
-    var report={schema:2,probeStartMs:started,firstUsableMs:null,firstHybridPaintMs:null,hybridAlreadyPresent:false,hybridTransitions:0,dpad:[],snapshots:[],limitations:['Browser observation, not physical Google TV','HTTP cache is not cleared; cold network state is not guaranteed','Native subscription counts only; browser DOM listener totals are unavailable']};
-    var observer,frame=0,stopped=false,lastHybrid=null,remaining=8,pendingKey=null,deadline;
+    var report={schema:3,probeStartMs:started,firstUsableMs:null,firstHybridPaintMs:null,hybridAlreadyPresent:false,hybridTransitions:0,dpad:[],snapshots:[],errors:[],limitations:['Browser observation, not physical Google TV','HTTP cache is not cleared; cold network state is not guaranteed','Native subscription counts only; browser DOM listener totals are unavailable','Error payloads/messages are intentionally excluded']};
+    var observer,frame=0,stopped=false,lastHybrid=null,remaining=24,pendingKey=null,deadline;
     function time(){return Math.round(perf.now()*10)/10;}
     function hybrid(){return !!document.body && document.body.classList.contains('stremio-hybrid') && !!document.getElementById('stremio-hybrid-style') && !!getComputedStyle(document.body).getPropertyValue('--sh-bg').trim();}
     report.hybridAlreadyPresent=hybrid();
@@ -13,7 +13,8 @@
     function snapshot(){
         var L=window.Lampa||{},api={app:L.Listener,settings:L.Settings&&L.Settings.listener,storage:L.Storage&&L.Storage.listener,controller:L.Controller&&L.Controller.listener,params:L.Params&&L.Params.listener};
         var counts={};Object.keys(api).forEach(function(k){counts[k]=count(api[k]);});
-        return {atMs:time(),nodes:document.querySelectorAll('*').length,styles:document.querySelectorAll('style,link[rel="stylesheet"]').length,uiScripts:Array.prototype.filter.call(document.querySelectorAll('script[src]'),function(n){return /\/lampa\/(?:ui\/|torrents-redesign)/.test(n.src);}).length,hybridStyles:document.querySelectorAll('#stremio-hybrid-style').length,hubStyles:document.querySelectorAll('#lampa-settings-hub-style').length,profileButtons:document.querySelectorAll('.sh-head-more').length,nativeSubscriptions:counts};
+        var ui=window.StremioHybrid,stats=ui&&typeof ui.diagnostics==='function'?ui.diagnostics():null;
+        return {atMs:time(),nodes:document.querySelectorAll('*').length,styles:document.querySelectorAll('style,link[rel="stylesheet"]').length,uiScripts:Array.prototype.filter.call(document.querySelectorAll('script[src]'),function(n){return /\/lampa\/(?:ui\/|torrents-redesign)/.test(n.src);}).length,hybridStyles:document.querySelectorAll('#stremio-hybrid-style').length,hubStyles:document.querySelectorAll('#lampa-settings-hub-style').length,profileButtons:document.querySelectorAll('.sh-head-more').length,nativeSubscriptions:counts,uiLifecycle:stats};
     }
     function publish(){
         report.paint=perf.getEntriesByType('paint').map(function(p){return {name:p.name,atMs:Math.round(p.startTime*10)/10};});
@@ -38,11 +39,12 @@
     function onKey(e){
         if(!/^Arrow|^Enter$|^Escape$|^Backspace$/.test(e.key)||stopped)return;
         pendingKey={before:focus(),start:perf.now(),at:time()};
-        requestAnimationFrame(function(){requestAnimationFrame(function(){inspect();if(report.snapshots.length<8)report.snapshots.push(snapshot());publish();if(--remaining<=0)stop();});});
+        requestAnimationFrame(function(){requestAnimationFrame(function(){inspect();if(report.snapshots.length<16)report.snapshots.push(snapshot());publish();if(--remaining<=0)stop();});});
     }
-    function stop(){if(stopped)return;publish();stopped=true;if(observer)observer.disconnect();if(frame)cancelAnimationFrame(frame);clearTimeout(deadline);document.removeEventListener('keydown',onKey,true);report.stopped=true;json.textContent=JSON.stringify(report);}
+    function onError(e){if(report.errors.length<8){var name=e.error&&e.error.name;report.errors.push({atMs:time(),type:/^(TypeError|ReferenceError|SyntaxError|RangeError|URIError|EvalError)$/.test(name)?name:'Error',line:Number(e.lineno)||0});publish();}}
+    function stop(){if(stopped)return;publish();stopped=true;if(observer)observer.disconnect();if(frame)cancelAnimationFrame(frame);clearTimeout(deadline);document.removeEventListener('keydown',onKey,true);window.removeEventListener('error',onError,true);report.stopped=true;json.textContent=JSON.stringify(report);}
     window.LampaStartupProbe={stop:stop};
     observer=new MutationObserver(function(records){if(records.some(function(r){return r.target!==json && !json.contains(r.target);} ))queue();});
     observer.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']});
-    document.addEventListener('keydown',onKey,true);deadline=setTimeout(stop,60000);inspect();
+    document.addEventListener('keydown',onKey,true);window.addEventListener('error',onError,true);deadline=setTimeout(stop,60000);inspect();
 })();
