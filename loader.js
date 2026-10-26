@@ -20,7 +20,7 @@
   window.LampaLoaderStarted = true;
 
   var BASE = String(window.LAMPA_PLUGINS_BASE || 'https://gorlim590.github.io/lampa/').replace(/\/?$/, '/');
-  var VERSION = String(window.LAMPA_PLUGINS_VERSION || '20261026-trakt-native-ratings-3.4.0');
+  var VERSION = String(window.LAMPA_PLUGINS_VERSION || '20261026-trakt-rating-widgets-3.4.1');
   var TIMEOUT_MS = 8000;
 
   // Базовий порядок з README: Trakt → Trakt+ → Interface+ → YDesign → решта за потреби.

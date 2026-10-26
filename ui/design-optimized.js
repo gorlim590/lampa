@@ -1745,10 +1745,20 @@
         if (n && n.parentNode) n.parentNode.removeChild(n);
     }
 
+    function personalRatingLabel(data) {
+        try {
+            var provider = window.TraktPlus;
+            var state = provider && typeof provider.cachedRating === 'function' ? provider.cachedRating(data) : null;
+            if (!state || !state.confirmed || typeof state.value !== 'number' || !isFinite(state.value) || state.value < 1 || state.value > 10 || state.value % 1) return null;
+            return 'Моя Trakt · ★ ' + (state.value / 2) + '/5' + (state.phase === 'stale' ? ' · кеш' : '');
+        } catch (e) { return null; }
+    }
     function updateCardMarks(el, data, type, ext) {
         var view = el.querySelector ? el.querySelector('.card__view') : null;
         if (!view) return;
         var mk = computeMarks(el, data, type, ext);
+        var personalHost = view.querySelector('.ydesign-info-wrap');
+        if (personalHost) syncNode(personalHost, 'ydesign-personal-rating', 'ydesign-personal-rating', personalRatingLabel(data));
         var nextState = window.TraktPlus && typeof TraktPlus.upNextStatus === 'function' ? TraktPlus.upNextStatus(data) : null;
         var newCount = nextState && nextState.phase === 'new' ? nextState.newEpisodes : 0;
         if (data && data._trakt_cached_only) {
@@ -2330,6 +2340,7 @@
             "body.ydesign-v-badges-one-row .ydesign-vertical .ydesign-ratings {display: flex !important;flex-wrap: wrap !important;align-content: flex-start !important;width: auto !important;height: 2.15em !important;max-height: 2.15em !important;min-height: 2.15em !important;line-height: 2.15em !important;margin: 0 !important;padding: 2px 0 !important;box-sizing: border-box !important;flex-shrink: 0 !important;column-gap: var(--ydesign-badges-gap, 0.15em) !important;row-gap: 50em !important;overflow: hidden !important;}",
             ".ydesign-badges {font-size: 1em !important;}",
             ".ydesign-ratings {font-size: 1em !important;}",
+            ".ydesign-personal-rating {display:block;flex:0 0 100%;width:100%;font-size:.9em;font-weight:700;color:#e8d7a5;line-height:1.5;padding:.2em 0;}",
             ".ydesign-genres {font-size: 1em !important;}",
             ".ydesign-badge {display: inline-flex !important;align-items: center !important;justify-content: center !important;box-sizing: border-box !important;height: 1.85em !important;min-height: 1.85em !important;max-height: 1.85em !important;line-height: 1.1 !important;border: 1px solid transparent !important;background: transparent !important;padding: 0 0.50em !important;text-shadow: none !important;white-space: nowrap !important;flex-shrink: 0 !important;text-align: center !important;vertical-align: middle !important;border-radius: var(--ydesign-badge-radius, 50px) !important;max-width: 100% !important;overflow: visible !important;}",
             "body:not(.stremio-hybrid) .ydesign-badge {box-shadow: none !important;}",
@@ -3957,6 +3968,7 @@
             initSeriesLogic();
             // Trakt+ повідомляє, коли змінився список переглянутих → оновлюємо позначки
             document.addEventListener('traktplus:watched', function () { scheduleRefreshMarks(); });
+            document.addEventListener('traktplus:ratings', function () { scheduleRefreshMarks(); });
 
             // рядки головної, оновлення позначок після перегляду, фонове завантаження списків
             registerRows();

@@ -200,7 +200,7 @@ body.stremio-hybrid .sh-movie .full-start-new__title { order:0; font-size:3.05em
 body.stremio-hybrid .sh-movie .full-start-new__head { order:1; font-size:.9em; color:var(--sm-muted); margin:0 0 .7em; line-height:1.5; text-shadow:none; }
 body.stremio-hybrid .sh-movie .ifx-original-title { display:inline; border:0; padding:0; margin-left:1em; color:var(--sm-muted); font-size:1em; font-weight:400; text-shadow:none; }
 body.stremio-hybrid .sh-movie .omdb-mdb-yarik-rate, body.stremio-hybrid .sh-movie .rate-fix { order:2; display:flex; flex-wrap:wrap; gap:.9em !important; margin:0 0 1em !important; align-items:center; }
-body.stremio-hybrid .sh-movie .full-start__rate { font-size:.95em !important; background:transparent !important; padding:0 !important; border:0; border-radius:0; min-height:0; gap:.35em; margin:0 !important; color:var(--sm-text) !important; }
+body.stremio-hybrid .sh-movie .full-start__rate { font-size:var(--sh-details-rating-size,1.25em) !important; background:transparent !important; padding:0 !important; border:0; border-radius:0; min-height:0; gap:.35em; margin:0 !important; color:var(--sm-text) !important; }
 body.stremio-hybrid .sh-movie .full-start__rate > div { color:var(--sm-text) !important; }
 body.stremio-hybrid .sh-movie .rating-icon-wrap, body.stremio-hybrid .sh-movie .rating-icon-wrap img { width:1.25em !important; height:1.25em !important; min-width:0 !important; }
 body.stremio-hybrid .sh-movie .cardify__details { order:3; width:100%; }
@@ -358,7 +358,7 @@ body.stremio-hybrid .sh-streams .ctr-size{white-space:normal;overflow-wrap:anywh
 @media(max-width:900px){body.stremio-hybrid .sh-movie-hero{--sh-stream-width:100%}body.stremio-hybrid .sh-has-streams .sh-movie-column{width:100%!important;max-width:100%!important}body.stremio-hybrid .sh-streams{position:relative;top:auto;right:auto;width:100%;height:60vh;border-left:0}}
 body.stremio-hybrid .sh-movie .full-descr__text{display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:3;max-height:4.95em!important;overflow:hidden;white-space:normal!important}
 body.stremio-hybrid .sh-movie.sh-description-expanded .full-descr__text{display:block!important;-webkit-line-clamp:unset;max-height:none!important;overflow:visible;white-space:pre-line!important}
-body.stremio-hybrid .sh-movie .sh-description-toggle{display:flex;align-items:center;justify-content:center;width:auto;min-width:0;min-height:2.9em;flex:0 0 auto;font-size:.85em!important;color:var(--sm-text);padding:0 .8em!important;border-radius:.55em;background:#ffffff12;border:1px solid #ffffff18}\nbody.stremio-hybrid .sh-movie .sh-description-toggle.focus{background:var(--sh-focus-soft);box-shadow:0 0 0 .12em var(--sh-accent-soft)}
+body.stremio-hybrid .sh-movie .sh-description-toggle{order:6;align-self:flex-start;margin:0 0 1.2em;display:flex;align-items:center;justify-content:center;width:auto;min-width:0;min-height:2.9em;flex:0 0 auto;font-size:.85em!important;color:var(--sm-text);padding:0 .8em!important;border-radius:.55em;background:#ffffff12;border:1px solid #ffffff18}\nbody.stremio-hybrid .sh-movie .sh-description-toggle.focus{background:var(--sh-focus-soft);box-shadow:0 0 0 .12em var(--sh-accent-soft)}
 body.stremio-hybrid .head .head__title{max-width:20vw}
 body.stremio-hybrid .sh-profile-menu .selectbox__content{position:absolute;right:1.8em;top:5em;bottom:auto;left:auto;width:23em;max-width:90vw;max-height:calc(100vh - 7em);border:1px solid var(--sh-border);box-shadow:0 .7em 2em #0005}
 body.stremio-hybrid .selectbox-item{transition:opacity var(--sh-speed) var(--sh-ease)!important}
@@ -384,6 +384,7 @@ body.stremio-hybrid .tp-person-unknown{font-size:.8em;color:var(--sh-muted)}
     // Cardify owns the native template/data. Move nodes with their handlers, never clone them.
     var movieRecords=[], movieFrame=0, movieTimers=[];
     function restoreMovie(record) {
+        if(record.ratingController&&record.ratingController.up===record.ratingUp)record.ratingController.up=record.originalRatingUp;
         (record.castLines||[]).forEach(function(entry){entry.line.unuse(entry.hook);delete entry.line._shCastHook;var rendered=entry.line.render(),node=rendered&&(rendered[0]||rendered);if(node&&node.querySelectorAll)node.querySelectorAll('.sh-cast-watched').forEach(function(n){n.remove();});});
         record.root.querySelectorAll('.sh-generated-description').forEach(function(n){n.remove();});
         (record.seriesFields||[]).forEach(function(n){n.remove();});
@@ -420,7 +421,7 @@ body.stremio-hybrid .tp-person-unknown{font-size:.8em;color:var(--sh-muted)}
             record.root.classList.toggle("sh-description-expanded",expanded);
         };
         $(button).on("hover:enter.shDescription",record.toggleDescription);
-        record.root.querySelector(".full-start-new__buttons").appendChild(button);
+        description.insertAdjacentElement('afterend',button);
     }
     function clearDescription(record) {
         if(record.descriptionToggle){$(record.descriptionToggle).off(".shDescription").remove();record.descriptionToggle=null;record.toggleDescription=null;}
@@ -441,6 +442,7 @@ body.stremio-hybrid .tp-person-unknown{font-size:.8em;color:var(--sh-muted)}
     function focusMovieActions(record, visible) {
         var controller=Lampa.Controller.enabled(),link=controller.controller&&controller.controller.link;
         if(controller.name!=='full_start'||!link||!visible.length)return;
+        bindRatingNavigation(record,controller.controller);
         var primary=visible.filter(function(node){return node.classList.contains('view--torrent');})[0]||visible[0];
         var focus=record.root.querySelector('.selector.focus'),last=link.last&&(link.last[0]||link.last);
         if(!record.initialFocusDone||!focus||(last&&!record.root.contains(last))){
@@ -448,6 +450,21 @@ body.stremio-hybrid .tp-person-unknown{font-size:.8em;color:var(--sh-muted)}
             link.last=target;Lampa.Controller.collectionSet(record.root);Lampa.Controller.collectionFocus(target,record.root);
         }
         record.initialFocusDone=true;
+    }
+    function bindRatingNavigation(record,controller) {
+        if(!controller||typeof controller.up!=='function'||controller.up===record.ratingUp)return;
+        if(record.ratingController&&record.ratingController.up===record.ratingUp)record.ratingController.up=record.originalRatingUp;
+        var original=controller.up;
+        record.ratingController=controller;record.originalRatingUp=original;
+        record.ratingUp=function(){
+            var from=record.root.querySelector('.full-start-new__buttons .selector.focus'),rating=record.root.querySelector('.tp-personal-rating');
+            if(from&&rating&&rating.getClientRects().length&&record.root.isConnected){
+                if(controller.link)controller.link.last=rating;
+                Lampa.Controller.collectionSet(record.root);Lampa.Controller.collectionFocus(rating,record.root);return;
+            }
+            return original.apply(this,arguments);
+        };
+        controller.up=record.ratingUp;
     }
     function movieButtonFocus(event) {
         var row=event.currentTarget, button=event.target.closest('.full-start__button,.sh-description-toggle');
@@ -1050,6 +1067,7 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         }
         if(event.name!=='full_start')return;
         var controller=Lampa.Controller.enabled().controller;
+        bindRatingNavigation(record,controller);
         if(controller.down===record.streamDown)return;
         record.streamInfoController=controller;record.originalInfoDown=controller.down;
         // Preserve native Down to cast/recommendations; sources open through the real torrent action.
