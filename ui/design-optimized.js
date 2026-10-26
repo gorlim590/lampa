@@ -2416,7 +2416,7 @@
             ".ydesign-badge-year {font-size: calc(var(--ydesign-year-size-val, 0.8) * 1em) !important;font-weight: 700 !important;color: #fff !important;}",
             ".ydesign-badge-age {font-size: calc(var(--ydesign-age-size-val, 0.8) * 1em) !important;font-weight: 700 !important;color: #fff !important;}",
             ".ydesign-badge-seasons {font-size: calc(var(--ydesign-seasons-size-val, 0.8) * 1em) !important;font-weight: 700 !important;color: #fff !important;}",
-            "body.ydesign-active .ydesign-badge-ua {font-size: calc(var(--ydesign-ua-size-val, 0.8) * 1em) !important;font-weight: 800 !important;line-height:1.3;color:#17202a !important;background:#ffd700 !important;background-image:none !important;border:1px solid #ffe566 !important;border-radius:.5em;padding:.12em .42em;white-space:nowrap;}",
+            "body.ydesign-active .ydesign-card.ydesign-vertical .ydesign-badge.ydesign-badge-ua {font-size: calc(var(--ydesign-ua-size-val, 0.8) * 1em) !important;font-weight: 800 !important;line-height:1.3;color:#17202a !important;background:#ffd700 !important;background-image:none !important;border:1px solid #ffe566 !important;border-radius:.5em;padding:.12em .42em;white-space:nowrap;}",
             ".ydesign-genre-badge {font-size: calc(var(--ydesign-genres-size-val, 0.8) * 1em) !important;font-weight: 600 !important;color: rgba(255,255,255,0.95) !important;}",
             ".ydesign-rating {font-size: calc(var(--ydesign-rating-size-val, 0.8) * 1em) !important;font-weight: 700 !important;color: #fff !important;gap: 0.25em !important;}",
             "body.ydesign-v-uniform-badges .ydesign-vertical .ydesign-badge {font-size: calc(var(--ydesign-badge-size-val, 0.8) * 1em) !important;}",
