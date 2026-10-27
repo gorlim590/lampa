@@ -13,6 +13,9 @@ const exercised=new Map();
 function mark(owner,keys,evidence,status='Verified in isolated tests'){
  for(const key of keys){const row=inventory.settings.find(item=>item.key===key&&item.owner===owner);assert(row,'No captured owner control '+owner+':'+key);assert(!exercised.has(row.id),'Control counted twice: '+row.id);exercised.set(row.id,{owner,status,evidence});}
 }
+function refine(owner,key,evidence,status){
+ const row=inventory.settings.find(item=>item.key===key&&item.owner===owner);assert(row,'No captured owner control '+owner+':'+key);assert(exercised.has(row.id),'Cannot refine untested control '+row.id);exercised.set(row.id,{owner,status,evidence});
+}
 function uniqueSettings(rows,names){
  const byName=new Map(rows.filter(row=>row.param&&row.param.name).map(row=>[row.param.name,row]));
  for(const name of names)assert(byName.has(name),'Owner did not register '+name);
@@ -131,13 +134,105 @@ test('Trakt auth renders its missing-token state without requesting user data; s
  const interval=extractFunction(source,'resolveMinInterval');vm.runInContext(interval,ctx);
  assert.equal(ctx.resolveMinInterval(),90000);values.trakt_scrobble_interval='30';assert.equal(ctx.resolveMinInterval(),30000);values.trakt_scrobble_interval='120';assert.equal(ctx.resolveMinInterval(),120000);values.trakt_scrobble_interval='0';assert.equal(ctx.resolveMinInterval(),90000);
  mark('trakt/trakt.js',['trakt_scrobble_interval'],'Actual interval resolver with mocked Storage and invalid-value fallback.');
- mark('trakt/trakt.js',['trakt_auth'],'Actual missing-token onRender only; no auth-start/API call.','Partially verified');
+ mark('trakt/trakt.js',['trakt_auth'],'Actual registration onRender missing-token branch; Phase 3 test below adds connected/failed status and mocked connect/disconnect paths.','Partially verified');
+});
+
+test('Trakt Core registrations route navigation, auth/logout, bookmark sync choices and full reset through isolated mocks',async()=>{
+ const source=fs.readFileSync(__dirname+'/../trakt/trakt.js','utf8'),names=['trakt_auth','nav_trakt_sync','nav_trakt_progress','nav_trakt_source','trakt_full_clear','trakt_bookmarks_mode','trakt_bookmarks_favorite_type','trakt_bookmarks_import','trakt_bookmarks_export'];
+ const definitions=[],routes=[],notices=[],writes=[],calls=[],operations=[],selections=[],storage={trakt_token:null,trakt_refresh_token:'refresh-fixture',trakt_bookmarks_mode:'watchlist',trakt_bookmarks_favorite_type:'like',favorite_movie:[{id:7}],profile_name:'fixture'};
+ const local={trakt_plus_cache:'fixture-cache',trakt_sync_cursor:'fixture-cursor',favorite_movie:'keep',profile_name:'profile-a',other:'keep'};
+ const localStorage=Object.assign({get length(){return Object.keys(local).length;},key(index){return Object.keys(local)[index]||null;},removeItem(key){delete local[key];delete this[key];}},local);
+ const api={get(path){calls.push(path);return Promise.resolve({username:'fixture-user',vip:false});},auth:{logout(){calls.push('logout');},device:{login(){calls.push('device-login');return Promise.resolve(null);}}}};
+ const Lampa={SettingsApi:{addParam:value=>definitions.push(value)},Storage:{get:key=>storage[key],field:key=>storage[key],set:(key,value)=>{storage[key]=value;writes.push([key,value]);}},Lang:{translate:key=>key},Platform:{is:()=>false},Settings:{create:(name,options)=>{routes.push({name,options});},update(){calls.push('settings-update');}},Bell:{push:value=>notices.push(value)}};
+ const context={Lampa,Api$1:api,localStorage,window:{},t$1:(key,fallback)=>fallback,DEFAULT_BOOKMARKS_SYNC_TYPES:['book','like','wath','look','viewed','scheduled','continued','thrown'],bookmarksSync:null,
+  startDeviceAuth:()=>calls.push('device-auth-dispatched'),logDebugOnce(){},ensureBookmarksSyncAvailable:()=>true,
+  runBookmarksSyncOperation:(operation,options)=>operations.push({operation,options}),selectMyList:(title,onSelect)=>selections.push({title,onSelect})};
+ const functions=['getBookmarksSyncMode','getSupportedFavoriteTypes','getFavoriteTypeTitle','getBookmarksFavoriteTypeValues','getBookmarksFavoriteType','startBookmarksImportFlow','startBookmarksExportFlow','addMainParams','addSyncParams','addProgressParams','addSourceParams'].map(name=>extractFunction(source,name));
+ vm.createContext(context);vm.runInContext(functions.join('\n'),context);context.addMainParams();context.addSyncParams();context.addProgressParams();context.addSourceParams();
+ const params=uniqueSettings(definitions,names);
+ // Status rendering and disconnect/connect dispatch are exercised without OAuth or account writes.
+ const label={value:'',html(value){this.value=value;}};params.get('trakt_auth').onRender({find:()=>label});assert(label.value.includes('trakttvAuthMissed'));assert.deepEqual(calls,[]);
+ params.get('trakt_auth').onChange();assert(calls.includes('device-auth-dispatched'));
+ storage.trakt_token='synthetic-token';params.get('trakt_auth').onRender({find:()=>label});await Promise.resolve();assert(label.value.includes('fixture-user'));assert(calls.includes('/users/me'));
+ params.get('trakt_auth').onChange();assert(calls.includes('logout'));assert(calls.includes('settings-update'));assert.deepEqual(storage.favorite_movie,[{id:7}]);
+ api.get=()=>Promise.reject(Error('synthetic expired auth'));params.get('trakt_auth').onRender({find:()=>label});await Promise.resolve();await Promise.resolve();assert.equal(label.value,'<span class="trakt-auth-label">Trakt.TV</span>');
+ // Navigation always opens the registered native owner and returns to Trakt on Back.
+ for(const [key,target] of [['nav_trakt_sync','trakt_sync'],['nav_trakt_progress','trakt_progress'],['nav_trakt_source','trakt_source']]){
+  params.get(key).onChange();assert.equal(routes.at(-1).name,target);routes.at(-1).options.onBack();assert.equal(routes.at(-1).name,'trakt');
+ }
+ // Import/export controls follow the selected list/favorite type, but the service-operation seam is intercepted.
+ storage.trakt_bookmarks_mode='watchlist';params.get('trakt_bookmarks_import').onRender({show(){calls.push('import-visible');},hide(){calls.push('import-hidden');}});params.get('trakt_bookmarks_import').onChange();
+ params.get('trakt_bookmarks_export').onChange();assert.equal(JSON.stringify(operations.slice(-2)),JSON.stringify([
+  {operation:'import',options:{source:'watchlist',favoriteType:'like'}},
+  {operation:'export',options:{target:'watchlist',favoriteType:'like'}}
+ ]));
+ storage.trakt_bookmarks_mode='my_lists';params.get('trakt_bookmarks_import').onChange();assert.equal(selections.length,1);selections[0].onSelect({listId:44});assert.equal(JSON.stringify(operations.at(-1)),JSON.stringify({operation:'import',options:{source:'my_list',listId:44,favoriteType:'like'}}));
+ storage.trakt_token=null;params.get('trakt_bookmarks_export').onRender({show(){},hide(){calls.push('export-hidden');}});assert(calls.includes('export-hidden'));
+ // The destructive control only touches Trakt-keyed localStorage plus the explicit auth keys it owns.
+ storage.trakt_token='synthetic-token';params.get('trakt_full_clear').onChange();
+ assert.equal(local.trakt_plus_cache,undefined);assert.equal(local.trakt_sync_cursor,undefined);assert.equal(local.favorite_movie,'keep');assert.equal(local.profile_name,'profile-a');assert.equal(local.other,'keep');
+ for(const key of ['trakt_token','trakt_refresh_token','trakt_token_created_at','trakt_token_expires_in','trakt_token_expires_at','trakt_active_device_auth','trakt_active_device_auth_started_at'])assert(writes.some(([name])=>name===key));
+ assert.deepEqual(storage.favorite_movie,[{id:7}]);assert(notices.length);assert(calls.includes('settings-update'));
+ mark('trakt/trakt.js',['nav_trakt_sync','nav_trakt_progress','nav_trakt_source','trakt_full_clear'],'Actual registered callbacks/routes or full-clear owner handler with synthetic auth, intercepted API, disposable localStorage and preserved Lampa favorites.');
+ mark('trakt/trakt.js',['trakt_bookmarks_mode','trakt_bookmarks_favorite_type'],'Actual mode/type resolver functions control watchlist versus selected-list dispatch and supported favorite type.');
+ mark('trakt/trakt.js',['trakt_bookmarks_import','trakt_bookmarks_export'],'Actual registered action callbacks and import/export flow routing; downstream sync operation is intercepted before API or favorite mutations.','Partially verified');
+ refine('trakt/trakt.js','trakt_auth','Actual registration covers missing and connected status, rejected /users/me fallback, mocked connect dispatch and disconnect delegation; real device OAuth/polling remains untested.','Partially verified');
+});
+
+test('Torrents Cinema settings registrations feed actual TV presentation and release-selection owners',()=>{
+ const source=fs.readFileSync(__dirname+'/../torrents-redesign.js','utf8'),registered=[],saved={},classes=new Set(),styles={},changed=[];
+ const localStorage={getItem:key=>Object.hasOwn(saved,key)?String(saved[key]):null,setItem:(key,value)=>{saved[key]=String(value);}};
+ const Lampa={SettingsApi:{addComponent(){},addParam:def=>registered.push(def)},Storage:{get:(key,fallback)=>Object.hasOwn(saved,key)?saved[key]:fallback}};
+ const context={window:{localStorage},Lampa,stopped:false,applySettings:()=>changed.push(true),text:value=>String(value==null?'':value),sourceCounts:new WeakMap(),
+  rows:st=>st.rows,decorate(){},updateCollection(){},focus(){},el:()=>({textContent:'',remove(){},classList:{add(){}}}),
+  releaseMatch:(data)=>({eligible:true,similarity:1,reasons:data.suspect?['Fixture mismatch']:[]})};
+ const blockStart=source.indexOf("    Lampa.SettingsApi.addComponent({component:'torrents_cinema'");const blockEnd=source.indexOf('    if(Lampa.Player',blockStart);assert(blockStart>0&&blockEnd>blockStart);
+ const settingFns=['setting','enabled','minimum','flag','appearance','trackerMatches','score','refresh','pumpRequests','refreshFileRatings'].map(name=>extractFunction(source,name,name==='enabled'||name==='minimum'||name==='flag'||name==='appearance'||name==='trackerMatches'||name==='score'||name==='refresh'||name==='pumpRequests'||name==='refreshFileRatings'?{last:name==='refreshFileRatings'}:{}));
+ const option=extractFunction(source,'option');
+ const registry=source.slice(blockStart,blockEnd);
+ vm.createContext(context);vm.runInContext(settingFns.join('\n')+'\n'+option+'\n'+registry,context);
+ const names=['theme','tv','animations','title_lines','cards','intensity','opacity','darkness','ua','ua_audio','ua_subs','quality','tracker','dedupe','suspect','auto','parallel','episode_ratings'];
+ const params=uniqueSettings(registered,names.map(name=>'torrents_cinema_'+name));
+ saved.torrents_cinema_theme='minimum';saved.torrents_cinema_tv=false;saved.torrents_cinema_animations=false;saved.torrents_cinema_title_lines='5';saved.torrents_cinema_cards='expanded';saved.torrents_cinema_intensity='.5';saved.torrents_cinema_opacity='.75';saved.torrents_cinema_darkness='.7';
+ const root={classList:{toggle:(name,on)=>on?classes.add(name):classes.delete(name)},style:{setProperty:(name,value)=>styles[name]=String(value)}};context.appearance({root});assert.equal(context.minimum({}),true);
+ assert(classes.has('ctr-no-motion'));assert(!classes.has('ctr-tv'));assert.equal(JSON.stringify(styles),JSON.stringify({'--ctr-title-lines':'5','--ctr-row-padding':'.5em','--ctr-intensity':'.5','--ctr-panel-opacity':'.75','--ctr-darkness':'.7'}));
+ assert.equal(params.get('torrents_cinema_enabled').param.default,true);assert.equal(params.get('torrents_cinema_quality').param.default,'1080');params.get('torrents_cinema_tv').onChange();assert.equal(changed.length,1);
+ // refresh() consumes these stored options, hides tracker/hash duplicates, scores UA audio/subtitle and quality, and owns the non-autoplay state.
+ const makeRow=(id,data)=>{const best={textContent:''},row={_ctrData:data,hidden:false,attributes:{},classNames:new Set(),classList:{remove:name=>row.classNames.delete(name),add:name=>row.classNames.add(name)}};const chips={appendChild(node){row.warning=node;}};row.querySelector=selector=>selector==='.ctr-best'?best:selector==='.ctr-suspect'?(row.warning||null):selector==='.ctr-chips'?chips:null;row.id=id;row.best=best;row.chips=chips;return row;};
+ const mkData=(overrides={})=>({hash:'',bytes:5e9,sourceRank:0,seeds:50,bitrate:8,tracker:'Toloka',parsed:{quality:'1080',raw:'Fixture Movie 2024',audio:null,subs:null},...overrides});
+ const audio=makeRow('audio',mkData({hash:'a'.repeat(40),parsed:{quality:'1080',raw:'Fixture Movie 2024',audio:{ua:true},subs:null}}));
+ const subtitle=makeRow('subtitle',mkData({hash:'b'.repeat(40),tracker:'Mazepa',parsed:{quality:'1080',raw:'Fixture Movie 2024',audio:null,subs:{ua:true}}}));
+ const quality=makeRow('quality',mkData({hash:'c'.repeat(40),parsed:{quality:'2160',raw:'Fixture Movie 2024',audio:null,subs:null}}));
+ const play={attrs:{},setAttribute(name,value){this.attrs[name]=String(value);}};
+ const st={dead:false,rows:[audio,subtitle,quality],availableCounts:null,nativeQuality:false,activityObject:{},filter:'all',tabs:{children:[]},list:{querySelector:()=>null},root:{querySelector:()=>null,querySelectorAll:()=>[]},play};
+ saved.torrents_cinema_theme='cinema';saved.torrents_cinema_ua=true;saved.torrents_cinema_ua_audio=true;saved.torrents_cinema_ua_subs=true;saved.torrents_cinema_quality='1080';saved.torrents_cinema_tracker='all';saved.torrents_cinema_dedupe=false;saved.torrents_cinema_suspect=false;saved.torrents_cinema_auto=true;
+ context.refresh(st);assert.equal(st.best,audio,'UA audio is the preferred score');
+ saved.torrents_cinema_ua_audio=false;context.refresh(st);assert.equal(st.best,subtitle,'UA subtitles outrank quality when UA audio preference is disabled');
+ saved.torrents_cinema_ua=false; saved.torrents_cinema_quality='2160';context.refresh(st);assert.equal(st.best,quality,'Selected resolution affects the actual owner score');
+ saved.torrents_cinema_tracker='toloka';context.refresh(st);assert.equal(subtitle.hidden,true);assert.notEqual(st.best,subtitle);
+ saved.torrents_cinema_tracker='all';saved.torrents_cinema_dedupe=true;subtitle._ctrData.hash=audio._ctrData.hash;context.refresh(st);assert.equal(subtitle.hidden,true,'Repeated infohash is removed only when dedupe is enabled');
+ saved.torrents_cinema_dedupe=false;saved.torrents_cinema_suspect=true;audio._ctrData.suspect=true;context.refresh(st);assert(audio.warning&&audio.warning.textContent.includes('Fixture mismatch'));
+ saved.torrents_cinema_auto=false;context.refresh(st);assert.equal(play.attrs['aria-disabled'],'true');assert(!st.best.classNames.has('is-best'));
+ mark('torrents-redesign.js',['torrents_cinema_theme','torrents_cinema_tv','torrents_cinema_animations','torrents_cinema_title_lines','torrents_cinema_cards','torrents_cinema_intensity','torrents_cinema_opacity','torrents_cinema_darkness'],'Actual registrations plus setting/appearance/minimum owner functions; disposable localStorage values drive TV classes and CSS variables.');
+ mark('torrents-redesign.js',['torrents_cinema_ua','torrents_cinema_ua_audio','torrents_cinema_ua_subs','torrents_cinema_quality','torrents_cinema_tracker','torrents_cinema_dedupe','torrents_cinema_suspect','torrents_cinema_auto'],'Actual refresh/score/tracker owner functions consume mock settings for release preference/filter/duplicate/label/autoplay-disabled effects; no playback is invoked.');
+});
+
+test('Torrents request concurrency and episode-rating preferences honor mock persistence without external calls',()=>{
+ const source=fs.readFileSync(__dirname+'/../torrents-redesign.js','utf8'),saved={},context={window:{localStorage:{getItem:key=>Object.hasOwn(saved,key)?String(saved[key]):null}},Lampa:{},stopped:false,runningRequests:0,requestQueue:[],ratingCalls:0,ratingNode:()=>{context.ratingCalls++;},flag:null};
+ vm.createContext(context);vm.runInContext([extractFunction(source,'setting'),extractFunction(source,'flag'),extractFunction(source,'pumpRequests'),extractFunction(source,'refreshFileRatings')].join('\n'),context);
+ saved.torrents_cinema_parallel='2';context.requestQueue=Array.from({length:4},()=>({st:{dead:false},start(){context.runningRequests++;}}));context.pumpRequests();assert.equal(context.runningRequests,2);assert.equal(context.requestQueue.length,2);
+ context.runningRequests=1;context.pumpRequests();assert.equal(context.runningRequests,2,'Configured concurrency caps owner scheduling');
+ let removed=0;const node={isConnected:true,querySelector:()=>({remove(){removed++;}})};const state={fileNodes:[node]};saved.torrents_cinema_episode_ratings=false;context.refreshFileRatings(state);assert.equal(removed,1);assert.equal(context.ratingCalls,0);
+ saved.torrents_cinema_episode_ratings=true;context.refreshFileRatings(state);assert.equal(context.ratingCalls,1);
+ mark('torrents-redesign.js',['torrents_cinema_parallel','torrents_cinema_episode_ratings'],'Actual request pump and file-rating owner handlers consume disposable settings; queue starts are counted locally, and rating badge removal/enable is mocked.');
 });
 
 test('functional verification set is unique and reaches the requested representative batch size',()=>{
  const expected=new Map(functionalManifest.controls.map(row=>[row.id,row]));
- assert.equal(exercised.size,expected.size);assert(exercised.size>=25&&exercised.size<=40);
+ const added=functionalManifest.controls.filter(row=>row.batch==='phase3').length;
+ assert.equal(functionalManifest.controls.filter(row=>row.batch==='baseline').length,functionalManifest.baselineDistinctControls);
+ assert.equal(exercised.size,expected.size);assert.equal(exercised.size,functionalManifest.baselineDistinctControls+added);assert(added>=25&&added<=40);
  assert.deepEqual([...exercised.keys()].sort(),[...expected.keys()].sort());
- for(const[id,evidence]of exercised)assert.equal(evidence.status,expected.get(id).status,id);
+ for(const[id,evidence]of exercised){assert.equal(evidence.status,expected.get(id).status,id);assert.equal(evidence.owner,expected.get(id).owner,id);assert.equal(expected.get(id).liveRuntime,'Not verified',id);}
  global.__settingsFunctionalEvidence=Object.fromEntries(exercised);
 });

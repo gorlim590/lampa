@@ -1,44 +1,760 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
+  "baselineDistinctControls": 39,
   "controls": [
-    { "id": "ydesign_grid:ydesign_theme", "status": "Verified in isolated tests", "test": "YDesign registration, mocked Storage, change listener, CSS owner effect, mock restart" },
-    { "id": "ydesign_styles:ydesign_style", "status": "Verified in isolated tests", "test": "YDesign registration, mocked Storage, change listener, class owner effect" },
-    { "id": "ydesign_styles:ydesign_focus_fx", "status": "Verified in isolated tests", "test": "YDesign registration, mocked Storage, change listener, class owner effect" },
-    { "id": "ydesign_grid:ydesign_ribbons", "status": "Verified in isolated tests", "test": "YDesign registration, mocked Storage, change listener, class owner effect" },
-    { "id": "ydesign_grid:ydesign_watched_mark", "status": "Verified in isolated tests", "test": "YDesign registration, mocked Storage, change listener, class owner effect" },
-    { "id": "ydesign_grid:ydesign_progress_marks", "status": "Verified in isolated tests", "test": "YDesign registration, mocked Storage, change listener, class owner effect" },
-    { "id": "ydesign_grid:ydesign_collection_mark", "status": "Verified in isolated tests", "test": "YDesign registration, mocked Storage, change listener, class owner effect" },
-    { "id": "ydesign_grid:ydesign_grid_items_v", "status": "Verified in isolated tests", "test": "YDesign registration, mocked Storage, change listener, CSS value and mock restart" },
-    { "id": "ydesign_grid:ydesign_card_gap", "status": "Verified in isolated tests", "test": "YDesign registration, mocked Storage, change listener, CSS value and mock restart" },
-    { "id": "ydesign_badges_style:ydesign_ratings_saturate", "status": "Verified in isolated tests", "test": "YDesign registration, mocked Storage, change listener, CSS value and class effect" },
-    { "id": "ydesign_vertical:ydesign_v_show_ua", "status": "Verified in isolated tests", "test": "YDesign registration, mocked Storage, change listener, visibility class effect" },
-    { "id": "ydesign_vertical:ydesign_v_show_age", "status": "Verified in isolated tests", "test": "YDesign registration, mocked Storage, change listener, visibility class effect" },
-    { "id": "ydesign_vertical:ydesign_v_show_genres", "status": "Verified in isolated tests", "test": "YDesign registration, mocked Storage, change listener, visibility class effect" },
-    { "id": "cardify:cardify_show_status", "status": "Verified in isolated tests", "test": "Cardify actual owner visibility function; mock Storage state and restart" },
-    { "id": "cardify:cardify_show_pg", "status": "Verified in isolated tests", "test": "Cardify actual owner visibility function; mock Storage state and restart" },
-    { "id": "cardify:cardify_show_rating", "status": "Verified in isolated tests", "test": "Cardify registered onChange/onRender; mock Storage and owner classes" },
-    { "id": "cardify:cardify_ratings_position", "status": "Verified in isolated tests", "test": "Cardify registered onChange/onRender; write, owner classes and mock restart" },
-    { "id": "trakt_plus:trakt_plus_enable", "status": "Verified in isolated tests", "test": "Trakt+ registered callback/config parser with mock Storage" },
-    { "id": "trakt_plus:trakt_plus_hide_watched", "status": "Verified in isolated tests", "test": "Trakt+ registered callback/config parser with mock Storage" },
-    { "id": "trakt_plus:trakt_plus_hide_shows", "status": "Verified in isolated tests", "test": "Trakt+ registered callback/config parser with mock Storage" },
-    { "id": "trakt_plus:trakt_plus_mark", "status": "Verified in isolated tests", "test": "Trakt+ registered callback/config parser with mock Storage" },
-    { "id": "trakt_plus:trakt_plus_mark_shows", "status": "Verified in isolated tests", "test": "Trakt+ registered callback/config parser with mock Storage" },
-    { "id": "trakt_plus:trakt_plus_autosync", "status": "Verified in isolated tests", "test": "Trakt+ registered callback/config parser with mock Storage" },
-    { "id": "trakt_plus:trakt_plus_trend_hide_watched", "status": "Verified in isolated tests", "test": "Trakt+ registered callback/config parser with mock Storage" },
-    { "id": "trakt_plus:trakt_plus_more", "status": "Verified in isolated tests", "test": "Trakt+ registered callback/config parser with mock Storage" },
-    { "id": "trakt_plus:trakt_plus_full_rows", "status": "Verified in isolated tests", "test": "Trakt+ registered callback/config parser with mock Storage" },
-    { "id": "trakt_plus:trakt_plus_full_button", "status": "Verified in isolated tests", "test": "Trakt+ registered callback/config parser with mock Storage" },
-    { "id": "trakt_plus:trakt_plus_auto_home", "status": "Verified in isolated tests", "test": "Trakt+ registered callback/config parser with mock Storage" },
-    { "id": "trakt_plus:trakt_plus_row_limit", "status": "Verified in isolated tests", "test": "Trakt+ registered callback/config parser with mock Storage" },
-    { "id": "trakt_plus:trakt_plus_cache_min", "status": "Verified in isolated tests", "test": "Trakt+ registered callback/config parser with mock Storage" },
-    { "id": "trakt_plus:trakt_plus_min_rating", "status": "Verified in isolated tests", "test": "Trakt+ registered callback/config parser with mock Storage" },
-    { "id": "trakt_plus:trakt_plus_min_votes", "status": "Verified in isolated tests", "test": "Trakt+ registered callback/config parser with mock Storage" },
-    { "id": "trakt_plus:trakt_plus_rec_type", "status": "Verified in isolated tests", "test": "Trakt+ registered callback/config parser with mock Storage" },
-    { "id": "trakt_plus:trakt_plus_exclude_genres", "status": "Verified in isolated tests", "test": "Trakt+ registered callback/config parser with mock Storage" },
-    { "id": "trakt_plus:trakt_plus_reset_cache", "status": "Verified in isolated tests", "test": "Trakt+ registered reset callback with intercepted API; no local favorites removed" },
-    { "id": "interface_mod_new:interface_mod_new_theme_select", "status": "Verified in isolated tests", "test": "Interface+ registered theme option; actual theme switch/default restore and Hybrid focus selector guard" },
-    { "id": "interface:stremio_hybrid_enabled", "status": "Verified in isolated tests", "test": "Hybrid registered enable option and actual setEnabled/applyShell repeated transitions" },
-    { "id": "trakt_progress:trakt_scrobble_interval", "status": "Verified in isolated tests", "test": "Trakt interval resolver reads mock values and falls back for invalid value" },
-    { "id": "trakt:trakt_auth", "status": "Partially verified", "test": "Actual registered onRender missing-token branch; auth start/API branch intentionally not called" }
+    {
+      "id": "ydesign_grid:ydesign_theme",
+      "status": "Verified in isolated tests",
+      "test": "YDesign registration, mocked Storage, change listener, CSS owner effect, mock restart",
+      "owner": "ui/design-optimized.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "ydesign_styles:ydesign_style",
+      "status": "Verified in isolated tests",
+      "test": "YDesign registration, mocked Storage, change listener, class owner effect",
+      "owner": "ui/design-optimized.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "ydesign_styles:ydesign_focus_fx",
+      "status": "Verified in isolated tests",
+      "test": "YDesign registration, mocked Storage, change listener, class owner effect",
+      "owner": "ui/design-optimized.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "ydesign_grid:ydesign_ribbons",
+      "status": "Verified in isolated tests",
+      "test": "YDesign registration, mocked Storage, change listener, class owner effect",
+      "owner": "ui/design-optimized.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "ydesign_grid:ydesign_watched_mark",
+      "status": "Verified in isolated tests",
+      "test": "YDesign registration, mocked Storage, change listener, class owner effect",
+      "owner": "ui/design-optimized.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "ydesign_grid:ydesign_progress_marks",
+      "status": "Verified in isolated tests",
+      "test": "YDesign registration, mocked Storage, change listener, class owner effect",
+      "owner": "ui/design-optimized.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "ydesign_grid:ydesign_collection_mark",
+      "status": "Verified in isolated tests",
+      "test": "YDesign registration, mocked Storage, change listener, class owner effect",
+      "owner": "ui/design-optimized.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "ydesign_grid:ydesign_grid_items_v",
+      "status": "Verified in isolated tests",
+      "test": "YDesign registration, mocked Storage, change listener, CSS value and mock restart",
+      "owner": "ui/design-optimized.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "ydesign_grid:ydesign_card_gap",
+      "status": "Verified in isolated tests",
+      "test": "YDesign registration, mocked Storage, change listener, CSS value and mock restart",
+      "owner": "ui/design-optimized.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "ydesign_badges_style:ydesign_ratings_saturate",
+      "status": "Verified in isolated tests",
+      "test": "YDesign registration, mocked Storage, change listener, CSS value and class effect",
+      "owner": "ui/design-optimized.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "ydesign_vertical:ydesign_v_show_ua",
+      "status": "Verified in isolated tests",
+      "test": "YDesign registration, mocked Storage, change listener, visibility class effect",
+      "owner": "ui/design-optimized.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "ydesign_vertical:ydesign_v_show_age",
+      "status": "Verified in isolated tests",
+      "test": "YDesign registration, mocked Storage, change listener, visibility class effect",
+      "owner": "ui/design-optimized.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "ydesign_vertical:ydesign_v_show_genres",
+      "status": "Verified in isolated tests",
+      "test": "YDesign registration, mocked Storage, change listener, visibility class effect",
+      "owner": "ui/design-optimized.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "cardify:cardify_show_status",
+      "status": "Verified in isolated tests",
+      "test": "Cardify actual owner visibility function; mock Storage state and restart",
+      "owner": "ui/cardify-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "cardify:cardify_show_pg",
+      "status": "Verified in isolated tests",
+      "test": "Cardify actual owner visibility function; mock Storage state and restart",
+      "owner": "ui/cardify-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "cardify:cardify_show_rating",
+      "status": "Verified in isolated tests",
+      "test": "Cardify registered onChange/onRender; mock Storage and owner classes",
+      "owner": "ui/cardify-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "cardify:cardify_ratings_position",
+      "status": "Verified in isolated tests",
+      "test": "Cardify registered onChange/onRender; write, owner classes and mock restart",
+      "owner": "ui/cardify-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "trakt_plus:trakt_plus_enable",
+      "status": "Verified in isolated tests",
+      "test": "Trakt+ registered callback/config parser with mock Storage",
+      "owner": "trakt/trakt-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "trakt_plus:trakt_plus_hide_watched",
+      "status": "Verified in isolated tests",
+      "test": "Trakt+ registered callback/config parser with mock Storage",
+      "owner": "trakt/trakt-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "trakt_plus:trakt_plus_hide_shows",
+      "status": "Verified in isolated tests",
+      "test": "Trakt+ registered callback/config parser with mock Storage",
+      "owner": "trakt/trakt-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "trakt_plus:trakt_plus_mark",
+      "status": "Verified in isolated tests",
+      "test": "Trakt+ registered callback/config parser with mock Storage",
+      "owner": "trakt/trakt-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "trakt_plus:trakt_plus_mark_shows",
+      "status": "Verified in isolated tests",
+      "test": "Trakt+ registered callback/config parser with mock Storage",
+      "owner": "trakt/trakt-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "trakt_plus:trakt_plus_autosync",
+      "status": "Verified in isolated tests",
+      "test": "Trakt+ registered callback/config parser with mock Storage",
+      "owner": "trakt/trakt-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "trakt_plus:trakt_plus_trend_hide_watched",
+      "status": "Verified in isolated tests",
+      "test": "Trakt+ registered callback/config parser with mock Storage",
+      "owner": "trakt/trakt-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "trakt_plus:trakt_plus_more",
+      "status": "Verified in isolated tests",
+      "test": "Trakt+ registered callback/config parser with mock Storage",
+      "owner": "trakt/trakt-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "trakt_plus:trakt_plus_full_rows",
+      "status": "Verified in isolated tests",
+      "test": "Trakt+ registered callback/config parser with mock Storage",
+      "owner": "trakt/trakt-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "trakt_plus:trakt_plus_full_button",
+      "status": "Verified in isolated tests",
+      "test": "Trakt+ registered callback/config parser with mock Storage",
+      "owner": "trakt/trakt-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "trakt_plus:trakt_plus_auto_home",
+      "status": "Verified in isolated tests",
+      "test": "Trakt+ registered callback/config parser with mock Storage",
+      "owner": "trakt/trakt-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "trakt_plus:trakt_plus_row_limit",
+      "status": "Verified in isolated tests",
+      "test": "Trakt+ registered callback/config parser with mock Storage",
+      "owner": "trakt/trakt-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "trakt_plus:trakt_plus_cache_min",
+      "status": "Verified in isolated tests",
+      "test": "Trakt+ registered callback/config parser with mock Storage",
+      "owner": "trakt/trakt-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "trakt_plus:trakt_plus_min_rating",
+      "status": "Verified in isolated tests",
+      "test": "Trakt+ registered callback/config parser with mock Storage",
+      "owner": "trakt/trakt-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "trakt_plus:trakt_plus_min_votes",
+      "status": "Verified in isolated tests",
+      "test": "Trakt+ registered callback/config parser with mock Storage",
+      "owner": "trakt/trakt-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "trakt_plus:trakt_plus_rec_type",
+      "status": "Verified in isolated tests",
+      "test": "Trakt+ registered callback/config parser with mock Storage",
+      "owner": "trakt/trakt-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "trakt_plus:trakt_plus_exclude_genres",
+      "status": "Verified in isolated tests",
+      "test": "Trakt+ registered callback/config parser with mock Storage",
+      "owner": "trakt/trakt-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "trakt_plus:trakt_plus_reset_cache",
+      "status": "Verified in isolated tests",
+      "test": "Trakt+ registered reset callback with intercepted API; no local favorites removed",
+      "owner": "trakt/trakt-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "interface_mod_new:interface_mod_new_theme_select",
+      "status": "Verified in isolated tests",
+      "test": "Interface+ registered theme option; actual theme switch/default restore and Hybrid focus selector guard",
+      "owner": "ui/interface-plus.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "interface:stremio_hybrid_enabled",
+      "status": "Verified in isolated tests",
+      "test": "Hybrid registered enable option and actual setEnabled/applyShell repeated transitions",
+      "owner": "ui/stremio-hybrid.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "trakt_progress:trakt_scrobble_interval",
+      "status": "Verified in isolated tests",
+      "test": "Trakt interval resolver reads mock values and falls back for invalid value",
+      "owner": "trakt/trakt.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "trakt:trakt_auth",
+      "status": "Partially verified",
+      "test": "Actual registration: missing/connected status, rejected /users/me fallback, mocked connect dispatch, disconnect delegation; device OAuth/polling remains untested",
+      "owner": "trakt/trakt.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "trakt:nav_trakt_sync",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual registered handler opens trakt_sync and native Back returns to trakt",
+      "owner": "trakt/trakt.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual registered handler opens trakt_sync and native Back returns to trakt",
+      "assertedEffect": "Actual registered handler opens trakt_sync and native Back returns to trakt",
+      "mockedDependencies": [
+        "Lampa.Storage/Settings/Bell mock",
+        "Trakt API interception",
+        "synthetic localStorage",
+        "no live credentials"
+      ],
+      "persistenceResetEvidence": "Mock Storage reads for mode/type; native Lampa Settings writer and service persistence are outside this fixture."
+    },
+    {
+      "id": "trakt:nav_trakt_progress",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual registered handler opens trakt_progress and native Back returns to trakt",
+      "owner": "trakt/trakt.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual registered handler opens trakt_progress and native Back returns to trakt",
+      "assertedEffect": "Actual registered handler opens trakt_progress and native Back returns to trakt",
+      "mockedDependencies": [
+        "Lampa.Storage/Settings/Bell mock",
+        "Trakt API interception",
+        "synthetic localStorage",
+        "no live credentials"
+      ],
+      "persistenceResetEvidence": "Mock Storage reads for mode/type; native Lampa Settings writer and service persistence are outside this fixture."
+    },
+    {
+      "id": "trakt:nav_trakt_source",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual registered handler opens trakt_source and native Back returns to trakt",
+      "owner": "trakt/trakt.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual registered handler opens trakt_source and native Back returns to trakt",
+      "assertedEffect": "Actual registered handler opens trakt_source and native Back returns to trakt",
+      "mockedDependencies": [
+        "Lampa.Storage/Settings/Bell mock",
+        "Trakt API interception",
+        "synthetic localStorage",
+        "no live credentials"
+      ],
+      "persistenceResetEvidence": "Mock Storage reads for mode/type; native Lampa Settings writer and service persistence are outside this fixture."
+    },
+    {
+      "id": "trakt:trakt_full_clear",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual full-clear callback removes Trakt-keyed disposable localStorage and explicit auth keys; preserves non-Trakt keys and Lampa favorites",
+      "owner": "trakt/trakt.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual full-clear callback removes Trakt-keyed disposable localStorage and explicit auth keys; preserves non-Trakt keys and Lampa favorites",
+      "assertedEffect": "Actual full-clear callback removes Trakt-keyed disposable localStorage and explicit auth keys; preserves non-Trakt keys and Lampa favorites",
+      "mockedDependencies": [
+        "Lampa.Storage/Settings/Bell mock",
+        "Trakt API interception",
+        "synthetic localStorage",
+        "no live credentials"
+      ],
+      "persistenceResetEvidence": "Synthetic Trakt keys cleared; unrelated/profile/favorite keys preserved; explicit auth keys reset."
+    },
+    {
+      "id": "trakt_sync:trakt_bookmarks_mode",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual mode resolver selects watchlist versus my-lists flow",
+      "owner": "trakt/trakt.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual mode resolver selects watchlist versus my-lists flow",
+      "assertedEffect": "Actual mode resolver selects watchlist versus my-lists flow",
+      "mockedDependencies": [
+        "Lampa.Storage/Settings/Bell mock",
+        "Trakt API interception",
+        "synthetic localStorage",
+        "no live credentials"
+      ],
+      "persistenceResetEvidence": "Mock Storage reads for mode/type; native Lampa Settings writer and service persistence are outside this fixture."
+    },
+    {
+      "id": "trakt_sync:trakt_bookmarks_favorite_type",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual supported favorite-type resolver feeds isolated import/export dispatch",
+      "owner": "trakt/trakt.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual supported favorite-type resolver feeds isolated import/export dispatch",
+      "assertedEffect": "Actual supported favorite-type resolver feeds isolated import/export dispatch",
+      "mockedDependencies": [
+        "Lampa.Storage/Settings/Bell mock",
+        "Trakt API interception",
+        "synthetic localStorage",
+        "no live credentials"
+      ],
+      "persistenceResetEvidence": "Mock Storage reads for mode/type; native Lampa Settings writer and service persistence are outside this fixture."
+    },
+    {
+      "id": "trakt_sync:trakt_bookmarks_import",
+      "batch": "phase3",
+      "status": "Partially verified",
+      "test": "Actual registration and import flow route tested; sync operation intercepted before API/favorite mutation",
+      "owner": "trakt/trakt.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual registration and import flow route tested; sync operation intercepted before API/favorite mutation",
+      "assertedEffect": "Actual registration and import flow route tested; sync operation intercepted before API/favorite mutation",
+      "mockedDependencies": [
+        "Lampa.Storage/Settings/Bell mock",
+        "Trakt API interception",
+        "synthetic localStorage",
+        "no live credentials"
+      ],
+      "persistenceResetEvidence": "No data mutation; downstream operation intercepted before API and Favorites."
+    },
+    {
+      "id": "trakt_sync:trakt_bookmarks_export",
+      "batch": "phase3",
+      "status": "Partially verified",
+      "test": "Actual registration and export flow route tested; sync operation intercepted before API/favorite mutation",
+      "owner": "trakt/trakt.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual registration and export flow route tested; sync operation intercepted before API/favorite mutation",
+      "assertedEffect": "Actual registration and export flow route tested; sync operation intercepted before API/favorite mutation",
+      "mockedDependencies": [
+        "Lampa.Storage/Settings/Bell mock",
+        "Trakt API interception",
+        "synthetic localStorage",
+        "no live credentials"
+      ],
+      "persistenceResetEvidence": "No data mutation; downstream operation intercepted before API and Favorites."
+    },
+    {
+      "id": "torrents_cinema:torrents_cinema_theme",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual minimum-theme resolver reads disposable Storage",
+      "owner": "torrents-redesign.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual minimum-theme resolver reads disposable Storage",
+      "assertedEffect": "Actual minimum-theme resolver reads disposable Storage",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed."
+    },
+    {
+      "id": "torrents_cinema:torrents_cinema_tv",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual TV presentation owner toggles reduced-effects class from mock Storage",
+      "owner": "torrents-redesign.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual TV presentation owner toggles reduced-effects class from mock Storage",
+      "assertedEffect": "Actual TV presentation owner toggles reduced-effects class from mock Storage",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed."
+    },
+    {
+      "id": "torrents_cinema:torrents_cinema_animations",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual presentation owner toggles motion class from mock Storage",
+      "owner": "torrents-redesign.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual presentation owner toggles motion class from mock Storage",
+      "assertedEffect": "Actual presentation owner toggles motion class from mock Storage",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed."
+    },
+    {
+      "id": "torrents_cinema:torrents_cinema_title_lines",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual presentation owner maps title-lines value to CSS variable",
+      "owner": "torrents-redesign.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual presentation owner maps title-lines value to CSS variable",
+      "assertedEffect": "Actual presentation owner maps title-lines value to CSS variable",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed."
+    },
+    {
+      "id": "torrents_cinema:torrents_cinema_cards",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual presentation owner maps card density to row padding",
+      "owner": "torrents-redesign.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual presentation owner maps card density to row padding",
+      "assertedEffect": "Actual presentation owner maps card density to row padding",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed."
+    },
+    {
+      "id": "torrents_cinema:torrents_cinema_intensity",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual presentation owner maps intensity setting to CSS variable",
+      "owner": "torrents-redesign.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual presentation owner maps intensity setting to CSS variable",
+      "assertedEffect": "Actual presentation owner maps intensity setting to CSS variable",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed."
+    },
+    {
+      "id": "torrents_cinema:torrents_cinema_opacity",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual presentation owner maps panel opacity setting to CSS variable",
+      "owner": "torrents-redesign.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual presentation owner maps panel opacity setting to CSS variable",
+      "assertedEffect": "Actual presentation owner maps panel opacity setting to CSS variable",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed."
+    },
+    {
+      "id": "torrents_cinema:torrents_cinema_darkness",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual presentation owner maps backdrop darkness setting to CSS variable",
+      "owner": "torrents-redesign.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual presentation owner maps backdrop darkness setting to CSS variable",
+      "assertedEffect": "Actual presentation owner maps backdrop darkness setting to CSS variable",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed."
+    },
+    {
+      "id": "torrents_cinema:torrents_cinema_ua",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual refresh/score owner consumes mock Ukrainian preference in release selection",
+      "owner": "torrents-redesign.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual refresh/score owner consumes mock Ukrainian preference in release selection",
+      "assertedEffect": "Actual refresh/score owner consumes mock Ukrainian preference in release selection",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed."
+    },
+    {
+      "id": "torrents_cinema:torrents_cinema_ua_audio",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual refresh/score owner gives Ukrainian audio preference to best-release selection",
+      "owner": "torrents-redesign.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual refresh/score owner gives Ukrainian audio preference to best-release selection",
+      "assertedEffect": "Actual refresh/score owner gives Ukrainian audio preference to best-release selection",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed."
+    },
+    {
+      "id": "torrents_cinema:torrents_cinema_ua_subs",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual refresh/score owner gives Ukrainian subtitle preference when audio preference is disabled",
+      "owner": "torrents-redesign.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual refresh/score owner gives Ukrainian subtitle preference when audio preference is disabled",
+      "assertedEffect": "Actual refresh/score owner gives Ukrainian subtitle preference when audio preference is disabled",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed."
+    },
+    {
+      "id": "torrents_cinema:torrents_cinema_quality",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual release score selects configured resolution",
+      "owner": "torrents-redesign.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual release score selects configured resolution",
+      "assertedEffect": "Actual release score selects configured resolution",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed."
+    },
+    {
+      "id": "torrents_cinema:torrents_cinema_tracker",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual refresh/tracker filter hides releases from other trackers",
+      "owner": "torrents-redesign.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual refresh/tracker filter hides releases from other trackers",
+      "assertedEffect": "Actual refresh/tracker filter hides releases from other trackers",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed."
+    },
+    {
+      "id": "torrents_cinema:torrents_cinema_dedupe",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual refresh hides repeated infohash only when duplicate filter is enabled",
+      "owner": "torrents-redesign.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual refresh hides repeated infohash only when duplicate filter is enabled",
+      "assertedEffect": "Actual refresh hides repeated infohash only when duplicate filter is enabled",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed."
+    },
+    {
+      "id": "torrents_cinema:torrents_cinema_suspect",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual refresh owner renders mismatch explanation from mocked match result",
+      "owner": "torrents-redesign.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual refresh owner renders mismatch explanation from mocked match result",
+      "assertedEffect": "Actual refresh owner renders mismatch explanation from mocked match result",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed."
+    },
+    {
+      "id": "torrents_cinema:torrents_cinema_auto",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual refresh owner disables recommended-play action without invoking playback",
+      "owner": "torrents-redesign.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual refresh owner disables recommended-play action without invoking playback",
+      "assertedEffect": "Actual refresh owner disables recommended-play action without invoking playback",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed."
+    },
+    {
+      "id": "torrents_cinema:torrents_cinema_parallel",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual request pump respects configured local concurrency; no requests issued",
+      "owner": "torrents-redesign.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual request pump respects configured local concurrency; no requests issued",
+      "assertedEffect": "Actual request pump respects configured local concurrency; no requests issued",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed."
+    },
+    {
+      "id": "torrents_cinema:torrents_cinema_episode_ratings",
+      "batch": "phase3",
+      "status": "Verified in isolated tests",
+      "test": "Actual file-rating owner removes or refreshes a mocked badge based on setting",
+      "owner": "torrents-redesign.js",
+      "liveRuntime": "Not verified",
+      "sourceFunctionOrRegistration": "Actual file-rating owner removes or refreshes a mocked badge based on setting",
+      "assertedEffect": "Actual file-rating owner removes or refreshes a mocked badge based on setting",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed."
+    }
   ]
 }

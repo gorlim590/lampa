@@ -10,7 +10,9 @@ const inventory = JSON.parse(fs.readFileSync(inventoryPath, 'utf8'));
 const controlRows = inventory.settings.filter(row => row.kind === 'control');
 const presentationRows = inventory.settings.filter(row => row.kind !== 'control');
 const functionalManifestPath = path.join(root, 'tests/fixtures/settings-functional-evidence.json');
-const functionalControls = JSON.parse(fs.readFileSync(functionalManifestPath, 'utf8')).controls;
+const functionalManifest = JSON.parse(fs.readFileSync(functionalManifestPath, 'utf8'));
+const functionalControls = functionalManifest.controls;
+const phaseControls = functionalControls.filter(item => item.batch === 'phase3');
 const functionalById = new Map(functionalControls.map(item => [item.id, item]));
 const duplicateIds = new Set(inventory.duplicateIds || []);
 const storageOwners = new Map();
@@ -54,6 +56,7 @@ for (const row of controlRows) {
 }
 
 const records = controlRows.map(row => {
+  const evidence = functionalById.get(row.id);
   const flags = [];
   if (row.owner === 'Unresolved' || row.ownerConfidence === 'unresolved') flags.push('ambiguous-handler-owner');
   if (duplicateIds.has(row.id)) flags.push('duplicate-control-identity-review');
@@ -70,7 +73,13 @@ const records = controlRows.map(row => {
     owner: row.owner,
     ownerEvidence: row.ownerConfidence,
     status: statusOf(row),
-    evidence: functionalById.get(row.id)?.test || row.verification || 'No control-specific functional evidence recorded.',
+    evidence: evidence?.test || row.verification || 'No control-specific functional evidence recorded.',
+    ...(evidence ? {
+      liveRuntimeStatus: evidence.liveRuntime || 'Not verified',
+      testFile: 'tests/settings-functional.cjs',
+      mockedDependencies: evidence.mockedDependencies || [],
+      persistenceResetEvidence: evidence.persistenceResetEvidence || 'Not exercised by isolated functional tests.'
+    } : {}),
     storageKeys: row.storageKeys || [],
     findings: flags
   };
@@ -90,13 +99,18 @@ const report = {
     presentationRecords: presentationRows.length,
     recordedDuplicateIds: duplicateIds.size,
     distinctControlsExercised: functionalControls.length,
+    phaseDistinctControlsExercised: phaseControls.length,
     verifiedInIsolation: functionalControls.filter(item => item.status === 'Verified in isolated tests').length,
-    partiallyExercisedInIsolation: functionalControls.filter(item => item.status === 'Partially verified').length
+    partiallyExercisedInIsolation: functionalControls.filter(item => item.status === 'Partially verified').length,
+    phaseVerifiedInIsolation: phaseControls.filter(item => item.status === 'Verified in isolated tests').length,
+    phasePartiallyExercisedInIsolation: phaseControls.filter(item => item.status === 'Partially verified').length
   },
   functionalTests: {
     file: 'tests/settings-functional.cjs',
-    isolatedCases: 7,
-    mode: 'Source owner functions/registrations with disposable Storage, mocked UI effects and intercepted Trakt API; no live credentials or writes.',
+    isolatedCases: 10,
+    supportingFiles: ['tests/settings-plugin-delivery.cjs', 'tests/settings-hub-lifecycle.cjs'],
+    defaultLiveRuntimeStatus: 'Not verified',
+    mode: 'Source owner functions/registrations with disposable Storage, mocked UI effects and intercepted Trakt API; no live credentials or service/account writes.',
     liveRuntimeVerified: 0
   },
   categories: Object.fromEntries(Object.entries(categories).sort(([a], [b]) => a.localeCompare(b)).map(([name, rows]) => [name, group(rows)])),
@@ -121,13 +135,13 @@ const report = {
   ],
   followUpQueue: [
     { rank: 1, priority: 'P1 verification', owner: 'external/core-app.js / device player integrations', controls: ['player:player', 'player:player_torrent', 'player:player_iptv'], reason: 'Playback routing controls are captured but their effects and device fallback behavior have no acceptance evidence.' },
-    { rank: 2, priority: 'P1 verification', owner: 'trakt/trakt.js', controls: ['trakt:trakt_auth', 'trakt:trakt_full_clear'], reason: 'Missing-token auth rendering was exercised without network access; authenticated action and destructive full-reset semantics still need isolated coverage.' },
-    { rank: 3, priority: 'P1 verification', owner: 'trakt/trakt.js', controls: ['trakt:nav_trakt_sync'], reason: 'The Trakt+ preferences and cache reset run against mocked services; core sync action and account-isolation semantics remain unverified.' },
+    { rank: 2, priority: 'P1 verification', owner: 'trakt/trakt.js and Trakt API bridge', controls: ['trakt:trakt_auth'], reason: 'Status, missing-token dispatch, mocked disconnect delegation and failed /users/me fallback are isolated; actual device OAuth/polling and expired-token service acceptance remain unverified.' },
+    { rank: 3, priority: 'P1 verification', owner: 'trakt/trakt.js', controls: ['trakt_sync:trakt_bookmarks_import', 'trakt_sync:trakt_bookmarks_export', 'trakt:trakt_full_clear'], reason: 'Mode/type dispatch and full-clear namespace behavior were isolated; downstream sync API/favorite mutations and profile-scoped reset semantics remain unverified.' },
     { rank: 4, priority: 'P1 verification', owner: 'BWA external plugin; owner unresolved in capture', controls: controlRows.filter(row => row.component === 'bwa').map(row => row.id), reason: 'Ten controls have no attributable source/handler; resolve delivery and owner before claiming support or changing them.' },
     { rank: 5, priority: 'P1 verification', owner: 'ui/settings-hub.js plus PR #98 Hybrid/Settings owners', controls: ['settings_hub lifecycle', 'native Settings fallback'], reason: 'Mocks cover lifecycle/focus and fallback; verify exact delivered assets in one existing browser session when safe access permits.' },
     { rank: 6, priority: 'P1 verification', owner: 'providers/tmdb-networks.js', controls: ['platforms_margins:*'], reason: 'Four related margin controls share owner-reported storage access; inspect key-level writes and reset semantics in an isolated fixture.' },
     { rank: 7, priority: 'P1 verification', owner: 'ui/design-optimized.js and ui/interface-plus.js', controls: controlRows.filter(row => row.newCategory === 'appearance' && /ydesign|interface/i.test(row.component)).slice(0, 12).map(row => row.id), reason: 'Appearance is the largest category; verify representative high-impact controls against the merged single presentation owner boundaries.' },
-    { rank: 8, priority: 'P1 verification', owner: 'loader.js and plugins-to-enable/*', controls: ['plugins:plugins', 'plugins:install'], reason: 'Installation, enable/disable and missing-plugin fallback must be isolated from real user plugin configuration.' },
+    { rank: 8, priority: 'P1 verification', owner: 'loader.js and plugins-to-enable/*', controls: ['plugins:plugins', 'plugins:install'], reason: 'Loader sequence, failed delivery and late callback behavior are isolated; per-plugin enable controls and dependency readiness remain unavailable or unverified.' },
     { rank: 9, priority: 'P1 verification', owner: 'ui/menu-hide.js', controls: controlRows.filter(row => row.component === 'menu_filter').map(row => row.id), reason: 'Anonymous repeated registrations prevent stable per-control identity; determine whether they are duplicate controls or intentional per-item handlers.' },
     { rank: 10, priority: 'P2 verification', owner: 'community/new-category.js', controls: ['ncInfo:group'], reason: 'The self-Back defect is fixed, while the owner template remains lazy and represented as a dependency gap until opened through its native owner.' },
     { rank: 11, priority: 'P2 verification', owner: 'all current setting owners', controls: ['settings with account/profile/device scope'], reason: 'The inventory has no per-control reset, restart or profile-scope certification; derive boundaries from owner code before any migration.' },

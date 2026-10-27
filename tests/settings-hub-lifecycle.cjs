@@ -61,3 +61,10 @@ test('Single UI owner can unmount/remount functional Settings without retaining 
   f.hub.destroy();f.hub.destroy();assert.equal(f.listeners.open.length,0);assert.equal(f.listeners.close.length,0);assert.equal(f.params.settings_hub,undefined);assert.equal(f.params.settings_hub_page,undefined);assert.equal(f.params.ydesign,foreign);assert.equal(f.hub.owns('settings_hub'),false);assert.equal(f.L.Controller.enabled().name,'settings');assert.equal(f.styles.length,0);
  }
 });
+test('Missing owner template is blocked with an explanation while the native Settings fallback remains available',()=>{
+ const f=fixture();f.params.missing_external_owner=[{param:{name:'external_pref',type:'select'},field:{name:'External preference'}}];
+ const nativeTemplate=f.L.Template.get;f.L.Template.get=name=>name==='settings_missing_external_owner'?null:nativeTemplate(name);
+ assert.equal(f.hub.install(f.L,f.$,f.doc),true);f.open();f.enter('hub_problems');const creates=f.stats().creates;f.enter('hub_item_0');
+ assert.equal(f.stats().creates,creates,'Unavailable owner panel must not be opened');assert.equal(f.warnings.length,1);assert.match(f.warnings[0],/Панель ще не зареєстрована/);
+ f.back();f.enter('hub_native');assert.equal(f.L.Controller.enabled().name,'settings');assert(!f.classes.has('settings-hub-active'));
+});
