@@ -12,6 +12,8 @@
   var BASE = String(window.LAMPA_PLUGINS_BASE || 'https://gorlim590.github.io/lampa/').replace(/\/?$/, '/');
   var VERSION = String(window.LAMPA_PLUGINS_VERSION || '20261027-ui-first-1');
   var TIMEOUT_MS = 8000;
+  var READY_CHECK_MS = 100;
+  var READY_MAX_CHECKS = 300;
   var CRITICAL = ['ui/stremio-hybrid.js', 'ui/interface-plus.js', 'ui/design-optimized.js'];
   var DEFAULT_DEFERRED = [
     'trakt/trakt.js', 'trakt/trakt-plus.js', 'providers/torrent-search.js',
@@ -23,9 +25,11 @@
     stage: 'critical', criticalStartedAt: now(),
     criticalFinishedAt: null, deferredStartedAt: null, deferredFinishedAt: null,
     waitingForAppReady: false, requested: 0, loaded: 0, failed: 0, timedOut: 0,
-    lateLoads: 0, skipped: 0, activeDeferredLanes: 0
+    lateLoads: 0, skipped: 0, activeDeferredLanes: 0,
+    readinessChecks: 0, readinessFailure: null
   };
   window.LampaLoaderDiagnostics = state;
+  var readinessTimer = null, readinessListener = null, readinessOwner = null, readinessActive = false;
 
   function now() {
     try { if (window.performance && typeof window.performance.now === 'function') return Math.round(window.performance.now() * 10) / 10; }
@@ -144,9 +148,57 @@
     loadOne(list[index], stage, index + 1, function () { loadSeries(list, stage, index + 1, done); });
   }
 
-  function removeReadyListener(callback) {
-    try { if (window.Lampa && Lampa.Listener && Lampa.Listener.remove) Lampa.Listener.remove('app', callback); }
-    catch (e) { /* The listener is one-shot even when this API is absent. */ }
+  function removeReadyListener() {
+    if (!readinessListener) return;
+    try {
+      if (readinessOwner && readinessOwner.remove) readinessOwner.remove('app', readinessListener);
+    } catch (e) { state.readinessListenerRemoveFailed = true; }
+    readinessListener = null;
+    readinessOwner = null;
+  }
+
+  function finishReadiness() {
+    if (readinessTimer !== null) clearTimeout(readinessTimer);
+    readinessTimer = null;
+    readinessActive = false;
+    state.waitingForAppReady = false;
+    removeReadyListener();
+  }
+
+  function onNativeReady() {
+    if (!readinessActive || !window.Lampa) return;
+    finishReadiness();
+    startDeferred();
+  }
+
+  function checkNativeReady() {
+    if (!readinessActive) return;
+    state.readinessChecks++;
+    if (window.appready && window.Lampa) { onNativeReady(); return; }
+
+    var L = window.Lampa;
+    if (!readinessListener && L && L.Listener && L.Listener.follow && L.Listener.remove) {
+      readinessOwner = L.Listener;
+      readinessListener = function (event) {
+        if (event && event.type === 'ready') onNativeReady();
+      };
+      try { readinessOwner.follow('app', readinessListener); }
+      catch (e) {
+        readinessListener = null;
+        readinessOwner = null;
+        state.readinessSubscribeFailed = true;
+      }
+      if (window.appready && window.Lampa) { onNativeReady(); return; }
+    }
+
+    if (state.readinessChecks >= READY_MAX_CHECKS) {
+      finishReadiness();
+      state.readinessFailure = 'lampa-readiness-timeout';
+      state.stage = 'deferred-unavailable';
+      log('readiness', 0, 'timeout');
+      return;
+    }
+    readinessTimer = setTimeout(checkNativeReady, READY_CHECK_MS);
   }
 
   function startDeferred() {
@@ -199,23 +251,11 @@
   }
 
   function waitForAppReady() {
-    if (window.appready) { startDeferred(); return; }
-    var L = window.Lampa;
-    if (L && L.Listener && L.Listener.follow) {
-      state.waitingForAppReady = true;
-      var ready = function (event) {
-        if (event && event.type === 'ready') {
-          removeReadyListener(ready);
-          startDeferred();
-        }
-      };
-      L.Listener.follow('app', ready);
-      if (window.appready) { removeReadyListener(ready); startDeferred(); }
-    } else {
-      // Native UI is already usable; without the lifecycle API, optional services
-      // are intentionally skipped instead of polling or blocking startup.
-      state.stage = 'deferred-unavailable';
-    }
+    if (readinessActive || state.deferredStartedAt !== null) return;
+    readinessActive = true;
+    state.waitingForAppReady = true;
+    state.stage = 'waiting-for-appready';
+    checkNativeReady();
   }
 
   loadSeries(CRITICAL, 'critical', 0, function () {

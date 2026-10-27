@@ -12,7 +12,8 @@
         var version=new URL(overlayScriptURL||url.href).searchParams.get('v');url.search='';if(version)url.searchParams.set('v',version);script.src=url.href;script.onload=function(){if(!destroyed&&watching){movieRecords.forEach(removeStreams);scheduleMovie();}};
         script.onerror=function(){overlayLoading=false;};document.head.appendChild(script);
     }
-    var style, ready = false, destroyed = false, waiting = false, watching = false, moreButton = null, menuOpen = false, searchNode = null, searchReturn = false, settingsRail = null, settingsFrame = 0, settingsParameter = null, settingsCategory = 'interface', settingsLeftConsumed = false, settingsPrimaryRouting = false, searchSources = null, searchRoots = [];
+    var style, ready = false, destroyed = false, waiting = false, watching = false, nativeWaitTimer = 0, nativeWaitAttempts = 0, moreButton = null, menuOpen = false, searchNode = null, searchReturn = false, settingsRail = null, settingsFrame = 0, settingsParameter = null, settingsCategory = 'interface', settingsLeftConsumed = false, settingsPrimaryRouting = false, searchSources = null, searchRoots = [];
+    var NATIVE_WAIT_MS=100, NATIVE_WAIT_MAX=300;
     var css = `
 body.stremio-hybrid { --sh-bg:#121023; --sh-panel:#211d35; --sh-accent:#9775fa; --sh-muted:#aba7bd; --sh-rail:#0c0b16; --sh-text:#f0eef8; --sh-border:#ffffff16; --sh-radius:.7em; --sh-pill:2em; --sh-gap:1.1em; --sh-speed:160ms; --sh-ring:#9775fa66; --sh-focus:#7960c9; --sh-focus-soft:#3e315b; --sh-header:transparent; --sh-panel-raised:#29233e; --sh-accent-soft:#b79bff; --sh-focus-text:#e9e0ff; --sh-focus-ink:#201536; --sh-inactive:#726d86; --sh-secondary:#d0cadf; --sh-inset:1.8em; --sh-ease:ease-out; background:#121023 !important; color:#f0eef8; }
 body.stremio-hybrid .background { opacity:.12 !important; }
@@ -1533,18 +1534,30 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
     }
     function setEnabled(on) { Lampa.Storage.set('stremio_hybrid_enabled', !!on); apply(!!on); }
     function stopWaiting() {
+        if(nativeWaitTimer){clearTimeout(nativeWaitTimer);nativeWaitTimer=0;}
         document.removeEventListener('DOMContentLoaded', onDOM);
         if (waiting && window.Lampa && Lampa.Listener) Lampa.Listener.remove('app', onApp);
         waiting = false;
     }
     function onApp(event) { if (event && event.type === 'ready') init(); }
-    function onDOM() {
+    function scheduleNativeReadiness() {
+        if(nativeWaitTimer || ready || destroyed)return;
+        nativeWaitTimer=setTimeout(function(){nativeWaitTimer=0;checkNativeReadiness();},NATIVE_WAIT_MS);
+    }
+    function checkNativeReadiness() {
+        if(ready || destroyed)return;
+        nativeWaitAttempts++;
         prepareShell();
-        if (window.appready) init();
-        else if (!waiting && window.Lampa && Lampa.Listener) {
-            Lampa.Listener.follow('app', onApp);
-            waiting = true;
+        if(window.appready && window.Lampa && Lampa.SettingsApi){init();return;}
+        if(window.Lampa && Lampa.Listener && Lampa.Listener.follow && Lampa.Listener.remove && !waiting){
+            try{waiting=true;Lampa.Listener.follow('app',onApp);}
+            catch(e){waiting=false;bootStats.readinessSubscribeFailures=(bootStats.readinessSubscribeFailures||0)+1;}
         }
+        if(nativeWaitAttempts>=NATIVE_WAIT_MAX){bootStats.nativeReadinessTimedOut=true;stopWaiting();return;}
+        scheduleNativeReadiness();
+    }
+    function onDOM() {
+        checkNativeReadiness();
     }
     function init() {
         if (ready || destroyed || !window.Lampa || !Lampa.SettingsApi) return;
@@ -1575,7 +1588,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         openUtilities: openHeaderUtilities,
         setEnabled: setEnabled,
         refresh: function () { if (ready) apply(enabled()); },
-        diagnostics: function () {return {version:UI_VERSION,scriptStartMs:bootStats.scriptStartMs,shellAppliedMs:bootStats.shellAppliedMs,firstShellFrameMs:bootStats.firstShellFrameMs,readyMs:bootStats.readyMs,initCount:bootStats.initCount,styleInsertions:bootStats.styleInsertions,shellTransitions:bootStats.shellTransitions,settingsLoads:bootStats.settingsLoads,settingsMounts:bootStats.settingsMounts,settingsUnmounts:bootStats.settingsUnmounts,settingsFailures:bootStats.settingsFailures,presentationFailures:bootStats.presentationFailures||0};},
+        diagnostics: function () {return {version:UI_VERSION,scriptStartMs:bootStats.scriptStartMs,shellAppliedMs:bootStats.shellAppliedMs,firstShellFrameMs:bootStats.firstShellFrameMs,readyMs:bootStats.readyMs,initCount:bootStats.initCount,styleInsertions:bootStats.styleInsertions,shellTransitions:bootStats.shellTransitions,settingsLoads:bootStats.settingsLoads,settingsMounts:bootStats.settingsMounts,settingsUnmounts:bootStats.settingsUnmounts,settingsFailures:bootStats.settingsFailures,presentationFailures:bootStats.presentationFailures||0,nativeReadinessTimedOut:!!bootStats.nativeReadinessTimedOut,readinessSubscribeFailures:bootStats.readinessSubscribeFailures||0};},
         destroy: function () {
             apply(false);
             removeHeaderUtilitiesSetting();
@@ -1587,7 +1600,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         }
     };
     prepareShell();
-    if (window.appready) init();
+    if (window.appready && window.Lampa && Lampa.SettingsApi) init();
     else {
         onDOM();
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', onDOM);

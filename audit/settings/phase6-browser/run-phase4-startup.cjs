@@ -13,25 +13,39 @@ const root = path.resolve(__dirname, '../../..');
 const origin = 'https://siaivo.isroot.in/';
 const profile = process.env.LAMPA_TEST_CHROMIUM_PROFILE || '/home/gostrimchik/lampa-testing/chromium-profile';
 const version = '20261027-ui-first-1';
+const hybridVersion = '3.0.0-early-shell-phase1';
+const trialCount = Math.max(1, Math.min(3, parseInt(process.env.LAMPA_PHASE4_TRIALS || '3', 10) || 3));
 const assets = [
     'loader.js', 'ui/stremio-hybrid.js', 'ui/settings-hub.js', 'ui/torrent-overlay.js',
-    'ui/interface-plus.js', 'ui/design-optimized.js', 'ui/cardify-plus.js'
+    'ui/interface-plus.js', 'ui/design-optimized.js', 'ui/cardify-plus.js',
+    'trakt/trakt.js', 'trakt/trakt-plus.js', 'providers/torrent-search.js',
+    'media/average-rating.js', 'localization/translate.js'
 ];
 const bytes = Object.fromEntries(assets.map(name => [name, fs.readFileSync(path.join(root, name))]));
 const hashes = Object.fromEntries(assets.map(name => [name, crypto.createHash('sha256').update(bytes[name]).digest('hex')]));
 const commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
+const dirtyAssets = execFileSync('git', ['status', '--porcelain', '--', ...assets], { cwd: root, encoding: 'utf8' }).trim();
+assert.equal(dirtyAssets, '', 'commit allowlisted browser assets before claiming exact commit delivery');
 const pageCount = async () => (await (await fetch('http://127.0.0.1:9222/json/list')).json()).filter(t => t.type === 'page').length;
-const profilePids = () => fs.readdirSync('/proc').filter(n => /^\d+$/.test(n)).filter(n => {
-    try { const c = fs.readFileSync('/proc/' + n + '/cmdline', 'utf8'); return c.includes('--user-data-dir=' + profile) && c.includes('--remote-debugging-port=9222') && !c.includes('--type='); }
-    catch (_) { return false; }
-});
+const profilePids = () => {
+    const rows = execFileSync('ps', ['-eo', 'pid,args'], { encoding: 'utf8' }).split('\n');
+    const pids = [];
+    for (const row of rows) {
+        if (!row.includes('--user-data-dir=' + profile) || !row.includes('--remote-debugging-port=9222') || row.includes('--type=')) continue;
+        const match = row.trim().match(/^(\d+)\s/);
+        if (match) pids.push(match[1]);
+    }
+    return pids;
+};
 
 function safeBrowserMarksSource() {
     return `(() => {
       const m = window.__lampaPhase4Marks = { firstPaint: null, fcp: null, hybridShell: null, homeCards: null, pageErrors: [] };
-      window.addEventListener('error', e => { if (m.pageErrors.length < 20) { const u = e.filename ? new URL(e.filename, location.href) : null; m.pageErrors.push({ name: e.error && e.error.name || 'Error', source: u ? u.origin + u.pathname : '', line: e.lineno || 0 }); } });
+      const onError = e => { if (m.pageErrors.length < 20) { const u = e.filename ? new URL(e.filename, location.href) : null; m.pageErrors.push({ name: e.error && e.error.name || 'Error', source: u ? u.origin + u.pathname : '', line: e.lineno || 0 }); } };
+      window.addEventListener('error', onError);
       const recordPaint = entries => entries.getEntries().forEach(e => { if (e.name === 'first-paint' && m.firstPaint === null) m.firstPaint = e.startTime; if (e.name === 'first-contentful-paint' && m.fcp === null) m.fcp = e.startTime; });
-      try { new PerformanceObserver(recordPaint).observe({ type: 'paint', buffered: true }); } catch (_) {}
+      let paintObserver = null;
+      try { paintObserver = new PerformanceObserver(recordPaint); paintObserver.observe({ type: 'paint', buffered: true }); } catch (_) {}
       const inspect = () => {
         if (document.body && document.body.classList.contains('stremio-hybrid') && m.hybridShell === null) m.hybridShell = performance.now();
         const card = document.querySelector('.ydesign-vertical');
@@ -40,19 +54,21 @@ function safeBrowserMarksSource() {
       };
       let observer = null;
       try { observer = new MutationObserver(inspect); observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] }); } catch (_) {}
-      window.__lampaPhase4StopMarks = () => { if (observer) observer.disconnect(); clearTimeout(window.__lampaPhase4MarkTimer); };
-      document.addEventListener('DOMContentLoaded', inspect, { once: true });
+      const onDom = () => inspect();
+      window.__lampaPhase4StopMarks = () => { if (observer) observer.disconnect(); if (paintObserver) paintObserver.disconnect(); window.removeEventListener('error', onError); document.removeEventListener('DOMContentLoaded', onDom); clearTimeout(window.__lampaPhase4MarkTimer); };
+      document.addEventListener('DOMContentLoaded', onDom, { once: true });
       inspect();
       window.__lampaPhase4MarkTimer = setTimeout(() => { if (observer) observer.disconnect(); }, 45000);
     })();`;
 }
 
 (async () => {
-    let browser, page, cdp, marksScriptId, listScriptId, routeHandler;
-    const routes = [], blocked = { traktApi: 0, traktAuth: 0, duplicateUi: 0 };
+    let browser, page, cdp, marksScriptId, listScriptId, routeHandler, pageConsoleHandler, pageErrorHandler, resultsToWrite, finalUi;
+    let originalPageCount = 0, originalViewport, targetId = null;
+    const routes = [], blocked = { traktApi: 0, traktAuth: 0, duplicateOwnModules: 0 };
     const consoleErrors = [], pageErrors = [];
     const startSamples = { baseline: [], optimized: [] };
-    const originalPageCount = await pageCount();
+    originalPageCount = await pageCount();
     const pidsBefore = profilePids();
     assert.equal(pidsBefore.length, 1, 'must attach to the one dedicated Chromium process');
     assert.equal(originalPageCount > 0, true, 'CDP must expose the existing pages');
@@ -63,8 +79,8 @@ function safeBrowserMarksSource() {
         page = pages[0];
         const targetBefore = (await (await fetch('http://127.0.0.1:9222/json/list')).json()).find(t => t.type === 'page' && t.url.startsWith(origin));
         assert(targetBefore, 'existing Lampa target must be present');
-        const targetId = targetBefore.id;
-        const originalViewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight, dpr: devicePixelRatio }));
+        targetId = targetBefore.id;
+        originalViewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight, dpr: devicePixelRatio }));
         startSamples.baseline.push(await page.evaluate(() => {
             const d = window.StremioHybrid?.diagnostics?.() || {}, paints = performance.getEntriesByType('paint');
             const paint = name => paints.find(entry => entry.name === name)?.startTime ?? null;
@@ -74,8 +90,12 @@ function safeBrowserMarksSource() {
                 appready: !!window.appready, previewModuleCount: window.LampaPhase6ModuleReport?.modules?.length || 0,
                 loaderStarted: !!window.LampaLoaderStarted, hybrid: !!window.StremioHybrid, verticalCards: document.querySelectorAll('.ydesign-vertical').length };
         }));
-        page.on('console', message => { if (message.type() === 'error') { const location=message.location();let source='unknown';try{const u=new URL(location.url);source=u.origin+u.pathname;}catch(_){}consoleErrors.push({kind:'console.error',source,line:location.lineNumber||0}); } });
-        page.on('pageerror', error => { let source='unknown',line=0;const match=String(error.stack||'').match(/(https?:\/\/[^\s)]+):(\d+):(\d+)/);if(match){try{const u=new URL(match[1]);source=u.origin+u.pathname;line=Number(match[2])||0;}catch(_){}}pageErrors.push({name:error.name||'Error',source,line}); });
+        pageConsoleHandler = message => { if (message.type() === 'error') { const location=message.location();let source='unknown';try{const u=new URL(location.url);source=u.origin+u.pathname;}catch(_){}consoleErrors.push({kind:'console.error',source,line:location.lineNumber||0}); } };
+        pageErrorHandler = error => { let source='unknown',line=0;const match=String(error.stack||'').match(/(https?:\/\/[^\s)]+):(\d+):(\d+)/);if(match){try{const u=new URL(match[1]);source=u.origin+u.pathname;line=Number(match[2])||0;}catch(_){}}pageErrors.push({name:error.name||'Error',source,line}); };
+        page.on('console', pageConsoleHandler);
+        page.on('pageerror', pageErrorHandler);
+        // This is a scoped CDP session on the already-open page, never a new
+        // browser context or target.
         cdp = await page.context().newCDPSession(page);
         await cdp.send('Page.enable');
         const init = await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: safeBrowserMarksSource() });
@@ -93,20 +113,21 @@ function safeBrowserMarksSource() {
                 const local = url.hostname === '127.0.0.1' && url.port === '8766';
                 let name = null;
                 if (local && url.pathname.endsWith('/preview-loader.js')) name = 'loader.js';
-                else if (local && /\/(stremio-hybrid|interface-plus|design-optimized|cardify-plus)\.js$/.test(url.pathname)) {
-                    blocked.duplicateUi++;
+                else if (local && /\/(stremio-hybrid|interface-plus|design-optimized|cardify-plus|torrent-search|average-rating|translate|trakt|trakt-plus)\.js$/.test(url.pathname)) {
+                    blocked.duplicateOwnModules++;
                     return route.abort('blockedbyclient');
                 }
                 else if (url.origin === 'https://gorlim590.github.io' && url.pathname.startsWith('/lampa/')) name = url.pathname.slice('/lampa/'.length);
                 if (name && Object.prototype.hasOwnProperty.call(bytes, name)) {
                     const isEntrypoint = name === 'loader.js';
-                    const correctVersion = isEntrypoint || url.searchParams.get('v') === version;
+                    const expectedVersion = name === 'ui/settings-hub.js' ? hybridVersion : version;
+                    const correctVersion = isEntrypoint || url.searchParams.get('v') === expectedVersion;
                     if (correctVersion) {
                         routes.push({ url: url.origin + url.pathname, source: name, sha256: hashes[name] });
                         return route.fulfill({ status: 200, body: bytes[name], contentType: 'application/javascript; charset=utf-8', headers: { 'Cache-Control': 'no-store', 'X-Lampa-Phase4-SHA256': hashes[name] } });
                     }
-                    if (/^ui\/(stremio-hybrid|interface-plus|design-optimized|cardify-plus)\.js$/.test(name)) {
-                        blocked.duplicateUi++;
+                    if (/^(ui\/(stremio-hybrid|settings-hub|torrent-overlay|interface-plus|design-optimized|cardify-plus)|trakt\/(trakt|trakt-plus)|providers\/torrent-search|media\/average-rating|localization\/translate)\.js$/.test(name)) {
+                        blocked.duplicateOwnModules++;
                         return route.abort('blockedbyclient');
                     }
                 }
@@ -138,8 +159,20 @@ function safeBrowserMarksSource() {
                     cards: document.querySelectorAll('.ydesign-vertical').length, uaBadges: document.querySelectorAll('.ydesign-badge-ua').length,
                     hybridStyles: document.querySelectorAll('#stremio-hybrid-style').length, hybrid: !!window.StremioHybrid,
                     hub: !!window.LampaSettingsHub, cardifySettings: (window.Lampa?.SettingsApi?.getParam('cardify') || []).length,
+                    activeModules: { traktCore: !!window.TraktTV, traktPlus: !!window.trakt_plus_ready, torrentSearch: !!window.LampaTorrentSearch, averageRating: !!window.lampa_omdb_plugin_loaded, localization: !!window.YTranslateLoaded },
                     resources };
             });
+            if (variant === 'optimized') {
+                await page.waitForFunction(() => window.LampaLoaderDiagnostics && window.LampaLoaderDiagnostics.stage === 'complete', null, { timeout: 90000 });
+                row.deferredCompleteMs = await page.evaluate(() => performance.now());
+                row.loaderFailed = await page.evaluate(() => window.LampaLoaderDiagnostics.failed);
+                row.loaderRequested = await page.evaluate(() => window.LampaLoaderDiagnostics.requested);
+                row.activeModules = await page.evaluate(() => ({ traktCore: !!window.TraktTV, traktPlus: !!window.trakt_plus_ready, torrentSearch: !!window.LampaTorrentSearch, averageRating: !!window.lampa_omdb_plugin_loaded, localization: !!window.YTranslateLoaded, cardifySettings: (window.Lampa?.SettingsApi?.getParam('cardify') || []).length }));
+                assert.equal(row.loaderRequested, 9, 'critical UI plus all six standard deferred plugins were requested');
+                assert.equal(row.loaderFailed, 0, 'standard configuration scripts all completed');
+                assert.deepEqual(row.activeModules, { traktCore: true, traktPlus: true, torrentSearch: true, averageRating: true, localization: true, cardifySettings: row.activeModules.cardifySettings });
+                assert(row.activeModules.cardifySettings > 0, 'Cardify+ settings registered');
+            }
             row.wallToReadyMs = Date.now() - began;
             startSamples[variant].push(row);
             return row;
@@ -148,15 +181,18 @@ function safeBrowserMarksSource() {
         // Keep these bounded and in the same tab. Baseline is the currently
         // installed local preview manifest; optimized is the branch loader routed
         // to the exact checked-out allowlist. No cache/profile clearing occurs.
-        listScriptId = (await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: "window.LAMPA_PLUGINS_LIST = ['ui/cardify-plus.js'];" })).identifier;
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < trialCount; i++) await sample('baseline');
+        // This is the complete documented default deferred graph, held in memory
+        // for the optimized branch only. It intentionally bypasses personal Storage.
+        listScriptId = (await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: "window.LAMPA_PLUGINS_LIST = ['trakt/trakt.js','trakt/trakt-plus.js','providers/torrent-search.js','media/average-rating.js','ui/cardify-plus.js','localization/translate.js'];" })).identifier;
+        for (let i = 0; i < trialCount; i++) {
             const row = await sample('optimized');
             if (row.cards === 0) break;
         }
         await cdp.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: listScriptId });
         listScriptId = null;
 
-        const finalUi = await page.evaluate(() => ({
+        finalUi = await page.evaluate(() => ({
             viewport: { width: innerWidth, height: innerHeight, dpr: devicePixelRatio },
             bodyClasses: [...document.body.classList].filter(c => /^(stremio-hybrid|ydesign-active|orientation--portrait)$/.test(c)),
             controller: window.Lampa?.Controller?.enabled?.()?.name || '',
@@ -272,8 +308,9 @@ function safeBrowserMarksSource() {
         assert.equal(profilePids().length, 1, 'the original dedicated Chromium process remains alive');
         assert.deepEqual(await page.evaluate(() => ({ width: innerWidth, height: innerHeight, dpr: devicePixelRatio })), originalViewport, 'the original viewport is preserved');
 
-        const results = {
+        resultsToWrite = {
             testedCommit: commit,
+            testedAssets: hashes,
             mode: 'existing dedicated Chromium; warm reloads only; no storage clearing',
             viewport: originalViewport,
             baseline: startSamples.baseline,
@@ -290,18 +327,35 @@ function safeBrowserMarksSource() {
             dpad: { status: dpadMoved ? 'PASS' : 'PARTIAL', focusRestored: dpadMoved ? JSON.stringify(await focusState()).includes(JSON.stringify(beforeFocus.focus)) : false, before: beforeFocus, after: afterFocus },
             browserSurvival: { matchingProfileProcesses: profilePids().length, pageCount: await pageCount(), sameTarget: !!targetAfter }
         };
-        fs.writeFileSync(path.join(__dirname, 'phase4-browser-results.json'), JSON.stringify(results, null, 2) + '\n');
-        console.log(JSON.stringify({ ok: true, baselineRuns: results.baseline.length, optimizedRuns: results.optimized.length,
-            browserSurvival: results.browserSurvival, finalUi, blocked, routeAssetCount: routes.length,
-            median: { baselineHybridMs: median(results.baseline.map(r => r.hybridShellMs)), optimizedHybridMs: median(results.optimized.map(r => r.hybridShellMs)), baselineCardsMs: median(results.baseline.map(r => r.homeCardsMs)), optimizedCardsMs: median(results.optimized.map(r => r.homeCardsMs)) } }, null, 2));
     } finally {
-        if (page && routeHandler) await page.unroute('**/*', routeHandler).catch(error => { console.error('route_cleanup_failed', error.name); });
-        if (page) await page.evaluate(() => { if (window.__lampaPhase4StopMarks) window.__lampaPhase4StopMarks(); clearTimeout(window.__lampaPhase4MarkTimer); delete window.__lampaPhase4Marks; delete window.__lampaPhase4StopMarks; delete window.__lampaPhase4MarkTimer; }).catch(error => { console.error('marks_cleanup_failed', error.name); });
-        if (cdp && marksScriptId) await cdp.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: marksScriptId }).catch(error => { console.error('marks_script_cleanup_failed', error.name); });
-        if (cdp && listScriptId) await cdp.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: listScriptId }).catch(error => { console.error('list_script_cleanup_failed', error.name); });
-        if (cdp) await cdp.detach().catch(error => { console.error('cdp_detach_failed', error.name); });
-        // Deliberately never call browser.close(): CDP owns a user-visible process.
+        const cleanupFailures = [];
+        async function cleanup(label, action) { try { await action(); } catch (error) { cleanupFailures.push(label + ':' + error.name); } }
+        if (page && pageConsoleHandler) await cleanup('console_listener', () => page.off('console', pageConsoleHandler));
+        if (page && pageErrorHandler) await cleanup('page_error_listener', () => page.off('pageerror', pageErrorHandler));
+        if (page && routeHandler) await cleanup('route', () => page.unroute('**/*', routeHandler));
+        if (page) await cleanup('marks', () => page.evaluate(() => { if (window.__lampaPhase4StopMarks) window.__lampaPhase4StopMarks(); clearTimeout(window.__lampaPhase4MarkTimer); delete window.__lampaPhase4Marks; delete window.__lampaPhase4StopMarks; delete window.__lampaPhase4MarkTimer; }));
+        if (cdp && marksScriptId) await cleanup('marks_script', () => cdp.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: marksScriptId }));
+        if (cdp && listScriptId) await cleanup('list_script', () => cdp.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: listScriptId }));
+        if (cdp) await cleanup('cdp_detach', () => cdp.detach());
+        // Only detach the page CDP session; preserve the existing browser process and tab.
+        if (page) {
+            await cleanup('same_target', async () => {
+                const targets = await (await fetch('http://127.0.0.1:9222/json/list')).json();
+                if (!targets.some(t => t.type === 'page' && t.id === targetId)) throw new Error('original page target missing');
+                if (await pageCount() !== originalPageCount) throw new Error('page count changed');
+            });
+            await cleanup('browser_process', async () => { if (profilePids().length !== 1) throw new Error('dedicated browser process missing or duplicated'); });
+        }
+        if (cleanupFailures.length) throw new Error('browser cleanup failed: ' + cleanupFailures.join(', '));
     }
+    if (!resultsToWrite) throw new Error('browser run produced no result');
+    resultsToWrite.browserSurvival = { matchingProfileProcesses: profilePids().length, pageCount: await pageCount(), sameTarget: true };
+    assert.equal(resultsToWrite.browserSurvival.matchingProfileProcesses, 1, 'dedicated Chromium process survives cleanup');
+    assert.equal(resultsToWrite.browserSurvival.pageCount, originalPageCount, 'existing tab count is preserved');
+    fs.writeFileSync(path.join(__dirname, 'phase4-browser-results.json'), JSON.stringify(resultsToWrite, null, 2) + '\n');
+    console.log(JSON.stringify({ ok: true, baselineRuns: resultsToWrite.baseline.length, optimizedRuns: resultsToWrite.optimized.length,
+        browserSurvival: resultsToWrite.browserSurvival, finalUi, blocked, routeAssetCount: routes.length,
+        median: { baselineHybridMs: median(resultsToWrite.baseline.map(r => r.hybridShellMs)), optimizedHybridMs: median(resultsToWrite.optimized.map(r => r.hybridShellMs)), baselineCardsMs: median(resultsToWrite.baseline.map(r => r.homeCardsMs)), optimizedCardsMs: median(resultsToWrite.optimized.map(r => r.homeCardsMs)) } }, null, 2));
 })().catch(error => { console.error('phase4_browser_failed', error.name, error.message); process.exitCode = 1; });
 
 function median(values) {

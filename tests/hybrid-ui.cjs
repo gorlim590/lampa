@@ -16,6 +16,29 @@ test('theme cleanup removes the exact action/handler and reactivation is collaps
 test('description state is owned by one detail instance, not shared by media type',()=>{const f=fixture(),other={root:f.root};f.context.setupDescription(f.record,f.description);f.context.setupDescription(other,f.description);f.handlers.get(f.record.descriptionToggle)();assert.equal(other.descriptionToggle.getAttribute('aria-expanded'),'false');});
 test('profile Select never inherits the focused torrent filter surface',()=>{let cleared=0;const context={menuOpen:true,clearStreamSelect:()=>cleared++};vm.createContext(context);vm.runInContext(source.slice(source.indexOf('    function onStreamSelect('),source.indexOf('    function setupStreamTools(')),context);context.onStreamSelect({});assert.equal(cleared,1);});
 
+function nativeReadinessFixture(max=3){
+ const timers=new Map(),listeners=[];let id=0,prepared=0,removed=0;
+ const context={window:{appready:false},ready:false,destroyed:false,waiting:false,nativeWaitTimer:0,nativeWaitAttempts:0,NATIVE_WAIT_MS:100,NATIVE_WAIT_MAX:max,bootStats:{},document:{removeEventListener(){},addEventListener(){}},setTimeout(fn,ms){const key=++id;timers.set(key,{fn,ms});return key;},clearTimeout(key){timers.delete(key);},prepareShell(){prepared++;},init(){context.ready=true;context.stopWaiting();}};
+ Object.defineProperty(context,'Lampa',{get(){return context.window.Lampa;}});
+ vm.createContext(context);vm.runInContext(source.slice(source.indexOf('    function stopWaiting()'),source.indexOf('    function init()')),context);
+ return{context,timers,listeners,prepared:()=>prepared,removed:()=>removed,install(){context.window.Lampa={SettingsApi:{},Listener:{follow(name,fn){listeners.push({name,fn});},remove(name,fn){removed++;const i=listeners.findIndex(x=>x.name===name&&x.fn===fn);if(i>=0)listeners.splice(i,1);}},Storage:{get(){return true;}}};},tick(){const entry=[...timers.entries()][0];assert(entry,'Expected one pending bounded readiness timer');timers.delete(entry[0]);entry[1].fn();}};
+}
+
+test('Hybrid loaded before Lampa API recovers after DOM readiness and subscribes once',()=>{
+ const f=nativeReadinessFixture();f.context.checkNativeReadiness();
+ assert.equal(f.context.ready,false);assert.equal(f.prepared(),1);assert.equal(f.timers.size,1);
+ f.install();f.tick();
+ assert.equal(f.listeners.length,1);assert.equal(f.context.waiting,true);assert.equal(f.timers.size,1);
+ f.context.window.appready=true;f.listeners[0].fn({type:'ready'});
+ assert.equal(f.context.ready,true);assert.equal(f.removed(),1);assert.equal(f.timers.size,0);
+ f.context.checkNativeReadiness();assert.equal(f.listeners.length,0,'readiness completion cannot subscribe again');
+});
+
+test('Hybrid late native API wait terminates at its configured bound',()=>{
+ const f=nativeReadinessFixture(2);f.context.checkNativeReadiness();f.tick();
+ assert.equal(f.context.bootStats.nativeReadinessTimedOut,true);assert.equal(f.context.nativeWaitTimer,0);assert.equal(f.timers.size,0);
+});
+
 test('a replaced action bar releases its detached handler before rebuilding',()=>{const f=fixture();f.context.setupDescription(f.record,f.description);const old=f.record.descriptionToggle;old.isConnected=false;f.context.setupDescription(f.record,f.description);assert.notEqual(f.record.descriptionToggle,old);assert(!f.handlers.has(old));assert.equal(f.handlers.size,1);assert.equal(f.record.descriptionToggle.getAttribute('aria-expanded'),'false');});
 
 function focusFixture(){const torrent={classList:{contains:x=>x==='view--torrent'}},other={classList:{contains:()=>false}},root={current:null,querySelector(){return this.current},contains:n=>[torrent,other].includes(n)},link={last:null},controller={name:'full_start',controller:{link}},calls=[],c={Lampa:{Controller:{enabled:()=>controller,collectionSet(){},collectionFocus:n=>{calls.push(n);root.current=n}}}};vm.createContext(c);vm.runInContext(source.slice(source.indexOf('    function focusMovieActions('),source.indexOf('    function movieButtonFocus(')),c);return{c,root,link,controller,calls,torrent,other,record:{root}};}

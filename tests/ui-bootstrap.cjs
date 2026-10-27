@@ -2,7 +2,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const source=fs.readFileSync(__dirname+'/../ui/stremio-hybrid.js','utf8');
 function fixture(value=true,full=false,primaryValue=false){
- const nodes=[],classes=new Set(),events={},native=[],params=[],writes=[],frames=new Map(),counts={setup:0,remove:0,avatar:0};let clock=0;
+ const nodes=[],classes=new Set(),events={},native=[],params=[],writes=[],frames=new Map(),timers=new Map(),counts={setup:0,remove:0,avatar:0};let clock=0,timerId=0;
  const doc={readyState:'complete',currentScript:{src:'https://example.org/ui/stremio-hybrid.js?private=fixture'},
   body:{classList:{contains:n=>classes.has(n),toggle:(n,on)=>on?classes.add(n):classes.delete(n)}},
   head:{appendChild:n=>{nodes.push(n);n.isConnected=true;}},getElementById:id=>nodes.find(n=>n.id===id)||null,
@@ -10,7 +10,7 @@ function fixture(value=true,full=false,primaryValue=false){
   addEventListener:(name,fn)=>events[name]=fn,removeEventListener:name=>delete events[name]};
  const L={Storage:{get:key=>key==='stremio_hybrid_enabled'?value:key==='stremio_hybrid_primary_settings'?primaryValue:false,set:(key,v)=>{writes.push([key,v]);if(key==='stremio_hybrid_enabled')value=v;else if(key==='stremio_hybrid_primary_settings')primaryValue=v;}},
   SettingsApi:{getParam:()=>params,addParam:p=>params.push(p)},Listener:{follow:(name,fn)=>native.push(fn),remove:(name,fn)=>{const i=native.indexOf(fn);if(i>=0)native.splice(i,1);}}};
- const c={URL,document:doc,Lampa:L,window:{appready:false,Lampa:L,performance:{now:()=>++clock}},$:()=>{},UI_VERSION:'fixture-v1',css:'fixture-css',style:null,ready:false,destroyed:false,waiting:false,watching:false,shellFrame:0,requestAnimationFrame:fn=>{const id=frames.size+1;frames.set(id,fn);return id;},cancelAnimationFrame:id=>frames.delete(id),
+ const c={URL,document:doc,Lampa:L,window:{appready:false,Lampa:L,performance:{now:()=>++clock}},$:()=>{},setTimeout:(fn,ms)=>{const id=++timerId;timers.set(id,{fn,ms});return id;},clearTimeout:id=>timers.delete(id),nativeWaitTimer:0,nativeWaitAttempts:0,NATIVE_WAIT_MS:100,NATIVE_WAIT_MAX:300,UI_VERSION:'fixture-v1',css:'fixture-css',style:null,ready:false,destroyed:false,waiting:false,watching:false,shellFrame:0,requestAnimationFrame:fn=>{const id=frames.size+1;frames.set(id,fn);return id;},cancelAnimationFrame:id=>frames.delete(id),
   bootStats:{scriptStartMs:0,shellAppliedMs:null,firstShellFrameMs:null,readyMs:null,initCount:0,styleInsertions:0,shellTransitions:0,settingsLoads:0,settingsMounts:0,settingsUnmounts:0,settingsFailures:0},settingsHub:null,settingsScript:null,settingsLoading:false,settingsAttempted:false,settingsFailedApi:null,
   overlayScriptURL:doc.currentScript.src,setupUI:()=>{counts.setup++;c.watching=true;},removeUI:()=>{counts.remove++;c.watching=false;},updateAvatar:()=>counts.avatar++,onHeaderUtilitiesSetting:()=>{},removeHeaderUtilitiesSetting:()=>{},openHeaderUtilities:()=>{},backdropResume:null,movieBrands:[],movieEnglish:[],paletteCache:[]};
  vm.createContext(c);
@@ -19,7 +19,7 @@ function fixture(value=true,full=false,primaryValue=false){
   const start=source.indexOf('    function enabled()'),end=source.indexOf('    window.StremioHybrid = {');
   vm.runInContext(source.slice(start,end),c);vm.runInContext(source.slice(end,source.lastIndexOf('})();')),c);
  }
- return {c,doc,L,nodes,classes,events,native,params,writes,counts,frames,ready(){c.window.appready=true;const cb=native[0];assert(cb);cb({type:'ready'});return cb;}};
+ return {c,doc,L,nodes,classes,events,native,params,writes,counts,frames,timers,ready(){c.window.appready=true;const cb=native[0];assert(cb);cb({type:'ready'});return cb;}};
 }
 test('Actual entrypoint paints static shell before appready without functional controller or metadata APIs',()=>{
  const f=fixture(true,true);assert(f.classes.has('stremio-hybrid'));assert.equal(f.nodes.length,1);assert.equal(f.nodes[0].id,'stremio-hybrid-style');assert(f.nodes[0].textContent.includes('settings-hub-active'));assert.equal(f.params.length,0);assert.equal(f.writes.length,0);assert.equal(f.native.length,1);assert.equal(f.c.window.StremioHybrid.diagnostics().initCount,0);
