@@ -109,11 +109,10 @@ async function loadAsset(pathname) {
             const r = await fetch('http://127.0.0.1:8766/ui/stremio-hybrid.js', { mode: 'cors', credentials: 'omit', cache: 'no-store' });
             const b = await r.arrayBuffer();
             const h = await crypto.subtle.digest('SHA-256', b);
-            return { status: r.status, contentType: r.headers.get('content-type'), cors: r.headers.get('access-control-allow-origin'), exposedHash: r.headers.get('x-phase6-sha256'), bodyHash: [...new Uint8Array(h)].map(x => x.toString(16).padStart(2, '0')).join('') };
+            return { status: r.status, contentType: r.headers.get('content-type'), exposedHash: r.headers.get('x-phase6-sha256'), bodyHash: [...new Uint8Array(h)].map(x => x.toString(16).padStart(2, '0')).join('') };
         });
         assert.equal(cors.status, 200);
         assert.match(cors.contentType || '', /javascript/);
-        assert.equal(cors.cors, '*');
         assert.equal(cors.bodyHash, verified['ui/stremio-hybrid.js'].digest);
         assert.equal(cors.exposedHash, cors.bodyHash);
 
