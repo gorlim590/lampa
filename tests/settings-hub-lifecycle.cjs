@@ -2,21 +2,21 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 function fixture(){
  delete require.cache[require.resolve('../ui/settings-hub.js')];const hub=require('../ui/settings-hub.js');
- const components={},params={},templates={},listeners={},styles=[],warnings=[],classes=new Set();let items=[],nativeFolders=[],enabled={name:'settings',controller:{}},focused=null,destroyed=0,creates=0;
+ const components={},params={},templates={},listeners={},styles=[],warnings=[],classes=new Set();let items=[],nativeFolders=[],editRequest=null,enabled={name:'settings',controller:{}},focused=null,destroyed=0,creates=0;
  const bodyNode={},rootNode={attrs:{},setAttribute(k,v){this.attrs[k]=v;}};
  function wrap(nodes){if(!Array.isArray(nodes))nodes=[nodes];const out={length:nodes.length,toArray:()=>nodes,detach:()=>out,remove:()=>out,
   find(selector){if(selector==='.settings__body')return wrap(bodyNode);if(selector==='.settings-folder[data-component]')return wrap(nativeFolders);if(selector==='[data-name]'||selector==='.settings-param.selector')return wrap(items);if(selector==='.settings-param__name')return {text:()=>nodes[0]?.label||''};return wrap([]);},
   filter(fn){return wrap(nodes.filter(n=>fn.call(n)));},first(){return wrap(nodes.slice(0,1));},on(event,fn){nodes.forEach(n=>n.enter=fn);return out;},trigger(event){if(event==='hover:focus')nodes.forEach(n=>n.scrollFocused=true);else nodes[0]?.enter?.();return out;}};
  nodes.forEach((n,i)=>out[i]=n);return out;}
  const $=wrap,L={Template:{add:(name,html)=>templates[name]=html,get:name=>templates[name]||'<div></div>'},SettingsApi:{allParams:()=>params,allComponents:()=>components,addComponent:d=>{components[d.component]=d;templates['settings_'+d.component]='<div></div>';},addParam:d=>(params[d.component]||=[]).push(d),removeParams:id=>delete params[id],removeComponent:id=>{delete components[id];delete params[id];}},Settings:{main:()=>({render:()=>wrap({})}),render:()=>wrap(rootNode),listener:{follow:(event,fn)=>(listeners[event]||=[]).push(fn),remove:(event,fn)=>{listeners[event]=(listeners[event]||[]).filter(x=>x!==fn);}},
-  create(name,options={}){creates++;let dead=false;items=(params[name]||[]).map(def=>{const item={label:def.field.name,key:def.param.name,getAttribute:k=>k==='data-name'?def.param.name:null};def.onRender?.(wrap(item));return item;});
+  create(name,options={}){creates++;let dead=false;items=(params[name]||[]).map(def=>{const item={label:def.field.name,description:def.field.description,key:def.param.name,getAttribute:k=>k==='data-name'?def.param.name:null};def.onRender?.(wrap(item));return item;});
    const controller={back(){assert(!dead,'native component destroyed twice');dead=true;destroyed++;items=[];if(options.onBack)options.onBack();else L.Controller.toggle('settings');}};
    // Mirrors native order: build controller, send open, then toggle component.
    enabled={name:'settings_component',controller};(listeners.open||[]).forEach(fn=>fn({name,body:wrap(bodyNode),params:options}));
-  }},Controller:{enabled:()=>enabled,collectionFocus:node=>focused=node,toggle:name=>{enabled={name,controller:{}};}},Input:{edit(){}},Noty:{show:message=>warnings.push(message)},Storage:{get(){throw Error('Unexpected preference read');},set(){throw Error('Unexpected preference write');}}};
+  }},Controller:{enabled:()=>enabled,collectionFocus:node=>focused=node,toggle:name=>{enabled={name,controller:{}};}},Input:{edit:(options,callback)=>editRequest={options,callback}},Noty:{show:message=>warnings.push(message)},Storage:{get(){throw Error('Unexpected preference read');},set(){throw Error('Unexpected preference write');}}};
  const doc={body:{classList:{add:x=>classes.add(x),remove:x=>classes.delete(x),contains:x=>classes.has(x)}},head:{appendChild:n=>styles.push(n)},createElement:()=>({})};
  function addFolder(id,options={}){const attrs={'data-component':id},hidden=new Set();if(options.hidden)hidden.add('hidden');const node={style:{display:options.display||''},getAttribute:key=>attrs[key]||null,setAttribute:(key,value)=>attrs[key]=value,removeAttribute:key=>delete attrs[key],classList:{contains:key=>hidden.has(key)},enter:options.enter||(()=>{})};nativeFolders.push(node);return node;}
- return {hub,L,$,doc,params,listeners,styles,warnings,classes,rootNode,addFolder,open:()=>L.Settings.create('settings_hub'),openMain:()=>L.Settings.create('main'),
+ return {hub,L,$,doc,params,templates,listeners,styles,warnings,classes,rootNode,addFolder,open:()=>L.Settings.create('settings_hub'),openMain:()=>L.Settings.create('main'),search:value=>{assert(editRequest,'Search input was not opened');editRequest.callback(value);return editRequest;},searchOptions:()=>editRequest&&editRequest.options,
   enter(key){const item=items.find(n=>n.key===key);assert(item,'Missing navigation row '+key);item.enter();},back:()=>enabled.controller.back(),items:()=>items,focus:()=>focused,stats:()=>({destroyed,creates})};
 }
 test('Hub delegates native owner Back once and restores the selected row/category without re-registering business handlers',()=>{
@@ -66,6 +66,20 @@ test('Paging bounds rendered links, discovers late registrations and does not du
  f.back();f.params.ydesign.push({param:{name:'late',type:'select'},field:{name:'Новий'}});f.enter('hub_category_appearance');f.enter('hub_next');f.enter('hub_next');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,18);
  assert.equal(f.hub.install(f.L,f.$,f.doc),false);assert.equal(f.styles.length,0);assert.equal(f.listeners.open.length,1);assert.equal(f.listeners.close.length,1);
  f.listeners.close[0]();assert.equal(f.hub.owns('ydesign'),false);assert(!f.classes.has('settings-hub-active'));
+});
+test('Search is global, case-insensitive, metadata-only, deduplicated, and preserves query and result focus on owner Back',()=>{
+ const f=fixture();f.params.ydesign=[{param:{name:'rating_card_mode',type:'select'},field:{name:'Режим карток'}}];
+ f.templates.settings_ydesign='<div class="settings-param selector" data-name="rating_card_mode" data-type="select"><div class="settings-param__name">Режим карток</div></div>';
+ f.hub.install(f.L,f.$,f.doc);f.open();assert.equal(f.items().filter(x=>x.key==='hub_problems').length,0,'No problem shortcut without evidence');
+ assert.match(f.items().find(x=>x.key==='hub_category_appearance').description,/1 доступних/);
+ f.enter('hub_search');f.search('DESIGN-OPTIMIZED');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,1,'Template and SettingsApi duplicates render once');
+ assert.match(f.items().find(x=>x.key==='hub_item_0').description,/Зовнішній вигляд · ui\/design-optimized\.js · Не перевірено/);
+ f.enter('hub_search');assert.equal(f.searchOptions().value,'DESIGN-OPTIMIZED');f.search('YDESIGN');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,1);
+ f.enter('hub_search');f.search('RATING_CARD_MODE');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,1);
+ f.enter('hub_item_0');f.back();assert.equal(f.focus().key,'hub_item_0','Back restores focus to the same search result');f.enter('hub_search');assert.equal(f.searchOptions().value,'RATING_CARD_MODE','Owner Back preserves the query');
+ f.search('РЕЖИМ КАРТОК');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,1,'Visible Ukrainian labels are searched case-insensitively');
+ f.enter('hub_search');f.search('no-such-option');assert.equal(f.items().find(x=>x.key==='hub_empty').label,'За цим запитом нічого не знайдено');
+ f.enter('hub_back');assert.equal(f.focus().key,'hub_search');
 });
 test('Unsafe credential owner is never opened from the index and native fallback remains available',()=>{
  const f=fixture();f.params.omdb_config_ui=[{param:{name:'omdb_api_key_set',type:'static'},field:{name:'Ключ'}}];f.hub.install(f.L,f.$,f.doc);f.open();f.enter('hub_problems');const before=f.stats().creates;f.enter('hub_item_0');assert.equal(f.stats().creates,before);assert.equal(f.warnings.length,1);
@@ -137,4 +151,10 @@ test('Hub hides only known direct owner folders while active and restores every 
  f.enter('hub_native');assert.equal(safe.getAttribute('data-settings-hub-consolidated'),null,'Standard Settings immediately restores consolidated folders');
  f.open();assert.equal(safe.getAttribute('data-settings-hub-consolidated'),'true');f.hub.destroy();
  assert.equal(safe.getAttribute('data-settings-hub-consolidated'),null,'Destroy restores the original folder');
+});
+test('A native owner panel failure restores consolidated folders and the native Settings route',()=>{
+ const f=fixture(),safe=f.addFolder('ydesign');f.params.ydesign=[{param:{name:'card_size',type:'select'},field:{name:'Розмір картки'}}];
+ f.hub.install(f.L,f.$,f.doc);f.open();f.enter('hub_category_appearance');const create=f.L.Settings.create;
+ f.L.Settings.create=(name,options)=>{if(name==='ydesign')throw Error('fixture owner delivery failure');return create(name,options);};
+ f.enter('hub_item_0');assert.equal(f.L.Controller.enabled().name,'settings');assert.equal(safe.getAttribute('data-settings-hub-consolidated'),null);assert(!f.classes.has('settings-hub-active'));assert.match(f.warnings.at(-1),/стандартними налаштуваннями/);
 });
