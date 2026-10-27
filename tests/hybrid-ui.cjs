@@ -50,6 +50,19 @@ test('synopsis presentation has no copied selectors, tabindex, click handlers or
 test('primary action row retains native scrolling after description action moves below the synopsis',()=>{const button={classList:{contains:()=>false},getAttribute:()=>null,textContent:'Онлайн',getBoundingClientRect:()=>({left:270,right:410})},row={scrollLeft:0,contains:()=>true,setAttribute(){},getBoundingClientRect:()=>({left:0,right:300})},c={};vm.createContext(c);vm.runInContext(source.slice(source.indexOf('    function movieButtonFocus('),source.indexOf('    function ratingFallback(')),c);c.movieButtonFocus({currentTarget:row,target:{closest:selector=>selector.includes('full-start__button')?button:null}});assert.equal(row.scrollLeft,118);});
 test('Up from every native action visits personal rating before delegating to the header',()=>{let onAction=true,up=0;const rating={getClientRects:()=>[{}]},focuses=[],controller={link:{},up:()=>up++},root={isConnected:true,querySelector:s=>s.includes('buttons')?(onAction?{}:null):rating},record={root};const c={Lampa:{Controller:{collectionSet:()=>{},collectionFocus:n=>focuses.push(n)}}};vm.createContext(c);vm.runInContext(source.slice(source.indexOf('    function bindRatingNavigation('),source.indexOf('    function movieButtonFocus(')),c);c.bindRatingNavigation(record,controller);const wrapper=controller.up;c.bindRatingNavigation(record,controller);assert.equal(controller.up,wrapper);controller.up();assert.equal(focuses[0],rating);assert.equal(controller.link.last,rating);assert.equal(up,0);onAction=false;controller.up();assert.equal(up,1);root.isConnected=false;onAction=true;controller.up();assert.equal(up,2);});
 
+test('Native menu controller expands the existing sidebar and leaving it restores the compact rail',()=>{
+ const classes=new Set(),context={document:{body:{classList:{toggle:(name,on)=>on?classes.add(name):classes.delete(name)}}},movieRecords:[],Lampa:{}};
+ const sync=source.match(/    function syncNavigationState\(name\) \{[\s\S]*?\n    \}/)[0];
+ const start=source.indexOf('    function onStreamController(event) {'),end=source.indexOf('    function onStreamProfile(',start);
+ vm.createContext(context);vm.runInContext(sync+'\n'+source.slice(start,end),context);
+ context.onStreamController({name:'menu'});assert(classes.has('sh-navigation-expanded'));
+ context.onStreamController({name:'main'});assert(!classes.has('sh-navigation-expanded'));
+ assert(source.includes('.sh-navigation-expanded .wrap__left .menu__text { display:block !important;'));
+ assert(source.includes('.menu__item.traverse:not(.focus) { box-shadow:inset .18em 0 var(--sh-accent); }'));
+ assert(source.includes('@media(prefers-reduced-motion:reduce){body.stremio-hybrid .wrap__left'));
+ assert(source.includes("classList.remove('sh-movie-active','sh-navigation-expanded')"),'Hybrid teardown must restore the compact rail');
+});
+
 test('Hybrid Settings rail skips explicitly hidden folders and isolates plugin component IDs',()=>{
  const makeFolder=(component,label,display='',hiddenClass=false)=>({component,label,style:{display},classList:{contains:name=>(name==='hide'&&hiddenClass)},getAttribute:name=>name==='data-component'?component:null,querySelector:()=>({textContent:label})});
  const folders=[makeFolder('bandera_online','Bandera Online'),makeFolder('omdb_config_ui','OMDB','none'),makeFolder('omdb_ratings_select','Вибір рейтингів','',true),makeFolder('uacomentsy','UaKomentsY')];

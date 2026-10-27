@@ -27,6 +27,7 @@ body.stremio-hybrid .wrap { background:var(--sh-bg); }
 body.stremio-hybrid .wrap__left { background:var(--sh-rail) !important; visibility:visible !important; }
 body.stremio-hybrid .menu__item { margin:.15em .45em; border-radius:var(--sh-radius) !important; min-height:2.8em; color:var(--sh-inactive); }
 body.stremio-hybrid .menu__item.focus, body.stremio-hybrid .menu__item.traverse { background:var(--sh-panel-raised) !important; color:var(--sh-accent-soft) !important; }
+body.stremio-hybrid .menu__item.traverse:not(.focus) { box-shadow:inset .18em 0 var(--sh-accent); }
 body.stremio-hybrid .menu__ico { opacity:1; }
 body.stremio-hybrid .items-line { padding-bottom:2.4em; }
 body.stremio-hybrid .items-line__head { padding:0 1.8em 1em; }
@@ -161,6 +162,12 @@ body.stremio-hybrid .menu__item, body.stremio-hybrid .head__action, body.stremio
  body.stremio-hybrid .wrap__left--hidden .menu__ico { margin:0; }
  body.stremio-hybrid .wrap__left--hidden .menu__text { display:none; }
  body.stremio-hybrid .wrap__left--hidden .menu__version { font-size:.45em; }
+ body.stremio-hybrid .wrap__left { transition:width var(--sh-speed) var(--sh-ease),min-width var(--sh-speed) var(--sh-ease); }
+ body.stremio-hybrid.sh-navigation-expanded .wrap__left { position:fixed; inset:0 auto 0 0; z-index:50; width:15em !important; min-width:15em; box-shadow:.8em 0 2em #0007; }
+ body.stremio-hybrid.sh-navigation-expanded .wrap__left .menu { width:15em !important; }
+ body.stremio-hybrid.sh-navigation-expanded .wrap__left .menu__item { justify-content:flex-start; padding:.8em 1em; }
+ body.stremio-hybrid.sh-navigation-expanded .wrap__left .menu__ico { width:1.35em; margin:0 .8em 0 0; flex:0 0 1.35em; }
+ body.stremio-hybrid.sh-navigation-expanded .wrap__left .menu__text { display:block !important; opacity:1; max-width:11em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
  body.stremio-hybrid .items-line:not(.vinyl-line) .card.ydesign-vertical { width:calc((100% + var(--ydesign-card-gap,var(--sh-gap))) / var(--ydesign-grid-items-v,5) - var(--ydesign-card-gap,var(--sh-gap))) !important; margin-left:0 !important; margin-right:0 !important; }
  body.stremio-hybrid .mapping--grid .card.ydesign-vertical { width:calc(100% / var(--ydesign-grid-items-v,5)) !important; }
 }
@@ -383,7 +390,7 @@ body.stremio-hybrid .head .head__title{max-width:20vw}
 body.stremio-hybrid .sh-profile-menu .selectbox__content{position:absolute;right:1.8em;top:5em;bottom:auto;left:auto;width:23em;max-width:90vw;max-height:calc(100vh - 7em);border:1px solid var(--sh-border);box-shadow:0 .7em 2em #0005}
 body.stremio-hybrid .selectbox-item{transition:opacity var(--sh-speed) var(--sh-ease)!important}
 body.stremio-hybrid .selectbox-item__title{white-space:normal;overflow-wrap:anywhere}
-@media(prefers-reduced-motion:reduce){body.stremio-hybrid .selectbox,body.stremio-hybrid .selectbox-item,body.stremio-hybrid .sh-movie-page .full-start__background{transition:none!important;animation:none!important}}
+@media(prefers-reduced-motion:reduce){body.stremio-hybrid .wrap__left,body.stremio-hybrid .selectbox,body.stremio-hybrid .selectbox-item,body.stremio-hybrid .sh-movie-page .full-start__background{transition:none!important;animation:none!important}}
 `;
     css += `
 body.stremio-hybrid .full-person:not(.full-person--small){width:9.5em;display:flex;flex-direction:column;align-items:stretch;gap:.55em;padding:.45em;border-radius:.75em;background:#ffffff06;transition:transform var(--sh-speed) ease-out}
@@ -1076,6 +1083,7 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         onStreamController({name:Lampa.Controller.enabled().name});
     }
     function onStreamController(event) {
+        syncNavigationState(event&&event.name);
         if(!event||!['full_start','content'].includes(event.name))return;
         var record=movieRecords.filter(function(r){return r.page.classList.contains('activity--active')&&r.streamPane;})[0];if(!record)return;
         // Native player/Files return may activate the underlying detail controller.
@@ -1230,6 +1238,11 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         var active = Lampa.Activity.active();
         document.body.setAttribute('data-sh-page', active ? active.component : 'main');
         document.body.classList.toggle('sh-movie-active',!!(active&&active.component==='full'&&(active.method==='movie'||active.method==='tv')));
+        var controller=Lampa.Controller.enabled();
+        syncNavigationState(controller&&controller.name);
+    }
+    function syncNavigationState(name) {
+        if(document.body)document.body.classList.toggle('sh-navigation-expanded',name==='menu');
     }
     css += '\nbody.stremio-hybrid .sh-home-duplicate{display:none!important}';
     var homePolicies=[],headTimeMove=null;
@@ -1331,7 +1344,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         if(headTimeMove){var t=headTimeMove;headTimeMove=null;t.parent.insertBefore(t.node,t.next&&t.next.parentNode===t.parent?t.next:null);}
         if (moreButton) { $(moreButton).off('hover:enter', openActions).remove(); moreButton=null; }
         document.querySelectorAll('.sh-head-secondary').forEach(function (node) { node.classList.remove('sh-head-secondary'); });
-        document.body.removeAttribute('data-sh-page');document.body.classList.remove('sh-movie-active');
+        document.body.removeAttribute('data-sh-page');document.body.classList.remove('sh-movie-active','sh-navigation-expanded');
     }
     // Categories route through the native folder callbacks. Parameters are never cloned.
     function nativeSettingsFolders() {
