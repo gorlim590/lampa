@@ -24,7 +24,7 @@ test('release metadata keeps audio and subtitles separate and exposes only ident
   const api = fixture().api;
   const release = api.normalizeRelease({
     Title: 'The Others (2001) 1080p', AudioLanguages: ['en', 'uk-UA'],
-    SubtitleLanguages: ['ru'], ReleaseGroup: 'Fixture Dubbing Group',
+    SubtitleLanguages: ['ru'], VoiceoverStudio: 'Fixture Dubbing Group',
     ffprobe: [{ codec_type: 'audio', tags: { language: 'eng' } }, { codec_type: 'subtitle', tags: { language: 'uk' } }]
   });
   assert.equal(release.parsed.audio.label, 'English, Українська');
@@ -43,6 +43,42 @@ test('release metadata keeps audio and subtitles separate and exposes only ident
   assert.equal(titleOnly.parsed.audio.label, 'Невідомо');
   assert.equal(titleOnly.parsed.subs.label, 'Українська');
   assert.equal(api.normalizeRelease({ Title: 'Movie 1080p' }).parsed.voiceover, 'Невідомо');
+  const groupOnly = api.normalizeRelease({ Title: 'Frieren S01E01 1080p', ReleaseGroup: 'Fixture Release Group' });
+  assert.equal(groupOnly.parsed.voiceover, 'Невідомо', 'release-group metadata is not proof of a dubbing studio');
+});
+
+test('anime studio aliases and multiple confirmed audio tracks normalize without subtitle inference', () => {
+  const api = fixture().api;
+  const amanogawa = api.normalizeRelease({
+    Title: 'Frieren S01E03 1080p Amanogawa Multi-voice',
+    AudioTracks: [{ language: 'uk', type: 'audio' }, { language: 'ja', type: 'audio' }],
+    SubtitleLanguages: ['en']
+  });
+  assert.deepEqual(Array.from(amanogawa.parsed.audio.languages), ['Українська', 'Японська']);
+  assert.equal(amanogawa.parsed.voiceover, 'Амоногава');
+  assert.equal(amanogawa.parsed.voiceoverType, 'Багатоголосе');
+  assert.equal(amanogawa.parsed.subs.label, 'English');
+  const dali = api.normalizeRelease({
+    Title: 'Frieren S01E03 1080p', VoiceoverStudios: ['Amanogawa', 'Далі Буде'],
+    VoiceoverType: 'two-voice', ffprobe: [{ codec_type: 'audio', tags: { language: 'jpn' } }]
+  });
+  assert.equal(dali.parsed.voiceover, 'Амоногава / Далі Буде');
+  assert.equal(dali.parsed.voiceoverType, 'Двоголосе');
+  assert.equal(dali.parsed.audio.label, 'Японська');
+  const subtitlesOnly = api.normalizeRelease({ Title: 'Frieren S01E03 Ukr Subs', SubtitleLanguages: ['uk'] });
+  assert.equal(subtitlesOnly.parsed.audio.label, 'Невідомо');
+  assert.equal(subtitlesOnly.parsed.voiceover, 'Невідомо');
+});
+
+test('recommendation prioritizes confirmed Ukrainian audio, then Toloka before Mazepa', () => {
+  const api = fixture().api;
+  const match = { eligible: true, similarity: 1 };
+  const toloka = api.normalizeRelease({ Title: 'Series S01E01 1080p', Tracker: 'Toloka', AudioLanguages: ['uk'], Seeders: 1 });
+  const mazepa = api.normalizeRelease({ Title: 'Series S01E01 2160p', Tracker: 'Mazepa', AudioLanguages: ['uk'], Seeders: 10000 });
+  const audio = api.normalizeRelease({ Title: 'Series S01E01 1080p', Tracker: 'Mazepa', AudioLanguages: ['uk'], Seeders: 1 });
+  const noAudioToloka = api.normalizeRelease({ Title: 'Series S01E01 1080p', Tracker: 'Toloka', AudioLanguages: ['en'], Seeders: 10000 });
+  assert(api.score(toloka, match) > api.score(mazepa, match), 'Toloka preference survives seed and resolution differences');
+  assert(api.score(audio, match) > api.score(noAudioToloka, match), 'confirmed Ukrainian audio outranks tracker priority');
 });
 
 test('tracker filters expose actual counts and retain Toloka then Mazepa priority if Toloka is absent', () => {

@@ -26,7 +26,7 @@
                 var key = identity(row, slot.spec, index), existing = seen[key], provenance = { id: slot.spec.id, label: slot.spec.label, type: slot.spec.type };
                 if (existing) {
                     if (!existing.parser_sources.some(function (source) { return source.id === provenance.id; })) existing.parser_sources.push(provenance);
-                    ['AudioLanguages','audio_languages','SubtitleLanguages','subtitle_languages','Voices','voices','ReleaseGroup','release_group','VoiceoverStudio','voiceover_studio','ffprobe','info','Resolution','resolution','Season','season','Episode','episode','InfoHash'].forEach(function (field) { if (existing[field] == null && row[field] != null) existing[field] = row[field]; });
+                    ['AudioLanguages','audio_languages','AudioTracks','audio_tracks','SubtitleLanguages','subtitle_languages','Voices','voices','ReleaseGroup','release_group','VoiceoverStudio','voiceover_studio','VoiceoverStudios','voiceover_studios','VoiceoverTeams','voiceover_teams','VoiceoverGroups','voiceover_groups','VoiceoverType','voiceover_type','DubbingStudio','dubbing_studio','DubbingType','dubbing_type','ffprobe','info','Resolution','resolution','Season','season','Episode','episode','InfoHash'].forEach(function (field) { if (existing[field] == null && row[field] != null) existing[field] = row[field]; });
                     existing.parser_originals.push(row); return;
                 }
                 var item = clone(row);
@@ -78,7 +78,10 @@
                     item.PublishDate = L.Utils.strToTime(r.publishDate); item.PublisTime = item.PublishDate; item.hash = titleHash;
                     item.viewed = L.Storage.cache('torrents_view', 5000, []).indexOf(titleHash) >= 0; item.source_rank = spec.id === 'primary' ? 0 : 1;
                     item.AudioLanguages = r.AudioLanguages || r.audioLanguages || r.audio_languages;
+                    item.AudioTracks = r.AudioTracks || r.audioTracks || r.audio_tracks;
                     item.SubtitleLanguages = r.SubtitleLanguages || r.subtitleLanguages || r.subtitle_languages;
+                    item.VoiceoverStudio = r.VoiceoverStudio || r.voiceoverStudio || r.voiceover_studio;
+                    item.VoiceoverType = r.VoiceoverType || r.voiceoverType || r.voiceover_type;
                     item.parser_original = r; return item;
                 }) });
             }, function (xhr) { fail(xhr && xhr.status === 429 ? 'rate-limit' : xhr && xhr.status >= 500 ? 'server-error' : 'network'); });

@@ -95,7 +95,7 @@
         try { var m = /[?&]xt=urn:btih:([a-z0-9]+)/i.exec(decodeURIComponent(magnet)); if (m) fromMagnet = m[1]; } catch (e) { /* malformed magnet remains distinct */ }
         var hash = canonicalHash(value) || canonicalHash(fromMagnet); if (hash) return 'hash:' + hash;
         var url = row.Link || row.downloadUrl || row.DownloadUrl || magnet;
-        return url ? 'url:' + url : 'title:' + normalize(row.Title || row.title) + '|' + text(row.Size || row.size) + '|' + text(row.Tracker || row.indexer) + '|' + JSON.stringify([row.Quality || row.Resolution, row.AudioLanguages || row.audio_languages, row.SubtitleLanguages || row.subtitle_languages, row.ReleaseGroup || row.release_group, row.Version || row.version]);
+        return url ? 'url:' + url : 'title:' + normalize(row.Title || row.title) + '|' + text(row.Size || row.size) + '|' + text(row.Tracker || row.indexer) + '|' + JSON.stringify([row.Quality || row.Resolution, row.AudioLanguages || row.audio_languages, row.AudioTracks || row.audio_tracks, row.SubtitleLanguages || row.subtitle_languages, row.VoiceoverStudio || row.voiceover_studio, row.VoiceoverType || row.voiceover_type, row.ReleaseGroup || row.release_group, row.Version || row.version]);
     }
     function dedup(rows) {
         var used = Object.create(null), out = [];

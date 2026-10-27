@@ -61,7 +61,16 @@ function fixture() {
   vm.runInContext(hybrid.slice(adapterStart, adapterEnd), context);
   const files = new Node(), filters = new Node(), sortNative = new Node(), rootNode = new Node();
   rootNode.querySelector = selector => selector === '.torrent-list' ? list : selector === '.explorer__files' ? files : selector === '.torrent-filter' ? filters : selector === '.filter--sort' ? sortNative : null;
-  rootNode.querySelectorAll = selector => selector === '.torrent-item' ? list.querySelectorAll(selector) : [];
+  rootNode.querySelectorAll = selector => {
+    if (selector === '.torrent-item') return list.querySelectorAll(selector);
+    const tools = files.children.find(node => node.classList.contains('ctr-tools'));
+    if (!tools) return [];
+    if (selector === '.ctr-tools .selector,.torrent-filter .selector') return Object.values(nodes).flatMap(group => group.children).filter(node => node.classList.contains('selector'));
+    if (selector === '.ctr-tabs [data-quality]') return nodes['.ctr-tabs'].children.filter(node => node.dataset.quality);
+    if (selector === '.ctr-tracker-tabs .selector') return nodes['.ctr-tracker-tabs'].children;
+    if (selector === '.ctr-menus .selector') return nodes['.ctr-menus'].children;
+    return [];
+  };
   rootNode.classList.add('sh-cinema-explorer');
   const pane = new Node(); pane.querySelectorAll = () => [];
   const page = { classList: { contains: () => true } };
@@ -81,8 +90,8 @@ function fixture() {
   };
   // Template-backed toolbar fixture: preserve the production setupStreamTools handlers.
   const filesInsert = files.insertBefore.bind(files);
-  files.insertBefore = (node, before) => { node.nodes = nodes; node.querySelector = selector => nodes[selector] || null; return filesInsert(node, before); };
-  const sourceFunctions = ['streamSession', 'streamAlive', 'streamTrackerKey', 'streamSortKey', 'streamWindow', 'streamUpdateRows', 'decorateStreamRows', 'syncStreamTrackerTools', 'streamFocus', 'setupStreamTools'];
+  files.insertBefore = (node, before) => { node.nodes = nodes; node.querySelector = selector => nodes[selector] || null; node.classList.add('ctr-tools'); return filesInsert(node, before); };
+  const sourceFunctions = ['streamSession', 'streamAlive', 'streamTrackerKey', 'streamSortKey', 'streamWindow', 'streamUpdateRows', 'decorateStreamRows', 'syncStreamTrackerTools', 'streamFocus', 'streamMove', 'setupStreamTools'];
   context.streamActivate = () => {};
   context.streamSelectOwner = null;
   vm.runInContext(sourceFunctions.map(name => extract(hybrid, name)).join('\n'), context);
@@ -93,9 +102,9 @@ function fixture() {
 
 test('Hybrid embedded list uses shared metadata, exact matching, tracker filters, sorting and Best Choice pinning', () => {
   const f = fixture();
-  const toloka = f.release('The Others (2001) 1080p', 'Toloka', { AudioLanguages: ['uk'], SubtitleLanguages: ['ru'], ReleaseGroup: 'UA Studio', Size: 900000000 });
+  const toloka = f.release('The Others (2001) 1080p', 'Toloka', { AudioLanguages: ['uk'], SubtitleLanguages: ['ru'], VoiceoverStudio: 'UA Studio', Size: 900000000 });
   const mazepa = f.release('The Others (2001) 2160p', 'Mazepa', { AudioLanguages: ['en'], SubtitleLanguages: ['uk'], Seeders: 80, Size: 4000000000 });
-  const wrongYear = f.release('The Others (2024) 2160p', 'Mazepa', { AudioLanguages: ['uk'], Seeders: 500 });
+  const wrongYear = f.release('The Others (2024) 2160p', 'Mazepa', { AudioLanguages: ['uk'], Seeders: 500, ReleaseGroup: 'Амоногава' });
   f.context.streamUpdateRows(f.st);
   assert.equal(f.st.displayRows.length, 3);
   assert.equal(f.st.displayRows[0], toloka.row, 'the confirmed Ukrainian-audio release is the single Best Choice');
@@ -105,15 +114,40 @@ test('Hybrid embedded list uses shared metadata, exact matching, tracker filters
   assert.equal(mazepa.row.nodes['.ctr-chips'].textContent.includes('Аудіо: Українська'), false, 'Ukrainian subtitles never become Ukrainian audio');
   assert.equal(mazepa.row.nodes['.ctr-chips'].textContent.includes('Субтитри: Українська'), true);
   assert.equal(wrongYear.row.classList.contains('is-best'), false);
+  assert.equal(wrongYear.row.nodes['.ctr-chips'].textContent.includes('Амоногава'), false, 'a release group alone is not a studio identity');
   f.api.storeSort('quality'); f.context.streamUpdateRows(f.st);
   assert.equal(f.st.displayRows[0], toloka.row, 'Best Choice stays first despite quality sorting');
   assert.equal(f.list.children[0], toloka.row, 'the first displayed DOM row is physically pinned');
   f.api.storeTrackerFilter('mazepa'); f.context.streamUpdateRows(f.st);
-  assert.equal(f.st.displayRows.length, 2);
-  assert.equal(f.st.displayRows[0], mazepa.row);
-  assert.equal(f.st.displayRows[1], wrongYear.row);
-  assert.equal(f.st.best, mazepa.row, 'filtering out Toloka selects a valid Mazepa fallback without changing Toloka priority');
-  assert.equal(f.list.children[0], mazepa.row);
+  assert.equal(f.st.displayRows.length, 3);
+  assert.equal(f.st.displayRows[0], toloka.row, 'global Toloka recommendation stays pinned when Mazepa is selected');
+  assert.equal(toloka.row.getAttribute('data-best-outside-filter'), 'true');
+  assert.match(toloka.row.nodes['.ctr-best'].textContent, /Toloka поза фільтром/);
+  assert.equal(f.st.displayRows.filter(row => row === toloka.row).length, 1, 'pinned release is not repeated in ordinary results');
+  assert.equal(f.st.displayRows[1], mazepa.row);
+  assert.equal(f.st.displayRows[2], wrongYear.row);
+  assert.equal(f.st.best, toloka.row, 'the global Best Choice is independent of the ordinary tracker filter');
+  assert.equal(f.list.children[0], toloka.row);
+});
+
+test('Hybrid popup rows display confirmed anime audio/studio tracks and reject the wrong season', () => {
+  const f = fixture();
+  f.st.params.movie = { id: 55, source: 'tmdb', media_type: 'tv', name: 'Frieren', original_name: 'Frieren', first_air_date: '2023-10-01' };
+  f.st.params.season = 1;
+  f.st.child.getFilterData = () => ({ season: 1 });
+  const amanogawa = f.release('Frieren S01E03 1080p Amanogawa Multi-voice', 'Toloka', {
+    AudioTracks: [{ language: 'uk', type: 'audio' }, { language: 'ja', type: 'audio' }],
+    SubtitleLanguages: ['en'], VoiceoverStudio: 'Amanogawa', VoiceoverType: 'multi-voice'
+  });
+  const wrongSeason = f.release('Frieren S02E03 2160p', 'Mazepa', { AudioLanguages: ['uk'], VoiceoverStudio: 'Далі Буде' });
+  const ambiguousGroup = f.release('Frieren S01E03 1080p Japanese audio', 'Nyaa', { AudioLanguages: ['ja'], ReleaseGroup: 'Далі Буде' });
+  f.context.streamUpdateRows(f.st);
+  const chips = amanogawa.row.nodes['.ctr-chips'].textContent;
+  assert.match(chips, /Аудіо: Українська \/ Японська/);
+  assert.match(chips, /Озвучення: Амоногава · Багатоголосе/);
+  assert.match(chips, /Субтитри: English/);
+  assert.equal(wrongSeason.row.classList.contains('is-best'), false);
+  assert.match(ambiguousGroup.row.nodes['.ctr-chips'].textContent, /Студія невідома/);
 });
 
 test('Hybrid embedded controls invoke native tracker/sort handlers; async rows re-rank and empty/singleton results are safe', async () => {
@@ -137,8 +171,9 @@ test('Hybrid embedded controls invoke native tracker/sort handlers; async rows r
   const sourceSelect = f.selections.at(-1);
   sourceSelect.onSelect(sourceSelect.items[0]);
   assert.equal(f.api.selectedTrackerFilter(), 'source:nyaa');
-  assert.equal(f.st.displayRows.length, 1);
-  assert.equal(f.st.displayRows[0], other.row);
+  assert.equal(f.st.displayRows.length, 2, 'the global pinned release remains alongside the source-filtered ordinary row');
+  assert.equal(f.st.displayRows[0], toloka.row);
+  assert.equal(f.st.displayRows[1], other.row);
   assert.equal(f.focus.current, sourceButton, 'focus returns from the native tracker picker to its owner control');
   await new Promise(resolve => setTimeout(resolve, 190));
   allButton.dispatch('hover:enter');
@@ -151,12 +186,24 @@ test('Hybrid embedded controls invoke native tracker/sort handlers; async rows r
   assert.equal(f.st.displayRows[0], toloka.row, 'Best Choice remains pinned above the selected seeders sort');
   assert.equal(f.st.displayRows[1], mazepa.row, 'the remaining rows follow the requested seeders sort');
   assert.equal(f.st.displayRows.includes(other.row), true);
+  f.st.last = toloka.row; f.context.streamMove(f.record, 'left');
+  assert.equal(f.focus.current, allButton, 'D-pad left from a release returns to the tracker toolbar');
+  assert.equal(f.st.root.querySelectorAll('.ctr-tracker-tabs .selector').includes(allButton), true, 'active tracker control belongs to the tracker group');
+  f.st.last = allButton; f.context.streamMove(f.record, 'down');
+  assert.equal(f.focus.current, f.st.sortButton, 'D-pad down from tracker filters enters sort controls');
+  f.st.last = toloka.row; f.context.streamMove(f.record, 'down');
+  assert.equal(f.focus.current, mazepa.row, 'D-pad down selects the next release in the real sorted order');
   const third = f.release('The Others (2001) 1080p', 'Mazepa', { AudioLanguages: ['uk'], Seeders: 120 });
   f.context.streamUpdateRows(f.st);
   assert.match(mazepaButton.textContent, /Мазепа · 2/);
   assert.equal(f.st.best, third.row, 'late parser row updates recommendation and order');
   f.api.storeTrackerFilter('source:', 'Missing Tracker'); f.context.streamUpdateRows(f.st);
-  assert.equal(f.st.displayRows.length, 0); assert.equal(f.st.best, null);
+  assert.equal(f.st.displayRows.length, 1, 'a global recommendation remains when the ordinary filter has no matches');
+  assert.equal(f.st.displayRows[0], third.row); assert.equal(f.st.best, third.row);
+  f.api.storeTrackerFilter('all');
+  const unrelated = f.release('Unrelated title (1999) 1080p', 'Toloka'); f.context.streamUpdateRows(f.st);
+  f.st.rows = [unrelated.row]; f.st.sourceData = new WeakMap([[unrelated.row, unrelated.source]]); f.context.streamUpdateRows(f.st);
+  assert.equal(f.st.best, null, 'no trustworthy title match means no Best Choice');
   f.api.storeTrackerFilter('all'); f.st.rows = [toloka.row]; f.st.sourceData = new WeakMap([[toloka.row, toloka.source]]); f.context.streamUpdateRows(f.st);
   assert.equal(f.st.displayRows.length, 1); assert.equal(f.st.displayRows[0], toloka.row); assert.equal(f.st.best, toloka.row, 'a single valid release can be Best Choice');
 });
