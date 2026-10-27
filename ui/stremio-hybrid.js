@@ -1336,7 +1336,10 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
     // Categories route through the native folder callbacks. Parameters are never cloned.
     function nativeSettingsFolders() {
         return Lampa.Settings.main().render().find('.settings-folder[data-component]').filter(function () {
-            return !this.classList.contains('hide') && !this.classList.contains('hidden') && this.style.display !== 'none';
+            var visibility=null;
+            try { if(window.getComputedStyle) visibility=window.getComputedStyle(this); } catch(e) { /* Keep native fallback available. */ }
+            var display=visibility ? visibility.display : this.style.display;
+            return !this.classList.contains('hide') && !this.classList.contains('hidden') && display !== 'none' && (!visibility || (visibility.visibility !== 'hidden' && visibility.visibility !== 'collapse'));
         }).toArray();
     }
     function updateSettingsRail() {
