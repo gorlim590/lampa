@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "baselineDistinctControls": 39,
+  "baselineDistinctControls": 41,
   "controls": [
     {
       "id": "ydesign_grid:ydesign_theme",
@@ -755,6 +755,22 @@
         "no playback or network"
       ],
       "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed."
+    },
+    {
+      "id": "ydesign_grid:ydesign_row_continue",
+      "status": "Verified in isolated tests",
+      "test": "YDesign registered Home Continue row enable/disable; real makeRowCall owner with synthetic progress and disposable Storage",
+      "owner": "ui/design-optimized.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
+    },
+    {
+      "id": "ydesign_grid:ydesign_row_week",
+      "status": "Verified in isolated tests",
+      "test": "YDesign registered weekly row toggle; real makeRowCall owner with synthetic progress and disposable Storage",
+      "owner": "ui/design-optimized.js",
+      "liveRuntime": "Not verified",
+      "batch": "baseline"
     }
   ]
 }

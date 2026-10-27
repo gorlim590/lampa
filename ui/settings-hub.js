@@ -16,10 +16,17 @@
         ['plugins', 'Плагіни та інтеграції'], ['system', 'Система та діагностика']
     ];
     var owners = {ydesign:'ui/design-optimized.js', interface_mod_new:'ui/interface-plus.js', cardify:'ui/cardify-plus.js',
-        trakt:'trakt/trakt.js', trakt_plus:'trakt/trakt-plus.js', home_history:'plugins-to-enable/home-history.js',
+        trakt:'trakt/trakt.js', trakt_plus:'trakt/trakt-plus.js', home_history:'plugins-to-enable/home-policy.js',
         torrents_cinema:'torrents-redesign.js', screensaver_plus:'ui/screensaver-plus.js',
         omdb_config_ui:'media/average-rating.js', omdb_ratings_select:'media/average-rating.js',
         ytranslate:'localization/translate.js', menu_filter:'ui/menu-hide.js'};
+    var visiblePreferences = {
+        ydesign_row_continue:1, ydesign_row_week:1, ydesign_theme:1, ydesign_grid_items_v:1,
+        ydesign_focus_fx:1, ydesign_style:1, ydesign_v_show_ua:1, ydesign_v_show_age:1,
+        ydesign_v_show_genres:1, ydesign_v_show_slogan:1, ydesign_v_show_year:1,
+        ydesign_v_show_seasons:1, ydesign_v_show_add_title:1
+    };
+    function hasVisiblePreference(key) { return !!visiblePreferences[key] || /^ydesign_v_(title_size|add_title_size|slogan_size|badge_size|year_size|age_size|seasons_size|ua_size|genres_size|rating_size|cards|align_logo|align_add_title|align_badges|align_slogan)$/.test(key); }
     function clean(value) { return typeof value === 'string' ? value.replace(/<[^>]*>/g, '').replace(/https?:\/\/\S+|[\w.+-]+@[\w.-]+\.[a-z]{2,}/ig, '[приховано]').slice(0, 220) : ''; }
     function category(component, key) {
         var s = (component + ':' + key).toLowerCase();
@@ -62,6 +69,8 @@
                     owner:owners[component] || (/^ydesign_/.test(component) ? owners.ydesign : 'Панель: '+title), category:category(component,key),
                     registration:origin, ordinal:index, storageKeys:key && /^(select|input|trigger|toggle)$/.test(p.type)?[key]:[], persistence:'native-owner', scope:'unverified', status:'unverified', issue:73,
                     explanation:'Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм.'};
+                // Only expose a fixed allowlist of non-sensitive presentation preferences in Hub summaries.
+                if(origin==='SettingsApi' && hasVisiblePreference(key))row.visiblePreference={type:p.type,defaultValue:p.default,values:p.values};
                 if(component==='omdb_config_ui' && /^(omdb_api_key_set|mdblist_api_key_set|simkl_api_key_set|mal_api_key_set|mal_cors_proxies_set)$/.test(key) && !(L.AverageRating && L.AverageRating.settingsPrivacyVersion>=1)) {
                     row.status='blocked';row.explanation='Потрібне оновлення плагіна рейтингів: стара панель показує приватні значення відкритим текстом. #73';
                 }
@@ -78,7 +87,7 @@
             } catch (e) { gaps.push(component);panelAvailable=false; }
             (params[component] || []).forEach(function (def, i) {
                 var p=def.param || {}, code=typeof def.onRender==='function'?Function.prototype.toString.call(def.onRender):'';
-                add({key:p.name,type:p.type,label:clean((def.field || {}).name),backLoop:component==='addCategory' && p.name==='ncInfo' && /controller\.back\s*=/.test(code) && /Settings\.create\(['"]ncInfo['"]\)/.test(code)},i,'SettingsApi');
+                add({key:p.name,type:p.type,label:clean((def.field || {}).name),default:p.default,values:p.values,backLoop:component==='addCategory' && p.name==='ncInfo' && /controller\.back\s*=/.test(code) && /Settings\.create\(['"]ncInfo['"]\)/.test(code)},i,'SettingsApi');
             });
             rows.slice(before).forEach(function(row){row.panelAvailable=panelAvailable;if(!panelAvailable && row.status==='unverified'){row.status='blocked';row.explanation='Панель ще не зареєстрована власником. Спочатку відкрийте його стандартний розділ налаштувань. #73';}});
             if(rows.length===before && (folders || []).some(function(f){return f.id===component;}))rows.push({id:component+':folder',component:component,key:'',label:title,owner:'Штатна панель або інтеграція',category:category(component,''),route:'folder',status:'unverified',issue:73,explanation:'Не перевірено: спеціальний маршрут відкривається оригінальною кнопкою Lampa.'});
@@ -98,7 +107,7 @@
     function install(L, $, doc) {
         if (installed || !L || !$ || !L.Template || !L.SettingsApi || !L.SettingsApi.allParams || !L.SettingsApi.allComponents || !L.SettingsApi.removeParams || !L.SettingsApi.removeComponent || !L.Settings || !L.Settings.main || !L.Settings.listener || !L.Settings.listener.remove) return false;
         installed = true;
-        var registry, group = 'all', query = '', page = 0, returning = false, focusId = '', rootFocus = '', limit = 24, nativeMainBypass = false;
+        var registry, group = 'all', query = '', page = 0, returning = false, focusId = '', rootFocus = '', headingIndices={}, limit = 24, nativeMainBypass = false;
         var metrics = {opens:0, builds:0, renderedRows:0, maxRenderedRows:0, listeners:2, timers:0, observers:0};
         function openNativeMain() {
             restoreConsolidatedFolders();
@@ -157,13 +166,24 @@
             return result;
         }
         function selectedRows(groupId,term) { return uniqueRows(registry.select(groupId,term)); }
+        var categoryDescriptions = {
+            profiles:'Профілі та облікові записи', home:'Рекомендації й порядок рядків головної',
+            appearance:'Тема, картки, бейджі та фокус', playback:'Плеєр, субтитри й відтворення',
+            torrents:'Джерела та пошук торентів', trakt:'Синхронізація й обліковий запис Trakt',
+            language:'Мова та доступність контенту', screensaver:'Заставка та сповіщення',
+            plugins:'Підключені розширення', system:'Діагностика та системні опції'
+        };
+        function optionCount(count) {
+            var tail=count%100,unit=count%10;
+            return count+' '+(unit===1 && tail!==11?'опція':unit>=2 && unit<=4 && (tail<12 || tail>14)?'опції':'опцій');
+        }
         function categoryTitle(id) { var entry=categories.filter(function(item){return item[0]===id;})[0];return entry?entry[1]:'Інші налаштування'; }
         function statusTitle(row) {
             if(row.status==='broken')return 'Підтверджена помилка';
-            if(row.status==='blocked')return 'Недоступно';
-            if(row.status==='partial')return 'Частково перевірено';
+            if(row.status==='blocked' || row.panelAvailable===false)return 'Потрібна інтеграція';
+            if(row.status==='partial')return 'Часткова підтримка';
             if(row.status==='unsupported')return 'Не підтримується';
-            return row.panelAvailable===false?'Панель недоступна':'Панель доступна · ефект не перевірено';
+            return 'Власник доступний · ефект не перевірено';
         }
         function statusClass(row) {
             if(row.status==='broken')return 'settings-hub-status-broken';
@@ -171,20 +191,49 @@
             if(row.status==='partial')return 'settings-hub-status-partial';
             return 'settings-hub-status-unverified';
         }
+        function currentSummary(row) {
+            if(row.component==='home_history' && (row.key==='home_history_edit_order' || row.key==='home_history_reset_order')) {
+                try {
+                    var history=typeof window!=='undefined' && window.LampaHomeHistory;
+                    var policy=history && typeof history.policy==='function' && history.policy();
+                    if(policy && typeof policy.hasCustomOrder==='function')return 'Порядок рядків: '+(policy.hasCustomOrder()?'налаштовано':'типовий');
+                } catch (e) { /* Keep the native owner as the only source of saved Home order state. */ }
+            }
+            if(!row.visiblePreference || !L.Storage || typeof L.Storage.get!=='function')return '';
+            try {
+                var value=L.Storage.get(row.key);
+                if(value===undefined || value===null || value==='' || value==='undefined')value=row.visiblePreference.defaultValue;
+                if(value===undefined)return '';
+                if(row.visiblePreference.type==='trigger') {
+                    var enabled=value===true || value===1 || value==='1' || value==='true';
+                    return 'Зараз: '+(enabled?'увімкнено':'вимкнено');
+                }
+                var options=row.visiblePreference.values;
+                if(options && Object.prototype.hasOwnProperty.call(options,String(value)))value=options[String(value)];
+                else if(options)return 'Зараз: невідоме значення';
+                return 'Зараз: '+clean(String(value));
+            } catch (e) { return ''; }
+        }
         function editSearch() {
             L.Input.edit({title:'Пошук налаштувань',value:query,free:true,nosave:true},function(value){query=clean(value);group='all';page=0;focusId='';showList();});
         }
         function renderRoot() {
             L.SettingsApi.removeParams(ROOT);
+            headingIndices[ROOT]=0;
+            heading(ROOT,'Налаштування','settings-hub-section-heading');
+            heading(ROOT,'Розділи','settings-hub-section-kicker');
             categories.forEach(function(c){
                 var count=uniqueRows(registry.rows.filter(function(row){return row.category===c[0] && row.panelAvailable!==false && row.status!=='broken' && row.status!=='blocked';})).length;
-                button(ROOT,'hub_category_'+c[0],c[1],'Кількість доступних маршрутів: '+count+'; роботу опцій не перевірено',function(){choose(c[0]);});
+                var available=count?categoryDescriptions[c[0]]+' · '+optionCount(count):'Інтеграцію не підключено';
+                var key='hub_category_'+c[0],selected=key===rootFocus;
+                button(ROOT,key,c[1],available,function(){choose(c[0]);},'settings-hub-category settings-hub-category-'+c[0]+(selected?' settings-hub-category-selected':''));
             });
-            button(ROOT,'hub_search','Пошук налаштувань',query?'Змінити запит: '+query:'Назва, плагін або ключ параметра',function(){rootFocus='hub_search';editSearch();});
-            if(selectedRows('problems','').length)button(ROOT,'hub_problems','Проблемні налаштування','Лише підтверджені помилки, часткові обмеження й недоступні панелі.',function(){choose('problems','hub_problems');});
-            if(selectedRows('unverified','').length)button(ROOT,'hub_unverified','Не перевірено','Параметри без підтвердження ефекту та збереження.',function(){choose('unverified','hub_unverified');});
-            button(ROOT,'hub_all','Усі налаштування та пошук','Оригінальні обробники й значення збережено.',function(){choose('all','hub_all');});
-            button(ROOT,'hub_native','Стандартні налаштування','Повернутися до штатного інтерфейсу Lampa.',function(){leave();active=false;doc.body.classList.remove('settings-hub-active');openNativeMain();});
+            heading(ROOT,'Інструменти','settings-hub-section-kicker');
+            button(ROOT,'hub_search','Пошук налаштувань',query?'Змінити пошуковий запит':'За назвою, плагіном або ключем',function(){rootFocus='hub_search';editSearch();},'settings-hub-action');
+            if(selectedRows('problems','').length)button(ROOT,'hub_problems','Проблемні налаштування','Підтверджені проблеми й обмеження',function(){choose('problems','hub_problems');},'settings-hub-action');
+            if(selectedRows('unverified','').length)button(ROOT,'hub_unverified','Не перевірено','Параметри без підтвердження ефекту',function(){choose('unverified','hub_unverified');},'settings-hub-action');
+            button(ROOT,'hub_all','Усі налаштування','Повний список зареєстрованих власників',function(){choose('all','hub_all');},'settings-hub-action');
+            button(ROOT,'hub_native','Стандартні налаштування','Відкрити повне меню Lampa',function(){leave();active=false;doc.body.classList.remove('settings-hub-active');openNativeMain();},'settings-hub-action settings-hub-native');
         }
         function focus(key) {
             var body=L.Settings.render().find('.settings__body'), target=body.find('[data-name]').filter(function(){return this.getAttribute('data-name')===key;}).first();
@@ -198,12 +247,18 @@
             L.Settings.main().render().detach();
         }
         function nativePage(name, back, skipBack) { leave(skipBack); active=true; if(name===ROOT){rebuild();consolidateFolders();renderRoot();} L.Settings.create(name,{onBack:function(){if(!returning){returning=true;try{back();}finally{returning=false;}}}}); }
+        function heading(component,label,className) {
+            var name='hub_heading_'+component+'_'+(headingIndices[component]=(headingIndices[component]||0)+1);
+            L.SettingsApi.addParam({component:component,param:{name:name,type:'title'},field:{name:clean(label)},onRender:function(item){if(className && typeof item.addClass==='function')item.addClass(className);}});
+        }
         function button(component, key, label, description, action, className) {
             L.SettingsApi.addParam({component:component,param:{name:key,type:'button'},field:{name:clean(label),description:clean(description)},onRender:function(item){if(className && typeof item.addClass==='function')item.addClass(className);item.on('hover:enter.settingsHub',action);}});
         }
-        function mark() {
+        function mark(view) {
             doc.body.classList.add('settings-hub-active');
             var root=L.Settings.render()[0];root.setAttribute('data-settings-hub-version','73-preview-1');
+            root.setAttribute('data-settings-hub-view',view||'owner');
+            root.setAttribute('data-settings-hub-selected',group);
             root.setAttribute('data-settings-hub-metrics',JSON.stringify(metrics));
         }
         function openRoot(fromNativeMain) { nativePage(ROOT,function(){active=false;doc.body.classList.remove('settings-hub-active');openNativeMain();},fromNativeMain); if(rootFocus)focus(rootFocus); }
@@ -235,13 +290,20 @@
             if(!registry)rebuild();
             var filtered=selectedRows(group,query),total=Math.ceil(filtered.length/limit);
             page=Math.max(0,Math.min(page,Math.max(0,total-1)));L.SettingsApi.removeParams(PAGE);
-            button(PAGE,'hub_back','До категорій','Повернутися до Центру налаштувань',openRoot);
-            button(PAGE,'hub_search','Пошук налаштувань',query || 'Назва, плагін, компонент або ключ параметра',editSearch);
+            headingIndices[PAGE]=0;
+            var title=query?'Результати пошуку':group==='all'?'Усі налаштування':group==='problems'?'Проблемні налаштування':group==='unverified'?'Не перевірено':categoryTitle(group);
+            heading(PAGE,title,'settings-hub-page-heading');
+            button(PAGE,'hub_back','Назад до розділів','Повернутися до категорій',openRoot,'settings-hub-action');
+            button(PAGE,'hub_search','Пошук налаштувань',query?'Змінити пошуковий запит':'За назвою, плагіном або ключем',editSearch,'settings-hub-action');
             filtered.slice(page*limit,(page+1)*limit).forEach(function(row,index){
-                var context=categoryTitle(row.category)+' · '+row.owner+' · '+statusTitle(row)+(row.duplicateRegistrations>1?' · '+row.duplicateRegistrations+' реєстрації':'')+' · '+row.explanation;
-                button(PAGE,'hub_item_'+index,row.label,context,function(){openOwner(row);},statusClass(row));
+                var value=currentSummary(row),context=(value?value+' · ':'')+categoryTitle(row.category)+' · '+row.owner+' · '+statusTitle(row)+(row.duplicateRegistrations>1?' · '+row.duplicateRegistrations+' реєстрації':'')+(['broken','partial','blocked'].indexOf(row.status)!==-1?' · '+row.explanation:'');
+                button(PAGE,'hub_item_'+index,row.label,context,function(){openOwner(row);},'settings-hub-setting '+statusClass(row)+(value?' settings-hub-has-value':''));
             });
-            if(!filtered.length)button(PAGE,'hub_empty',query?'За цим запитом нічого не знайдено':group==='problems'?'Підтверджених проблем не знайдено':'У цій категорії немає записів','Змініть запит або поверніться до категорій. Поточні значення й приватні дані не шукаються.',function(){});
+            if(!filtered.length) {
+                var emptyCategory=!query && group!=='all' && group!=='unverified' && group!=='problems';
+                button(PAGE,'hub_empty',query?'За цим запитом нічого не знайдено':group==='problems'?'Підтверджених проблем не знайдено':'У цій категорії немає зареєстрованих опцій',emptyCategory?'Необхідний власник може бути вимкнений або не встановлений. Усі штатні розділи залишаються доступними в стандартних налаштуваннях.':'Змініть запит або поверніться до категорій. Поточні значення й приватні дані не шукаються.',function(){});
+                if(emptyCategory)button(PAGE,'hub_empty_native','Відкрити стандартні налаштування','Показати всі штатні та сторонні розділи Lampa.',function(){leave();active=false;restoreConsolidatedFolders();doc.body.classList.remove('settings-hub-active');openNativeMain();});
+            }
             if(page>0)button(PAGE,'hub_previous','Попередня сторінка',(page+1)+' / '+total,function(){page--;focusId='';showList();focus('hub_previous');});
             if(page+1<total)button(PAGE,'hub_next','Наступна сторінка',(page+1)+' / '+total,function(){page++;focusId='';showList();focus('hub_next');});
             metrics.renderedRows=Math.min(limit,filtered.length-page*limit);metrics.maxRenderedRows=Math.max(metrics.maxRenderedRows,metrics.renderedRows);
@@ -255,8 +317,9 @@
         rebuild();renderRoot();
         // No stylesheet, theme bootstrap or visual controller: those belong to #79.
         function onOpen(e){
-            if(e.name===ROOT){active=true;metrics.opens++;rebuild();mark();}
-            else if(e.name===PAGE || active && e.name!=='main')mark();
+            if(e.name===ROOT){active=true;metrics.opens++;rebuild();mark('landing');}
+            else if(e.name===PAGE)mark(query?'search':group);
+            else if(active && e.name!=='main')mark('owner');
             else if(e.name==='main'){active=false;restoreConsolidatedFolders();doc.body.classList.remove('settings-hub-active');}
         }
         function onClose(){active=false;restoreConsolidatedFolders();registry=null;doc.body.classList.remove('settings-hub-active');}

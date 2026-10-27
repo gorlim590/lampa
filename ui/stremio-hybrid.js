@@ -106,6 +106,37 @@ body.stremio-hybrid.settings-hub-active .settings-param.settings-hub-status-part
 body.stremio-hybrid.settings-hub-active .settings-param.settings-hub-status-broken { border-left:.22em solid #e37878; }
 body.stremio-hybrid.settings-hub-active .settings-param.settings-hub-status-unavailable { border-left:.22em solid #777386; opacity:.78; }
 body.stremio-hybrid.settings-hub-active .settings-param.focus { background:var(--sh-focus-soft); box-shadow:inset .2em 0 var(--sh-accent); }
+/* #73 supplies semantic classes; Hybrid remains the only Settings visual owner. */
+body.stremio-hybrid.settings-hub-active [data-settings-hub-view="landing"] .settings__body > .scroll > .scroll__content { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); grid-auto-flow:row; align-content:start; gap:.65em; padding:.2em .25em 1em; }
+body.stremio-hybrid.settings-hub-active [data-settings-hub-view="landing"] .settings-hub-section-heading,
+body.stremio-hybrid.settings-hub-active [data-settings-hub-view="landing"] .settings-hub-section-kicker { grid-column:1 / -1; }
+body.stremio-hybrid.settings-hub-active .settings-hub-section-heading { padding:.15em .2em .3em; color:var(--sh-text); font-size:1.65em; font-weight:600; letter-spacing:.01em; }
+body.stremio-hybrid.settings-hub-active .settings-hub-section-kicker { padding:.6em .25em .1em; color:var(--sh-muted); font-size:.82em; text-transform:uppercase; letter-spacing:.12em; }
+body.stremio-hybrid.settings-hub-active .settings-hub-category { min-height:5.2em; padding:1em 1.15em; margin:0; background:var(--sh-panel); border:1px solid var(--sh-border); transition:background var(--sh-speed) var(--sh-ease),border-color var(--sh-speed) var(--sh-ease),transform var(--sh-speed) var(--sh-ease),box-shadow var(--sh-speed) var(--sh-ease); }
+body.stremio-hybrid.settings-hub-active .settings-hub-category .settings-param__name { position:relative; padding-left:2.15em; font-size:1.08em; font-weight:600; }
+body.stremio-hybrid.settings-hub-active .settings-hub-category .settings-param__name:before { position:absolute; left:.1em; top:0; width:1.5em; color:var(--sh-accent-soft); text-align:center; font-size:1.15em; line-height:1.2; }
+body.stremio-hybrid.settings-hub-active .settings-hub-category-profiles .settings-param__name:before { content:'◉'; }
+body.stremio-hybrid.settings-hub-active .settings-hub-category-home .settings-param__name:before { content:'⌂'; }
+body.stremio-hybrid.settings-hub-active .settings-hub-category-appearance .settings-param__name:before { content:'◈'; }
+body.stremio-hybrid.settings-hub-active .settings-hub-category-playback .settings-param__name:before { content:'▶'; }
+body.stremio-hybrid.settings-hub-active .settings-hub-category-torrents .settings-param__name:before { content:'⇩'; }
+body.stremio-hybrid.settings-hub-active .settings-hub-category-trakt .settings-param__name:before { content:'✓'; }
+body.stremio-hybrid.settings-hub-active .settings-hub-category-language .settings-param__name:before { content:'文'; }
+body.stremio-hybrid.settings-hub-active .settings-hub-category-screensaver .settings-param__name:before { content:'☾'; }
+body.stremio-hybrid.settings-hub-active .settings-hub-category-plugins .settings-param__name:before { content:'▦'; }
+body.stremio-hybrid.settings-hub-active .settings-hub-category-system .settings-param__name:before { content:'⚙'; }
+body.stremio-hybrid.settings-hub-active .settings-hub-category-selected { border-color:var(--sh-accent); background:var(--sh-panel-raised); }
+body.stremio-hybrid.settings-hub-active .settings-hub-category.focus { background:var(--sh-focus-soft); border-color:var(--sh-accent-soft); box-shadow:0 0 0 .14em var(--sh-ring); transform:translateY(-.04em); }
+body.stremio-hybrid.settings-hub-active .settings-hub-action { background:transparent; border:1px solid var(--sh-border); }
+body.stremio-hybrid.settings-hub-active .settings-hub-native { border-color:var(--sh-accent); background:#9775fa16; }
+body.stremio-hybrid.settings-hub-active .settings-hub-page-heading { padding:.15em .2em .7em; color:var(--sh-text); font-size:1.5em; font-weight:600; }
+body.stremio-hybrid.settings-hub-active .settings-hub-setting.settings-hub-has-value .settings-param__descr { color:var(--sh-accent-soft); font-weight:500; }
+body.stremio-hybrid.settings-hub-active .settings-hub-setting.focus { background:var(--sh-focus-soft); box-shadow:0 0 0 .12em var(--sh-ring); }
+@media (max-width: 58em) {
+ body.stremio-hybrid.settings-hub-active [data-settings-hub-view="landing"] .settings__body > .scroll > .scroll__content { grid-template-columns:minmax(0,1fr); gap:.45em; }
+ body.stremio-hybrid.settings-hub-active .settings-hub-category { min-height:4.3em; padding:.8em 1em; }
+ body.stremio-hybrid.settings-hub-active .settings-hub-section-heading { font-size:1.35em; }
+}
 body.stremio-hybrid .settings-param { padding:1em; margin-bottom:.25em; }
 body.stremio-hybrid .settings-param__name { font-size:1em; }
 body.stremio-hybrid .settings-param__value { font-size:.85em; }
