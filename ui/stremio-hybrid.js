@@ -1353,14 +1353,16 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
             settingsRail.textContent='';
             folders.forEach(function(node){
                 var item=document.createElement('div'); item.className='sh-settings-category selector';
-                item.setAttribute('data-component',node.getAttribute('data-component'));
+                // Keep native component IDs off copied rail nodes. Plugin CSS may
+                // target a broad div[data-component] selector and hide a route.
+                item.setAttribute('data-sh-settings-component',node.getAttribute('data-component'));
                 item.textContent=node.querySelector('.settings-folder__name').textContent;
                 settingsRail.appendChild(item);
             });
             settingsRail.setAttribute('data-signature',signature);
         }
         settingsRail.querySelectorAll('.sh-settings-category').forEach(function(node){
-            if(node.getAttribute('data-component')===settingsCategory) node.setAttribute('aria-current','page'); else node.removeAttribute('aria-current');
+            if(node.getAttribute('data-sh-settings-component')===settingsCategory) node.setAttribute('aria-current','page'); else node.removeAttribute('aria-current');
         });
     }
     function focusSettingsCategory(delta) {
@@ -1392,7 +1394,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
     }
     function onSettingsCategory(event) {
         var item=event.target.closest('.sh-settings-category');
-        if(item && settingsRail.contains(item)) { event.stopPropagation();chooseSettingsCategory(item.getAttribute('data-component'),false); }
+        if(item && settingsRail.contains(item)) { event.stopPropagation();chooseSettingsCategory(item.getAttribute('data-sh-settings-component'),false); }
     }
     function settingsNavToggle() {
         if(!settingsRail) { Lampa.Controller.toggle('settings'); return; }
@@ -1409,7 +1411,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
     function installSettingsController() {
         Lampa.Controller.add('sh_settings_nav',{
             toggle:settingsNavToggle,
-            enter:function(){var item=settingsRail && settingsRail.querySelector('.sh-settings-category.focus');if(item)chooseSettingsCategory(item.getAttribute('data-component'),false);},
+            enter:function(){var item=settingsRail && settingsRail.querySelector('.sh-settings-category.focus');if(item)chooseSettingsCategory(item.getAttribute('data-sh-settings-component'),false);},
             up:function(){focusSettingsCategory(-1);}, down:function(){focusSettingsCategory(1);},
             right:function(){if(settingsParameter)Lampa.Controller.toggle('settings_component');},
             left:settingsNavBack, back:settingsNavBack

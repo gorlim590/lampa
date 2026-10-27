@@ -28,6 +28,14 @@ This setup attaches to the already-running dedicated Lampa Chromium at CDP `127.
 
 Hybrid is the one visual owner. Interface+ remains active through its presentation contract; its standalone header style must remain absent while Hybrid owns the header. YDesign supplies vertical cards/badges, and Cardify+ remains the original details/settings owner. Third-party or external core behaviors remain unverified unless their actual owner source is available and safe to exercise.
 
+## Persistent visual test profile
+
+For the dedicated test profile's normal Home/Settings verification, enable the main Hybrid switch once through **Settings → Інтерфейс → Stremio × Lampa → Так** (`stremio_hybrid_enabled`). This is a UI-only preference change in that isolated profile; it persists through reloads and is reversible by choosing **Ні** in the same row. The production setting behavior/default is unchanged. Do not change `stremio_hybrid_primary_settings` as part of this setup: it is a separate opt-in that keeps native Settings as the default entry unless explicitly tested.
+
+The phase 6 fixture runner can still provide temporary values for its isolated Hub-routing scenarios. It is not needed to activate Hybrid in the persistent UI test profile. Never copy account/session data into a disposable state or treat the existing profile as unauthenticated.
+
+To verify the persisted profile and exact current branch without Storage overrides, set `LAMPA_TEST_CHROMIUM_PROFILE` locally to the dedicated profile directory and run `node audit/settings/phase6-browser/run-issue79.cjs`. The runner requires the existing CDP browser and tab, verifies `/health`, CORS and asset hashes, routes the canonical Hybrid/Hub scripts from the branch allowlist, blocks Trakt API/auth hosts, exercises native D-pad/Back and exits by detaching without calling `browser.close()`.
+
 ## Safety and limitations
 
 - The existing browser profile is treated as potentially authenticated. The runner does not inspect, reset or copy profile values. Although `Storage.set` is intercepted, application reads may still use existing preferences; this harness does not claim full Storage isolation.
