@@ -28,9 +28,11 @@ function chromiumPids() {
     for (const entry of fs.readdirSync('/proc')) {
         if (!/^\d+$/.test(entry)) continue;
         try {
-            const args = fs.readFileSync('/proc/' + entry + '/cmdline', 'utf8').split('\0');
-            if (args.some(arg => arg === '--user-data-dir=' + profilePath) &&
-                args.includes('--remote-debugging-port=9222') && !args.some(arg => arg.startsWith('--type='))) matches.push(Number(entry));
+            // Some managed browser launchers expose one flattened cmdline arg
+            // instead of NUL-separated argv; test presence without exporting it.
+            const args = fs.readFileSync('/proc/' + entry + '/cmdline', 'utf8');
+            if (args.includes('--user-data-dir=' + profilePath) &&
+                args.includes('--remote-debugging-port=9222') && !args.includes('--type=')) matches.push(Number(entry));
         } catch (_) { /* Process exited during the read. */ }
     }
     return matches.sort((a, b) => a - b);
