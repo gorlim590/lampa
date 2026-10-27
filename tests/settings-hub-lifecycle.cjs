@@ -183,3 +183,58 @@ test('A native owner panel failure restores consolidated folders and the native 
  f.L.Settings.create=(name,options)=>{if(name==='ydesign')throw Error('fixture owner delivery failure');return create(name,options);};
  f.enter('hub_item_0');assert.equal(f.L.Controller.enabled().name,'settings');assert.equal(safe.getAttribute('data-settings-hub-consolidated'),null);assert.equal(safe.style.display,'block');assert.equal(safe.getAttribute('data-component'),'ydesign');assert(!f.classes.has('settings-hub-active'));assert.match(f.warnings.at(-1),/стандартними налаштуваннями/);
 });
+
+test('Repeated Hub navigation, owner Back, search and reinstall cycles keep registrations and listeners bounded',()=>{
+ const f=fixture();
+ f.params.ydesign=Array.from({length:65},(_,i)=>({param:{name:'stress_'+i,type:'select'},field:{name:'Опція '+i}}));
+ assert.equal(f.hub.install(f.L,f.$,f.doc),true);
+ const rootParams=()=>f.params.settings_hub.map(item=>item.param.name);
+ const rootBaseline=rootParams();
+ for(let i=0;i<30;i++){
+  f.open();f.enter('hub_category_appearance');f.enter('hub_item_0');f.back();
+  assert.equal(f.focus().key,'hub_item_0','Owner Back restores the selected setting after cycle '+i);
+  f.back();assert.equal(f.focus().key,'hub_category_appearance','List Back restores its category after cycle '+i);
+  f.back();assert.equal(f.L.Controller.enabled().name,'settings','Root Back exits to native Settings after cycle '+i);
+  assert.deepEqual(rootParams(),rootBaseline,'Hub root registrations remain stable after cycle '+i);
+ }
+ for(let i=0;i<20;i++){
+  f.open();f.enter('hub_search');f.search('STRESS_6'+(i%5));
+  assert(f.items().some(item=>item.key.startsWith('hub_item_')),'Search returns a result on edit cycle '+i);
+  f.back();f.enter('hub_search');assert.equal(f.searchOptions().value,'STRESS_6'+(i%5),'Search query survives list reentry '+i);
+  f.listeners.close[0]();
+ }
+ assert.equal(f.listeners.open.length,1);assert.equal(f.listeners.close.length,1);
+ assert.equal(f.styles.length,0,'Hub does not accumulate a separate stylesheet');
+ const roots=new Set(rootParams());assert.equal(roots.size,rootBaseline.length,'No duplicate root IDs after repeated entry');
+ f.hub.destroy();assert.equal(f.listeners.open.length,0);assert.equal(f.listeners.close.length,0);
+ for(let i=0;i<10;i++){
+  assert.equal(f.hub.install(f.L,f.$,f.doc),true);f.open();f.hub.destroy();
+  assert.equal(f.listeners.open.length,0,'Destroy removes open listener after reinstall '+i);
+  assert.equal(f.listeners.close.length,0,'Destroy removes close listener after reinstall '+i);
+  assert.equal(f.params.settings_hub,undefined);assert.equal(f.params.settings_hub_page,undefined);
+ }
+});
+
+test('Synthetic 506-row Hub workload stays paginated and reports cold/warm navigation timings',t=>{
+ const {performance}=require('node:perf_hooks'),f=fixture();
+ f.params.ydesign=Array.from({length:506},(_,i)=>({param:{name:'bench_'+i,type:'select'},field:{name:'Налаштування '+i}}));
+ const elapsed=fn=>{const start=performance.now();fn();return +(performance.now()-start).toFixed(3);};
+ const timings={registryInstallMs:elapsed(()=>assert.equal(f.hub.install(f.L,f.$,f.doc),true))};
+ timings.coldRootMs=elapsed(()=>f.open());
+ timings.categoryMs=elapsed(()=>f.enter('hub_category_appearance'));
+ assert.equal(f.items().filter(row=>row.key.startsWith('hub_item_')).length,24);
+ timings.pageMs=elapsed(()=>f.enter('hub_next'));
+ timings.searchMs=elapsed(()=>{f.enter('hub_search');f.search('BENCH_5');});
+ assert(f.items().filter(row=>row.key.startsWith('hub_item_')).length<=24);
+ timings.ownerOpenMs=elapsed(()=>f.enter('hub_item_0'));
+ timings.ownerBackMs=elapsed(()=>f.back());
+ timings.warmRootMs=elapsed(()=>f.back());
+ f.back();
+ timings.reopenMs=elapsed(()=>f.open());
+ const rows=f.items().filter(row=>row.key.startsWith('hub_item_')).length;
+ const activeMetrics=JSON.parse(f.rootNode.attrs['data-settings-hub-metrics']);
+ assert.equal(activeMetrics.observers,0);assert.equal(activeMetrics.timers,0);assert.equal(activeMetrics.listeners,2);
+ assert.equal(f.params.ydesign.length,506);assert(rows<=24);
+ t.diagnostic(JSON.stringify({machine:process.platform+' '+process.arch+' Node '+process.version,fixture:'mock Lampa SettingsApi; 506 synthetic owner records; no real storage/services',timingsMs:timings,registryRows:506,renderedSettingRows:rows,maxRows:24,metrics:activeMetrics}));
+ f.hub.destroy();
+});

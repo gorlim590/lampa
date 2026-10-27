@@ -1,0 +1,25 @@
+{
+  "manifestVersion": 1,
+  "purpose": "Phase 6 desktop Lampa QA in the existing dedicated browser; profile is treated as potentially authenticated; exact files served from the checked-out feature branch",
+  "modules": [
+    {"name": "Trakt Core", "path": "trakt/trakt.js", "role": "functional owner", "safety": "network requests blocked by browser harness"},
+    {"name": "Trakt+", "path": "trakt/trakt-plus.js", "role": "functional owner", "safety": "configuration only; no sync actions"},
+    {"name": "Interface+", "path": "ui/interface-plus.js", "role": "presentation adapter"},
+    {"name": "YDesign", "path": "ui/design-optimized.js", "role": "card presentation owner"},
+    {"name": "AverageRating", "path": "media/average-rating.js", "role": "rating owner", "safety": "external requests blocked"},
+    {"name": "Cardify+", "path": "ui/cardify-plus.js", "role": "card metadata adapter"},
+    {"name": "Home History", "path": "plugins-to-enable/home-history.js", "role": "Home owner", "safety": "network writes blocked"},
+    {"name": "Torrents Cinema", "path": "torrents-redesign.js", "role": "torrent UI owner", "safety": "no playback or torrent actions"},
+    {"name": "Parser settings", "path": "providers/parsers.js", "role": "parser owner", "safety": "no searches launched"},
+    {"name": "Localization", "path": "localization/translate.js", "role": "language owner"},
+    {"name": "Screensaver+", "path": "ui/screensaver-plus.js", "role": "screensaver owner", "safety": "idle media actions not invoked"},
+    {"name": "Community New Category", "path": "community/new-category.js", "role": "community owner", "safety": "no catalog actions"},
+    {"name": "Stremio Hybrid", "path": "stremio-hybrid.js", "source": "ui/stremio-hybrid.js", "role": "canonical visual and Settings lifecycle owner", "last": true}
+  ],
+  "deliberatelyExcluded": [
+    {"name": "Legacy Cardify", "reason": "conflicts with Cardify+; not loaded"},
+    {"name": "BWA", "reason": "external source/owner unavailable; not loaded"},
+    {"name": "Profiles+", "reason": "no matching first-party source/manifest module; native profile owner retained"},
+    {"name": "External Lampa player/TorrServer", "reason": "external core owner; no behavior substitute"}
+  ]
+}
