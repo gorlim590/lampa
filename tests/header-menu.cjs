@@ -29,6 +29,6 @@ test('repeated initialization and destroy/reinitialize register one utility sett
  vm.runInContext(source.slice(source.indexOf('    function init() {'),source.indexOf('    window.StremioHybrid = {')),c);
  c.init();c.init();assert.equal(f.params.filter(p=>p.param.name==='sh_header_utilities').length,1);
  c.removeHeaderUtilitiesSetting();c.ready=false;c.init();
- assert.deepEqual(f.params.map(p=>p.param.name).sort(),['sh_header_utilities','sh_profile_avatar','sh_torrent_mode','stremio_hybrid_enabled']);
+ assert.deepEqual(f.params.map(p=>p.param.name).sort(),['sh_header_utilities','sh_profile_avatar','sh_torrent_mode','stremio_hybrid_enabled','stremio_hybrid_primary_settings']);
 });
 test('avatar URL policy rejects embedded data, credentials, files and excessive input',()=>{const c={URL};vm.createContext(c);vm.runInContext(source.slice(source.indexOf('    function avatarURL('),source.indexOf('    function updateAvatar(')),c);for(const x of ['data:image/png;base64,AAA','file:///private/image','https://u:p@example.org/a','https://example.org/'+'a'.repeat(2048),null])assert.equal(c.avatarURL(x),'');assert.equal(c.avatarURL('https://example.org/avatar.png'),'https://example.org/avatar.png');});

@@ -93,12 +93,23 @@
             }};
     }
     function owns(name) { return installed && (name === ROOT || name === PAGE || active); }
-    function destroy() { if(teardown){var cleanup=teardown;teardown=null;cleanup();}installed=false;active=false; }
+    function destroy() { if(teardown){var cleanup=teardown;teardown=null;cleanup();}installed=false;active=false;openPrimary=null;consumeNativeMainBypass=null; }
+    var openPrimary = null, consumeNativeMainBypass = null;
     function install(L, $, doc) {
         if (installed || !L || !$ || !L.Template || !L.SettingsApi || !L.SettingsApi.allParams || !L.SettingsApi.allComponents || !L.SettingsApi.removeParams || !L.SettingsApi.removeComponent || !L.Settings || !L.Settings.main || !L.Settings.listener || !L.Settings.listener.remove) return false;
         installed = true;
-        var registry, group = 'all', query = '', page = 0, returning = false, focusId = '', rootFocus = '', limit = 24;
+        var registry, group = 'all', query = '', page = 0, returning = false, focusId = '', rootFocus = '', limit = 24, nativeMainBypass = false;
         var metrics = {opens:0, builds:0, renderedRows:0, maxRenderedRows:0, listeners:2, timers:0, observers:0};
+        function openNativeMain() {
+            nativeMainBypass=true;
+            try { L.Controller.toggle('settings'); }
+            finally { nativeMainBypass=false; }
+        }
+        consumeNativeMainBypass = function () {
+            if(!nativeMainBypass)return false;
+            nativeMainBypass=false;
+            return true;
+        };
         function folders() {
             return L.Settings.main().render().find('.settings-folder[data-component]').toArray().filter(function (n) { return n.getAttribute('data-component') !== ROOT && n.style.display !== 'none' && !n.classList.contains('hide') && !n.classList.contains('hidden'); });
         }
@@ -109,14 +120,14 @@
             var body=L.Settings.render().find('.settings__body'), target=body.find('[data-name]').filter(function(){return this.getAttribute('data-name')===key;}).first();
             if(target.length){L.Controller.collectionFocus(target[0],body);target.trigger('hover:focus');}
         }
-        function leave() {
+        function leave(skipBack) {
             var enabled=L.Controller.enabled();
-            if(!returning && enabled.name==='settings_component' && enabled.controller && enabled.controller.back) {
+            if(!skipBack && !returning && enabled.name==='settings_component' && enabled.controller && enabled.controller.back) {
                 returning=true;try{enabled.controller.back();}finally{returning=false;}
             }
             L.Settings.main().render().detach();
         }
-        function nativePage(name, back) { leave(); active=true; L.Settings.create(name,{onBack:function(){if(!returning){returning=true;try{back();}finally{returning=false;}}}}); }
+        function nativePage(name, back, skipBack) { leave(skipBack); active=true; L.Settings.create(name,{onBack:function(){if(!returning){returning=true;try{back();}finally{returning=false;}}}}); }
         function button(component, key, label, description, action) {
             L.SettingsApi.addParam({component:component,param:{name:key,type:'button'},field:{name:clean(label),description:clean(description)},onRender:function(item){item.on('hover:enter.settingsHub',action);}});
         }
@@ -125,7 +136,16 @@
             var root=L.Settings.render()[0];root.setAttribute('data-settings-hub-version','73-preview-1');
             root.setAttribute('data-settings-hub-metrics',JSON.stringify(metrics));
         }
-        function openRoot() { nativePage(ROOT,function(){active=false;doc.body.classList.remove('settings-hub-active');L.Controller.toggle('settings');}); if(rootFocus)focus(rootFocus); }
+        function openRoot(fromNativeMain) { nativePage(ROOT,function(){active=false;doc.body.classList.remove('settings-hub-active');openNativeMain();},fromNativeMain); if(rootFocus)focus(rootFocus); }
+        openPrimary = function () {
+            if (!installed || active) return false;
+            try { openRoot(true); return active; }
+            catch (error) {
+                active=false;doc.body.classList.remove('settings-hub-active');
+                try { openNativeMain(); } catch (fallbackError) { /* Native main is the best available fallback. */ }
+                return false;
+            }
+        };
         function openOwner(row) {
             if(row.status==='broken'){L.Noty.show(row.explanation);return;}
             if(row.component==='omdb_config_ui' && !(L.AverageRating && L.AverageRating.settingsPrivacyVersion>=1)){L.Noty.show('Спершу оновіть плагін рейтингів: стара панель може показати приватні ключі. #73');return;}
@@ -164,7 +184,7 @@
         button(ROOT,'hub_problems','Проблемні налаштування','Лише підтверджені помилки й обмеження; неперевірені — окремо.',function(){choose('problems');});
         button(ROOT,'hub_unverified','Не перевірено','Параметри без підтвердження ефекту та збереження.',function(){choose('unverified');});
         button(ROOT,'hub_all','Усі налаштування та пошук','Оригінальні обробники й значення збережено.',function(){choose('all');});
-        button(ROOT,'hub_native','Стандартні налаштування','Повернутися до штатного інтерфейсу Lampa.',function(){leave();active=false;doc.body.classList.remove('settings-hub-active');L.Controller.toggle('settings');});
+        button(ROOT,'hub_native','Стандартні налаштування','Повернутися до штатного інтерфейсу Lampa.',function(){leave();active=false;doc.body.classList.remove('settings-hub-active');openNativeMain();});
         // No stylesheet, theme bootstrap or visual controller: those belong to #79.
         function onOpen(e){
             if(e.name===ROOT){active=true;metrics.opens++;rebuild();mark();}
@@ -176,12 +196,14 @@
         L.Settings.listener.follow('close',onClose);
         teardown=function(){
             L.Settings.listener.remove('open',onOpen);L.Settings.listener.remove('close',onClose);
-            if(active){leave();active=false;doc.body.classList.remove('settings-hub-active');L.Controller.toggle('settings');}
+            if(active){leave();active=false;doc.body.classList.remove('settings-hub-active');openNativeMain();}
             L.SettingsApi.removeComponent(ROOT);L.SettingsApi.removeParams(PAGE);
             L.Settings.main().render().find('[data-component="'+ROOT+'"]').remove();
             registry=null;
+            openPrimary=null;
+            consumeNativeMainBypass=null;
         };
         return true;
     }
-    return {contractVersion:1,categories:categories,category:category,fields:fields,createRegistry:createRegistry,owns:owns,install:install,destroy:destroy};
+    return {contractVersion:1,categories:categories,category:category,fields:fields,createRegistry:createRegistry,owns:owns,openPrimary:function(){return openPrimary ? openPrimary() : false;},consumeNativeMainBypass:function(){return consumeNativeMainBypass ? consumeNativeMainBypass() : false;},install:install,destroy:destroy};
 });
