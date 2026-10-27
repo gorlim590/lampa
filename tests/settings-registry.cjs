@@ -45,11 +45,11 @@ test('Loading the reusable module has no UI/bootstrap/listener side effect befor
  vm.runInNewContext(fs.readFileSync(__dirname+'/../ui/settings-hub.js','utf8'),{window});
  assert.equal(window.LampaSettingsHub.contractVersion,1);assert.equal(window.LampaSettingsHub.owns('settings_hub'),false);
 });
-test('Info self-navigation is reproduced in isolation and reported separately from a lazy template dependency',()=>{
+test('Info keeps native Back; lazy template dependency remains reported separately',()=>{
  const fs=require('node:fs'),vm=require('node:vm'),source=fs.readFileSync(__dirname+'/../community/new-category.js','utf8');
  const marker=source.indexOf('name: "ncInfo",',source.indexOf('//Info\n      Lampa.SettingsApi.addParam')),start=source.lastIndexOf('      Lampa.SettingsApi.addParam({',marker),end=source.indexOf('\n      });',marker)+10;
- assert(marker>0&&end>marker);let definition,enter;const routes=[],controller={};const Lampa={Lang:{translate:x=>x},SettingsApi:{addParam:d=>definition=d},Settings:{create:name=>routes.push(name)},Controller:{enabled:()=>({controller})}};
- vm.runInNewContext(source.slice(start,end),{Lampa});definition.onRender({show(){},on:(event,fn)=>enter=fn});enter();controller.back();controller.back();assert.deepEqual(routes,['ncInfo','ncInfo','ncInfo']);
+ assert(marker>0&&end>marker);let definition,enter;const routes=[],backCalls=[];const nativeBack=()=>backCalls.push('native');const controller={back:nativeBack};const Lampa={Lang:{translate:x=>x},SettingsApi:{addParam:d=>definition=d},Settings:{create:name=>routes.push(name)},Controller:{enabled:()=>({controller})}};
+ vm.runInNewContext(source.slice(start,end),{Lampa});definition.onRender({show(){},on:(event,fn)=>enter=fn});enter();controller.back();assert.deepEqual(routes,['ncInfo']);assert.deepEqual(backCalls,['native']);assert.equal(controller.back,nativeBack);
  const {L,params}=fixture();params.addCategory=[definition];params.ncInfo=[{param:{name:'group',type:'static'},field:{name:'Інформація'}}];const get=L.Template.get;L.Template.get=key=>{if(key==='settings_ncInfo')throw Error('Lazy template');return get(key);};
- const r=hub.createRegistry(L);assert.equal(r.rows.find(x=>x.component==='addCategory').status,'broken');assert.equal(r.rows.find(x=>x.component==='ncInfo').status,'blocked');assert.equal(r.select('problems').length,2);
+ const r=hub.createRegistry(L);assert.notEqual(r.rows.find(x=>x.component==='addCategory').status,'broken');assert.equal(r.rows.find(x=>x.component==='ncInfo').status,'blocked');assert.equal(r.select('problems').length,1);
 });
