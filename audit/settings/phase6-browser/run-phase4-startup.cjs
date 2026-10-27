@@ -64,8 +64,8 @@ function safeBrowserMarksSource() {
 
 (async () => {
     let browser, page, cdp, marksScriptId, listScriptId, routeHandler, pageConsoleHandler, pageErrorHandler, resultsToWrite, finalUi;
-    let originalPageCount = 0, originalViewport, targetId = null;
-    const routes = [], blocked = { traktApi: 0, traktAuth: 0, duplicateOwnModules: 0 };
+    let originalPageCount = 0, originalViewport, targetId = null, initialObservation = null;
+    const routes = [], blocked = { traktApi: 0, traktAuth: 0, duplicateOwnModules: 0, duplicateOwnModulePaths: [] };
     const consoleErrors = [], pageErrors = [];
     const startSamples = { baseline: [], optimized: [] };
     originalPageCount = await pageCount();
@@ -81,7 +81,7 @@ function safeBrowserMarksSource() {
         assert(targetBefore, 'existing Lampa target must be present');
         targetId = targetBefore.id;
         originalViewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight, dpr: devicePixelRatio }));
-        startSamples.baseline.push(await page.evaluate(() => {
+        initialObservation = await page.evaluate(() => {
             const d = window.StremioHybrid?.diagnostics?.() || {}, paints = performance.getEntriesByType('paint');
             const paint = name => paints.find(entry => entry.name === name)?.startTime ?? null;
             return { source: 'existing page before route; local Phase 6 preview deployment (not latest-main exact)',
@@ -89,7 +89,7 @@ function safeBrowserMarksSource() {
                 hybridScriptStartMs: d.scriptStartMs ?? null, hybridShellMs: d.shellAppliedMs ?? null, firstHybridFrameMs: d.firstShellFrameMs ?? null,
                 appready: !!window.appready, previewModuleCount: window.LampaPhase6ModuleReport?.modules?.length || 0,
                 loaderStarted: !!window.LampaLoaderStarted, hybrid: !!window.StremioHybrid, verticalCards: document.querySelectorAll('.ydesign-vertical').length };
-        }));
+        });
         pageConsoleHandler = message => { if (message.type() === 'error') { const location=message.location();let source='unknown';try{const u=new URL(location.url);source=u.origin+u.pathname;}catch(_){}consoleErrors.push({kind:'console.error',source,line:location.lineNumber||0}); } };
         pageErrorHandler = error => { let source='unknown',line=0;const match=String(error.stack||'').match(/(https?:\/\/[^\s)]+):(\d+):(\d+)/);if(match){try{const u=new URL(match[1]);source=u.origin+u.pathname;line=Number(match[2])||0;}catch(_){}}pageErrors.push({name:error.name||'Error',source,line}); };
         page.on('console', pageConsoleHandler);
@@ -115,6 +115,7 @@ function safeBrowserMarksSource() {
                 if (local && url.pathname.endsWith('/preview-loader.js')) name = 'loader.js';
                 else if (local && /\/(stremio-hybrid|interface-plus|design-optimized|cardify-plus|torrent-search|average-rating|translate|trakt|trakt-plus)\.js$/.test(url.pathname)) {
                     blocked.duplicateOwnModules++;
+                    blocked.duplicateOwnModulePaths.push(url.origin + url.pathname);
                     return route.abort('blockedbyclient');
                 }
                 else if (url.origin === 'https://gorlim590.github.io' && url.pathname.startsWith('/lampa/')) name = url.pathname.slice('/lampa/'.length);
@@ -128,6 +129,7 @@ function safeBrowserMarksSource() {
                     }
                     if (/^(ui\/(stremio-hybrid|settings-hub|torrent-overlay|interface-plus|design-optimized|cardify-plus)|trakt\/(trakt|trakt-plus)|providers\/torrent-search|media\/average-rating|localization\/translate)\.js$/.test(name)) {
                         blocked.duplicateOwnModules++;
+                        blocked.duplicateOwnModulePaths.push(url.origin + url.pathname);
                         return route.abort('blockedbyclient');
                     }
                 }
@@ -311,6 +313,7 @@ function safeBrowserMarksSource() {
         resultsToWrite = {
             testedCommit: commit,
             testedAssets: hashes,
+            initialObservation,
             mode: 'existing dedicated Chromium; warm reloads only; no storage clearing',
             viewport: originalViewport,
             baseline: startSamples.baseline,

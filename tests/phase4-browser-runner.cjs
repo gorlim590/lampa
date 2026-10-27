@@ -15,6 +15,7 @@ test('runner uses the full default deferred graph and blocks Trakt auth/API call
  for(const file of ['trakt/trakt.js','trakt/trakt-plus.js','providers/torrent-search.js','media/average-rating.js','ui/cardify-plus.js','localization/translate.js'])assert(source.includes(file));
  assert(source.includes("url.hostname === 'api.trakt.tv'"));
  assert(source.includes("url.hostname === 'auth.trakt.tv'"));
+ assert(source.includes('duplicateOwnModulePaths.push(url.origin + url.pathname)'));
  assert(!source.includes("LAMPA_PLUGINS_LIST = ['ui/cardify-plus.js']"));
 });
 

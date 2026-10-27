@@ -1,69 +1,741 @@
 {
-  "baseSha": "bb689027eccab5a0758e3bf7c7f05328d640f74f",
-  "sourceBranch": "feat/issue-79-phase4-ui-first",
-  "mode": "Existing dedicated Chromium tab; exact working-tree source routed into that tab; warm reloads only; no profile/storage clearing",
-  "assetSha256": {
-    "loader.js": "7cff53ca65293eb126b444b193a5a54ee0879c416437f10b4ca167345a385dbc",
-    "ui/stremio-hybrid.js": "4c5da5fc8030730f315e76557705b11a75b2124be4cd9b54bef966a02f86e9dd",
+  "testedCommit": "7fe0c7334bf539c583c4dbddc5ea42f1a5f3cdbf",
+  "testedAssets": {
+    "loader.js": "143f9ccd8a3e1ce94ac6db18d381cbcde56581bc0a8130861e18158da7b920b6",
+    "ui/stremio-hybrid.js": "be5fa583141c7c7d50d761da5b95d9a2ba78ca44d88fc8bcff6974f708085031",
     "ui/settings-hub.js": "aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288",
+    "ui/torrent-overlay.js": "ea9cf9384ce50a612e2def6ef4edce83f01093e24e84360b1818ad040296401c",
     "ui/interface-plus.js": "9537df254948a908cc21b03647740d1c8f59458828d7378e7c51c584f85a5d0d",
     "ui/design-optimized.js": "6bce398af8d1f85faaeca7721a94540a0c73571038932fb475fcf76d7c1a0dcf",
     "ui/cardify-plus.js": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
-    "ui/torrent-overlay.js": "ea9cf9384ce50a612e2def6ef4edce83f01093e24e84360b1818ad040296401c"
+    "trakt/trakt.js": "3230fdcd8eed32642d0ad6d616e8d3b9628a4320d97fb0b5fef005d7eea3cb38",
+    "trakt/trakt-plus.js": "2bfe8ae58a3619de30d298951638a69640b686ade98e1483f838d4c84c7bee8e",
+    "providers/torrent-search.js": "6b0530d01bcb14a151a1519cd29adcf1f3ba029b065d19bc5b0eb6dee3a5d453",
+    "media/average-rating.js": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+    "localization/translate.js": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68"
   },
-  "startup": {
-    "initialObservedDelivery": "The preexisting page had the Phase 6 preview loader active, repository loader inactive, and a 13-module serial preview path; this was not a current-main baseline.",
-    "optimizedWarmReloads": 3,
-    "criticalLoaderMs": [518, 479, 451],
-    "appreadyAtLoaderStart": false,
-    "loadedCriticalUiModules": 3,
-    "loaderFailedCount": [0, 0, 0],
-    "visualStateEachRun": {
-      "hybrid": true,
-      "settingsHub": true,
-      "hybridStylesheets": 1,
-      "interfaceAdapterContract": 1,
-      "interfaceFallbackHeaderCss": false,
-      "ydesignVerticalCards": 21,
-      "ukrainianBadges": 3,
-      "cardifySettingsParameters": 11
-    },
-    "paintTiming": "First Paint, FCP, first native shell, first Hybrid shell and Home-card timing were unavailable from this warm-preview route.",
-    "comparison": "Not comparable: prior route was an older preview, and paint metrics were unavailable. No startup improvement or flash elimination claim is made."
-  },
-  "navigation": {
-    "status": "PASS",
-    "sameExistingTab": true,
-    "scenario": "Native Settings → Hub → search → YDesign owner → Back to same query/result/focus → Hub root → Standard Lampa Settings; root Back returned to native Settings without re-entry.",
-    "method": "Native Lampa controller and keyboard flow; one initial search-field harness assumption was corrected to use the native keyboard confirmation flow.",
-    "repeatCount": 1,
-    "limitations": "A two-consecutive-run integrated scenario was not completed. Final repeated-run attempt lost the existing CDP/browser connection; no browser restart was attempted."
-  },
-  "safety": {
-    "profileDataCleared": false,
-    "persistentSettingsChanged": false,
-    "authenticatedMutations": false,
-    "traktApiRequests": 0,
-    "traktAuthRequests": 0,
-    "mockedServices": ["Trakt API and authentication endpoints blocked at the browser boundary"],
-    "testOptionalPluginList": "In-memory test-only list; not persisted",
-    "storageIsolation": "Not complete: Lampa Storage was not cleared or exported; do not treat these browser observations as disposable-storage evidence."
-  },
-  "console": {
-    "errorsObservedAcrossEarlierCombinedRuns": 184,
-    "pageSyntaxErrorsObserved": 3,
-    "attribution": "Unavailable; the earlier capture aggregated errors across routes and did not retain source details. Console cleanliness is not established."
-  },
+  "mode": "existing dedicated Chromium; warm reloads only; no storage clearing",
   "viewport": {
     "width": 7680,
     "height": 4320,
-    "devicePixelRatio": 0.25,
-    "interpretation": "Existing browser viewport; screenshots/crops are not 1080p rendering or device acceptance."
+    "dpr": 0.25
   },
-  "finalBrowserState": {
-    "status": "BLOCKED",
-    "evidence": "After the final runner attempt, the existing CDP endpoint stopped responding and no process matching the dedicated profile remained. Runner cleanup reported route/mark removal errors. No Chromium process, tab, profile or server was restarted or replaced.",
-    "cause": "Unknown"
+  "baseline": [
+    {
+      "firstPaintMs": 1092,
+      "firstContentfulPaintMs": 1344,
+      "hybridShellMs": 4150.8,
+      "homeCardsMs": 10084.300000011921,
+      "paintTimingApi": {
+        "firstPaintMs": 1092,
+        "firstContentfulPaintMs": 1344
+      },
+      "hybridScriptStartMs": 4144.9,
+      "hybridAppliedShellMs": 4150.8,
+      "firstHybridFrameMs": 4153.1,
+      "appready": true,
+      "appreadyAtLoaderStart": false,
+      "criticalMs": 999,
+      "deferredMs": 935,
+      "loaderStage": "complete",
+      "loaderLoaded": 9,
+      "loaderFailed": 0,
+      "cards": 22,
+      "uaBadges": 5,
+      "hybridStyles": 1,
+      "hybrid": true,
+      "hub": true,
+      "cardifySettings": 11,
+      "activeModules": {
+        "traktCore": true,
+        "traktPlus": true,
+        "torrentSearch": true,
+        "averageRating": true,
+        "localization": true
+      },
+      "resources": [
+        {
+          "path": "http://127.0.0.1:8766/preview-loader.js",
+          "startMs": 3491,
+          "durationMs": 37,
+          "responseEndMs": 3528
+        },
+        {
+          "path": "https://gorlim590.github.io/lampa/ui/stremio-hybrid.js",
+          "startMs": 3497,
+          "durationMs": 650,
+          "responseEndMs": 4147
+        },
+        {
+          "path": "https://gorlim590.github.io/lampa/ui/stremio-hybrid.js",
+          "startMs": 3535,
+          "durationMs": 601,
+          "responseEndMs": 4136
+        },
+        {
+          "path": "https://gorlim590.github.io/lampa/ui/interface-plus.js",
+          "startMs": 4153,
+          "durationMs": 199,
+          "responseEndMs": 4352
+        },
+        {
+          "path": "https://gorlim590.github.io/lampa/ui/stremio-hybrid.js",
+          "startMs": 4163,
+          "durationMs": 277,
+          "responseEndMs": 4440
+        },
+        {
+          "path": "https://gorlim590.github.io/lampa/ui/design-optimized.js",
+          "startMs": 4362,
+          "durationMs": 161,
+          "responseEndMs": 4523
+        },
+        {
+          "path": "https://gorlim590.github.io/lampa/ui/torrent-overlay.js",
+          "startMs": 8586,
+          "durationMs": 196,
+          "responseEndMs": 8781
+        },
+        {
+          "path": "https://gorlim590.github.io/lampa/ui/settings-hub.js",
+          "startMs": 8588,
+          "durationMs": 199,
+          "responseEndMs": 8787
+        },
+        {
+          "path": "https://gorlim590.github.io/lampa/ui/cardify-plus.js",
+          "startMs": 9117,
+          "durationMs": 237,
+          "responseEndMs": 9354
+        }
+      ],
+      "wallToReadyMs": 10250
+    }
+  ],
+  "optimized": [
+    {
+      "firstPaintMs": 248,
+      "firstContentfulPaintMs": 332,
+      "hybridShellMs": 1990.1,
+      "homeCardsMs": 10820.800000011921,
+      "paintTimingApi": {
+        "firstPaintMs": 248,
+        "firstContentfulPaintMs": 332
+      },
+      "hybridScriptStartMs": 1981.5,
+      "hybridAppliedShellMs": 1990.1,
+      "firstHybridFrameMs": 2005.8,
+      "appready": true,
+      "appreadyAtLoaderStart": false,
+      "criticalMs": 567,
+      "deferredMs": 314,
+      "loaderStage": "complete",
+      "loaderLoaded": 9,
+      "loaderFailed": 0,
+      "cards": 28,
+      "uaBadges": 11,
+      "hybridStyles": 1,
+      "hybrid": true,
+      "hub": true,
+      "cardifySettings": 11,
+      "activeModules": {
+        "traktCore": true,
+        "traktPlus": true,
+        "torrentSearch": true,
+        "averageRating": true,
+        "localization": true,
+        "cardifySettings": 11
+      },
+      "resources": [
+        {
+          "path": "http://127.0.0.1:8766/preview-loader.js",
+          "startMs": 1738,
+          "durationMs": 37,
+          "responseEndMs": 1775
+        },
+        {
+          "path": "https://gorlim590.github.io/lampa/ui/stremio-hybrid.js",
+          "startMs": 1748,
+          "durationMs": 132,
+          "responseEndMs": 1880
+        },
+        {
+          "path": "https://gorlim590.github.io/lampa/ui/stremio-hybrid.js",
+          "startMs": 1781,
+          "durationMs": 155,
+          "responseEndMs": 1936
+        },
+        {
+          "path": "http://127.0.0.1:8766/preview-loader.js",
+          "startMs": 1783,
+          "durationMs": 156,
+          "responseEndMs": 1939
+        },
+        {
+          "path": "https://gorlim590.github.io/lampa/ui/interface-plus.js",
+          "startMs": 2017,
+          "durationMs": 98,
+          "responseEndMs": 2115
+        },
+        {
+          "path": "https://gorlim590.github.io/lampa/ui/design-optimized.js",
+          "startMs": 2290,
+          "durationMs": 40,
+          "responseEndMs": 2329
+        },
+        {
+          "path": "https://gorlim590.github.io/lampa/ui/torrent-overlay.js",
+          "startMs": 6825,
+          "durationMs": 23,
+          "responseEndMs": 6848
+        },
+        {
+          "path": "https://gorlim590.github.io/lampa/ui/settings-hub.js",
+          "startMs": 6826,
+          "durationMs": 27,
+          "responseEndMs": 6854
+        },
+        {
+          "path": "https://gorlim590.github.io/lampa/ui/cardify-plus.js",
+          "startMs": 7084,
+          "durationMs": 42,
+          "responseEndMs": 7127
+        }
+      ],
+      "deferredCompleteMs": 11057,
+      "loaderRequested": 9,
+      "wallToReadyMs": 11129
+    }
+  ],
+  "routeAssets": [
+    {
+      "url": "http://127.0.0.1:8766/preview-loader.js",
+      "source": "loader.js",
+      "sha256": "143f9ccd8a3e1ce94ac6db18d381cbcde56581bc0a8130861e18158da7b920b6"
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/ui/stremio-hybrid.js",
+      "source": "ui/stremio-hybrid.js",
+      "sha256": "be5fa583141c7c7d50d761da5b95d9a2ba78ca44d88fc8bcff6974f708085031"
+    },
+    {
+      "url": "http://127.0.0.1:8766/preview-loader.js",
+      "source": "loader.js",
+      "sha256": "143f9ccd8a3e1ce94ac6db18d381cbcde56581bc0a8130861e18158da7b920b6"
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/ui/interface-plus.js",
+      "source": "ui/interface-plus.js",
+      "sha256": "9537df254948a908cc21b03647740d1c8f59458828d7378e7c51c584f85a5d0d"
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/ui/design-optimized.js",
+      "source": "ui/design-optimized.js",
+      "sha256": "6bce398af8d1f85faaeca7721a94540a0c73571038932fb475fcf76d7c1a0dcf"
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/ui/settings-hub.js",
+      "source": "ui/settings-hub.js",
+      "sha256": "aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288"
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/trakt/trakt.js",
+      "source": "trakt/trakt.js",
+      "sha256": "3230fdcd8eed32642d0ad6d616e8d3b9628a4320d97fb0b5fef005d7eea3cb38"
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/providers/torrent-search.js",
+      "source": "providers/torrent-search.js",
+      "sha256": "6b0530d01bcb14a151a1519cd29adcf1f3ba029b065d19bc5b0eb6dee3a5d453"
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/trakt/trakt-plus.js",
+      "source": "trakt/trakt-plus.js",
+      "sha256": "2bfe8ae58a3619de30d298951638a69640b686ade98e1483f838d4c84c7bee8e"
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/media/average-rating.js",
+      "source": "media/average-rating.js",
+      "sha256": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94"
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/ui/cardify-plus.js",
+      "source": "ui/cardify-plus.js",
+      "sha256": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb"
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/localization/translate.js",
+      "source": "localization/translate.js",
+      "sha256": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68"
+    }
+  ],
+  "exactAssetHashes": {
+    "loader.js": "143f9ccd8a3e1ce94ac6db18d381cbcde56581bc0a8130861e18158da7b920b6",
+    "ui/stremio-hybrid.js": "be5fa583141c7c7d50d761da5b95d9a2ba78ca44d88fc8bcff6974f708085031",
+    "ui/settings-hub.js": "aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288",
+    "ui/torrent-overlay.js": "ea9cf9384ce50a612e2def6ef4edce83f01093e24e84360b1818ad040296401c",
+    "ui/interface-plus.js": "9537df254948a908cc21b03647740d1c8f59458828d7378e7c51c584f85a5d0d",
+    "ui/design-optimized.js": "6bce398af8d1f85faaeca7721a94540a0c73571038932fb475fcf76d7c1a0dcf",
+    "ui/cardify-plus.js": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+    "trakt/trakt.js": "3230fdcd8eed32642d0ad6d616e8d3b9628a4320d97fb0b5fef005d7eea3cb38",
+    "trakt/trakt-plus.js": "2bfe8ae58a3619de30d298951638a69640b686ade98e1483f838d4c84c7bee8e",
+    "providers/torrent-search.js": "6b0530d01bcb14a151a1519cd29adcf1f3ba029b065d19bc5b0eb6dee3a5d453",
+    "media/average-rating.js": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+    "localization/translate.js": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68"
   },
-  "physicalGoogleTv": "NOT TESTED"
+  "blockedServiceCounts": {
+    "traktApi": 0,
+    "traktAuth": 0,
+    "duplicateOwnModules": 2
+  },
+  "consoleErrorCount": 114,
+  "consoleErrorKinds": [
+    {
+      "kind": "console.error",
+      "source": "https://siaivo.isroot.in/vender/jquery/jquery.js",
+      "line": 9565
+    },
+    {
+      "kind": "console.error",
+      "source": "https://siaivo.isroot.in/vender/jquery/jquery.js",
+      "line": 9565
+    },
+    {
+      "kind": "console.error",
+      "source": "https://siaivo.isroot.in/vender/jquery/jquery.js",
+      "line": 9565
+    },
+    {
+      "kind": "console.error",
+      "source": "https://siaivo.isroot.in/vender/jquery/jquery.js",
+      "line": 9565
+    },
+    {
+      "kind": "console.error",
+      "source": "https://siaivo.isroot.in/vender/jquery/jquery.js",
+      "line": 9565
+    },
+    {
+      "kind": "console.error",
+      "source": "https://siaivo.isroot.in/vender/jquery/jquery.js",
+      "line": 9565
+    },
+    {
+      "kind": "console.error",
+      "source": "https://siaivo.isroot.in/vender/jquery/jquery.js",
+      "line": 9565
+    },
+    {
+      "kind": "console.error",
+      "source": "https://siaivo.isroot.in/vender/jquery/jquery.js",
+      "line": 9565
+    },
+    {
+      "kind": "console.error",
+      "source": "https://siaivo.isroot.in/vender/jquery/jquery.js",
+      "line": 9565
+    },
+    {
+      "kind": "console.error",
+      "source": "https://siaivo.isroot.in/vender/jquery/jquery.js",
+      "line": 9565
+    },
+    {
+      "kind": "console.error",
+      "source": "https://siaivo.isroot.in/vender/jquery/jquery.js",
+      "line": 9565
+    },
+    {
+      "kind": "console.error",
+      "source": "https://siaivo.isroot.in/vender/jquery/jquery.js",
+      "line": 9565
+    },
+    {
+      "kind": "console.error",
+      "source": "https://siaivo.isroot.in/app.min.js",
+      "line": 53834
+    },
+    {
+      "kind": "console.error",
+      "source": "http://127.0.0.1:8766/preview-loader.js",
+      "line": 0
+    },
+    {
+      "kind": "console.error",
+      "source": "http://127.0.0.1:8766/media/custom-favorites.js",
+      "line": 0
+    },
+    {
+      "kind": "console.error",
+      "source": "http://127.0.0.1:8766/providers/parsers.js",
+      "line": 0
+    },
+    {
+      "kind": "console.error",
+      "source": "http://127.0.0.1:8766/ui/screensaver-plus.js",
+      "line": 0
+    },
+    {
+      "kind": "console.error",
+      "source": "http://127.0.0.1:8766/media/ua-comments.js",
+      "line": 0
+    },
+    {
+      "kind": "console.error",
+      "source": "https://siaivo.isroot.in/vender/jquery/jquery.js",
+      "line": 9565
+    },
+    {
+      "kind": "console.error",
+      "source": "https://siaivo.isroot.in/vender/jquery/jquery.js",
+      "line": 9565
+    }
+  ],
+  "pageErrorNames": [
+    {
+      "name": "SyntaxError",
+      "source": "https://siaivo.isroot.in/app.min.js",
+      "line": 44592
+    },
+    {
+      "name": "SyntaxError",
+      "source": "https://siaivo.isroot.in/app.min.js",
+      "line": 44592
+    },
+    {
+      "name": "SyntaxError",
+      "source": "https://siaivo.isroot.in/app.min.js",
+      "line": 44592
+    },
+    {
+      "name": "SyntaxError",
+      "source": "https://siaivo.isroot.in/app.min.js",
+      "line": 44592
+    }
+  ],
+  "scriptErrors": [
+    {
+      "name": "SyntaxError",
+      "source": "https://siaivo.isroot.in/",
+      "line": 4
+    },
+    {
+      "name": "SyntaxError",
+      "source": "https://siaivo.isroot.in/",
+      "line": 83
+    }
+  ],
+  "finalUi": {
+    "viewport": {
+      "width": 7680,
+      "height": 4320,
+      "dpr": 0.25
+    },
+    "bodyClasses": [
+      "orientation--portrait",
+      "stremio-hybrid",
+      "ydesign-active"
+    ],
+    "controller": "items_line",
+    "hybridOwner": true,
+    "hybridInitCount": 1,
+    "hybridStyleCount": 1,
+    "interfaceAdapter": 1,
+    "interfaceFallbackHeaderStyle": false,
+    "ydesignReady": true,
+    "verticalCards": 28,
+    "uaBadges": 11,
+    "hubContract": 1,
+    "settingsOpen": false
+  },
+  "navigation": {
+    "settingsOpen": "PASS",
+    "dpadCategory": "PASS",
+    "metadataSearch": "PASS",
+    "ownerRoute": "PASS",
+    "ownerBackFocusAndQuery": "PASS",
+    "standardFallback": {
+      "controller": "sh_settings_nav",
+      "nativeRailVisible": true,
+      "hubActive": false
+    },
+    "hubRootBack": "PASS",
+    "repeatedEntryRegistrations": "PASS",
+    "queryResults": {
+      "controller": "settings_component",
+      "visibleResults": 1,
+      "empty": false,
+      "queryPreserved": true
+    },
+    "ownerPanel": {
+      "controller": "settings_component",
+      "settingVisible": true,
+      "hubActive": true
+    },
+    "ownerBack": {
+      "controller": "settings_component",
+      "focus": "hub_item_0",
+      "queryPreserved": true
+    },
+    "hubRoot": {
+      "controller": "settings_component",
+      "focus": "hub_search",
+      "queryPreserved": true
+    },
+    "rootBack": {
+      "controller": "sh_settings_nav",
+      "nativeRailVisible": true,
+      "hubActive": false
+    },
+    "hubParamsBefore": 15,
+    "hubParamsAfter": 15
+  },
+  "dpad": {
+    "status": "PASS",
+    "focusRestored": true,
+    "before": {
+      "controller": "items_line",
+      "focus": {
+        "tag": "DIV",
+        "name": "",
+        "action": "",
+        "class": "card",
+        "rowIndex": 0,
+        "itemIndex": 0
+      }
+    },
+    "after": {
+      "controller": "items_line",
+      "focus": {
+        "tag": "DIV",
+        "name": "",
+        "action": "",
+        "class": "card",
+        "rowIndex": 1,
+        "itemIndex": 0
+      }
+    }
+  },
+  "browserSurvival": {
+    "matchingProfileProcesses": 1,
+    "pageCount": 1,
+    "sameTarget": true
+  },
+  "initialObservation": {
+    "source": "existing page before route; local Phase 6 preview deployment (not latest-main exact)",
+    "firstPaintMs": 1008,
+    "firstContentfulPaintMs": 1276,
+    "hybridScriptStartMs": 4312.2,
+    "hybridShellMs": 4317.5,
+    "firstHybridFrameMs": 4324.7,
+    "appready": true,
+    "previewModuleCount": 0,
+    "loaderStarted": true,
+    "hybrid": true,
+    "verticalCards": 28
+  },
+  "comparison": {
+    "status": "PARTIAL: one warm paired observation only; current local preview baseline and exact branch default path, no cold launch or cache reset",
+    "method": "Same dedicated tab/profile, same viewport, sequential reloads; existing route was measured first, exact branch bytes and full documented default plugin list second. No browser profile data were cleared.",
+    "baseline": {
+      "firstPaintMs": 1092,
+      "firstContentfulPaintMs": 1344,
+      "hybridShellMs": 4150.8,
+      "firstHybridFrameMs": 4153.1,
+      "homeCardsMs": 10084.300000011921
+    },
+    "optimized": {
+      "firstPaintMs": 248,
+      "firstContentfulPaintMs": 332,
+      "hybridShellMs": 1990.1,
+      "firstHybridFrameMs": 2005.8,
+      "homeCardsMs": 10820.800000011921
+    },
+    "deltaOptimizedMinusBaselineMs": {
+      "firstPaintMs": -844,
+      "firstContentfulPaintMs": -1012,
+      "hybridShellMs": -2160.7,
+      "firstHybridFrameMs": -2147.3,
+      "homeCardsMs": 736.5
+    },
+    "criticalQueueMs": {
+      "baseline": 999,
+      "optimized": 567
+    },
+    "deferredCompleteMs": {
+      "baseline": 935,
+      "optimized": 11057
+    },
+    "firstUsableDpadLatency": "NOT TIMED; native D-pad focus move and restoration were exercised successfully after Home rendered.",
+    "browserCondition": "Current viewport 7680×4320 at DPR 0.25; one warm run per variant. No viewport override, cache clear, or profile reset."
+  },
+  "standardDefaultPluginGraph": {
+    "testOnlyInMemoryList": [
+      "trakt/trakt.js",
+      "trakt/trakt-plus.js",
+      "providers/torrent-search.js",
+      "media/average-rating.js",
+      "ui/cardify-plus.js",
+      "localization/translate.js"
+    ],
+    "userStoredPluginList": "NOT READ; the test override bypassed any personal Storage list",
+    "loaderRequested": 9,
+    "loaderLoaded": 9,
+    "loaderFailed": 0,
+    "initializedIndicators": {
+      "traktCore": true,
+      "traktPlus": true,
+      "torrentSearch": true,
+      "averageRating": true,
+      "localization": true,
+      "cardifySettings": 11
+    },
+    "status": "PASS for execution/registration of the full standard default graph; Trakt account/network behavior remains unverified because both Trakt API and OAuth hosts were blocked."
+  },
+  "duplicateDelivery": {
+    "status": "PARTIAL",
+    "observedOwnModuleRequestsBlockedByTestRoute": 2,
+    "personalInstalledExtensionList": "NOT INSPECTED OR MODIFIED",
+    "meaning": "The test route suppressed duplicate old-host deliveries to isolate the documented one-loader path. This does not prove the installed extension list is already consolidated. README now lists all nine loader-owned direct URLs to remove during a deliberate migration.",
+    "blockedPathsStatus": "Path names were not captured in this completed run; the rerunnable harness now records only origin/path, with query strings omitted."
+  },
+  "cleanup": {
+    "status": "PASS",
+    "verified": [
+      "Playwright page console/error handlers removed",
+      "request route unregistered",
+      "page error listener removed",
+      "PerformanceObserver and MutationObserver disconnected",
+      "temporary globals and timer removed",
+      "new-document script IDs removed",
+      "page CDP session detached",
+      "same page target and page count preserved",
+      "dedicated process still present"
+    ],
+    "browserCloseCalled": false
+  },
+  "browserAcceptance": {
+    "status": "PASS for the bounded exact-source run",
+    "settingsNavigation": {
+      "settingsOpen": "PASS",
+      "dpadCategory": "PASS",
+      "metadataSearch": "PASS",
+      "ownerRoute": "PASS",
+      "ownerBackFocusAndQuery": "PASS",
+      "standardFallback": {
+        "controller": "sh_settings_nav",
+        "nativeRailVisible": true,
+        "hubActive": false
+      },
+      "hubRootBack": "PASS",
+      "repeatedEntryRegistrations": "PASS",
+      "queryResults": {
+        "controller": "settings_component",
+        "visibleResults": 1,
+        "empty": false,
+        "queryPreserved": true
+      },
+      "ownerPanel": {
+        "controller": "settings_component",
+        "settingVisible": true,
+        "hubActive": true
+      },
+      "ownerBack": {
+        "controller": "settings_component",
+        "focus": "hub_item_0",
+        "queryPreserved": true
+      },
+      "hubRoot": {
+        "controller": "settings_component",
+        "focus": "hub_search",
+        "queryPreserved": true
+      },
+      "rootBack": {
+        "controller": "sh_settings_nav",
+        "nativeRailVisible": true,
+        "hubActive": false
+      },
+      "hubParamsBefore": 15,
+      "hubParamsAfter": 15
+    },
+    "dpadFocus": {
+      "status": "PASS",
+      "focusRestored": true,
+      "before": {
+        "controller": "items_line",
+        "focus": {
+          "tag": "DIV",
+          "name": "",
+          "action": "",
+          "class": "card",
+          "rowIndex": 0,
+          "itemIndex": 0
+        }
+      },
+      "after": {
+        "controller": "items_line",
+        "focus": {
+          "tag": "DIV",
+          "name": "",
+          "action": "",
+          "class": "card",
+          "rowIndex": 1,
+          "itemIndex": 0
+        }
+      }
+    },
+    "sameTabAndProcessSurvival": {
+      "matchingProfileProcesses": 1,
+      "pageCount": 1,
+      "sameTarget": true
+    },
+    "actualInstalledExtensionConfiguration": "NOT VERIFIED; no profile preferences were read or changed.",
+    "temporaryContextPolicy": "The runner attached to the existing page context; no new browser context, page, process, or profile was created."
+  },
+  "incidentInvestigation": {
+    "kernelOOMEvents": [
+      {
+        "time": "2026-10-27 22:35:47 +02:00",
+        "victim": "chrome process 276762"
+      },
+      {
+        "time": "2026-10-27 22:38:55 +02:00",
+        "victim": "chrome process 420652"
+      }
+    ],
+    "currentDedicatedProfileProcess": "A process for the dedicated profile was later observed listening on 127.0.0.1:9222 and survived this bounded run.",
+    "attribution": "OOM renderer/process kills are evidenced, but the available records do not link either victim to the vanished Lampa target. The CDP disappearance cause remains not fully established."
+  },
+  "consoleAssessment": {
+    "consoleErrors": 114,
+    "pageExceptions": [
+      {
+        "name": "SyntaxError",
+        "source": "https://siaivo.isroot.in/app.min.js",
+        "line": 44592
+      },
+      {
+        "name": "SyntaxError",
+        "source": "https://siaivo.isroot.in/app.min.js",
+        "line": 44592
+      },
+      {
+        "name": "SyntaxError",
+        "source": "https://siaivo.isroot.in/app.min.js",
+        "line": 44592
+      },
+      {
+        "name": "SyntaxError",
+        "source": "https://siaivo.isroot.in/app.min.js",
+        "line": 44592
+      }
+    ],
+    "status": "Observed, not clean. Four SyntaxError page exceptions were attributed to the host app bundle at app.min.js line 44592; source cause was not established. Other console/network errors were not triaged in this scoped task."
+  },
+  "physicalGoogleTV": "NOT TESTED",
+  "installation": {
+    "supportedSingleEntry": "Add the repository loader.js URL in Lampa Extensions, then remove separate URLs for the nine loader-owned modules listed in README. Restore those URLs when rolling back; no Storage migration is required.",
+    "hostEarlyPaintBoundary": "The loader cannot precede native first paint if Lampa only delivers extensions afterward. In this paired run FCP preceded the Hybrid shell in both paths; the gap was reduced but remained.",
+    "installedOneEntryPath": "NOT VERIFIED in the extension manager."
+  }
 }
