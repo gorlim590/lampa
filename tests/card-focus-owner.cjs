@@ -36,3 +36,18 @@ test('All standalone theme surfaces yield to Hybrid without changing native acti
  let restored=css;for(const selector of surfaces)restored=restored.replace('body:not(.stremio-hybrid) '+selector,selector);assert.equal(restored,oldNodes[0].textContent,name+' must preserve standalone declarations and native action styling');}
  f.apply('default');assert.equal(f.nodes.length,0);
 });
+
+test('Native Settings and Select rows yield base/focus decoration while every standalone theme remains identical',()=>{
+ const targets=['.settings-folder','.settings-param','.selectbox-item'],f=themeFixture();
+ // Undo only this milestone's six scoped selectors, leaving card/surface gates intact.
+ let previous=iface;for(const cls of targets)previous=previous.replaceAll('body:not(.stremio-hybrid) '+cls,cls);
+ const nodes=[],c={document:{getElementById:id=>nodes.find(n=>n.id===id)||null,createElement:()=>({remove(){nodes.splice(nodes.indexOf(this),1)}}),head:{appendChild:n=>nodes.push(n)}}};
+ vm.runInNewContext(previous.slice(previous.indexOf('    function applyTheme('),previous.indexOf('    var STATUS_BASE_SEL')),c);
+ for(const name of themes){f.apply(name);c.applyTheme(name);let normalized=f.nodes[0].textContent;for(const cls of targets)normalized=normalized.replaceAll('body:not(.stremio-hybrid) '+cls,cls);assert.equal(normalized,nodes[0].textContent,name+' declarations and unselected action rules must be unchanged');
+  const rules=f.nodes[0].textContent.match(/[^{}]+\{[^{}]*\}/g)||[];for(const rule of rules)for(const selector of rule.split('{')[0].split(',').map(s=>s.trim()))if(targets.some(cls=>selector.includes(cls)))assert(selector.startsWith('body:not(.stremio-hybrid) '),name+' '+selector);
+ }
+ // Ownership is class-based and applies in either plugin load order. No action/state handlers added.
+ const block=iface.slice(iface.indexOf('    function applyTheme('),iface.indexOf('    var STATUS_BASE_SEL'));
+ assert(!/MutationObserver|setInterval|setTimeout|addEventListener|StremioHybrid/.test(block));
+ assert(!/aria-disabled|:disabled|:active|\.loading|\.selected/.test(block));
+});
