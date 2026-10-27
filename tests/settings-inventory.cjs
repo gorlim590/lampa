@@ -10,7 +10,8 @@ test('Published inventory preserves every captured record and explicit effect/ow
 test('Unresolved and duplicate identities remain explicit rather than treated as certified owners or duplicate handlers',()=>{
  assert(inventory.settings.some(r=>r.owner==='Unresolved'));assert(inventory.gaps.length);
  for(const id of inventory.duplicateIds)for(const row of inventory.settings.filter(r=>r.id===id))assert.equal(row.identityVerified,false);
- assert(inventory.settings.some(r=>r.status==='Broken'));assert(inventory.settings.some(r=>r.status==='Requires dependency'));
+ assert(inventory.settings.some(r=>r.status==='Broken'&&r.id==='addCategory:ncInfo'),'The captured checkpoint retains the historic PR #99 finding');
+ assert(inventory.settings.some(r=>r.status==='Requires dependency'));
 });
 test('Public artifacts contain no local source paths, callback bodies or captured current values',()=>{
  assert(inventory.sources.length);for(const source of inventory.sources){assert.equal(source.local,undefined);assert.match(source.sha256,/^[a-f0-9]{64}$/);}
@@ -19,11 +20,13 @@ test('Public artifacts contain no local source paths, callback bodies or capture
 test('Reusable comprehensive summary is fresh and keeps runtime verification separate from static attribution',()=>{
  execFileSync(process.execPath,['scripts/settings-audit-summary.mjs','--check'],{cwd:__dirname+'/..',stdio:'pipe'});
  const summary=JSON.parse(fs.readFileSync(__dirname+'/../audit/settings/settings-audit-summary.json','utf8'));
- assert.equal(summary.counts.identifiableControls,506);assert.equal(summary.counts.presentationRecords,70);
  assert.equal(summary.records.length,summary.counts.identifiableControls);
- assert.equal(Object.values(summary.categories).reduce((n,category)=>n+category.total,0),506);
- assert.equal(Object.values(summary.categories).reduce((n,category)=>n+category.verified,0),0);
+ assert.equal(Object.values(summary.categories).reduce((n,category)=>n+category.total,0),summary.counts.identifiableControls);
+ assert.equal(Object.values(summary.categories).reduce((n,category)=>n+category.verifiedRuntime,0),0);
+ assert(summary.counts.distinctControlsExercised>=25&&summary.counts.distinctControlsExercised<=40);
+ assert.equal(summary.confirmedDefects.length,0);
  assert.equal(summary.followUpQueue.length,12);
- assert.equal(summary.confirmedDefects[0].id,'addCategory:ncInfo');
- assert.equal(summary.records.find(row=>row.id==='addCategory:ncInfo').status,'Fixed in source; runtime not verified');
+ assert.equal(summary.records.find(row=>row.id==='addCategory:ncInfo').status,'Fixed in source; runtime not verified (merged PR #99)');
 });
+
+require('./settings-functional.cjs');

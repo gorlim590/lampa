@@ -63,34 +63,34 @@ No production loader or manifest entry activates this adapter, including `settin
 
 `node --test tests/settings-census.cjs tests/settings-registry.cjs tests/settings-hub-lifecycle.cjs tests/settings-sensitive-summaries.cjs` covers privacy, categories, unknown/problem states, late discovery, native lifecycle cleanup, focus/Back return, bounded paging and unsafe panel protection in isolated fixtures. These do not certify primary-browser or physical TV acceptance.
 
-## Current comprehensive checkpoint (main after PR #98)
+## Current comprehensive checkpoint (functional batch from main after PR #99)
 
-The reusable reconciliation is `node scripts/settings-audit-summary.mjs`; `node scripts/settings-audit-summary.mjs --check` verifies the committed [machine summary](settings-audit-summary.json). It reuses the schema 2 inventory rather than recapturing or walking controls manually. The underlying capture contains 576 records: **506 controls and 70 presentation records**. It remains the PR #92 checkpoint capture, not a fresh census of the deployed app after #98. The summary preserves that limitation and separates controls from presentation rows.
+The reusable reconciliation is `node scripts/settings-audit-summary.mjs`; `node scripts/settings-audit-summary.mjs --check` verifies the committed [machine summary](settings-audit-summary.json). It reuses the schema 2 inventory rather than recapturing or walking controls manually. The baseline capture remains the PR #92 checkpoint, not a fresh census of deployed main. Control and presentation totals are derived from the inventory at generation time.
 
-The reconciled `control` status totals are evidence-based. **0 verified, 0 currently broken, 9 partial (including 2 lazy dependency rows), 0 unsupported, 497 unverified**; no static record is promoted to verified. One source-confirmed P1 was broken in the original capture and is now fixed: `community/new-category.js` replaced the native Back callback with another `Settings.create('ncInfo')`. The override is removed and regression coverage exercises the actual owner registration in an isolated mock. Browser and physical TV acceptance remain open. The earlier AverageRating credential-summary P0 repair remains covered by `tests/settings-sensitive-summaries.cjs` and does not expose credential values.
+The functional batch exercises **39 distinct controls** in seven isolated test cases: 38 verified against mocked owner effects and one partial (missing-token Trakt auth rendering). No control is verified in a live runtime; the remaining inventory is unverified, unsupported, unavailable or fixed in source awaiting runtime acceptance as detailed in JSON. The batch found no new confirmed broken control and made no production behavior changes. Existing `ncInfo` Back and AverageRating privacy repairs remain covered by prior regressions. No real account, user Storage, or live service was accessed. Browser and physical TV acceptance remain open.
 
-Per-category control totals (total / verified / broken / partial / unsupported / unverified):
+Per-category control totals (total / isolated verified / live verified / broken / partial / fixed-source/runtime-unverified / unsupported / unverified / unavailable):
 
-| Category | Total | Verified | Broken | Partial | Unsupported | Unverified |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Appearance | 231 | 0 | 0 | 6 | 0 | 225 |
-| Home | 11 | 0 | 0 | 3 | 0 | 8 |
-| Language | 31 | 0 | 0 | 0 | 0 | 31 |
-| Playback | 16 | 0 | 0 | 0 | 0 | 16 |
-| Plugins | 31 | 0 | 0 | 0 | 0 | 31 |
-| Profiles | 9 | 0 | 0 | 0 | 0 | 9 |
-| Screensaver | 33 | 0 | 0 | 0 | 0 | 33 |
-| System | 42 | 0 | 0 | 0 | 0 | 42 |
-| Torrents | 62 | 0 | 0 | 0 | 0 | 62 |
-| Trakt | 40 | 0 | 0 | 0 | 0 | 40 |
+| Category | Total | Isolated | Live | Broken | Partial | Fixed, runtime unverified | Unsupported | Unverified | Unavailable |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Appearance | 231 | 19 | 0 | 0 | 1 | 5 | 0 | 206 | 0 |
+| Home | 11 | 0 | 0 | 0 | 0 | 1 | 0 | 8 | 2 |
+| Language | 31 | 0 | 0 | 0 | 0 | 0 | 0 | 31 | 0 |
+| Playback | 16 | 0 | 0 | 0 | 0 | 0 | 0 | 16 | 0 |
+| Plugins | 31 | 0 | 0 | 0 | 0 | 0 | 0 | 31 | 0 |
+| Profiles | 9 | 0 | 0 | 0 | 0 | 0 | 0 | 9 | 0 |
+| Screensaver | 33 | 0 | 0 | 0 | 0 | 0 | 0 | 33 | 0 |
+| System | 42 | 0 | 0 | 0 | 0 | 0 | 0 | 42 | 0 |
+| Torrents | 62 | 0 | 0 | 0 | 0 | 0 | 0 | 62 | 0 |
+| Trakt | 40 | 19 | 0 | 0 | 1 | 0 | 0 | 20 | 0 |
 
 ### Ranked follow-up queue
 
-These are ranked verification actions from the inventory, **not additional confirmed defects**. The only confirmed defect found in this checkpoint is the repaired `ncInfo` Back loop. Duplicate IDs and shared storage access are review signals, not permission to remove controls or evidence of a collision.
+These are ranked verification actions from the inventory, **not confirmed defects**. This batch confirmed no new broken controls. Duplicate IDs and shared storage access are review signals, not permission to remove controls or evidence of a collision.
 
 1. **P1 — Playback** (`external/core-app.js`, `player:player`, `player:player_torrent`, `player:player_iptv`): verify route selection, fallback and device-specific playback in a controlled runtime.
-2. **P1 — Trakt auth/reset** (`trakt/trakt.js`, `trakt:trakt_auth`, `trakt:trakt_full_clear`): add mocked handler and reset semantics coverage; never use live account data.
-3. **P1 — Trakt sync/progress** (`trakt/trakt.js`, `trakt/trakt-plus.js`): test effects and profile isolation against disposable APIs and Storage.
+2. **P1 — Trakt auth/reset** (`trakt/trakt.js`, `trakt:trakt_auth`, `trakt:trakt_full_clear`): missing-token rendering was isolated; authenticated action and destructive reset semantics remain unverified. Never use live account data.
+3. **P1 — Core Trakt sync/profile scope** (`trakt/trakt.js`, `trakt:nav_trakt_sync`): Trakt+ preferences/cache reset were exercised against mocks; core sync and account-isolation semantics remain unverified.
 4. **P1 — Unattributed BWA** (10 `bwa:*` controls): recover source/delivery owner before classifying behavior.
 5. **P1 — Settings Hub with merged Hybrid** (`ui/settings-hub.js`, PR #98 Settings owner): exact-asset open/Back/focus/fallback verification in the existing browser when safely available.
 6. **P1 — Network margin persistence** (`providers/tmdb-networks.js`, `platforms_margins:*`): inspect individual writes and reset behavior; shared handler access is not itself a collision.

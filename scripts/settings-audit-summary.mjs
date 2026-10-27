@@ -9,6 +9,9 @@ const outputPath = path.join(root, 'audit/settings/settings-audit-summary.json')
 const inventory = JSON.parse(fs.readFileSync(inventoryPath, 'utf8'));
 const controlRows = inventory.settings.filter(row => row.kind === 'control');
 const presentationRows = inventory.settings.filter(row => row.kind !== 'control');
+const functionalManifestPath = path.join(root, 'tests/fixtures/settings-functional-evidence.json');
+const functionalControls = JSON.parse(fs.readFileSync(functionalManifestPath, 'utf8')).controls;
+const functionalById = new Map(functionalControls.map(item => [item.id, item]));
 const duplicateIds = new Set(inventory.duplicateIds || []);
 const storageOwners = new Map();
 
@@ -20,22 +23,25 @@ for (const row of controlRows) {
 }
 
 const statusOf = row => {
-  // This defect was repaired in the current owner source and has an isolated
-  // regression. Keep runtime/device acceptance explicitly open.
-  if (row.id === 'addCategory:ncInfo' && row.owner === 'community/new-category.js') {
-    return 'Fixed in source; runtime not verified';
-  }
+  if (functionalById.has(row.id)) return functionalById.get(row.id).status;
+  if (row.id === 'addCategory:ncInfo' && row.owner === 'community/new-category.js') return 'Fixed in source; runtime not verified (merged PR #99)';
+  if (row.status === 'Requires dependency') return 'Unavailable; lazy owner template requires native owner panel';
+  if (row.status === 'Partially works') return 'Partially verified from owner source; runtime not verified';
+  if (row.status === 'Fixed in working tree; runtime not verified') return 'Fixed in source; runtime not verified';
   return row.status;
 };
 
 const group = rows => {
-  const result = { total: rows.length, verified: 0, broken: 0, partial: 0, unsupported: 0, unverified: 0 };
+  const result = { total: rows.length, verifiedIsolated: 0, verifiedRuntime: 0, broken: 0, partial: 0, fixedSourceRuntimeUnverified: 0, unsupported: 0, unverified: 0, unavailable: 0 };
   for (const row of rows) {
     const status = statusOf(row).toLowerCase();
-    if (status === 'works' || status === 'verified') result.verified++;
+    if (status.startsWith('verified in isolated tests')) result.verifiedIsolated++;
+    else if (status.startsWith('verified in live runtime')) result.verifiedRuntime++;
     else if (status === 'broken') result.broken++;
     else if (status.includes('unsupported') || status.includes('obsolete')) result.unsupported++;
-    else if (status.includes('partial') || status.includes('requires dependency') || status.includes('fixed in source') || status.includes('fixed in working tree')) result.partial++;
+    else if (status.includes('unavailable') || status.includes('requires dependency')) result.unavailable++;
+    else if (status.includes('fixed in source')) result.fixedSourceRuntimeUnverified++;
+    else if (status.includes('partial')) result.partial++;
     else result.unverified++;
   }
   return result;
@@ -55,7 +61,7 @@ const records = controlRows.map(row => {
   if (row.status === 'Requires dependency') flags.push('missing-or-unavailable-dependency');
   if (/unsupported|obsolete/i.test(row.status)) flags.push('obsolete-or-unsupported-option');
   if (row.newCategory === 'appearance') flags.push('visual-override-review-candidate');
-  if (statusOf(row) !== 'Works') flags.push('runtime-or-device-verification-required');
+  if (!statusOf(row).startsWith('Verified in live runtime')) flags.push('runtime-or-device-verification-required');
   return {
     id: row.id,
     instanceId: row.instanceId,
@@ -64,6 +70,7 @@ const records = controlRows.map(row => {
     owner: row.owner,
     ownerEvidence: row.ownerConfidence,
     status: statusOf(row),
+    evidence: functionalById.get(row.id)?.test || row.verification || 'No control-specific functional evidence recorded.',
     storageKeys: row.storageKeys || [],
     findings: flags
   };
@@ -81,7 +88,16 @@ const report = {
     capturedRecords: inventory.settings.length,
     identifiableControls: controlRows.length,
     presentationRecords: presentationRows.length,
-    recordedDuplicateIds: duplicateIds.size
+    recordedDuplicateIds: duplicateIds.size,
+    distinctControlsExercised: functionalControls.length,
+    verifiedInIsolation: functionalControls.filter(item => item.status === 'Verified in isolated tests').length,
+    partiallyExercisedInIsolation: functionalControls.filter(item => item.status === 'Partially verified').length
+  },
+  functionalTests: {
+    file: 'tests/settings-functional.cjs',
+    isolatedCases: 7,
+    mode: 'Source owner functions/registrations with disposable Storage, mocked UI effects and intercepted Trakt API; no live credentials or writes.',
+    liveRuntimeVerified: 0
   },
   categories: Object.fromEntries(Object.entries(categories).sort(([a], [b]) => a.localeCompare(b)).map(([name, rows]) => [name, group(rows)])),
   findings: {
@@ -93,19 +109,20 @@ const report = {
     visualOverrideReviewCandidates: records.filter(row => row.findings.includes('visual-override-review-candidate')).length,
     requiresRuntimeOrDeviceVerification: records.filter(row => row.findings.includes('runtime-or-device-verification-required')).length
   },
-  confirmedDefects: [
+  confirmedDefects: [],
+  previouslyFixedFindings: [
     {
       priority: 'P1',
       id: 'addCategory:ncInfo',
       owner: 'community/new-category.js',
-      evidence: 'The Info onRender handler opened ncInfo and replaced the active controller Back callback with another create(ncInfo). The override is removed; tests/settings-nc-info.cjs exercises the current handler with isolated Settings/Controller mocks.',
-      status: 'Fixed in source; isolated regression required; browser/runtime and TV remain unverified.'
+      evidence: 'The earlier source-confirmed Back self-loop was fixed in merged PR #99 and its isolated regression remains in tests/settings-nc-info.cjs.',
+      status: 'Already fixed on baseline; runtime and TV remain unverified.'
     }
   ],
   followUpQueue: [
     { rank: 1, priority: 'P1 verification', owner: 'external/core-app.js / device player integrations', controls: ['player:player', 'player:player_torrent', 'player:player_iptv'], reason: 'Playback routing controls are captured but their effects and device fallback behavior have no acceptance evidence.' },
-    { rank: 2, priority: 'P1 verification', owner: 'trakt/trakt.js', controls: ['trakt:trakt_auth', 'trakt:trakt_full_clear'], reason: 'Auth and destructive reset controls require isolated handler/persistence tests; never exercise against live accounts.' },
-    { rank: 3, priority: 'P1 verification', owner: 'trakt/trakt.js and trakt/trakt-plus.js', controls: ['trakt:nav_trakt_sync', 'trakt_plus:*'], reason: 'High-impact sync and progress preferences need mocked API/storage effect and account-isolation coverage.' },
+    { rank: 2, priority: 'P1 verification', owner: 'trakt/trakt.js', controls: ['trakt:trakt_auth', 'trakt:trakt_full_clear'], reason: 'Missing-token auth rendering was exercised without network access; authenticated action and destructive full-reset semantics still need isolated coverage.' },
+    { rank: 3, priority: 'P1 verification', owner: 'trakt/trakt.js', controls: ['trakt:nav_trakt_sync'], reason: 'The Trakt+ preferences and cache reset run against mocked services; core sync action and account-isolation semantics remain unverified.' },
     { rank: 4, priority: 'P1 verification', owner: 'BWA external plugin; owner unresolved in capture', controls: controlRows.filter(row => row.component === 'bwa').map(row => row.id), reason: 'Ten controls have no attributable source/handler; resolve delivery and owner before claiming support or changing them.' },
     { rank: 5, priority: 'P1 verification', owner: 'ui/settings-hub.js plus PR #98 Hybrid/Settings owners', controls: ['settings_hub lifecycle', 'native Settings fallback'], reason: 'Mocks cover lifecycle/focus and fallback; verify exact delivered assets in one existing browser session when safe access permits.' },
     { rank: 6, priority: 'P1 verification', owner: 'providers/tmdb-networks.js', controls: ['platforms_margins:*'], reason: 'Four related margin controls share owner-reported storage access; inspect key-level writes and reset semantics in an isolated fixture.' },
