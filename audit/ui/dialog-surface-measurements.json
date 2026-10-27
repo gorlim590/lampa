@@ -1,0 +1,170 @@
+{
+  "baselineCommit": "18d90ff03824abdf5f87af29969591f3a68d8865",
+  "testedCommit": "63d01b4c0f65c736425ecd305eec078faef22618",
+  "interfaceSha256": "927d3bf54fb161fbd125ff42e3a88db56b106249f967e916a498335c50639be4",
+  "before": {
+    "current": {
+      "atMs": 33864.7,
+      "hubStyles": 0,
+      "hybridStyles": 1,
+      "nativeSubscriptions": {
+        "app": 194,
+        "controller": 4,
+        "params": 0,
+        "settings": 17,
+        "storage": 37
+      },
+      "nodes": 1747,
+      "profileButtons": 1,
+      "styles": 48,
+      "uiLifecycle": {
+        "firstShellFrameMs": 4459.9,
+        "initCount": 1,
+        "readyMs": 9216.8,
+        "scriptStartMs": 4453.5,
+        "settingsFailures": 0,
+        "settingsLoads": 1,
+        "settingsMounts": 1,
+        "settingsUnmounts": 0,
+        "shellAppliedMs": 4458,
+        "shellTransitions": 1,
+        "styleInsertions": 1,
+        "version": "3.0.0-early-shell-phase1"
+      },
+      "uiScripts": 11
+    },
+    "errors": [
+      {
+        "atMs": 9298.9,
+        "kind": "resource",
+        "line": 0,
+        "opaque": false,
+        "tag": "SCRIPT",
+        "type": "Error"
+      }
+    ],
+    "focus": "\u041f\u043e\u0432\u043d\u0438\u0439 \u0435\u043a\u0440\u0430\u043d",
+    "menuDpad": {
+      "atMs": 33857.2,
+      "focusResponseMs": 5.5
+    },
+    "surface": {
+      "background": "rgba(17, 18, 29, 0.96)",
+      "blur": "none",
+      "border": "1.33333px solid rgba(26, 89, 77, 0.12)",
+      "height": 1057.7083740234375,
+      "radius": "27.3732px",
+      "shadow": "rgba(0, 0, 0, 0.333) 0px 19.1612px 54.7463px 0px",
+      "width": 629.5625
+    }
+  },
+  "after": {
+    "current": {
+      "atMs": 33436.8,
+      "hubStyles": 0,
+      "hybridStyles": 1,
+      "nativeSubscriptions": {
+        "app": 196,
+        "controller": 4,
+        "params": 0,
+        "settings": 17,
+        "storage": 39
+      },
+      "nodes": 1746,
+      "profileButtons": 1,
+      "styles": 48,
+      "uiLifecycle": {
+        "firstShellFrameMs": 1929.9,
+        "initCount": 1,
+        "readyMs": 2421.6,
+        "scriptStartMs": 1921.2,
+        "settingsFailures": 0,
+        "settingsLoads": 1,
+        "settingsMounts": 1,
+        "settingsUnmounts": 0,
+        "shellAppliedMs": 1927.3,
+        "shellTransitions": 1,
+        "styleInsertions": 1,
+        "version": "3.0.0-early-shell-phase1"
+      },
+      "uiScripts": 8
+    },
+    "errors": [
+      {
+        "atMs": 2694.6,
+        "kind": "resource",
+        "line": 0,
+        "opaque": false,
+        "tag": "SCRIPT",
+        "type": "Error"
+      }
+    ],
+    "focus": "\u041f\u043e\u0432\u043d\u0438\u0439 \u0435\u043a\u0440\u0430\u043d",
+    "menuDpad": {
+      "atMs": 33427.6,
+      "focusResponseMs": 7.1
+    },
+    "source": [
+      "/gh/gorlim590/lampa@63d01b4c0f65c736425ecd305eec078faef22618/ui/interface-plus.js"
+    ],
+    "surface": {
+      "background": "rgba(17, 18, 29, 0.96)",
+      "blur": "none",
+      "border": "1.33333px solid rgba(255, 255, 255, 0.086)",
+      "height": 1057.7083740234375,
+      "radius": "27.3732px",
+      "shadow": "rgba(0, 0, 0, 0.333) 0px 19.1612px 54.7463px 0px",
+      "width": 629.5625
+    }
+  },
+  "toggle": {
+    "off": {
+      "focus": "stremio_hybrid_enabled",
+      "hybrid": false,
+      "styles": 0,
+      "surface": {
+        "background": "rgba(12, 22, 25, 0.97)",
+        "border": "1.33333px solid rgba(26, 89, 77, 0.12)"
+      },
+      "theme": true
+    },
+    "on": {
+      "focus": "stremio_hybrid_enabled",
+      "hybrid": true,
+      "styles": 1
+    },
+    "back": {
+      "focus": "head__action selector sh-head-more focus",
+      "menuSkin": false
+    }
+  },
+  "nativeModal": {
+    "focus": "\u041d\u0456",
+    "message": "\u0414\u043b\u044f \u0437\u0430\u0441\u0442\u043e\u0441\u0443\u0432\u0430\u043d\u043d\u044f \u043f\u043b\u0430\u0433\u0456\u043d\u0430 \u043d\u0435\u043e\u0431\u0445\u0456\u0434\u043d\u043e \u043f\u0435\u0440\u0435\u0437\u0430\u0432\u0430\u043d\u0442\u0430\u0436\u0438\u0442\u0438 \u043f\u0440\u043e\u0433\u0440\u0430\u043c\u0443\u041d\u0456\u0422\u0430\u043a",
+    "surface": {
+      "background": "rgba(17, 18, 29, 0.96)",
+      "blur": "none",
+      "border": "0px none rgb(223, 223, 223)",
+      "radius": "27.3732px"
+    }
+  },
+  "console": {
+    "errorEntries": 3,
+    "namedExceptions": 0,
+    "affectedSourceExceptions": 0
+  },
+  "restoration": {
+    "originalLoaderURLRestored": true,
+    "originalHybridURLNeverChanged": true,
+    "probeRemoved": true,
+    "hybridEnabledRestored": true,
+    "userTabPreserved": true
+  },
+  "limits": [
+    "One primary desktop Chrome sample per version; no physical Google TV.",
+    "D-pad uses the same two-frame observation window; 5.5 vs7.1ms is not a performance gain or robust regression.",
+    "Async DOM/subscription/script counts and different CDN delivery are not attributable to this CSS-only patch.",
+    "Unattributed SCRIPT resource errors remain; no globally clean-console or backend acceptance claim.",
+    "No UI screenshot, personal Home titles/statuses, tokens, URL queries or storage values are published."
+  ]
+}
