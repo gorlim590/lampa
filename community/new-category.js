@@ -609,10 +609,6 @@
           item.show();
           item.on("hover:enter", function () {
             Lampa.Settings.create("ncInfo");
-            var enabledController = Lampa.Controller.enabled();
-            enabledController.controller.back = function () {
-              Lampa.Settings.create('ncInfo');
-            };
           });
         }
       });

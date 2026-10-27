@@ -63,6 +63,46 @@ No production loader or manifest entry activates this adapter, including `settin
 
 `node --test tests/settings-census.cjs tests/settings-registry.cjs tests/settings-hub-lifecycle.cjs tests/settings-sensitive-summaries.cjs` covers privacy, categories, unknown/problem states, late discovery, native lifecycle cleanup, focus/Back return, bounded paging and unsafe panel protection in isolated fixtures. These do not certify primary-browser or physical TV acceptance.
 
+## Current comprehensive checkpoint (main after PR #98)
+
+The reusable reconciliation is `node scripts/settings-audit-summary.mjs`; `node scripts/settings-audit-summary.mjs --check` verifies the committed [machine summary](settings-audit-summary.json). It reuses the schema 2 inventory rather than recapturing or walking controls manually. The underlying capture contains 576 records: **506 controls and 70 presentation records**. It remains the PR #92 checkpoint capture, not a fresh census of the deployed app after #98. The summary preserves that limitation and separates controls from presentation rows.
+
+The reconciled `control` status totals are evidence-based. **0 verified, 0 currently broken, 9 partial (including 2 lazy dependency rows), 0 unsupported, 497 unverified**; no static record is promoted to verified. One source-confirmed P1 was broken in the original capture and is now fixed: `community/new-category.js` replaced the native Back callback with another `Settings.create('ncInfo')`. The override is removed and regression coverage exercises the actual owner registration in an isolated mock. Browser and physical TV acceptance remain open. The earlier AverageRating credential-summary P0 repair remains covered by `tests/settings-sensitive-summaries.cjs` and does not expose credential values.
+
+Per-category control totals (total / verified / broken / partial / unsupported / unverified):
+
+| Category | Total | Verified | Broken | Partial | Unsupported | Unverified |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Appearance | 231 | 0 | 0 | 6 | 0 | 225 |
+| Home | 11 | 0 | 0 | 3 | 0 | 8 |
+| Language | 31 | 0 | 0 | 0 | 0 | 31 |
+| Playback | 16 | 0 | 0 | 0 | 0 | 16 |
+| Plugins | 31 | 0 | 0 | 0 | 0 | 31 |
+| Profiles | 9 | 0 | 0 | 0 | 0 | 9 |
+| Screensaver | 33 | 0 | 0 | 0 | 0 | 33 |
+| System | 42 | 0 | 0 | 0 | 0 | 42 |
+| Torrents | 62 | 0 | 0 | 0 | 0 | 62 |
+| Trakt | 40 | 0 | 0 | 0 | 0 | 40 |
+
+### Ranked follow-up queue
+
+These are ranked verification actions from the inventory, **not additional confirmed defects**. The only confirmed defect found in this checkpoint is the repaired `ncInfo` Back loop. Duplicate IDs and shared storage access are review signals, not permission to remove controls or evidence of a collision.
+
+1. **P1 — Playback** (`external/core-app.js`, `player:player`, `player:player_torrent`, `player:player_iptv`): verify route selection, fallback and device-specific playback in a controlled runtime.
+2. **P1 — Trakt auth/reset** (`trakt/trakt.js`, `trakt:trakt_auth`, `trakt:trakt_full_clear`): add mocked handler and reset semantics coverage; never use live account data.
+3. **P1 — Trakt sync/progress** (`trakt/trakt.js`, `trakt/trakt-plus.js`): test effects and profile isolation against disposable APIs and Storage.
+4. **P1 — Unattributed BWA** (10 `bwa:*` controls): recover source/delivery owner before classifying behavior.
+5. **P1 — Settings Hub with merged Hybrid** (`ui/settings-hub.js`, PR #98 Settings owner): exact-asset open/Back/focus/fallback verification in the existing browser when safely available.
+6. **P1 — Network margin persistence** (`providers/tmdb-networks.js`, `platforms_margins:*`): inspect individual writes and reset behavior; shared handler access is not itself a collision.
+7. **P1 — Appearance high-impact options** (`ui/design-optimized.js`, `ui/interface-plus.js`): verify representative settings against current presentation ownership.
+8. **P1 — Plugin enable/disable** (`loader.js`, `plugins-to-enable/*`): test install, repeated open/close, missing plugin and failed dependency with disposable state.
+9. **P1 — Anonymous menu filters** (`ui/menu-hide.js`, duplicate `menu_filter:*` IDs): determine stable identity and whether registrations represent intentional repeated items.
+10. **P2 — Lazy Info template** (`community/new-category.js`, `ncInfo:group`): preserve native owner route and verify availability only after the owner opens.
+11. **P2 — Scope/reset/restart map** (all owners): inspect source for account/profile/device scope and reset/restart semantics before any key migration.
+12. **P2 — Visual override candidates** (Appearance category): check current merged owner behavior; the category-level screening flag is not a confirmed override.
+
+The report classifies ambiguous owner, duplicate identity, cross-owner storage-key, dependency, obsolete-option and visual-review signals separately. A cross-owner storage-key candidate is not reported as a confirmed collision without owner-level evidence. Continue Issue #73 by adding disposable tests for priorities 1–9, then use one bounded existing-browser verification for Settings Hub/Hybrid and reconcile a fresh registration snapshot. Google TV stays **NOT VERIFIED**.
+
 The developer-only `audit/settings/preview.js?settings_preview=1` harness loads the matching-branch functional adapter only. It never destroys/reloads Hybrid or installs a stylesheet. It refuses to mount against an active legacy Hybrid without the compatibility contract and explains the #79 dependency. Browser acceptance must use the actual modified module in the authorized existing user tab; blocked integration is not a runtime PASS.
 
 The external core source contains an anonymous Params `update_scroll_position` subscription in native Component construction that is not paired with removal in its Back/destroy code. This source-level lifecycle concern is outside this repository; do not claim all native listener counts are stable based on the Hub own-listener fixture. No global subscription patch is introduced. Runtime measurement/owner remediation remains a phase-5 acceptance item.
