@@ -134,6 +134,9 @@ async function loadAsset(pathname) {
         await page.reload({ waitUntil: 'domcontentloaded', timeout: 30000 });
         await page.waitForFunction(() => document.body.classList.contains('stremio-hybrid') && !!window.StremioHybrid, { timeout: 30000 });
         await page.waitForFunction(() => window.StremioHybrid?.diagnostics()?.settingsMounts >= 1, { timeout: 30000 });
+        await page.waitForFunction(() => window.InterfacePlusPresentation?.contractVersion === 1 &&
+            window.YDesignLoaded === true && (Lampa.SettingsApi.getParam('cardify') || []).length > 0 &&
+            document.querySelectorAll('.ydesign-vertical').length > 0, { timeout: 30000 });
         const startup = await page.evaluate(() => ({
             hybrid: document.body.classList.contains('stremio-hybrid'), version: StremioHybrid.version,
             diagnostics: StremioHybrid.diagnostics(), hub: !!window.LampaSettingsHub,
