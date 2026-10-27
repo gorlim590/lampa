@@ -85,3 +85,39 @@ Actual immutable tested source `63d01b4c0f65c736425ecd305eec078faef22618`, Inter
 - Original loader URL restored; Hybrid URL never changed in this milestone. Only temporary probe removed, normal reload, same profile/tab/auth/history/preferences preserved. Hybrid on/off was restored to enabled. Screenshot stayed local because the surrounding Home contains personal viewing information; no screenshot/account data committed.
 
 Native anonymous Settings listener lifetime remains the previously documented upstream concern; no native core/Registry patch or new navigation audit. Later button/global-background conflicts require their own reproduction before a separate PR. Keep #79 open; no automatic merge.
+
+### #79 Phase 2 — native Settings / Select action-row ownership (after #95)
+
+Baseline main `258aa750c68a6486a7f0f9f5c88a7eb304a5d737`. Scope selection used computed styles in the existing primary Lampa tab and the prior ownership map. Ordinary extension URLs initially exposed stale Interface surface CSS, so the baseline was explicitly loaded through the existing immutable source-loader before editing. No delivery/bootstrap fix is part of this milestone.
+
+**Confirmed conflict:** native Select and Settings focused parameters had Hybrid's purple background/white text, but Interface emerald `!important` rules supplied green shadow `rgba(26,89,77,.25) 0 2px 8px` and1em radius instead of the existing Hybrid .7em/inset-ring token. Native Details actions were inspected: their focused background/color/border/shadow/transform/transition already came from Hybrid/Buttons+, so they were not migrated. Native modal buttons are not in Interface's theme selector groups and remain unchanged. Do not treat every overlap as a defect.
+
+The single subsystem is native **Settings/Select action rows**: `.settings-folder`, `.settings-param`, `.selectbox-item`, plus their focused variants. Only those six selectors in Interface's existing theme base/focus groups are gated by `body:not(.stremio-hybrid)`. Existing Hybrid CSS automatically becomes authoritative. No new stronger Hybrid overrides, component renderer, state/action handler, style reinjection, observer/timer/store or Settings Registry change. Card rings and container surfaces from94/95, Details layout, global body theme, sidebar, player/torrents/Trakt and YDesign metadata are untouched.
+
+All14 standalone themes retain the same declarations, transitions and state behavior; a new test executes each theme and compares the entire generated CSS against its previous rendering after normalizing only the six selectors. Other action selectors remain byte-equivalent. Existing native checked/disabled/loading/pressed semantics and handlers are not replaced; no artificial disabled/loading states were forced in the user's app.
+
+Actual tested Interface source `abdfdcb3bab4f817f73a35c48d21e4b23a3ee301`, SHA-256 `8af96b51f36d6e7af05d4e86f834c38e1fe6ecf786aa4a4a7672a798fab0cf64`; CDN/local bytes matched and the existing main tab loaded that path. [Safe measurements](../audit/ui/action-focus-measurements.json).
+
+| Computed focused row | Before | After |
+| --- | --- | --- |
+| Radius (Select and Settings) |27.3732px|19.1612px (.7em)|
+| Shadow |green0 2px 8px|Hybrid inset4.927px, rgb(183,155,255)|
+| Background / foreground |purple rgb(121,96,201) / white|unchanged|
+| Border / scale / padding / opacity |native values|unchanged|
+| Transition |Select opacity.16s; Settings transform+opacity.16s|unchanged|
+| Menu D-pad sample |6.1ms|9.4ms|
+| Styles / owner init+style+mount+load |48 /1 each|48 /1 each|
+
+One bounded two-frame sample is3.3ms slower; **no speedup or robust regression claim**. No production callback/request/DOM additions. Native app/storage subscription counts differed with asynchronous service initialization; no leak-free or startup/network improvement assertion. The previously documented anonymous native Settings callback remains upstream and unchanged.
+
+Runtime scenarios in the same user profile:
+
+1. **PASS** native profile Select Up/Down/Back; exact avatar focus restored. Settings focused row uses canonical inset ring and existing spacing. **PASS** native Hybrid off/on restores original emerald gradient/shadow/radius and the exact trigger focus; enabled state restored.
+2. **PASS** real Details → Favorites via Left/Right/OK → native checkbox Select → Up/Down → Back. Exact `.button--book.focus` restored, loading cleared, ratings retained. No menu choice was activated, so no favorite/history/Trakt data changed. Details initial Torrent focus remains intact.
+3. **PASS** actual native confirmation/cancellation dialog during removal of only the audit probe: Left/Right works, No closes and restores originating Extensions focus. Original Hybrid pill/focus styles retained; no modal logic change.
+
+**19 local tests PASS** (5 presentation/all14themes/audit-entry +14header/native-action regressions). Repository checks69JS/43manifest/513URLs, syntax/diff/security checks PASS; existing CI registration reused. Three console error entries, zero named JS or affected-source exceptions, one unattributed SCRIPT resource error per measured version. Do not claim an entirely clean third-party environment. Physical Google TV and live forced disabled/loading coverage **NOT TESTED**.
+
+Original loader URL restored, Hybrid URL never changed, only temporary probe removed, normal reload leaves the same profile/tab usable. Local screenshot is not committed because surrounding Home contains personal viewing information. Existing delta-tree publication reuses unchanged Hybrid/YDesign/Cardify/service blobs and production code is not retransferred with evidence-only commits.
+
+Remaining candidates: other Interface action groups (sidebar/menu, generic/simple actions, player controls) and global body rules require their own runtime proof before migration. No verified Details-focus conflict was found here. Do not import those candidates speculatively; do not close79/73 or automatically merge.
