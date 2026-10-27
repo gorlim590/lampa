@@ -1419,10 +1419,14 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
     function onSettingsOpen(event) {
         if(settingsFrame) cancelAnimationFrame(settingsFrame);
         if(event.name!=='main' && window.LampaSettingsHub && window.LampaSettingsHub.owns(event.name)) { settingsCategory=''; onSettingsClose(); return; }
+        var bypassPrimary=false;
+        if(event.name==='main' && settingsHub && window.LampaSettingsHub===settingsHub && settingsHub.contractVersion===1 && typeof settingsHub.consumeNativeMainBypass==='function') {
+            try { bypassPrimary=settingsHub.consumeNativeMainBypass()===true; } catch(e) { bypassPrimary=false; }
+        }
         settingsFrame=requestAnimationFrame(function(){
             settingsFrame=0;
             if(!watching || !document.body.classList.contains('settings--open'))return;
-            if(event.name==='main' && !settingsPrimaryRouting && settingsHub && window.LampaSettingsHub===settingsHub && settingsHub.contractVersion===1 && typeof settingsHub.openPrimary==='function' && typeof settingsHub.owns==='function') {
+            if(event.name==='main' && !bypassPrimary && !settingsPrimaryRouting && settingsHub && window.LampaSettingsHub===settingsHub && settingsHub.contractVersion===1 && typeof settingsHub.openPrimary==='function' && typeof settingsHub.owns==='function') {
                 var primary=false;
                 try { var preference=Lampa.Storage.get('stremio_hybrid_primary_settings',false);primary=settingsHub.owns('settings_hub') && (preference===true || preference==='true' || preference===1 || preference==='1'); } catch(e) { primary=false; }
                 if(primary) {

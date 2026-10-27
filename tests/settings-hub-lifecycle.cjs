@@ -14,7 +14,7 @@ function fixture(){
    // Mirrors native order: build controller, send open, then toggle component.
    enabled={name:'settings_component',controller};(listeners.open||[]).forEach(fn=>fn({name,body:wrap(bodyNode),params:options}));
   }},Controller:{enabled:()=>enabled,collectionFocus:node=>focused=node,toggle:name=>{enabled={name,controller:{}};}},Input:{edit(){}},Noty:{show:message=>warnings.push(message)},Storage:{get(){throw Error('Unexpected preference read');},set(){throw Error('Unexpected preference write');}}};
- const doc={body:{classList:{add:x=>classes.add(x),remove:x=>classes.delete(x)}},head:{appendChild:n=>styles.push(n)},createElement:()=>({})};
+ const doc={body:{classList:{add:x=>classes.add(x),remove:x=>classes.delete(x),contains:x=>classes.has(x)}},head:{appendChild:n=>styles.push(n)},createElement:()=>({})};
  return {hub,L,$,doc,params,listeners,styles,warnings,classes,rootNode,open:()=>L.Settings.create('settings_hub'),openMain:()=>L.Settings.create('main'),
   enter(key){const item=items.find(n=>n.key===key);assert(item,'Missing navigation row '+key);item.enter();},back:()=>enabled.controller.back(),items:()=>items,focus:()=>focused,stats:()=>({destroyed,creates})};
 }
@@ -32,6 +32,32 @@ test('Opt-in primary entry opens the existing Hub root from native Main and Back
 test('Primary entry reports failure and restores native Settings when Hub creation throws',()=>{
  const f=fixture();f.hub.install(f.L,f.$,f.doc);f.L.Settings.create=()=>{throw Error('fixture initialization failure');};
  assert.equal(f.hub.openPrimary(),false);assert.equal(f.L.Controller.enabled().name,'settings');assert(!f.classes.has('settings-hub-active'));
+});
+test('Integrated Hub and Hybrid routing keeps explicit native returns one-shot and allows the next fresh open',()=>{
+ const f=fixture(),source=fs.readFileSync(__dirname+'/../ui/stremio-hybrid.js','utf8'),frames=[],events=[],hybridCalls=[];let primary=true;
+ f.classes.add('settings--open');
+ const c={settingsFrame:0,watching:true,settingsCategory:'interface',settingsParameter:null,settingsPrimaryRouting:false,settingsHub:f.hub,
+  window:{LampaSettingsHub:f.hub},Lampa:{Storage:{get:key=>{assert.equal(key,'stremio_hybrid_primary_settings');return primary;}},Controller:{enabled:()=>f.L.Controller.enabled()}},cancelAnimationFrame:()=>{},
+  onSettingsClose:()=>hybridCalls.push('close'),requestAnimationFrame:fn=>{frames.push(fn);return frames.length;},document:f.doc,nativeSettingsFolders:()=>[],updateSettingsRail:()=>hybridCalls.push('native-main'),chooseSettingsCategory:()=>{}};
+ vm.runInNewContext(source.slice(source.indexOf('    function onSettingsOpen('),source.indexOf('    function onSettingsClose(')),c);
+ const originalCreate=f.L.Settings.create;f.L.Settings.create=(name,options)=>{events.push(name);return originalCreate(name,options);};
+ assert.equal(f.hub.install(f.L,f.$,f.doc),true);f.listeners.open.unshift(c.onSettingsOpen);
+ const baseToggle=f.L.Controller.toggle;f.L.Controller.toggle=name=>{baseToggle(name);if(name==='settings')f.listeners.open.slice().forEach(fn=>fn({name:'main'}));};
+ function flush(){let guard=0;while(frames.length){assert(guard++<12,'Settings Main/Hub transition loop');frames.shift()();}}
+ function freshOpen(){f.openMain();flush();}
+ const hubOpens=()=>events.filter(name=>name==='settings_hub').length;
+ primary=false;freshOpen();assert.equal(hubOpens(),0,'Preference OFF leaves the native Main open');
+ primary=true;freshOpen();assert.equal(hubOpens(),1,'Preference ON opens Hub');
+ f.enter('hub_native');flush();assert.equal(f.L.Controller.enabled().name,'settings');assert.equal(hubOpens(),1,'Standard Settings return must bypass primary routing once');
+ freshOpen();assert.equal(hubOpens(),2,'A fresh Settings opening routes to Hub again');
+ f.back();flush();assert.equal(f.L.Controller.enabled().name,'settings');assert.equal(hubOpens(),2,'Hub root Back returns to native Settings once');
+ freshOpen();assert.equal(hubOpens(),3,'The bypass was consumed and does not suppress a fresh open');
+ const beforeFailure=hubOpens(),create=f.L.Settings.create;let failedAttempts=0;f.L.Settings.create=(name,options)=>{if(name==='settings_hub'){failedAttempts++;throw Error('fixture Hub initialization failure');}return create(name,options);};
+ f.openMain();flush();assert.equal(failedAttempts,1,'Failed attempt is bounded to one Hub initialization');assert.equal(hubOpens(),beforeFailure);assert.equal(f.L.Controller.enabled().name,'settings');
+ f.L.Settings.create=create;
+ c.settingsHub=null;f.hub.destroy();assert.equal(f.listeners.open.filter(fn=>fn===c.onSettingsOpen).length,1);assert.equal(f.listeners.open.length,1,'Destroy removes the Hub listener');
+ c.watching=false;freshOpen();assert.equal(hubOpens(),beforeFailure,'Disabled Hybrid leaves native Settings working');c.watching=true;
+ c.settingsHub=f.hub;assert.equal(f.hub.install(f.L,f.$,f.doc),true);assert.equal(f.listeners.open.length,2,'Reinstall adds one Hub listener');freshOpen();assert.equal(hubOpens(),beforeFailure+1,'Reinstall routes a fresh opening with no stale bypass');
 });
 test('Paging bounds rendered links, discovers late registrations and does not duplicate listeners/styles on reopen',()=>{
  const f=fixture();f.params.ydesign=Array.from({length:65},(_,i)=>({param:{name:'setting_'+i,type:'select'},field:{name:'Параметр '+i}}));f.hub.install(f.L,f.$,f.doc);
