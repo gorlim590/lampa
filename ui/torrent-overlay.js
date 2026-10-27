@@ -22,6 +22,7 @@ body.stremio-hybrid .sh-torrent-overlay .ctr-row{grid-template-columns:4.2em min
 body.stremio-hybrid .sh-torrent-overlay .ctr-name{font-size:1.18em!important;font-weight:650;line-height:1.4}
 body.stremio-hybrid .sh-torrent-overlay .ctr-quality strong,body.stremio-hybrid .sh-torrent-overlay .ctr-size{font-size:1.1em}
 body.stremio-hybrid .sh-torrent-overlay .ctr-chip,body.stremio-hybrid .sh-torrent-overlay .ctr-peers,body.stremio-hybrid .sh-torrent-overlay .ctr-best,body.stremio-hybrid .sh-torrent-overlay .ctr-quality small{font-size:.95em!important;white-space:normal;overflow-wrap:anywhere}
+body.stremio-hybrid .sh-torrent-overlay .ctr-chip.is-unknown{color:#a6aec0;border:1px dashed #ffffff30}
 body.stremio-hybrid .sh-torrent-overlay .ctr-bitrate{display:none}
 body.stremio-hybrid .sh-torrent-overlay .ctr-chips{gap:.3em .6em}
 body.stremio-hybrid .sh-torrent-overlay .focus{outline:2px solid #fff!important;outline-offset:-2px;box-shadow:inset .2em 0 var(--sm-accent,#bca8f0)!important;background:#302b47!important}
@@ -61,30 +62,28 @@ body.stremio-hybrid .sh-torrent-overlay .parser-search-status{display:none}
         var ep=coord(source.Episode??source.episode,false);
         return season!=null?'S'+pad(season)+(ep==null?'':'E'+pad(ep)):ep!=null?'E'+pad(ep):'епізоди не визначено';
     }
-    function releaseView(source,movie,kind) {
+    function releaseView(source,movie,kind,context) {
         source=source||{};movie=movie||{};var api=window.TorrentsRedesign,raw=String(source.Title||source.title||''),data=api&&api.normalizeRelease?api.normalizeRelease(source):null;
-        var match=data&&api.releaseMatch?api.releaseMatch(data,movie,{}):null;
+        var match=data&&api.releaseMatch?api.releaseMatch(data,movie,context||{}):null;
         // Full parser release names carry edition, voice and pack details needed on TV.
         // Keep relevance/ranking separate from display; never synthesize a replacement title.
         return {title:raw||'Назва релізу недоступна',raw:raw,release:data?data.parsed.name:'',match:match,data:data};
     }
-    function decorate(row,source,movie,kind) {
-        var view=releaseView(source,movie,kind),name=row.querySelector('.ctr-name'),chips=row.querySelector('.ctr-chips');
+    function decorate(row,source,movie,kind,context) {
+        var view=releaseView(source,movie,kind,context),name=row.querySelector('.ctr-name'),chips=row.querySelector('.ctr-chips');
         if(name)name.textContent=view.title;
         row.title=view.raw;row.setAttribute('aria-label',view.title);
         if(!chips)return view;
         chips.textContent='';
         function chip(label,cls){var n=document.createElement('div');n.className='ctr-chip '+(cls||'');n.textContent=label;chips.appendChild(n);}
-        if(view.release)chip(view.release);
-        // Native .m-audio tags originate from ffprobe; title tokens and subtitle tags cannot prove audio.
-        var audio=Array.from(row.querySelectorAll('.m-audio')).map(function(n){return n.getAttribute('aria-label')||n.textContent;});
-        var languages=source.AudioLanguages||source.audio_languages||[];
-        if(!Array.isArray(languages))languages=[languages];
-        var known=audio.concat(languages).join(' '),ua=/(?:^|[^a-z])(ukr?|ua|ukrainian)(?=$|[^a-z])|українськ/i.test(known),en=/(?:^|[^a-z])(en|eng|english)(?=$|[^a-z])/i.test(known);
-        if(ua)chip('🇺🇦 Українська · аудіо','is-ua');if(en)chip('🇬🇧 English · аудіо');
-        if(!ua&&!en)chip(audio.length?'Аудіо: '+audio.join(' · '):'Мови аудіо не підтверджено');
-        if(row.querySelector('.m-subtitle'))chip('CC · субтитри');
-        if(view.data&&view.data.tracker)chip(view.data.tracker);
+        var data=view.data,parsed=data&&data.parsed||{},audio=parsed.audio||{label:'Невідомо',ua:false},subs=parsed.subs||{label:'Невідомо'};
+        if(parsed.name)chip(parsed.name);
+        chip('🔊 Аудіо: '+(audio.label||'Невідомо'),audio.ua?'is-ua':audio.label==='Невідомо'?'is-unknown':'');
+        chip('Озвучення: '+(parsed.voiceover||'Невідомо'),!parsed.voiceover||parsed.voiceover==='Невідомо'?'is-unknown':'');
+        chip('Субтитри: '+(subs.label||'Невідомо'),subs.label==='Невідомо'?'is-unknown':'');
+        chip('Якість: '+(parsed.quality?(parsed.quality==='2160'?'4K':parsed.quality+'p'):'Невідомо'),parsed.quality?'':'is-unknown');
+        chip('Трекер: '+(data&&data.tracker||'Невідомо'),data&&data.tracker?'':'is-unknown');
+        chip('Сіди: '+(data&&data.seeds!=null?data.seeds:'Невідомо'),data&&data.seeds!=null?'':'is-unknown');
         row.classList.remove('is-best','sh-source-pick');
         // Recommendation is conditional on actual Cinema ranking, relevance and availability, never just 4K.
         return view;
