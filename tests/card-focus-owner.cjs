@@ -51,3 +51,22 @@ test('Native Settings and Select rows yield base/focus decoration while every st
  assert(!/MutationObserver|setInterval|setTimeout|addEventListener|StremioHybrid/.test(block));
  assert(!/aria-disabled|:disabled|:active|\.loading|\.selected/.test(block));
 });
+
+test('Sidebar menu and version decoration yields to Hybrid while all 14 standalone themes remain identical',()=>{
+ const targets=['.menu__item','.menu__item.focus','.menu__item.traverse','.menu__item.hover','.menu__version','.menu__version.focus'],f=themeFixture();
+ // Recreate the prior renderer; after removing only the six ownership prefixes,
+ // every generated theme rule must remain byte-for-byte identical.
+ let previous=iface;for(const selector of targets)previous=previous.replaceAll('body:not(.stremio-hybrid) '+selector,selector);
+ const nodes=[],c={document:{getElementById:id=>nodes.find(n=>n.id===id)||null,createElement:()=>({remove(){nodes.splice(nodes.indexOf(this),1)}}),head:{appendChild:n=>nodes.push(n)}}};
+ vm.runInNewContext(previous.slice(previous.indexOf('    function applyTheme('),previous.indexOf('    var STATUS_BASE_SEL')),c);
+ assert.equal(themes.length,14);
+ for(const name of themes){
+  f.apply(name);c.applyTheme(name);let normalized=f.nodes[0].textContent;
+  for(const selector of targets)normalized=normalized.replaceAll('body:not(.stremio-hybrid) '+selector,selector);
+  assert.equal(normalized,nodes[0].textContent,name+' must preserve standalone theme declarations and unrelated selectors');
+  const rules=f.nodes[0].textContent.match(/[^{}]+\{[^{}]*\}/g)||[];
+  for(const rule of rules)for(const selector of rule.split('{')[0].split(',').map(s=>s.trim()))
+   if(targets.some(target=>selector===target))assert(selector.startsWith('body:not(.stremio-hybrid) '),name+' '+selector);
+ }
+ f.apply('default');assert.equal(f.nodes.length,0);
+});
