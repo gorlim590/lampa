@@ -15,6 +15,8 @@ const profile = process.env.LAMPA_TEST_CHROMIUM_PROFILE || '/home/gostrimchik/la
 const version = '20261027-ui-first-1';
 const hybridVersion = '3.0.0-early-shell-phase1';
 const trialCount = Math.max(1, Math.min(3, parseInt(process.env.LAMPA_PHASE4_TRIALS || '3', 10) || 3));
+const phase7Only = process.env.LAMPA_PHASE7_ONLY === '1';
+const evidenceFilename = phase7Only ? 'phase7-startup-results.json' : 'phase4-browser-results.json';
 const assets = [
     'loader.js', 'ui/stremio-hybrid.js', 'ui/settings-hub.js', 'ui/torrent-overlay.js',
     'ui/interface-plus.js', 'ui/design-optimized.js', 'ui/cardify-plus.js',
@@ -26,6 +28,11 @@ const hashes = Object.fromEntries(assets.map(name => [name, crypto.createHash('s
 const commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
 const dirtyAssets = execFileSync('git', ['status', '--porcelain', '--', ...assets], { cwd: root, encoding: 'utf8' }).trim();
 assert.equal(dirtyAssets, '', 'commit allowlisted browser assets before claiming exact commit delivery');
+const probeRelative = path.relative(root, path.join(__dirname, 'startup-probe.js'));
+const startupProbeSource = fs.readFileSync(path.join(root, probeRelative), 'utf8');
+const startupProbeHash = crypto.createHash('sha256').update(startupProbeSource).digest('hex');
+assert.equal(execFileSync('git', ['status', '--porcelain', '--', probeRelative], { cwd: root, encoding: 'utf8' }).trim(), '', 'commit startup probe before using it');
+assert.equal(crypto.createHash('sha256').update(execFileSync('git', ['show', commit + ':' + probeRelative], { cwd: root, maxBuffer: 4 * 1024 * 1024 })).digest('hex'), startupProbeHash, 'startup probe bytes must match the recorded commit');
 const pageCount = async () => (await (await fetch('http://127.0.0.1:9222/json/list')).json()).filter(t => t.type === 'page').length;
 const profilePids = () => {
     const rows = execFileSync('ps', ['-eo', 'pid,args'], { encoding: 'utf8' }).split('\n');
@@ -63,7 +70,7 @@ function safeBrowserMarksSource() {
 }
 
 (async () => {
-    let browser, page, cdp, marksScriptId, listScriptId, routeHandler, pageConsoleHandler, pageErrorHandler, resultsToWrite, finalUi;
+    let browser, page, cdp, marksScriptId, probeScriptId, listScriptId, routeHandler, pageConsoleHandler, pageErrorHandler, resultsToWrite, finalUi;
     let originalPageCount = 0, originalViewport, targetId = null, initialObservation = null;
     const routes = [], blocked = { traktApi: 0, traktAuth: 0, duplicateOwnModules: 0, duplicateOwnModulePaths: [] };
     const consoleErrors = [], pageErrors = [];
@@ -100,6 +107,8 @@ function safeBrowserMarksSource() {
         await cdp.send('Page.enable');
         const init = await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: safeBrowserMarksSource() });
         marksScriptId = init.identifier;
+        const probeInit = await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: startupProbeSource });
+        probeScriptId = probeInit.identifier;
 
         // Scoped safety: service-auth calls are blocked; ordinary Lampa POSTs and
         // metadata/catalog requests continue untouched. The opt-list override is
@@ -162,6 +171,7 @@ function safeBrowserMarksSource() {
                     hybridStyles: document.querySelectorAll('#stremio-hybrid-style').length, hybrid: !!window.StremioHybrid,
                     hub: !!window.LampaSettingsHub, cardifySettings: (window.Lampa?.SettingsApi?.getParam('cardify') || []).length,
                     activeModules: { traktCore: !!window.TraktTV, traktPlus: !!window.trakt_plus_ready, torrentSearch: !!window.LampaTorrentSearch, averageRating: !!window.lampa_omdb_plugin_loaded, localization: !!window.YTranslateLoaded },
+                    phase7Startup: window.__lampaPhase7Probe?.snapshot() || null,
                     resources };
             });
             if (variant === 'optimized') {
@@ -180,10 +190,10 @@ function safeBrowserMarksSource() {
             return row;
         }
 
-        // Keep these bounded and in the same tab. Baseline is the currently
-        // installed local preview manifest; optimized is the branch loader routed
-        // to the exact checked-out allowlist. No cache/profile clearing occurs.
-        for (let i = 0; i < trialCount; i++) await sample('baseline');
+        // Keep runs bounded and in the same tab. Phase 7 mode measures only the
+        // exact branch graph; it does not mix the old preview's module list into
+        // a baseline/optimized comparison.
+        if (!phase7Only) for (let i = 0; i < trialCount; i++) await sample('baseline');
         // This is the complete documented default deferred graph, held in memory
         // for the optimized branch only. It intentionally bypasses personal Storage.
         listScriptId = (await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: "window.LAMPA_PLUGINS_LIST = ['trakt/trakt.js','trakt/trakt-plus.js','providers/torrent-search.js','media/average-rating.js','ui/cardify-plus.js','localization/translate.js'];" })).identifier;
@@ -314,7 +324,8 @@ function safeBrowserMarksSource() {
             testedCommit: commit,
             testedAssets: hashes,
             initialObservation,
-            mode: 'existing dedicated Chromium; warm reloads only; no storage clearing',
+            mode: phase7Only ? 'existing dedicated Chromium; exact branch only; warm reloads; no cache/profile clearing' : 'existing dedicated Chromium; warm reloads only; no storage clearing',
+            phase7Instrumentation: { path: probeRelative, sha256: startupProbeHash, markersAreNavigationRelative: true, resourceUrls: 'allowlisted local assets only; external paths redacted', probeReadsStorage: false },
             viewport: originalViewport,
             baseline: startSamples.baseline,
             optimized: startSamples.optimized,
@@ -337,7 +348,9 @@ function safeBrowserMarksSource() {
         if (page && pageErrorHandler) await cleanup('page_error_listener', () => page.off('pageerror', pageErrorHandler));
         if (page && routeHandler) await cleanup('route', () => page.unroute('**/*', routeHandler));
         if (page) await cleanup('marks', () => page.evaluate(() => { if (window.__lampaPhase4StopMarks) window.__lampaPhase4StopMarks(); clearTimeout(window.__lampaPhase4MarkTimer); delete window.__lampaPhase4Marks; delete window.__lampaPhase4StopMarks; delete window.__lampaPhase4MarkTimer; }));
+        if (page) await cleanup('phase7_probe', async () => { const errors = await page.evaluate(() => window.__lampaPhase7Probe?.stop() || []); if (errors.length) throw new Error(errors.join(',')); });
         if (cdp && marksScriptId) await cleanup('marks_script', () => cdp.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: marksScriptId }));
+        if (cdp && probeScriptId) await cleanup('phase7_probe_script', () => cdp.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: probeScriptId }));
         if (cdp && listScriptId) await cleanup('list_script', () => cdp.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: listScriptId }));
         if (cdp) await cleanup('cdp_detach', () => cdp.detach());
         // Only detach the page CDP session; preserve the existing browser process and tab.
@@ -355,7 +368,7 @@ function safeBrowserMarksSource() {
     resultsToWrite.browserSurvival = { matchingProfileProcesses: profilePids().length, pageCount: await pageCount(), sameTarget: true };
     assert.equal(resultsToWrite.browserSurvival.matchingProfileProcesses, 1, 'dedicated Chromium process survives cleanup');
     assert.equal(resultsToWrite.browserSurvival.pageCount, originalPageCount, 'existing tab count is preserved');
-    fs.writeFileSync(path.join(__dirname, 'phase4-browser-results.json'), JSON.stringify(resultsToWrite, null, 2) + '\n');
+    fs.writeFileSync(path.join(__dirname, evidenceFilename), JSON.stringify(resultsToWrite, null, 2) + '\n');
     console.log(JSON.stringify({ ok: true, baselineRuns: resultsToWrite.baseline.length, optimizedRuns: resultsToWrite.optimized.length,
         browserSurvival: resultsToWrite.browserSurvival, finalUi, blocked, routeAssetCount: routes.length,
         median: { baselineHybridMs: median(resultsToWrite.baseline.map(r => r.hybridShellMs)), optimizedHybridMs: median(resultsToWrite.optimized.map(r => r.hybridShellMs)), baselineCardsMs: median(resultsToWrite.baseline.map(r => r.homeCardsMs)), optimizedCardsMs: median(resultsToWrite.optimized.map(r => r.homeCardsMs)) } }, null, 2));

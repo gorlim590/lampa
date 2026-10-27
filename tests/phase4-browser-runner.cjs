@@ -21,5 +21,8 @@ test('runner uses the full default deferred graph and blocks Trakt auth/API call
 
 test('all temporary instrumentation has checked cleanup and original tab/process survival checks',()=>{
  for(const token of ["page.unroute('**/*', routeHandler)","page.off('console', pageConsoleHandler)","page.off('pageerror', pageErrorHandler)",'paintObserver.disconnect()','observer.disconnect()','window.removeEventListener(\'error\', onError)','Page.removeScriptToEvaluateOnNewDocument','cdp.detach()','cleanupFailures.length','dedicated Chromium process survives cleanup','existing tab count is preserved'])assert(source.includes(token),token);
+ assert(source.includes("startup-probe.js"));
+ assert(source.includes("phase7Startup: window.__lampaPhase7Probe?.snapshot()"));
+ assert(source.includes("page.evaluate(() => window.__lampaPhase7Probe?.stop()"));
  assert(!/cleanup\([^\n]*\.catch\(/.test(source));
 });
