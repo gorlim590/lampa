@@ -37,5 +37,7 @@ test('Hybrid Settings rail skips CSS-hidden native folders and keeps later D-pad
  vm.createContext(c);vm.runInContext(source.slice(source.indexOf('    function nativeSettingsFolders('),source.indexOf('    function releaseSettingsParameter(')),c);
  const available=c.nativeSettingsFolders();assert.deepEqual(available.map(node=>node.component),['bandera_online','uacomentsy']);
  assert.equal(folders.length,4,'native registrations are preserved');c.updateSettingsRail();assert.deepEqual(activeRail.children.map(node=>node.textContent),['Bandera Online','UaKomentsY']);
+ assert.equal(activeRail.children[0].getAttribute('data-component'),null,'copied routes must not inherit native plugin CSS selectors');
+ assert.equal(activeRail.children[0].getAttribute('data-sh-settings-component'),'bandera_online');
  activeRail.children[0].focused=true;c.focusSettingsCategory(1);assert.equal(activeRail.querySelector('.focus').textContent,'UaKomentsY');
 });
