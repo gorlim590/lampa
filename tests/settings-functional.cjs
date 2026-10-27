@@ -24,6 +24,7 @@ function uniqueSettings(rows,names){
 
 test('YDesign grid, styles, badges and visual options persist in mock Storage and reach owner effects',()=>{
  const f=ydFixture();f.api.createSettings();
+ f.classes.add('stremio-hybrid');
  const values={
   ydesign_theme:'oled',ydesign_style:'neon',ydesign_focus_fx:'glow',
   ydesign_ribbons:false,ydesign_watched_mark:false,ydesign_progress_marks:false,ydesign_collection_mark:false,
@@ -35,10 +36,29 @@ test('YDesign grid, styles, badges and visual options persist in mock Storage an
  for(const[name,value]of Object.entries(values)){f.context.Lampa.Storage.set(name,value);f.api.onSettingChange({name});}
  f.flush(60);f.flush(60);
  for(const name of ['ydesign-theme-oled','ydesign-style-neon','ydesign-focus-glow','ydesign-ribbons-off','ydesign-watched-off','ydesign-progress-off','ydesign-seq-off','ydesign-sat-on','ydesign-v-hide-ua','ydesign-v-hide-age','ydesign-v-hide-genres'])assert(f.classes.has(name),'Expected owner effect '+name);
+ assert(f.classes.has('stremio-hybrid'),'YDesign preference changes do not take visual ownership from Hybrid');
  assert.equal(f.cssVars['--ydesign-grid-items-v'],'7');assert.equal(f.cssVars['--ydesign-card-gap'],'1.2em');assert.equal(f.cssVars['--ydesign-ratings-saturate'],'25%');
  const restarted=ydFixture({storage:{...f.store}});restarted.api.applyDynamicCSSNow();
  assert.equal(restarted.cssVars['--ydesign-grid-items-v'],'7');assert(restarted.classes.has('ydesign-theme-oled'));
  mark('ui/design-optimized.js',names,'Registered owner options; simulated Storage writes, actual onSettingChange/applyDynamicCSSNow effects and mock restart readback.');
+});
+
+test('YDesign Home row settings gate the real registered ContentRows builders',()=>{
+ const card={id:73,source:'tmdb',media_type:'movie',original_title:'Synthetic Home row'},series={id:91,source:'tmdb',media_type:'tv',name:'Synthetic weekly series'};
+ const f=ydFixture({history:[card,series],percent:28,storage:{ydesign_row_continue:false,ydesign_row_week:false}});f.api.createSettings();
+ const settings=uniqueSettings(f.settingsParams,['ydesign_row_continue','ydesign_row_week']);
+ assert.equal(settings.get('ydesign_row_continue').param.default,true);assert.equal(settings.get('ydesign_row_week').param.default,true);
+ assert.equal(f.api.makeRowCall('cont','Продовжити перегляд'),undefined,'Disabled Home row has no ContentRows builder');
+ f.context.Lampa.Storage.set('ydesign_row_continue',true);f.api.onSettingChange({name:'ydesign_row_continue'});f.flush(60);
+ const build=f.api.makeRowCall('cont','Продовжити перегляд');assert.equal(typeof build,'function');let data;build(value=>data=value);assert.equal(data.results[0].id,73);
+ f.context.Lampa.Storage.set('ydesign_row_continue',false);f.api.onSettingChange({name:'ydesign_row_continue'});f.flush(60);assert.equal(f.api.makeRowCall('cont','Продовжити перегляд'),undefined);
+ const offset=new Date();offset.setDate(offset.getDate()+2);const nextDate=offset.toISOString().slice(0,10);
+ f.api.ApiCache.set(f.api.extCacheKey(91,'tv'),{next_ep:{date:nextDate}});
+ assert.equal(f.api.makeRowCall('week','Виходять цього тижня'),undefined,'Disabled weekly row has no ContentRows builder');
+ f.context.Lampa.Storage.set('ydesign_row_week',true);f.api.onSettingChange({name:'ydesign_row_week'});f.flush(60);
+ const week=f.api.makeRowCall('week','Виходять цього тижня');assert.equal(typeof week,'function');let weeklyData;week(value=>weeklyData=value);assert.equal(weeklyData.results[0].id,91);
+ f.context.Lampa.Storage.set('ydesign_row_week',false);f.api.onSettingChange({name:'ydesign_row_week'});f.flush(60);assert.equal(f.api.makeRowCall('week','Виходять цього тижня'),undefined);
+ mark('ui/design-optimized.js',['ydesign_row_continue','ydesign_row_week'],'Actual YDesign SettingsApi defaults, mock native Storage writes and onSettingChange; actual makeRowCall output reflects Continue and this-week rows on/off using synthetic local progress/cache; no network or account data.');
 });
 
 test('Cardify+ rating visibility and position handlers update native owner classes and survive mock restart',()=>{

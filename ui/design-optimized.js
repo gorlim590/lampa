@@ -1951,7 +1951,7 @@
     // Рахуємо тільки з кешу (без мережі): якщо даних серіалу ще немає — їх підтягне warmRows
     function computeRows() {
         var up = [], cont = [], cands = rowCandidates();
-        for (var i = 0; i < cands.length && jobs.length < 24; i++) {
+        for (var i = 0; i < cands.length; i++) {
             var c = cands[i];
             if (isTvMedia(c)) {
                 var ext = ApiCache.get(extCacheKey(c.id, 'tv'));

@@ -18,9 +18,9 @@
     "identifiableControls": 506,
     "presentationRecords": 70,
     "recordedDuplicateIds": 5,
-    "distinctControlsExercised": 65,
+    "distinctControlsExercised": 67,
     "phaseDistinctControlsExercised": 26,
-    "verifiedInIsolation": 62,
+    "verifiedInIsolation": 64,
     "partiallyExercisedInIsolation": 3,
     "phaseVerifiedInIsolation": 24,
     "phasePartiallyExercisedInIsolation": 2
@@ -50,13 +50,13 @@
     },
     "home": {
       "total": 11,
-      "verifiedIsolated": 0,
+      "verifiedIsolated": 2,
       "verifiedRuntime": 0,
       "broken": 0,
       "partial": 0,
       "fixedSourceRuntimeUnverified": 1,
       "unsupported": 0,
-      "unverified": 8,
+      "unverified": 6,
       "unavailable": 2
     },
     "language": {
@@ -5107,8 +5107,12 @@
       "label": "Рядок «Продовжити перегляд»",
       "owner": "ui/design-optimized.js",
       "ownerEvidence": "registration",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "YDesign registered Home Continue row enable/disable; real makeRowCall owner with synthetic progress and disposable Storage",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "ydesign_row_continue"
       ],
@@ -5123,8 +5127,12 @@
       "label": "Рядок «Виходять цього тижня»",
       "owner": "ui/design-optimized.js",
       "ownerEvidence": "registration",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "YDesign registered weekly row toggle; real makeRowCall owner with synthetic progress and disposable Storage",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "ydesign_row_week"
       ],

@@ -7,7 +7,7 @@ function fixture(){
  const bodyNode={},rootNode={attrs:{},setAttribute(k,v){this.attrs[k]=v;}};
  function wrap(nodes){if(!Array.isArray(nodes))nodes=[nodes];const out={length:nodes.length,toArray:()=>nodes,detach:()=>out,remove:()=>out,
   find(selector){if(selector==='.settings__body')return wrap(bodyNode);if(selector==='.settings-folder[data-component]')return wrap(nativeFolders);if(selector==='[data-name]'||selector==='.settings-param.selector')return wrap(items);if(selector==='.settings-param__name')return {text:()=>nodes[0]?.label||''};return wrap([]);},
-  filter(fn){return wrap(nodes.filter(n=>fn.call(n)));},first(){return wrap(nodes.slice(0,1));},on(event,fn){nodes.forEach(n=>n.enter=fn);return out;},addClass(name){nodes.forEach(n=>(n.classes||(n.classes=[])).push(name));return out;},trigger(event){if(event==='hover:focus')nodes.forEach(n=>n.scrollFocused=true);else nodes[0]?.enter?.();return out;}};
+  filter(fn){return wrap(nodes.filter(n=>fn.call(n)));},first(){return wrap(nodes.slice(0,1));},on(event,fn){nodes.forEach(n=>n.enter=fn);return out;},addClass(name){nodes.forEach(n=>(n.classes||(n.classes=[])).push(...String(name).split(/\s+/)));return out;},trigger(event){if(event==='hover:focus')nodes.forEach(n=>n.scrollFocused=true);else nodes[0]?.enter?.();return out;}};
  nodes.forEach((n,i)=>out[i]=n);return out;}
  const $=wrap,L={Template:{add:(name,html)=>templates[name]=html,get:name=>templates[name]||'<div></div>'},SettingsApi:{allParams:()=>params,allComponents:()=>components,addComponent:d=>{components[d.component]=d;templates['settings_'+d.component]='<div></div>';},addParam:d=>(params[d.component]||=[]).push(d),removeParams:id=>delete params[id],removeComponent:id=>{delete components[id];delete params[id];}},Settings:{main:()=>({render:()=>wrap({})}),render:()=>wrap(rootNode),listener:{follow:(event,fn)=>(listeners[event]||=[]).push(fn),remove:(event,fn)=>{listeners[event]=(listeners[event]||[]).filter(x=>x!==fn);}},
   create(name,options={}){creates++;openedSettings.push(name);let dead=false;items=(params[name]||[]).map(def=>{const item={label:def.field.name,description:def.field.description,key:def.param.name,classes:[],getAttribute:k=>k==='data-name'?def.param.name:null};def.onRender?.(wrap(item));return item;});
@@ -64,7 +64,7 @@ test('Integrated Hub and Hybrid routing keeps explicit native returns one-shot a
 test('Paging bounds rendered links, discovers late registrations and does not duplicate listeners/styles on reopen',()=>{
  const f=fixture();f.params.ydesign=Array.from({length:65},(_,i)=>({param:{name:'setting_'+i,type:'select'},field:{name:'Параметр '+i}}));f.hub.install(f.L,f.$,f.doc);
  f.open();f.enter('hub_category_appearance');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,24);f.enter('hub_next');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,24);
- f.back();const rootKeys=f.params.settings_hub.map(x=>x.param.name);assert.equal(new Set(rootKeys).size,rootKeys.length,'Root controls are not duplicated on reentry');
+ f.back();const rootKeys=f.params.settings_hub.map(x=>x.param.name);assert.equal(new Set(rootKeys).size,rootKeys.length,'Root controls are not duplicated on reentry: '+rootKeys.join(','));
  f.params.ydesign.push({param:{name:'late',type:'select'},field:{name:'Новий'}});f.enter('hub_category_appearance');f.enter('hub_next');f.enter('hub_next');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,18);
  assert.equal(f.hub.install(f.L,f.$,f.doc),false);assert.equal(f.styles.length,0);assert.equal(f.listeners.open.length,1);assert.equal(f.listeners.close.length,1);
  f.listeners.close[0]();assert.equal(f.hub.owns('ydesign'),false);assert(!f.classes.has('settings-hub-active'));
@@ -73,9 +73,9 @@ test('Search is global, case-insensitive, metadata-only, deduplicated, and prese
  const f=fixture();f.params.ydesign=[{param:{name:'rating_card_mode',type:'select'},field:{name:'Режим карток'}}];
  f.templates.settings_ydesign='<div class="settings-param selector" data-name="rating_card_mode" data-type="select"><div class="settings-param__name">Режим карток</div></div>';
  f.hub.install(f.L,f.$,f.doc);f.open();assert.equal(f.items().filter(x=>x.key==='hub_problems').length,0,'No problem shortcut without evidence');
- assert.match(f.items().find(x=>x.key==='hub_category_appearance').description,/Зареєстровано опцій: 1\. Це не підтверджує їхню роботу/);
+ assert.match(f.items().find(x=>x.key==='hub_category_appearance').description,/Тема, картки, бейджі та фокус · 1 опція/);
  f.enter('hub_search');f.search('DESIGN-OPTIMIZED');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,1,'Template and SettingsApi duplicates render once');
- assert.match(f.items().find(x=>x.key==='hub_item_0').description,/Зовнішній вигляд · ui\/design-optimized\.js · Панель доступна · ефект не перевірено/);
+ assert.match(f.items().find(x=>x.key==='hub_item_0').description,/Зовнішній вигляд · ui\/design-optimized\.js · Власник доступний · ефект не перевірено/);
  assert(f.items().find(x=>x.key==='hub_item_0').classes.includes('settings-hub-status-unverified'));
  f.enter('hub_search');assert.equal(f.searchOptions().value,'DESIGN-OPTIMIZED');f.search('YDESIGN');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,1);
  f.enter('hub_search');f.search('RATING_CARD_MODE');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,1);
@@ -158,6 +158,18 @@ test('Every status class emitted by Hub has a matching Hybrid Settings selector'
  const emitted=Array.from(block.matchAll(/return '(settings-hub-status-[a-z]+)'/g),match=>match[1]);
  assert.deepEqual(new Set(emitted),new Set(['settings-hub-status-unverified','settings-hub-status-partial','settings-hub-status-broken','settings-hub-status-unavailable']));
  emitted.forEach(name=>assert.match(hybridSource,new RegExp('settings-hub-active \\.settings-param\\.'+name+' \\{'),name+' must have an active-Hybrid selector'));
+});
+test('Hub landing emits semantic TV category/action classes and Hybrid styles one responsive owner',()=>{
+ const f=fixture(),hubSource=fs.readFileSync(__dirname+'/../ui/settings-hub.js','utf8'),hybridSource=fs.readFileSync(__dirname+'/../ui/stremio-hybrid.js','utf8');
+ f.params.ydesign_grid=[{param:{name:'ydesign_row_continue',type:'trigger',default:true},field:{name:'Рядок «Продовжити перегляд»'}}];
+ f.hub.install(f.L,f.$,f.doc);f.open();assert.equal(f.rootNode.attrs['data-settings-hub-view'],'landing');
+ const home=f.items().find(item=>item.key==='hub_category_home');assert(home.classes.includes('settings-hub-category-home'));
+ assert(f.items().find(item=>item.key==='hub_native').classes.includes('settings-hub-native'));
+ f.enter('hub_category_home');assert.equal(f.rootNode.attrs['data-settings-hub-view'],'home');f.back();
+ assert.equal(f.rootNode.attrs['data-settings-hub-view'],'landing');assert(f.items().find(item=>item.key==='hub_category_home').classes.includes('settings-hub-category-selected'));
+ assert.match(hubSource,/function heading\(component,label,className\)/);
+ assert.match(hybridSource,/\[data-settings-hub-view="landing"\] \.settings__body > \.scroll > \.scroll__content \{ display:grid/);
+ assert.match(hybridSource,/@media \(max-width: 58em\)/);assert.match(hybridSource,/settings-hub-category-home \.settings-param__name:before/);
 });
 test('Unsafe credential owner is never opened from the index and native fallback remains available',()=>{
  const f=fixture();f.params.omdb_config_ui=[{param:{name:'omdb_api_key_set',type:'static'},field:{name:'Ключ'}}];f.hub.install(f.L,f.$,f.doc);f.open();f.enter('hub_problems');const before=f.stats().creates;f.enter('hub_item_0');assert.equal(f.stats().creates,before);assert.equal(f.warnings.length,1);
@@ -267,7 +279,7 @@ test('Repeated Hub navigation, owner Back, search and reinstall cycles keep regi
  }
  assert.equal(f.listeners.open.length,1);assert.equal(f.listeners.close.length,1);
  assert.equal(f.styles.length,0,'Hub does not accumulate a separate stylesheet');
- const roots=new Set(rootParams());assert.equal(roots.size,rootBaseline.length,'No duplicate root IDs after repeated entry');
+ const roots=new Set(rootParams());assert.equal(roots.size,rootBaseline.length,'No duplicate root IDs after repeated entry: '+rootParams().join(','));
  f.hub.destroy();assert.equal(f.listeners.open.length,0);assert.equal(f.listeners.close.length,0);
  for(let i=0;i<10;i++){
   assert.equal(f.hub.install(f.L,f.$,f.doc),true);f.open();f.hub.destroy();
