@@ -26,7 +26,7 @@
                 var key = identity(row, slot.spec, index), existing = seen[key], provenance = { id: slot.spec.id, label: slot.spec.label, type: slot.spec.type };
                 if (existing) {
                     if (!existing.parser_sources.some(function (source) { return source.id === provenance.id; })) existing.parser_sources.push(provenance);
-                    ['AudioLanguages','audio_languages','SubtitleLanguages','subtitle_languages','ffprobe','info','Resolution','resolution','Season','season','Episode','episode','InfoHash'].forEach(function (field) { if (existing[field] == null && row[field] != null) existing[field] = row[field]; });
+                    ['AudioLanguages','audio_languages','SubtitleLanguages','subtitle_languages','Voices','voices','ReleaseGroup','release_group','VoiceoverStudio','voiceover_studio','ffprobe','info','Resolution','resolution','Season','season','Episode','episode','InfoHash'].forEach(function (field) { if (existing[field] == null && row[field] != null) existing[field] = row[field]; });
                     existing.parser_originals.push(row); return;
                 }
                 var item = clone(row);

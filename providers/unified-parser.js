@@ -60,6 +60,8 @@
             Type: item.type === 'series' || item.type === 'anime' || item.type === 'dorama' ? 'tv' : item.type,
             AudioLanguages: item.audio_languages || item.AudioLanguages,
             Voices: item.voices || item.Voices,
+            ReleaseGroup: item.release_group || item.ReleaseGroup,
+            VoiceoverStudio: item.voiceover_studio || item.VoiceoverStudio,
             Quality: item.quality || item.Quality,
             SubtitleLanguages: item.subtitle_languages || item.SubtitleLanguages,
             Resolution: item.resolution || item.Resolution,
