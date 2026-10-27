@@ -775,5 +775,29 @@
     "aggregateChromeRssGiB": 7.1,
     "additionalBrowserTest": "NOT RUN; swap was effectively exhausted and Chromium renderer OOM kills were recorded."
   },
-  "performanceConclusion": "One warm pair only. Hybrid shell arrived earlier in the branch sample; Home cards were 736.5ms later. This does not establish overall startup improvement; optional script execution may contend for main-thread time, but causality was not isolated."
+  "performanceConclusion": "One warm pair only. Hybrid shell arrived earlier in the branch sample; Home cards were 736.5ms later. This does not establish overall startup improvement; optional script execution may contend for main-thread time, but causality was not isolated.",
+  "homeBottleneckAnalysis": {
+    "testedSourceCommit": "7fe0c7334bf539c583c4dbddc5ea42f1a5f3cdbf",
+    "mode": "Reanalysis of sanitized existing exact-branch warm run; no browser reloaded.",
+    "observed": {
+      "firstHomeCardsMs": 10820.8,
+      "deferredLaneCompleteMs": 11057,
+      "deferredLaneDurationMs": 314,
+      "estimatedNativeReadinessAndDeferredStartMs": 10743,
+      "cardsAfterEstimatedDeferredStartMs": 77.8,
+      "deferredLaneCompletionAfterCardsMs": 236.2,
+      "loaderCriticalDurationMs": 567,
+      "defaultLoaderScripts": 9,
+      "loaderFailures": 0
+    },
+    "conclusion": "In this single warm sample, first Home cards appeared about 78 ms after the deferred lane began and about 236 ms before it completed. The optional deferred loader queue therefore was not the wait for first cards in this sample. The native appready/Home creation/content pipeline is the remaining likely boundary; appready was not directly timestamped and core Home network/render stages were not instrumented, so exact attribution remains unverified.",
+    "homeHistoryBoundary": "plugins-to-enable/home-history.js is not in the tested default nine-script loader graph. Its paired-row computation optimization is relevant only when that optional plugin is separately enabled and cannot explain the measured default-path 10.82 s card time.",
+    "dpad": "Not timed. Prior browser session exercised focus movement/restoration after Home rendered but did not establish first usable D-pad latency.",
+    "limitations": [
+      "One warm paired observation only",
+      "Viewport 7680x4320 DPR 0.25",
+      "No host app source or source map",
+      "No browser rerun because exact-branch preview server on 127.0.0.1:8766 was absent"
+    ]
+  }
 }
