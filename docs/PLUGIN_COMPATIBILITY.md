@@ -38,3 +38,33 @@ Nightingale was removed at the user's request. YDesign is the sole card UA indic
 ## Settings Registry integration (#73 / #79)
 
 Hub and Hybrid coordinate through `LampaSettingsHub.owns(name)`: Hybrid cancels its rail frame and clears the remembered category while Hub owns native Settings routes. Other routes retain native/Hybrid behavior. Loading the internal module is inert; only the single UI owner mounts/unmounts it. Combined integration requires the compatibility handshake, never a second global stylesheet or a theme reload. Old AverageRating panels are blocked by Hub until `settingsPrivacyVersion >= 1`; native fallback remains accessible. No Home/torrent business controller is replaced. See [inventory gaps](../audit/settings/README.md).
+
+## #79 Phase 2 — scoped card focus ownership
+
+Based on merged #93/main `8c3d1a7`; reuses #9/#15/#79 ownership evidence. This PR migrates **only the outer native-card focus/hover decoration**, not every presentation feature.
+
+| Boundary | Canonical / retained owner | Status and next scope |
+| --- | --- | --- |
+| Outer card focus/hover ring while Hybrid is active | Hybrid stylesheet | Interface themes yielded only their card pseudo-border/glow; Hybrid neutralizes the native pseudo-ring and uses its existing view shadow. Actual body class controls ownership; no plugin-presence heuristic/listener. |
+| Standalone Interface card focus | Original Interface theme table | All14 themes retained, gated to `body:not(.stremio-hybrid)`. No saved theme value migration. |
+| Vertical card content/UA/IMDb/personal Trakt rating/progress | YDesign and existing service writers | Unchanged. Existing YDesign outer-focus guards already yield to Hybrid; do not copy metadata or watched logic into shell. |
+| Details structure and metadata | Cardify+ templates / Interface+ section / native handlers; Hybrid composition | Unchanged; migrate one verified presentation boundary later. |
+| Header/sidebar/menu theme | Existing Hybrid plus legacy Interface theme rules | Deferred: Interface's button/modal/background overrides still exist. This PR does not assert that those are consolidated. |
+| Settings Registry/service handlers | #73 native Registry / original services | Unchanged. Do not add another controller/store or patch native listener arrays. |
+
+**Reproduction:** in the existing primary Lampa tab, an emerald Interface theme added a green1.333px pseudo-border plus10px glow while Hybrid simultaneously drew its white/purple view shadow. The fixed source yields the Interface selector and clears only the native card pseudo-decoration in Hybrid. The resulting pseudo-border is0/none, the glow is none; card radius43.797px and the original Hybrid shadow are unchanged. Hover uses the same owner. Standalone keeps its original rules automatically when the body class changes. No competing content renderer was demonstrated at this boundary, so none was removed.
+
+### Repeated-navigation listener diagnosis
+
+Phase1 recorded native Params subscriptions0→8 across Settings panels while owner initialization/style/mount remained1. Public native host `/app.min.js?v=1992278` (SHA-256 `9cea962508ca7dfd50da201f9dd0c0ea012f541d0f8db932723a8d16a2a9cc1a`) registers an anonymous `Params.listener.follow('update_scroll_position', function...)` in native Settings `buildEvents()` (line15387). Both Back and `destroy()` remove only the named `update_scroll` callback (lines15450/15464), leaving the anonymous callback retained. This establishes a source-level lifetime mismatch; it is not proof of a Hybrid/Registry reinitialization leak. Callback closures retain the panel's scroll/last state. The proper upstream fix is a named, per-instance position callback removed by both teardown paths. Do not monkeypatch private native listener arrays or rewrite Registry/service handlers in this visual PR. No zero-global-listener-growth claim.
+
+### Focused verification / performance
+
+- Tested immutable source `7d3bdc7fde008a8f1bd8265213dc81ed0cb3ad82`; CDN bytes match local hashes in [measurements](../audit/ui/card-focus-measurements.json). Existing primary user tab loaded actual changed Interface+ and Hybrid, plus unchanged YDesign/Cardify+ from that same revision.
+- **PASS** one ring/unchanged radius, UA and IMDb/rating nodes present; Right/Left use native navigation. **PASS** Details opens with Torrent action focus and Back restores a card. **PASS** native Hybrid off/on removes/restores one stylesheet, preserves the original Interface theme and trigger focus; setting restored enabled.
+- **27 automated PASS**: card-focus ownership/14themes, bounded audit-entry cleanup, existing Hybrid description/navigation/bootstrap tests. Repository check69JS/43manifest/510URLs and diff checks pass; final evidence-only head reruns CI.
+- D-pad59→57ms, including the same two-frame probe window: **no demonstrated performance change**. Two competing card decorations become one; no new production handlers, requests, timers, observers or content DOM nodes. Styles48→47, nodes1724→1763 and UI-tag counts11→5 are async/CDN/probe snapshot dependent, not proven reductions. Startup4.649→2.071s/frame and11.493→10.452s/usable are recorded only for transparency: audit-loader/CDN/cache differ, so not a startup optimization claim.
+- Console: three error logs, zero named JS/affected-source exceptions; resource failures1before/2after. Attribution is unconfirmed, no globally clean-console or backend acceptance claim. Physical Google TV **NOT TESTED**.
+- The opt-in `audit/ui/phase2-loader.js` selects the immutable actual loader/modules for verification, restores its temporary global base on success/failure and never enters default activation. No production bootstrap change. Original loader/Hybrid extension URLs were restored, only temporary probe removed; user tab/settings/auth/history preserved.
+
+Keep this PR independently reversible. Remaining #79 work: verify/migrate Interface button/modal/background themes, YDesign presentation fragments and Cardify templates separately, preserving service ownership; resolve the upstream native callback lifetime separately. No automatic merge or closing #79.

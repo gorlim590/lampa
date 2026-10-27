@@ -1,0 +1,165 @@
+{
+  "baseline": "8c3d1a7a0277075c0696f7c7286560081ec5c864",
+  "testedCommit": "7d3bdc7fde008a8f1bd8265213dc81ed0cb3ad82",
+  "sourceSha256": {
+    "ui/stremio-hybrid.js": "966ab64747f26fa10eb3efabcd6c86360948f46270ac5c78b41bb26779e88efc",
+    "ui/interface-plus.js": "7f74be4d41e522fee2784c9f684a6008b393fdb9ac516546e9f4790beea423a4"
+  },
+  "before": {
+    "hybridFrameMs": 4649.4,
+    "usableMs": 11493.3,
+    "firstDpad": {
+      "atMs": 22693.8,
+      "focusResponseMs": 59
+    },
+    "current": {
+      "atMs": 22755.1,
+      "hubStyles": 0,
+      "hybridStyles": 1,
+      "nativeSubscriptions": {
+        "app": 196,
+        "controller": 4,
+        "params": 0,
+        "settings": 17,
+        "storage": 37
+      },
+      "nodes": 1724,
+      "profileButtons": 1,
+      "styles": 48,
+      "uiLifecycle": {
+        "firstShellFrameMs": 4643.4,
+        "initCount": 1,
+        "readyMs": 9324.3,
+        "scriptStartMs": 4635,
+        "settingsFailures": 0,
+        "settingsLoads": 1,
+        "settingsMounts": 1,
+        "settingsUnmounts": 0,
+        "shellAppliedMs": 4641.2,
+        "shellTransitions": 1,
+        "styleInsertions": 1,
+        "version": "3.0.0-early-shell-phase1"
+      },
+      "uiScripts": 11
+    },
+    "errors": [
+      {
+        "atMs": 9391.6,
+        "kind": "resource",
+        "line": 0,
+        "opaque": false,
+        "tag": "SCRIPT",
+        "type": "Error"
+      }
+    ],
+    "card": {
+      "afterBorder": "1.33333px solid rgb(26, 89, 77)",
+      "afterShadow": "rgba(26, 89, 77, 0.35) 0px 0px 10px 0px",
+      "radius": "43.7971px",
+      "shadow": "rgb(240, 238, 248) 0px 0px 0px 3.83224px, rgba(151, 117, 250, 0.4) 0px 0px 0px 7.39076px"
+    },
+    "visibleUaNodes": 18,
+    "visibleRatingNodes": 27
+  },
+  "after": {
+    "hybridFrameMs": 2071.3,
+    "usableMs": 10451.9,
+    "firstDpad": {
+      "atMs": 12872.8,
+      "focusResponseMs": 57
+    },
+    "current": {
+      "atMs": 12931.3,
+      "hubStyles": 0,
+      "hybridStyles": 1,
+      "nativeSubscriptions": {
+        "app": 197,
+        "controller": 4,
+        "params": 0,
+        "settings": 17,
+        "storage": 39
+      },
+      "nodes": 1763,
+      "profileButtons": 1,
+      "styles": 47,
+      "uiLifecycle": {
+        "firstShellFrameMs": 2062.5,
+        "initCount": 1,
+        "readyMs": 2574.2,
+        "scriptStartMs": 2048.4,
+        "settingsFailures": 0,
+        "settingsLoads": 1,
+        "settingsMounts": 1,
+        "settingsUnmounts": 0,
+        "shellAppliedMs": 2056.5,
+        "shellTransitions": 1,
+        "styleInsertions": 1,
+        "version": "3.0.0-early-shell-phase1"
+      },
+      "uiScripts": 5
+    },
+    "errors": [
+      {
+        "atMs": 2748.6,
+        "kind": "resource",
+        "line": 0,
+        "opaque": false,
+        "tag": "SCRIPT",
+        "type": "Error"
+      },
+      {
+        "atMs": 9463.5,
+        "kind": "resource",
+        "line": 0,
+        "opaque": false,
+        "tag": "SCRIPT",
+        "type": "Error"
+      }
+    ],
+    "card": {
+      "afterBorder": "0px none rgb(223, 223, 223)",
+      "afterShadow": "none",
+      "radius": "43.7971px",
+      "shadow": "rgb(240, 238, 248) 0px 0px 0px 3.83224px, rgba(151, 117, 250, 0.4) 0px 0px 0px 7.39076px"
+    },
+    "visibleUaNodes": 17,
+    "visibleRatingNodes": 30
+  },
+  "toggle": {
+    "off": {
+      "focus": "stremio_hybrid_enabled",
+      "hybrid": false,
+      "interfaceTheme": 1,
+      "standaloneSelectorEnabled": true,
+      "styles": 0
+    },
+    "on": {
+      "focus": "stremio_hybrid_enabled",
+      "hybrid": true,
+      "styles": 1
+    }
+  },
+  "browserScenarios": {
+    "singleRing": "PASS",
+    "detailsOkBackFocus": "PASS",
+    "nativeHybridOffOn": "PASS"
+  },
+  "console": {
+    "errorEntries": 3,
+    "namedExceptions": 0,
+    "affectedSourceExceptions": 0
+  },
+  "restored": {
+    "loaderURL": true,
+    "hybridURL": true,
+    "probeRemoved": true,
+    "hybridEnabledRestored": true
+  },
+  "limits": [
+    "Primary desktop Chrome, not physical Google TV.",
+    "One bounded sample per version; 59 vs57ms D-pad does not demonstrate a speedup.",
+    "Startup timings are confounded by CDN/cache and optional audit-loader delivery; no startup improvement claim.",
+    "Different async Home contents/style counts and SCRIPT resource failures are not attributed to this CSS patch.",
+    "No long-task/FPS/memory/total DOM listener certification; no parser/player/backend acceptance."
+  ]
+}
