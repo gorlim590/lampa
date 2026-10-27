@@ -135,7 +135,8 @@
                 if(isConsolidated(node) || node.getAttribute('data-settings-hub-consolidated')!==null || !(owners[component] || /^ydesign_/.test(component)))return;
                 if(node.style.display==='none' || node.classList.contains('hide') || node.classList.contains('hidden'))return;
                 var rows=registry.rows.filter(function(row){return row.component===component;});
-                var directRoute=rows.length>0 && rows.every(function(row){return row.route!=='folder' && row.panelAvailable!==false && row.status!=='broken' && row.status!=='blocked';});
+                var ownerParams=L.SettingsApi.allParams()[component]||[],registered=!!L.SettingsApi.allComponents()[component] || ownerParams.length>0;
+                var directRoute=registered && rows.length>0 && rows.every(function(row){return row.route!=='folder' && row.panelAvailable!==false && row.status!=='broken' && row.status!=='blocked';});
                 if(directRoute){node.setAttribute('data-settings-hub-consolidated','true');consolidatedFolders.push({node:node});}
             });
         }
@@ -177,7 +178,7 @@
             L.SettingsApi.removeParams(ROOT);
             categories.forEach(function(c){
                 var count=uniqueRows(registry.rows.filter(function(row){return row.category===c[0] && row.panelAvailable!==false && row.status!=='broken' && row.status!=='blocked';})).length;
-                button(ROOT,'hub_category_'+c[0],c[1],count+' доступних налаштувань у поточному реєстрі',function(){choose(c[0]);});
+                button(ROOT,'hub_category_'+c[0],c[1],'Кількість доступних маршрутів: '+count+'; роботу опцій не перевірено',function(){choose(c[0]);});
             });
             button(ROOT,'hub_search','Пошук налаштувань',query?'Змінити запит: '+query:'Назва, плагін або ключ параметра',function(){rootFocus='hub_search';editSearch();});
             if(selectedRows('problems','').length)button(ROOT,'hub_problems','Проблемні налаштування','Лише підтверджені помилки, часткові обмеження й недоступні панелі.',function(){choose('problems','hub_problems');});

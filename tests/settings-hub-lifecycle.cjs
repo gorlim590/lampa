@@ -72,7 +72,7 @@ test('Search is global, case-insensitive, metadata-only, deduplicated, and prese
  const f=fixture();f.params.ydesign=[{param:{name:'rating_card_mode',type:'select'},field:{name:'Режим карток'}}];
  f.templates.settings_ydesign='<div class="settings-param selector" data-name="rating_card_mode" data-type="select"><div class="settings-param__name">Режим карток</div></div>';
  f.hub.install(f.L,f.$,f.doc);f.open();assert.equal(f.items().filter(x=>x.key==='hub_problems').length,0,'No problem shortcut without evidence');
- assert.match(f.items().find(x=>x.key==='hub_category_appearance').description,/1 доступних/);
+ assert.match(f.items().find(x=>x.key==='hub_category_appearance').description,/Кількість доступних маршрутів: 1; роботу опцій не перевірено/);
  f.enter('hub_search');f.search('DESIGN-OPTIMIZED');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,1,'Template and SettingsApi duplicates render once');
  assert.match(f.items().find(x=>x.key==='hub_item_0').description,/Зовнішній вигляд · ui\/design-optimized\.js · Панель доступна · ефект не перевірено/);
  assert(f.items().find(x=>x.key==='hub_item_0').classes.includes('settings-hub-status-unverified'));
@@ -82,6 +82,20 @@ test('Search is global, case-insensitive, metadata-only, deduplicated, and prese
  f.search('РЕЖИМ КАРТОК');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,1,'Visible Ukrainian labels are searched case-insensitively');
  f.enter('hub_search');f.search('no-such-option');assert.equal(f.items().find(x=>x.key==='hub_empty').label,'За цим запитом нічого не знайдено');
  f.enter('hub_back');assert.equal(f.focus().key,'hub_search');
+ f.enter('hub_search');assert.equal(f.searchOptions().value,'no-such-option','Root Back preserves the last query');
+});
+test('Search opened from a category restores that category and query after owner Back and list Back',()=>{
+ const f=fixture();f.params.ydesign=[{param:{name:'card_size',type:'select'},field:{name:'Розмір картки'}}];f.hub.install(f.L,f.$,f.doc);f.open();
+ f.enter('hub_category_appearance');f.enter('hub_search');f.search('YDESIGN');f.enter('hub_item_0');f.back();
+ assert.equal(f.focus().key,'hub_item_0');assert.match(f.items().find(x=>x.key==='hub_item_0').description,/Зовнішній вигляд/);
+ f.enter('hub_back');assert.equal(f.focus().key,'hub_category_appearance');f.enter('hub_search');assert.equal(f.searchOptions().value,'YDESIGN');
+});
+test('Every status class emitted by Hub has a matching Hybrid Settings selector',()=>{
+ const hubSource=fs.readFileSync(__dirname+'/../ui/settings-hub.js','utf8'),hybridSource=fs.readFileSync(__dirname+'/../ui/stremio-hybrid.js','utf8');
+ const block=hubSource.slice(hubSource.indexOf('        function statusClass('),hubSource.indexOf('        function editSearch('));
+ const emitted=Array.from(block.matchAll(/return '(settings-hub-status-[a-z]+)'/g),match=>match[1]);
+ assert.deepEqual(new Set(emitted),new Set(['settings-hub-status-unverified','settings-hub-status-partial','settings-hub-status-broken','settings-hub-status-unavailable']));
+ emitted.forEach(name=>assert.match(hybridSource,new RegExp('settings-hub-active \\.settings-param\\.'+name+' \\{'),name+' must have an active-Hybrid selector'));
 });
 test('Unsafe credential owner is never opened from the index and native fallback remains available',()=>{
  const f=fixture();f.params.omdb_config_ui=[{param:{name:'omdb_api_key_set',type:'static'},field:{name:'Ключ'}}];f.hub.install(f.L,f.$,f.doc);f.open();f.enter('hub_problems');const before=f.stats().creates;f.enter('hub_item_0');assert.equal(f.stats().creates,before);assert.equal(f.warnings.length,1);
@@ -140,11 +154,12 @@ test('Missing owner template is blocked with an explanation while the native Set
  f.back();f.enter('hub_native');assert.equal(f.L.Controller.enabled().name,'settings');assert(!f.classes.has('settings-hub-active'));
 });
 test('Hub hides only known direct owner folders while active and restores every folder on native fallback or destroy',()=>{
- const f=fixture(),safe=f.addFolder('ydesign'),unknown=f.addFolder('external_plugin'),system=f.addFolder('system_tools'),missing=f.addFolder('trakt_plus'),preserved=f.addFolder('ydesign_legacy',{marker:''});
+ const f=fixture(),safe=f.addFolder('ydesign'),unknown=f.addFolder('external_plugin'),system=f.addFolder('system_tools'),missing=f.addFolder('trakt_plus'),preserved=f.addFolder('ydesign_legacy',{marker:''}),templateOnly=f.addFolder('ydesign_template_only');
  f.params.ydesign=[{param:{name:'card_size',type:'select'},field:{name:'Розмір картки'}}];
  f.params.external_plugin=[{param:{name:'external_pref',type:'select'},field:{name:'Зовнішній параметр'}}];
  f.params.trakt_plus=[{param:{name:'trakt_pref',type:'select'},field:{name:'Trakt'}}];
  f.params.ydesign_legacy=[{param:{name:'old_pref',type:'select'},field:{name:'Стара опція'}}];
+ f.templates.settings_ydesign_template_only='<div class="settings-param selector" data-name="orphaned"><div class="settings-param__name">Осиротілий шаблон</div></div>';
  const get=f.L.Template.get;f.L.Template.get=name=>name==='settings_trakt_plus'?null:get(name);
  f.hub.install(f.L,f.$,f.doc);f.open();
  const hybridSource=fs.readFileSync(__dirname+'/../ui/stremio-hybrid.js','utf8');assert(hybridSource.includes('settings-hub-active .settings-folder[data-settings-hub-consolidated="true"]'));
@@ -154,13 +169,17 @@ test('Hub hides only known direct owner folders while active and restores every 
  assert.equal(system.getAttribute('data-settings-hub-consolidated'),null,'Native/system folder remains visible');
  assert.equal(missing.getAttribute('data-settings-hub-consolidated'),null,'Missing panel remains reachable natively');
  assert.equal(preserved.getAttribute('data-settings-hub-consolidated'),'','Pre-existing folder metadata is preserved');
+ assert.equal(templateOnly.getAttribute('data-settings-hub-consolidated'),null,'Template rows without an owner SettingsApi registration do not establish an accessible Hub route');
  f.enter('hub_native');assert.equal(safe.getAttribute('data-settings-hub-consolidated'),null,'Standard Settings immediately restores consolidated folders');
+ assert.equal(safe.style.display,'','Fallback preserves original folder visibility');assert.equal(safe.getAttribute('data-component'),'ydesign');assert.equal(preserved.getAttribute('data-settings-hub-consolidated'),'');
+ f.open();assert.equal(safe.getAttribute('data-settings-hub-consolidated'),'true');f.listeners.close[0]();assert.equal(safe.getAttribute('data-settings-hub-consolidated'),null,'Close restores consolidated folders');
+ assert.equal(safe.style.display,'');assert.equal(safe.getAttribute('data-component'),'ydesign');assert.equal(preserved.getAttribute('data-settings-hub-consolidated'),'');
  f.open();assert.equal(safe.getAttribute('data-settings-hub-consolidated'),'true');f.hub.destroy();
- assert.equal(safe.getAttribute('data-settings-hub-consolidated'),null,'Destroy restores the original folder');
+ assert.equal(safe.getAttribute('data-settings-hub-consolidated'),null,'Destroy restores the original folder');assert.equal(safe.style.display,'');assert.equal(safe.getAttribute('data-component'),'ydesign');assert.equal(preserved.getAttribute('data-settings-hub-consolidated'),'');
 });
 test('A native owner panel failure restores consolidated folders and the native Settings route',()=>{
- const f=fixture(),safe=f.addFolder('ydesign');f.params.ydesign=[{param:{name:'card_size',type:'select'},field:{name:'Розмір картки'}}];
+ const f=fixture(),safe=f.addFolder('ydesign',{display:'block'});f.params.ydesign=[{param:{name:'card_size',type:'select'},field:{name:'Розмір картки'}}];
  f.hub.install(f.L,f.$,f.doc);f.open();f.enter('hub_category_appearance');const create=f.L.Settings.create;
  f.L.Settings.create=(name,options)=>{if(name==='ydesign')throw Error('fixture owner delivery failure');return create(name,options);};
- f.enter('hub_item_0');assert.equal(f.L.Controller.enabled().name,'settings');assert.equal(safe.getAttribute('data-settings-hub-consolidated'),null);assert(!f.classes.has('settings-hub-active'));assert.match(f.warnings.at(-1),/стандартними налаштуваннями/);
+ f.enter('hub_item_0');assert.equal(f.L.Controller.enabled().name,'settings');assert.equal(safe.getAttribute('data-settings-hub-consolidated'),null);assert.equal(safe.style.display,'block');assert.equal(safe.getAttribute('data-component'),'ydesign');assert(!f.classes.has('settings-hub-active'));assert.match(f.warnings.at(-1),/стандартними налаштуваннями/);
 });
