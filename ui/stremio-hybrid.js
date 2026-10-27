@@ -239,8 +239,7 @@ body.stremio-hybrid .sh-movie .full-start__button.sh-movie-primary { width:auto;
 body.stremio-hybrid .sh-movie .full-start__button.sh-movie-primary span, body.stremio-hybrid .sh-movie .full-start__button.sh-movie-primary .full-start__text { display:block !important; font-size:.95em; }
 body.stremio-hybrid .sh-movie .full-start__button.focus { background:#f0edf9 !important; color:#15121f !important; border-color:#fff; box-shadow:inset 0 0 0 .1em #fff !important; }
 body.stremio-hybrid .sh-movie-page .full-descr { padding-top:1em; }
-/* Embedded native movie torrent sources; standalone explorer styles are untouched. */
-body.stremio-hybrid .sh-streams { position:absolute; top:.6em; right:1.8em; width:25vw; height:calc(100vh - 10em); max-height:42em; z-index:2; display:flex; flex-direction:column; min-height:0; padding:.75em; border-radius:.6em; background:rgba(12,12,22,.91); border:1px solid #ffffff10; color:#efeff5; }
+/* Embedded torrent content is mounted only by the owned full-screen popup adapter. */
 body.stremio-hybrid .sh-stream-head { display:flex; align-items:center; justify-content:space-between; gap:1em; }
 body.stremio-hybrid .sh-stream-head h2 { font-size:1.1em; font-weight:500; margin:0; }
 
@@ -324,8 +323,10 @@ body.stremio-hybrid .sh-movie .full-start__button.sh-movie-primary.focus { backg
 
 
 body.stremio-hybrid .sh-streams .sh-cinema-explorer .explorer__files-head { display:none !important; }
+body.stremio-hybrid .sh-streams .torrent-item.sh-tracker-hidden{display:none!important}
 body.stremio-hybrid .sh-streams .ctr-tools { flex-shrink:0; padding:.1em .2em .6em; font-size:.75em; }
 body.stremio-hybrid .sh-streams .ctr-tabs,body.stremio-hybrid .sh-streams .ctr-menus { display:flex; flex-wrap:wrap; gap:.4em; margin-bottom:.4em; }
+body.stremio-hybrid .sh-streams .ctr-tracker-tabs{padding:.35em 0 .1em;border-top:1px solid #ffffff18}
 body.stremio-hybrid .sh-streams .ctr-button,body.stremio-hybrid .sh-streams .ctr-tab { color:var(--text); background:#ffffff09; border:1px solid var(--line); border-radius:.5em; padding:.45em .6em; min-height:2.2em; }
 body.stremio-hybrid .sh-streams .ctr-tab { border-radius:2em; }
 body.stremio-hybrid .sh-streams .ctr-tab.is-active { background:var(--acc); color:var(--sm-accent-ink,#fff); border-color:var(--acc); }
@@ -335,9 +336,6 @@ body.stremio-hybrid .sh-streams .ctr-release-info { min-width:0; }
 
 
 body.stremio-hybrid .sh-movie-page .scroll--mask { mask-image:none !important; -webkit-mask-image:none !important; }
-/* Full-height Stremio source rail; remains inside the movie scroll, so lower rows are unobstructed. */
-body.stremio-hybrid .sh-movie-hero { position:relative; --sh-stream-width:42%; --sh-stream-gap:1.2em; }
-body.stremio-hybrid .sh-streams { top:-2.8em; right:0; width:var(--sh-stream-width); box-sizing:border-box; height:calc(100vh - 3.7em); max-height:none; padding:.8em; border-radius:0; border:0; border-left:1px solid #ffffff10; background:rgba(9,10,18,.94); }
 body.stremio-hybrid.sh-movie-active { --sh-bg:#0c0c16; }
 body.stremio-hybrid.sh-movie-active .head { background:var(--sh-header) !important; border:0 !important; box-shadow:none !important; }
 body.stremio-hybrid.sh-movie-active .head .open--search,body.stremio-hybrid.sh-movie-active .head .sh-head-more { background:transparent !important; background-image:none !important; }
@@ -368,13 +366,11 @@ body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; 
 
 `;
     css += `
-body.stremio-hybrid .sh-has-streams .sh-movie-column{width:calc(100% - var(--sh-stream-width) - var(--sh-stream-gap))!important;max-width:calc(100% - var(--sh-stream-width) - var(--sh-stream-gap))!important;min-width:0}
 body.stremio-hybrid .sh-streams .torrent-item{font-size:.9em}
 body.stremio-hybrid .sh-streams .ctr-name,body.stremio-hybrid .sh-streams .torrent-item__title{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;-webkit-line-clamp:unset!important;max-height:none!important;overflow-wrap:anywhere}
 body.stremio-hybrid .sh-streams .ctr-row{grid-template-columns:3em minmax(0,1fr) minmax(4.5em,auto)}
 body.stremio-hybrid .sh-streams .ctr-release-info,body.stremio-hybrid .sh-streams .ctr-metrics{min-width:0}
 body.stremio-hybrid .sh-streams .ctr-size{white-space:normal;overflow-wrap:anywhere}
-@media(max-width:900px){body.stremio-hybrid .sh-movie-hero{--sh-stream-width:100%}body.stremio-hybrid .sh-has-streams .sh-movie-column{width:100%!important;max-width:100%!important}body.stremio-hybrid .sh-streams{position:relative;top:auto;right:auto;width:100%;height:60vh;border-left:0}}
 body.stremio-hybrid .sh-movie .full-descr__text{display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:3;max-height:4.95em!important;overflow:hidden;white-space:normal!important}
 body.stremio-hybrid .sh-movie.sh-description-expanded .full-descr__text{display:block!important;-webkit-line-clamp:unset;max-height:none!important;overflow:visible;white-space:pre-line!important}
 body.stremio-hybrid .sh-movie .sh-description-toggle{order:6;align-self:flex-start;margin:0 0 1.2em;display:flex;align-items:center;justify-content:center;width:auto;min-width:0;min-height:2.9em;flex:0 0 auto;font-size:.85em!important;color:var(--sm-text);padding:0 .8em!important;border-radius:.55em;background:#ffffff12;border:1px solid #ffffff18}\nbody.stremio-hybrid .sh-movie .sh-description-toggle.focus{background:var(--sh-focus-soft);box-shadow:0 0 0 .12em var(--sh-accent-soft)}
@@ -753,6 +749,7 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         var names={df:df,df_year:df+' '+year,df_lg:df+' '+lg,df_lg_year:df+' '+lg+' '+year,lg:lg,lg_year:lg+' '+year,lg_df:lg+' '+df,lg_df_year:lg+' '+df+' '+year};
         return {component:'torrents',url:'',title:Lampa.Lang.translate('title_torrents'),search:names[Lampa.Storage.field('parse_lang')]||df,search_one:lg,search_two:df,movie:movie,page:1};
     }
+    function streamHeaderTitle(params){var movie=params.movie||{},title=movie.title||movie.name||movie.original_title||movie.original_name||'Торренти',year=String(movie.release_date||movie.first_air_date||'').slice(0,4),season=Number(params.season||params.filter_season),episode=Number(params.episode||params.filter_episode),parts=[title];if(year)parts.push(year);if(season>0)parts.push('Сезон '+season);if(episode>0)parts.push('Серія '+episode);return parts.join(' · ');}
     function streamStatus(record,text) {if(record.streamStatus)record.streamStatus.textContent=text;}
     function streamSession(){return window.LampaTorrentOverlay?LampaTorrentOverlay.session():String(streamGeneration);}
     function streamAlive(st){var a=Lampa.Activity.active();return !st.dead&&st.record.streamChild===st&&st.session===streamSession()&&a&&a.activity===st.record.activity;}
@@ -795,10 +792,15 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         filter.render().find('.filter--search').trigger('hover:enter');
     }
     function streamWindow(st,start) {
-        var row=st.root.querySelector('.torrent-list');if(!row)return;
-        st.windowStart=Math.max(0,start);st.windowing=true;
-        st.rows.forEach(function(node,i){if(i<st.windowStart||i>=st.windowStart+40)$(node).detach();else row.appendChild(node);});
-        st.windowing=false;
+        var list=st.root.querySelector('.torrent-list');if(!list)return;
+        var rows=st.displayRows||st.rows,scroll=list.closest('.scroll'),top=scroll&&scroll.scrollTop||0;
+        st.windowStart=Math.max(0,Math.min(Number(start)||0,Math.max(0,rows.length-1)));st.windowing=true;
+        var desired=rows.slice(st.windowStart,st.windowStart+40),current=Array.prototype.slice.call(list.querySelectorAll('.torrent-item'));
+        if(current.length!==desired.length||current.some(function(node,i){return node!==desired[i];})){
+            st.rows.forEach(function(node){if(node.parentNode)node.parentNode.removeChild(node);});
+            desired.forEach(function(node){list.appendChild(node);});
+        }
+        if(scroll)scroll.scrollTop=top;st.windowing=false;
     }
 
     // Row view adapter extracted from inspected TorrentsRedesign 1.1.0.
@@ -811,9 +813,9 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         function seedClass(n){return n==null?'':n>=20?'is-good':n>=5?'is-warn':'is-bad';}
         function bitrateClass(n){return n==null?'':n>=8?'is-good':n>=3?'is-warn':'is-bad';}
   function rowData(row,source) {
-    var raw=source&&(source.Title||source.title)||row.querySelector('.torrent-item__title')?.textContent||'',parsed=parseTitle(raw);
+    var raw=source&&(source.Title||source.title)||row.querySelector('.torrent-item__title')?.textContent||'',api=window.TorrentsRedesign,normalized=api&&api.normalizeRelease?api.normalizeRelease(source||{Title:raw}):null,parsed=normalized&&normalized.parsed||parseTitle(raw);
     function value(selector){var n=row.querySelector(selector);return n?n.textContent:'';}
-    return {parsed:parsed,seeds:number(source?source.Seeders:value('.torrent-item__seeds span')),peers:number(source?source.Peers:value('.torrent-item__grabs span')),bitrate:number(source&&source.bitrate!=null?source.bitrate:value('.torrent-item__bitrate span')),bytes:number(source&&source.Size),size:text(source&&source.size||value('.torrent-item__size'))||'—',tracker:text(source&&(source.Tracker||source.tracker)||value('.torrent-item__tracker')),date:text(source&&source.date||value('.torrent-item__date'))};
+    return {parsed:parsed,year:normalized&&normalized.year,seeds:normalized?normalized.seeds:number(source?source.Seeders:value('.torrent-item__seeds span')),peers:normalized?normalized.peers:number(source?source.Peers:value('.torrent-item__grabs span')),bitrate:number(source&&source.bitrate!=null?source.bitrate:value('.torrent-item__bitrate span')),bytes:normalized?normalized.bytes:number(source&&source.Size),size:text(source&&source.size||value('.torrent-item__size'))||'—',tracker:normalized&&normalized.tracker||text(source&&(source.Tracker||source.tracker)||value('.torrent-item__tracker')),date:normalized&&normalized.date||text(source&&source.date||value('.torrent-item__date')),season:normalized&&normalized.season,episode:normalized&&normalized.episode,sourceRank:normalized&&normalized.sourceRank};
   }
   function decorate(row,source) {
     if(row.getAttribute('data-parsed')==='1')return;source=source||row._ctrSource;var d=rowData(row,source);if(d.bitrate<=0)d.bitrate=null;if(d.seeds<0)d.seeds=null;if(d.peers<0)d.peers=null;row._ctrData=d;row.setAttribute('data-parsed','1');row.setAttribute('data-ctr-quality',d.parsed.quality);row._ctrOriginalTitle=row.getAttribute('title');row.title=d.parsed.raw+(d.date?'\n'+d.date:'');
@@ -822,40 +824,44 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
 
         return {decorate:decorate};
     })();
-    function decorateStreamRows(st) {
-        var flags={UKR:'🇺🇦',UK:'🇺🇦',UA:'🇺🇦',ENG:'🇬🇧',EN:'🇬🇧',RUS:'🇷🇺',RU:'🇷🇺',FRE:'🇫🇷',FRA:'🇫🇷',FR:'🇫🇷',GER:'🇩🇪',DEU:'🇩🇪',DE:'🇩🇪',ITA:'🇮🇹',IT:'🇮🇹',SPA:'🇪🇸',ES:'🇪🇸',POL:'🇵🇱',PL:'🇵🇱',JPN:'🇯🇵',JA:'🇯🇵',KOR:'🇰🇷',KO:'🇰🇷',POR:'🇵🇹',PT:'🇵🇹',CHI:'🇨🇳',ZHO:'🇨🇳',ZH:'🇨🇳',CZE:'🇨🇿',CS:'🇨🇿',HIN:'🇮🇳',HI:'🇮🇳',TUR:'🇹🇷',TR:'🇹🇷'};
-        var ranked=[];
+    function streamTrackerKey(st){var api=window.TorrentsRedesign;return api&&api.selectedTrackerFilter?api.selectedTrackerFilter():'all';}
+    function streamSortKey(){var value;try{value=Lampa.Storage.get('torrents_cinema_sort','recommended');}catch(e){}return value||'recommended';}
+    function streamUpdateRows(st){
+        var api=window.TorrentsRedesign,filter=streamTrackerKey(st),movie=st.params.movie||{},nativeFilter=st.child&&st.child.getFilterData?st.child.getFilterData()||{}:{},context=Object.assign({},st.params,nativeFilter),qualityFilter=Array.isArray(nativeFilter.quality)?nativeFilter.quality:[],best=null,bestScore=-Infinity,preferredQuality='1080';
+        try{preferredQuality=Lampa.Storage.get('torrents_cinema_quality','1080')||'1080';}catch(e){}
         st.rows.forEach(function(row){
-            row.querySelectorAll('.m-audio').forEach(function(tag){
-                if(tag.dataset.shLanguage)return;
-                var text=tag.textContent.trim(),match=text.match(/^([a-z]{2,3})(?=\s|$|[-:])/i),flag=match&&flags[match[1].toUpperCase()];
-                if(flag){tag.dataset.shLanguage=match[1].toUpperCase();tag.setAttribute('aria-label',text);tag.title=text;tag.textContent=flag+text.slice(match[1].length);}
-            });
-            var data=st.sourceData.get(row),seeds=data&&Number(data.Seeders);
-            cinemaRows.decorate(row,data);row.classList.add('sh-cinema-row');
-            // An older global TorrentsRedesign render listener may have decorated this row first.
-            var name=row.querySelector('.ctr-name'),nativeTitle=row.querySelector('.torrent-item__title');if(name&&nativeTitle)name.textContent=nativeTitle.textContent;
-            row.querySelectorAll('.ctr-chip').forEach(function(chip){if(chip.textContent.indexOf('Субтитри:')===0)chip.remove();});
-            // Keep ffprobe voice labels; flags replace language codes, not voice names.
-            var chips=row.querySelector('.ctr-chips');
-            if(chips&&!row.dataset.shAudioChips){
-                row.dataset.shAudioChips='1';
-                var audio=Array.prototype.slice.call(row.querySelectorAll('.m-audio'));
-                if(audio.length){chips.querySelectorAll('.is-ua').forEach(function(n){n.remove();});audio.forEach(function(tag){var n=document.createElement('div');n.className='ctr-chip sh-audio-chip';n.textContent=tag.textContent;n.title=tag.getAttribute('aria-label')||tag.textContent;chips.appendChild(n);});}
-                if(audio.length&&row._ctrData.parsed.audio&&/Eng/i.test(row._ctrData.parsed.audio.label)&&!row.querySelector('[data-sh-language=ENG],[data-sh-language=EN]')){var eng=document.createElement('div');eng.className='ctr-chip sh-audio-chip';eng.textContent='🇬🇧';eng.title='Eng · назва релізу';chips.appendChild(eng);}
-                chips.querySelectorAll('.ctr-chip').forEach(function(n){n.textContent=n.textContent.replace(/🇺🇦\s*Укр/g,'🇺🇦').replace(/🔊\s*Eng|\bEng\b/g,'🇬🇧');if(n.textContent.indexOf('Субтитри:')===0)n.textContent=n.textContent.replace(/Укр/g,'🇺🇦');});
-            }
-            if(seeds>0){var ua=!!row.querySelector('[data-sh-language="UKR"],[data-sh-language="UK"],[data-sh-language="UA"]');if(ua&&row._ctrData)row._ctrData.parsed.audio={ua:true,label:'🇺🇦'};ranked.push({row:row,score:window.TorrentsRedesign&&TorrentsRedesign.score?TorrentsRedesign.score(row._ctrData):(ua?1000:0)+Math.log(seeds+1)});}
-            row.classList.remove('sh-source-pick','is-best');
+            var source=st.sourceData.get(row)||row._ctrSource||{Title:row.querySelector('.torrent-item__title')?.textContent||''};
+            cinemaRows.decorate(row,source);row.classList.add('sh-cinema-row');
+            var view=window.LampaTorrentOverlay?LampaTorrentOverlay.decorate(row,source,movie,st.record.kind,context):null,data=view&&view.data;
+            if(!data&&api&&api.normalizeRelease)data=api.normalizeRelease(source);
+            if(!data)data=row._ctrData;
+            if(!data)return;row._ctrSource=source;row._ctrData=data;row._shMatch=view&&view.match;
+            if(!row._shMatch&&api&&api.releaseMatch)row._shMatch=api.releaseMatch(data,movie,context);
+            var matches=!api||!api.trackerMatches||api.trackerMatches(data.tracker,filter),qualityMatches=!qualityFilter.length||qualityFilter.some(function(q){q=String(q).toLowerCase();return q==='4k'||q==='2160'?data.parsed.quality==='2160':String(data.parsed.quality)===q.replace(/p$/,'');});row.classList.toggle('sh-tracker-hidden',!matches);row.classList.remove('is-best','sh-source-pick');
+            data.sortScore=api&&api.score?api.score(data,row._shMatch,{ua:true,audio:true,subs:true,quality:preferredQuality}):0;
+            if(qualityMatches&&!row.hidden&&row._shMatch&&api&&api.bestMatchAllowed&&api.bestMatchAllowed(data,movie,row._shMatch)&&data.sortScore>bestScore){best=row;bestScore=data.sortScore;}
         });
-        if(window.LampaTorrentOverlay){
-            var choices=[];
-            st.rows.forEach(function(row){var source=st.sourceData.get(row)||{Title:row.querySelector('.torrent-item__title')?.textContent},view=LampaTorrentOverlay.decorate(row,source,st.params.movie,st.record.kind);
-                if(view.match&&view.match.eligible&&view.match.similarity>=.75&&view.data.seeds>0&&window.TorrentsRedesign){var score=TorrentsRedesign.score(view.data,view.match);if(isFinite(score))choices.push({row:row,score:score});}
-            });
-            choices.sort(function(a,b){return b.score-a.score;});if(choices.length>1&&choices[0].score>choices[1].score)choices[0].row.classList.add('is-best','sh-source-pick');
+        var visible=st.rows.filter(function(row){var data=row._ctrData||{},qualityFilter=st.child&&st.child.getFilterData?st.child.getFilterData().quality:[];qualityFilter=Array.isArray(qualityFilter)?qualityFilter:[];var qualityMatches=!qualityFilter.length||qualityFilter.some(function(q){q=String(q).toLowerCase();return q==='4k'||q==='2160'?data.parsed.quality==='2160':String(data.parsed.quality)===q.replace(/p$/,'');});return !row.hidden&&qualityMatches&&!row.classList.contains('sh-tracker-hidden');});
+        st.best=best;var ordinary=visible.filter(function(row){return row!==best;});ordinary=api&&api.sortReleaseRows?api.sortReleaseRows(ordinary,streamSortKey()):ordinary.slice();
+        var ordered=best?[best].concat(ordinary):ordinary;st.displayRows=best&&api&&api.pinBestRow?api.pinBestRow(ordered,best,true):ordered;
+        if(best){
+            st.displayRows=st.displayRows.filter(function(row,index){return index===0||row!==best;});
+            best.classList.remove('sh-tracker-hidden');
+            best.classList.add('is-best','sh-source-pick');
+            var label=best.querySelector('.ctr-best'),outside=api&&api.trackerMatches&&!api.trackerMatches(best._ctrData.tracker,filter),reasons=[];
+            if(best._shMatch&&best._shMatch.similarity>=.99)reasons.push('точний збіг');
+            if(best._ctrData.parsed.audio&&best._ctrData.parsed.audio.ua)reasons.push('українське аудіо');
+            if(best._ctrData.tracker)reasons.push(best._ctrData.tracker);
+            if(best._ctrData.parsed.quality)reasons.push(best._ctrData.parsed.quality==='2160'?'4K':best._ctrData.parsed.quality+'p');
+            if(label)label.textContent=outside?'Найкращий вибір · '+best._ctrData.tracker+' поза фільтром'+(best._ctrData.parsed.audio&&best._ctrData.parsed.audio.ua?' · українське аудіо':''):'Найкращий вибір · '+reasons.slice(0,3).join(' · ');
+            best.setAttribute('data-best-outside-filter',outside?'true':'false');
         }
+        var focused=st.last,focusIndex=st.displayRows.indexOf(focused);if(focusIndex>=0&&st.displayRows.length>40&&(focusIndex<st.windowStart||focusIndex>=st.windowStart+40))st.windowStart=Math.floor(focusIndex/20)*20;
+        streamWindow(st,st.windowStart);syncStreamTrackerTools(st);
+        if(focused&&focused.classList&&focused.classList.contains('torrent-item')&&focusIndex<0){focused=st.displayRows[0]||st.trackerButtons&&st.trackerButtons.all||st.sortButton;st.last=focused;}
+        if(focused&&st.wantFocus&&streamSelectOwner!==st&&!st.queryFilter)streamFocus(st,focused);
     }
+    function decorateStreamRows(st){st.rows.forEach(function(row){var data=st.sourceData.get(row);cinemaRows.decorate(row,data);row.classList.add('sh-cinema-row');});streamUpdateRows(st);}
     function streamLower(record) {streamInfo(record);if(record.originalInfoDown)record.originalInfoDown();}
 
 
@@ -883,14 +889,27 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         });
         if(st.tools||!st.root.querySelector('.torrent-filter'))return;
         var tools=document.createElement('div');tools.className='ctr-tools';
-        tools.innerHTML='<div class="ctr-tabs"></div><div class="ctr-menus"></div>';
+        tools.innerHTML='<div class="ctr-tabs"></div><div class="ctr-tabs ctr-tracker-tabs"></div><div class="ctr-menus"></div>';
         st.tools=tools;st.root.classList.add('sh-cinema-explorer');
         function button(label,fn,cls){var n=document.createElement('div');n.className=(cls||'ctr-button')+' selector';n.textContent=label;n.setAttribute('role','button');var last=0;function run(e){var now=Date.now();if(now-last<180)return;last=now;st.last=n;e.stopImmediatePropagation();fn(n);}n.addEventListener('hover:enter',run);n.addEventListener('click',run);return n;}
         ['all','2160','1080','720'].forEach(function(q){var n=button(q==='all'?'Усі':q==='2160'?'4K':q+'p',function(){
             var filter=Object.assign({},st.child.getFilterData()||{});filter.quality=q==='all'?[]:[q==='2160'?'4k':q+'p'];st.child.setFilterData(filter);st.child.applyFilter();streamActivate(st.record);streamFocus(st,n);
         },'ctr-tab');n.dataset.quality=q;tools.querySelector('.ctr-tabs').appendChild(n);});
+        var trackerTabs=tools.querySelector('.ctr-tracker-tabs');st.trackerButtons={};
+        [['all','Усі'],['toloka','Толока'],['mazepa','Мазепа'],['source','Інші']].forEach(function(entry){var key=entry[0],n=button(entry[1],function(){
+            var api=window.TorrentsRedesign;if(!api||!api.storeTrackerFilter)return;
+            function apply(selected,name){if(!api.storeTrackerFilter(selected,name))return;st.last=n;decorateStreamRows(st);streamActivate(st.record);streamFocus(st,n);}
+            if(key!=='source'){apply(key,'');return;}
+            var options=api.trackerOptions?api.trackerOptions(st.rows.map(function(row){return row._ctrData||{};})).filter(function(option){return option.key.indexOf('source:')===0;}):[];
+            if(!options.length)return Lampa.Noty.show('Інших трекерів у цих результатах немає');
+            Lampa.Select.show({title:'Оберіть трекер',items:options.map(function(option){return {title:option.label+' · '+option.count,key:option.key,name:option.name};}),onBack:function(){streamActivate(st.record);streamFocus(st,n);},onSelect:function(option){apply('source:',option.name);}});
+        },'ctr-tab');n.dataset.tracker=key;trackerTabs.appendChild(n);st.trackerButtons[key]=n;});
         var menus=tools.querySelector('.ctr-menus');
-        if(st.root.querySelector('.filter--sort'))menus.appendChild(button('Сортування',function(){st.root.querySelector('.filter--sort').dispatchEvent(new Event('hover:enter'));}));
+        st.sortButton=button('Сортування',function(){
+            var items=[['recommended','Рекомендований'],['quality','Якість · 4K спочатку'],['seeders','Сіди · найбільше'],['size','Розмір · більший'],['date','Дата · новіші'],['tracker','Толока → Мазепа → інші']].map(function(entry){return {title:entry[1],key:entry[0]};});
+            Lampa.Select.show({title:'Сортування релізів',items:items,onBack:function(){streamActivate(st.record);streamFocus(st,st.sortButton);},onSelect:function(item){var api=window.TorrentsRedesign;if(api&&api.storeSort&&api.storeSort(item.key)){st.last=st.sortButton;decorateStreamRows(st);streamActivate(st.record);streamFocus(st,st.sortButton);}}});
+        });menus.appendChild(st.sortButton);
+        if(st.root.querySelector('.filter--sort'))menus.appendChild(button('Штатне сортування',function(){st.root.querySelector('.filter--sort').dispatchEvent(new Event('hover:enter'));}));
         menus.appendChild(button('Фільтри та джерела',function(){
             var items=[['filter','Фільтри / трекери'],['parser','Джерело'],['search','Пошук']].filter(function(x){return st.root.querySelector('.filter--'+x[0]);}).map(function(x){return {title:x[1],native:x[0]};});
             Lampa.Select.show({title:'Фільтри та джерела',items:items,onBack:function(){streamActivate(st.record);},onSelect:function(item){streamActivate(st.record);st.root.querySelector('.filter--'+item.native).dispatchEvent(new Event('hover:enter'));}});
@@ -901,10 +920,19 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         setupStreamTools(st);if(!st.tools)return;
         var filter=st.child.getFilterData()||{},q=Array.isArray(filter.quality)&&filter.quality.length===1?String(filter.quality[0]).replace('4k','2160').replace('p',''):'all';
         st.tools.querySelectorAll('[data-quality]').forEach(function(n){n.classList.toggle('is-active',n.dataset.quality===q);n.setAttribute('aria-pressed',String(n.dataset.quality===q));});
+        syncStreamTrackerTools(st);
+    }
+    function syncStreamTrackerTools(st){
+        if(!st.trackerButtons)return;var api=window.TorrentsRedesign;if(!api||!api.trackerOptions)return;
+        var options=api.trackerOptions(st.rows.map(function(row){return row._ctrData||{};})),selected=api.selectedTrackerFilter?api.selectedTrackerFilter():'all',map={};options.forEach(function(option){map[option.key]=option.count;});
+        var others=options.filter(function(option){return option.key.indexOf('source:')===0;}),current=others.filter(function(option){return option.key===selected;})[0],otherCount=others.reduce(function(total,option){return total+option.count;},0);
+        st.trackerButtons.all.textContent='Усі · '+(map.all||0);st.trackerButtons.toloka.textContent='Толока · '+(map.toloka||0);st.trackerButtons.mazepa.textContent='Мазепа · '+(map.mazepa||0);st.trackerButtons.source.textContent=current?'Інші: '+current.name+' · '+current.count:'Інші · '+otherCount;
+        [['all','all'],['toloka','toloka'],['mazepa','mazepa'],['source','source']].forEach(function(pair){var button=st.trackerButtons[pair[0]],active=pair[0]==='source'?selected.indexOf('source:')===0:selected===pair[1];button.classList.toggle('is-active',!!active);button.setAttribute('aria-pressed',String(!!active));});
+        var labels={recommended:'Рекомендований',quality:'Якість',seeders:'Сіди',size:'Розмір',date:'Дата',tracker:'Трекер'},sort;try{sort=Lampa.Storage.get('torrents_cinema_sort','recommended');}catch(e){}st.sortButton.textContent='Сортування · '+(labels[sort]||labels.recommended);
     }
     function streamSyncRows(st) {
         st.root.querySelectorAll('.torrent-item').forEach(function(row){if(st.rows.indexOf(row)<0)st.rows.push(row);});
-        decorateStreamRows(st);syncStreamTools(st);if(st.rows.length>40)streamWindow(st,st.windowStart);
+        decorateStreamRows(st);syncStreamTools(st);
     }
     function streamFocus(st,node) {
         if(!streamAlive(st)||!st.wantFocus||!st.record.streamView?.isOpen())return;
@@ -914,24 +942,23 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
     }
     function streamMove(record,direction) {
         var st=record.streamChild;if(!st)return;if(st.loading)st.navigatedWhileLoading=true;
-        var index=st.rows.indexOf(st.last),filters=Array.prototype.filter.call(st.root.querySelectorAll('.ctr-tools .selector,.torrent-filter .selector'),function(n){return n.offsetParent!==null;}),headers=Array.prototype.slice.call(record.streamPane.querySelectorAll('.sh-stream-head .selector'));
+        var rows=st.displayRows||st.rows,index=rows.indexOf(st.last),filters=Array.prototype.filter.call(st.root.querySelectorAll('.ctr-tools .selector,.torrent-filter .selector'),function(n){return n.offsetParent!==null;}),headers=Array.prototype.slice.call(record.streamPane.querySelectorAll('.sh-stream-head .selector'));
         if(index>=0){
-            if(direction==='left'){streamFocus(st,filters[0]||headers[0]);return;}
-            if(direction==='right'){streamFocus(st,filters[0]||headers[0]);return;}
-            if(direction==='down'&&index+1>=st.rows.length)st.child.next();
+            if(direction==='left'||direction==='right'){streamFocus(st,st.trackerButtons&&st.trackerButtons.all||filters[0]||headers[0]);return;}
+            if(direction==='down'&&index+1>=rows.length)st.child.next();
             var next=index+(direction==='down'?1:-1);
-            if(next<0){streamFocus(st,filters[filters.length-1]||headers[headers.length-1]);return;}
-            if(!st.rows[next]){streamFocus(st,st.rows[index]);return;}
+            if(next<0){streamFocus(st,st.sortButton||filters[filters.length-1]||headers[headers.length-1]);return;}
+            if(!rows[next]){streamFocus(st,rows[index]);return;}
             if(next<st.windowStart)streamWindow(st,Math.max(0,st.windowStart-20));
             if(next>=st.windowStart+40)streamWindow(st,st.windowStart+20);
-            streamFocus(st,st.rows[next]);return;
+            streamFocus(st,rows[next]);return;
         }
-        var tabs=Array.prototype.slice.call(st.root.querySelectorAll('.ctr-tabs .selector')),menus=Array.prototype.slice.call(st.root.querySelectorAll('.ctr-menus .selector'));
-        var group=headers.indexOf(st.last)>=0?headers:tabs.indexOf(st.last)>=0?tabs:menus.indexOf(st.last)>=0?menus:filters,at=group.indexOf(st.last);
+        var qualityTabs=Array.prototype.slice.call(st.root.querySelectorAll('.ctr-tabs [data-quality]')),trackerTabs=Array.prototype.slice.call(st.root.querySelectorAll('.ctr-tracker-tabs .selector')),menus=Array.prototype.slice.call(st.root.querySelectorAll('.ctr-menus .selector'));
+        var group=headers.indexOf(st.last)>=0?headers:qualityTabs.indexOf(st.last)>=0?qualityTabs:trackerTabs.indexOf(st.last)>=0?trackerTabs:menus.indexOf(st.last)>=0?menus:filters,at=group.indexOf(st.last);
         if(direction==='left'){if(at>0)streamFocus(st,group[at-1]);else streamFocus(st,group[0]||headers[0]);}
-        else if(direction==='right')streamFocus(st,group[at+1]||filters[0]||st.rows[0]||record.streamLoad);
-        else if(direction==='down'){var target=group===headers&&filters.length?filters[0]:group===tabs&&menus.length?menus[0]:st.rows[st.windowStart];if(target)streamFocus(st,target);else streamFocus(st,headers[0]);}
-        else if(group===headers)streamFocus(st,headers[0]);else if(group===menus&&tabs.length)streamFocus(st,tabs[Math.min(at,tabs.length-1)]);else streamFocus(st,headers[headers.length-1]);
+        else if(direction==='right'){var nextControl=group[at+1];if(!nextControl)nextControl=group===qualityTabs?trackerTabs[0]:group===trackerTabs?menus[0]:filters[0]||rows[0];streamFocus(st,nextControl||record.streamLoad);}
+        else if(direction==='down'){var target=group===headers?qualityTabs[0]:group===qualityTabs?trackerTabs[0]:group===trackerTabs?menus[0]:rows[st.windowStart];if(target)streamFocus(st,target);else streamFocus(st,headers[0]);}
+        else {var target=group===menus?trackerTabs[trackerTabs.length-1]:group===trackerTabs?qualityTabs[Math.min(at,qualityTabs.length-1)]:group===qualityTabs?headers[headers.length-1]:headers[0];streamFocus(st,target||headers[0]);}
     }
     function streamActivate(record) {
         var st=record.streamChild;if(!st||!streamAlive(st)||!record.streamView?.isOpen())return;
@@ -997,6 +1024,7 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         if(record.streamChild){var existing=record.streamChild;existing.wantFocus=true;if(existing.deferred){var deferred=existing.deferred;existing.deferred=null;deferred();}streamActivate(record);return;}
         if(typeof Lampa.Component.get('torrents')!=='function'){streamStatus(record,'Модуль торрентів недоступний · Повторіть спробу');streamShellActivate(record);return;}
         var params=Object.assign(streamParams(record),record.streamQuery||{}), st={record:record,params:params,rows:[],sourceData:new WeakMap(),windowStart:0,dead:false,wantFocus:true,loading:true,session:streamSession()};
+        var header=record.streamPane.querySelector&&record.streamPane.querySelector('.sh-stream-head h2');if(header)header.textContent=streamHeaderTitle(params);
         record.streamChild=st;record.streamFocused=true;record.streamLoad.hidden=true;streamStatus(record,'Пошук джерел…');
         var key=window.LampaTorrentOverlay?LampaTorrentOverlay.key(params,record.kind,streamGeneration):[record.kind,params.movie.id,params.search,streamGeneration].join('|');st.key=key;
         try {
@@ -1005,11 +1033,11 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
             st.child.activity={loader:function(on){if(!streamAlive(st)||!record.streamView?.isOpen())return;st.loading=on;record.streamPane.dataset.state=on?'loading':st.error?'parser-error':st.total===0?'empty':'ready';record.streamPane.setAttribute('aria-busy',on?'true':'false');streamStatus(record,on?'Пошук джерел…':st.error?'Парсер недоступний · Оновити — повторна спроба':st.partial?'Частина парсерів недоступна · Знайдено: '+st.total:st.total===0?'Джерел не знайдено':st.total!=null?'Знайдено: '+st.total:'Джерела');if(!on){streamSyncRows(st);if(!st.loadedOnce){st.loadedOnce=true;if(!st.navigatedWhileLoading)st.last=st.root.querySelector('.torrent-item')||st.last;}st.child.start=function(){streamActivate(record);};}},toggle:function(){if(!st.dead&&st.wantFocus)streamActivate(record);},render:function(){return $(st.root);}};
             st.child.start=function(){streamActivate(record);};st.child.back=function(){closeStreamOverlay(record,true);};
             var append=st.child.append,reset=st.child.reset,next=st.child.next,applyFilter=st.child.applyFilter;
-            st.child.applyFilter=function(){params.page=1;return applyFilter.apply(st.child,arguments);};
+            st.child.applyFilter=function(){params.page=1;var result=applyFilter.apply(st.child,arguments);streamSyncRows(st);return result;};
             st.onRender=function(event){if(st.appending&&event.type==='render'&&event.item&&event.element)st.sourceData.set(event.item[0]||event.item,event.element);};Lampa.Listener.follow('torrent',st.onRender);
             st.child.append=function(){st.appending=true;try{append.apply(st.child,arguments);}finally{st.appending=false;}streamSyncRows(st);};
-            st.child.reset=function(){st.rows.forEach(function(row){$(row).remove();});st.rows=[];st.windowStart=0;return reset.apply(st.child,arguments);};
-            st.child.next=function(){if(!streamAlive(st)||st.windowing||!st.wantFocus)return;var focused=st.last;next.apply(st.child,arguments);if(st.rows.length>st.windowStart+40){streamWindow(st,st.windowStart+20);if(focused&&focused.isConnected)streamFocus(st,focused);}};
+            st.child.reset=function(){st.rows.forEach(function(row){$(row).remove();});st.rows=[];st.displayRows=[];st.windowStart=0;return reset.apply(st.child,arguments);};
+            st.child.next=function(){if(!streamAlive(st)||st.windowing||!st.wantFocus)return;var focused=st.last;next.apply(st.child,arguments);if((st.displayRows||st.rows).length>st.windowStart+40){streamWindow(st,st.windowStart+20);if(focused&&focused.isConnected)streamFocus(st,focused);}};
             st.onFocus=function(event){var node=event.target.closest('.selector');if(node&&st.root.contains(node)){st.last=node;if(node.classList.contains('torrent-item'))st.selectedRow=node;}};
             st.onEnter=function(event){
                 if(event.target.closest('.torrent-item')){
@@ -1041,12 +1069,12 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         record.streamPane.removeEventListener('hover:enter',record.streamEnter,true);record.streamPane.removeEventListener('click',record.streamClick);
         record.page.removeEventListener('hover:enter',record.streamEnter,true);record.streamPane.removeEventListener('hover:focus',record.streamPaneFocus,true);
         if(record.streamView){record.streamView.destroy();record.streamView=null;}else record.streamPane.remove();record.streamPane=null;
-        if(record.streamHost){var host=record.streamHost;if(host.parentNode)host.parentNode.insertBefore(record.root,host);host.remove();record.streamHost=null;}record.page.classList.remove('sh-has-streams');
+        record.page.classList.remove('sh-has-streams');
         if(record.activity.component.pause===record.streamPause)record.activity.component.pause=record.originalPause;
         if(record.streamInfoController&&record.streamInfoController.down===record.streamDown)record.streamInfoController.down=record.originalInfoDown;
     }
     function setupStreams(record) {
-        if(record.streamPane||!Lampa.Storage.field('parser_use')||!window.lampa_settings.torrents_use)return;
+        if(record.streamPane||!Lampa.Storage.field('parser_use')||!window.lampa_settings.torrents_use||!window.LampaTorrentOverlay)return;
         var action=record.root.querySelector('.view--torrent'),bar=record.root.querySelector('.full-start-new__buttons');
         // Core keeps optional actions in a hidden template pool. Buttons+ used to move it.
         // Move the existing node once, preserving every handler; restore it with the theme.
@@ -1056,10 +1084,9 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         installStreamRoutes();
         var pane=document.createElement('section');pane.className='sh-streams';pane.setAttribute('aria-label','Торрентні джерела');pane.setAttribute('aria-busy','false');
         pane.innerHTML='<div class="sh-stream-head"><h2>Торренти</h2><div class="sh-stream-retry selector" role="button" title="Повторити пошук">Оновити</div><div class="sh-stream-close selector" role="button" aria-label="Закрити торренти">Закрити · Back</div></div><div class="sh-stream-status" role="status">Джерела завантажуються лише після відкриття</div><div class="sh-stream-load selector" role="button">Показати джерела</div><div class="sh-stream-content"></div>';
-        record.streamPane=pane;record.streamContent=pane.querySelector('.sh-stream-content');record.streamStatus=pane.querySelector('.sh-stream-status');record.streamLoad=pane.querySelector('.sh-stream-load');var host=document.createElement('div');host.className='sh-movie-hero';record.root.parentNode.insertBefore(host,record.root);host.appendChild(record.root);host.appendChild(pane);record.streamHost=host;record.page.classList.add('sh-has-streams');
-        var inline=Lampa.Storage.get('sh_torrent_mode','overlay')==='inline'||!window.LampaTorrentOverlay;
-        record.streamView=window.LampaTorrentOverlay?LampaTorrentOverlay.create(pane,record.page,inline):{inline:true,isOpen:function(){return true;},open:function(){},close:function(){},destroy:function(){pane.remove();}};
-        var movie=streamMovie(record);pane.querySelector('h2').textContent='Торренти · '+(movie.title||movie.name||'')+' '+String(movie.release_date||movie.first_air_date||'').slice(0,4);
+        record.streamPane=pane;record.streamContent=pane.querySelector('.sh-stream-content');record.streamStatus=pane.querySelector('.sh-stream-status');record.streamLoad=pane.querySelector('.sh-stream-load');record.page.classList.add('sh-has-streams');
+        record.streamView=LampaTorrentOverlay.create(pane,record.page);
+        pane.querySelector('h2').textContent='Торренти · '+streamHeaderTitle(streamParams(record));
         record.streamEnter=function(event){
             if(event.target.closest('.view--torrent')&&record.root.contains(event.target)){event.stopImmediatePropagation();loadStreams(record);}
             else if(event.target.closest('.sh-stream-close')){event.stopImmediatePropagation();closeStreamOverlay(record,true);}
@@ -1067,7 +1094,7 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
             else if(event.target.closest('.sh-stream-retry')){event.stopImmediatePropagation();var key=record.streamChild&&record.streamChild.key;streamCache=streamCache.filter(function(item){return item.key!==key;});closeStreamChild(record);loadStreams(record);}
         };
         record.page.addEventListener('hover:enter',record.streamEnter,true);
-        if(!inline)pane.addEventListener('hover:enter',record.streamEnter,true);
+        pane.addEventListener('hover:enter',record.streamEnter,true);
         record.streamClick=function(event){var button=event.target.closest('.sh-stream-head .selector,.sh-stream-load');if(button)button.dispatchEvent(new Event('hover:enter',{bubbles:true}));};pane.addEventListener('click',record.streamClick);
         record.streamPaneFocus=function(event){if(record.streamChild){var node=event.target.closest('.selector');if(node)record.streamChild.last=node;}};record.streamPane.addEventListener('hover:focus',record.streamPaneFocus,true);
         record.originalPause=record.activity.component.pause;
@@ -1081,7 +1108,7 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         // Native player/Files return may activate the underlying detail controller.
         // A visible overlay must retain remote ownership; leave inner menus/player alone.
         var st=record.streamChild;
-        if(st&&st.wantFocus&&record.streamView&&!record.streamView.inline&&record.streamView.isOpen()&&streamAlive(st)){
+        if(st&&st.wantFocus&&record.streamView&&record.streamView.isOpen()&&streamAlive(st)){
             streamActivate(record);return;
         }
         if(event.name!=='full_start')return;
@@ -1094,7 +1121,7 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
     }
     function onStreamProfile(){streamGeneration++;streamCache=[];movieRecords.forEach(function(record){closeStreamOverlay(record,false);closeStreamChild(record);});}
     function onStreamSettings(event) {
-        if(event&&/^(account|account_user|account_email|sh_torrent_mode)$/.test(event.name)){onStreamProfile();if(event.name==='sh_torrent_mode'){movieRecords.forEach(removeStreams);scheduleMovie();}return;}
+        if(event&&/^(account|account_user|account_email)$/.test(event.name)){onStreamProfile();return;}
         if(event&&/^(jackett_|prowlarr_|parser_|parse_)/.test(event.name)){if(movieRecords.some(function(r){return r.streamChild&&r.streamChild.providerChanging;}))return;streamGeneration++;streamCache=[];movieRecords.forEach(function(r){closeStreamOverlay(r,false);closeStreamChild(r);});}
     }
 
@@ -1563,7 +1590,6 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         }
         if(!params.some(function(item){return item.param&&item.param.name==='sh_profile_avatar';}))Lampa.SettingsApi.addParam({component:'interface',param:{name:'sh_profile_avatar',type:'input',values:'',placeholder:'https://example.org/avatar.jpg',default:''},field:{name:'Фото профілю · URL',description:'Адреса HTTP(S) зображення. Порожнє поле повертає стандартний значок; саме фото не зберігається в localStorage.'},onChange:function(){if(window.StremioHybrid)window.StremioHybrid.refresh();}});
         if(!params.some(function(item){return item.param&&item.param.name==='sh_header_utilities';}))Lampa.SettingsApi.addParam({component:'interface',param:{name:'sh_header_utilities',type:'button'},field:{name:'Додаткові дії панелі',description:'Сповіщення, профіль, Trakt і перехід до навігації. Використовує чинні дії Lampa.'},onChange:onHeaderUtilitiesSetting});
-        if(!params.some(function(item){return item.param&&item.param.name==='sh_torrent_mode';}))Lampa.SettingsApi.addParam({component:'interface',param:{name:'sh_torrent_mode',type:'select',values:{overlay:'Вікно',inline:'Вбудована панель'},default:'overlay'},field:{name:'Торренти · вигляд',description:'Вікно відкривається кнопкою Торренти. Обидва режими використовують той самий пошук і плеєр.'}});
         if(!params.some(function(item){return item.param&&item.param.name==='stremio_hybrid_primary_settings';}))Lampa.SettingsApi.addParam({component:'interface',param:{name:'stremio_hybrid_primary_settings',type:'trigger',values:true,default:false},field:{name:'Центр налаштувань як головний',description:'Опційно відкривати Центр налаштувань замість головної сторінки Lampa. Стандартні налаштування залишаються доступними в Центрі.'}});
         apply(enabled());
     }

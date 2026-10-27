@@ -12,7 +12,7 @@
         return /^[\u1100-\u11ff\u3130-\u318f\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af ]+$/.test(normalized) ? normalized.replace(/ /g, '') : normalized;
     }
     function series(movie) { return movie.media_type === 'tv' || movie.method === 'tv' || !!(movie.original_name || movie.first_air_date || movie.number_of_seasons); }
-    function target(movie) { return !!movie && (/^(ja|ko|zh|cn)$/i.test(movie.original_language || '') || /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/.test(text(movie.original_name || movie.original_title))); }
+    function target(movie) { return !!movie && (/^(ja|ko|zh|cn)$/i.test(movie.original_language || '') || /[\u0400-\u052f\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/.test([movie.title,movie.name,movie.original_title,movie.original_name].join(' '))); }
     function identity(movie) { if (movie.id === undefined || movie.id === null || text(movie.id).trim() === '') return null; return (series(movie) ? 'tv:' : 'movie:') + (movie.source || 'tmdb') + ':' + movie.id; }
     function cached(movie) { var key = identity(movie), entry = key && metadata[key]; return entry && entry.expires > Date.now() ? entry.data : null; }
     function remember(movie, data) {
@@ -95,7 +95,7 @@
         try { var m = /[?&]xt=urn:btih:([a-z0-9]+)/i.exec(decodeURIComponent(magnet)); if (m) fromMagnet = m[1]; } catch (e) { /* malformed magnet remains distinct */ }
         var hash = canonicalHash(value) || canonicalHash(fromMagnet); if (hash) return 'hash:' + hash;
         var url = row.Link || row.downloadUrl || row.DownloadUrl || magnet;
-        return url ? 'url:' + url : 'title:' + normalize(row.Title || row.title) + '|' + text(row.Size || row.size) + '|' + text(row.Tracker || row.indexer) + '|' + JSON.stringify([row.Quality || row.Resolution, row.AudioLanguages || row.audio_languages, row.SubtitleLanguages || row.subtitle_languages, row.ReleaseGroup || row.release_group, row.Version || row.version]);
+        return url ? 'url:' + url : 'title:' + normalize(row.Title || row.title) + '|' + text(row.Size || row.size) + '|' + text(row.Tracker || row.indexer) + '|' + JSON.stringify([row.Quality || row.Resolution, row.AudioLanguages || row.audio_languages, row.AudioTracks || row.audio_tracks, row.SubtitleLanguages || row.subtitle_languages, row.VoiceoverStudio || row.voiceover_studio, row.VoiceoverType || row.voiceover_type, row.ReleaseGroup || row.release_group, row.Version || row.version]);
     }
     function dedup(rows) {
         var used = Object.create(null), out = [];
@@ -137,7 +137,10 @@
                 if (!alive()) return;
                 if (calls >= MAX_CALLS || remaining() <= 0) return finish(Object.assign({}, lastData, { Results: [] }));
                 var available = candidates();
-                if (!metadataTried && (!available.length || available.every(function (name) { return /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/.test(name); }) && names.every(function (name) { return /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/.test(name); }))) return metadataThenNext();
+                // Fetch one metadata record only when local title variants contain no Latin-script
+                // alias. Cyrillic-only local titles may still need a verified English translation.
+                if (!metadataTried && names.every(function (name) { return !/[a-z]/i.test(name); })) return metadataThenNext();
+                metadataTried = true;
                 if (!available.length) return finish(Object.assign({}, lastData, { Results: [] }));
                 run(available[0], true);
             }
