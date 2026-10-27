@@ -819,9 +819,9 @@
         var old = document.getElementById('interface_mod_theme');
         if (old) old.remove();
         if (!theme || theme === 'default') return;
-        // Native Settings/Select rows yield their decoration to the active canonical owner.
-        var b = '.menu__item, body:not(.stremio-hybrid) .settings-folder, body:not(.stremio-hybrid) .settings-param, body:not(.stremio-hybrid) .selectbox-item, .full-start__button, .full-descr__tag, .player-panel .button, .custom-online-btn, .custom-torrent-btn, .main2-more-btn, .simple-button, .menu__version';
-        var f = '.menu__item.focus, .menu__item.traverse, .menu__item.hover, body:not(.stremio-hybrid) .settings-folder.focus, body:not(.stremio-hybrid) .settings-param.focus, body:not(.stremio-hybrid) .selectbox-item.focus, .full-start__button.focus, .full-descr__tag.focus, .player-panel .button.focus, .custom-online-btn.focus, .custom-torrent-btn.focus, .main2-more-btn.focus, .simple-button.focus, .menu__version.focus';
+        // Native menu rows yield to Hybrid's active rail; Settings/Select rows also yield to the active canonical owner.
+        var b = 'body:not(.stremio-hybrid) .menu__item, body:not(.stremio-hybrid) .settings-folder, body:not(.stremio-hybrid) .settings-param, body:not(.stremio-hybrid) .selectbox-item, .full-start__button, .full-descr__tag, .player-panel .button, .custom-online-btn, .custom-torrent-btn, .main2-more-btn, .simple-button, body:not(.stremio-hybrid) .menu__version';
+        var f = 'body:not(.stremio-hybrid) .menu__item.focus, body:not(.stremio-hybrid) .menu__item.traverse, body:not(.stremio-hybrid) .menu__item.hover, body:not(.stremio-hybrid) .settings-folder.focus, body:not(.stremio-hybrid) .settings-param.focus, body:not(.stremio-hybrid) .selectbox-item.focus, .full-start__button.focus, .full-descr__tag.focus, .player-panel .button.focus, .custom-online-btn.focus, .custom-torrent-btn.focus, .main2-more-btn.focus, .simple-button.focus, body:not(.stremio-hybrid) .menu__version.focus';
         // The canonical Hybrid owner supplies the card focus ring; retain standalone themes.
         var c = 'body:not(.stremio-hybrid) .card.focus .card__view::after, body:not(.stremio-hybrid) .card.hover .card__view::after';
         // Overlay surfaces belong to Hybrid only while its body class is active.
