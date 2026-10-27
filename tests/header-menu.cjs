@@ -24,7 +24,7 @@ test('destroy cleanup removes only the owned setting and preserves foreign Inter
 test('settings dispatcher follows current Hybrid instance rather than retaining the old action',()=>{const f=fixture();f.c.onHeaderUtilitiesSetting();let calls=0;f.c.window.StremioHybrid={openUtilities:()=>calls++};f.c.onHeaderUtilitiesSetting();assert.equal(calls,1);});
 test('early destroy tolerates a runtime whose SettingsApi is not ready',()=>{const f=fixture();f.c.window.Lampa=null;assert.doesNotThrow(()=>f.c.removeHeaderUtilitiesSetting());f.c.window.Lampa=f.c.Lampa;f.c.Lampa.SettingsApi=null;assert.doesNotThrow(()=>f.c.removeHeaderUtilitiesSetting());});
 test('repeated initialization and destroy/reinitialize register one utility setting',()=>{
- const f=fixture(),c=f.c;c.ready=false;c.destroyed=false;c.bootStats={initCount:0};c.stopWaiting=()=>{};c.apply=()=>{};c.enabled=()=>true;
+ const f=fixture(),c=f.c;c.ready=false;c.destroyed=false;c.bootStats={initCount:0};c.uiNow=()=>0;c.stopWaiting=()=>{};c.apply=()=>{};c.enabled=()=>true;
  c.window.Lampa=c.Lampa;c.Lampa.SettingsApi.addParam=p=>f.params.push(p);
  vm.runInContext(source.slice(source.indexOf('    function init() {'),source.indexOf('    window.StremioHybrid = {')),c);
  c.init();c.init();assert.equal(f.params.filter(p=>p.param.name==='sh_header_utilities').length,1);

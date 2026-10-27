@@ -3,7 +3,7 @@
     'use strict';
     if (window.StremioHybrid) return;
     var UI_VERSION='3.0.0-early-shell-phase1';
-    var bootStats={initCount:0,styleInsertions:0,shellTransitions:0,settingsLoads:0,settingsMounts:0,settingsUnmounts:0,settingsFailures:0};
+    var bootStats={scriptStartMs:uiNow(),shellAppliedMs:null,firstShellFrameMs:null,readyMs:null,initCount:0,styleInsertions:0,shellTransitions:0,settingsLoads:0,settingsMounts:0,settingsUnmounts:0,settingsFailures:0},shellFrame=0;
     var settingsHub=null,settingsScript=null,settingsLoading=false,settingsAttempted=false,settingsFailedApi=null;
     var overlayScriptURL=document.currentScript&&document.currentScript.src,overlayLoading=false;
     function ensureTorrentOverlay(){
@@ -1450,6 +1450,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         var value = Lampa.Storage.get('stremio_hybrid_enabled', true);
         return value !== false && value !== 'false' && value !== 0 && value !== '0';
     }
+    function uiNow(){return window.performance && typeof window.performance.now==='function'?Math.round(window.performance.now()*10)/10:null;}
     // One static shell owner; native functional adapters still wait for appready.
     function applyShell(on) {
         if (destroyed || !document.body) return;
@@ -1459,6 +1460,10 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         }
         if(document.body.classList.contains('stremio-hybrid')!==on)bootStats.shellTransitions++;
         document.body.classList.toggle('stremio-hybrid', on);
+        if(on){
+            if(bootStats.shellAppliedMs===null)bootStats.shellAppliedMs=uiNow();
+            if(bootStats.firstShellFrameMs===null && !shellFrame && typeof requestAnimationFrame==='function')shellFrame=requestAnimationFrame(function(){shellFrame=0;if(!destroyed && document.body.classList.contains('stremio-hybrid'))bootStats.firstShellFrameMs=uiNow();});
+        }else if(shellFrame){cancelAnimationFrame(shellFrame);shellFrame=0;}
         if (!on && style) { style.remove(); style = null; }
     }
     function prepareShell() {
@@ -1481,12 +1486,13 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         url.search='';url.searchParams.set('v',UI_VERSION);
         settingsScript=document.createElement('script');settingsScript.src=url.href;
         settingsScript.onload=function(){settingsLoading=false;if(!destroyed && watching)mountSettings();};
-        settingsScript.onerror=function(){settingsLoading=false;};
+        settingsScript.onerror=function(){settingsLoading=false;bootStats.settingsFailures++;settingsScript.onload=null;settingsScript.onerror=null;settingsScript.remove();settingsScript=null;};
         document.head.appendChild(settingsScript);
     }
     function unmountSettings() {
         settingsFailedApi=null;
-        if(settingsHub){var api=settingsHub;settingsHub=null;api.destroy();bootStats.settingsUnmounts++;}
+        if(!settingsLoading)settingsAttempted=false;
+        if(settingsHub){var api=settingsHub;settingsHub=null;try{api.destroy();}catch(e){bootStats.settingsFailures++;}bootStats.settingsUnmounts++;}
     }
     function apply(on) {
         if (destroyed) return;
@@ -1514,6 +1520,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         if (ready || destroyed || !window.Lampa || !Lampa.SettingsApi) return;
         ready = true;
         bootStats.initCount++;
+        bootStats.readyMs=uiNow();
         stopWaiting();
         var params = Lampa.SettingsApi.getParam('interface') || [];
         if (!params.some(function (item) { return item.param && item.param.name === 'stremio_hybrid_enabled'; })) {
@@ -1535,7 +1542,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         openUtilities: openHeaderUtilities,
         setEnabled: setEnabled,
         refresh: function () { if (ready) apply(enabled()); },
-        diagnostics: function () {return {version:UI_VERSION,initCount:bootStats.initCount,styleInsertions:bootStats.styleInsertions,shellTransitions:bootStats.shellTransitions,settingsLoads:bootStats.settingsLoads,settingsMounts:bootStats.settingsMounts,settingsUnmounts:bootStats.settingsUnmounts,settingsFailures:bootStats.settingsFailures};},
+        diagnostics: function () {return {version:UI_VERSION,scriptStartMs:bootStats.scriptStartMs,shellAppliedMs:bootStats.shellAppliedMs,firstShellFrameMs:bootStats.firstShellFrameMs,readyMs:bootStats.readyMs,initCount:bootStats.initCount,styleInsertions:bootStats.styleInsertions,shellTransitions:bootStats.shellTransitions,settingsLoads:bootStats.settingsLoads,settingsMounts:bootStats.settingsMounts,settingsUnmounts:bootStats.settingsUnmounts,settingsFailures:bootStats.settingsFailures};},
         destroy: function () {
             apply(false);
             removeHeaderUtilitiesSetting();
