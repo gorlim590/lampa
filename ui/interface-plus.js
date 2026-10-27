@@ -7,11 +7,11 @@
     (function headerPresentation() {
         var ownedStyle = null;
         var css = [
-            'body .head { background:#15171c !important; background-image:none !important; color:#f4f4f7; }',
-            'body .head .head__time { align-items:center; -webkit-align-items:center; margin-top:0; flex-shrink:0; }',
-            'body .head .head__time-now { font-size:1.5em; line-height:1.15; margin:0 .55em 0 0; font-variant-numeric:tabular-nums; font-feature-settings:"tnum"; }',
-            'body .head .head__time > div:last-child { text-align:left; }',
-            'body .head .head__time-date, body .head .head__time-week { font-size:.72em; line-height:1.3; white-space:nowrap; }'
+            'body:not(.stremio-hybrid) .head { background:#15171c !important; background-image:none !important; color:#f4f4f7; }',
+            'body:not(.stremio-hybrid) .head .head__time { align-items:center; -webkit-align-items:center; margin-top:0; flex-shrink:0; }',
+            'body:not(.stremio-hybrid) .head .head__time-now { font-size:1.5em; line-height:1.15; margin:0 .55em 0 0; font-variant-numeric:tabular-nums; font-feature-settings:"tnum"; }',
+            'body:not(.stremio-hybrid) .head .head__time > div:last-child { text-align:left; }',
+            'body:not(.stremio-hybrid) .head .head__time-date, body:not(.stremio-hybrid) .head .head__time-week { font-size:.72em; line-height:1.3; white-space:nowrap; }'
         ].join('\n');
         function syncHeader() {
             var ui = window.StremioHybrid;

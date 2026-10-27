@@ -15,7 +15,7 @@
     var style, ready = false, destroyed = false, waiting = false, watching = false, nativeWaitTimer = 0, nativeWaitAttempts = 0, moreButton = null, menuOpen = false, searchNode = null, searchReturn = false, settingsRail = null, settingsFrame = 0, settingsParameter = null, settingsCategory = 'interface', settingsLeftConsumed = false, settingsPrimaryRouting = false, searchSources = null, searchRoots = [];
     var NATIVE_WAIT_MS=100, NATIVE_WAIT_MAX=300;
     var css = `
-body.stremio-hybrid { --sh-bg:#121023; --sh-panel:#211d35; --sh-accent:#9775fa; --sh-muted:#aba7bd; --sh-rail:#0c0b16; --sh-text:#f0eef8; --sh-border:#ffffff16; --sh-radius:.7em; --sh-pill:2em; --sh-gap:1.1em; --sh-speed:160ms; --sh-ring:#9775fa66; --sh-focus:#7960c9; --sh-focus-soft:#3e315b; --sh-header:transparent; --sh-panel-raised:#29233e; --sh-accent-soft:#b79bff; --sh-focus-text:#e9e0ff; --sh-focus-ink:#201536; --sh-inactive:#726d86; --sh-secondary:#d0cadf; --sh-inset:1.8em; --sh-ease:ease-out; background:#121023 !important; color:#f0eef8; }
+body.stremio-hybrid { --sh-bg:#121023; --sh-panel:#211d35; --sh-accent:#9775fa; --sh-muted:#aba7bd; --sh-rail:#090a12; --sh-text:#f0eef8; --sh-border:#ffffff16; --sh-radius:.7em; --sh-pill:2em; --sh-gap:1.1em; --sh-speed:160ms; --sh-ring:#9775fa66; --sh-focus:#7960c9; --sh-focus-soft:#3e315b; --sh-header:transparent; --sh-panel-raised:#29233e; --sh-accent-soft:#b79bff; --sh-focus-text:#e9e0ff; --sh-focus-ink:#201536; --sh-inactive:#726d86; --sh-secondary:#d0cadf; --sh-inset:1.8em; --sh-ease:ease-out; background:#121023 !important; color:#f0eef8; }
 body.stremio-hybrid .background { opacity:.12 !important; }
 body.stremio-hybrid .head { color:#f4f4f7; background:transparent !important; background-image:none !important; border:0 !important; box-shadow:none !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
 /* The native collapsed navigation rail occupies 4.4em. The header itself spans
@@ -383,7 +383,6 @@ body.stremio-hybrid .head .head__title{max-width:20vw}
 body.stremio-hybrid .sh-profile-menu .selectbox__content{position:absolute;right:1.8em;top:5em;bottom:auto;left:auto;width:23em;max-width:90vw;max-height:calc(100vh - 7em);border:1px solid var(--sh-border);box-shadow:0 .7em 2em #0005}
 body.stremio-hybrid .selectbox-item{transition:opacity var(--sh-speed) var(--sh-ease)!important}
 body.stremio-hybrid .selectbox-item__title{white-space:normal;overflow-wrap:anywhere}
-body.stremio-hybrid .wrap__left{background:#090a12!important}
 @media(prefers-reduced-motion:reduce){body.stremio-hybrid .selectbox,body.stremio-hybrid .selectbox-item,body.stremio-hybrid .sh-movie-page .full-start__background{transition:none!important;animation:none!important}}
 `;
     css += `
@@ -1584,7 +1583,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         version: UI_VERSION,
         settingsHubVersion: 1,
         presentationVersion: 1,
-        ownsPresentation: function (region) { return region==='header' && !destroyed && !!style && !!document.body && document.body.classList.contains('stremio-hybrid'); },
+        ownsPresentation: function (region) { return (region==='header' || region==='navigation') && !destroyed && !!style && !!document.body && document.body.classList.contains('stremio-hybrid'); },
         openUtilities: openHeaderUtilities,
         setEnabled: setEnabled,
         refresh: function () { if (ready) apply(enabled()); },
