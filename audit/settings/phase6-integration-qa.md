@@ -1,6 +1,6 @@
 # Issue #73 Phase 6 Integration QA
 
-Tested baseline: `fefc419aebc655d2bb39c1e498cbd7c88ac566c1` (PR #103). Evidence in this report is from isolated fixtures unless stated otherwise. The historical 576-record inventory and summary were reused, not rebuilt.
+Tested code head: `2e2685dfda597f1f139fc433e46b1420711470ad`; base: `fefc419aebc655d2bb39c1e498cbd7c88ac566c1` (PR #103). Evidence in this report is from isolated fixtures unless stated otherwise. The historical 576-record inventory and summary were reused, not rebuilt.
 
 ## Evidence summary
 
@@ -73,6 +73,16 @@ One cold/warm fixture sample (`performance.now()`, Linux x64, Node v24.22.1; moc
 - Physical Google TV: NOT TESTED.
 
 **Verdict: NOT READY FOR OPT-IN QA** until the deployed asset hashes are verified against an authorized preview/head and one bounded runtime smoke test covers focus, owner Back and native fallback. **Not ready to enable by default** until exact delivery, runtime persistence/owner behavior, and physical Google TV D-pad/Back acceptance are established. Rollback remains the existing opt-in preference OFF plus native Settings fallback.
+
+| Release criterion | Evidence state |
+| --- | --- |
+| Settings entry/exit, Back stack, search, paging, owner route, native fallback | Fixture PASS; exact deployed browser behavior blocked |
+| D-pad focus, Ukrainian label readability, device Back | Fixture focus callbacks partial; Google TV NOT TESTED |
+| Folder restoration, unknown/system owner preservation | Fixture PASS for cases listed above |
+| Persistence/defaults and privacy | Existing synthetic owner fixtures PASS; runtime storage/account behavior NOT TESTED |
+| Initialization/teardown and repeated use | Fixture stress PASS; browser resource behavior NOT TESTED |
+| Correct JS delivery | BLOCKED: no matching served asset hashes |
+| User rollback | Source verified: preference stays OFF by default and native Settings fallback remains |
 
 ## Follow-up batch
 
