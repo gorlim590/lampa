@@ -16,7 +16,7 @@
         ['plugins', 'Плагіни та інтеграції'], ['system', 'Система та діагностика']
     ];
     var owners = {ydesign:'ui/design-optimized.js', interface_mod_new:'ui/interface-plus.js', cardify:'ui/cardify-plus.js',
-        trakt:'trakt/trakt.js', trakt_plus:'trakt/trakt-plus.js', home_history:'plugins-to-enable/home-history.js',
+        trakt:'trakt/trakt.js', trakt_plus:'trakt/trakt-plus.js', home_history:'plugins-to-enable/home-policy.js',
         torrents_cinema:'torrents-redesign.js', screensaver_plus:'ui/screensaver-plus.js',
         omdb_config_ui:'media/average-rating.js', omdb_ratings_select:'media/average-rating.js',
         ytranslate:'localization/translate.js', menu_filter:'ui/menu-hide.js'};
@@ -157,6 +157,10 @@
             return result;
         }
         function selectedRows(groupId,term) { return uniqueRows(registry.select(groupId,term)); }
+        var categoryDescriptions = {
+            home:'Рекомендації, рядки головної сторінки та їхній порядок. Редагування виконується власним плагіном.',
+            appearance:'Картки, фокус, бейджі й тема. Поточне значення та його зміна відкриваються в оригінальній панелі власника.'
+        };
         function categoryTitle(id) { var entry=categories.filter(function(item){return item[0]===id;})[0];return entry?entry[1]:'Інші налаштування'; }
         function statusTitle(row) {
             if(row.status==='broken')return 'Підтверджена помилка';
@@ -178,7 +182,7 @@
             L.SettingsApi.removeParams(ROOT);
             categories.forEach(function(c){
                 var count=uniqueRows(registry.rows.filter(function(row){return row.category===c[0] && row.panelAvailable!==false && row.status!=='broken' && row.status!=='blocked';})).length;
-                button(ROOT,'hub_category_'+c[0],c[1],'Кількість доступних маршрутів: '+count+'; роботу опцій не перевірено',function(){choose(c[0]);});
+                button(ROOT,'hub_category_'+c[0],c[1],(categoryDescriptions[c[0]]?categoryDescriptions[c[0]]+' ':'')+'Зареєстровано опцій: '+count+'. Це не підтверджує їхню роботу.',function(){choose(c[0]);});
             });
             button(ROOT,'hub_search','Пошук налаштувань',query?'Змінити запит: '+query:'Назва, плагін або ключ параметра',function(){rootFocus='hub_search';editSearch();});
             if(selectedRows('problems','').length)button(ROOT,'hub_problems','Проблемні налаштування','Лише підтверджені помилки, часткові обмеження й недоступні панелі.',function(){choose('problems','hub_problems');});
@@ -241,7 +245,11 @@
                 var context=categoryTitle(row.category)+' · '+row.owner+' · '+statusTitle(row)+(row.duplicateRegistrations>1?' · '+row.duplicateRegistrations+' реєстрації':'')+' · '+row.explanation;
                 button(PAGE,'hub_item_'+index,row.label,context,function(){openOwner(row);},statusClass(row));
             });
-            if(!filtered.length)button(PAGE,'hub_empty',query?'За цим запитом нічого не знайдено':group==='problems'?'Підтверджених проблем не знайдено':'У цій категорії немає записів','Змініть запит або поверніться до категорій. Поточні значення й приватні дані не шукаються.',function(){});
+            if(!filtered.length) {
+                var emptyCategory=!query && group!=='all' && group!=='unverified' && group!=='problems';
+                button(PAGE,'hub_empty',query?'За цим запитом нічого не знайдено':group==='problems'?'Підтверджених проблем не знайдено':'У цій категорії немає зареєстрованих опцій',emptyCategory?'Необхідний власник може бути вимкнений або не встановлений. Усі штатні розділи залишаються доступними в стандартних налаштуваннях.':'Змініть запит або поверніться до категорій. Поточні значення й приватні дані не шукаються.',function(){});
+                if(emptyCategory)button(PAGE,'hub_empty_native','Відкрити стандартні налаштування','Показати всі штатні та сторонні розділи Lampa.',function(){leave();active=false;restoreConsolidatedFolders();doc.body.classList.remove('settings-hub-active');openNativeMain();});
+            }
             if(page>0)button(PAGE,'hub_previous','Попередня сторінка',(page+1)+' / '+total,function(){page--;focusId='';showList();focus('hub_previous');});
             if(page+1<total)button(PAGE,'hub_next','Наступна сторінка',(page+1)+' / '+total,function(){page++;focusId='';showList();focus('hub_next');});
             metrics.renderedRows=Math.min(limit,filtered.length-page*limit);metrics.maxRenderedRows=Math.max(metrics.maxRenderedRows,metrics.renderedRows);
