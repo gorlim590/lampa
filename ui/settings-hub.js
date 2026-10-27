@@ -132,7 +132,7 @@
             if(!active || !registry)return;
             allFolders().forEach(function(node){
                 var component=node.getAttribute('data-component');
-                if(isConsolidated(node) || node.getAttribute('data-settings-hub-consolidated') || !(owners[component] || /^ydesign_/.test(component)))return;
+                if(isConsolidated(node) || node.getAttribute('data-settings-hub-consolidated')!==null || !(owners[component] || /^ydesign_/.test(component)))return;
                 if(node.style.display==='none' || node.classList.contains('hide') || node.classList.contains('hidden'))return;
                 var rows=registry.rows.filter(function(row){return row.component===component;});
                 var directRoute=rows.length>0 && rows.every(function(row){return row.route!=='folder' && row.panelAvailable!==false && row.status!=='broken' && row.status!=='blocked';});
@@ -162,7 +162,13 @@
             if(row.status==='blocked')return 'Недоступно';
             if(row.status==='partial')return 'Частково перевірено';
             if(row.status==='unsupported')return 'Не підтримується';
-            return 'Не перевірено';
+            return row.panelAvailable===false?'Панель недоступна':'Панель доступна · ефект не перевірено';
+        }
+        function statusClass(row) {
+            if(row.status==='broken')return 'settings-hub-status-broken';
+            if(row.status==='blocked' || row.panelAvailable===false)return 'settings-hub-status-unavailable';
+            if(row.status==='partial')return 'settings-hub-status-partial';
+            return 'settings-hub-status-unverified';
         }
         function editSearch() {
             L.Input.edit({title:'Пошук налаштувань',value:query,free:true,nosave:true},function(value){query=clean(value);group='all';page=0;focusId='';showList();});
@@ -191,8 +197,8 @@
             L.Settings.main().render().detach();
         }
         function nativePage(name, back, skipBack) { leave(skipBack); active=true; if(name===ROOT){rebuild();consolidateFolders();renderRoot();} L.Settings.create(name,{onBack:function(){if(!returning){returning=true;try{back();}finally{returning=false;}}}}); }
-        function button(component, key, label, description, action) {
-            L.SettingsApi.addParam({component:component,param:{name:key,type:'button'},field:{name:clean(label),description:clean(description)},onRender:function(item){item.on('hover:enter.settingsHub',action);}});
+        function button(component, key, label, description, action, className) {
+            L.SettingsApi.addParam({component:component,param:{name:key,type:'button'},field:{name:clean(label),description:clean(description)},onRender:function(item){if(className && typeof item.addClass==='function')item.addClass(className);item.on('hover:enter.settingsHub',action);}});
         }
         function mark() {
             doc.body.classList.add('settings-hub-active');
@@ -232,9 +238,9 @@
             button(PAGE,'hub_search','Пошук налаштувань',query || 'Назва, плагін, компонент або ключ параметра',editSearch);
             filtered.slice(page*limit,(page+1)*limit).forEach(function(row,index){
                 var context=categoryTitle(row.category)+' · '+row.owner+' · '+statusTitle(row)+(row.duplicateRegistrations>1?' · '+row.duplicateRegistrations+' реєстрації':'')+' · '+row.explanation;
-                button(PAGE,'hub_item_'+index,row.label,context,function(){openOwner(row);});
+                button(PAGE,'hub_item_'+index,row.label,context,function(){openOwner(row);},statusClass(row));
             });
-            if(!filtered.length)button(PAGE,'hub_empty',query?'За цим запитом нічого не знайдено':'У цій категорії немає записів','Змініть запит або поверніться до категорій. Поточні значення й приватні дані не шукаються.',function(){});
+            if(!filtered.length)button(PAGE,'hub_empty',query?'За цим запитом нічого не знайдено':group==='problems'?'Підтверджених проблем не знайдено':'У цій категорії немає записів','Змініть запит або поверніться до категорій. Поточні значення й приватні дані не шукаються.',function(){});
             if(page>0)button(PAGE,'hub_previous','Попередня сторінка',(page+1)+' / '+total,function(){page--;focusId='';showList();focus('hub_previous');});
             if(page+1<total)button(PAGE,'hub_next','Наступна сторінка',(page+1)+' / '+total,function(){page++;focusId='';showList();focus('hub_next');});
             metrics.renderedRows=Math.min(limit,filtered.length-page*limit);metrics.maxRenderedRows=Math.max(metrics.maxRenderedRows,metrics.renderedRows);

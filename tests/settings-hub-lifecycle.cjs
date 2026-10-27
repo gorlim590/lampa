@@ -6,16 +6,16 @@ function fixture(){
  const bodyNode={},rootNode={attrs:{},setAttribute(k,v){this.attrs[k]=v;}};
  function wrap(nodes){if(!Array.isArray(nodes))nodes=[nodes];const out={length:nodes.length,toArray:()=>nodes,detach:()=>out,remove:()=>out,
   find(selector){if(selector==='.settings__body')return wrap(bodyNode);if(selector==='.settings-folder[data-component]')return wrap(nativeFolders);if(selector==='[data-name]'||selector==='.settings-param.selector')return wrap(items);if(selector==='.settings-param__name')return {text:()=>nodes[0]?.label||''};return wrap([]);},
-  filter(fn){return wrap(nodes.filter(n=>fn.call(n)));},first(){return wrap(nodes.slice(0,1));},on(event,fn){nodes.forEach(n=>n.enter=fn);return out;},trigger(event){if(event==='hover:focus')nodes.forEach(n=>n.scrollFocused=true);else nodes[0]?.enter?.();return out;}};
+  filter(fn){return wrap(nodes.filter(n=>fn.call(n)));},first(){return wrap(nodes.slice(0,1));},on(event,fn){nodes.forEach(n=>n.enter=fn);return out;},addClass(name){nodes.forEach(n=>(n.classes||(n.classes=[])).push(name));return out;},trigger(event){if(event==='hover:focus')nodes.forEach(n=>n.scrollFocused=true);else nodes[0]?.enter?.();return out;}};
  nodes.forEach((n,i)=>out[i]=n);return out;}
  const $=wrap,L={Template:{add:(name,html)=>templates[name]=html,get:name=>templates[name]||'<div></div>'},SettingsApi:{allParams:()=>params,allComponents:()=>components,addComponent:d=>{components[d.component]=d;templates['settings_'+d.component]='<div></div>';},addParam:d=>(params[d.component]||=[]).push(d),removeParams:id=>delete params[id],removeComponent:id=>{delete components[id];delete params[id];}},Settings:{main:()=>({render:()=>wrap({})}),render:()=>wrap(rootNode),listener:{follow:(event,fn)=>(listeners[event]||=[]).push(fn),remove:(event,fn)=>{listeners[event]=(listeners[event]||[]).filter(x=>x!==fn);}},
-  create(name,options={}){creates++;let dead=false;items=(params[name]||[]).map(def=>{const item={label:def.field.name,description:def.field.description,key:def.param.name,getAttribute:k=>k==='data-name'?def.param.name:null};def.onRender?.(wrap(item));return item;});
+  create(name,options={}){creates++;let dead=false;items=(params[name]||[]).map(def=>{const item={label:def.field.name,description:def.field.description,key:def.param.name,classes:[],getAttribute:k=>k==='data-name'?def.param.name:null};def.onRender?.(wrap(item));return item;});
    const controller={back(){assert(!dead,'native component destroyed twice');dead=true;destroyed++;items=[];if(options.onBack)options.onBack();else L.Controller.toggle('settings');}};
    // Mirrors native order: build controller, send open, then toggle component.
    enabled={name:'settings_component',controller};(listeners.open||[]).forEach(fn=>fn({name,body:wrap(bodyNode),params:options}));
   }},Controller:{enabled:()=>enabled,collectionFocus:node=>focused=node,toggle:name=>{enabled={name,controller:{}};}},Input:{edit:(options,callback)=>editRequest={options,callback}},Noty:{show:message=>warnings.push(message)},Storage:{get(){throw Error('Unexpected preference read');},set(){throw Error('Unexpected preference write');}}};
  const doc={body:{classList:{add:x=>classes.add(x),remove:x=>classes.delete(x),contains:x=>classes.has(x)}},head:{appendChild:n=>styles.push(n)},createElement:()=>({})};
- function addFolder(id,options={}){const attrs={'data-component':id},hidden=new Set();if(options.hidden)hidden.add('hidden');const node={style:{display:options.display||''},getAttribute:key=>attrs[key]||null,setAttribute:(key,value)=>attrs[key]=value,removeAttribute:key=>delete attrs[key],classList:{contains:key=>hidden.has(key)},enter:options.enter||(()=>{})};nativeFolders.push(node);return node;}
+ function addFolder(id,options={}){const attrs={'data-component':id},hidden=new Set();if(options.marker!==undefined)attrs['data-settings-hub-consolidated']=options.marker;if(options.hidden)hidden.add('hidden');const node={style:{display:options.display||''},getAttribute:key=>Object.prototype.hasOwnProperty.call(attrs,key)?attrs[key]:null,setAttribute:(key,value)=>attrs[key]=value,removeAttribute:key=>delete attrs[key],classList:{contains:key=>hidden.has(key)},enter:options.enter||(()=>{})};nativeFolders.push(node);return node;}
  return {hub,L,$,doc,params,templates,listeners,styles,warnings,classes,rootNode,addFolder,open:()=>L.Settings.create('settings_hub'),openMain:()=>L.Settings.create('main'),search:value=>{assert(editRequest,'Search input was not opened');editRequest.callback(value);return editRequest;},searchOptions:()=>editRequest&&editRequest.options,
   enter(key){const item=items.find(n=>n.key===key);assert(item,'Missing navigation row '+key);item.enter();},back:()=>enabled.controller.back(),items:()=>items,focus:()=>focused,stats:()=>({destroyed,creates})};
 }
@@ -63,7 +63,8 @@ test('Integrated Hub and Hybrid routing keeps explicit native returns one-shot a
 test('Paging bounds rendered links, discovers late registrations and does not duplicate listeners/styles on reopen',()=>{
  const f=fixture();f.params.ydesign=Array.from({length:65},(_,i)=>({param:{name:'setting_'+i,type:'select'},field:{name:'Параметр '+i}}));f.hub.install(f.L,f.$,f.doc);
  f.open();f.enter('hub_category_appearance');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,24);f.enter('hub_next');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,24);
- f.back();f.params.ydesign.push({param:{name:'late',type:'select'},field:{name:'Новий'}});f.enter('hub_category_appearance');f.enter('hub_next');f.enter('hub_next');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,18);
+ f.back();const rootKeys=f.params.settings_hub.map(x=>x.param.name);assert.equal(new Set(rootKeys).size,rootKeys.length,'Root controls are not duplicated on reentry');
+ f.params.ydesign.push({param:{name:'late',type:'select'},field:{name:'Новий'}});f.enter('hub_category_appearance');f.enter('hub_next');f.enter('hub_next');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,18);
  assert.equal(f.hub.install(f.L,f.$,f.doc),false);assert.equal(f.styles.length,0);assert.equal(f.listeners.open.length,1);assert.equal(f.listeners.close.length,1);
  f.listeners.close[0]();assert.equal(f.hub.owns('ydesign'),false);assert(!f.classes.has('settings-hub-active'));
 });
@@ -73,7 +74,8 @@ test('Search is global, case-insensitive, metadata-only, deduplicated, and prese
  f.hub.install(f.L,f.$,f.doc);f.open();assert.equal(f.items().filter(x=>x.key==='hub_problems').length,0,'No problem shortcut without evidence');
  assert.match(f.items().find(x=>x.key==='hub_category_appearance').description,/1 доступних/);
  f.enter('hub_search');f.search('DESIGN-OPTIMIZED');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,1,'Template and SettingsApi duplicates render once');
- assert.match(f.items().find(x=>x.key==='hub_item_0').description,/Зовнішній вигляд · ui\/design-optimized\.js · Не перевірено/);
+ assert.match(f.items().find(x=>x.key==='hub_item_0').description,/Зовнішній вигляд · ui\/design-optimized\.js · Панель доступна · ефект не перевірено/);
+ assert(f.items().find(x=>x.key==='hub_item_0').classes.includes('settings-hub-status-unverified'));
  f.enter('hub_search');assert.equal(f.searchOptions().value,'DESIGN-OPTIMIZED');f.search('YDESIGN');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,1);
  f.enter('hub_search');f.search('RATING_CARD_MODE');assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,1);
  f.enter('hub_item_0');f.back();assert.equal(f.focus().key,'hub_item_0','Back restores focus to the same search result');f.enter('hub_search');assert.equal(f.searchOptions().value,'RATING_CARD_MODE','Owner Back preserves the query');
@@ -138,16 +140,20 @@ test('Missing owner template is blocked with an explanation while the native Set
  f.back();f.enter('hub_native');assert.equal(f.L.Controller.enabled().name,'settings');assert(!f.classes.has('settings-hub-active'));
 });
 test('Hub hides only known direct owner folders while active and restores every folder on native fallback or destroy',()=>{
- const f=fixture(),safe=f.addFolder('ydesign'),unknown=f.addFolder('external_plugin'),system=f.addFolder('system_tools'),missing=f.addFolder('trakt_plus');
+ const f=fixture(),safe=f.addFolder('ydesign'),unknown=f.addFolder('external_plugin'),system=f.addFolder('system_tools'),missing=f.addFolder('trakt_plus'),preserved=f.addFolder('ydesign_legacy',{marker:''});
  f.params.ydesign=[{param:{name:'card_size',type:'select'},field:{name:'Розмір картки'}}];
  f.params.external_plugin=[{param:{name:'external_pref',type:'select'},field:{name:'Зовнішній параметр'}}];
  f.params.trakt_plus=[{param:{name:'trakt_pref',type:'select'},field:{name:'Trakt'}}];
+ f.params.ydesign_legacy=[{param:{name:'old_pref',type:'select'},field:{name:'Стара опція'}}];
  const get=f.L.Template.get;f.L.Template.get=name=>name==='settings_trakt_plus'?null:get(name);
  f.hub.install(f.L,f.$,f.doc);f.open();
+ const hybridSource=fs.readFileSync(__dirname+'/../ui/stremio-hybrid.js','utf8');assert(hybridSource.includes('settings-hub-active .settings-folder[data-settings-hub-consolidated="true"]'));
+ assert(hybridSource.includes('settings-hub-active .settings-param__name { font-size:1.1em; line-height:1.35; white-space:normal; overflow-wrap:anywhere; }'));
  assert.equal(safe.getAttribute('data-settings-hub-consolidated'),'true','Known owner panel with a registered template is consolidated');
  assert.equal(unknown.getAttribute('data-settings-hub-consolidated'),null,'Unknown owner remains in native navigation');
  assert.equal(system.getAttribute('data-settings-hub-consolidated'),null,'Native/system folder remains visible');
  assert.equal(missing.getAttribute('data-settings-hub-consolidated'),null,'Missing panel remains reachable natively');
+ assert.equal(preserved.getAttribute('data-settings-hub-consolidated'),'','Pre-existing folder metadata is preserved');
  f.enter('hub_native');assert.equal(safe.getAttribute('data-settings-hub-consolidated'),null,'Standard Settings immediately restores consolidated folders');
  f.open();assert.equal(safe.getAttribute('data-settings-hub-consolidated'),'true');f.hub.destroy();
  assert.equal(safe.getAttribute('data-settings-hub-consolidated'),null,'Destroy restores the original folder');

@@ -101,6 +101,10 @@ body.stremio-hybrid.settings-hub-active .settings-folder[data-settings-hub-conso
 body.stremio-hybrid.settings-hub-active .settings-param { border-radius:var(--sh-radius); }
 body.stremio-hybrid.settings-hub-active .settings-param__name { font-size:1.1em; line-height:1.35; white-space:normal; overflow-wrap:anywhere; }
 body.stremio-hybrid.settings-hub-active .settings-param__descr { overflow-wrap:anywhere; line-height:1.4; color:var(--sh-muted); }
+body.stremio-hybrid.settings-hub-active .settings-param.hub-status-unverified { border-left:.22em solid var(--sh-inactive); }
+body.stremio-hybrid.settings-hub-active .settings-param.hub-status-partial { border-left:.22em solid #d6ac63; }
+body.stremio-hybrid.settings-hub-active .settings-param.hub-status-broken { border-left:.22em solid #e37878; }
+body.stremio-hybrid.settings-hub-active .settings-param.hub-status-unavailable { border-left:.22em solid #777386; opacity:.78; }
 body.stremio-hybrid.settings-hub-active .settings-param.focus { background:var(--sh-focus-soft); box-shadow:inset .2em 0 var(--sh-accent); }
 body.stremio-hybrid .settings-param { padding:1em; margin-bottom:.25em; }
 body.stremio-hybrid .settings-param__name { font-size:1em; }
