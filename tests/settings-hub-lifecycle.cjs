@@ -87,7 +87,7 @@ test('Search is global, case-insensitive, metadata-only, deduplicated, and prese
 });
 test('Home and Appearance categories route to native controls and preserve owner registrations across Back',()=>{
  const f=fixture();let ownerRender=0;
- f.params.home_history=[{param:{name:'home_history_edit_order',type:'button'},field:{name:'Порядок рядків Home'},onRender:()=>ownerRender++}];
+ f.params.home_history=[{param:{name:'home_history_edit_order',type:'button'},field:{name:'Порядок рядків Home'},onRender:()=>ownerRender++},{param:{name:'home_history_reset_order',type:'button'},field:{name:'Скинути порядок'}}];
  f.params.ydesign_grid=[{param:{name:'ydesign_row_continue',type:'trigger',default:true},field:{name:'Рядок «Продовжити перегляд»'}}];
  f.params.ydesign_styles=[{param:{name:'ydesign_style',type:'select',default:'classic',values:{classic:'Класичний',glass:'Скло'}},field:{name:'Стиль карток'}}];
  const homeParams=f.params.home_history,homeDisplayParams=f.params.ydesign_grid,appearanceParams=f.params.ydesign_styles;
@@ -95,9 +95,10 @@ test('Home and Appearance categories route to native controls and preserve owner
  f.enter('hub_category_home');assert(f.items().some(x=>x.key==='hub_item_0'&&x.label==='Порядок рядків Home'));
  assert.match(f.items().find(x=>x.key==='hub_item_0').description,/plugins-to-enable\/home-policy\.js/);
  f.enter('hub_item_0');assert.equal(f.openedSettings.at(-1),'home_history');assert.equal(ownerRender,1);
- f.back();assert.equal(f.focus().key,'hub_item_0');f.back();assert.equal(f.focus().key,'hub_category_home');
- f.enter('hub_category_home');assert(f.items().some(x=>x.key==='hub_item_1'&&x.label==='Рядок «Продовжити перегляд»'));
- f.enter('hub_item_1');assert.equal(f.openedSettings.at(-1),'ydesign_grid');f.back();
+ f.back();f.enter('hub_item_1');assert.equal(f.openedSettings.at(-1),'home_history','Reset remains the original Home Policy owner action');
+ f.back();assert.equal(f.focus().key,'hub_item_1');f.back();assert.equal(f.focus().key,'hub_category_home');
+ f.enter('hub_category_home');assert(f.items().some(x=>x.key==='hub_item_2'&&x.label==='Рядок «Продовжити перегляд»'));
+ f.enter('hub_item_2');assert.equal(f.openedSettings.at(-1),'ydesign_grid');f.back();
  f.back();f.enter('hub_category_appearance');assert(f.items().some(x=>x.key==='hub_item_0'&&x.label==='Стиль карток'));
  f.enter('hub_item_0');assert.equal(f.openedSettings.at(-1),'ydesign_styles');f.back();
  assert.equal(f.params.home_history,homeParams,'Hub never replaces the Home owner registration');assert.equal(f.params.ydesign_grid,homeDisplayParams,'Hub never replaces the Home display registration');assert.equal(f.params.ydesign_styles,appearanceParams,'Hub never replaces the Appearance owner registration');
@@ -113,19 +114,28 @@ test('Hub shows safe current YDesign values and refreshes them after native-owne
  const keys=['ydesign_row_continue','ydesign_row_week','ydesign_theme','ydesign_grid_items_v','ydesign_focus_fx','ydesign_v_show_ua'];
  yd.settingsParams.filter(def=>keys.includes(def.param&&def.param.name)).forEach(def=>(f.params[def.component]||(f.params[def.component]=[])).push(def));
  f.L.Storage=yd.context.Lampa.Storage;
- yd.store.ydesign_row_continue=false;yd.store.ydesign_grid_items_v='6';yd.store.ydesign_theme='minimal';
+ yd.store.ydesign_row_continue=false;yd.store.ydesign_row_week=true;yd.store.ydesign_grid_items_v='6';yd.store.ydesign_theme='minimal';yd.store.ydesign_focus_fx='scale';yd.store.ydesign_v_show_ua=true;
  f.hub.install(f.L,f.$,f.doc);f.open();f.enter('hub_category_home');
  let row=f.items().find(item=>item.label==='Рядок «Продовжити перегляд»');assert(row);assert.match(row.description,/Зараз: вимкнено/);
+ const week=f.items().find(item=>item.label==='Рядок «Виходять цього тижня»');assert.match(week.description,/Зараз: увімкнено/);
  f.enter(row.key);assert.equal(f.openedSettings.at(-1),'ydesign_grid');
  yd.context.Lampa.Storage.set('ydesign_row_continue',true);yd.api.onSettingChange({name:'ydesign_row_continue'});yd.flush(60);
  f.back();row=f.items().find(item=>item.label==='Рядок «Продовжити перегляд»');assert.match(row.description,/Зараз: увімкнено/);
+ f.enter(week.key);assert.equal(f.openedSettings.at(-1),'ydesign_grid');yd.context.Lampa.Storage.set('ydesign_row_week',false);yd.api.onSettingChange({name:'ydesign_row_week'});yd.flush(60);f.back();
+ assert.match(f.items().find(item=>item.label==='Рядок «Виходять цього тижня»').description,/Зараз: вимкнено/);
  f.back();f.enter('hub_category_appearance');
  row=f.items().find(item=>item.label==='Кількість карток у рядку (Вертикальні)');assert(row);assert.match(row.description,/Зараз: 6/);
  f.enter(row.key);assert.equal(f.openedSettings.at(-1),'ydesign_grid');
  yd.context.Lampa.Storage.set('ydesign_grid_items_v','7');yd.api.onSettingChange({name:'ydesign_grid_items_v'});yd.flush(60);
  f.back();row=f.items().find(item=>item.label==='Кількість карток у рядку (Вертикальні)');assert.match(row.description,/Зараз: 7/);
+ row=f.items().find(item=>item.label==='Тема оформлення');assert.match(row.description,/Зараз: Мінімалістична/);f.enter(row.key);assert.equal(f.openedSettings.at(-1),'ydesign_grid');
+ yd.context.Lampa.Storage.set('ydesign_theme','oled');yd.api.onSettingChange({name:'ydesign_theme'});yd.flush(60);f.back();assert.match(f.items().find(item=>item.label==='Тема оформлення').description,/Зараз: OLED \(чорний фон\)/);
+ row=f.items().find(item=>item.label==='Ефект фокуса');assert.match(row.description,/Зараз: Збільшення \(стандарт\)/);f.enter(row.key);assert.equal(f.openedSettings.at(-1),'ydesign_styles');
+ yd.context.Lampa.Storage.set('ydesign_focus_fx','glow');yd.api.onSettingChange({name:'ydesign_focus_fx'});yd.flush(60);f.back();assert.match(f.items().find(item=>item.label==='Ефект фокуса').description,/Зараз: Світіння кольором постера/);
+ row=f.items().find(item=>item.label==='Показувати плашку UA');assert(row);assert.match(row.description,/Зараз: увімкнено/);f.enter(row.key);assert.equal(f.openedSettings.at(-1),'ydesign_vertical');
+ yd.context.Lampa.Storage.set('ydesign_v_show_ua',false);yd.api.onSettingChange({name:'ydesign_v_show_ua'});yd.flush(60);f.back();assert.match(f.items().find(item=>item.label==='Показувати плашку UA').description,/Зараз: вимкнено/);
  const restarted=ydesignFixture({storage:{...yd.store}});restarted.api.applyDynamicCSSNow();assert.equal(restarted.cssVars['--ydesign-grid-items-v'],'7');
- assert.deepEqual(yd.writes,['ydesign_row_continue','ydesign_grid_items_v']);
+ assert.deepEqual(yd.writes,['ydesign_row_continue','ydesign_row_week','ydesign_grid_items_v','ydesign_theme','ydesign_focus_fx','ydesign_v_show_ua']);
 });
 test('Home order summary reads the existing profile-scoped policy state and refreshes on return',()=>{
  const previous=global.window;let custom=false;global.window={LampaHomeHistory:{policy:()=>({hasCustomOrder:()=>custom})}};

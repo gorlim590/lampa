@@ -87,7 +87,7 @@
             } catch (e) { gaps.push(component);panelAvailable=false; }
             (params[component] || []).forEach(function (def, i) {
                 var p=def.param || {}, code=typeof def.onRender==='function'?Function.prototype.toString.call(def.onRender):'';
-                add({key:p.name,type:p.type,label:clean((def.field || {}).name),backLoop:component==='addCategory' && p.name==='ncInfo' && /controller\.back\s*=/.test(code) && /Settings\.create\(['"]ncInfo['"]\)/.test(code)},i,'SettingsApi');
+                add({key:p.name,type:p.type,label:clean((def.field || {}).name),default:p.default,values:p.values,backLoop:component==='addCategory' && p.name==='ncInfo' && /controller\.back\s*=/.test(code) && /Settings\.create\(['"]ncInfo['"]\)/.test(code)},i,'SettingsApi');
             });
             rows.slice(before).forEach(function(row){row.panelAvailable=panelAvailable;if(!panelAvailable && row.status==='unverified'){row.status='blocked';row.explanation='Панель ще не зареєстрована власником. Спочатку відкрийте його стандартний розділ налаштувань. #73';}});
             if(rows.length===before && (folders || []).some(function(f){return f.id===component;}))rows.push({id:component+':folder',component:component,key:'',label:title,owner:'Штатна панель або інтеграція',category:category(component,''),route:'folder',status:'unverified',issue:73,explanation:'Не перевірено: спеціальний маршрут відкривається оригінальною кнопкою Lampa.'});
