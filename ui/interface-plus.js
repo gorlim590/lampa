@@ -3,20 +3,33 @@
     if (window.__ifx_plugin_initialized) return;
     window.__ifx_plugin_initialized = true;
 
-    // One static header rule applies before app-ready and across native routes.
-    // Keep the native localized minute clock; no second clock or DOM tick loop.
-    (function injectHeaderCss() {
-        if (document.getElementById('ifx_header_css')) return;
-        var style = document.createElement('style');
-        style.id = 'ifx_header_css';
-        style.textContent = [
+    // Standalone fallback for one delegated presentation region, not a second UI controller.
+    (function headerPresentation() {
+        var ownedStyle = null;
+        var css = [
             'body .head { background:#15171c !important; background-image:none !important; color:#f4f4f7; }',
             'body .head .head__time { align-items:center; -webkit-align-items:center; margin-top:0; flex-shrink:0; }',
             'body .head .head__time-now { font-size:1.5em; line-height:1.15; margin:0 .55em 0 0; font-variant-numeric:tabular-nums; font-feature-settings:"tnum"; }',
             'body .head .head__time > div:last-child { text-align:left; }',
             'body .head .head__time-date, body .head .head__time-week { font-size:.72em; line-height:1.3; white-space:nowrap; }'
         ].join('\n');
-        document.head.appendChild(style);
+        function syncHeader() {
+            var ui = window.StremioHybrid;
+            var delegated = false;
+            try { delegated = ui && ui.presentationVersion === 1 && typeof ui.ownsPresentation === 'function' && ui.ownsPresentation('header'); }
+            catch (e) { /* A failed optional owner must not abort Interface services. */ }
+            if (delegated) {
+                if (ownedStyle) { ownedStyle.remove(); ownedStyle = null; }
+                return;
+            }
+            if (ownedStyle || document.getElementById('ifx_header_css')) return;
+            ownedStyle = document.createElement('style');
+            ownedStyle.id = 'ifx_header_css';
+            ownedStyle.textContent = css;
+            document.head.appendChild(ownedStyle);
+        }
+        window.InterfacePlusPresentation = {contractVersion:1, syncHeader:syncHeader};
+        syncHeader();
     })();
 
     var IFX_TITLE_SIZE_DEFAULT = 0.75;

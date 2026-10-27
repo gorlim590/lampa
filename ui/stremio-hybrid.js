@@ -3,7 +3,7 @@
     'use strict';
     if (window.StremioHybrid) return;
     var UI_VERSION='3.0.0-early-shell-phase1';
-    var bootStats={scriptStartMs:uiNow(),shellAppliedMs:null,firstShellFrameMs:null,readyMs:null,initCount:0,styleInsertions:0,shellTransitions:0,settingsLoads:0,settingsMounts:0,settingsUnmounts:0,settingsFailures:0},shellFrame=0;
+    var bootStats={scriptStartMs:uiNow(),shellAppliedMs:null,firstShellFrameMs:null,readyMs:null,initCount:0,styleInsertions:0,shellTransitions:0,settingsLoads:0,settingsMounts:0,settingsUnmounts:0,settingsFailures:0,presentationFailures:0},shellFrame=0;
     var settingsHub=null,settingsScript=null,settingsLoading=false,settingsAttempted=false,settingsFailedApi=null;
     var overlayScriptURL=document.currentScript&&document.currentScript.src,overlayLoading=false;
     function ensureTorrentOverlay(){
@@ -16,7 +16,7 @@
     var css = `
 body.stremio-hybrid { --sh-bg:#121023; --sh-panel:#211d35; --sh-accent:#9775fa; --sh-muted:#aba7bd; --sh-rail:#0c0b16; --sh-text:#f0eef8; --sh-border:#ffffff16; --sh-radius:.7em; --sh-pill:2em; --sh-gap:1.1em; --sh-speed:160ms; --sh-ring:#9775fa66; --sh-focus:#7960c9; --sh-focus-soft:#3e315b; --sh-header:transparent; --sh-panel-raised:#29233e; --sh-accent-soft:#b79bff; --sh-focus-text:#e9e0ff; --sh-focus-ink:#201536; --sh-inactive:#726d86; --sh-secondary:#d0cadf; --sh-inset:1.8em; --sh-ease:ease-out; background:#121023 !important; color:#f0eef8; }
 body.stremio-hybrid .background { opacity:.12 !important; }
-body.stremio-hybrid .head { background:transparent !important; background-image:none !important; border:0 !important; box-shadow:none !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
+body.stremio-hybrid .head { color:#f4f4f7; background:transparent !important; background-image:none !important; border:0 !important; box-shadow:none !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
 /* The native collapsed navigation rail occupies 4.4em. The header itself spans
    the viewport so search stays centered; reserve the rail only for its content. */
 body.stremio-hybrid .head__body { padding-left:calc(4.4em + var(--sh-inset)); padding-right:var(--sh-inset); }
@@ -1116,9 +1116,10 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         });
     }
     css += `
-body.stremio-hybrid .head .head__time{display:flex!important;position:static;transform:none;margin:0!important;gap:0;max-width:none;color:#f4f4f7;pointer-events:none}
+body.stremio-hybrid .head .head__time{display:flex!important;position:static;transform:none;margin:0!important;gap:0;max-width:none;color:#f4f4f7;pointer-events:none;flex-shrink:0;align-items:center;-webkit-align-items:center}
 body.stremio-hybrid .head .head__actions{display:flex;align-items:center;gap:.8em;flex:1;min-width:0;justify-content:flex-end}
-body.stremio-hybrid .head .head__time-now{font-size:1.5em!important;line-height:1.15;margin:0 .55em 0 0;font-variant-numeric:tabular-nums}
+body.stremio-hybrid .head .head__time-now{font-size:1.5em!important;line-height:1.15;margin:0 .55em 0 0;font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+body.stremio-hybrid .head .head__time > div:last-child{text-align:left}
 body.stremio-hybrid .head .head__time-date,body.stremio-hybrid .head .head__time-week{font-size:.72em!important;line-height:1.3;white-space:nowrap}
 body.stremio-hybrid .head .head__time-week{display:block}
 body.stremio-hybrid .head .head__logo-icon,body.stremio-hybrid .head .head__backward{display:none!important}
@@ -1467,6 +1468,13 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
             if(bootStats.firstShellFrameMs===null && !shellFrame && typeof requestAnimationFrame==='function')shellFrame=requestAnimationFrame(function(){shellFrame=0;if(!destroyed && document.body.classList.contains('stremio-hybrid'))bootStats.firstShellFrameMs=uiNow();});
         }else if(shellFrame){cancelAnimationFrame(shellFrame);shellFrame=0;}
         if (!on && style) { style.remove(); style = null; }
+        syncHeaderPresentation();
+    }
+    function syncHeaderPresentation() {
+        var api=window.InterfacePlusPresentation;
+        if(api && api.contractVersion===1 && typeof api.syncHeader==='function'){
+            try{api.syncHeader();}catch(e){bootStats.presentationFailures=(bootStats.presentationFailures||0)+1;}
+        }
     }
     function prepareShell() {
         if(window.Lampa && Lampa.Storage && document.body)applyShell(enabled());
@@ -1541,10 +1549,12 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
     window.StremioHybrid = {
         version: UI_VERSION,
         settingsHubVersion: 1,
+        presentationVersion: 1,
+        ownsPresentation: function (region) { return region==='header' && !destroyed && !!style && !!document.body && document.body.classList.contains('stremio-hybrid'); },
         openUtilities: openHeaderUtilities,
         setEnabled: setEnabled,
         refresh: function () { if (ready) apply(enabled()); },
-        diagnostics: function () {return {version:UI_VERSION,scriptStartMs:bootStats.scriptStartMs,shellAppliedMs:bootStats.shellAppliedMs,firstShellFrameMs:bootStats.firstShellFrameMs,readyMs:bootStats.readyMs,initCount:bootStats.initCount,styleInsertions:bootStats.styleInsertions,shellTransitions:bootStats.shellTransitions,settingsLoads:bootStats.settingsLoads,settingsMounts:bootStats.settingsMounts,settingsUnmounts:bootStats.settingsUnmounts,settingsFailures:bootStats.settingsFailures};},
+        diagnostics: function () {return {version:UI_VERSION,scriptStartMs:bootStats.scriptStartMs,shellAppliedMs:bootStats.shellAppliedMs,firstShellFrameMs:bootStats.firstShellFrameMs,readyMs:bootStats.readyMs,initCount:bootStats.initCount,styleInsertions:bootStats.styleInsertions,shellTransitions:bootStats.shellTransitions,settingsLoads:bootStats.settingsLoads,settingsMounts:bootStats.settingsMounts,settingsUnmounts:bootStats.settingsUnmounts,settingsFailures:bootStats.settingsFailures,presentationFailures:bootStats.presentationFailures||0};},
         destroy: function () {
             apply(false);
             removeHeaderUtilitiesSetting();
