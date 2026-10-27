@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "overallStatus": "PARTIAL",
-  "testedBranchSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+  "testedBranchSha": "b94081224154097a0cf025c981dfcae75ff693d5",
   "browser": "156.0.8078.4",
   "previewServer": "http://127.0.0.1:8766 (branch-bound, loopback only)",
   "rootCause": "The previously configured preview loader URL was not served because its existing loopback server had stopped. Its resource timing showed responseStatus 0; the browser therefore used published copies and lacked the Hybrid/Hub globals. Restarting the existing server restored local module execution.",
@@ -15,7 +15,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "2e805166d371bf84ba5ff5a488965fae41e7a369429a6eaa92e4855c482c7c0c",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "2e805166d371bf84ba5ff5a488965fae41e7a369429a6eaa92e4855c482c7c0c",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "audit/settings/phase6-browser/preview-loader.js",
         "expectedSha256": "2e805166d371bf84ba5ff5a488965fae41e7a369429a6eaa92e4855c482c7c0c",
         "exact": true
@@ -26,7 +27,8 @@
         "type": "cors",
         "contentType": "application/json; charset=utf-8",
         "sha256": "aae9accd18016ffc1e6708843aa2c49cf256cbddbe702f45f83b70294240e440",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "aae9accd18016ffc1e6708843aa2c49cf256cbddbe702f45f83b70294240e440",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "audit/settings/phase6-browser/manifest.json",
         "expectedSha256": "aae9accd18016ffc1e6708843aa2c49cf256cbddbe702f45f83b70294240e440",
         "exact": true
@@ -37,7 +39,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "593ca60780db85646f4c01c72896bf90a5aebfb38f909423cfb06ad49a712d8f",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "593ca60780db85646f4c01c72896bf90a5aebfb38f909423cfb06ad49a712d8f",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "ui/stremio-hybrid.js",
         "expectedSha256": "593ca60780db85646f4c01c72896bf90a5aebfb38f909423cfb06ad49a712d8f",
         "exact": true
@@ -48,7 +51,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "ui/settings-hub.js",
         "expectedSha256": "aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288",
         "exact": true
@@ -59,7 +63,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "ea9cf9384ce50a612e2def6ef4edce83f01093e24e84360b1818ad040296401c",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "ea9cf9384ce50a612e2def6ef4edce83f01093e24e84360b1818ad040296401c",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "ui/torrent-overlay.js",
         "expectedSha256": "ea9cf9384ce50a612e2def6ef4edce83f01093e24e84360b1818ad040296401c",
         "exact": true
@@ -70,7 +75,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "3230fdcd8eed32642d0ad6d616e8d3b9628a4320d97fb0b5fef005d7eea3cb38",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "3230fdcd8eed32642d0ad6d616e8d3b9628a4320d97fb0b5fef005d7eea3cb38",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "trakt/trakt.js",
         "expectedSha256": "3230fdcd8eed32642d0ad6d616e8d3b9628a4320d97fb0b5fef005d7eea3cb38",
         "exact": true
@@ -81,7 +87,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "2bfe8ae58a3619de30d298951638a69640b686ade98e1483f838d4c84c7bee8e",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "2bfe8ae58a3619de30d298951638a69640b686ade98e1483f838d4c84c7bee8e",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "trakt/trakt-plus.js",
         "expectedSha256": "2bfe8ae58a3619de30d298951638a69640b686ade98e1483f838d4c84c7bee8e",
         "exact": true
@@ -92,7 +99,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "9537df254948a908cc21b03647740d1c8f59458828d7378e7c51c584f85a5d0d",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "9537df254948a908cc21b03647740d1c8f59458828d7378e7c51c584f85a5d0d",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "ui/interface-plus.js",
         "expectedSha256": "9537df254948a908cc21b03647740d1c8f59458828d7378e7c51c584f85a5d0d",
         "exact": true
@@ -103,7 +111,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "6bce398af8d1f85faaeca7721a94540a0c73571038932fb475fcf76d7c1a0dcf",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "6bce398af8d1f85faaeca7721a94540a0c73571038932fb475fcf76d7c1a0dcf",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "ui/design-optimized.js",
         "expectedSha256": "6bce398af8d1f85faaeca7721a94540a0c73571038932fb475fcf76d7c1a0dcf",
         "exact": true
@@ -114,7 +123,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "media/average-rating.js",
         "expectedSha256": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
         "exact": true
@@ -125,7 +135,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "ui/cardify-plus.js",
         "expectedSha256": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
         "exact": true
@@ -136,7 +147,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "778e304b33b9b0b19a317616ea1a346a15e2f24942d734913a744c1b1065f934",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "778e304b33b9b0b19a317616ea1a346a15e2f24942d734913a744c1b1065f934",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "plugins-to-enable/home-history.js",
         "expectedSha256": "778e304b33b9b0b19a317616ea1a346a15e2f24942d734913a744c1b1065f934",
         "exact": true
@@ -147,7 +159,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "a66598bac58370ccb2e1b211283dd3c2e76cbfbb9643494e47ef9b2424cf7384",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "a66598bac58370ccb2e1b211283dd3c2e76cbfbb9643494e47ef9b2424cf7384",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "torrents-redesign.js",
         "expectedSha256": "a66598bac58370ccb2e1b211283dd3c2e76cbfbb9643494e47ef9b2424cf7384",
         "exact": true
@@ -158,7 +171,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "d3496f227af0e70a1d3e03e90591f1b8d1f2da670761f72f09160b6db165ffbf",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "d3496f227af0e70a1d3e03e90591f1b8d1f2da670761f72f09160b6db165ffbf",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "providers/parsers.js",
         "expectedSha256": "d3496f227af0e70a1d3e03e90591f1b8d1f2da670761f72f09160b6db165ffbf",
         "exact": true
@@ -169,7 +183,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "localization/translate.js",
         "expectedSha256": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
         "exact": true
@@ -180,7 +195,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "1cc40ac0ea6e6ae7c86fa54a76428568f984c4b49d2c785bd62604cdc6c9919b",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "1cc40ac0ea6e6ae7c86fa54a76428568f984c4b49d2c785bd62604cdc6c9919b",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "ui/screensaver-plus.js",
         "expectedSha256": "1cc40ac0ea6e6ae7c86fa54a76428568f984c4b49d2c785bd62604cdc6c9919b",
         "exact": true
@@ -191,7 +207,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "991be1b3ac028b048e7529f37aaf14b13ce9da94c5fff52724525af3fbb364d1",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "991be1b3ac028b048e7529f37aaf14b13ce9da94c5fff52724525af3fbb364d1",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "community/new-category.js",
         "expectedSha256": "991be1b3ac028b048e7529f37aaf14b13ce9da94c5fff52724525af3fbb364d1",
         "exact": true
@@ -421,7 +438,8 @@
       "type": "cors",
       "contentType": "application/javascript; charset=utf-8",
       "sha256": "2e805166d371bf84ba5ff5a488965fae41e7a369429a6eaa92e4855c482c7c0c",
-      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "headerSha256": "2e805166d371bf84ba5ff5a488965fae41e7a369429a6eaa92e4855c482c7c0c",
+      "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
       "source": "audit/settings/phase6-browser/preview-loader.js",
       "expectedSha256": "2e805166d371bf84ba5ff5a488965fae41e7a369429a6eaa92e4855c482c7c0c",
       "exact": true
@@ -432,7 +450,8 @@
       "type": "cors",
       "contentType": "application/json; charset=utf-8",
       "sha256": "aae9accd18016ffc1e6708843aa2c49cf256cbddbe702f45f83b70294240e440",
-      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "headerSha256": "aae9accd18016ffc1e6708843aa2c49cf256cbddbe702f45f83b70294240e440",
+      "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
       "source": "audit/settings/phase6-browser/manifest.json",
       "expectedSha256": "aae9accd18016ffc1e6708843aa2c49cf256cbddbe702f45f83b70294240e440",
       "exact": true
@@ -443,7 +462,8 @@
       "type": "cors",
       "contentType": "application/javascript; charset=utf-8",
       "sha256": "593ca60780db85646f4c01c72896bf90a5aebfb38f909423cfb06ad49a712d8f",
-      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "headerSha256": "593ca60780db85646f4c01c72896bf90a5aebfb38f909423cfb06ad49a712d8f",
+      "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
       "source": "ui/stremio-hybrid.js",
       "expectedSha256": "593ca60780db85646f4c01c72896bf90a5aebfb38f909423cfb06ad49a712d8f",
       "exact": true
@@ -454,7 +474,8 @@
       "type": "cors",
       "contentType": "application/javascript; charset=utf-8",
       "sha256": "aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288",
-      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "headerSha256": "aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288",
+      "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
       "source": "ui/settings-hub.js",
       "expectedSha256": "aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288",
       "exact": true
@@ -465,7 +486,8 @@
       "type": "cors",
       "contentType": "application/javascript; charset=utf-8",
       "sha256": "ea9cf9384ce50a612e2def6ef4edce83f01093e24e84360b1818ad040296401c",
-      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "headerSha256": "ea9cf9384ce50a612e2def6ef4edce83f01093e24e84360b1818ad040296401c",
+      "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
       "source": "ui/torrent-overlay.js",
       "expectedSha256": "ea9cf9384ce50a612e2def6ef4edce83f01093e24e84360b1818ad040296401c",
       "exact": true
@@ -476,7 +498,8 @@
       "type": "cors",
       "contentType": "application/javascript; charset=utf-8",
       "sha256": "3230fdcd8eed32642d0ad6d616e8d3b9628a4320d97fb0b5fef005d7eea3cb38",
-      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "headerSha256": "3230fdcd8eed32642d0ad6d616e8d3b9628a4320d97fb0b5fef005d7eea3cb38",
+      "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
       "source": "trakt/trakt.js",
       "expectedSha256": "3230fdcd8eed32642d0ad6d616e8d3b9628a4320d97fb0b5fef005d7eea3cb38",
       "exact": true
@@ -487,7 +510,8 @@
       "type": "cors",
       "contentType": "application/javascript; charset=utf-8",
       "sha256": "2bfe8ae58a3619de30d298951638a69640b686ade98e1483f838d4c84c7bee8e",
-      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "headerSha256": "2bfe8ae58a3619de30d298951638a69640b686ade98e1483f838d4c84c7bee8e",
+      "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
       "source": "trakt/trakt-plus.js",
       "expectedSha256": "2bfe8ae58a3619de30d298951638a69640b686ade98e1483f838d4c84c7bee8e",
       "exact": true
@@ -498,7 +522,8 @@
       "type": "cors",
       "contentType": "application/javascript; charset=utf-8",
       "sha256": "9537df254948a908cc21b03647740d1c8f59458828d7378e7c51c584f85a5d0d",
-      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "headerSha256": "9537df254948a908cc21b03647740d1c8f59458828d7378e7c51c584f85a5d0d",
+      "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
       "source": "ui/interface-plus.js",
       "expectedSha256": "9537df254948a908cc21b03647740d1c8f59458828d7378e7c51c584f85a5d0d",
       "exact": true
@@ -509,7 +534,8 @@
       "type": "cors",
       "contentType": "application/javascript; charset=utf-8",
       "sha256": "6bce398af8d1f85faaeca7721a94540a0c73571038932fb475fcf76d7c1a0dcf",
-      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "headerSha256": "6bce398af8d1f85faaeca7721a94540a0c73571038932fb475fcf76d7c1a0dcf",
+      "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
       "source": "ui/design-optimized.js",
       "expectedSha256": "6bce398af8d1f85faaeca7721a94540a0c73571038932fb475fcf76d7c1a0dcf",
       "exact": true
@@ -520,7 +546,8 @@
       "type": "cors",
       "contentType": "application/javascript; charset=utf-8",
       "sha256": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
-      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "headerSha256": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+      "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
       "source": "media/average-rating.js",
       "expectedSha256": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
       "exact": true
@@ -531,7 +558,8 @@
       "type": "cors",
       "contentType": "application/javascript; charset=utf-8",
       "sha256": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
-      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "headerSha256": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+      "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
       "source": "ui/cardify-plus.js",
       "expectedSha256": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
       "exact": true
@@ -542,7 +570,8 @@
       "type": "cors",
       "contentType": "application/javascript; charset=utf-8",
       "sha256": "778e304b33b9b0b19a317616ea1a346a15e2f24942d734913a744c1b1065f934",
-      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "headerSha256": "778e304b33b9b0b19a317616ea1a346a15e2f24942d734913a744c1b1065f934",
+      "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
       "source": "plugins-to-enable/home-history.js",
       "expectedSha256": "778e304b33b9b0b19a317616ea1a346a15e2f24942d734913a744c1b1065f934",
       "exact": true
@@ -553,7 +582,8 @@
       "type": "cors",
       "contentType": "application/javascript; charset=utf-8",
       "sha256": "a66598bac58370ccb2e1b211283dd3c2e76cbfbb9643494e47ef9b2424cf7384",
-      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "headerSha256": "a66598bac58370ccb2e1b211283dd3c2e76cbfbb9643494e47ef9b2424cf7384",
+      "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
       "source": "torrents-redesign.js",
       "expectedSha256": "a66598bac58370ccb2e1b211283dd3c2e76cbfbb9643494e47ef9b2424cf7384",
       "exact": true
@@ -564,7 +594,8 @@
       "type": "cors",
       "contentType": "application/javascript; charset=utf-8",
       "sha256": "d3496f227af0e70a1d3e03e90591f1b8d1f2da670761f72f09160b6db165ffbf",
-      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "headerSha256": "d3496f227af0e70a1d3e03e90591f1b8d1f2da670761f72f09160b6db165ffbf",
+      "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
       "source": "providers/parsers.js",
       "expectedSha256": "d3496f227af0e70a1d3e03e90591f1b8d1f2da670761f72f09160b6db165ffbf",
       "exact": true
@@ -575,7 +606,8 @@
       "type": "cors",
       "contentType": "application/javascript; charset=utf-8",
       "sha256": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
-      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "headerSha256": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
+      "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
       "source": "localization/translate.js",
       "expectedSha256": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
       "exact": true
@@ -586,7 +618,8 @@
       "type": "cors",
       "contentType": "application/javascript; charset=utf-8",
       "sha256": "1cc40ac0ea6e6ae7c86fa54a76428568f984c4b49d2c785bd62604cdc6c9919b",
-      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "headerSha256": "1cc40ac0ea6e6ae7c86fa54a76428568f984c4b49d2c785bd62604cdc6c9919b",
+      "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
       "source": "ui/screensaver-plus.js",
       "expectedSha256": "1cc40ac0ea6e6ae7c86fa54a76428568f984c4b49d2c785bd62604cdc6c9919b",
       "exact": true
@@ -597,7 +630,8 @@
       "type": "cors",
       "contentType": "application/javascript; charset=utf-8",
       "sha256": "991be1b3ac028b048e7529f37aaf14b13ce9da94c5fff52724525af3fbb364d1",
-      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "headerSha256": "991be1b3ac028b048e7529f37aaf14b13ce9da94c5fff52724525af3fbb364d1",
+      "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
       "source": "community/new-category.js",
       "expectedSha256": "991be1b3ac028b048e7529f37aaf14b13ce9da94c5fff52724525af3fbb364d1",
       "exact": true
@@ -728,7 +762,7 @@
       "active": true,
       "ownsHeader": true,
       "styles": 1,
-      "settingsMounts": 4,
+      "settingsMounts": 38,
       "settingsFailures": 0
     },
     "hub": {
@@ -736,11 +770,29 @@
       "categories": 10,
       "registered": true,
       "active": false,
-      "markerRetainedInHiddenNativeDom": true
+      "markerRetainedInHiddenNativeDom": true,
+      "registrationNames": [
+        "hub_category_profiles",
+        "hub_category_home",
+        "hub_category_appearance",
+        "hub_category_playback",
+        "hub_category_torrents",
+        "hub_category_trakt",
+        "hub_category_language",
+        "hub_category_screensaver",
+        "hub_category_plugins",
+        "hub_category_system",
+        "hub_search",
+        "hub_problems",
+        "hub_unverified",
+        "hub_all",
+        "hub_native"
+      ]
     },
     "ydesign": {
       "active": true,
-      "cards": 56
+      "cards": 42,
+      "badges": 104
     },
     "interfacePlus": {
       "contractVersion": 1,
@@ -1174,8 +1226,8 @@
           "active": true,
           "styleCount": 1,
           "hubParams": 15,
-          "mounts": 3,
-          "unmounts": 2
+          "mounts": 37,
+          "unmounts": 36
         },
         "disabled": {
           "active": false,
@@ -1246,7 +1298,7 @@
   ],
   "stress": {
     "mainFlowRuns": 2,
-    "storageSetAttemptsIntercepted": 3,
+    "storageSetAttemptsIntercepted": 4,
     "blockedSensitiveRequests": 0,
     "consoleErrorsDuringRuns": [],
     "pageErrors": [],
@@ -1257,5 +1309,62 @@
     "settings-hub-root.png"
   ],
   "viewport": "Existing attached page reports an unbounded viewport; no viewport override was applied. Launcher config is 1920×1080.",
-  "productionChanges": "None. Reproduced harness over-Back caused Lampa core’s intentional triple-Back escape (<500ms); with a 650ms separation the same native root-Back succeeds twice. No Hub defect was reproduced independently."
+  "productionChanges": "None. Reproduced harness over-Back caused Lampa core’s intentional triple-Back escape (<500ms); with a 650ms separation the same native root-Back succeeds twice. No Hub defect was reproduced independently.",
+  "browserHarnessHardening": {
+    "result": "PASS",
+    "repeatedE2eRuns": [
+      {
+        "iteration": 1,
+        "result": "PASS"
+      },
+      {
+        "iteration": 2,
+        "result": "PASS"
+      }
+    ],
+    "cleanup": {
+      "errors": [],
+      "settingsClosedToInitialState": true,
+      "inactiveKeyboardPanelsRemoved": 0,
+      "pageRestore": {
+        "errors": [],
+        "settingsObserverRemoved": true,
+        "storageGetRestored": true,
+        "storageSetRestored": true,
+        "temporaryGlobalsRemoved": true,
+        "hybridRestored": true
+      },
+      "networkRouteUnregistered": true,
+      "cdpClientDisconnected": true,
+      "status": "PASS"
+    },
+    "browserSurvival": {
+      "originalProcessStillAlive": true,
+      "sameLampaTabStillAvailable": true,
+      "lampaTabCount": 1
+    },
+    "blockedServiceCounts": {},
+    "blockedServiceOrigins": {},
+    "homeDesignVerification": {
+      "controller": "head",
+      "hybridCanonicalHeader": true,
+      "headerVisible": true,
+      "menuVisible": true,
+      "centeredSearchVisible": true,
+      "clockDateVisible": true,
+      "profileControlVisible": true,
+      "verticalPosterCount": 42,
+      "visibleUkrainianBadgeCount": 11,
+      "ydesignStyleCount": 1,
+      "interfacePlusHeaderStyleCount": 0
+    },
+    "startupInactiveKeyboardPanelsRemoved": 0,
+    "viewport": {
+      "width": 7544,
+      "height": 3672,
+      "dpr": 0.25,
+      "playwrightViewport": null
+    },
+    "note": "The existing browser profile is preserved; temporary Hybrid activation, test Storage interception and inactive native keyboard DOM cleanup are session-only."
+  }
 }

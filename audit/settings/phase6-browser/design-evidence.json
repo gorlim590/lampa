@@ -1,60 +1,267 @@
 {
-  "mode": "existing dedicated tab; screenshot crops only (1920×1080) from unmodified 7680×3812 live viewport",
+  "mode": "Existing dedicated Chromium page; exact branch assets; screenshots are 1920×1080 crops of the unmodified page viewport",
+  "testedBranchSha": "b94081224154097a0cf025c981dfcae75ff693d5",
   "home": {
     "controller": "head",
     "hybrid": true,
     "header": true,
     "search": true,
     "leftMenu": true,
-    "clock": true,
-    "avatar": true,
-    "verticalPosterCount": 56,
-    "badgeCount": 84
+    "clockDate": true,
+    "profileControl": true,
+    "verticalPosterCount": 42,
+    "visibleUkrainianBadgeCount": 11
   },
   "hub": {
     "controller": "settings_component",
-    "component": "settings_hub (native Settings component marker)",
+    "component": "settings_hub",
     "active": true,
-    "rootVersion": "73-preview-1",
-    "focus": "hub_category_profiles",
+    "focus": "hub_search",
     "categories": 10,
-    "settingsController": "settings_component",
-    "focusMethod": "native D-pad ArrowUp from the previously restored search focus"
+    "contractVersion": 1,
+    "ownerRouting": "YDesign owner Back restored the same visible result and focus in both runs"
   },
   "design": {
     "viewport": {
-      "width": 7680,
-      "height": 3812,
-      "dpr": 0.25
+      "width": 7544,
+      "height": 3672,
+      "dpr": 0.25,
+      "playwrightViewport": null
     },
     "hybrid": {
       "active": true,
       "ownsHeader": true,
-      "hybridStyleCount": 1
+      "styleCount": 1
     },
     "ydesign": {
       "active": true,
-      "verticalPosterCount": 56,
+      "verticalPosterCount": 42,
+      "visibleUkrainianBadgeCount": 11,
+      "renderedBadgeCount": 104,
       "styleCount": 1
     },
     "interfacePlus": {
-      "contract": 1,
-      "standaloneHeaderStyles": 0
+      "contractVersion": 1,
+      "competingHeaderStyles": 0
     },
-    "cardifyOwner": true,
-    "torrentOverlay": true,
-    "hubMounted": true,
-    "hubController": "settings_component",
-    "styleIds": [
-      "ydesign-style-block",
-      "ydesign-font-css",
-      "stremio-hybrid-style"
-    ]
+    "cardifyPlus": {
+      "settingsOwnerRegistered": true,
+      "detailsComposition": "PARTIAL / not rendered under safe request policy"
+    },
+    "torrentOverlay": {
+      "apiAvailable": true,
+      "interaction": "NOT TESTED"
+    },
+    "hubMountedThroughHybrid": true
   },
-  "consolePageErrors": [],
+  "activeModuleMatrix": [
+    {
+      "name": "Trakt Core",
+      "sourceUrl": "http://127.0.0.1:8766/trakt/trakt.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "trakt"
+      ],
+      "visualOwnership": "functional owner",
+      "status": "loaded; owner registration observed, functional effects not exercised",
+      "sha256": "3230fdcd8eed32642d0ad6d616e8d3b9628a4320d97fb0b5fef005d7eea3cb38"
+    },
+    {
+      "name": "Trakt+",
+      "sourceUrl": "http://127.0.0.1:8766/trakt/trakt-plus.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "trakt_plus"
+      ],
+      "visualOwnership": "functional owner",
+      "status": "loaded; owner registration observed, functional effects not exercised",
+      "sha256": "2bfe8ae58a3619de30d298951638a69640b686ade98e1483f838d4c84c7bee8e"
+    },
+    {
+      "name": "Interface+",
+      "sourceUrl": "http://127.0.0.1:8766/ui/interface-plus.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "interface_mod_new"
+      ],
+      "visualOwnership": "presentation adapter",
+      "status": "compatible adapter; no competing Hybrid header",
+      "sha256": "9537df254948a908cc21b03647740d1c8f59458828d7378e7c51c584f85a5d0d"
+    },
+    {
+      "name": "YDesign",
+      "sourceUrl": "http://127.0.0.1:8766/ui/design-optimized.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "ydesign",
+        "ydesign_styles",
+        "ydesign_grid",
+        "ydesign_vertical",
+        "ydesign_notch",
+        "ydesign_badges_style",
+        "ydesign_fonts",
+        "ydesign_texts",
+        "ydesign_series",
+        "ydesign_perf"
+      ],
+      "visualOwnership": "card presentation owner",
+      "status": "active card presentation owner",
+      "sha256": "6bce398af8d1f85faaeca7721a94540a0c73571038932fb475fcf76d7c1a0dcf"
+    },
+    {
+      "name": "AverageRating",
+      "sourceUrl": "http://127.0.0.1:8766/media/average-rating.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "omdb_config_ui",
+        "omdb_ratings_select"
+      ],
+      "visualOwnership": "rating owner",
+      "status": "loaded; owner registration observed, functional effects not exercised",
+      "sha256": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94"
+    },
+    {
+      "name": "Cardify+",
+      "sourceUrl": "http://127.0.0.1:8766/ui/cardify-plus.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "cardify"
+      ],
+      "visualOwnership": "card metadata adapter",
+      "status": "settings owner registered; Details composition partial",
+      "sha256": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb"
+    },
+    {
+      "name": "Home History",
+      "sourceUrl": "http://127.0.0.1:8766/plugins-to-enable/home-history.js",
+      "loaded": true,
+      "initialized": null,
+      "settingsRegistered": [],
+      "visualOwnership": "Home owner",
+      "status": "loaded; Settings registration not observed; initialization unverified",
+      "sha256": "778e304b33b9b0b19a317616ea1a346a15e2f24942d734913a744c1b1065f934"
+    },
+    {
+      "name": "Torrents Cinema",
+      "sourceUrl": "http://127.0.0.1:8766/torrents-redesign.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "torrents_cinema"
+      ],
+      "visualOwnership": "torrent UI owner",
+      "status": "loaded; owner registration observed, functional effects not exercised",
+      "sha256": "a66598bac58370ccb2e1b211283dd3c2e76cbfbb9643494e47ef9b2424cf7384"
+    },
+    {
+      "name": "Parser settings",
+      "sourceUrl": "http://127.0.0.1:8766/providers/parsers.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "parser"
+      ],
+      "visualOwnership": "parser owner",
+      "status": "loaded; owner registration observed, functional effects not exercised",
+      "sha256": "d3496f227af0e70a1d3e03e90591f1b8d1f2da670761f72f09160b6db165ffbf"
+    },
+    {
+      "name": "Localization",
+      "sourceUrl": "http://127.0.0.1:8766/localization/translate.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "ytranslate"
+      ],
+      "visualOwnership": "language owner",
+      "status": "loaded; owner registration observed, functional effects not exercised",
+      "sha256": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68"
+    },
+    {
+      "name": "Screensaver+",
+      "sourceUrl": "http://127.0.0.1:8766/ui/screensaver-plus.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "screensaver_plus"
+      ],
+      "visualOwnership": "screensaver owner",
+      "status": "loaded; owner registration observed, functional effects not exercised",
+      "sha256": "1cc40ac0ea6e6ae7c86fa54a76428568f984c4b49d2c785bd62604cdc6c9919b"
+    },
+    {
+      "name": "Community New Category",
+      "sourceUrl": "http://127.0.0.1:8766/community/new-category.js",
+      "loaded": true,
+      "initialized": null,
+      "settingsRegistered": [],
+      "visualOwnership": "community owner",
+      "status": "loaded; Settings registration not observed; initialization unverified",
+      "sha256": "991be1b3ac028b048e7529f37aaf14b13ce9da94c5fff52724525af3fbb364d1"
+    },
+    {
+      "name": "Stremio Hybrid",
+      "sourceUrl": "http://127.0.0.1:8766/stremio-hybrid.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "interface"
+      ],
+      "visualOwnership": "canonical visual and Settings lifecycle owner",
+      "status": "active canonical visual/Settings owner",
+      "sha256": "593ca60780db85646f4c01c72896bf90a5aebfb38f909423cfb06ad49a712d8f"
+    },
+    {
+      "name": "Settings Hub (Hybrid dependency)",
+      "sourceUrl": "http://127.0.0.1:8766/settings-hub.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "settings_hub"
+      ],
+      "visualOwnership": "Hybrid lifecycle owner",
+      "status": "mounted by Hybrid; ten native categories; controller remains settings_component",
+      "sha256": "aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288"
+    },
+    {
+      "name": "Torrent overlay (Hybrid dependency)",
+      "sourceUrl": "http://127.0.0.1:8766/torrent-overlay.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [],
+      "visualOwnership": "Hybrid torrent presentation",
+      "status": "API available; overlay interaction not tested",
+      "sha256": "ea9cf9384ce50a612e2def6ef4edce83f01093e24e84360b1818ad040296401c"
+    }
+  ],
+  "cleanup": {
+    "e2e": "PASS",
+    "originalBrowserProcessSurvived": true,
+    "sameLampaTabSurvived": true,
+    "cleanupFailureProbe": "PASS"
+  },
+  "consolePageErrors": {
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": 0,
+    "blockedServiceCounts": {},
+    "blockedServiceOrigins": {}
+  },
+  "viewportNote": "The attached page viewport is not changed by the runner; current size is reported above. Cropped images are not a 1920×1080 viewport test or physical Google TV acceptance.",
   "screenshots": {
     "home": "home-design.png",
-    "settingsHub": "settings-hub-root.png",
-    "details": "not captured because Details surface did not render under safe request policy"
-  }
+    "settingsHub": "settings-hub-root.png"
+  },
+  "limitations": [
+    "Search text is entered in the native Lampa keyboard; the native confirmation control is pointer-activated because Controller keybord does not expose it for D-pad focus. Physical remote confirmation is unverified.",
+    "No physical Google TV verification.",
+    "Sensitive Trakt/auth/history/playback calls are intercepted if triggered; no such calls occurred in the final E2E run.",
+    "Details composition and live torrent overlay interaction remain unverified."
+  ]
 }

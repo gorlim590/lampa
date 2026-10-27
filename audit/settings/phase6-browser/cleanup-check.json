@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "mode": "intentional assertion failure against the existing dedicated CDP page",
+  "expectedFailureObserved": true,
+  "cleanup": {
+    "errors": [],
+    "settingsClosedToInitialState": true,
+    "inactiveKeyboardPanelsRemoved": 0,
+    "pageRestore": {
+      "errors": [],
+      "settingsObserverRemoved": true,
+      "storageGetRestored": true,
+      "storageSetRestored": true,
+      "temporaryGlobalsRemoved": true,
+      "hybridRestored": true
+    },
+    "networkRouteUnregistered": true,
+    "cdpClientDisconnected": true,
+    "status": "PASS"
+  },
+  "browserSurvival": {
+    "originalProcessStillAlive": true,
+    "sameLampaTabStillAvailable": true,
+    "lampaTabCount": 1
+  }
+}

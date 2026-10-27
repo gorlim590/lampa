@@ -1,11 +1,11 @@
 {
   "result": "PASS",
   "mode": "existing dedicated CDP page; no new browser/tab/context/profile",
-  "branchSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+  "branchSha": "b94081224154097a0cf025c981dfcae75ff693d5",
   "browser": "156.0.8078.4",
   "viewport": {
-    "width": 7680,
-    "height": 3812,
+    "width": 7544,
+    "height": 3672,
     "dpr": 0.25,
     "playwrightViewport": null
   },
@@ -23,8 +23,12 @@
               "main",
               "settings_hub"
             ],
+            "currentSettingsComponent": "settings_hub",
             "focusedId": "hub_search",
             "focusedLabel": "Пошук налаштувань",
+            "panelVisible": true,
+            "focusVisibleInActivePanel": true,
+            "expectedElementVisibleInActivePanel": true,
             "nativeMain": false,
             "hubVersion": "73-preview-1"
           },
@@ -57,8 +61,12 @@
               "main",
               "settings_hub"
             ],
+            "currentSettingsComponent": "settings_hub",
             "focusedId": "hub_category_profiles",
             "focusedLabel": "Профілі та облікові записи",
+            "panelVisible": true,
+            "focusVisibleInActivePanel": true,
+            "expectedElementVisibleInActivePanel": true,
             "nativeMain": false,
             "hubVersion": "73-preview-1"
           },
@@ -80,12 +88,13 @@
           "state": {
             "controller": "keybord",
             "keyboardVisible": true,
-            "inputVisible": true
+            "inputVisible": true,
+            "inputFocused": false
           },
           "expectedBack": "Hub root"
         },
         {
-          "action": "Native keyboard confirms metadata search",
+          "action": "Visible native keyboard confirmation control submits metadata search",
           "state": {
             "controller": "settings_component",
             "settingsOpen": true,
@@ -95,11 +104,16 @@
               "settings_hub",
               "settings_hub_page"
             ],
+            "currentSettingsComponent": "settings_hub_page",
             "focusedId": "hub_back",
             "focusedLabel": "До категорій",
+            "panelVisible": true,
+            "focusVisibleInActivePanel": true,
+            "expectedElementVisibleInActivePanel": true,
             "nativeMain": false,
             "hubVersion": "73-preview-1"
           },
+          "confirmationMethod": "Playwright pointer activation of the native Lampa confirmation button",
           "result": {
             "id": "hub_item_2",
             "label": "💙 YDesign • Підтримати розробника"
@@ -118,8 +132,12 @@
               "settings_hub_page",
               "ydesign"
             ],
+            "currentSettingsComponent": "ydesign",
             "focusedId": "ydesign_donate_btn_main",
             "focusedLabel": "💙 YDesign • Підтримати розробника",
+            "panelVisible": true,
+            "focusVisibleInActivePanel": true,
+            "expectedElementVisibleInActivePanel": true,
             "nativeMain": false,
             "hubVersion": "73-preview-1"
           },
@@ -138,8 +156,12 @@
               "ydesign",
               "settings_hub_page"
             ],
+            "currentSettingsComponent": "settings_hub_page",
             "focusedId": "hub_item_2",
             "focusedLabel": "💙 YDesign • Підтримати розробника",
+            "panelVisible": true,
+            "focusVisibleInActivePanel": true,
+            "expectedElementVisibleInActivePanel": true,
             "nativeMain": false,
             "hubVersion": "73-preview-1"
           },
@@ -157,8 +179,12 @@
               "settings_hub_page",
               "settings_hub"
             ],
+            "currentSettingsComponent": "settings_hub",
             "focusedId": "hub_search",
             "focusedLabel": "Пошук налаштувань",
+            "panelVisible": true,
+            "focusVisibleInActivePanel": true,
+            "expectedElementVisibleInActivePanel": true,
             "nativeMain": false,
             "hubVersion": "73-preview-1"
           },
@@ -167,17 +193,21 @@
         {
           "action": "Hub root → Standard Settings",
           "state": {
-            "controller": "sh_settings_nav",
+            "controller": "settings",
             "settingsOpen": true,
             "hubActive": false,
             "settingsComponentEvents": [
+              "ydesign",
               "settings_hub_page",
               "settings_hub",
-              "main",
-              "siaivo"
+              "main"
             ],
+            "currentSettingsComponent": "main",
             "focusedId": "",
             "focusedLabel": "",
+            "panelVisible": true,
+            "focusVisibleInActivePanel": true,
+            "expectedElementVisibleInActivePanel": true,
             "nativeMain": true,
             "hubVersion": "73-preview-1"
           },
@@ -186,28 +216,154 @@
         {
           "action": "Close Standard Settings → fresh Hub open → root Back",
           "state": {
-            "controller": "sh_settings_nav",
+            "controller": "settings",
             "settingsOpen": true,
             "hubActive": false,
             "settingsComponentEvents": [
               "main",
-              "settings_hub",
               "main",
-              "siaivo"
+              "settings_hub",
+              "main"
             ],
+            "currentSettingsComponent": "main",
             "focusedId": "",
             "focusedLabel": "",
+            "panelVisible": true,
+            "focusVisibleInActivePanel": true,
+            "expectedElementVisibleInActivePanel": true,
             "nativeMain": true,
             "hubVersion": "73-preview-1"
           },
           "events": [
-            "main",
-            "siaivo"
+            "main"
           ],
           "expectedBack": "native Settings Main; no Hub re-entry"
         }
       ],
       "result": "PASS",
+      "inactiveKeyboardPanelsRemovedAfterConfirmation": 0,
+      "visibleSearchRows": [
+        {
+          "id": "hub_item_0",
+          "label": "Продовжити перегляд",
+          "context": "Зовнішній вигляд · Панель: Канали · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_1",
+          "label": "Виходять цього тижня",
+          "context": "Зовнішній вигляд · Панель: Канали · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_2",
+          "label": "💙 YDesign • Підтримати розробника",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_3",
+          "label": "🎨 Стилі, ефекти та Пресети",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_4",
+          "label": "🎬 Відображення карток та Сітка",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_5",
+          "label": "📱 Вертикальні картки",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_6",
+          "label": "✂️ Верхні бейджі",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_7",
+          "label": "🏷️ Стилі бейджів та Рейтинги",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_8",
+          "label": "🔤 Шрифти",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_9",
+          "label": "🔤 Мови, Логотипи та Якість",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_10",
+          "label": "📺 Редизайн Серій та Епізодів",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_11",
+          "label": "⚙️ API Ключі, Кеш та Підтримка",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_12",
+          "label": "Стиль карток",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_13",
+          "label": "Ефект фокуса",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_14",
+          "label": "Анімація появи карток",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_15",
+          "label": "Чіп «Trakt» на переглянутих",
+          "context": "Trakt та синхронізація · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_16",
+          "label": "Ліниве завантаження",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_17",
+          "label": "UA-плашка за торентами",
+          "context": "Торренти та джерела · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_18",
+          "label": "Позначки «Новинка» / «Скоро»",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_19",
+          "label": "Позначка «Переглянуто»",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_20",
+          "label": "Прогрес на картках",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_21",
+          "label": "Мітка «Продовження»",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_22",
+          "label": "Рядок «Продовжити перегляд»",
+          "context": "Головна сторінка та рекомендації · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_23",
+          "label": "Рядок «Виходять цього тижня»",
+          "context": "Головна сторінка та рекомендації · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        }
+      ],
       "settingsEvents": [
         "main",
         "settings_hub",
@@ -215,11 +371,10 @@
         "ydesign",
         "settings_hub_page",
         "settings_hub",
-        "main",
-        "siaivo"
+        "main"
       ],
       "closedState": {
-        "controller": "items_line",
+        "controller": "head",
         "settingsOpen": false,
         "hubActive": false
       }
@@ -239,8 +394,12 @@
               "main",
               "settings_hub"
             ],
+            "currentSettingsComponent": "settings_hub",
             "focusedId": "hub_search",
             "focusedLabel": "Пошук налаштувань",
+            "panelVisible": true,
+            "focusVisibleInActivePanel": true,
+            "expectedElementVisibleInActivePanel": true,
             "nativeMain": false,
             "hubVersion": "73-preview-1"
           },
@@ -252,12 +411,13 @@
           "state": {
             "controller": "keybord",
             "keyboardVisible": true,
-            "inputVisible": true
+            "inputVisible": true,
+            "inputFocused": false
           },
           "expectedBack": "Hub root"
         },
         {
-          "action": "Native keyboard confirms metadata search",
+          "action": "Visible native keyboard confirmation control submits metadata search",
           "state": {
             "controller": "settings_component",
             "settingsOpen": true,
@@ -268,11 +428,16 @@
               "settings_hub",
               "settings_hub_page"
             ],
+            "currentSettingsComponent": "settings_hub_page",
             "focusedId": "hub_back",
             "focusedLabel": "До категорій",
+            "panelVisible": true,
+            "focusVisibleInActivePanel": true,
+            "expectedElementVisibleInActivePanel": true,
             "nativeMain": false,
             "hubVersion": "73-preview-1"
           },
+          "confirmationMethod": "Playwright pointer activation of the native Lampa confirmation button",
           "result": {
             "id": "hub_item_2",
             "label": "💙 YDesign • Підтримати розробника"
@@ -291,8 +456,12 @@
               "settings_hub_page",
               "ydesign"
             ],
+            "currentSettingsComponent": "ydesign",
             "focusedId": "ydesign_donate_btn_main",
             "focusedLabel": "💙 YDesign • Підтримати розробника",
+            "panelVisible": true,
+            "focusVisibleInActivePanel": true,
+            "expectedElementVisibleInActivePanel": true,
             "nativeMain": false,
             "hubVersion": "73-preview-1"
           },
@@ -311,8 +480,12 @@
               "ydesign",
               "settings_hub_page"
             ],
+            "currentSettingsComponent": "settings_hub_page",
             "focusedId": "hub_item_2",
             "focusedLabel": "💙 YDesign • Підтримати розробника",
+            "panelVisible": true,
+            "focusVisibleInActivePanel": true,
+            "expectedElementVisibleInActivePanel": true,
             "nativeMain": false,
             "hubVersion": "73-preview-1"
           },
@@ -330,8 +503,12 @@
               "settings_hub_page",
               "settings_hub"
             ],
+            "currentSettingsComponent": "settings_hub",
             "focusedId": "hub_search",
             "focusedLabel": "Пошук налаштувань",
+            "panelVisible": true,
+            "focusVisibleInActivePanel": true,
+            "expectedElementVisibleInActivePanel": true,
             "nativeMain": false,
             "hubVersion": "73-preview-1"
           },
@@ -340,17 +517,21 @@
         {
           "action": "Hub root → Standard Settings",
           "state": {
-            "controller": "sh_settings_nav",
+            "controller": "settings",
             "settingsOpen": true,
             "hubActive": false,
             "settingsComponentEvents": [
+              "ydesign",
               "settings_hub_page",
               "settings_hub",
-              "main",
-              "siaivo"
+              "main"
             ],
+            "currentSettingsComponent": "main",
             "focusedId": "",
             "focusedLabel": "",
+            "panelVisible": true,
+            "focusVisibleInActivePanel": true,
+            "expectedElementVisibleInActivePanel": true,
             "nativeMain": true,
             "hubVersion": "73-preview-1"
           },
@@ -359,28 +540,154 @@
         {
           "action": "Close Standard Settings → fresh Hub open → root Back",
           "state": {
-            "controller": "sh_settings_nav",
+            "controller": "settings",
             "settingsOpen": true,
             "hubActive": false,
             "settingsComponentEvents": [
               "main",
-              "settings_hub",
               "main",
-              "siaivo"
+              "settings_hub",
+              "main"
             ],
+            "currentSettingsComponent": "main",
             "focusedId": "",
             "focusedLabel": "",
+            "panelVisible": true,
+            "focusVisibleInActivePanel": true,
+            "expectedElementVisibleInActivePanel": true,
             "nativeMain": true,
             "hubVersion": "73-preview-1"
           },
           "events": [
-            "main",
-            "siaivo"
+            "main"
           ],
           "expectedBack": "native Settings Main; no Hub re-entry"
         }
       ],
       "result": "PASS",
+      "inactiveKeyboardPanelsRemovedAfterConfirmation": 0,
+      "visibleSearchRows": [
+        {
+          "id": "hub_item_0",
+          "label": "Продовжити перегляд",
+          "context": "Зовнішній вигляд · Панель: Канали · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_1",
+          "label": "Виходять цього тижня",
+          "context": "Зовнішній вигляд · Панель: Канали · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_2",
+          "label": "💙 YDesign • Підтримати розробника",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_3",
+          "label": "🎨 Стилі, ефекти та Пресети",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_4",
+          "label": "🎬 Відображення карток та Сітка",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_5",
+          "label": "📱 Вертикальні картки",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_6",
+          "label": "✂️ Верхні бейджі",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_7",
+          "label": "🏷️ Стилі бейджів та Рейтинги",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_8",
+          "label": "🔤 Шрифти",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_9",
+          "label": "🔤 Мови, Логотипи та Якість",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_10",
+          "label": "📺 Редизайн Серій та Епізодів",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_11",
+          "label": "⚙️ API Ключі, Кеш та Підтримка",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_12",
+          "label": "Стиль карток",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_13",
+          "label": "Ефект фокуса",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_14",
+          "label": "Анімація появи карток",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_15",
+          "label": "Чіп «Trakt» на переглянутих",
+          "context": "Trakt та синхронізація · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_16",
+          "label": "Ліниве завантаження",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_17",
+          "label": "UA-плашка за торентами",
+          "context": "Торренти та джерела · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_18",
+          "label": "Позначки «Новинка» / «Скоро»",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_19",
+          "label": "Позначка «Переглянуто»",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_20",
+          "label": "Прогрес на картках",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_21",
+          "label": "Мітка «Продовження»",
+          "context": "Зовнішній вигляд · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_22",
+          "label": "Рядок «Продовжити перегляд»",
+          "context": "Головна сторінка та рекомендації · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        },
+        {
+          "id": "hub_item_23",
+          "label": "Рядок «Виходять цього тижня»",
+          "context": "Головна сторінка та рекомендації · ui/design-optimized.js · Панель доступна · ефект не перевірено · Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм."
+        }
+      ],
       "settingsEvents": [
         "main",
         "settings_hub",
@@ -388,11 +695,10 @@
         "ydesign",
         "settings_hub_page",
         "settings_hub",
-        "main",
-        "siaivo"
+        "main"
       ],
       "closedState": {
-        "controller": "items_line",
+        "controller": "head",
         "settingsOpen": false,
         "hubActive": false
       }
@@ -406,8 +712,8 @@
         "active": true,
         "styleCount": 1,
         "hubParams": 15,
-        "mounts": 3,
-        "unmounts": 2
+        "mounts": 37,
+        "unmounts": 36
       },
       "disabled": {
         "active": false,
@@ -443,13 +749,37 @@
           "hub_native"
         ]
       },
-      "storageSetAttempts": 3
+      "storageSetAttempts": 4
     }
   ],
   "screenshots": [
-    "settings-hub-root.png"
+    "settings-hub-root.png",
+    "home-design.png"
   ],
   "blockedRequests": 0,
+  "blockedServiceCounts": {},
+  "blockedServiceOrigins": {},
+  "cleanup": {
+    "errors": [],
+    "settingsClosedToInitialState": true,
+    "inactiveKeyboardPanelsRemoved": 0,
+    "pageRestore": {
+      "errors": [],
+      "settingsObserverRemoved": true,
+      "storageGetRestored": true,
+      "storageSetRestored": true,
+      "temporaryGlobalsRemoved": true,
+      "hybridRestored": true
+    },
+    "networkRouteUnregistered": true,
+    "cdpClientDisconnected": true,
+    "status": "PASS"
+  },
+  "browserSurvival": {
+    "originalProcessStillAlive": true,
+    "sameLampaTabStillAvailable": true,
+    "lampaTabCount": 1
+  },
   "consoleErrors": [],
   "pageErrors": [],
   "failedRequests": 0,
@@ -464,7 +794,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "2e805166d371bf84ba5ff5a488965fae41e7a369429a6eaa92e4855c482c7c0c",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "2e805166d371bf84ba5ff5a488965fae41e7a369429a6eaa92e4855c482c7c0c",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "audit/settings/phase6-browser/preview-loader.js",
         "expectedSha256": "2e805166d371bf84ba5ff5a488965fae41e7a369429a6eaa92e4855c482c7c0c",
         "exact": true
@@ -475,7 +806,8 @@
         "type": "cors",
         "contentType": "application/json; charset=utf-8",
         "sha256": "aae9accd18016ffc1e6708843aa2c49cf256cbddbe702f45f83b70294240e440",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "aae9accd18016ffc1e6708843aa2c49cf256cbddbe702f45f83b70294240e440",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "audit/settings/phase6-browser/manifest.json",
         "expectedSha256": "aae9accd18016ffc1e6708843aa2c49cf256cbddbe702f45f83b70294240e440",
         "exact": true
@@ -486,7 +818,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "593ca60780db85646f4c01c72896bf90a5aebfb38f909423cfb06ad49a712d8f",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "593ca60780db85646f4c01c72896bf90a5aebfb38f909423cfb06ad49a712d8f",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "ui/stremio-hybrid.js",
         "expectedSha256": "593ca60780db85646f4c01c72896bf90a5aebfb38f909423cfb06ad49a712d8f",
         "exact": true
@@ -497,7 +830,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "ui/settings-hub.js",
         "expectedSha256": "aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288",
         "exact": true
@@ -508,7 +842,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "ea9cf9384ce50a612e2def6ef4edce83f01093e24e84360b1818ad040296401c",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "ea9cf9384ce50a612e2def6ef4edce83f01093e24e84360b1818ad040296401c",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "ui/torrent-overlay.js",
         "expectedSha256": "ea9cf9384ce50a612e2def6ef4edce83f01093e24e84360b1818ad040296401c",
         "exact": true
@@ -519,7 +854,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "3230fdcd8eed32642d0ad6d616e8d3b9628a4320d97fb0b5fef005d7eea3cb38",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "3230fdcd8eed32642d0ad6d616e8d3b9628a4320d97fb0b5fef005d7eea3cb38",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "trakt/trakt.js",
         "expectedSha256": "3230fdcd8eed32642d0ad6d616e8d3b9628a4320d97fb0b5fef005d7eea3cb38",
         "exact": true
@@ -530,7 +866,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "2bfe8ae58a3619de30d298951638a69640b686ade98e1483f838d4c84c7bee8e",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "2bfe8ae58a3619de30d298951638a69640b686ade98e1483f838d4c84c7bee8e",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "trakt/trakt-plus.js",
         "expectedSha256": "2bfe8ae58a3619de30d298951638a69640b686ade98e1483f838d4c84c7bee8e",
         "exact": true
@@ -541,7 +878,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "9537df254948a908cc21b03647740d1c8f59458828d7378e7c51c584f85a5d0d",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "9537df254948a908cc21b03647740d1c8f59458828d7378e7c51c584f85a5d0d",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "ui/interface-plus.js",
         "expectedSha256": "9537df254948a908cc21b03647740d1c8f59458828d7378e7c51c584f85a5d0d",
         "exact": true
@@ -552,7 +890,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "6bce398af8d1f85faaeca7721a94540a0c73571038932fb475fcf76d7c1a0dcf",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "6bce398af8d1f85faaeca7721a94540a0c73571038932fb475fcf76d7c1a0dcf",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "ui/design-optimized.js",
         "expectedSha256": "6bce398af8d1f85faaeca7721a94540a0c73571038932fb475fcf76d7c1a0dcf",
         "exact": true
@@ -563,7 +902,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "media/average-rating.js",
         "expectedSha256": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
         "exact": true
@@ -574,7 +914,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "ui/cardify-plus.js",
         "expectedSha256": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
         "exact": true
@@ -585,7 +926,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "778e304b33b9b0b19a317616ea1a346a15e2f24942d734913a744c1b1065f934",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "778e304b33b9b0b19a317616ea1a346a15e2f24942d734913a744c1b1065f934",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "plugins-to-enable/home-history.js",
         "expectedSha256": "778e304b33b9b0b19a317616ea1a346a15e2f24942d734913a744c1b1065f934",
         "exact": true
@@ -596,7 +938,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "a66598bac58370ccb2e1b211283dd3c2e76cbfbb9643494e47ef9b2424cf7384",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "a66598bac58370ccb2e1b211283dd3c2e76cbfbb9643494e47ef9b2424cf7384",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "torrents-redesign.js",
         "expectedSha256": "a66598bac58370ccb2e1b211283dd3c2e76cbfbb9643494e47ef9b2424cf7384",
         "exact": true
@@ -607,7 +950,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "d3496f227af0e70a1d3e03e90591f1b8d1f2da670761f72f09160b6db165ffbf",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "d3496f227af0e70a1d3e03e90591f1b8d1f2da670761f72f09160b6db165ffbf",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "providers/parsers.js",
         "expectedSha256": "d3496f227af0e70a1d3e03e90591f1b8d1f2da670761f72f09160b6db165ffbf",
         "exact": true
@@ -618,7 +962,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "localization/translate.js",
         "expectedSha256": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
         "exact": true
@@ -629,7 +974,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "1cc40ac0ea6e6ae7c86fa54a76428568f984c4b49d2c785bd62604cdc6c9919b",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "1cc40ac0ea6e6ae7c86fa54a76428568f984c4b49d2c785bd62604cdc6c9919b",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "ui/screensaver-plus.js",
         "expectedSha256": "1cc40ac0ea6e6ae7c86fa54a76428568f984c4b49d2c785bd62604cdc6c9919b",
         "exact": true
@@ -640,7 +986,8 @@
         "type": "cors",
         "contentType": "application/javascript; charset=utf-8",
         "sha256": "991be1b3ac028b048e7529f37aaf14b13ce9da94c5fff52724525af3fbb364d1",
-        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "headerSha256": "991be1b3ac028b048e7529f37aaf14b13ce9da94c5fff52724525af3fbb364d1",
+        "sourceSha": "b94081224154097a0cf025c981dfcae75ff693d5",
         "source": "community/new-category.js",
         "expectedSha256": "991be1b3ac028b048e7529f37aaf14b13ce9da94c5fff52724525af3fbb364d1",
         "exact": true
@@ -648,7 +995,34 @@
     ]
   },
   "activeModuleCount": 13,
-  "lampaStorageSetAttempts": 3,
+  "harnessHybridEnabledTemporarily": true,
+  "startupInactiveKeyboardPanelsRemoved": 0,
+  "lastState": {
+    "expected": "Fresh Hub root Back after Standard Settings",
+    "controller": "settings",
+    "currentSettingsComponent": "main",
+    "settingsOpen": true,
+    "hubActive": false,
+    "panelVisible": true,
+    "expectedElementVisibleInActivePanel": true,
+    "focusedId": "",
+    "focusVisibleInActivePanel": true
+  },
+  "inactiveKeyboardPanelsRemovedBeforeHomeCapture": 0,
+  "homeDesignVerification": {
+    "controller": "head",
+    "hybridCanonicalHeader": true,
+    "headerVisible": true,
+    "menuVisible": true,
+    "centeredSearchVisible": true,
+    "clockDateVisible": true,
+    "profileControlVisible": true,
+    "verticalPosterCount": 42,
+    "visibleUkrainianBadgeCount": 11,
+    "ydesignStyleCount": 1,
+    "interfacePlusHeaderStyleCount": 0
+  },
+  "lampaStorageSetAttempts": 4,
   "activeModules": [
     {
       "name": "Trakt Core",
