@@ -593,11 +593,18 @@
     "status": "PASS for execution/registration of the full standard default graph; Trakt account/network behavior remains unverified because both Trakt API and OAuth hosts were blocked."
   },
   "duplicateDelivery": {
-    "status": "PARTIAL",
-    "observedOwnModuleRequestsBlockedByTestRoute": 2,
-    "personalInstalledExtensionList": "NOT INSPECTED OR MODIFIED",
-    "meaning": "The test route suppressed duplicate old-host deliveries to isolate the documented one-loader path. This does not prove the installed extension list is already consolidated. README now lists all nine loader-owned direct URLs to remove during a deliberate migration.",
-    "blockedPathsStatus": "Path names were not captured in this completed run; the rerunnable harness now records only origin/path, with query strings omitted."
+    "status": "PARTIAL; path-level attribution incomplete",
+    "confirmedDuplicateResourcePath": "https://gorlim590.github.io/lampa/ui/stremio-hybrid.js",
+    "resourceTimingCount": 2,
+    "exactBranchResponseRouteCount": 1,
+    "otherObservedRepeatedEntry": "http://127.0.0.1:8766/preview-loader.js requested twice; the loader singleton prevents the second execution sequence.",
+    "routeBlockedOwnedModuleCount": 2,
+    "secondBlockedPath": "NOT RECORDED by the completed run; no safe way to reconstruct it from the sanitized event record.",
+    "loaderInternalDuplication": "Not indicated: LampaLoaderStarted guards repeated entry and seen/pathKey deduplicates the configured graph; the branch route served one Hybrid source response.",
+    "pluginImportScan": "No script import of stremio-hybrid.js, Interface+, YDesign or Cardify+ was found in source plugin modules; Settings Hub owner strings are route metadata, not script imports.",
+    "mostSupportedOrigin": "Host/preview extension delivery. The extra Hybrid path was delivered outside the single exact branch-loader route. The test evidence cannot distinguish an installed extension URL from a separate preview injection.",
+    "installedExtensionList": "NOT READ OR MODIFIED. The route list was not persisted or exported.",
+    "migration": "Install the one loader URL, then remove only the nine exact loader-owned URLs listed in README. Preserve all other extension URLs. Review this manually in Lampa Extensions and use the documented reverse steps to roll back."
   },
   "cleanup": {
     "status": "PASS",
@@ -737,5 +744,36 @@
     "supportedSingleEntry": "Add the repository loader.js URL in Lampa Extensions, then remove separate URLs for the nine loader-owned modules listed in README. Restore those URLs when rolling back; no Storage migration is required.",
     "hostEarlyPaintBoundary": "The loader cannot precede native first paint if Lampa only delivers extensions afterward. In this paired run FCP preceded the Hybrid shell in both paths; the gap was reduced but remained.",
     "installedOneEntryPath": "NOT VERIFIED in the extension manager."
-  }
+  },
+  "startupFlashFinding": {
+    "fcpMs": {
+      "oldPreview": 1344,
+      "branch": 332
+    },
+    "hybridShellMs": {
+      "oldPreview": 4150.8,
+      "branch": 1990.1
+    },
+    "fcpBeforeHybrid": true,
+    "finding": "The loader can shorten delivery after it starts, but the host paints content before it injects this extension. A plugin cannot reliably style a page before its own code is delivered.",
+    "safeMitigation": "Use one loader entry and remove duplicate owners to minimize delay. Reliable no-flash startup requires a host-supported pre-paint hook/entrypoint; no overlay or global CSS workaround is added."
+  },
+  "runtimeErrorAttribution": {
+    "source": "https://siaivo.isroot.in/app.min.js:44592",
+    "observations": 4,
+    "routing": "The browser runner routes only Trakt endpoints and allowlisted local/GitHub extension URLs; requests for the host app bundle continued to the host unchanged.",
+    "assessment": "Host-origin bundle is the observed exception frame, not a branch asset or test-fulfilled script. A plugin could still trigger host code; no exact expression/source map was captured, so final causality is unproven.",
+    "upstreamChanged": false
+  },
+  "memoryDecision": {
+    "mode": "Read-only system/process snapshot; no browser connection or reload performed for this follow-up.",
+    "ramTotalGiB": 15,
+    "ramAvailableGiB": 3.3,
+    "swapTotalGiB": 2,
+    "swapAvailableMiB": 8.3,
+    "chromeProcessCount": 40,
+    "aggregateChromeRssGiB": 7.1,
+    "additionalBrowserTest": "NOT RUN; swap was effectively exhausted and Chromium renderer OOM kills were recorded."
+  },
+  "performanceConclusion": "One warm pair only. Hybrid shell arrived earlier in the branch sample; Home cards were 736.5ms later. This does not establish overall startup improvement; optional script execution may contend for main-thread time, but causality was not isolated."
 }
