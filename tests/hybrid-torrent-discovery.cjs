@@ -130,6 +130,26 @@ test('Hybrid embedded list uses shared metadata, exact matching, tracker filters
   assert.equal(f.list.children[0], toloka.row);
 });
 
+test('popup exposes exactly one Best Choice badge and none when no qualified candidate exists', () => {
+  assert.match(overlay, /\.sh-torrent-overlay \.ctr-best\{display:none!important/);
+  assert.match(overlay, /\.sh-torrent-overlay \.torrent-item\.is-best \.ctr-best\{display:inline-flex!important\}/);
+  const f = fixture();
+  const qualified = f.release('The Others (2001) 1080p', 'Toloka', { AudioLanguages: ['uk'] });
+  const ordinary = f.release('The Others (2001) 720p', 'Mazepa', { AudioLanguages: ['en'] });
+  f.context.streamUpdateRows(f.st);
+  let visibleBadges = f.st.rows.filter(row => row.classList.contains('is-best'));
+  assert.deepEqual(visibleBadges, [qualified.row], 'only the recommendation owner can reveal its badge');
+  assert.equal(visibleBadges[0].nodes['.ctr-best'].textContent.includes('Найкращий вибір'), true);
+  assert.equal(ordinary.row.nodes['.ctr-best'].textContent, '', 'ordinary rows keep their badge node empty');
+
+  const unrelated = f.release('Unrelated release (1999) 1080p', 'Toloka');
+  f.st.rows = [unrelated.row]; f.st.sourceData = new WeakMap([[unrelated.row, unrelated.source]]);
+  f.context.streamUpdateRows(f.st);
+  visibleBadges = f.st.rows.filter(row => row.classList.contains('is-best'));
+  assert.equal(f.st.best, null);
+  assert.equal(visibleBadges.length, 0, 'an unqualified list reveals no Best Choice badge');
+});
+
 test('Hybrid popup rows display confirmed anime audio/studio tracks and reject the wrong season', () => {
   const f = fixture();
   f.st.params.movie = { id: 55, source: 'tmdb', media_type: 'tv', name: 'Frieren', original_name: 'Frieren', first_air_date: '2023-10-01' };

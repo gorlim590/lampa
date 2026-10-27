@@ -21,7 +21,8 @@ body.stremio-hybrid .sh-torrent-overlay .ctr-menus{margin-left:auto}
 body.stremio-hybrid .sh-torrent-overlay .ctr-button,body.stremio-hybrid .sh-torrent-overlay .ctr-tab{min-height:2.6em;padding:.5em .85em;box-sizing:border-box;font-size:1em}
 body.stremio-hybrid .sh-torrent-overlay .torrent-item.sh-cinema-row{font-size:1em!important;padding:.85em!important;margin:0 0 .6em!important;border-radius:.7em;border:2px solid #ffffff14!important;transition:border-color .12s ease,background-color .12s ease!important}
 body.stremio-hybrid .sh-torrent-overlay .torrent-item.sh-cinema-row.is-best{border-color:rgba(83,220,157,.58)!important;background:linear-gradient(100deg,rgba(37,113,83,.25),rgba(255,255,255,.035))!important;box-shadow:inset .22em 0 #43d99d,0 .4em 1.4em #0004!important}
-body.stremio-hybrid .sh-torrent-overlay .ctr-best{display:inline-flex!important;align-items:center;width:max-content;max-width:100%;margin:0 0 .45em;padding:.25em .6em;border:1px solid #65e6aa70;border-radius:2em;background:#28a46a25;color:#b9f6d7;font-size:.78em!important;font-weight:800;line-height:1.3;overflow-wrap:anywhere}
+body.stremio-hybrid .sh-torrent-overlay .ctr-best{display:none!important;align-items:center;width:max-content;max-width:100%;margin:0 0 .45em;padding:.25em .6em;border:1px solid #65e6aa70;border-radius:2em;background:#28a46a25;color:#b9f6d7;font-size:.78em!important;font-weight:800;line-height:1.3;overflow-wrap:anywhere}
+body.stremio-hybrid .sh-torrent-overlay .torrent-item.is-best .ctr-best{display:inline-flex!important}
 body.stremio-hybrid .sh-torrent-overlay .is-best[data-best-outside-filter=true] .ctr-best{border-color:#f0c66d88;background:#a77a1d24;color:#ffe1a0}
 body.stremio-hybrid .sh-torrent-overlay .ctr-row{grid-template-columns:4.2em minmax(0,1fr) 8em;gap:1em;min-height:5.5em}
 body.stremio-hybrid .sh-torrent-overlay .ctr-name{font-size:1.18em!important;font-weight:650;line-height:1.4}
