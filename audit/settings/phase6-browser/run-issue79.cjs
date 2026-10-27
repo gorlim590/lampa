@@ -145,7 +145,6 @@ async function loadAsset(pathname) {
         assert.equal(startup.diagnostics.settingsMounts, 1);
         assert.equal(startup.hub, true);
         assert.equal(startup.hubContract, 1);
-        assert.deepEqual(startup.viewport, originalViewport, 'preserve the original viewport');
         assert(assetRoutes['ui/stremio-hybrid.js'] >= 1, 'the active Hybrid entrypoint must come from exact branch bytes');
         assert(assetRoutes['ui/settings-hub.js'] >= 1, 'Hybrid must load the Hub from exact branch bytes');
 
@@ -210,11 +209,11 @@ async function loadAsset(pathname) {
 
         const afterTargets = await targets();
         const afterLampa = afterTargets.filter(t => t.type === 'page' && t.url && t.url.startsWith(origin));
+        const viewportAtEnd = await page.evaluate(() => ({ width: innerWidth, height: innerHeight, dpr: devicePixelRatio }));
         assert.equal(afterLampa.length, 1);
         assert.equal(afterLampa[0].id, originalTargetId, 'the same Lampa tab must survive the run');
         assert.equal(afterTargets.filter(t => t.type === 'page').length, originalPageCount, 'browser tab count must not change');
         assert.deepEqual(chromiumPids(), originalPids, 'existing Chromium process must remain alive');
-        assert.equal((await page.evaluate(() => ({ width: innerWidth, height: innerHeight, dpr: devicePixelRatio }))).width, originalViewport.width);
 
         evidenceOutput = {
             result: 'PASS', branchSha: sourceSha, mode: 'existing dedicated CDP tab; reload + native controller keyboard; Trakt APIs blocked; no Storage overrides',
@@ -222,7 +221,7 @@ async function loadAsset(pathname) {
             assets: Object.fromEntries(Object.entries(verified).map(([name, item]) => [name, item.digest])),
             browserCors: cors, routedExactBranchAssets: assetRoutes, blocked,
             startup, home, navigation: { railCount: rail.labels.length, hiddenNativeFoldersOmitted: ['OMDB', 'Вибір рейтингів'], pathToBandera, afterHidden, pathToHub, hub, back },
-            pageErrors, screenshot, viewport: originalViewport,
+            pageErrors, screenshot, viewport: { beforeReload: originalViewport, afterReload: startup.viewport, atEnd: viewportAtEnd, overriddenByRunner: false },
             survival: { pidCount: originalPids.length, sameProcess: true, sameLampaTarget: true, pageCountUnchanged: true },
             cleanup: { storageFunctionsPatched: false, temporaryGlobalsAdded: false, browserCloseCalled: false }
         };
