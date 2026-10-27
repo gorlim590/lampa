@@ -1,5 +1,6 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const {fixture:ydesignFixture}=require('./helpers/ydesign-fixture.cjs');
 function fixture(){
  delete require.cache[require.resolve('../ui/settings-hub.js')];const hub=require('../ui/settings-hub.js');
  const components={},params={},templates={},listeners={},styles=[],warnings=[],classes=new Set(),openedSettings=[];let items=[],nativeFolders=[],editRequest=null,enabled={name:'settings',controller:{}},focused=null,destroyed=0,creates=0;
@@ -106,6 +107,34 @@ test('An empty category offers direct native fallback without inventing a settin
  assert.equal(f.items().find(x=>x.key==='hub_empty').label,'У цій категорії немає зареєстрованих опцій');
  assert.equal(f.items().filter(x=>x.key.startsWith('hub_item_')).length,0);
  f.enter('hub_empty_native');assert.equal(f.L.Controller.enabled().name,'settings');assert(!f.classes.has('settings-hub-active'));
+});
+test('Hub shows safe current YDesign values and refreshes them after native-owner changes and Back',()=>{
+ const f=fixture(),yd=ydesignFixture();yd.api.createSettings();
+ const keys=['ydesign_row_continue','ydesign_row_week','ydesign_theme','ydesign_grid_items_v','ydesign_focus_fx','ydesign_v_show_ua'];
+ yd.settingsParams.filter(def=>keys.includes(def.param&&def.param.name)).forEach(def=>(f.params[def.component]||(f.params[def.component]=[])).push(def));
+ f.L.Storage=yd.context.Lampa.Storage;
+ yd.store.ydesign_row_continue=false;yd.store.ydesign_grid_items_v='6';yd.store.ydesign_theme='minimal';
+ f.hub.install(f.L,f.$,f.doc);f.open();f.enter('hub_category_home');
+ let row=f.items().find(item=>item.label==='Рядок «Продовжити перегляд»');assert(row);assert.match(row.description,/Зараз: вимкнено/);
+ f.enter(row.key);assert.equal(f.openedSettings.at(-1),'ydesign_grid');
+ yd.context.Lampa.Storage.set('ydesign_row_continue',true);yd.api.onSettingChange({name:'ydesign_row_continue'});yd.flush(60);
+ f.back();row=f.items().find(item=>item.label==='Рядок «Продовжити перегляд»');assert.match(row.description,/Зараз: увімкнено/);
+ f.back();f.enter('hub_category_appearance');
+ row=f.items().find(item=>item.label==='Кількість карток у рядку (Вертикальні)');assert(row);assert.match(row.description,/Зараз: 6/);
+ f.enter(row.key);assert.equal(f.openedSettings.at(-1),'ydesign_grid');
+ yd.context.Lampa.Storage.set('ydesign_grid_items_v','7');yd.api.onSettingChange({name:'ydesign_grid_items_v'});yd.flush(60);
+ f.back();row=f.items().find(item=>item.label==='Кількість карток у рядку (Вертикальні)');assert.match(row.description,/Зараз: 7/);
+ const restarted=ydesignFixture({storage:{...yd.store}});restarted.api.applyDynamicCSSNow();assert.equal(restarted.cssVars['--ydesign-grid-items-v'],'7');
+ assert.deepEqual(yd.writes,['ydesign_row_continue','ydesign_grid_items_v']);
+});
+test('Home order summary reads the existing profile-scoped policy state and refreshes on return',()=>{
+ const previous=global.window;let custom=false;global.window={LampaHomeHistory:{policy:()=>({hasCustomOrder:()=>custom})}};
+ try {
+  const f=fixture();f.params.home_history=[{param:{name:'home_history_edit_order',type:'button'},field:{name:'Порядок рядків Home'}}];
+  f.hub.install(f.L,f.$,f.doc);f.open();f.enter('hub_category_home');
+  let row=f.items().find(item=>item.label==='Порядок рядків Home');assert.match(row.description,/Порядок рядків: типовий/);
+  f.enter(row.key);custom=true;f.back();row=f.items().find(item=>item.label==='Порядок рядків Home');assert.match(row.description,/Порядок рядків: налаштовано/);
+ } finally { if(previous===undefined)delete global.window;else global.window=previous; }
 });
 test('Search opened from a category restores that category and query after owner Back and list Back',()=>{
  const f=fixture();f.params.ydesign=[{param:{name:'card_size',type:'select'},field:{name:'Розмір картки'}}];f.hub.install(f.L,f.$,f.doc);f.open();

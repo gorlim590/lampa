@@ -20,6 +20,13 @@
         torrents_cinema:'torrents-redesign.js', screensaver_plus:'ui/screensaver-plus.js',
         omdb_config_ui:'media/average-rating.js', omdb_ratings_select:'media/average-rating.js',
         ytranslate:'localization/translate.js', menu_filter:'ui/menu-hide.js'};
+    var visiblePreferences = {
+        ydesign_row_continue:1, ydesign_row_week:1, ydesign_theme:1, ydesign_grid_items_v:1,
+        ydesign_focus_fx:1, ydesign_style:1, ydesign_v_show_ua:1, ydesign_v_show_age:1,
+        ydesign_v_show_genres:1, ydesign_v_show_slogan:1, ydesign_v_show_year:1,
+        ydesign_v_show_seasons:1, ydesign_v_show_add_title:1
+    };
+    function hasVisiblePreference(key) { return !!visiblePreferences[key] || /^ydesign_v_(title_size|add_title_size|slogan_size|badge_size|year_size|age_size|seasons_size|ua_size|genres_size|rating_size|cards|align_logo|align_add_title|align_badges|align_slogan)$/.test(key); }
     function clean(value) { return typeof value === 'string' ? value.replace(/<[^>]*>/g, '').replace(/https?:\/\/\S+|[\w.+-]+@[\w.-]+\.[a-z]{2,}/ig, '[приховано]').slice(0, 220) : ''; }
     function category(component, key) {
         var s = (component + ':' + key).toLowerCase();
@@ -62,6 +69,8 @@
                     owner:owners[component] || (/^ydesign_/.test(component) ? owners.ydesign : 'Панель: '+title), category:category(component,key),
                     registration:origin, ordinal:index, storageKeys:key && /^(select|input|trigger|toggle)$/.test(p.type)?[key]:[], persistence:'native-owner', scope:'unverified', status:'unverified', issue:73,
                     explanation:'Не перевірено: реєстрація не підтверджує дію, збереження чи підтримку пристроєм.'};
+                // Only expose a fixed allowlist of non-sensitive presentation preferences in Hub summaries.
+                if(origin==='SettingsApi' && hasVisiblePreference(key))row.visiblePreference={type:p.type,defaultValue:p.default,values:p.values};
                 if(component==='omdb_config_ui' && /^(omdb_api_key_set|mdblist_api_key_set|simkl_api_key_set|mal_api_key_set|mal_cors_proxies_set)$/.test(key) && !(L.AverageRating && L.AverageRating.settingsPrivacyVersion>=1)) {
                     row.status='blocked';row.explanation='Потрібне оновлення плагіна рейтингів: стара панель показує приватні значення відкритим текстом. #73';
                 }
@@ -175,6 +184,29 @@
             if(row.status==='partial')return 'settings-hub-status-partial';
             return 'settings-hub-status-unverified';
         }
+        function currentSummary(row) {
+            if(row.component==='home_history' && (row.key==='home_history_edit_order' || row.key==='home_history_reset_order')) {
+                try {
+                    var history=typeof window!=='undefined' && window.LampaHomeHistory;
+                    var policy=history && typeof history.policy==='function' && history.policy();
+                    if(policy && typeof policy.hasCustomOrder==='function')return 'Порядок рядків: '+(policy.hasCustomOrder()?'налаштовано':'типовий');
+                } catch (e) { /* Keep the native owner as the only source of saved Home order state. */ }
+            }
+            if(!row.visiblePreference || !L.Storage || typeof L.Storage.get!=='function')return '';
+            try {
+                var value=L.Storage.get(row.key);
+                if(value===undefined || value===null || value==='' || value==='undefined')value=row.visiblePreference.defaultValue;
+                if(value===undefined)return '';
+                if(row.visiblePreference.type==='trigger') {
+                    var enabled=value===true || value===1 || value==='1' || value==='true';
+                    return 'Зараз: '+(enabled?'увімкнено':'вимкнено');
+                }
+                var options=row.visiblePreference.values;
+                if(options && Object.prototype.hasOwnProperty.call(options,String(value)))value=options[String(value)];
+                else if(options)return 'Зараз: невідоме значення';
+                return 'Зараз: '+clean(String(value));
+            } catch (e) { return ''; }
+        }
         function editSearch() {
             L.Input.edit({title:'Пошук налаштувань',value:query,free:true,nosave:true},function(value){query=clean(value);group='all';page=0;focusId='';showList();});
         }
@@ -182,7 +214,8 @@
             L.SettingsApi.removeParams(ROOT);
             categories.forEach(function(c){
                 var count=uniqueRows(registry.rows.filter(function(row){return row.category===c[0] && row.panelAvailable!==false && row.status!=='broken' && row.status!=='blocked';})).length;
-                button(ROOT,'hub_category_'+c[0],c[1],(categoryDescriptions[c[0]]?categoryDescriptions[c[0]]+' ':'')+'Зареєстровано опцій: '+count+'. Це не підтверджує їхню роботу.',function(){choose(c[0]);});
+                var available=count?'Зареєстровано опцій: '+count+'. Це не підтверджує їхню роботу.':'Активні власники не зареєстрували тут опцій; інтеграція може бути вимкнена.';
+                button(ROOT,'hub_category_'+c[0],c[1],(categoryDescriptions[c[0]]?categoryDescriptions[c[0]]+' ':'')+available,function(){choose(c[0]);});
             });
             button(ROOT,'hub_search','Пошук налаштувань',query?'Змінити запит: '+query:'Назва, плагін або ключ параметра',function(){rootFocus='hub_search';editSearch();});
             if(selectedRows('problems','').length)button(ROOT,'hub_problems','Проблемні налаштування','Лише підтверджені помилки, часткові обмеження й недоступні панелі.',function(){choose('problems','hub_problems');});
@@ -242,7 +275,7 @@
             button(PAGE,'hub_back','До категорій','Повернутися до Центру налаштувань',openRoot);
             button(PAGE,'hub_search','Пошук налаштувань',query || 'Назва, плагін, компонент або ключ параметра',editSearch);
             filtered.slice(page*limit,(page+1)*limit).forEach(function(row,index){
-                var context=categoryTitle(row.category)+' · '+row.owner+' · '+statusTitle(row)+(row.duplicateRegistrations>1?' · '+row.duplicateRegistrations+' реєстрації':'')+' · '+row.explanation;
+                var value=currentSummary(row),context=categoryTitle(row.category)+' · '+row.owner+' · '+statusTitle(row)+(row.duplicateRegistrations>1?' · '+row.duplicateRegistrations+' реєстрації':'')+(value?' · '+value:'')+' · '+row.explanation;
                 button(PAGE,'hub_item_'+index,row.label,context,function(){openOwner(row);},statusClass(row));
             });
             if(!filtered.length) {

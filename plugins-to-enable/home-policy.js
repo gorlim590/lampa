@@ -183,6 +183,7 @@
             if (comp && comp.items && comp.items.some(function (item) { return !stableId(item.data); }) && L.Activity.replace) L.Activity.replace({ component: 'main', source: active.source || 'tmdb', page: 1 });
         }
         return { prepare: prepare, wrap: wrap, register: register, install: install, bootstrap: bootstrap, apply: apply, visible: visible, saveVisible: saveVisible, reset: reset, editor: editor,
+            hasCustomOrder: function () { return saved().length > 0; },
             inventory: function () { return Object.keys(inventory).map(function (id) { return inventory[id]; }); }, classify: identify };
     };
 })();
