@@ -4,7 +4,7 @@
 
 | Field | Result |
 | --- | --- |
-| Tested source SHA | `6df1263291d1a8ffdbf6762f2391ec283e10e471` |
+| Tested source SHA | `0dd9bf9b7b00bf1445aba4eaf3a87de6f2495786` |
 | Browser mode | Existing dedicated Chromium over CDP; one existing Lampa tab; real Lampa Controller keyboard navigation |
 | Result | PASS for the bounded Hybrid startup, Settings rail and Hub mount scenario |
 | Browser | Chromium `156.0.8078.4`; process/profile and original tab survived |
@@ -18,7 +18,7 @@ The tested browser asset hashes were:
 
 | Asset | SHA-256 |
 | --- | --- |
-| `ui/stremio-hybrid.js` | `d0ab195493f31d1d2fbbfb9641dc4364895f6bcfae486bb7951445b67c11878f` |
+| `ui/stremio-hybrid.js` | `4c5da5fc8030730f315e76557705b11a75b2124be4cd9b54bef966a02f86e9dd` |
 | `ui/settings-hub.js` | `aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288` |
 | `ui/design-optimized.js` | `6bce398af8d1f85faaeca7721a94540a0c73571038932fb475fcf76d7c1a0dcf` |
 | `ui/interface-plus.js` | `9537df254948a908cc21b03647740d1c8f59458828d7378e7c51c584f85a5d0d` |
@@ -47,7 +47,7 @@ The live page exposed the defect that the earlier isolated fixture missed. A thi
 
 The original runner assertions also overclaimed behavior: native Settings `render()` returns detached folder nodes whose computed style is not reliable, so it cannot infer their later CSS visibility. The revised browser assertions exercise the resulting visible rail. Native return from the Hub root deliberately lands on the native first folder rather than immediately reopening the Hub; the runner now checks native usability and no re-entry, not a false Hub-row focus expectation.
 
-Focused suite: **68 passed, 0 failed** across Hybrid, Hub lifecycle, Registry, bootstrap and header menu. Syntax checks and `git diff --check` passed. Startup timing from this one reload was Hybrid script start `3313.9 ms`, shell applied `3318.7 ms`, first shell frame `3356.2 ms`, and Lampa ready `7853.3 ms`. These are fixture/host-specific observations without a comparable baseline; they do not prove a startup optimization or identify the host delivery delay. Physical Google TV remains NOT VERIFIED.
+Focused suite: **196 passed, 0 failed** across Settings inventory/functional/lifecycle/Registry, Hybrid, bootstrap, header, YDesign and torrent overlay regressions. Repository validation, summary freshness, syntax checks and `git diff --check` passed. Startup timing from this one reload was Hybrid script start `3237.8 ms`, shell applied `3242.6 ms`, first shell frame `3278.6 ms`, and Lampa ready `7900.2 ms`. These are fixture/host-specific observations without a comparable baseline; they do not prove a startup optimization or identify the host delivery delay. Physical Google TV remains NOT VERIFIED.
 
 ## Remaining acceptance gaps
 
