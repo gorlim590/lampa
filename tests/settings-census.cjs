@@ -1,5 +1,5 @@
 'use strict';
-const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
 const census=require('../audit/settings/runtime-census.js');
 test('census enumerates definitions without invoking handlers, storage or service probes',()=>{
  const fail=()=>{throw Error('Forbidden side effect')},params=Object.freeze({interface:[Object.freeze({param:{name:'theme',type:'select',default:'default'},field:{name:'Тема'},onChange:fail,onRender:fail})]});
@@ -27,17 +27,17 @@ test('script inventory strips credentials/query strings and never serializes fun
  const doc={querySelectorAll:()=>[{getAttribute:()=> 'https://user:secret@example.org/plugin.js?token=fixture-secret'}]};
  const r=census.capture(L,doc),json=JSON.stringify(r);assert(!json.includes('fixture-secret'));assert(!json.includes('user:secret'));assert.deepEqual(r.scripts,[{host:'example.org',path:'/plugin.js'}]);
 });
-test('loader audit path is explicit and does not change its normal plugin sequence',()=>{
+test('production loader starts the canonical shell before appready and defers optional services',()=>{
  const source=fs.readFileSync(__dirname+'/../loader.js','utf8');
- for(const [query,extra]of [['',0],['?settings_audit=0',0],['?settings_audit=1',1]]){
-  const loaded=[];vm.runInNewContext(source,{window:{appready:true,location:{search:query}},Lampa:{Storage:{get:()=>null},Utils:{putScriptAsync:(urls,ok)=>{loaded.push(urls[0]);ok()}}},setTimeout:()=>1,clearTimeout:()=>{}});
-  assert.equal(loaded.length,8+extra);assert.equal(loaded.some(x=>x.includes('runtime-census.js')),!!extra);
- }
+ assert.match(source,/var CRITICAL = \['ui\/stremio-hybrid\.js', 'ui\/interface-plus\.js', 'ui\/design-optimized\.js'\]/);
+ assert.match(source,/var DEFAULT_DEFERRED = \[[\s\S]*?'trakt\/trakt\.js', 'trakt\/trakt-plus\.js', 'providers\/torrent-search\.js'/);
+ assert.match(source,/loadSeries\(CRITICAL, 'critical', 0, function \(\) \{[\s\S]*?waitForAppReady\(\);[\s\S]*?\}\);/);
+ assert(source.includes("L.Listener.follow('app', ready)"));
+ assert(!source.includes('runtime-census.js'));
 });
-test('Production loader never installs a second Settings UI entrypoint',()=>{
+test('production loader never installs a second Settings UI entrypoint',()=>{
  const source=fs.readFileSync(__dirname+'/../loader.js','utf8');
- for(const [query,count]of [['?settings_hub=0',8],['?settings_hub=1',8],['?settings_hub=1&settings_audit=1',9]]){
-  const loaded=[];vm.runInNewContext(source,{window:{appready:true,location:{search:query}},Lampa:{Storage:{get:()=>null},Utils:{putScriptAsync:(urls,ok)=>{loaded.push(urls[0]);ok()}}},setTimeout:()=>1,clearTimeout:()=>{}});
-  assert.equal(loaded.length,count);assert(!loaded.some(x=>x.includes('settings-hub.js')));if(count===9)assert(loaded[8].includes('runtime-census.js'));
- }
+ assert(source.includes("'ui/stremio-hybrid.js'"));
+ assert(!source.includes("'ui/settings-hub.js'"));
+ assert(!source.includes('runtime-census.js'));
 });

@@ -1,0 +1,69 @@
+{
+  "baseSha": "bb689027eccab5a0758e3bf7c7f05328d640f74f",
+  "sourceBranch": "feat/issue-79-phase4-ui-first",
+  "mode": "Existing dedicated Chromium tab; exact working-tree source routed into that tab; warm reloads only; no profile/storage clearing",
+  "assetSha256": {
+    "loader.js": "7cff53ca65293eb126b444b193a5a54ee0879c416437f10b4ca167345a385dbc",
+    "ui/stremio-hybrid.js": "4c5da5fc8030730f315e76557705b11a75b2124be4cd9b54bef966a02f86e9dd",
+    "ui/settings-hub.js": "aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288",
+    "ui/interface-plus.js": "9537df254948a908cc21b03647740d1c8f59458828d7378e7c51c584f85a5d0d",
+    "ui/design-optimized.js": "6bce398af8d1f85faaeca7721a94540a0c73571038932fb475fcf76d7c1a0dcf",
+    "ui/cardify-plus.js": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+    "ui/torrent-overlay.js": "ea9cf9384ce50a612e2def6ef4edce83f01093e24e84360b1818ad040296401c"
+  },
+  "startup": {
+    "initialObservedDelivery": "The preexisting page had the Phase 6 preview loader active, repository loader inactive, and a 13-module serial preview path; this was not a current-main baseline.",
+    "optimizedWarmReloads": 3,
+    "criticalLoaderMs": [518, 479, 451],
+    "appreadyAtLoaderStart": false,
+    "loadedCriticalUiModules": 3,
+    "loaderFailedCount": [0, 0, 0],
+    "visualStateEachRun": {
+      "hybrid": true,
+      "settingsHub": true,
+      "hybridStylesheets": 1,
+      "interfaceAdapterContract": 1,
+      "interfaceFallbackHeaderCss": false,
+      "ydesignVerticalCards": 21,
+      "ukrainianBadges": 3,
+      "cardifySettingsParameters": 11
+    },
+    "paintTiming": "First Paint, FCP, first native shell, first Hybrid shell and Home-card timing were unavailable from this warm-preview route.",
+    "comparison": "Not comparable: prior route was an older preview, and paint metrics were unavailable. No startup improvement or flash elimination claim is made."
+  },
+  "navigation": {
+    "status": "PASS",
+    "sameExistingTab": true,
+    "scenario": "Native Settings → Hub → search → YDesign owner → Back to same query/result/focus → Hub root → Standard Lampa Settings; root Back returned to native Settings without re-entry.",
+    "method": "Native Lampa controller and keyboard flow; one initial search-field harness assumption was corrected to use the native keyboard confirmation flow.",
+    "repeatCount": 1,
+    "limitations": "A two-consecutive-run integrated scenario was not completed. Final repeated-run attempt lost the existing CDP/browser connection; no browser restart was attempted."
+  },
+  "safety": {
+    "profileDataCleared": false,
+    "persistentSettingsChanged": false,
+    "authenticatedMutations": false,
+    "traktApiRequests": 0,
+    "traktAuthRequests": 0,
+    "mockedServices": ["Trakt API and authentication endpoints blocked at the browser boundary"],
+    "testOptionalPluginList": "In-memory test-only list; not persisted",
+    "storageIsolation": "Not complete: Lampa Storage was not cleared or exported; do not treat these browser observations as disposable-storage evidence."
+  },
+  "console": {
+    "errorsObservedAcrossEarlierCombinedRuns": 184,
+    "pageSyntaxErrorsObserved": 3,
+    "attribution": "Unavailable; the earlier capture aggregated errors across routes and did not retain source details. Console cleanliness is not established."
+  },
+  "viewport": {
+    "width": 7680,
+    "height": 4320,
+    "devicePixelRatio": 0.25,
+    "interpretation": "Existing browser viewport; screenshots/crops are not 1080p rendering or device acceptance."
+  },
+  "finalBrowserState": {
+    "status": "BLOCKED",
+    "evidence": "After the final runner attempt, the existing CDP endpoint stopped responding and no process matching the dedicated profile remained. Runner cleanup reported route/mark removal errors. No Chromium process, tab, profile or server was restarted or replaced.",
+    "cause": "Unknown"
+  },
+  "physicalGoogleTv": "NOT TESTED"
+}
