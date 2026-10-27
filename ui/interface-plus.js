@@ -810,7 +810,8 @@
         var f = '.menu__item.focus, .menu__item.traverse, .menu__item.hover, .settings-folder.focus, .settings-param.focus, .selectbox-item.focus, .full-start__button.focus, .full-descr__tag.focus, .player-panel .button.focus, .custom-online-btn.focus, .custom-torrent-btn.focus, .main2-more-btn.focus, .simple-button.focus, .menu__version.focus';
         // The canonical Hybrid owner supplies the card focus ring; retain standalone themes.
         var c = 'body:not(.stremio-hybrid) .card.focus .card__view::after, body:not(.stremio-hybrid) .card.hover .card__view::after';
-        var m = '.settings__content, .settings-input__content, .selectbox__content, .modal__content';
+        // Overlay surfaces belong to Hybrid only while its body class is active.
+        var m = 'body:not(.stremio-hybrid) .settings__content, body:not(.stremio-hybrid) .settings-input__content, body:not(.stremio-hybrid) .selectbox__content, body:not(.stremio-hybrid) .modal__content';
         var performanceCss = b + ' { transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, background-color 0.2s ease-out, color 0.2s ease-out !important; } ';
         var themeCss = {
             emerald_v1:
