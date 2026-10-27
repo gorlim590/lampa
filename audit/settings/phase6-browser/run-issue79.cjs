@@ -205,8 +205,10 @@ async function loadAsset(pathname) {
 
         await page.keyboard.press('Escape');
         await page.waitForFunction(() => document.body.classList.contains('settings--open') && Lampa.Controller.enabled()?.name === 'sh_settings_nav', { timeout: 5000 });
-        const back = await page.evaluate(() => ({ controller: Lampa.Controller.enabled()?.name, focus: document.querySelector('.sh-settings-category.focus')?.textContent.trim() || '' }));
-        assert.equal(back.focus, 'Центр налаштувань', 'Back must restore the native Settings rail position');
+        const back = await page.evaluate(() => ({ controller: Lampa.Controller.enabled()?.name, focus: document.querySelector('.sh-settings-category.focus')?.textContent.trim() || '', settingsOpen: document.body.classList.contains('settings--open'), hubSearchVisible: (() => { const n=document.querySelector('[data-name="hub_search"]'); return !!n && !!(n.offsetWidth || n.offsetHeight || n.getClientRects().length); })() }));
+        assert.equal(back.settingsOpen, true, 'Hub Back must leave native Settings open');
+        assert(back.focus, 'native Settings must retain a focused category');
+        assert.equal(back.hubSearchVisible, false, 'explicit native return must not re-enter the Hub');
         await page.keyboard.press('Escape');
         await page.waitForFunction(() => !document.body.classList.contains('settings--open'), { timeout: 5000 });
 
