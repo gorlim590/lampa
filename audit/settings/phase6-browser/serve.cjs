@@ -23,7 +23,31 @@ const files = new Map([
     ...assetPaths.map(name => ['/' + name, path.join(root, name)])
 ]);
 const sha = data => crypto.createHash('sha256').update(data).digest('hex');
-const branchSha = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
+const git = args => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
+const branchSha = git(['rev-parse', 'HEAD']);
+const relativeAssets = [...new Set([...files.values()].map(filename => path.relative(root, filename)))];
+const committedHashes = new Map();
+for (const relative of relativeAssets) {
+    if (relative.startsWith('..') || path.isAbsolute(relative)) throw new Error('Asset escaped checkout');
+    const status = git(['status', '--porcelain', '--untracked-files=all', '--', relative]);
+    if (status) throw new Error('Refusing dirty served asset: ' + relative);
+    const committed = execFileSync('git', ['show', branchSha + ':' + relative], { cwd: root, maxBuffer: 16 * 1024 * 1024 });
+    const working = fs.readFileSync(path.join(root, relative));
+    if (!committed.equals(working)) throw new Error('Working asset differs from commit: ' + relative);
+    committedHashes.set(relative, sha(committed));
+}
+function currentCheckoutMismatch(onlyRelative) {
+    try {
+        if (git(['rev-parse', 'HEAD']) !== branchSha) return ['HEAD'];
+        const assets = onlyRelative ? [onlyRelative] : relativeAssets;
+        const dirty = git(['status', '--porcelain', '--untracked-files=all', '--', ...assets]);
+        if (dirty) return ['dirty allowlisted asset'];
+        return assets.filter(relative => {
+            const current = fs.readFileSync(path.join(root, relative));
+            return sha(current) !== committedHashes.get(relative);
+        });
+    } catch { return ['checkout verification failed']; }
+}
 const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
@@ -37,15 +61,26 @@ const server = http.createServer((req, res) => {
     if (req.method === 'OPTIONS') { res.writeHead(204, headers); return res.end(); }
     if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405, headers); return res.end(); }
     const pathname = new URL(req.url, 'http://127.0.0.1').pathname;
+    const filename = files.get(pathname);
+    const mismatch = currentCheckoutMismatch(filename ? path.relative(root, filename) : undefined);
+    if (mismatch.length) {
+        const body = Buffer.from(JSON.stringify({ ok: false, branchSha, stale: true, mismatch }));
+        res.writeHead(409, { ...headers, 'Content-Type': 'application/json', 'Content-Length': body.length });
+        return res.end(req.method === 'HEAD' ? undefined : body);
+    }
     if (pathname === '/health') {
         const body = Buffer.from(JSON.stringify({ ok: true, branchSha, allowedAssets: files.size }));
         res.writeHead(200, { ...headers, 'Content-Type': 'application/json', 'Content-Length': body.length });
         return res.end(req.method === 'HEAD' ? undefined : body);
     }
-    const filename = files.get(pathname);
     if (!filename) { res.writeHead(404, headers); return res.end(); }
     fs.readFile(filename, (error, data) => {
         if (error) { res.writeHead(503, headers); return res.end(); }
+        const relative = path.relative(root, filename);
+        if (sha(data) !== committedHashes.get(relative) || currentCheckoutMismatch(relative).length) {
+            res.writeHead(409, { ...headers, 'X-Phase6-Source-SHA': branchSha });
+            return res.end();
+        }
         res.writeHead(200, {
             ...headers,
             'Content-Type': pathname.endsWith('.json') ? 'application/json; charset=utf-8' : 'application/javascript; charset=utf-8',
