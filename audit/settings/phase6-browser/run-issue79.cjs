@@ -177,15 +177,15 @@ async function loadAsset(pathname) {
             filteredHidden: [...document.querySelectorAll('.sh-settings-category')].filter(n => getComputedStyle(n).display === 'none' || getComputedStyle(n).visibility === 'hidden').map(n => n.textContent.trim())
         }));
         assert.equal(rail.controller, 'sh_settings_nav');
-        assert.equal(rail.labels.includes('OMDB'), false);
-        assert.equal(rail.labels.includes('Вибір рейтингів'), false);
+        assert.equal(rail.labels.includes('OMDB'), true, 'third-party hidden-folder selector must not hide Hybrid routes');
+        assert.equal(rail.labels.includes('Вибір рейтингів'), true, 'native folder remains reachable through Hybrid navigation');
         assert.deepEqual(rail.filteredHidden, []);
         const pathToBandera = await assertFocus(page, 'Bandera Online');
         await page.keyboard.press('ArrowDown');
-        await page.waitForFunction(() => document.querySelector('.sh-settings-category.focus')?.textContent.trim() === 'UaKomentsY', { timeout: 2000 });
+        await page.waitForFunction(() => document.querySelector('.sh-settings-category.focus')?.textContent.trim() === 'OMDB', { timeout: 2000 });
         const afterHidden = await page.evaluate(() => ({ controller: Lampa.Controller.enabled()?.name, focus: document.querySelector('.sh-settings-category.focus')?.textContent.trim() }));
         assert.equal(afterHidden.controller, 'sh_settings_nav');
-        assert.equal(afterHidden.focus, 'UaKomentsY', 'D-pad must skip CSS-hidden native folders and continue to the next visible route');
+        assert.equal(afterHidden.focus, 'OMDB', 'D-pad must reach the route that third-party CSS previously hid');
         const pathToHub = await assertFocus(page, 'Центр налаштувань');
         await page.keyboard.press('Enter');
         await page.waitForFunction(() => !!document.querySelector('[data-name="hub_search"]'), { timeout: 8000 });
@@ -223,7 +223,7 @@ async function loadAsset(pathname) {
             browser: browser.version(), startupElapsedMs: Date.now() - start,
             assets: Object.fromEntries(Object.entries(verified).map(([name, item]) => [name, item.digest])),
             browserCors: cors, routedExactBranchAssets: assetRoutes, blocked,
-            startup, home, navigation: { railCount: rail.labels.length, hiddenNativeFoldersOmitted: ['OMDB', 'Вибір рейтингів'], pathToBandera, afterHidden, pathToHub, hub, back },
+            startup, home, navigation: { railCount: rail.labels.length, cssConflictingFoldersAccessible: ['OMDB', 'Вибір рейтингів'], pathToBandera, afterHidden, pathToHub, hub, back },
             pageErrors, screenshot, viewport: { beforeReload: originalViewport, afterReload: startup.viewport, atEnd: viewportAtEnd, overriddenByRunner: false },
             survival: { pidCount: originalPids.length, sameProcess: true, sameLampaTarget: true, pageCountUnchanged: true },
             cleanup: { storageFunctionsPatched: false, temporaryGlobalsAdded: false, browserCloseCalled: false }
