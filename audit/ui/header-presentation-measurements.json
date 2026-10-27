@@ -1,0 +1,126 @@
+{
+  "historicalCheckpoint": true,
+  "acceptanceFollowup": {
+    "status": "PASS",
+    "report": "header-runtime-acceptance.json",
+    "testedUI": "a7ecc18a2757b582aa50be46a60634cf3a6305ea"
+  },
+  "baseline": "e0d871a4fdc7eecd92b06ca16cdeab3c79e0a022",
+  "testedCommit": "e5f8ccef0c0925d0abadc2523f2045abc38a3b1c",
+  "sha256": {
+    "hybrid": "ff62d525f3ba41e8de21b2e3c86ee232e85141db03d9c7d44d69a278508d56a1",
+    "interface": "c95dbdb2b97139e7d1b861b6b6502707fdf204e2b9ee2649a783edb0f8c4d509"
+  },
+  "headerOwnership": {
+    "before": {
+      "canonicalStyles": 1,
+      "legacyStyles": 1,
+      "legacyRules": 5,
+      "legacyBytes": 525
+    },
+    "after": {
+      "canonicalStyles": 1,
+      "legacyStyles": 0,
+      "legacyRules": 0,
+      "legacyBytes": 0
+    }
+  },
+  "computedParity": {
+    "header": true,
+    "clock": true,
+    "clockNow": true,
+    "clockDate": true,
+    "clockLast": true,
+    "search": true,
+    "avatar": true
+  },
+  "unchangedGeometry": {
+    "search": {
+      "height": 72.52083587646484,
+      "width": 711.6875,
+      "x": 924.15625,
+      "y": 13.645833969116213
+    },
+    "avatar": {
+      "height": 72.52083587646484,
+      "width": 72.52083587646484,
+      "x": 2438.20849609375,
+      "y": 13.666666984558104
+    }
+  },
+  "unchangedTypography": {
+    "headerColor": "rgb(244, 244, 247)",
+    "clockFont": "41.0598px",
+    "clockFeature": "\"tnum\"",
+    "dateFont": "19.7087px",
+    "dateAlignment": "left",
+    "clockFlexShrink": "0"
+  },
+  "navigation": {
+    "searchOpen": {
+      "headerClocks": 1,
+      "searchInput": 1
+    },
+    "searchBack": {
+      "searchFocusRestored": true
+    },
+    "profileBack": {
+      "avatarFocusRestored": true
+    },
+    "repeat": {
+      "avatar": 1,
+      "avatarFocusRestored": true,
+      "canonicalStyles": 1,
+      "clocks": 1,
+      "legacyHeaderStyles": 0,
+      "search": 1
+    }
+  },
+  "toggle": {
+    "off": {
+      "background": "rgb(21, 23, 28)",
+      "canonicalStyles": 0,
+      "clocks": 1,
+      "focus": "stremio_hybrid_enabled",
+      "hybrid": false,
+      "legacyHeaderBytes": 525,
+      "legacyHeaderStyles": 1
+    },
+    "on": {
+      "avatar": 1,
+      "canonicalStyles": 1,
+      "clocks": 1,
+      "focus": "stremio_hybrid_enabled",
+      "hybrid": true,
+      "legacyHeaderStyles": 0,
+      "search": 1
+    }
+  },
+  "restored": {
+    "canonicalStyles": 1,
+    "cards": 49,
+    "clockNodes": 1,
+    "focusedCard": true,
+    "headActions": 8,
+    "hybrid": true,
+    "legacyHeaderStyles": 1,
+    "probe": false,
+    "testScripts": 0
+  },
+  "sourceBytesDelta": {
+    "hybrid": 795,
+    "interface": 648
+  },
+  "console": {
+    "errorEntries": 5,
+    "namedExceptions": 0,
+    "attributedNewModuleErrors": 0
+  },
+  "limits": [
+    "Physical Google TV NOT TESTED. No startup/FPS/memory or network-gain claim.",
+    "Exact header parity and removal of one525-byte style node measured; JS grows1443bytes for contract/parity.",
+    "Home became empty in immutable-source pass; one native Refresh did not resolve it. Details smoke BLOCKED; no cause assigned.",
+    "Original URLs restored normal Home49cards; delivery/service environment differs, so integration parity must not be inferred.",
+    "No account values, cookies, raw logs or personal Home screenshot included."
+  ]
+}

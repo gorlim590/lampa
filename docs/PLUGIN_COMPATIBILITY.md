@@ -121,3 +121,71 @@ Runtime scenarios in the same user profile:
 Original loader URL restored, Hybrid URL never changed, only temporary probe removed, normal reload leaves the same profile/tab usable. Local screenshot is not committed because surrounding Home contains personal viewing information. Existing delta-tree publication reuses unchanged Hybrid/YDesign/Cardify/service blobs and production code is not retransferred with evidence-only commits.
 
 Remaining candidates: other Interface action groups (sidebar/menu, generic/simple actions, player controls) and global body rules require their own runtime proof before migration. No verified Details-focus conflict was found here. Do not import those candidates speculatively; do not close79/73 or automatically merge.
+
+## #79 presentation architecture milestone — header region delegation
+
+Baseline main `e0d871a` after merged93–96. Focused inventory reuses the preceding audit; this is not a Settings or repository re-audit.
+
+| Feature | Classification / owner | Milestone action |
+| --- | --- | --- |
+| Header skin, clock typography, transparency and positioning | Presentation → canonical Hybrid | Migrate the remaining Interface header CSS dependencies and delegate the whole header region; remove the competing legacy header stylesheet while owned. |
+| Native clock/time formatting, search, actions and profile/menu handlers | Functional/native or existing Hybrid handlers | Preserve original nodes/callbacks and native timer; no replacement clock, search or account logic. |
+| Interface visibility/preferences, localized title/series metadata, ratings helpers | Functional/settings or metadata → Interface/service owners | Keep handlers, storage keys, APIs and current settings; no migration. |
+| Vertical card layout/focus gates and content/UA/rating/progress writers | Presentation candidates / metadata → YDesign and service owners | Current card focus is already compatible after94; preserve metadata. Further presentation extraction needs independent parity evidence. |
+| Cardify Details template/backdrop/poster/logo composition | Presentation candidate → Hybrid; data/controls remain service owners | Deferred as a separate subsystem; do not rewrite templates/backdrop/player in header PR. |
+| Settings Registry plus card/dialog/Settings-Select presentation from93–96 | Already compatible | Reuse existing contract/focus/cleanup evidence; no repeated implementation. |
+| Interface standalone themes, other menu/sidebar/body styling | Standalone fallback / later presentation candidates | Retain all14 themes and preference values; independent future scope only after runtime proof. |
+
+**Header ownership evidence:** the real authorized main Lampa tab had one canonical Hybrid style plus an additional525-byte/five-rule `ifx_header_css`. Both match the header/clock: Hybrid wins transparency while Interface supplies header color rgb(244,244,247), clock flex-shrink and date-container alignment. The architecture is split even where declarations agree. Consolidation transfers those dependency rules into the existing static Hybrid style and replaces competing injection with an explicit, versioned region handoff in the original modules. No legacy plugin is disabled and no second installed UI entrypoint is introduced.
+
+### Header presentation contract / implementation
+
+- Hybrid advertises `presentationVersion:1` and `ownsPresentation('header')`. Ownership requires its actual active body class, live canonical stylesheet and non-destroyed instance, not mere global presence.
+- Interface+ exposes `InterfacePlusPresentation` contract1 with a single `syncHeader()` region adapter in its existing module. A capable active canonical owner suppresses creation of Interface's header stylesheet. If Interface loads first, the canonical shell synchronously asks the adapter to release only its owned header style. No foreign style with the same id is deleted.
+- The existing shell apply/off/destroy path synchronizes the adapter; no focus handlers, observers, timers, loader changes or new bootstrap stage. Disable/destroy restores the original standalone style; reenable removes it. Old/missing/incompatible/throwing owners preserve Interface fallback; a failed optional adapter cannot prevent the canonical shell. Relative diagnostics add only a numeric failure counter.
+- Header foreground, clock flex alignment/shrink, tabular-number feature and date alignment now live in the canonical static style. Original native clock/search/action nodes and callback ownership remain. Standalone CSS is byte-identical to baseline:525bytes, SHA-256 `0faf016c458d1463a560a4f3776e2bc5d132371d36810f52c856ad89c7be799f`. No service plugin is disabled.
+
+### Evidence and acceptance limits
+
+Tested source `e5f8ccef0c0925d0abadc2523f2045abc38a3b1c` in the existing authorized main Chrome tab; actual Hybrid and Interface paths loaded from that revision and CDN/local bytes matched. [Safe measurements](../audit/ui/header-presentation-measurements.json) and [public header-only screenshot](../audit/ui/header-presentation.png).
+
+| Claim | Evidence |
+| --- | --- |
+| One header presentation owner | canonical1+legacy1 → canonical1+legacy0;5 competing rules/525bytes no longer inserted in active Hybrid |
+| Visual parity | all7 compared computed-style/geometry groups identical: header, clock, digits, date, date wrapper, search and avatar |
+| Native node parity | one clock/search/avatar before, after and repeated profile navigation; no replacement clock/timer |
+| Functional header | PASS search opens native input, Back restores search focus; mouse/D-pad profile opens, Up/Down/Back/reopen restores exact avatar focus |
+| Reversible standalone | PASS native off/on; legacy525-byte dark header restored off, removed on; exact trigger focus and enabled preference restored |
+| Source/unit lifecycle |31 PASS:6 new region/delegation tests (both load orders, repeated sync/toggles, teardown, old/failing contract, foreign style protection, no value/timer/event work) +11bootstrap +14native header/action regressions |
+
+Syntax/repository validator69JS/43manifest/514URLs and diff checks PASS. CI source head all5 workflows successful; final evidence-only head still requires green CI before integration. No full suite re-run. Header style-node/matcher elimination is deterministic, not an FPS/startup gain: production JS grows795+648bytes for the explicit contract and transferred parity rules. No new stylesheet, installed entrypoint, request, observer, interval or event listener.
+
+**Historical runtime limitation (superseded by the A/B acceptance below):** the immutable-source pass later displayed empty Home. One native Refresh still had no cards; Details smoke was therefore BLOCKED. No named JS exception or error attributed to the changed modules was captured, but5 unattributed error entries remain. Do not assign a network/product root cause without evidence. Restoring both original extension URLs and normal reload recovered49cards/focused card. The source-loader delivery environment differs, so full Home/Details/service parity is not certified by the header-only assertions. That was the pre-follow-up checkpoint. The bounded UI-only A/B below supersedes this acceptance blocker without assigning an unproven root cause. No Home/Trakt/core workaround was added.
+
+Cleanup complete: original Hybrid/loader URLs restored, same profile/tab open, enabled setting restored, no probe was installed, no auth/history/account/server edits or storage clearing. Screenshot contains only the public header, no private Home context. Physical Google TV **NOT TESTED**. #79/#73 remain open; no automatic merge.
+
+Next migration candidates stay as classified above: YDesign/card presentation separated from metadata, Cardify template composition separated from data/controls, other Interface theme/menu regions only after scoped parity. This PR establishes a reusable region-ownership boundary rather than another global override stack; it does not claim the complete application is already one plugin.
+
+### PR97 runtime acceptance follow-up — controlled UI-only A/B
+
+**Home/Details/header acceptance PASS.** This supersedes the previous runtime blocker, not its historical observations. Existing production UI source `a7ecc18a2757b582aa50be46a60634cf3a6305ea` and its31 passing tests were preserved without a new production fix. Four new audit tests verify the diagnostic boundary; all other files/services/metadata ownership remain unchanged.
+
+The existing user main Chrome/Lampa tab ran one A/B comparison. Both phases used the normal Pages loader and the original service URLs/configuration; no `LAMPA_PLUGINS_BASE` or user-list override. Only Interface was redirected to the selected immutable UI revision, with Hybrid pinned to the same revision. The opt-in `audit/ui/header-runtime.js` temporarily replaces the loader URL, observes numerical registrations, script completions and aggregate API statuses, and expires its hooks. It never reads storage, request headers/bodies, responses or account/content identifiers; original arguments/callback results are passed through. Normal restoration reload removes all hooks, including any pass-through captured by later native wrappers.
+
+| Observation | A: merged main e0d871a | B: PR97 a7ecc18 |
+| --- | --- | --- |
+| Usable Home rows/cards |7 /49|7 /46|
+| Observed registrations / Home callbacks |41 /35 (from8)|41 /35 (from8)|
+| Loader script completion order |Trakt → Trakt+ → torrent-search → Interface → YDesign → average-rating → Cardify → translation|identical|
+| Non-UI delivery family |original Pages URLs|original Pages URLs|
+| Public service readiness flags |all observed APIs/classes present, appready|same|
+| Canonical / legacy header sheets |1 /1|1 /0|
+| Named JS exceptions |0|0|
+
+Hashes for both versions were independently checked against merged-main/local PR bytes, and actual script paths plus the ownership change confirmed execution. [Safe full results](../audit/ui/header-runtime-acceptance.json). Home/card totals are snapshots with asynchronous content; no identical-content or performance assertion. Both network buckets were empty in the bounded window: **no claim of zero total requests or verified fresh API success**. Cached/proxy/out-of-window behavior is not inferred as the root cause. Console captured2/4 unattributed entries, no named/changed-module exception; no global error-free claim.
+
+With B actually loaded: **PASS** Home renders; a real Details page opens; Torrent receives initial focus; Back restores the same originating card. Card identity was compared only in transient controller memory and not exported. **PASS** search is centered (0px delta), clock/date remain visible, native search input/Back and avatar menu work. **PASS** Hybrid off restores exactly one525-byte standalone header stylesheet; on restores a single canonical owner and exact trigger focus. No backend/Trakt test writes or manual history manipulation.
+
+Original Hybrid and loader URLs and enabled preference restored; same browser/profile/tab remains usable with49cards and no audit node/script. No new diagnostic extension was installed. The earlier empty Home was not reproduced in controlled UI-only A/B; its original root cause remains **UNKNOWN**. This is successful acceptance evidence, not a speculative attribution to CSS, Trakt, network or delivery.
+
+Reuse31 existing header/bootstrap tests;4 targeted audit tests and repository validator70JS/43entries/517URLs PASS. Final-head CI must remain green before marking Ready. Per the current user instruction, mark Ready and report GO only after that check; no automatic merge, no closing79/73. Physical Google TV remains NOT TESTED. No YDesign/Cardify migration started.

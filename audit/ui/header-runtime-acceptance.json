@@ -1,0 +1,263 @@
+{
+  "status": "PASS",
+  "baselineUI": "e0d871a4fdc7eecd92b06ca16cdeab3c79e0a022",
+  "testedPRUI": "a7ecc18a2757b582aa50be46a60634cf3a6305ea",
+  "auditCodeRevision": "ffaa38c6d34d3fad994d3d8787ed1b160d90386c",
+  "A": {
+    "uiRevision": "e0d871a4fdc7eecd92b06ca16cdeab3c79e0a022",
+    "appready": true,
+    "loaderStarted": true,
+    "readiness": {
+      "homeHistory": true,
+      "interface": true,
+      "trakt": true,
+      "traktPlus": true,
+      "ydesign": true
+    },
+    "home": {
+      "cards": 49,
+      "focusedCard": true,
+      "rows": 7
+    },
+    "observedRegistrations": 41,
+    "mainRowCalls": 1,
+    "callbackCounts": [
+      {
+        "after": 35,
+        "before": 8
+      }
+    ],
+    "loadedOrder": [
+      "trakt",
+      "trakt-plus",
+      "torrent-search",
+      "interface-plus",
+      "design-optimized",
+      "average-rating",
+      "cardify-plus",
+      "translate"
+    ],
+    "delivery": [
+      {
+        "module": "trakt",
+        "family": "pages"
+      },
+      {
+        "module": "trakt-plus",
+        "family": "pages"
+      },
+      {
+        "module": "torrent-search",
+        "family": "pages"
+      },
+      {
+        "module": "interface-plus",
+        "family": "immutable-ui"
+      },
+      {
+        "module": "design-optimized",
+        "family": "pages"
+      },
+      {
+        "module": "average-rating",
+        "family": "pages"
+      },
+      {
+        "module": "cardify-plus",
+        "family": "pages"
+      },
+      {
+        "module": "translate",
+        "family": "pages"
+      }
+    ],
+    "failedScripts": [],
+    "header": {
+      "canonicalStyles": 1,
+      "clocks": 1,
+      "legacyStyles": 1,
+      "owns": false
+    },
+    "networkStatusAggregates": {
+      "tmdb": {},
+      "trakt": {}
+    }
+  },
+  "B": {
+    "uiRevision": "a7ecc18a2757b582aa50be46a60634cf3a6305ea",
+    "appready": true,
+    "loaderStarted": true,
+    "readiness": {
+      "homeHistory": true,
+      "interface": true,
+      "trakt": true,
+      "traktPlus": true,
+      "ydesign": true
+    },
+    "home": {
+      "cards": 46,
+      "rows": 7
+    },
+    "observedRegistrations": 41,
+    "mainRowCalls": 1,
+    "callbackCounts": [
+      {
+        "after": 35,
+        "before": 8
+      }
+    ],
+    "loadedOrder": [
+      "trakt",
+      "trakt-plus",
+      "torrent-search",
+      "interface-plus",
+      "design-optimized",
+      "average-rating",
+      "cardify-plus",
+      "translate"
+    ],
+    "delivery": [
+      {
+        "module": "trakt",
+        "family": "pages"
+      },
+      {
+        "module": "trakt-plus",
+        "family": "pages"
+      },
+      {
+        "module": "torrent-search",
+        "family": "pages"
+      },
+      {
+        "module": "interface-plus",
+        "family": "immutable-ui"
+      },
+      {
+        "module": "design-optimized",
+        "family": "pages"
+      },
+      {
+        "module": "average-rating",
+        "family": "pages"
+      },
+      {
+        "module": "cardify-plus",
+        "family": "pages"
+      },
+      {
+        "module": "translate",
+        "family": "pages"
+      }
+    ],
+    "failedScripts": [],
+    "header": {
+      "canonicalStyles": 1,
+      "clocks": 1,
+      "legacyStyles": 0,
+      "owns": true
+    },
+    "networkStatusAggregates": {
+      "tmdb": {},
+      "trakt": {}
+    }
+  },
+  "comparison": {
+    "loaderCompletionOrderEqual": true,
+    "observedDeliveryFamiliesEqual": true,
+    "registrationCountEqual": true,
+    "mainCallbackCountsEqual": true
+  },
+  "hashVerification": {
+    "e0d871a4fdc7eecd92b06ca16cdeab3c79e0a022": {
+      "ui/stremio-hybrid.js": {
+        "matchesExpected": true,
+        "sha256": "966ab64747f26fa10eb3efabcd6c86360948f46270ac5c78b41bb26779e88efc"
+      },
+      "ui/interface-plus.js": {
+        "matchesExpected": true,
+        "sha256": "8af96b51f36d6e7af05d4e86f834c38e1fe6ecf786aa4a4a7672a798fab0cf64"
+      }
+    },
+    "a7ecc18a2757b582aa50be46a60634cf3a6305ea": {
+      "ui/stremio-hybrid.js": {
+        "matchesExpected": true,
+        "sha256": "ff62d525f3ba41e8de21b2e3c86ee232e85141db03d9c7d44d69a278508d56a1"
+      },
+      "ui/interface-plus.js": {
+        "matchesExpected": true,
+        "sha256": "c95dbdb2b97139e7d1b861b6b6502707fdf204e2b9ee2649a783edb0f8c4d509"
+      }
+    }
+  },
+  "detailsAcceptance": {
+    "details": true,
+    "torrentInitialFocus": true,
+    "originalHomeCardFocus": true
+  },
+  "headerAcceptance": {
+    "search": {
+      "clockNodes": 1,
+      "input": true
+    },
+    "searchBack": {
+      "cards": 46,
+      "searchFocus": true
+    },
+    "profileOpen": true,
+    "profileBack": true,
+    "off": {
+      "canonical": 0,
+      "focus": "stremio_hybrid_enabled",
+      "hybrid": false,
+      "legacy": 1,
+      "legacyBytes": 525
+    },
+    "on": {
+      "canonical": 1,
+      "focus": "stremio_hybrid_enabled",
+      "hybrid": true,
+      "legacy": 0
+    }
+  },
+  "headerGeometry": {
+    "canonicalStyles": 1,
+    "clockVisible": true,
+    "dateVisible": true,
+    "legacyStyles": 0,
+    "searchCenterDelta": 0
+  },
+  "console": {
+    "A": {
+      "logs": 2,
+      "namedExceptions": []
+    },
+    "B": {
+      "logs": 4,
+      "namedExceptions": [],
+      "attributedUIExceptions": 0
+    }
+  },
+  "environmentRestored": {
+    "auditNode": false,
+    "auditScripts": 0,
+    "cards": 49,
+    "enabled": true,
+    "focusedCard": true,
+    "normalHybrid": true,
+    "normalLoader": true
+  },
+  "priorFailure": {
+    "reproducedInControlledAB": false,
+    "rootCause": "UNKNOWN",
+    "productionFixRequired": false
+  },
+  "limitations": [
+    "Physical Google TV NOT TESTED; no live Trakt writes or forced backend resync.",
+    "No allowlisted XHR/fetch completions observed: no claim zero total requests, cache provenance or successful live API verification. Proxy/earlier/later requests may be outside coverage.",
+    "Row/card totals are bounded snapshots, not proof of identical personalized content or startup performance.",
+    "Loader callbacks are observed script completions, not every internal asynchronous service initialization.",
+    "Prior failure cause remains unknown; successful UI-only A/B supersedes the runtime blocker without attributing it.",
+    "No titles, content IDs, private history, credentials, cookies, raw logs or URL queries included."
+  ]
+}
