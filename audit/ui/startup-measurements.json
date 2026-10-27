@@ -1,0 +1,171 @@
+{
+  "baselineCommit": "aa6c476d1160265d4ac224780cdadb03c04a9eb1",
+  "testedSourceCommit": "2c466b69f3a964550fc90a793ff6f0d861c0cb44",
+  "hybridSha256": "7ae58eeb02eb216b727de4109ac5b4a31b9d22238d952b72eb81001cf3f9cf67",
+  "probeCommit": "12ded67c0f170a5a1fe5e01cd7335fc5a2ca7b62",
+  "baseline": [
+    {
+      "firstHybridPaintMs": 3757.1,
+      "firstUsableMs": 10122.7,
+      "dpad": [
+        {
+          "atMs": 26247.2,
+          "focusResponseMs": 69.7
+        }
+      ],
+      "errors": null,
+      "current": {
+        "atMs": 26318.8,
+        "nodes": 1860,
+        "styles": 48,
+        "uiScripts": 10,
+        "hybridStyles": 1,
+        "hubStyles": 0,
+        "profileButtons": 1,
+        "nativeSubscriptions": {
+          "app": 229,
+          "settings": 15,
+          "storage": 39,
+          "controller": 4,
+          "params": 0
+        }
+      }
+    },
+    {
+      "firstHybridPaintMs": 2802.6,
+      "firstUsableMs": 8606.2,
+      "dpad": [
+        {
+          "atMs": 27036.9,
+          "focusResponseMs": 59.6
+        }
+      ],
+      "errors": null,
+      "current": {
+        "atMs": 27098.1,
+        "nodes": 1735,
+        "styles": 48,
+        "uiScripts": 10,
+        "hybridStyles": 1,
+        "hubStyles": 0,
+        "profileButtons": 1,
+        "nativeSubscriptions": {
+          "app": 197,
+          "settings": 15,
+          "storage": 39,
+          "controller": 4,
+          "params": 0
+        }
+      }
+    }
+  ],
+  "final": {
+    "firstHybridPaintMs": 2294,
+    "firstUsableMs": 9500.3,
+    "dpad": [
+      {
+        "atMs": 9809.9,
+        "focusResponseMs": 77.7
+      }
+    ],
+    "errors": [
+      {
+        "atMs": 3011.8,
+        "kind": "resource",
+        "line": 0,
+        "opaque": false,
+        "tag": "SCRIPT",
+        "type": "Error"
+      }
+    ],
+    "current": {
+      "atMs": 9889.4,
+      "hubStyles": 0,
+      "hybridStyles": 1,
+      "nativeSubscriptions": {
+        "app": 213,
+        "controller": 4,
+        "params": 0,
+        "settings": 17,
+        "storage": 39
+      },
+      "nodes": 1660,
+      "profileButtons": 1,
+      "styles": 48,
+      "uiLifecycle": {
+        "firstShellFrameMs": 2287.6,
+        "initCount": 1,
+        "readyMs": 2813.1,
+        "scriptStartMs": 2276.8,
+        "settingsFailures": 0,
+        "settingsLoads": 1,
+        "settingsMounts": 1,
+        "settingsUnmounts": 0,
+        "shellAppliedMs": 2283.1,
+        "shellTransitions": 1,
+        "styleInsertions": 1,
+        "version": "3.0.0-early-shell-phase1"
+      },
+      "uiScripts": 8
+    }
+  },
+  "settingsReopen": {
+    "categoryFocus": [
+      "hub_category_appearance"
+    ],
+    "nativeRailRows": 31,
+    "hubActiveAfterBack": false,
+    "current": {
+      "atMs": 42323.5,
+      "hubStyles": 0,
+      "hybridStyles": 1,
+      "nativeSubscriptions": {
+        "app": 227,
+        "controller": 4,
+        "params": 8,
+        "settings": 17,
+        "storage": 39
+      },
+      "nodes": 1811,
+      "profileButtons": 1,
+      "styles": 48,
+      "uiLifecycle": {
+        "firstShellFrameMs": 2287.6,
+        "initCount": 1,
+        "readyMs": 2813.1,
+        "scriptStartMs": 2276.8,
+        "settingsFailures": 0,
+        "settingsLoads": 1,
+        "settingsMounts": 1,
+        "settingsUnmounts": 0,
+        "shellAppliedMs": 2283.1,
+        "shellTransitions": 1,
+        "styleInsertions": 1,
+        "version": "3.0.0-early-shell-phase1"
+      },
+      "uiScripts": 8
+    }
+  },
+  "console": {
+    "capturedErrorLogs": 2,
+    "namedJavaScriptExceptions": 0,
+    "uiSourceNamedExceptions": 0,
+    "unattributedScriptResourceFailures": 1
+  },
+  "restoration": {
+    "originalHybridURLRestored": true,
+    "temporaryProbeRemoved": true,
+    "existingTabStillUsable": true,
+    "hybridStyles": 1,
+    "profileButtons": 1
+  },
+  "limitations": [
+    "Desktop main Chrome only; physical Google TV NOT TESTED.",
+    "Normal reloads; HTTP cache not controlled. No certified cold-network benchmark.",
+    "Frame means RAF observing style/class/token; D-pad includes two-frame observation.",
+    "One final sample; earlier intermediate run was slower. No general startup-speedup claim.",
+    "DOM/native subscriptions vary with async Home/native panels. No total DOM-listener or leak-free certification.",
+    "UI resource count is snapshot/schema dependent; no script-reduction claim.",
+    "No private values, URL queries, console messages, cookies or account payloads."
+  ]
+}

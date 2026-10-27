@@ -2,6 +2,9 @@
 (function () {
     'use strict';
     if (window.StremioHybrid) return;
+    var UI_VERSION='3.0.0-early-shell-phase1';
+    var bootStats={scriptStartMs:uiNow(),shellAppliedMs:null,firstShellFrameMs:null,readyMs:null,initCount:0,styleInsertions:0,shellTransitions:0,settingsLoads:0,settingsMounts:0,settingsUnmounts:0,settingsFailures:0},shellFrame=0;
+    var settingsHub=null,settingsScript=null,settingsLoading=false,settingsAttempted=false,settingsFailedApi=null;
     var overlayScriptURL=document.currentScript&&document.currentScript.src,overlayLoading=false;
     function ensureTorrentOverlay(){
         if(window.LampaTorrentOverlay||overlayLoading)return;overlayLoading=true;
@@ -89,6 +92,13 @@ body.stremio-hybrid .sh-settings-rail { grid-column:1; grid-row:2; min-height:0;
 body.stremio-hybrid .sh-settings-category { color:var(--sh-muted); padding:.85em 1em; margin-bottom:.3em; border-radius:var(--sh-pill); font-size:.95em; cursor:pointer; }
 body.stremio-hybrid .sh-settings-category[aria-current="page"] { background:#ffffff09; color:var(--sh-text); }
 body.stremio-hybrid .sh-settings-category.focus { color:white; background:var(--sh-focus-soft); box-shadow:inset .18em 0 var(--sh-accent); }
+/* #79 owns presentation; #73 only mounts native controls/navigation. */
+body.stremio-hybrid.settings-hub-active .settings__body { grid-column:1 / -1; width:100%; max-width:70em; margin:0 auto; }
+body.stremio-hybrid.settings-hub-active .sh-settings-rail { display:none; }
+body.stremio-hybrid.settings-hub-active .settings-param { border-radius:var(--sh-radius); }
+body.stremio-hybrid.settings-hub-active .settings-param__name { font-size:1.1em; line-height:1.35; }
+body.stremio-hybrid.settings-hub-active .settings-param__descr { overflow-wrap:anywhere; line-height:1.4; color:var(--sh-muted); }
+body.stremio-hybrid.settings-hub-active .settings-param.focus { background:var(--sh-focus-soft); box-shadow:inset .2em 0 var(--sh-accent); }
 body.stremio-hybrid .settings-param { padding:1em; margin-bottom:.25em; }
 body.stremio-hybrid .settings-param__name { font-size:1em; }
 body.stremio-hybrid .settings-param__value { font-size:.85em; }
@@ -1405,7 +1415,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
     }
     function onSettingsOpen(event) {
         if(settingsFrame) cancelAnimationFrame(settingsFrame);
-        if(window.LampaSettingsHub && window.LampaSettingsHub.owns(event.name)) { settingsCategory=''; onSettingsClose(); return; }
+        if(event.name!=='main' && window.LampaSettingsHub && window.LampaSettingsHub.owns(event.name)) { settingsCategory=''; onSettingsClose(); return; }
         settingsFrame=requestAnimationFrame(function(){
             settingsFrame=0;
             if(!watching || !document.body.classList.contains('settings--open'))return;
@@ -1440,17 +1450,56 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         var value = Lampa.Storage.get('stremio_hybrid_enabled', true);
         return value !== false && value !== 'false' && value !== 0 && value !== '0';
     }
+    function uiNow(){return window.performance && typeof window.performance.now==='function'?Math.round(window.performance.now()*10)/10:null;}
+    // One static shell owner; native functional adapters still wait for appready.
+    function applyShell(on) {
+        if (destroyed || !document.body) return;
+        if (on && !style) {
+            style=document.getElementById('stremio-hybrid-style');
+            if(!style){style=document.createElement('style');style.id='stremio-hybrid-style';style.textContent=css;style.setAttribute('data-ui-version',UI_VERSION);document.head.appendChild(style);bootStats.styleInsertions++;}
+        }
+        if(document.body.classList.contains('stremio-hybrid')!==on)bootStats.shellTransitions++;
+        document.body.classList.toggle('stremio-hybrid', on);
+        if(on){
+            if(bootStats.shellAppliedMs===null)bootStats.shellAppliedMs=uiNow();
+            if(bootStats.firstShellFrameMs===null && !shellFrame && typeof requestAnimationFrame==='function')shellFrame=requestAnimationFrame(function(){shellFrame=0;if(!destroyed && document.body.classList.contains('stremio-hybrid'))bootStats.firstShellFrameMs=uiNow();});
+        }else if(shellFrame){cancelAnimationFrame(shellFrame);shellFrame=0;}
+        if (!on && style) { style.remove(); style = null; }
+    }
+    function prepareShell() {
+        if(window.Lampa && Lampa.Storage && document.body)applyShell(enabled());
+    }
+    function mountSettings() {
+        if(destroyed || !ready || !watching || settingsHub)return;
+        var api=window.LampaSettingsHub;
+        if(api && api===settingsFailedApi)return;
+        if(api){
+            if(api.contractVersion===1 && typeof api.install==='function' && typeof api.destroy==='function'){
+                try{if(api.install(Lampa,$,document)){settingsHub=api;bootStats.settingsMounts++;}}
+                catch(e){settingsFailedApi=api;bootStats.settingsFailures++;try{api.destroy();}catch(cleanupError){/* Native Settings remains the fallback. */}}
+            }
+            return;
+        }
+        if(settingsLoading || settingsAttempted)return;
+        settingsLoading=true;settingsAttempted=true;bootStats.settingsLoads++;
+        var url=new URL('settings-hub.js',overlayScriptURL || 'https://gorlim590.github.io/lampa/ui/stremio-hybrid.js');
+        url.search='';url.searchParams.set('v',UI_VERSION);
+        settingsScript=document.createElement('script');settingsScript.src=url.href;
+        settingsScript.onload=function(){settingsLoading=false;if(!destroyed && watching)mountSettings();};
+        settingsScript.onerror=function(){settingsLoading=false;bootStats.settingsFailures++;settingsScript.onload=null;settingsScript.onerror=null;settingsScript.remove();settingsScript=null;};
+        document.head.appendChild(settingsScript);
+    }
+    function unmountSettings() {
+        settingsFailedApi=null;
+        if(!settingsLoading)settingsAttempted=false;
+        if(settingsHub){var api=settingsHub;settingsHub=null;try{api.destroy();}catch(e){bootStats.settingsFailures++;}bootStats.settingsUnmounts++;}
+    }
     function apply(on) {
         if (destroyed) return;
-        document.body.classList.toggle('stremio-hybrid', on);
-        if (on && !style) {
-            style = document.createElement('style');
-            style.id = 'stremio-hybrid-style';
-            style.textContent = css;
-            document.head.appendChild(style);
-        }
-        if (!on && style) { style.remove(); style = null; }
-        if (on) setupUI(); else removeUI();
+        applyShell(on);
+        if(!ready)return;
+        if(on){if(!watching)setupUI();else updateAvatar();mountSettings();}
+        else {unmountSettings();if(watching)removeUI();}
     }
     function setEnabled(on) { Lampa.Storage.set('stremio_hybrid_enabled', !!on); apply(!!on); }
     function stopWaiting() {
@@ -1460,6 +1509,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
     }
     function onApp(event) { if (event && event.type === 'ready') init(); }
     function onDOM() {
+        prepareShell();
         if (window.appready) init();
         else if (!waiting && window.Lampa && Lampa.Listener) {
             Lampa.Listener.follow('app', onApp);
@@ -1469,6 +1519,8 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
     function init() {
         if (ready || destroyed || !window.Lampa || !Lampa.SettingsApi) return;
         ready = true;
+        bootStats.initCount++;
+        bootStats.readyMs=uiNow();
         stopWaiting();
         var params = Lampa.SettingsApi.getParam('interface') || [];
         if (!params.some(function (item) { return item.param && item.param.name === 'stremio_hybrid_enabled'; })) {
@@ -1485,20 +1537,23 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         apply(enabled());
     }
     window.StremioHybrid = {
-        version: '2.9.0-torrent-overlay',
+        version: UI_VERSION,
         settingsHubVersion: 1,
         openUtilities: openHeaderUtilities,
         setEnabled: setEnabled,
         refresh: function () { if (ready) apply(enabled()); },
+        diagnostics: function () {return {version:UI_VERSION,scriptStartMs:bootStats.scriptStartMs,shellAppliedMs:bootStats.shellAppliedMs,firstShellFrameMs:bootStats.firstShellFrameMs,readyMs:bootStats.readyMs,initCount:bootStats.initCount,styleInsertions:bootStats.styleInsertions,shellTransitions:bootStats.shellTransitions,settingsLoads:bootStats.settingsLoads,settingsMounts:bootStats.settingsMounts,settingsUnmounts:bootStats.settingsUnmounts,settingsFailures:bootStats.settingsFailures};},
         destroy: function () {
             apply(false);
             removeHeaderUtilitiesSetting();
             backdropResume=null;movieBrands=[];movieEnglish=[];paletteCache=[];
             destroyed = true;
             stopWaiting();
+            if(settingsScript){settingsScript.onload=null;settingsScript.onerror=null;if(settingsLoading)settingsScript.remove();settingsScript=null;}
             delete window.StremioHybrid;
         }
     };
+    prepareShell();
     if (window.appready) init();
     else {
         onDOM();

@@ -40,6 +40,11 @@ test('Hybrid cancels its queued rail and yields before creating a competing navi
  const c={settingsFrame:7,settingsCategory:'settings_hub',window:{LampaSettingsHub:{owns:name=>name==='settings_hub'}},cancelAnimationFrame:id=>calls.push(['cancel',id]),onSettingsClose:()=>calls.push('close'),requestAnimationFrame:()=>{throw Error('Competing rail scheduled');}};
  vm.runInNewContext(source.slice(source.indexOf('    function onSettingsOpen('),source.indexOf('    function onSettingsClose(')),c);c.onSettingsOpen({name:'settings_hub'});assert.deepEqual(calls,[['cancel',7],'close']);assert.equal(c.settingsCategory,'','Native fallback must not auto-reopen Hub');
 });
+test('Native Main restores its rail even before the Hub listener clears the previous active flag',()=>{
+ const source=fs.readFileSync(__dirname+'/../ui/stremio-hybrid.js','utf8'),queued=[],calls=[];
+ const c={settingsFrame:0,watching:true,settingsCategory:'',settingsParameter:null,window:{LampaSettingsHub:{owns:()=>true}},cancelAnimationFrame:()=>{},onSettingsClose:()=>{throw Error('Native Main must not yield to a stale Hub flag');},requestAnimationFrame:fn=>{queued.push(fn);return 1;},document:{body:{classList:{contains:()=>true}}},nativeSettingsFolders:()=>[{getAttribute:()=> 'interface'}],updateSettingsRail:()=>calls.push('rail'),chooseSettingsCategory:(...args)=>calls.push(args)};
+ vm.runInNewContext(source.slice(source.indexOf('    function onSettingsOpen('),source.indexOf('    function onSettingsClose(')),c);c.onSettingsOpen({name:'main'});assert.equal(queued.length,1);c.window.LampaSettingsHub.owns=()=>false;queued[0]();assert.deepEqual(calls,['rail',['interface',true]]);
+});
 test('Audit harness never reloads themes and blocks incompatible active visual ownership',()=>{
  const source=fs.readFileSync(__dirname+'/../audit/settings/preview.js','utf8');
  for(const [enabled,legacy]of [[false,false],[true,false],[true,true]]){
