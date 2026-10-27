@@ -23,10 +23,11 @@ test('Reusable comprehensive summary is fresh and keeps runtime verification sep
  assert.equal(summary.records.length,summary.counts.identifiableControls);
  assert.equal(Object.values(summary.categories).reduce((n,category)=>n+category.total,0),summary.counts.identifiableControls);
  assert.equal(Object.values(summary.categories).reduce((n,category)=>n+category.verifiedRuntime,0),0);
- assert(summary.counts.distinctControlsExercised>=25&&summary.counts.distinctControlsExercised<=40);
+ assert(summary.counts.phaseDistinctControlsExercised>=25&&summary.counts.phaseDistinctControlsExercised<=40);
  assert.equal(summary.confirmedDefects.length,0);
  assert.equal(summary.followUpQueue.length,12);
  assert.equal(summary.records.find(row=>row.id==='addCategory:ncInfo').status,'Fixed in source; runtime not verified (merged PR #99)');
 });
 
 require('./settings-functional.cjs');
+require('./settings-plugin-delivery.cjs');

@@ -63,11 +63,11 @@ No production loader or manifest entry activates this adapter, including `settin
 
 `node --test tests/settings-census.cjs tests/settings-registry.cjs tests/settings-hub-lifecycle.cjs tests/settings-sensitive-summaries.cjs` covers privacy, categories, unknown/problem states, late discovery, native lifecycle cleanup, focus/Back return, bounded paging and unsafe panel protection in isolated fixtures. These do not certify primary-browser or physical TV acceptance.
 
-## Current comprehensive checkpoint (functional batch from main after PR #99)
+## Current comprehensive checkpoint (Phase 3, main after PR #100)
 
 The reusable reconciliation is `node scripts/settings-audit-summary.mjs`; `node scripts/settings-audit-summary.mjs --check` verifies the committed [machine summary](settings-audit-summary.json). It reuses the schema 2 inventory rather than recapturing or walking controls manually. The baseline capture remains the PR #92 checkpoint, not a fresh census of deployed main. Control and presentation totals are derived from the inventory at generation time.
 
-The functional batch exercises **39 distinct controls** in seven isolated test cases: 38 verified against mocked owner effects and one partial (missing-token Trakt auth rendering). No control is verified in a live runtime; the remaining inventory is unverified, unsupported, unavailable or fixed in source awaiting runtime acceptance as detailed in JSON. The batch found no new confirmed broken control and made no production behavior changes. Existing `ncInfo` Back and AverageRating privacy repairs remain covered by prior regressions. No real account, user Storage, or live service was accessed. Browser and physical TV acceptance remain open.
+The prior batch exercised 39 controls. Phase 3 adds **26 distinct controls** (24 isolated verified, 2 partial) across Trakt Core and the current Torrents Cinema owner. Cumulative evidence covers **65 controls**: 62 isolated verified and 3 partial; none has live-runtime evidence. The batch also verifies loader failure continuation and adds a missing-owner Hub fallback case. No new confirmed broken setting was found and no production behavior changed. Trakt import/export stops at an intercepted operation boundary; device OAuth is not run. Player selection and TorrServer endpoint controls belong to external Lampa core and remain unverified. No real credentials, account writes, installed settings or streams were accessed. Browser and physical TV acceptance remain open.
 
 Per-category control totals (total / isolated verified / live verified / broken / partial / fixed-source/runtime-unverified / unsupported / unverified / unavailable):
 
@@ -81,21 +81,21 @@ Per-category control totals (total / isolated verified / live verified / broken 
 | Profiles | 9 | 0 | 0 | 0 | 0 | 0 | 0 | 9 | 0 |
 | Screensaver | 33 | 0 | 0 | 0 | 0 | 0 | 0 | 33 | 0 |
 | System | 42 | 0 | 0 | 0 | 0 | 0 | 0 | 42 | 0 |
-| Torrents | 62 | 0 | 0 | 0 | 0 | 0 | 0 | 62 | 0 |
-| Trakt | 40 | 19 | 0 | 0 | 1 | 0 | 0 | 20 | 0 |
+| Torrents | 62 | 18 | 0 | 0 | 0 | 0 | 0 | 44 | 0 |
+| Trakt | 40 | 25 | 0 | 0 | 3 | 0 | 0 | 12 | 0 |
 
 ### Ranked follow-up queue
 
 These are ranked verification actions from the inventory, **not confirmed defects**. This batch confirmed no new broken controls. Duplicate IDs and shared storage access are review signals, not permission to remove controls or evidence of a collision.
 
 1. **P1 — Playback** (`external/core-app.js`, `player:player`, `player:player_torrent`, `player:player_iptv`): verify route selection, fallback and device-specific playback in a controlled runtime.
-2. **P1 — Trakt auth/reset** (`trakt/trakt.js`, `trakt:trakt_auth`, `trakt:trakt_full_clear`): missing-token rendering was isolated; authenticated action and destructive reset semantics remain unverified. Never use live account data.
-3. **P1 — Core Trakt sync/profile scope** (`trakt/trakt.js`, `trakt:nav_trakt_sync`): Trakt+ preferences/cache reset were exercised against mocks; core sync and account-isolation semantics remain unverified.
+2. **P1 — Trakt authenticated flows** (`trakt/trakt.js`, `trakt:trakt_auth`): missing/connected/failed status and disconnect delegation are mocked; actual device OAuth/polling and expired-token backend behavior remain unverified.
+3. **P1 — Trakt bookmark sync/profile scope** (`trakt/trakt.js`, `trakt_sync:trakt_bookmarks_import/export`): mode, type and flow routing are tested; actual API import/export commits and profile-scoped reset acceptance remain unverified.
 4. **P1 — Unattributed BWA** (10 `bwa:*` controls): recover source/delivery owner before classifying behavior.
 5. **P1 — Settings Hub with merged Hybrid** (`ui/settings-hub.js`, PR #98 Settings owner): exact-asset open/Back/focus/fallback verification in the existing browser when safely available.
 6. **P1 — Network margin persistence** (`providers/tmdb-networks.js`, `platforms_margins:*`): inspect individual writes and reset behavior; shared handler access is not itself a collision.
 7. **P1 — Appearance high-impact options** (`ui/design-optimized.js`, `ui/interface-plus.js`): verify representative settings against current presentation ownership.
-8. **P1 — Plugin enable/disable** (`loader.js`, `plugins-to-enable/*`): test install, repeated open/close, missing plugin and failed dependency with disposable state.
+8. **P1 — Plugin dependency ownership** (`loader.js`, `plugins-to-enable/*`, external BWA): loader sequence, failure continuation and late callback handling are tested; individual plugin enable controls and external dependency readiness remain unverified.
 9. **P1 — Anonymous menu filters** (`ui/menu-hide.js`, duplicate `menu_filter:*` IDs): determine stable identity and whether registrations represent intentional repeated items.
 10. **P2 — Lazy Info template** (`community/new-category.js`, `ncInfo:group`): preserve native owner route and verify availability only after the owner opens.
 11. **P2 — Scope/reset/restart map** (all owners): inspect source for account/profile/device scope and reset/restart semantics before any key migration.

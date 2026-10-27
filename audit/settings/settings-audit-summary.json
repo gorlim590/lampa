@@ -18,14 +18,22 @@
     "identifiableControls": 506,
     "presentationRecords": 70,
     "recordedDuplicateIds": 5,
-    "distinctControlsExercised": 39,
-    "verifiedInIsolation": 38,
-    "partiallyExercisedInIsolation": 1
+    "distinctControlsExercised": 65,
+    "phaseDistinctControlsExercised": 26,
+    "verifiedInIsolation": 62,
+    "partiallyExercisedInIsolation": 3,
+    "phaseVerifiedInIsolation": 24,
+    "phasePartiallyExercisedInIsolation": 2
   },
   "functionalTests": {
     "file": "tests/settings-functional.cjs",
-    "isolatedCases": 7,
-    "mode": "Source owner functions/registrations with disposable Storage, mocked UI effects and intercepted Trakt API; no live credentials or writes.",
+    "isolatedCases": 10,
+    "supportingFiles": [
+      "tests/settings-plugin-delivery.cjs",
+      "tests/settings-hub-lifecycle.cjs"
+    ],
+    "defaultLiveRuntimeStatus": "Not verified",
+    "mode": "Source owner functions/registrations with disposable Storage, mocked UI effects and intercepted Trakt API; no live credentials or service/account writes.",
     "liveRuntimeVerified": 0
   },
   "categories": {
@@ -119,24 +127,24 @@
     },
     "torrents": {
       "total": 62,
-      "verifiedIsolated": 0,
+      "verifiedIsolated": 18,
       "verifiedRuntime": 0,
       "broken": 0,
       "partial": 0,
       "fixedSourceRuntimeUnverified": 0,
       "unsupported": 0,
-      "unverified": 62,
+      "unverified": 44,
       "unavailable": 0
     },
     "trakt": {
       "total": 40,
-      "verifiedIsolated": 19,
+      "verifiedIsolated": 25,
       "verifiedRuntime": 0,
       "broken": 0,
-      "partial": 1,
+      "partial": 3,
       "fixedSourceRuntimeUnverified": 0,
       "unsupported": 0,
-      "unverified": 20,
+      "unverified": 12,
       "unavailable": 0
     }
   },
@@ -174,21 +182,22 @@
     {
       "rank": 2,
       "priority": "P1 verification",
-      "owner": "trakt/trakt.js",
+      "owner": "trakt/trakt.js and Trakt API bridge",
       "controls": [
-        "trakt:trakt_auth",
-        "trakt:trakt_full_clear"
+        "trakt:trakt_auth"
       ],
-      "reason": "Missing-token auth rendering was exercised without network access; authenticated action and destructive full-reset semantics still need isolated coverage."
+      "reason": "Status, missing-token dispatch, mocked disconnect delegation and failed /users/me fallback are isolated; actual device OAuth/polling and expired-token service acceptance remain unverified."
     },
     {
       "rank": 3,
       "priority": "P1 verification",
       "owner": "trakt/trakt.js",
       "controls": [
-        "trakt:nav_trakt_sync"
+        "trakt_sync:trakt_bookmarks_import",
+        "trakt_sync:trakt_bookmarks_export",
+        "trakt:trakt_full_clear"
       ],
-      "reason": "The Trakt+ preferences and cache reset run against mocked services; core sync action and account-isolation semantics remain unverified."
+      "reason": "Mode/type dispatch and full-clear namespace behavior were isolated; downstream sync API/favorite mutations and profile-scoped reset semantics remain unverified."
     },
     {
       "rank": 4,
@@ -256,7 +265,7 @@
         "plugins:plugins",
         "plugins:install"
       ],
-      "reason": "Installation, enable/disable and missing-plugin fallback must be isolated from real user plugin configuration."
+      "reason": "Loader sequence, failed delivery and late callback behavior are isolated; per-plugin enable controls and dependency readiness remain unavailable or unverified."
     },
     {
       "rank": 9,
@@ -632,6 +641,10 @@
       "ownerEvidence": "registration",
       "status": "Verified in isolated tests",
       "evidence": "Hybrid registered enable option and actual setEnabled/applyShell repeated transitions",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "stremio_hybrid_enabled"
       ],
@@ -1307,8 +1320,17 @@
       "label": "Тема",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "registration",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual minimum-theme resolver reads disposable Storage",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed.",
       "storageKeys": [
         "torrents_cinema_theme"
       ],
@@ -1357,8 +1379,17 @@
       "label": "Інтенсивність акцентного сяйва",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual presentation owner maps intensity setting to CSS variable",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed.",
       "storageKeys": [
         "torrents_cinema_intensity"
       ],
@@ -1373,8 +1404,17 @@
       "label": "Непрозорість панелі (Google TV)",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual presentation owner maps panel opacity setting to CSS variable",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed.",
       "storageKeys": [
         "torrents_cinema_opacity"
       ],
@@ -1389,8 +1429,17 @@
       "label": "Затемнення фону",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual presentation owner maps backdrop darkness setting to CSS variable",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed.",
       "storageKeys": [
         "torrents_cinema_darkness"
       ],
@@ -1405,8 +1454,17 @@
       "label": "Картки",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual presentation owner maps card density to row padding",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed.",
       "storageKeys": [
         "torrents_cinema_cards"
       ],
@@ -1421,8 +1479,17 @@
       "label": "Рядків назви (повна назва у фокусі)",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual presentation owner maps title-lines value to CSS variable",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed.",
       "storageKeys": [
         "torrents_cinema_title_lines"
       ],
@@ -1453,8 +1520,17 @@
       "label": "IMDb на сторінці файлів",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual file-rating owner removes or refreshes a mocked badge based on setting",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed.",
       "storageKeys": [
         "torrents_cinema_episode_ratings"
       ],
@@ -1469,8 +1545,17 @@
       "label": "Анімації",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual presentation owner toggles motion class from mock Storage",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed.",
       "storageKeys": [
         "torrents_cinema_animations"
       ],
@@ -1485,8 +1570,17 @@
       "label": "Пріоритет українських доріжок",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual refresh/score owner consumes mock Ukrainian preference in release selection",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed.",
       "storageKeys": [
         "torrents_cinema_ua"
       ],
@@ -1501,8 +1595,17 @@
       "label": "Пріоритет українського аудіо",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual refresh/score owner gives Ukrainian audio preference to best-release selection",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed.",
       "storageKeys": [
         "torrents_cinema_ua_audio"
       ],
@@ -1517,8 +1620,17 @@
       "label": "Пріоритет українських субтитрів",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual refresh/score owner gives Ukrainian subtitle preference when audio preference is disabled",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed.",
       "storageKeys": [
         "torrents_cinema_ua_subs"
       ],
@@ -1533,8 +1645,17 @@
       "label": "Бажана роздільна здатність",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual release score selects configured resolution",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed.",
       "storageKeys": [
         "torrents_cinema_quality"
       ],
@@ -1549,8 +1670,17 @@
       "label": "Рекомендований реліз (без автозапуску)",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual refresh owner disables recommended-play action without invoking playback",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed.",
       "storageKeys": [
         "torrents_cinema_auto"
       ],
@@ -1565,8 +1695,17 @@
       "label": "Фільтр трекерів",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual refresh/tracker filter hides releases from other trackers",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed.",
       "storageKeys": [
         "torrents_cinema_tracker"
       ],
@@ -1581,8 +1720,17 @@
       "label": "Приховувати підтверджені дублікати",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual refresh hides repeated infohash only when duplicate filter is enabled",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed.",
       "storageKeys": [
         "torrents_cinema_dedupe"
       ],
@@ -1597,8 +1745,17 @@
       "label": "Пояснювати підозрілі збіги",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual refresh owner renders mismatch explanation from mocked match result",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed.",
       "storageKeys": [
         "torrents_cinema_suspect"
       ],
@@ -1613,8 +1770,17 @@
       "label": "Оптимізація Google TV (без blur і масштабування)",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual TV presentation owner toggles reduced-effects class from mock Storage",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed.",
       "storageKeys": [
         "torrents_cinema_tv"
       ],
@@ -1661,8 +1827,17 @@
       "label": "Паралельні запити цього плагіна",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual request pump respects configured local concurrency; no requests issued",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "disposable localStorage",
+        "mock DOM/classes/styles",
+        "synthetic torrent rows/request queue",
+        "no playback or network"
+      ],
+      "persistenceResetEvidence": "Owner reads mock saved values; native Lampa Settings writer is not executed.",
       "storageKeys": [
         "torrents_cinema_parallel"
       ],
@@ -2756,7 +2931,11 @@
       "owner": "trakt/trakt.js",
       "ownerEvidence": "registration",
       "status": "Partially verified",
-      "evidence": "Actual registered onRender missing-token branch; auth start/API branch intentionally not called",
+      "evidence": "Actual registration: missing/connected status, rejected /users/me fallback, mocked connect dispatch, disconnect delegation; device OAuth/polling remains untested",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [],
       "findings": [
         "runtime-or-device-verification-required"
@@ -2769,8 +2948,17 @@
       "label": "Синхронізація списків",
       "owner": "trakt/trakt.js",
       "ownerEvidence": "registration",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual registered handler opens trakt_sync and native Back returns to trakt",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "Lampa.Storage/Settings/Bell mock",
+        "Trakt API interception",
+        "synthetic localStorage",
+        "no live credentials"
+      ],
+      "persistenceResetEvidence": "Mock Storage reads for mode/type; native Lampa Settings writer and service persistence are outside this fixture.",
       "storageKeys": [],
       "findings": [
         "runtime-or-device-verification-required"
@@ -2783,8 +2971,17 @@
       "label": "Налаштування прогресу",
       "owner": "trakt/trakt.js",
       "ownerEvidence": "registration",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual registered handler opens trakt_progress and native Back returns to trakt",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "Lampa.Storage/Settings/Bell mock",
+        "Trakt API interception",
+        "synthetic localStorage",
+        "no live credentials"
+      ],
+      "persistenceResetEvidence": "Mock Storage reads for mode/type; native Lampa Settings writer and service persistence are outside this fixture.",
       "storageKeys": [],
       "findings": [
         "runtime-or-device-verification-required"
@@ -2797,8 +2994,17 @@
       "label": "Налаштування джерела",
       "owner": "trakt/trakt.js",
       "ownerEvidence": "registration",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual registered handler opens trakt_source and native Back returns to trakt",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "Lampa.Storage/Settings/Bell mock",
+        "Trakt API interception",
+        "synthetic localStorage",
+        "no live credentials"
+      ],
+      "persistenceResetEvidence": "Mock Storage reads for mode/type; native Lampa Settings writer and service persistence are outside this fixture.",
       "storageKeys": [],
       "findings": [
         "runtime-or-device-verification-required"
@@ -2811,8 +3017,17 @@
       "label": "Очистити всі ключі Trakt.TV",
       "owner": "trakt/trakt.js",
       "ownerEvidence": "registration",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual full-clear callback removes Trakt-keyed disposable localStorage and explicit auth keys; preserves non-Trakt keys and Lampa favorites",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "Lampa.Storage/Settings/Bell mock",
+        "Trakt API interception",
+        "synthetic localStorage",
+        "no live credentials"
+      ],
+      "persistenceResetEvidence": "Synthetic Trakt keys cleared; unrelated/profile/favorite keys preserved; explicit auth keys reset.",
       "storageKeys": [
         "trakt_token",
         "trakt_refresh_token",
@@ -2833,8 +3048,17 @@
       "label": "Режим синхронізації",
       "owner": "trakt/trakt.js",
       "ownerEvidence": "registration",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual mode resolver selects watchlist versus my-lists flow",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "Lampa.Storage/Settings/Bell mock",
+        "Trakt API interception",
+        "synthetic localStorage",
+        "no live credentials"
+      ],
+      "persistenceResetEvidence": "Mock Storage reads for mode/type; native Lampa Settings writer and service persistence are outside this fixture.",
       "storageKeys": [
         "trakt_bookmarks_mode"
       ],
@@ -2849,8 +3073,17 @@
       "label": "Локальний список Lampa",
       "owner": "trakt/trakt.js",
       "ownerEvidence": "registration",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Verified in isolated tests",
+      "evidence": "Actual supported favorite-type resolver feeds isolated import/export dispatch",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "Lampa.Storage/Settings/Bell mock",
+        "Trakt API interception",
+        "synthetic localStorage",
+        "no live credentials"
+      ],
+      "persistenceResetEvidence": "Mock Storage reads for mode/type; native Lampa Settings writer and service persistence are outside this fixture.",
       "storageKeys": [
         "trakt_bookmarks_favorite_type"
       ],
@@ -2865,8 +3098,17 @@
       "label": "Імпортувати вибраний список з Trakt",
       "owner": "trakt/trakt.js",
       "ownerEvidence": "registration",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Partially verified",
+      "evidence": "Actual registration and import flow route tested; sync operation intercepted before API/favorite mutation",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "Lampa.Storage/Settings/Bell mock",
+        "Trakt API interception",
+        "synthetic localStorage",
+        "no live credentials"
+      ],
+      "persistenceResetEvidence": "No data mutation; downstream operation intercepted before API and Favorites.",
       "storageKeys": [],
       "findings": [
         "runtime-or-device-verification-required"
@@ -2879,8 +3121,17 @@
       "label": "Експортувати вибраний список у Trakt",
       "owner": "trakt/trakt.js",
       "ownerEvidence": "registration",
-      "status": "Not verified",
-      "evidence": "Registration census only; handlers, persistence, reset and physical TV not exercised",
+      "status": "Partially verified",
+      "evidence": "Actual registration and export flow route tested; sync operation intercepted before API/favorite mutation",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [
+        "Lampa.Storage/Settings/Bell mock",
+        "Trakt API interception",
+        "synthetic localStorage",
+        "no live credentials"
+      ],
+      "persistenceResetEvidence": "No data mutation; downstream operation intercepted before API and Favorites.",
       "storageKeys": [],
       "findings": [
         "runtime-or-device-verification-required"
@@ -2943,6 +3194,10 @@
       "ownerEvidence": "registration",
       "status": "Verified in isolated tests",
       "evidence": "Trakt interval resolver reads mock values and falls back for invalid value",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "trakt_scrobble_interval"
       ],
@@ -3007,6 +3262,10 @@
       "ownerEvidence": "handler function fingerprint",
       "status": "Verified in isolated tests",
       "evidence": "Trakt+ registered callback/config parser with mock Storage",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "trakt_plus_enable"
       ],
@@ -3023,6 +3282,10 @@
       "ownerEvidence": "handler function fingerprint",
       "status": "Verified in isolated tests",
       "evidence": "Trakt+ registered callback/config parser with mock Storage",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "trakt_plus_hide_watched"
       ],
@@ -3039,6 +3302,10 @@
       "ownerEvidence": "handler function fingerprint",
       "status": "Verified in isolated tests",
       "evidence": "Trakt+ registered callback/config parser with mock Storage",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "trakt_plus_hide_shows"
       ],
@@ -3055,6 +3322,10 @@
       "ownerEvidence": "handler function fingerprint",
       "status": "Verified in isolated tests",
       "evidence": "Trakt+ registered callback/config parser with mock Storage",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "trakt_plus_rec_type"
       ],
@@ -3071,6 +3342,10 @@
       "ownerEvidence": "handler function fingerprint",
       "status": "Verified in isolated tests",
       "evidence": "Trakt+ registered callback/config parser with mock Storage",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "trakt_plus_min_rating"
       ],
@@ -3087,6 +3362,10 @@
       "ownerEvidence": "handler function fingerprint",
       "status": "Verified in isolated tests",
       "evidence": "Trakt+ registered callback/config parser with mock Storage",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "trakt_plus_min_votes"
       ],
@@ -3103,6 +3382,10 @@
       "ownerEvidence": "handler function fingerprint",
       "status": "Verified in isolated tests",
       "evidence": "Trakt+ registered callback/config parser with mock Storage",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "trakt_plus_exclude_genres"
       ],
@@ -3119,6 +3402,10 @@
       "ownerEvidence": "handler function fingerprint",
       "status": "Verified in isolated tests",
       "evidence": "Trakt+ registered callback/config parser with mock Storage",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "trakt_plus_row_limit"
       ],
@@ -3135,6 +3422,10 @@
       "ownerEvidence": "handler function fingerprint",
       "status": "Verified in isolated tests",
       "evidence": "Trakt+ registered callback/config parser with mock Storage",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "trakt_plus_more"
       ],
@@ -3151,6 +3442,10 @@
       "ownerEvidence": "handler function fingerprint",
       "status": "Verified in isolated tests",
       "evidence": "Trakt+ registered callback/config parser with mock Storage",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "trakt_plus_cache_min"
       ],
@@ -3167,6 +3462,10 @@
       "ownerEvidence": "handler function fingerprint",
       "status": "Verified in isolated tests",
       "evidence": "Trakt+ registered callback/config parser with mock Storage",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "trakt_plus_trend_hide_watched"
       ],
@@ -3183,6 +3482,10 @@
       "ownerEvidence": "handler function fingerprint",
       "status": "Verified in isolated tests",
       "evidence": "Trakt+ registered callback/config parser with mock Storage",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "trakt_plus_mark"
       ],
@@ -3199,6 +3502,10 @@
       "ownerEvidence": "handler function fingerprint",
       "status": "Verified in isolated tests",
       "evidence": "Trakt+ registered callback/config parser with mock Storage",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "trakt_plus_mark_shows"
       ],
@@ -3215,6 +3522,10 @@
       "ownerEvidence": "handler function fingerprint",
       "status": "Verified in isolated tests",
       "evidence": "Trakt+ registered callback/config parser with mock Storage",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "trakt_plus_full_rows"
       ],
@@ -3231,6 +3542,10 @@
       "ownerEvidence": "handler function fingerprint",
       "status": "Verified in isolated tests",
       "evidence": "Trakt+ registered callback/config parser with mock Storage",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "trakt_plus_full_button"
       ],
@@ -3247,6 +3562,10 @@
       "ownerEvidence": "handler function fingerprint",
       "status": "Verified in isolated tests",
       "evidence": "Trakt+ registered callback/config parser with mock Storage",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "trakt_plus_auto_home"
       ],
@@ -3263,6 +3582,10 @@
       "ownerEvidence": "handler function fingerprint",
       "status": "Verified in isolated tests",
       "evidence": "Trakt+ registered callback/config parser with mock Storage",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "trakt_plus_autosync"
       ],
@@ -3321,6 +3644,10 @@
       "ownerEvidence": "handler function fingerprint",
       "status": "Verified in isolated tests",
       "evidence": "Trakt+ registered reset callback with intercepted API; no local favorites removed",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [],
       "findings": [
         "runtime-or-device-verification-required"
@@ -3894,6 +4221,10 @@
       "ownerEvidence": "registration",
       "status": "Verified in isolated tests",
       "evidence": "Interface+ registered theme option; actual theme switch/default restore and Hybrid focus selector guard",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "interface_mod_new_theme_select"
       ],
@@ -4586,6 +4917,10 @@
       "ownerEvidence": "registration",
       "status": "Verified in isolated tests",
       "evidence": "YDesign registration, mocked Storage, change listener, class owner effect",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "ydesign_style"
       ],
@@ -4603,6 +4938,10 @@
       "ownerEvidence": "registration",
       "status": "Verified in isolated tests",
       "evidence": "YDesign registration, mocked Storage, change listener, class owner effect",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "ydesign_focus_fx"
       ],
@@ -4686,6 +5025,10 @@
       "ownerEvidence": "registration",
       "status": "Verified in isolated tests",
       "evidence": "YDesign registration, mocked Storage, change listener, class owner effect",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "ydesign_ribbons"
       ],
@@ -4703,6 +5046,10 @@
       "ownerEvidence": "registration",
       "status": "Verified in isolated tests",
       "evidence": "YDesign registration, mocked Storage, change listener, class owner effect",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "ydesign_watched_mark"
       ],
@@ -4720,6 +5067,10 @@
       "ownerEvidence": "registration",
       "status": "Verified in isolated tests",
       "evidence": "YDesign registration, mocked Storage, change listener, class owner effect",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "ydesign_progress_marks"
       ],
@@ -4737,6 +5088,10 @@
       "ownerEvidence": "registration",
       "status": "Verified in isolated tests",
       "evidence": "YDesign registration, mocked Storage, change listener, class owner effect",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "ydesign_collection_mark"
       ],
@@ -4786,6 +5141,10 @@
       "ownerEvidence": "registration",
       "status": "Verified in isolated tests",
       "evidence": "YDesign registration, mocked Storage, change listener, CSS owner effect, mock restart",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "ydesign_theme"
       ],
@@ -4820,6 +5179,10 @@
       "ownerEvidence": "registration",
       "status": "Verified in isolated tests",
       "evidence": "YDesign registration, mocked Storage, change listener, CSS value and mock restart",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "ydesign_grid_items_v"
       ],
@@ -4837,6 +5200,10 @@
       "ownerEvidence": "registration",
       "status": "Verified in isolated tests",
       "evidence": "YDesign registration, mocked Storage, change listener, CSS value and mock restart",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "ydesign_card_gap"
       ],
@@ -5007,6 +5374,10 @@
       "ownerEvidence": "registration",
       "status": "Verified in isolated tests",
       "evidence": "YDesign registration, mocked Storage, change listener, visibility class effect",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "ydesign_v_show_age"
       ],
@@ -5024,6 +5395,10 @@
       "ownerEvidence": "registration",
       "status": "Verified in isolated tests",
       "evidence": "YDesign registration, mocked Storage, change listener, visibility class effect",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "ydesign_v_show_ua"
       ],
@@ -5041,6 +5416,10 @@
       "ownerEvidence": "registration",
       "status": "Verified in isolated tests",
       "evidence": "YDesign registration, mocked Storage, change listener, visibility class effect",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "ydesign_v_show_genres"
       ],
@@ -5805,6 +6184,10 @@
       "ownerEvidence": "registration",
       "status": "Verified in isolated tests",
       "evidence": "YDesign registration, mocked Storage, change listener, CSS value and class effect",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "ydesign_ratings_saturate"
       ],
@@ -6793,6 +7176,10 @@
       "ownerEvidence": "registration",
       "status": "Verified in isolated tests",
       "evidence": "Cardify actual owner visibility function; mock Storage state and restart",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "cardify_show_status"
       ],
@@ -6810,6 +7197,10 @@
       "ownerEvidence": "registration",
       "status": "Verified in isolated tests",
       "evidence": "Cardify registered onChange/onRender; mock Storage and owner classes",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "cardify_show_rating"
       ],
@@ -6827,6 +7218,10 @@
       "ownerEvidence": "registration",
       "status": "Verified in isolated tests",
       "evidence": "Cardify registered onChange/onRender; write, owner classes and mock restart",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "cardify_ratings_position"
       ],
@@ -6844,6 +7239,10 @@
       "ownerEvidence": "registration",
       "status": "Verified in isolated tests",
       "evidence": "Cardify actual owner visibility function; mock Storage state and restart",
+      "liveRuntimeStatus": "Not verified",
+      "testFile": "tests/settings-functional.cjs",
+      "mockedDependencies": [],
+      "persistenceResetEvidence": "Not exercised by isolated functional tests.",
       "storageKeys": [
         "cardify_show_pg"
       ],
