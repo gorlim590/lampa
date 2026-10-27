@@ -40,7 +40,7 @@ jobs:
         run: node --test --test-timeout=15000 tests/repository-checker.cjs
       - name: Header menu and Hybrid interaction regressions
         working-directory: main-checkout
-        run: node --test --test-timeout=15000 tests/header-menu.cjs tests/hybrid-ui.cjs tests/ui-bootstrap.cjs tests/ui-startup-probe.cjs tests/card-focus-owner.cjs tests/header-presentation.cjs
+        run: node --test --test-timeout=15000 tests/header-menu.cjs tests/hybrid-ui.cjs tests/ui-bootstrap.cjs tests/ui-startup-probe.cjs tests/card-focus-owner.cjs tests/header-presentation.cjs tests/header-runtime-audit.cjs
       - name: Localization fallback and recovery regressions
         working-directory: main-checkout
         run: node --test --test-timeout=15000 tests/localization.cjs
