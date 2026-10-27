@@ -15,7 +15,7 @@ function fixture(){
    enabled={name:'settings_component',controller};(listeners.open||[]).forEach(fn=>fn({name,body:wrap(bodyNode),params:options}));
   }},Controller:{enabled:()=>enabled,collectionFocus:node=>focused=node,toggle:name=>{enabled={name,controller:{}};}},Input:{edit(){}},Noty:{show:message=>warnings.push(message)},Storage:{get(){throw Error('Unexpected preference read');},set(){throw Error('Unexpected preference write');}}};
  const doc={body:{classList:{add:x=>classes.add(x),remove:x=>classes.delete(x)}},head:{appendChild:n=>styles.push(n)},createElement:()=>({})};
- return {hub,L,$,doc,params,listeners,styles,warnings,classes,rootNode,open:()=>L.Settings.create('settings_hub'),
+ return {hub,L,$,doc,params,listeners,styles,warnings,classes,rootNode,open:()=>L.Settings.create('settings_hub'),openMain:()=>L.Settings.create('main'),
   enter(key){const item=items.find(n=>n.key===key);assert(item,'Missing navigation row '+key);item.enter();},back:()=>enabled.controller.back(),items:()=>items,focus:()=>focused,stats:()=>({destroyed,creates})};
 }
 test('Hub delegates native owner Back once and restores the selected row/category without re-registering business handlers',()=>{
@@ -23,6 +23,15 @@ test('Hub delegates native owner Back once and restores the selected row/categor
  assert.equal(f.hub.install(f.L,f.$,f.doc),true);f.open();f.enter('hub_category_appearance');f.enter('hub_item_0');assert.equal(business,1);
  f.back();assert.equal(f.focus().key,'hub_item_0');assert(f.focus().scrollFocused);f.back();assert.equal(f.focus().key,'hub_category_appearance');
  assert.equal(f.params.ydesign,original);assert.equal(f.params.ydesign.length,1);assert.equal(business,1);assert.equal(f.stats().destroyed,4);
+});
+test('Opt-in primary entry opens the existing Hub root from native Main and Back restores native Settings',()=>{
+ const f=fixture();assert.equal(f.hub.install(f.L,f.$,f.doc),true);f.openMain();assert(!f.classes.has('settings-hub-active'));
+ assert.equal(f.hub.openPrimary(),true);assert(f.classes.has('settings-hub-active'));assert.equal(f.items().some(x=>x.key==='hub_native'),true);
+ f.back();assert.equal(f.L.Controller.enabled().name,'settings');assert(!f.classes.has('settings-hub-active'));
+});
+test('Primary entry reports failure and restores native Settings when Hub creation throws',()=>{
+ const f=fixture();f.hub.install(f.L,f.$,f.doc);f.L.Settings.create=()=>{throw Error('fixture initialization failure');};
+ assert.equal(f.hub.openPrimary(),false);assert.equal(f.L.Controller.enabled().name,'settings');assert(!f.classes.has('settings-hub-active'));
 });
 test('Paging bounds rendered links, discovers late registrations and does not duplicate listeners/styles on reopen',()=>{
  const f=fixture();f.params.ydesign=Array.from({length:65},(_,i)=>({param:{name:'setting_'+i,type:'select'},field:{name:'Параметр '+i}}));f.hub.install(f.L,f.$,f.doc);
@@ -42,8 +51,27 @@ test('Hybrid cancels its queued rail and yields before creating a competing navi
 });
 test('Native Main restores its rail even before the Hub listener clears the previous active flag',()=>{
  const source=fs.readFileSync(__dirname+'/../ui/stremio-hybrid.js','utf8'),queued=[],calls=[];
- const c={settingsFrame:0,watching:true,settingsCategory:'',settingsParameter:null,window:{LampaSettingsHub:{owns:()=>true}},cancelAnimationFrame:()=>{},onSettingsClose:()=>{throw Error('Native Main must not yield to a stale Hub flag');},requestAnimationFrame:fn=>{queued.push(fn);return 1;},document:{body:{classList:{contains:()=>true}}},nativeSettingsFolders:()=>[{getAttribute:()=> 'interface'}],updateSettingsRail:()=>calls.push('rail'),chooseSettingsCategory:(...args)=>calls.push(args)};
+ const c={settingsFrame:0,watching:true,settingsCategory:'',settingsParameter:null,settingsPrimaryRouting:false,settingsHub:null,Lampa:{Storage:{get:()=>false}},window:{LampaSettingsHub:{owns:()=>true}},cancelAnimationFrame:()=>{},onSettingsClose:()=>{throw Error('Native Main must not yield to a stale Hub flag');},requestAnimationFrame:fn=>{queued.push(fn);return 1;},document:{body:{classList:{contains:()=>true}}},nativeSettingsFolders:()=>[{getAttribute:()=> 'interface'}],updateSettingsRail:()=>calls.push('rail'),chooseSettingsCategory:(...args)=>calls.push(args)};
  vm.runInNewContext(source.slice(source.indexOf('    function onSettingsOpen('),source.indexOf('    function onSettingsClose(')),c);c.onSettingsOpen({name:'main'});assert.equal(queued.length,1);c.window.LampaSettingsHub.owns=()=>false;queued[0]();assert.deepEqual(calls,['rail',['interface',true]]);
+});
+test('Primary Settings routing is opt-in, requires the mounted compatible Hub and yields nested events without a Back loop',()=>{
+ const source=fs.readFileSync(__dirname+'/../ui/stremio-hybrid.js','utf8'),run=source.slice(source.indexOf('    function onSettingsOpen('),source.indexOf('    function onSettingsClose('));
+ function route(primary,makeApi,watching=true){
+  const queued=[],calls=[];const c={settingsFrame:0,watching,settingsCategory:'interface',settingsParameter:null,settingsPrimaryRouting:false,settingsHub:null,
+   window:{LampaSettingsHub:null},Lampa:{Storage:{get:key=>{assert.equal(key,'stremio_hybrid_primary_settings');return primary;}}},cancelAnimationFrame:()=>{},onSettingsClose:()=>calls.push('close'),requestAnimationFrame:fn=>{queued.push(fn);return queued.length;},
+   document:{body:{classList:{contains:()=>true}}},updateSettingsRail:()=>calls.push('native-rail'),nativeSettingsFolders:()=>[{getAttribute:()=> 'interface'}],chooseSettingsCategory:(...args)=>calls.push(['native-category',...args])};
+  const api=makeApi?makeApi(c,calls):null;c.settingsHub=api;c.window.LampaSettingsHub=api;
+  vm.runInNewContext(run,c);c.onSettingsOpen({name:'main'});queued.shift()();return {c,calls,queued};
+ }
+ const target=(c,calls,version=1,result=true)=>({contractVersion:version,owns:name=>name==='settings_hub',openPrimary(){calls.push('hub-root');c.onSettingsOpen({name:'settings_hub'});return result;}});
+ let r=route(true,target);assert.deepEqual(r.calls,['hub-root','close']);assert.equal(r.queued.length,0);
+ r=route('true',target);assert.deepEqual(r.calls,['hub-root','close'],'Boolean-like persisted opt-in values remain compatible');
+ r=route(true,null);assert.deepEqual(r.calls,['native-rail',['native-category','interface',true]]);
+ r=route(false,target);assert.deepEqual(r.calls,['native-rail',['native-category','interface',true]]);
+ r=route(true,(c,calls)=>target(c,calls,99));assert.deepEqual(r.calls,['native-rail',['native-category','interface',true]]);
+ r=route(true,(c,calls)=>({contractVersion:1,owns:()=>false,openPrimary:()=>{throw Error('unowned Hub must not be called');}}));assert.deepEqual(r.calls,['native-rail',['native-category','interface',true]]);
+ r=route(true,(c,calls)=>target(c,calls,1,false));assert.deepEqual(r.calls,['hub-root','close','native-rail',['native-category','interface',true]]);
+ r=route(true,target,false);assert.deepEqual(r.calls,[]);
 });
 test('Audit harness never reloads themes and blocks incompatible active visual ownership',()=>{
  const source=fs.readFileSync(__dirname+'/../audit/settings/preview.js','utf8');

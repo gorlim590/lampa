@@ -12,7 +12,7 @@
         var version=new URL(overlayScriptURL||url.href).searchParams.get('v');url.search='';if(version)url.searchParams.set('v',version);script.src=url.href;script.onload=function(){if(!destroyed&&watching){movieRecords.forEach(removeStreams);scheduleMovie();}};
         script.onerror=function(){overlayLoading=false;};document.head.appendChild(script);
     }
-    var style, ready = false, destroyed = false, waiting = false, watching = false, moreButton = null, menuOpen = false, searchNode = null, searchReturn = false, settingsRail = null, settingsFrame = 0, settingsParameter = null, settingsCategory = 'interface', settingsLeftConsumed = false, searchSources = null, searchRoots = [];
+    var style, ready = false, destroyed = false, waiting = false, watching = false, moreButton = null, menuOpen = false, searchNode = null, searchReturn = false, settingsRail = null, settingsFrame = 0, settingsParameter = null, settingsCategory = 'interface', settingsLeftConsumed = false, settingsPrimaryRouting = false, searchSources = null, searchRoots = [];
     var css = `
 body.stremio-hybrid { --sh-bg:#121023; --sh-panel:#211d35; --sh-accent:#9775fa; --sh-muted:#aba7bd; --sh-rail:#0c0b16; --sh-text:#f0eef8; --sh-border:#ffffff16; --sh-radius:.7em; --sh-pill:2em; --sh-gap:1.1em; --sh-speed:160ms; --sh-ring:#9775fa66; --sh-focus:#7960c9; --sh-focus-soft:#3e315b; --sh-header:transparent; --sh-panel-raised:#29233e; --sh-accent-soft:#b79bff; --sh-focus-text:#e9e0ff; --sh-focus-ink:#201536; --sh-inactive:#726d86; --sh-secondary:#d0cadf; --sh-inset:1.8em; --sh-ease:ease-out; background:#121023 !important; color:#f0eef8; }
 body.stremio-hybrid .background { opacity:.12 !important; }
@@ -1422,6 +1422,15 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         settingsFrame=requestAnimationFrame(function(){
             settingsFrame=0;
             if(!watching || !document.body.classList.contains('settings--open'))return;
+            if(event.name==='main' && !settingsPrimaryRouting && settingsHub && window.LampaSettingsHub===settingsHub && settingsHub.contractVersion===1 && typeof settingsHub.openPrimary==='function' && typeof settingsHub.owns==='function') {
+                var primary=false;
+                try { var preference=Lampa.Storage.get('stremio_hybrid_primary_settings',false);primary=settingsHub.owns('settings_hub') && (preference===true || preference==='true' || preference===1 || preference==='1'); } catch(e) { primary=false; }
+                if(primary) {
+                    settingsPrimaryRouting=true;
+                    try { if(settingsHub.openPrimary()===true)return; } catch(e) { /* Keep native Settings as the fallback. */ }
+                    finally { settingsPrimaryRouting=false; }
+                }
+            }
             updateSettingsRail();
             if(event.name==='main') {
                 settingsParameter=null;
@@ -1544,6 +1553,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         if(!params.some(function(item){return item.param&&item.param.name==='sh_profile_avatar';}))Lampa.SettingsApi.addParam({component:'interface',param:{name:'sh_profile_avatar',type:'input',values:'',placeholder:'https://example.org/avatar.jpg',default:''},field:{name:'Фото профілю · URL',description:'Адреса HTTP(S) зображення. Порожнє поле повертає стандартний значок; саме фото не зберігається в localStorage.'},onChange:function(){if(window.StremioHybrid)window.StremioHybrid.refresh();}});
         if(!params.some(function(item){return item.param&&item.param.name==='sh_header_utilities';}))Lampa.SettingsApi.addParam({component:'interface',param:{name:'sh_header_utilities',type:'button'},field:{name:'Додаткові дії панелі',description:'Сповіщення, профіль, Trakt і перехід до навігації. Використовує чинні дії Lampa.'},onChange:onHeaderUtilitiesSetting});
         if(!params.some(function(item){return item.param&&item.param.name==='sh_torrent_mode';}))Lampa.SettingsApi.addParam({component:'interface',param:{name:'sh_torrent_mode',type:'select',values:{overlay:'Вікно',inline:'Вбудована панель'},default:'overlay'},field:{name:'Торренти · вигляд',description:'Вікно відкривається кнопкою Торренти. Обидва режими використовують той самий пошук і плеєр.'}});
+        if(!params.some(function(item){return item.param&&item.param.name==='stremio_hybrid_primary_settings';}))Lampa.SettingsApi.addParam({component:'interface',param:{name:'stremio_hybrid_primary_settings',type:'trigger',values:true,default:false},field:{name:'Центр налаштувань як головний',description:'Опційно відкривати Центр налаштувань замість головної сторінки Lampa. Стандартні налаштування залишаються доступними в Центрі.'}});
         apply(enabled());
     }
     window.StremioHybrid = {

@@ -94,6 +94,7 @@
     }
     function owns(name) { return installed && (name === ROOT || name === PAGE || active); }
     function destroy() { if(teardown){var cleanup=teardown;teardown=null;cleanup();}installed=false;active=false; }
+    var openPrimary = null;
     function install(L, $, doc) {
         if (installed || !L || !$ || !L.Template || !L.SettingsApi || !L.SettingsApi.allParams || !L.SettingsApi.allComponents || !L.SettingsApi.removeParams || !L.SettingsApi.removeComponent || !L.Settings || !L.Settings.main || !L.Settings.listener || !L.Settings.listener.remove) return false;
         installed = true;
@@ -126,6 +127,15 @@
             root.setAttribute('data-settings-hub-metrics',JSON.stringify(metrics));
         }
         function openRoot() { nativePage(ROOT,function(){active=false;doc.body.classList.remove('settings-hub-active');L.Controller.toggle('settings');}); if(rootFocus)focus(rootFocus); }
+        openPrimary = function () {
+            if (!installed || active) return false;
+            try { openRoot(); return active; }
+            catch (error) {
+                active=false;doc.body.classList.remove('settings-hub-active');
+                try { L.Controller.toggle('settings'); } catch (fallbackError) { /* Native main is the best available fallback. */ }
+                return false;
+            }
+        };
         function openOwner(row) {
             if(row.status==='broken'){L.Noty.show(row.explanation);return;}
             if(row.component==='omdb_config_ui' && !(L.AverageRating && L.AverageRating.settingsPrivacyVersion>=1)){L.Noty.show('Спершу оновіть плагін рейтингів: стара панель може показати приватні ключі. #73');return;}
@@ -180,8 +190,9 @@
             L.SettingsApi.removeComponent(ROOT);L.SettingsApi.removeParams(PAGE);
             L.Settings.main().render().find('[data-component="'+ROOT+'"]').remove();
             registry=null;
+            openPrimary=null;
         };
         return true;
     }
-    return {contractVersion:1,categories:categories,category:category,fields:fields,createRegistry:createRegistry,owns:owns,install:install,destroy:destroy};
+    return {contractVersion:1,categories:categories,category:category,fields:fields,createRegistry:createRegistry,owns:owns,openPrimary:function(){return openPrimary ? openPrimary() : false;},install:install,destroy:destroy};
 });
