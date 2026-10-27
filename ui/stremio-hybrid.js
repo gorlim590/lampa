@@ -97,8 +97,9 @@ body.stremio-hybrid .sh-settings-category.focus { color:white; background:var(--
 /* #79 owns presentation; #73 only mounts native controls/navigation. */
 body.stremio-hybrid.settings-hub-active .settings__body { grid-column:1 / -1; width:100%; max-width:70em; margin:0 auto; }
 body.stremio-hybrid.settings-hub-active .sh-settings-rail { display:none; }
+body.stremio-hybrid.settings-hub-active .settings-folder[data-settings-hub-consolidated="true"] { display:none !important; }
 body.stremio-hybrid.settings-hub-active .settings-param { border-radius:var(--sh-radius); }
-body.stremio-hybrid.settings-hub-active .settings-param__name { font-size:1.1em; line-height:1.35; }
+body.stremio-hybrid.settings-hub-active .settings-param__name { font-size:1.1em; line-height:1.35; white-space:normal; overflow-wrap:anywhere; }
 body.stremio-hybrid.settings-hub-active .settings-param__descr { overflow-wrap:anywhere; line-height:1.4; color:var(--sh-muted); }
 body.stremio-hybrid.settings-hub-active .settings-param.focus { background:var(--sh-focus-soft); box-shadow:inset .2em 0 var(--sh-accent); }
 body.stremio-hybrid .settings-param { padding:1em; margin-bottom:.25em; }

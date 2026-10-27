@@ -101,6 +101,7 @@
         var registry, group = 'all', query = '', page = 0, returning = false, focusId = '', rootFocus = '', limit = 24, nativeMainBypass = false;
         var metrics = {opens:0, builds:0, renderedRows:0, maxRenderedRows:0, listeners:2, timers:0, observers:0};
         function openNativeMain() {
+            restoreConsolidatedFolders();
             nativeMainBypass=true;
             try { L.Controller.toggle('settings'); }
             finally { nativeMainBypass=false; }
@@ -110,11 +111,32 @@
             nativeMainBypass=false;
             return true;
         };
+        var consolidatedFolders=[];
+        function allFolders() {
+            return L.Settings.main().render().find('.settings-folder[data-component]').toArray().filter(function (n) { return n.getAttribute('data-component') !== ROOT; });
+        }
+        function isConsolidated(node) { return consolidatedFolders.some(function (entry) { return entry.node===node; }); }
         function folders() {
-            return L.Settings.main().render().find('.settings-folder[data-component]').toArray().filter(function (n) { return n.getAttribute('data-component') !== ROOT && n.style.display !== 'none' && !n.classList.contains('hide') && !n.classList.contains('hidden'); });
+            return allFolders().filter(function (n) { return isConsolidated(n) || n.style.display !== 'none' && !n.classList.contains('hide') && !n.classList.contains('hidden'); });
+        }
+        function restoreConsolidatedFolders() {
+            consolidatedFolders.forEach(function(entry){if(entry.node.getAttribute('data-settings-hub-consolidated')==='true')entry.node.removeAttribute('data-settings-hub-consolidated');});
+            consolidatedFolders=[];
+        }
+        function consolidateFolders() {
+            if(!active || !registry)return;
+            allFolders().forEach(function(node){
+                var component=node.getAttribute('data-component');
+                if(isConsolidated(node) || node.getAttribute('data-settings-hub-consolidated') || !(owners[component] || /^ydesign_/.test(component)))return;
+                if(node.style.display==='none' || node.classList.contains('hide') || node.classList.contains('hidden'))return;
+                var rows=registry.rows.filter(function(row){return row.component===component;});
+                var directRoute=rows.length>0 && rows.every(function(row){return row.route!=='folder' && row.panelAvailable!==false && row.status!=='broken' && row.status!=='blocked';});
+                if(directRoute){node.setAttribute('data-settings-hub-consolidated','true');consolidatedFolders.push({node:node});}
+            });
         }
         function rebuild() {
             registry=createRegistry(L,folders().map(function(n){return {id:n.getAttribute('data-component')};}));metrics.builds++;
+            if(active)consolidateFolders();
         }
         function focus(key) {
             var body=L.Settings.render().find('.settings__body'), target=body.find('[data-name]').filter(function(){return this.getAttribute('data-name')===key;}).first();
@@ -127,7 +149,7 @@
             }
             L.Settings.main().render().detach();
         }
-        function nativePage(name, back, skipBack) { leave(skipBack); active=true; L.Settings.create(name,{onBack:function(){if(!returning){returning=true;try{back();}finally{returning=false;}}}}); }
+        function nativePage(name, back, skipBack) { leave(skipBack); active=true; if(name===ROOT){rebuild();consolidateFolders();} L.Settings.create(name,{onBack:function(){if(!returning){returning=true;try{back();}finally{returning=false;}}}}); }
         function button(component, key, label, description, action) {
             L.SettingsApi.addParam({component:component,param:{name:key,type:'button'},field:{name:clean(label),description:clean(description)},onRender:function(item){item.on('hover:enter.settingsHub',action);}});
         }
@@ -142,6 +164,7 @@
             try { openRoot(true); return active; }
             catch (error) {
                 active=false;doc.body.classList.remove('settings-hub-active');
+                restoreConsolidatedFolders();
                 try { openNativeMain(); } catch (fallbackError) { /* Native main is the best available fallback. */ }
                 return false;
             }
@@ -150,8 +173,8 @@
             if(row.status==='broken'){L.Noty.show(row.explanation);return;}
             if(row.component==='omdb_config_ui' && !(L.AverageRating && L.AverageRating.settingsPrivacyVersion>=1)){L.Noty.show('Спершу оновіть плагін рейтингів: стара панель може показати приватні ключі. #73');return;}
             if(row.route==='folder'){
-                var original=folders().filter(function(n){return n.getAttribute('data-component')===row.component;})[0];
-                if(original){leave();active=false;doc.body.classList.remove('settings-hub-active');$(original).trigger('hover:enter');}
+                var original=allFolders().filter(function(n){return n.getAttribute('data-component')===row.component;})[0];
+                if(original){leave();active=false;restoreConsolidatedFolders();doc.body.classList.remove('settings-hub-active');$(original).trigger('hover:enter');}
                 return;
             }
             if(row.panelAvailable===false){L.Noty.show(row.explanation);return;}
@@ -189,14 +212,15 @@
         function onOpen(e){
             if(e.name===ROOT){active=true;metrics.opens++;rebuild();mark();}
             else if(e.name===PAGE || active && e.name!=='main')mark();
-            else if(e.name==='main'){active=false;doc.body.classList.remove('settings-hub-active');}
+            else if(e.name==='main'){active=false;restoreConsolidatedFolders();doc.body.classList.remove('settings-hub-active');}
         }
-        function onClose(){active=false;registry=null;doc.body.classList.remove('settings-hub-active');}
+        function onClose(){active=false;restoreConsolidatedFolders();registry=null;doc.body.classList.remove('settings-hub-active');}
         L.Settings.listener.follow('open',onOpen);
         L.Settings.listener.follow('close',onClose);
         teardown=function(){
             L.Settings.listener.remove('open',onOpen);L.Settings.listener.remove('close',onClose);
-            if(active){leave();active=false;doc.body.classList.remove('settings-hub-active');openNativeMain();}
+            if(active){leave();active=false;restoreConsolidatedFolders();doc.body.classList.remove('settings-hub-active');openNativeMain();}
+            else restoreConsolidatedFolders();
             L.SettingsApi.removeComponent(ROOT);L.SettingsApi.removeParams(PAGE);
             L.Settings.main().render().find('[data-component="'+ROOT+'"]').remove();
             registry=null;
