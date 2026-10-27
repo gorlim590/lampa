@@ -1,0 +1,60 @@
+{
+  "mode": "existing dedicated tab; screenshot crops only (1920×1080) from unmodified 7680×3812 live viewport",
+  "home": {
+    "controller": "head",
+    "hybrid": true,
+    "header": true,
+    "search": true,
+    "leftMenu": true,
+    "clock": true,
+    "avatar": true,
+    "verticalPosterCount": 56,
+    "badgeCount": 84
+  },
+  "hub": {
+    "controller": "settings_component",
+    "component": "settings_hub (native Settings component marker)",
+    "active": true,
+    "rootVersion": "73-preview-1",
+    "focus": "hub_category_profiles",
+    "categories": 10,
+    "settingsController": "settings_component",
+    "focusMethod": "native D-pad ArrowUp from the previously restored search focus"
+  },
+  "design": {
+    "viewport": {
+      "width": 7680,
+      "height": 3812,
+      "dpr": 0.25
+    },
+    "hybrid": {
+      "active": true,
+      "ownsHeader": true,
+      "hybridStyleCount": 1
+    },
+    "ydesign": {
+      "active": true,
+      "verticalPosterCount": 56,
+      "styleCount": 1
+    },
+    "interfacePlus": {
+      "contract": 1,
+      "standaloneHeaderStyles": 0
+    },
+    "cardifyOwner": true,
+    "torrentOverlay": true,
+    "hubMounted": true,
+    "hubController": "settings_component",
+    "styleIds": [
+      "ydesign-style-block",
+      "ydesign-font-css",
+      "stremio-hybrid-style"
+    ]
+  },
+  "consolePageErrors": [],
+  "screenshots": {
+    "home": "home-design.png",
+    "settingsHub": "settings-hub-root.png",
+    "details": "not captured because Details surface did not render under safe request policy"
+  }
+}

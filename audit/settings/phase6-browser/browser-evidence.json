@@ -1,0 +1,1261 @@
+{
+  "schemaVersion": 1,
+  "overallStatus": "PARTIAL",
+  "testedBranchSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+  "browser": "156.0.8078.4",
+  "previewServer": "http://127.0.0.1:8766 (branch-bound, loopback only)",
+  "rootCause": "The previously configured preview loader URL was not served because its existing loopback server had stopped. Its resource timing showed responseStatus 0; the browser therefore used published copies and lacked the Hybrid/Hub globals. Restarting the existing server restored local module execution.",
+  "assetProof": {
+    "status": "PASS",
+    "corsBodySha256CheckedAgainstBranch": true,
+    "exactAssets": [
+      {
+        "path": "/preview-loader.js",
+        "status": 200,
+        "type": "cors",
+        "contentType": "application/javascript; charset=utf-8",
+        "sha256": "2e805166d371bf84ba5ff5a488965fae41e7a369429a6eaa92e4855c482c7c0c",
+        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "source": "audit/settings/phase6-browser/preview-loader.js",
+        "expectedSha256": "2e805166d371bf84ba5ff5a488965fae41e7a369429a6eaa92e4855c482c7c0c",
+        "exact": true
+      },
+      {
+        "path": "/manifest.json",
+        "status": 200,
+        "type": "cors",
+        "contentType": "application/json; charset=utf-8",
+        "sha256": "aae9accd18016ffc1e6708843aa2c49cf256cbddbe702f45f83b70294240e440",
+        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "source": "audit/settings/phase6-browser/manifest.json",
+        "expectedSha256": "aae9accd18016ffc1e6708843aa2c49cf256cbddbe702f45f83b70294240e440",
+        "exact": true
+      },
+      {
+        "path": "/stremio-hybrid.js",
+        "status": 200,
+        "type": "cors",
+        "contentType": "application/javascript; charset=utf-8",
+        "sha256": "593ca60780db85646f4c01c72896bf90a5aebfb38f909423cfb06ad49a712d8f",
+        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "source": "ui/stremio-hybrid.js",
+        "expectedSha256": "593ca60780db85646f4c01c72896bf90a5aebfb38f909423cfb06ad49a712d8f",
+        "exact": true
+      },
+      {
+        "path": "/settings-hub.js",
+        "status": 200,
+        "type": "cors",
+        "contentType": "application/javascript; charset=utf-8",
+        "sha256": "aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288",
+        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "source": "ui/settings-hub.js",
+        "expectedSha256": "aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288",
+        "exact": true
+      },
+      {
+        "path": "/torrent-overlay.js",
+        "status": 200,
+        "type": "cors",
+        "contentType": "application/javascript; charset=utf-8",
+        "sha256": "ea9cf9384ce50a612e2def6ef4edce83f01093e24e84360b1818ad040296401c",
+        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "source": "ui/torrent-overlay.js",
+        "expectedSha256": "ea9cf9384ce50a612e2def6ef4edce83f01093e24e84360b1818ad040296401c",
+        "exact": true
+      },
+      {
+        "path": "/trakt/trakt.js",
+        "status": 200,
+        "type": "cors",
+        "contentType": "application/javascript; charset=utf-8",
+        "sha256": "3230fdcd8eed32642d0ad6d616e8d3b9628a4320d97fb0b5fef005d7eea3cb38",
+        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "source": "trakt/trakt.js",
+        "expectedSha256": "3230fdcd8eed32642d0ad6d616e8d3b9628a4320d97fb0b5fef005d7eea3cb38",
+        "exact": true
+      },
+      {
+        "path": "/trakt/trakt-plus.js",
+        "status": 200,
+        "type": "cors",
+        "contentType": "application/javascript; charset=utf-8",
+        "sha256": "2bfe8ae58a3619de30d298951638a69640b686ade98e1483f838d4c84c7bee8e",
+        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "source": "trakt/trakt-plus.js",
+        "expectedSha256": "2bfe8ae58a3619de30d298951638a69640b686ade98e1483f838d4c84c7bee8e",
+        "exact": true
+      },
+      {
+        "path": "/ui/interface-plus.js",
+        "status": 200,
+        "type": "cors",
+        "contentType": "application/javascript; charset=utf-8",
+        "sha256": "9537df254948a908cc21b03647740d1c8f59458828d7378e7c51c584f85a5d0d",
+        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "source": "ui/interface-plus.js",
+        "expectedSha256": "9537df254948a908cc21b03647740d1c8f59458828d7378e7c51c584f85a5d0d",
+        "exact": true
+      },
+      {
+        "path": "/ui/design-optimized.js",
+        "status": 200,
+        "type": "cors",
+        "contentType": "application/javascript; charset=utf-8",
+        "sha256": "6bce398af8d1f85faaeca7721a94540a0c73571038932fb475fcf76d7c1a0dcf",
+        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "source": "ui/design-optimized.js",
+        "expectedSha256": "6bce398af8d1f85faaeca7721a94540a0c73571038932fb475fcf76d7c1a0dcf",
+        "exact": true
+      },
+      {
+        "path": "/media/average-rating.js",
+        "status": 200,
+        "type": "cors",
+        "contentType": "application/javascript; charset=utf-8",
+        "sha256": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "source": "media/average-rating.js",
+        "expectedSha256": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+        "exact": true
+      },
+      {
+        "path": "/ui/cardify-plus.js",
+        "status": 200,
+        "type": "cors",
+        "contentType": "application/javascript; charset=utf-8",
+        "sha256": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "source": "ui/cardify-plus.js",
+        "expectedSha256": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+        "exact": true
+      },
+      {
+        "path": "/plugins-to-enable/home-history.js",
+        "status": 200,
+        "type": "cors",
+        "contentType": "application/javascript; charset=utf-8",
+        "sha256": "778e304b33b9b0b19a317616ea1a346a15e2f24942d734913a744c1b1065f934",
+        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "source": "plugins-to-enable/home-history.js",
+        "expectedSha256": "778e304b33b9b0b19a317616ea1a346a15e2f24942d734913a744c1b1065f934",
+        "exact": true
+      },
+      {
+        "path": "/torrents-redesign.js",
+        "status": 200,
+        "type": "cors",
+        "contentType": "application/javascript; charset=utf-8",
+        "sha256": "a66598bac58370ccb2e1b211283dd3c2e76cbfbb9643494e47ef9b2424cf7384",
+        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "source": "torrents-redesign.js",
+        "expectedSha256": "a66598bac58370ccb2e1b211283dd3c2e76cbfbb9643494e47ef9b2424cf7384",
+        "exact": true
+      },
+      {
+        "path": "/providers/parsers.js",
+        "status": 200,
+        "type": "cors",
+        "contentType": "application/javascript; charset=utf-8",
+        "sha256": "d3496f227af0e70a1d3e03e90591f1b8d1f2da670761f72f09160b6db165ffbf",
+        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "source": "providers/parsers.js",
+        "expectedSha256": "d3496f227af0e70a1d3e03e90591f1b8d1f2da670761f72f09160b6db165ffbf",
+        "exact": true
+      },
+      {
+        "path": "/localization/translate.js",
+        "status": 200,
+        "type": "cors",
+        "contentType": "application/javascript; charset=utf-8",
+        "sha256": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
+        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "source": "localization/translate.js",
+        "expectedSha256": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
+        "exact": true
+      },
+      {
+        "path": "/ui/screensaver-plus.js",
+        "status": 200,
+        "type": "cors",
+        "contentType": "application/javascript; charset=utf-8",
+        "sha256": "1cc40ac0ea6e6ae7c86fa54a76428568f984c4b49d2c785bd62604cdc6c9919b",
+        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "source": "ui/screensaver-plus.js",
+        "expectedSha256": "1cc40ac0ea6e6ae7c86fa54a76428568f984c4b49d2c785bd62604cdc6c9919b",
+        "exact": true
+      },
+      {
+        "path": "/community/new-category.js",
+        "status": 200,
+        "type": "cors",
+        "contentType": "application/javascript; charset=utf-8",
+        "sha256": "991be1b3ac028b048e7529f37aaf14b13ce9da94c5fff52724525af3fbb364d1",
+        "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+        "source": "community/new-category.js",
+        "expectedSha256": "991be1b3ac028b048e7529f37aaf14b13ce9da94c5fff52724525af3fbb364d1",
+        "exact": true
+      }
+    ],
+    "activeLocalModuleReport": [
+      {
+        "name": "Trakt Core",
+        "sourceUrl": "http://127.0.0.1:8766/trakt/trakt.js",
+        "loaded": true,
+        "initialized": true,
+        "settingsRegistered": [
+          "trakt"
+        ],
+        "visualOwnership": "functional owner",
+        "consoleErrorsDuringRun": 0,
+        "status": "loaded; owner registration observed, functional effects not exercised",
+        "sha256": "3230fdcd8eed32642d0ad6d616e8d3b9628a4320d97fb0b5fef005d7eea3cb38",
+        "exactAssetHashVerified": true
+      },
+      {
+        "name": "Trakt+",
+        "sourceUrl": "http://127.0.0.1:8766/trakt/trakt-plus.js",
+        "loaded": true,
+        "initialized": true,
+        "settingsRegistered": [
+          "trakt_plus"
+        ],
+        "visualOwnership": "functional owner",
+        "consoleErrorsDuringRun": 0,
+        "status": "loaded; owner registration observed, functional effects not exercised",
+        "sha256": "2bfe8ae58a3619de30d298951638a69640b686ade98e1483f838d4c84c7bee8e",
+        "exactAssetHashVerified": true
+      },
+      {
+        "name": "Interface+",
+        "sourceUrl": "http://127.0.0.1:8766/ui/interface-plus.js",
+        "loaded": true,
+        "initialized": true,
+        "settingsRegistered": [
+          "interface_mod_new"
+        ],
+        "visualOwnership": "presentation adapter",
+        "consoleErrorsDuringRun": 0,
+        "status": "compatible adapter; no competing Hybrid header",
+        "sha256": "9537df254948a908cc21b03647740d1c8f59458828d7378e7c51c584f85a5d0d",
+        "exactAssetHashVerified": true
+      },
+      {
+        "name": "YDesign",
+        "sourceUrl": "http://127.0.0.1:8766/ui/design-optimized.js",
+        "loaded": true,
+        "initialized": true,
+        "settingsRegistered": [
+          "ydesign",
+          "ydesign_styles",
+          "ydesign_grid",
+          "ydesign_vertical",
+          "ydesign_notch",
+          "ydesign_badges_style",
+          "ydesign_fonts",
+          "ydesign_texts",
+          "ydesign_series",
+          "ydesign_perf"
+        ],
+        "visualOwnership": "card presentation owner",
+        "consoleErrorsDuringRun": 0,
+        "status": "active card presentation owner",
+        "sha256": "6bce398af8d1f85faaeca7721a94540a0c73571038932fb475fcf76d7c1a0dcf",
+        "exactAssetHashVerified": true
+      },
+      {
+        "name": "AverageRating",
+        "sourceUrl": "http://127.0.0.1:8766/media/average-rating.js",
+        "loaded": true,
+        "initialized": true,
+        "settingsRegistered": [
+          "omdb_config_ui",
+          "omdb_ratings_select"
+        ],
+        "visualOwnership": "rating owner",
+        "consoleErrorsDuringRun": 0,
+        "status": "loaded; owner registration observed, functional effects not exercised",
+        "sha256": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+        "exactAssetHashVerified": true
+      },
+      {
+        "name": "Cardify+",
+        "sourceUrl": "http://127.0.0.1:8766/ui/cardify-plus.js",
+        "loaded": true,
+        "initialized": true,
+        "settingsRegistered": [
+          "cardify"
+        ],
+        "visualOwnership": "card metadata adapter",
+        "consoleErrorsDuringRun": 0,
+        "status": "settings owner registered; Details composition partial",
+        "sha256": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+        "exactAssetHashVerified": true
+      },
+      {
+        "name": "Home History",
+        "sourceUrl": "http://127.0.0.1:8766/plugins-to-enable/home-history.js",
+        "loaded": true,
+        "initialized": null,
+        "settingsRegistered": [],
+        "visualOwnership": "Home owner",
+        "consoleErrorsDuringRun": 0,
+        "status": "loaded; Settings registration not observed; initialization unverified",
+        "sha256": "778e304b33b9b0b19a317616ea1a346a15e2f24942d734913a744c1b1065f934",
+        "exactAssetHashVerified": true
+      },
+      {
+        "name": "Torrents Cinema",
+        "sourceUrl": "http://127.0.0.1:8766/torrents-redesign.js",
+        "loaded": true,
+        "initialized": true,
+        "settingsRegistered": [
+          "torrents_cinema"
+        ],
+        "visualOwnership": "torrent UI owner",
+        "consoleErrorsDuringRun": 0,
+        "status": "loaded; owner registration observed, functional effects not exercised",
+        "sha256": "a66598bac58370ccb2e1b211283dd3c2e76cbfbb9643494e47ef9b2424cf7384",
+        "exactAssetHashVerified": true
+      },
+      {
+        "name": "Parser settings",
+        "sourceUrl": "http://127.0.0.1:8766/providers/parsers.js",
+        "loaded": true,
+        "initialized": true,
+        "settingsRegistered": [
+          "parser"
+        ],
+        "visualOwnership": "parser owner",
+        "consoleErrorsDuringRun": 0,
+        "status": "loaded; owner registration observed, functional effects not exercised",
+        "sha256": "d3496f227af0e70a1d3e03e90591f1b8d1f2da670761f72f09160b6db165ffbf",
+        "exactAssetHashVerified": true
+      },
+      {
+        "name": "Localization",
+        "sourceUrl": "http://127.0.0.1:8766/localization/translate.js",
+        "loaded": true,
+        "initialized": true,
+        "settingsRegistered": [
+          "ytranslate"
+        ],
+        "visualOwnership": "language owner",
+        "consoleErrorsDuringRun": 0,
+        "status": "loaded; owner registration observed, functional effects not exercised",
+        "sha256": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
+        "exactAssetHashVerified": true
+      },
+      {
+        "name": "Screensaver+",
+        "sourceUrl": "http://127.0.0.1:8766/ui/screensaver-plus.js",
+        "loaded": true,
+        "initialized": true,
+        "settingsRegistered": [
+          "screensaver_plus"
+        ],
+        "visualOwnership": "screensaver owner",
+        "consoleErrorsDuringRun": 0,
+        "status": "loaded; owner registration observed, functional effects not exercised",
+        "sha256": "1cc40ac0ea6e6ae7c86fa54a76428568f984c4b49d2c785bd62604cdc6c9919b",
+        "exactAssetHashVerified": true
+      },
+      {
+        "name": "Community New Category",
+        "sourceUrl": "http://127.0.0.1:8766/community/new-category.js",
+        "loaded": true,
+        "initialized": null,
+        "settingsRegistered": [],
+        "visualOwnership": "community owner",
+        "consoleErrorsDuringRun": 0,
+        "status": "loaded; Settings registration not observed; initialization unverified",
+        "sha256": "991be1b3ac028b048e7529f37aaf14b13ce9da94c5fff52724525af3fbb364d1",
+        "exactAssetHashVerified": true
+      },
+      {
+        "name": "Stremio Hybrid",
+        "sourceUrl": "http://127.0.0.1:8766/stremio-hybrid.js",
+        "loaded": true,
+        "initialized": true,
+        "settingsRegistered": [
+          "interface"
+        ],
+        "visualOwnership": "canonical visual and Settings lifecycle owner",
+        "consoleErrorsDuringRun": 0,
+        "status": "active canonical visual/Settings owner",
+        "sha256": "593ca60780db85646f4c01c72896bf90a5aebfb38f909423cfb06ad49a712d8f",
+        "exactAssetHashVerified": true
+      },
+      {
+        "name": "Settings Hub (Hybrid dependency)",
+        "sourceUrl": "http://127.0.0.1:8766/settings-hub.js",
+        "loaded": true,
+        "initialized": true,
+        "settingsRegistered": [
+          "settings_hub"
+        ],
+        "visualOwnership": "Hybrid lifecycle owner",
+        "consoleErrorsDuringRun": 0,
+        "status": "mounted by Hybrid; ten native categories; controller remains settings_component",
+        "sha256": "aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288",
+        "exactAssetHashVerified": true
+      },
+      {
+        "name": "Torrent overlay (Hybrid dependency)",
+        "sourceUrl": "http://127.0.0.1:8766/torrent-overlay.js",
+        "loaded": true,
+        "initialized": true,
+        "settingsRegistered": [],
+        "visualOwnership": "Hybrid torrent presentation",
+        "consoleErrorsDuringRun": 0,
+        "status": "API available; overlay interaction not tested",
+        "sha256": "ea9cf9384ce50a612e2def6ef4edce83f01093e24e84360b1818ad040296401c",
+        "exactAssetHashVerified": true
+      }
+    ]
+  },
+  "servedHashes": [
+    {
+      "path": "/preview-loader.js",
+      "status": 200,
+      "type": "cors",
+      "contentType": "application/javascript; charset=utf-8",
+      "sha256": "2e805166d371bf84ba5ff5a488965fae41e7a369429a6eaa92e4855c482c7c0c",
+      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "source": "audit/settings/phase6-browser/preview-loader.js",
+      "expectedSha256": "2e805166d371bf84ba5ff5a488965fae41e7a369429a6eaa92e4855c482c7c0c",
+      "exact": true
+    },
+    {
+      "path": "/manifest.json",
+      "status": 200,
+      "type": "cors",
+      "contentType": "application/json; charset=utf-8",
+      "sha256": "aae9accd18016ffc1e6708843aa2c49cf256cbddbe702f45f83b70294240e440",
+      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "source": "audit/settings/phase6-browser/manifest.json",
+      "expectedSha256": "aae9accd18016ffc1e6708843aa2c49cf256cbddbe702f45f83b70294240e440",
+      "exact": true
+    },
+    {
+      "path": "/stremio-hybrid.js",
+      "status": 200,
+      "type": "cors",
+      "contentType": "application/javascript; charset=utf-8",
+      "sha256": "593ca60780db85646f4c01c72896bf90a5aebfb38f909423cfb06ad49a712d8f",
+      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "source": "ui/stremio-hybrid.js",
+      "expectedSha256": "593ca60780db85646f4c01c72896bf90a5aebfb38f909423cfb06ad49a712d8f",
+      "exact": true
+    },
+    {
+      "path": "/settings-hub.js",
+      "status": 200,
+      "type": "cors",
+      "contentType": "application/javascript; charset=utf-8",
+      "sha256": "aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288",
+      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "source": "ui/settings-hub.js",
+      "expectedSha256": "aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288",
+      "exact": true
+    },
+    {
+      "path": "/torrent-overlay.js",
+      "status": 200,
+      "type": "cors",
+      "contentType": "application/javascript; charset=utf-8",
+      "sha256": "ea9cf9384ce50a612e2def6ef4edce83f01093e24e84360b1818ad040296401c",
+      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "source": "ui/torrent-overlay.js",
+      "expectedSha256": "ea9cf9384ce50a612e2def6ef4edce83f01093e24e84360b1818ad040296401c",
+      "exact": true
+    },
+    {
+      "path": "/trakt/trakt.js",
+      "status": 200,
+      "type": "cors",
+      "contentType": "application/javascript; charset=utf-8",
+      "sha256": "3230fdcd8eed32642d0ad6d616e8d3b9628a4320d97fb0b5fef005d7eea3cb38",
+      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "source": "trakt/trakt.js",
+      "expectedSha256": "3230fdcd8eed32642d0ad6d616e8d3b9628a4320d97fb0b5fef005d7eea3cb38",
+      "exact": true
+    },
+    {
+      "path": "/trakt/trakt-plus.js",
+      "status": 200,
+      "type": "cors",
+      "contentType": "application/javascript; charset=utf-8",
+      "sha256": "2bfe8ae58a3619de30d298951638a69640b686ade98e1483f838d4c84c7bee8e",
+      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "source": "trakt/trakt-plus.js",
+      "expectedSha256": "2bfe8ae58a3619de30d298951638a69640b686ade98e1483f838d4c84c7bee8e",
+      "exact": true
+    },
+    {
+      "path": "/ui/interface-plus.js",
+      "status": 200,
+      "type": "cors",
+      "contentType": "application/javascript; charset=utf-8",
+      "sha256": "9537df254948a908cc21b03647740d1c8f59458828d7378e7c51c584f85a5d0d",
+      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "source": "ui/interface-plus.js",
+      "expectedSha256": "9537df254948a908cc21b03647740d1c8f59458828d7378e7c51c584f85a5d0d",
+      "exact": true
+    },
+    {
+      "path": "/ui/design-optimized.js",
+      "status": 200,
+      "type": "cors",
+      "contentType": "application/javascript; charset=utf-8",
+      "sha256": "6bce398af8d1f85faaeca7721a94540a0c73571038932fb475fcf76d7c1a0dcf",
+      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "source": "ui/design-optimized.js",
+      "expectedSha256": "6bce398af8d1f85faaeca7721a94540a0c73571038932fb475fcf76d7c1a0dcf",
+      "exact": true
+    },
+    {
+      "path": "/media/average-rating.js",
+      "status": 200,
+      "type": "cors",
+      "contentType": "application/javascript; charset=utf-8",
+      "sha256": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "source": "media/average-rating.js",
+      "expectedSha256": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+      "exact": true
+    },
+    {
+      "path": "/ui/cardify-plus.js",
+      "status": 200,
+      "type": "cors",
+      "contentType": "application/javascript; charset=utf-8",
+      "sha256": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "source": "ui/cardify-plus.js",
+      "expectedSha256": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+      "exact": true
+    },
+    {
+      "path": "/plugins-to-enable/home-history.js",
+      "status": 200,
+      "type": "cors",
+      "contentType": "application/javascript; charset=utf-8",
+      "sha256": "778e304b33b9b0b19a317616ea1a346a15e2f24942d734913a744c1b1065f934",
+      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "source": "plugins-to-enable/home-history.js",
+      "expectedSha256": "778e304b33b9b0b19a317616ea1a346a15e2f24942d734913a744c1b1065f934",
+      "exact": true
+    },
+    {
+      "path": "/torrents-redesign.js",
+      "status": 200,
+      "type": "cors",
+      "contentType": "application/javascript; charset=utf-8",
+      "sha256": "a66598bac58370ccb2e1b211283dd3c2e76cbfbb9643494e47ef9b2424cf7384",
+      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "source": "torrents-redesign.js",
+      "expectedSha256": "a66598bac58370ccb2e1b211283dd3c2e76cbfbb9643494e47ef9b2424cf7384",
+      "exact": true
+    },
+    {
+      "path": "/providers/parsers.js",
+      "status": 200,
+      "type": "cors",
+      "contentType": "application/javascript; charset=utf-8",
+      "sha256": "d3496f227af0e70a1d3e03e90591f1b8d1f2da670761f72f09160b6db165ffbf",
+      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "source": "providers/parsers.js",
+      "expectedSha256": "d3496f227af0e70a1d3e03e90591f1b8d1f2da670761f72f09160b6db165ffbf",
+      "exact": true
+    },
+    {
+      "path": "/localization/translate.js",
+      "status": 200,
+      "type": "cors",
+      "contentType": "application/javascript; charset=utf-8",
+      "sha256": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
+      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "source": "localization/translate.js",
+      "expectedSha256": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
+      "exact": true
+    },
+    {
+      "path": "/ui/screensaver-plus.js",
+      "status": 200,
+      "type": "cors",
+      "contentType": "application/javascript; charset=utf-8",
+      "sha256": "1cc40ac0ea6e6ae7c86fa54a76428568f984c4b49d2c785bd62604cdc6c9919b",
+      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "source": "ui/screensaver-plus.js",
+      "expectedSha256": "1cc40ac0ea6e6ae7c86fa54a76428568f984c4b49d2c785bd62604cdc6c9919b",
+      "exact": true
+    },
+    {
+      "path": "/community/new-category.js",
+      "status": 200,
+      "type": "cors",
+      "contentType": "application/javascript; charset=utf-8",
+      "sha256": "991be1b3ac028b048e7529f37aaf14b13ce9da94c5fff52724525af3fbb364d1",
+      "sourceSha": "44667cc73dc6f0e6374ea191be9b4772cf83788f",
+      "source": "community/new-category.js",
+      "expectedSha256": "991be1b3ac028b048e7529f37aaf14b13ce9da94c5fff52724525af3fbb364d1",
+      "exact": true
+    }
+  ],
+  "navigation": [
+    {
+      "scenario": "primary preference OFF → native Settings",
+      "status": "PASS"
+    },
+    {
+      "scenario": "opt-in primary entry → Hub root",
+      "status": "PASS"
+    },
+    {
+      "scenario": "native D-pad ArrowDown, OK, Back and focus restoration",
+      "status": "PASS"
+    },
+    {
+      "scenario": "all ten categories through native focus/Enter/Escape",
+      "status": "PASS",
+      "details": [
+        {
+          "id": "profiles",
+          "status": "PASS",
+          "rows": 9,
+          "paginated": false,
+          "focusRestored": true
+        },
+        {
+          "id": "home",
+          "status": "PASS",
+          "rows": 10,
+          "paginated": false,
+          "focusRestored": true
+        },
+        {
+          "id": "appearance",
+          "status": "PASS",
+          "rows": 24,
+          "paginated": true,
+          "focusRestored": true
+        },
+        {
+          "id": "playback",
+          "status": "PASS",
+          "rows": 16,
+          "paginated": false,
+          "focusRestored": true
+        },
+        {
+          "id": "torrents",
+          "status": "PASS",
+          "rows": 24,
+          "paginated": true,
+          "focusRestored": true
+        },
+        {
+          "id": "trakt",
+          "status": "PASS",
+          "rows": 24,
+          "paginated": true,
+          "focusRestored": true
+        },
+        {
+          "id": "language",
+          "status": "PASS",
+          "rows": 24,
+          "paginated": true,
+          "focusRestored": true
+        },
+        {
+          "id": "screensaver",
+          "status": "PASS",
+          "rows": 24,
+          "paginated": true,
+          "focusRestored": true
+        },
+        {
+          "id": "plugins",
+          "status": "PASS",
+          "rows": 24,
+          "paginated": true,
+          "focusRestored": true
+        },
+        {
+          "id": "system",
+          "status": "PASS",
+          "rows": 24,
+          "paginated": true,
+          "focusRestored": true
+        }
+      ]
+    },
+    {
+      "scenario": "owner metadata search",
+      "status": "PASS"
+    },
+    {
+      "scenario": "search pagination page 2",
+      "status": "PASS"
+    },
+    {
+      "scenario": "search result → original owner → Back",
+      "status": "PASS"
+    },
+    {
+      "scenario": "query/page preserved after owner Back",
+      "status": "PASS"
+    },
+    {
+      "scenario": "search empty state and query editing",
+      "status": "PASS"
+    },
+    {
+      "scenario": "missing owner remains recoverable in Hub",
+      "status": "PASS"
+    },
+    {
+      "scenario": "Standard Lampa Settings fallback restores native folders",
+      "status": "PASS"
+    }
+  ],
+  "activeRuntime": {
+    "controller": "head",
+    "settingsOpen": false,
+    "hybrid": {
+      "active": true,
+      "ownsHeader": true,
+      "styles": 1,
+      "settingsMounts": 4,
+      "settingsFailures": 0
+    },
+    "hub": {
+      "contractVersion": 1,
+      "categories": 10,
+      "registered": true,
+      "active": false,
+      "markerRetainedInHiddenNativeDom": true
+    },
+    "ydesign": {
+      "active": true,
+      "cards": 56
+    },
+    "interfacePlus": {
+      "contractVersion": 1,
+      "competingHeaderStyles": 0
+    },
+    "cardifyRegistered": true,
+    "torrentOverlayAvailable": true,
+    "owners": {
+      "hybrid": [
+        "interface"
+      ],
+      "traktCore": [
+        "trakt"
+      ],
+      "traktPlus": [
+        "trakt_plus"
+      ],
+      "interfacePlus": [
+        "interface_mod_new"
+      ],
+      "ydesign": [
+        "ydesign",
+        "ydesign_styles",
+        "ydesign_grid",
+        "ydesign_vertical",
+        "ydesign_notch",
+        "ydesign_badges_style",
+        "ydesign_fonts",
+        "ydesign_texts",
+        "ydesign_series",
+        "ydesign_perf"
+      ],
+      "averageRating": [
+        "omdb_config_ui",
+        "omdb_ratings_select"
+      ],
+      "cardify": [
+        "cardify"
+      ],
+      "homeHistory": [],
+      "torrents": [
+        "torrents_cinema"
+      ],
+      "parser": [
+        "parser"
+      ],
+      "localization": [
+        "ytranslate"
+      ],
+      "screensaver": [
+        "screensaver_plus"
+      ],
+      "community": [],
+      "hub": [
+        "settings_hub"
+      ]
+    },
+    "styleIds": [
+      "ydesign-style-block",
+      "ydesign-font-css",
+      "stremio-hybrid-style"
+    ]
+  },
+  "activeModuleMatrix": [
+    {
+      "name": "Trakt Core",
+      "sourceUrl": "http://127.0.0.1:8766/trakt/trakt.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "trakt"
+      ],
+      "visualOwnership": "functional owner",
+      "consoleErrorsDuringRun": 0,
+      "status": "loaded; owner registration observed, functional effects not exercised",
+      "sha256": "3230fdcd8eed32642d0ad6d616e8d3b9628a4320d97fb0b5fef005d7eea3cb38",
+      "exactAssetHashVerified": true
+    },
+    {
+      "name": "Trakt+",
+      "sourceUrl": "http://127.0.0.1:8766/trakt/trakt-plus.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "trakt_plus"
+      ],
+      "visualOwnership": "functional owner",
+      "consoleErrorsDuringRun": 0,
+      "status": "loaded; owner registration observed, functional effects not exercised",
+      "sha256": "2bfe8ae58a3619de30d298951638a69640b686ade98e1483f838d4c84c7bee8e",
+      "exactAssetHashVerified": true
+    },
+    {
+      "name": "Interface+",
+      "sourceUrl": "http://127.0.0.1:8766/ui/interface-plus.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "interface_mod_new"
+      ],
+      "visualOwnership": "presentation adapter",
+      "consoleErrorsDuringRun": 0,
+      "status": "compatible adapter; no competing Hybrid header",
+      "sha256": "9537df254948a908cc21b03647740d1c8f59458828d7378e7c51c584f85a5d0d",
+      "exactAssetHashVerified": true
+    },
+    {
+      "name": "YDesign",
+      "sourceUrl": "http://127.0.0.1:8766/ui/design-optimized.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "ydesign",
+        "ydesign_styles",
+        "ydesign_grid",
+        "ydesign_vertical",
+        "ydesign_notch",
+        "ydesign_badges_style",
+        "ydesign_fonts",
+        "ydesign_texts",
+        "ydesign_series",
+        "ydesign_perf"
+      ],
+      "visualOwnership": "card presentation owner",
+      "consoleErrorsDuringRun": 0,
+      "status": "active card presentation owner",
+      "sha256": "6bce398af8d1f85faaeca7721a94540a0c73571038932fb475fcf76d7c1a0dcf",
+      "exactAssetHashVerified": true
+    },
+    {
+      "name": "AverageRating",
+      "sourceUrl": "http://127.0.0.1:8766/media/average-rating.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "omdb_config_ui",
+        "omdb_ratings_select"
+      ],
+      "visualOwnership": "rating owner",
+      "consoleErrorsDuringRun": 0,
+      "status": "loaded; owner registration observed, functional effects not exercised",
+      "sha256": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+      "exactAssetHashVerified": true
+    },
+    {
+      "name": "Cardify+",
+      "sourceUrl": "http://127.0.0.1:8766/ui/cardify-plus.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "cardify"
+      ],
+      "visualOwnership": "card metadata adapter",
+      "consoleErrorsDuringRun": 0,
+      "status": "settings owner registered; Details composition partial",
+      "sha256": "934cc71a1e95781b4daa1f1f39aa495ae88cc83a3bcd27bdd9f489cf65abc6bb",
+      "exactAssetHashVerified": true
+    },
+    {
+      "name": "Home History",
+      "sourceUrl": "http://127.0.0.1:8766/plugins-to-enable/home-history.js",
+      "loaded": true,
+      "initialized": null,
+      "settingsRegistered": [],
+      "visualOwnership": "Home owner",
+      "consoleErrorsDuringRun": 0,
+      "status": "loaded; Settings registration not observed; initialization unverified",
+      "sha256": "778e304b33b9b0b19a317616ea1a346a15e2f24942d734913a744c1b1065f934",
+      "exactAssetHashVerified": true
+    },
+    {
+      "name": "Torrents Cinema",
+      "sourceUrl": "http://127.0.0.1:8766/torrents-redesign.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "torrents_cinema"
+      ],
+      "visualOwnership": "torrent UI owner",
+      "consoleErrorsDuringRun": 0,
+      "status": "loaded; owner registration observed, functional effects not exercised",
+      "sha256": "a66598bac58370ccb2e1b211283dd3c2e76cbfbb9643494e47ef9b2424cf7384",
+      "exactAssetHashVerified": true
+    },
+    {
+      "name": "Parser settings",
+      "sourceUrl": "http://127.0.0.1:8766/providers/parsers.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "parser"
+      ],
+      "visualOwnership": "parser owner",
+      "consoleErrorsDuringRun": 0,
+      "status": "loaded; owner registration observed, functional effects not exercised",
+      "sha256": "d3496f227af0e70a1d3e03e90591f1b8d1f2da670761f72f09160b6db165ffbf",
+      "exactAssetHashVerified": true
+    },
+    {
+      "name": "Localization",
+      "sourceUrl": "http://127.0.0.1:8766/localization/translate.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "ytranslate"
+      ],
+      "visualOwnership": "language owner",
+      "consoleErrorsDuringRun": 0,
+      "status": "loaded; owner registration observed, functional effects not exercised",
+      "sha256": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
+      "exactAssetHashVerified": true
+    },
+    {
+      "name": "Screensaver+",
+      "sourceUrl": "http://127.0.0.1:8766/ui/screensaver-plus.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "screensaver_plus"
+      ],
+      "visualOwnership": "screensaver owner",
+      "consoleErrorsDuringRun": 0,
+      "status": "loaded; owner registration observed, functional effects not exercised",
+      "sha256": "1cc40ac0ea6e6ae7c86fa54a76428568f984c4b49d2c785bd62604cdc6c9919b",
+      "exactAssetHashVerified": true
+    },
+    {
+      "name": "Community New Category",
+      "sourceUrl": "http://127.0.0.1:8766/community/new-category.js",
+      "loaded": true,
+      "initialized": null,
+      "settingsRegistered": [],
+      "visualOwnership": "community owner",
+      "consoleErrorsDuringRun": 0,
+      "status": "loaded; Settings registration not observed; initialization unverified",
+      "sha256": "991be1b3ac028b048e7529f37aaf14b13ce9da94c5fff52724525af3fbb364d1",
+      "exactAssetHashVerified": true
+    },
+    {
+      "name": "Stremio Hybrid",
+      "sourceUrl": "http://127.0.0.1:8766/stremio-hybrid.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "interface"
+      ],
+      "visualOwnership": "canonical visual and Settings lifecycle owner",
+      "consoleErrorsDuringRun": 0,
+      "status": "active canonical visual/Settings owner",
+      "sha256": "593ca60780db85646f4c01c72896bf90a5aebfb38f909423cfb06ad49a712d8f",
+      "exactAssetHashVerified": true
+    },
+    {
+      "name": "Settings Hub (Hybrid dependency)",
+      "sourceUrl": "http://127.0.0.1:8766/settings-hub.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [
+        "settings_hub"
+      ],
+      "visualOwnership": "Hybrid lifecycle owner",
+      "consoleErrorsDuringRun": 0,
+      "status": "mounted by Hybrid; ten native categories; controller remains settings_component",
+      "sha256": "aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288",
+      "exactAssetHashVerified": true
+    },
+    {
+      "name": "Torrent overlay (Hybrid dependency)",
+      "sourceUrl": "http://127.0.0.1:8766/torrent-overlay.js",
+      "loaded": true,
+      "initialized": true,
+      "settingsRegistered": [],
+      "visualOwnership": "Hybrid torrent presentation",
+      "consoleErrorsDuringRun": 0,
+      "status": "API available; overlay interaction not tested",
+      "sha256": "ea9cf9384ce50a612e2def6ef4edce83f01093e24e84360b1818ad040296401c",
+      "exactAssetHashVerified": true
+    }
+  ],
+  "ownedModuleIsolation": {
+    "status": "PASS",
+    "reason": "A prior same-tab local-preview reload fulfilled four matching published first-party script requests with empty JavaScript; the corresponding active module report resolves to local branch sources. Hybrid has exactly one shell stylesheet and Interface+ has no competing header stylesheet.",
+    "suppressedPublishedDuplicates": [
+      {
+        "path": "/lampa/torrents-redesign.js",
+        "count": 2
+      },
+      {
+        "path": "/lampa/community/new-category.js",
+        "count": 2
+      }
+    ],
+    "styleOwnership": {
+      "hybrid": 1,
+      "interfacePlusCompetingHeader": 0,
+      "ydesign": 1
+    }
+  },
+  "scenarios": [
+    {
+      "scenario": "primary preference OFF → native Settings",
+      "status": "PASS"
+    },
+    {
+      "scenario": "opt-in primary entry → Hub root",
+      "status": "PASS"
+    },
+    {
+      "scenario": "native D-pad ArrowDown, OK, Back and focus restoration",
+      "status": "PASS"
+    },
+    {
+      "scenario": "all ten categories through native focus/Enter/Escape",
+      "status": "PASS",
+      "details": [
+        {
+          "id": "profiles",
+          "status": "PASS",
+          "rows": 9,
+          "paginated": false,
+          "focusRestored": true
+        },
+        {
+          "id": "home",
+          "status": "PASS",
+          "rows": 10,
+          "paginated": false,
+          "focusRestored": true
+        },
+        {
+          "id": "appearance",
+          "status": "PASS",
+          "rows": 24,
+          "paginated": true,
+          "focusRestored": true
+        },
+        {
+          "id": "playback",
+          "status": "PASS",
+          "rows": 16,
+          "paginated": false,
+          "focusRestored": true
+        },
+        {
+          "id": "torrents",
+          "status": "PASS",
+          "rows": 24,
+          "paginated": true,
+          "focusRestored": true
+        },
+        {
+          "id": "trakt",
+          "status": "PASS",
+          "rows": 24,
+          "paginated": true,
+          "focusRestored": true
+        },
+        {
+          "id": "language",
+          "status": "PASS",
+          "rows": 24,
+          "paginated": true,
+          "focusRestored": true
+        },
+        {
+          "id": "screensaver",
+          "status": "PASS",
+          "rows": 24,
+          "paginated": true,
+          "focusRestored": true
+        },
+        {
+          "id": "plugins",
+          "status": "PASS",
+          "rows": 24,
+          "paginated": true,
+          "focusRestored": true
+        },
+        {
+          "id": "system",
+          "status": "PASS",
+          "rows": 24,
+          "paginated": true,
+          "focusRestored": true
+        }
+      ]
+    },
+    {
+      "scenario": "owner metadata search",
+      "status": "PASS"
+    },
+    {
+      "scenario": "search pagination page 2",
+      "status": "PASS"
+    },
+    {
+      "scenario": "search result → original owner → Back",
+      "status": "PASS"
+    },
+    {
+      "scenario": "query/page preserved after owner Back",
+      "status": "PASS"
+    },
+    {
+      "scenario": "search empty state and query editing",
+      "status": "PASS"
+    },
+    {
+      "scenario": "missing owner remains recoverable in Hub",
+      "status": "PASS"
+    },
+    {
+      "scenario": "Standard Lampa Settings fallback restores native folders",
+      "status": "PASS"
+    },
+    {
+      "scenario": "Native Settings → Hub → metadata search → YDesign owner → Back with same result/query → Hub root → Standard Settings",
+      "status": "PASS",
+      "consecutiveRuns": 2
+    },
+    {
+      "scenario": "Standard Settings close → fresh Hub open → native root Back, paced beyond native triple-Back threshold",
+      "status": "PASS",
+      "consecutiveRuns": 2
+    },
+    {
+      "scenario": "Hybrid off → native Settings fallback → Hybrid on → Hub remount",
+      "status": "PASS",
+      "evidence": {
+        "before": {
+          "active": true,
+          "styleCount": 1,
+          "hubParams": 15,
+          "mounts": 3,
+          "unmounts": 2
+        },
+        "disabled": {
+          "active": false,
+          "settingsOpen": false,
+          "hubActive": false
+        },
+        "disabledFallback": {
+          "controller": "settings",
+          "hubActive": false,
+          "nativeFolders": 29,
+          "markerCount": 0
+        },
+        "reenabledHub": {
+          "active": true,
+          "hubActive": true,
+          "controller": "settings_component",
+          "styleCount": 1,
+          "hubParamNames": [
+            "hub_category_profiles",
+            "hub_category_home",
+            "hub_category_appearance",
+            "hub_category_playback",
+            "hub_category_torrents",
+            "hub_category_trakt",
+            "hub_category_language",
+            "hub_category_screensaver",
+            "hub_category_plugins",
+            "hub_category_system",
+            "hub_search",
+            "hub_problems",
+            "hub_unverified",
+            "hub_all",
+            "hub_native"
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "Card → Details composition",
+      "status": "PARTIAL",
+      "reason": "Safe native card entry reached Lampa content, but Details did not render with credential/API-keyed requests protected; no playback was invoked.",
+      "evidence": {
+        "before": {
+          "controller": "items_line",
+          "focus": "card selector layer--visible layer--render card--loaded ydesign-card ydesign-vertical ydesign-ready focus",
+          "cardCount": 56,
+          "settings": false
+        },
+        "after": {
+          "controller": "content",
+          "details": false,
+          "hybridMovie": false,
+          "series": false,
+          "cardifyClasses": [
+            "cardify-ratings-card",
+            "sh-movie-active"
+          ],
+          "settings": false,
+          "storageWriteAttempts": 1
+        },
+        "status": "PARTIAL"
+      }
+    },
+    {
+      "scenario": "Physical Google TV / actual remote",
+      "status": "NOT TESTED"
+    }
+  ],
+  "stress": {
+    "mainFlowRuns": 2,
+    "storageSetAttemptsIntercepted": 3,
+    "blockedSensitiveRequests": 0,
+    "consoleErrorsDuringRuns": [],
+    "pageErrors": [],
+    "failedRequests": 0
+  },
+  "screenshots": [
+    "home-design.png",
+    "settings-hub-root.png"
+  ],
+  "viewport": "Existing attached page reports an unbounded viewport; no viewport override was applied. Launcher config is 1920×1080.",
+  "productionChanges": "None. Reproduced harness over-Back caused Lampa core’s intentional triple-Back escape (<500ms); with a 650ms separation the same native root-Back succeeds twice. No Hub defect was reproduced independently."
+}

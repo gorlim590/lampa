@@ -1,0 +1,24 @@
+{
+  "mode": "existing page, native D-pad focus then Enter; no playback; authenticated services and writes blocked",
+  "before": {
+    "controller": "items_line",
+    "focus": "card selector layer--visible layer--render card--loaded ydesign-card ydesign-vertical ydesign-ready focus",
+    "cardCount": 56,
+    "settings": false
+  },
+  "after": {
+    "controller": "content",
+    "details": false,
+    "hybridMovie": false,
+    "series": false,
+    "cardifyClasses": [
+      "cardify-ratings-card",
+      "sh-movie-active"
+    ],
+    "settings": false,
+    "storageWriteAttempts": 1
+  },
+  "status": "PARTIAL",
+  "screenshot": null,
+  "reason": "D-pad focused card and Enter reached Lampa content with Hybrid active, but no Details surface rendered during the bounded wait under a request policy that blocks protected/auth/API-keyed requests. No playback was invoked; one Lampa Storage set call was intercepted and not persisted."
+}
