@@ -1,0 +1,223 @@
+{
+  "baselineCommit": "258aa750c68a6486a7f0f9f5c88a7eb304a5d737",
+  "testedCommit": "abdfdcb3bab4f817f73a35c48d21e4b23a3ee301",
+  "interfaceSha256": "8af96b51f36d6e7af05d4e86f834c38e1fe6ecf786aa4a4a7672a798fab0cf64",
+  "before": {
+    "current": {
+      "atMs": 35690.6,
+      "hubStyles": 0,
+      "hybridStyles": 1,
+      "nativeSubscriptions": {
+        "app": 194,
+        "controller": 4,
+        "params": 0,
+        "settings": 17,
+        "storage": 37
+      },
+      "nodes": 1748,
+      "profileButtons": 1,
+      "styles": 48,
+      "uiLifecycle": {
+        "firstShellFrameMs": 2878.6,
+        "initCount": 1,
+        "readyMs": 7724.2,
+        "scriptStartMs": 2869.2,
+        "settingsFailures": 0,
+        "settingsLoads": 1,
+        "settingsMounts": 1,
+        "settingsUnmounts": 0,
+        "shellAppliedMs": 2872.7,
+        "shellTransitions": 1,
+        "styleInsertions": 1,
+        "version": "3.0.0-early-shell-phase1"
+      },
+      "uiScripts": 8
+    },
+    "dpad": {
+      "atMs": 35682.7,
+      "focusResponseMs": 6.1
+    },
+    "errors": [
+      {
+        "atMs": 7814.2,
+        "kind": "resource",
+        "line": 0,
+        "opaque": false,
+        "tag": "SCRIPT",
+        "type": "Error"
+      }
+    ],
+    "focusClass": "selectbox-item selector focus",
+    "source": [
+      "/gh/gorlim590/lampa@258aa750c68a6486a7f0f9f5c88a7eb304a5d737/ui/interface-plus.js"
+    ],
+    "style": {
+      "background": "none / rgb(121, 96, 201)",
+      "border": "0px none rgb(255, 255, 255)",
+      "color": "rgb(255, 255, 255)",
+      "opacity": "1",
+      "padding": "41.0598px 54.7463px",
+      "radius": "27.3732px",
+      "shadow": "rgba(26, 89, 77, 0.25) 0px 2px 8px 0px",
+      "transform": "none",
+      "transition": "opacity 0.16s ease-out"
+    }
+  },
+  "after": {
+    "current": {
+      "atMs": 40617.6,
+      "hubStyles": 0,
+      "hybridStyles": 1,
+      "nativeSubscriptions": {
+        "app": 196,
+        "controller": 4,
+        "params": 0,
+        "settings": 17,
+        "storage": 39
+      },
+      "nodes": 1748,
+      "profileButtons": 1,
+      "styles": 48,
+      "uiLifecycle": {
+        "firstShellFrameMs": 3119,
+        "initCount": 1,
+        "readyMs": 3237.1,
+        "scriptStartMs": 3050,
+        "settingsFailures": 0,
+        "settingsLoads": 1,
+        "settingsMounts": 1,
+        "settingsUnmounts": 0,
+        "shellAppliedMs": 3053.4,
+        "shellTransitions": 1,
+        "styleInsertions": 1,
+        "version": "3.0.0-early-shell-phase1"
+      },
+      "uiScripts": 8
+    },
+    "dpad": {
+      "atMs": 40605.4,
+      "focusResponseMs": 9.4
+    },
+    "errors": [
+      {
+        "atMs": 3425.9,
+        "kind": "resource",
+        "line": 0,
+        "opaque": false,
+        "tag": "SCRIPT",
+        "type": "Error"
+      }
+    ],
+    "focusClass": "selectbox-item selector focus",
+    "source": [
+      "/gh/gorlim590/lampa@abdfdcb3bab4f817f73a35c48d21e4b23a3ee301/ui/interface-plus.js"
+    ],
+    "style": {
+      "background": "none / rgb(121, 96, 201)",
+      "border": "0px none rgb(255, 255, 255)",
+      "color": "rgb(255, 255, 255)",
+      "opacity": "1",
+      "padding": "41.0598px 54.7463px",
+      "radius": "19.1612px",
+      "shadow": "rgb(183, 155, 255) 4.92717px 0px 0px 0px inset",
+      "transform": "none",
+      "transition": "opacity 0.16s ease-out"
+    }
+  },
+  "settingsBefore": {
+    "classes": "settings-param selector focus",
+    "style": {
+      "background": "none / rgb(121, 96, 201)",
+      "border": "1.33333px solid rgba(0, 0, 0, 0)",
+      "color": "rgb(255, 255, 255)",
+      "padding": "27.3732px",
+      "radius": "27.3732px",
+      "shadow": "rgba(26, 89, 77, 0.25) 0px 2px 8px 0px",
+      "transform": "none",
+      "transition": "transform 0.16s ease-out, opacity 0.16s ease-out"
+    }
+  },
+  "settingsAfter": {
+    "classes": "settings-param selector focus",
+    "style": {
+      "background": "none / rgb(121, 96, 201)",
+      "border": "1.33333px solid rgba(0, 0, 0, 0)",
+      "color": "rgb(255, 255, 255)",
+      "padding": "27.3732px",
+      "radius": "19.1612px",
+      "shadow": "rgb(183, 155, 255) 4.92717px 0px 0px 0px inset",
+      "transform": "none",
+      "transition": "transform 0.16s ease-out, opacity 0.16s ease-out"
+    }
+  },
+  "details": {
+    "profileBack": {
+      "profileFocusRestored": true
+    },
+    "bookFocusRestored": true,
+    "focused": "full-start__button selector button--book button-mode-2 focus",
+    "ratingsPresent": true,
+    "stillLoading": false
+  },
+  "nativeModal": {
+    "buttons": [
+      {
+        "background": "rgb(62, 49, 91)",
+        "color": "rgb(240, 238, 248)",
+        "focus": true,
+        "opacity": "1",
+        "radius": "65.6956px",
+        "shadow": "rgb(151, 117, 250) 0px 0px 0px 3.28478px",
+        "text": "\u041d\u0456"
+      },
+      {
+        "background": "rgb(41, 35, 62)",
+        "color": "rgb(223, 223, 223)",
+        "focus": false,
+        "opacity": "1",
+        "radius": "65.6956px",
+        "shadow": "none",
+        "text": "\u0422\u0430\u043a"
+      }
+    ],
+    "closed": true,
+    "focus": "extensions__item selector layer--visible layer--render focus"
+  },
+  "toggle": {
+    "off": {
+      "focus": "stremio_hybrid_enabled",
+      "hybrid": false,
+      "style": {
+        "background": "linear-gradient(to right, rgb(26, 89, 77), rgb(14, 54, 82)) / rgb(121, 96, 201)",
+        "color": "rgb(255, 255, 255)",
+        "radius": "27.3732px",
+        "shadow": "rgba(26, 89, 77, 0.25) 0px 2px 8px 0px"
+      },
+      "theme": true
+    },
+    "on": {
+      "focus": "stremio_hybrid_enabled",
+      "hybrid": true,
+      "styles": 1
+    }
+  },
+  "console": {
+    "errorEntries": 3,
+    "namedExceptions": 0,
+    "affectedSourceExceptions": 0
+  },
+  "restored": {
+    "loaderURL": true,
+    "hybridURLNeverChanged": true,
+    "probeRemoved": true,
+    "enabledRestored": true
+  },
+  "limits": [
+    "One primary desktop Chrome pass; physical Google TV NOT TESTED.",
+    "Same two-frame timing method, one sample per version: 6.1 vs9.4ms does not prove speedup or a robust regression.",
+    "Native asynchronous Home/Settings subscription variations are not attributed to CSS.",
+    "No personal favorite/rating/history changes, private values, raw console payloads or screenshots published.",
+    "Live forced disabled/loading states were not introduced; original state handlers/markers are unchanged.",
+    "No real playback/backend/network acceptance or whole-application error-free claim."
+  ]
+}
