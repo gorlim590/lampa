@@ -160,8 +160,32 @@ Tested source `e5f8ccef0c0925d0abadc2523f2045abc38a3b1c` in the existing authori
 
 Syntax/repository validator69JS/43manifest/514URLs and diff checks PASS. CI source head all5 workflows successful; final evidence-only head still requires green CI before integration. No full suite re-run. Header style-node/matcher elimination is deterministic, not an FPS/startup gain: production JS grows795+648bytes for the explicit contract and transferred parity rules. No new stylesheet, installed entrypoint, request, observer, interval or event listener.
 
-**Partial runtime acceptance:** the immutable-source pass later displayed empty Home. One native Refresh still had no cards; Details smoke was therefore BLOCKED. No named JS exception or error attributed to the changed modules was captured, but5 unattributed error entries remain. Do not assign a network/product root cause without evidence. Restoring both original extension URLs and normal reload recovered49cards/focused card. The source-loader delivery environment differs, so full Home/Details/service parity is not certified by the header-only assertions. Keep the Draft until a bounded follow-up with unchanged service delivery confirms that scenario. No Home/Trakt/core workaround was added.
+**Historical runtime limitation (superseded by the A/B acceptance below):** the immutable-source pass later displayed empty Home. One native Refresh still had no cards; Details smoke was therefore BLOCKED. No named JS exception or error attributed to the changed modules was captured, but5 unattributed error entries remain. Do not assign a network/product root cause without evidence. Restoring both original extension URLs and normal reload recovered49cards/focused card. The source-loader delivery environment differs, so full Home/Details/service parity is not certified by the header-only assertions. That was the pre-follow-up checkpoint. The bounded UI-only A/B below supersedes this acceptance blocker without assigning an unproven root cause. No Home/Trakt/core workaround was added.
 
 Cleanup complete: original Hybrid/loader URLs restored, same profile/tab open, enabled setting restored, no probe was installed, no auth/history/account/server edits or storage clearing. Screenshot contains only the public header, no private Home context. Physical Google TV **NOT TESTED**. #79/#73 remain open; no automatic merge.
 
 Next migration candidates stay as classified above: YDesign/card presentation separated from metadata, Cardify template composition separated from data/controls, other Interface theme/menu regions only after scoped parity. This PR establishes a reusable region-ownership boundary rather than another global override stack; it does not claim the complete application is already one plugin.
+
+### PR97 runtime acceptance follow-up — controlled UI-only A/B
+
+**Home/Details/header acceptance PASS.** This supersedes the previous runtime blocker, not its historical observations. Existing production UI source `a7ecc18a2757b582aa50be46a60634cf3a6305ea` and its31 passing tests were preserved without a new production fix. Four new audit tests verify the diagnostic boundary; all other files/services/metadata ownership remain unchanged.
+
+The existing user main Chrome/Lampa tab ran one A/B comparison. Both phases used the normal Pages loader and the original service URLs/configuration; no `LAMPA_PLUGINS_BASE` or user-list override. Only Interface was redirected to the selected immutable UI revision, with Hybrid pinned to the same revision. The opt-in `audit/ui/header-runtime.js` temporarily replaces the loader URL, observes numerical registrations, script completions and aggregate API statuses, and expires its hooks. It never reads storage, request headers/bodies, responses or account/content identifiers; original arguments/callback results are passed through. Normal restoration reload removes all hooks, including any pass-through captured by later native wrappers.
+
+| Observation | A: merged main e0d871a | B: PR97 a7ecc18 |
+| --- | --- | --- |
+| Usable Home rows/cards |7 /49|7 /46|
+| Observed registrations / Home callbacks |41 /35 (from8)|41 /35 (from8)|
+| Loader script completion order |Trakt → Trakt+ → torrent-search → Interface → YDesign → average-rating → Cardify → translation|identical|
+| Non-UI delivery family |original Pages URLs|original Pages URLs|
+| Public service readiness flags |all observed APIs/classes present, appready|same|
+| Canonical / legacy header sheets |1 /1|1 /0|
+| Named JS exceptions |0|0|
+
+Hashes for both versions were independently checked against merged-main/local PR bytes, and actual script paths plus the ownership change confirmed execution. [Safe full results](../audit/ui/header-runtime-acceptance.json). Home/card totals are snapshots with asynchronous content; no identical-content or performance assertion. Both network buckets were empty in the bounded window: **no claim of zero total requests or verified fresh API success**. Cached/proxy/out-of-window behavior is not inferred as the root cause. Console captured2/4 unattributed entries, no named/changed-module exception; no global error-free claim.
+
+With B actually loaded: **PASS** Home renders; a real Details page opens; Torrent receives initial focus; Back restores the same originating card. Card identity was compared only in transient controller memory and not exported. **PASS** search is centered (0px delta), clock/date remain visible, native search input/Back and avatar menu work. **PASS** Hybrid off restores exactly one525-byte standalone header stylesheet; on restores a single canonical owner and exact trigger focus. No backend/Trakt test writes or manual history manipulation.
+
+Original Hybrid and loader URLs and enabled preference restored; same browser/profile/tab remains usable with49cards and no audit node/script. No new diagnostic extension was installed. The earlier empty Home was not reproduced in controlled UI-only A/B; its original root cause remains **UNKNOWN**. This is successful acceptance evidence, not a speculative attribution to CSS, Trakt, network or delivery.
+
+Reuse31 existing header/bootstrap tests;4 targeted audit tests and repository validator70JS/43entries/517URLs PASS. Final-head CI must remain green before marking Ready. Per the current user instruction, mark Ready and report GO only after that check; no automatic merge, no closing79/73. Physical Google TV remains NOT TESTED. No YDesign/Cardify migration started.

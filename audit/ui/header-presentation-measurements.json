@@ -1,4 +1,10 @@
 {
+  "historicalCheckpoint": true,
+  "acceptanceFollowup": {
+    "status": "PASS",
+    "report": "header-runtime-acceptance.json",
+    "testedUI": "a7ecc18a2757b582aa50be46a60634cf3a6305ea"
+  },
   "baseline": "e0d871a4fdc7eecd92b06ca16cdeab3c79e0a022",
   "testedCommit": "e5f8ccef0c0925d0abadc2523f2045abc38a3b1c",
   "sha256": {
