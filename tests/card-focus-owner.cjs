@@ -25,3 +25,14 @@ test('Verification entry restores the prior loader base on success/failure witho
  for(const hadBase of [false,true])for(const event of ['onload','onerror']){const nodes=[],window=hadBase?{LAMPA_PLUGINS_BASE:'https://example.org/original/'}:{};const c={window,URL,document:{currentScript:{src:'https://cdn.jsdelivr.net/gh/gorlim590/lampa@fixture/audit/ui/phase2-loader.js?context=0.0.0.0'},createElement:()=>({}),head:{appendChild:n=>nodes.push(n)}}};vm.runInNewContext(source,c);assert.equal(nodes.length,1);assert.equal(nodes[0].src,'https://cdn.jsdelivr.net/gh/gorlim590/lampa@fixture/loader.js');nodes[0][event]();assert.equal(Object.hasOwn(window,'LAMPA_PLUGINS_BASE'),hadBase);if(hadBase)assert.equal(window.LAMPA_PLUGINS_BASE,'https://example.org/original/');assert.equal(nodes[0].onload,null);assert.equal(nodes[0].onerror,null);}
  assert(!/Storage|MutationObserver|setInterval|setTimeout/.test(source));
 });
+
+test('All standalone theme surfaces yield to Hybrid without changing native action or card rules',()=>{
+ const f=themeFixture(),surfaces=['.settings__content','.settings-input__content','.selectbox__content','.modal__content'];
+ // Compare with the pre-milestone renderer: only these four selectors may change.
+ const old=iface.replace("body:not(.stremio-hybrid) .settings__content, body:not(.stremio-hybrid) .settings-input__content, body:not(.stremio-hybrid) .selectbox__content, body:not(.stremio-hybrid) .modal__content",surfaces.join(', '));
+ const oldNodes=[],c={document:{getElementById:id=>oldNodes.find(n=>n.id===id)||null,createElement:()=>({remove(){oldNodes.splice(oldNodes.indexOf(this),1)}}),head:{appendChild:n=>oldNodes.push(n)}}};
+ vm.runInNewContext(old.slice(old.indexOf('    function applyTheme('),old.indexOf('    var STATUS_BASE_SEL')),c);
+ for(const name of themes){f.apply(name);c.applyTheme(name);const css=f.nodes[0].textContent,rules=css.match(/[^{}]+\{[^{}]*\}/g)||[];const panels=rules.filter(r=>r.includes('.modal__content'));assert.equal(panels.length,1,name);const selectors=panels[0].split('{')[0].split(',').map(x=>x.trim());assert.deepEqual(selectors,surfaces.map(x=>'body:not(.stremio-hybrid) '+x));
+ let restored=css;for(const selector of surfaces)restored=restored.replace('body:not(.stremio-hybrid) '+selector,selector);assert.equal(restored,oldNodes[0].textContent,name+' must preserve standalone declarations and native action styling');}
+ f.apply('default');assert.equal(f.nodes.length,0);
+});
