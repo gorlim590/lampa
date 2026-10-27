@@ -37,7 +37,9 @@ body.stremio-hybrid .ydesign-card, body.stremio-hybrid .ydesign-card.focus { ani
 body.stremio-hybrid .card.focus { transform:scale(1.035) !important; z-index:20; }
 body.stremio-hybrid .card .card__view { border-radius:var(--sh-radius) !important; transition:none !important; }
 body.stremio-hybrid .card.ydesign-card .card__view { border-radius:var(--yd-r,var(--sh-radius)) !important; }
-body.stremio-hybrid .card.focus .card__view { box-shadow:0 0 0 .14em var(--sh-text),0 0 0 .27em var(--sh-ring) !important; }
+body.stremio-hybrid .card.focus .card__view, body.stremio-hybrid .card.hover .card__view { box-shadow:0 0 0 .14em var(--sh-text),0 0 0 .27em var(--sh-ring) !important; }
+/* One outer card focus renderer; native/Interface pseudo-rings yield to the shell. */
+body.stremio-hybrid .card.focus .card__view::after, body.stremio-hybrid .card.hover .card__view::after { border:0 !important; box-shadow:none !important; }
 body.stremio-hybrid .ydesign-card.focus::after, body.stremio-hybrid .ydesign-card .ydesign-content-layer::after { display:none !important; }
 body.stremio-hybrid .ydesign-card .card__view::before { animation:none !important; }
 body.stremio-hybrid .ydesign-badge, body.stremio-hybrid .ydesign-genre-badge, body.stremio-hybrid .ydesign-rating, body.stremio-hybrid .ydesign-series-pill, body.stremio-hybrid .ydesign-card-notch { backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
