@@ -72,7 +72,7 @@ No secrets or account data are included. The browser runner, once run on the aut
 - Added `tests/torrent-cinema-native-lifecycle.cjs` for replacement Select, same-menu focus restoration, Files close handoff, delayed generic Loading, synchronous media Loading, and observer cancellation. The existing `tests/torrent-overlay.cjs` entry loads this focused suite, so the current CI workflow covers it without workflow permission changes. Focused tests: **78/78 PASS** across native lifecycle, lifecycle, overlay, inline, legacy torrent and Hybrid suites. Build freshness and `git diff --check`: **PASS**.
 - Exact branch artifact after rebuild: `ui/torrent-cinema.js`, 156,522 bytes, SHA-256 `0a866d9e27e4c1b2b424c39beecae029ef772933cdc9ccdd66c280855b697458`.
 - The existing end-to-end runner was attempted in both Hybrid and standalone modes against this artifact. Both **FAIL before layout capture**: the synthetic Details torrent action calls `Activity.push` with the expected fixture ID/source while the Full page and stream pane are active, but the installed runtime enters native activity `torrents`; the custom overlay is closed and its 12 fixture rows are not rendered. Each run times out waiting for result rows and restores the original URL/tab. This is a confirmed browser integration blocker (not a Select/Loading unit-test failure); no 720p/1080p/4K screenshots, Select elementFromPoint checks, Files loop or focus matrix are claimed as passed. Runner diagnostics now preserve the sanitized transition evidence.
-- The five GitHub Actions checks on prior PR head `b32d72c` were all successful. The follow-up commit has not yet been pushed, so CI on the changed head remains **NOT RUN**.
+- Follow-up commits `fa13a9a` and `8c554a6` were pushed to the existing Draft PR branch; final HEAD is `8c554a6bfaab0f5c3030de6ae1e73f73baa0ce30`. All five GitHub Actions checks on this final HEAD **PASS**.
 
 ### Current acceptance status
 
@@ -83,5 +83,5 @@ No secrets or account data are included. The browser runner, once run on the aut
 | Hybrid browser matrix | FAIL before first layout; overlay route hands off to native Torrent activity |
 | Standalone browser matrix | FAIL before first layout; same native activity handoff |
 | Select z-order/hit test, D-pad matrix, Files/Back loops | BLOCKED by overlay not remaining open in the existing runner |
-| GitHub Actions on follow-up head | NOT RUN |
+| GitHub Actions on follow-up head | PASS (5/5) |
 | Physical Google TV | NOT TESTED |
