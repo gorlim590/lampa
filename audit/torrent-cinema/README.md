@@ -35,7 +35,7 @@ The reference comparison keeps its TV composition while applying the owner's req
 
 ## Size/performance
 
-Raw shared presentation source changes from 299,568 to 243,401 bytes (56,167 fewer; 18.7%). Legacy installed URLs may add tiny alias requests, never another owner. Four complete rows fit at 720p and five at 1080p/4K; the 4K modal uses 44px typography.
+Raw shared presentation source changes from 299,568 to 251,859 bytes (47,709 fewer; 15.9%). Legacy installed URLs may add tiny alias requests, never another owner. Four complete rows fit at 720p and five at 1080p/4K; the 4K modal uses 44px typography.
 
 Single first-open observations: 268.3ms before, 349.7ms Hybrid, 347.5ms standalone. Host/protocol polling differs, so latency comparison is **INCONCLUSIVE**. No startup/FPS/memory/device gain claimed. The active runtime has 13 removable subscriptions and one scoped stylesheet; disabling removes these, retaining only its reversible enable-setting listener until destroy.
 
