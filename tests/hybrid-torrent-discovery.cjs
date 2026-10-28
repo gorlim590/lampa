@@ -161,13 +161,16 @@ test('Hybrid popup rows display confirmed anime audio/studio tracks and reject t
   });
   const wrongSeason = f.release('Frieren S02E03 2160p', 'Mazepa', { AudioLanguages: ['uk'], VoiceoverStudio: 'Далі Буде' });
   const ambiguousGroup = f.release('Frieren S01E03 1080p Japanese audio', 'Nyaa', { AudioLanguages: ['ja'], ReleaseGroup: 'Далі Буде' });
+  const nestedVoice = f.release('Frieren S01E03 1080p', 'Toloka', { info: { Voices: ['Далі Буде'] } });
   f.context.streamUpdateRows(f.st);
   const chips = amanogawa.row.nodes['.ctr-chips'].textContent;
-  assert.match(chips, /Аудіо: Українська \/ Японська/);
+  assert.match(chips, /Аудіо: Українська/);
+  assert.doesNotMatch(chips, /Аудіо: Українська \/ Японська/);
   assert.match(chips, /Озвучення: Амоногава · Багатоголосе/);
   assert.match(chips, /Субтитри: English/);
   assert.equal(wrongSeason.row.classList.contains('is-best'), false);
   assert.match(ambiguousGroup.row.nodes['.ctr-chips'].textContent, /Студія невідома/);
+  assert.match(nestedVoice.row.nodes['.ctr-chips'].textContent, /Озвучення: Далі Буде/);
 });
 
 test('Hybrid embedded controls invoke native tracker/sort handlers; async rows re-rank and empty/singleton results are safe', async () => {
