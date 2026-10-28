@@ -106,7 +106,7 @@ function integrationFixture() {
   f.context.shouldSendProgress = () => f.context.throttleState.lastSendTime === 0;
   const values = { trakt_enable_watching: true, trakt_token: 'synthetic-token', trakt_min_progress: 90 };
   const player = Object.create(null), timelineHandlers = Object.create(null), globalListeners = Object.create(null), accountListeners = Object.create(null), storageListeners = [], documentListeners = Object.create(null);
-  let activityCard = null, activeVideo = null, playerOpened = false;
+  let activityCard = null, activeVideo = null, playerOpened = false, currentCardReadCount = 0;
   const on = map => (name, fn) => { (map[name] || (map[name] = [])).push(fn); };
   const remove = map => (name, fn) => { map[name] = (map[name] || []).filter(item => item !== fn); };
   const storage = {
@@ -136,7 +136,7 @@ function integrationFixture() {
     isInitialized: false,
     isInitialized$1: false,
     pendingExternalPlayback: null, pendingInternalPlayback: null, timelineProgressSamples: {},
-    playbackInstanceSequence: 0, currentPlaybackInstance: null, terminalPlaybackInstanceId: null, terminalPlaybackHash: null,
+    playbackInstanceSequence: 0, playbackIdentityGeneration: 0, currentPlaybackInstance: null, terminalPlaybackInstanceId: null,
     setHashMeta: (hash, value) => { meta[hash] = value; }, getHashMeta: hash => meta[hash] || null,
     extractSeasonEpisode: media => ({ season: media.season_number, episode: media.episode_number }),
     resolveSeasonEpisode: () => ({}), loadSessionCache: () => {}, loadHashMetaCache: () => {},
@@ -144,7 +144,7 @@ function integrationFixture() {
     slog: () => {}, logWarn: (...args) => { f.context.lastWarning = args; f.context.lastWarningMessage = String(args[1]); }, logDebugOnce: () => {},
     getCompletionKey: () => 'synthetic-completion',
     markFinishIntent: () => { f.context.finishIntentCount = (f.context.finishIntentCount || 0) + 1; },
-    finish: () => { f.context.finishCallCount = (f.context.finishCallCount || 0) + 1; return Promise.resolve(); },
+    finish: media => { f.context.finishCallCount = (f.context.finishCallCount || 0) + 1; (f.context.finishedMedia || (f.context.finishedMedia = [])).push({ ...media }); return Promise.resolve(); },
     documentListeners, storageListeners, playerHandlers: player, activityCard
   });
   const instanceHelpersStart = source.indexOf('  function beginPlaybackInstance(');
@@ -154,8 +154,8 @@ function integrationFixture() {
   vm.runInContext('var onPlayerStart = ' + productionMethod('watching', 'onPlayerStart') + '; var processTimelineUpdate = ' + productionMethod('watching', 'processTimelineUpdate') + '; var watchingInit = ' + productionMethod('watching', 'init') + '; var eventInit = ' + productionMethod('events', 'init') + ';', f.context);
   const watching = {
     isLoggingEnabled: () => false,
-    getCurrentCard: () => activityCard,
-    checkAndAddToShow: () => {},
+    getCurrentCard: () => { currentCardReadCount++; return activityCard; },
+    checkAndAddToShow: (media, hash) => { (f.context.showWatchingCalls || (f.context.showWatchingCalls = [])).push({ id: media && media.id, episode_number: media && media.episode_number, hash }); },
     getMetaByHash: () => null,
     onPlayerStart: f.context.onPlayerStart,
     processTimelineUpdate: f.context.processTimelineUpdate,
@@ -181,7 +181,7 @@ function integrationFixture() {
     playerOpened = true;
     (player.start || []).slice().forEach(fn => fn({ card: media, timeline: { hash, percent: 0 } }));
   };
-  return { ...f, values, player, playerEvent, storageChange, documentListeners, accountListeners, timeline, launch, video: () => activeVideo, watching, events };
+  return { ...f, values, player, playerEvent, storageChange, documentListeners, accountListeners, timeline, launch, video: () => activeVideo, watching, events, currentCardReadCount: () => currentCardReadCount };
 }
 
 async function flush() { for (let i = 0; i < 12; i++) await Promise.resolve(); }
@@ -293,6 +293,61 @@ test('production Timeline switching sends S01E02 STOP before S01E03 START', asyn
   assert.deepEqual(f.calls.map(call => [call.action, call.media.episode_number]), [['start', 2], ['stop', 2], ['start', 3]]);
 });
 
+test('stale S01E02 completion after switching to S01E03 cannot mutate or complete the current episode', async () => {
+  const f = integrationFixture(), second = episode(2), third = episode(3);
+  f.launch(second, 'delayed-e2'); f.timeline('delayed-e2', 10, 1); f.timeline('delayed-e2', 11, 1.1); await flush();
+  f.launch(third, 'current-e3'); f.timeline('current-e3', 0, 0); f.timeline('current-e3', 1, 0.1); await flush();
+  const finishCount = f.context.finishCallCount || 0;
+  const showCount = (f.context.showWatchingCalls || []).length;
+  const callCount = f.calls.length;
+  const currentCardReads = f.currentCardReadCount();
+  f.timeline('delayed-e2', 950, 95); await flush();
+  assert.equal(f.context.finishCallCount || 0, finishCount);
+  assert.equal((f.context.showWatchingCalls || []).length, showCount);
+  assert.equal(f.calls.length, callCount);
+  assert.equal(f.currentCardReadCount(), currentCardReads, 'stale hash never falls back to the current Activity card');
+  assert.ok(!(f.context.finishedMedia || []).some(media => media.episode_number === 3));
+});
+
+test('delayed high-progress movie Timeline cannot complete a different current movie', async () => {
+  const f = integrationFixture(), oldMovie = movie(101), currentMovie = movie(202);
+  f.launch(oldMovie, 'old-movie'); f.timeline('old-movie', 1, 1); f.timeline('old-movie', 2, 2); await flush();
+  f.launch(currentMovie, 'current-movie'); f.timeline('current-movie', 0, 0); f.timeline('current-movie', 1, 0.1); await flush();
+  const finishCount = f.context.finishCallCount || 0;
+  const showCount = (f.context.showWatchingCalls || []).length;
+  const callCount = f.calls.length;
+  f.timeline('old-movie', 990, 99); await flush();
+  assert.equal(f.context.finishCallCount || 0, finishCount);
+  assert.equal((f.context.showWatchingCalls || []).length, showCount);
+  assert.equal(f.calls.length, callCount);
+  assert.ok(!(f.context.finishedMedia || []).some(media => media.id === currentMovie.id));
+});
+
+test('unassociated Timeline hash cannot use Activity identity for any playback or account mutation', async () => {
+  const f = integrationFixture();
+  f.currentCard = movie(303);
+  f.context.currentPlaybackInstance = null;
+  f.timeline('unknown-hash', 990, 99); await flush();
+  assert.deepEqual(f.calls, []);
+  assert.equal(f.context.finishCallCount || 0, 0);
+  assert.deepEqual(f.context.showWatchingCalls || [], []);
+  assert.equal(f.currentCardReadCount(), 0);
+  assert.equal(f.context.window.last_timeline_event, undefined);
+});
+
+test('verified current episode completes once at threshold with its exact identity', async () => {
+  const f = integrationFixture(), current = episode(7, 0);
+  f.launch(current, 'special-current');
+  f.timeline('special-current', 880, 88); f.timeline('special-current', 890, 89); await flush();
+  f.timeline('special-current', 900, 90); await flush();
+  f.timeline('special-current', 910, 91); f.timeline('special-current', 920, 92); await flush();
+  assert.equal(f.context.finishCallCount, 1);
+  assert.equal(f.context.finishedMedia[0].id, current.id);
+  assert.equal(f.context.finishedMedia[0].season_number, 0);
+  assert.equal(f.context.finishedMedia[0].episode_number, 7);
+  assert.deepEqual(f.calls.map(call => call.action), ['start', 'stop']);
+});
+
 test('production destroy and error handlers STOP the confirmed session', async () => {
   for (const endEvent of ['destroy', 'error']) {
     const f = integrationFixture(), media = movie(endEvent === 'destroy' ? 1 : 2);
@@ -364,11 +419,14 @@ test('profile switch invalidates active session and stale Timeline cannot restar
   const f = integrationFixture(), media = movie(11);
   f.launch(media, 'profile-switch'); f.timeline('profile-switch', 1, 1); f.timeline('profile-switch', 2, 2); await flush();
   assert.deepEqual(f.calls.map(call => call.action), ['start']);
+  const showWritesBeforeSwitch = (f.context.showWatchingCalls || []).length;
   (f.accountListeners.profile_select || []).slice().forEach(fn => fn({}));
-  f.timeline('profile-switch', 3, 3); f.timeline('profile-switch', 4, 4); await flush();
+  f.timeline('profile-switch', 990, 99); await flush();
   assert.deepEqual(f.calls.map(call => call.action), ['start']);
   assert.equal(f.api.getActiveSession(), null);
   assert.equal(f.context.queueClearCount, 1);
+  assert.equal(f.context.finishCallCount || 0, 0, 'same-token profile switch cannot finish stale media');
+  assert.equal((f.context.showWatchingCalls || []).length, showWritesBeforeSwitch, 'stale progress cannot write show-watching state into another profile');
 });
 
 test('season zero specials retain exact identity in production session keys', async () => {

@@ -10007,6 +10007,7 @@
   var pendingInternalPlayback = null;
   var timelineProgressSamples = {};
   var playbackInstanceSequence = 0;
+  var playbackIdentityGeneration = 0;
   var currentPlaybackInstance = null;
   var terminalPlaybackInstanceId = null;
 
@@ -10018,6 +10019,7 @@
       media: media,
       hash: hash || null,
       token: String(Lampa.Storage.get('trakt_token') || ''),
+      identityGeneration: playbackIdentityGeneration,
       external: !!external
     };
     terminalPlaybackInstanceId = null;
@@ -10186,16 +10188,8 @@
       if (isNaN(percent)) percent = 0;
       var timelinePosition = Number(road.time);
       if (!isFinite(timelinePosition) || timelinePosition < 0) timelinePosition = percent;
-      markProgressUpdate();
       var token = Lampa.Storage.get('trakt_token');
       var minProgress = parseInt(Lampa.Storage.field('trakt_min_progress') || config.minProgress);
-      window.last_timeline_event = {
-        data: {
-          hash: hash,
-          road: road
-        },
-        ts: Date.now()
-      };
       if (this.isLoggingEnabled()) {
         slog('Processing timeline update', {
           hash: hash,
@@ -10211,23 +10205,34 @@
         return;
       }
       var timelineInstance = currentPlaybackInstance;
-      var playbackInstanceMatches = !!(timelineInstance && timelineInstance.token === String(token) && (!timelineInstance.hash || timelineInstance.hash === hash));
-      var card = playbackInstanceMatches ? timelineInstance.media : this.getCurrentCard();
+      // Timeline hashes are the identity boundary for playback side effects.
+      // Activity.active() may already point at a different episode/movie, so
+      // it must never be used to attribute a stale or unassociated callback.
+      var playbackInstanceMatches = !!(timelineInstance && timelineInstance.media && timelineInstance.hash && timelineInstance.hash === hash && timelineInstance.token === String(token) && timelineInstance.identityGeneration === playbackIdentityGeneration);
+      if (!playbackInstanceMatches) {
+        if (this.isLoggingEnabled()) slog('Ignoring Timeline update without current playback identity', { hash: hash });
+        return;
+      }
+      var card = timelineInstance.media;
       var externalPlayback = pendingExternalPlayback;
       if (externalPlayback) {
         if (externalPlayback.hash && externalPlayback.hash !== hash) {
-          pendingExternalPlayback = null;
           return;
         }
+        if (externalPlayback.token && externalPlayback.token !== String(token)) return;
+        if (externalPlayback.identityGeneration != null && externalPlayback.identityGeneration !== playbackIdentityGeneration) return;
         card = externalPlayback.media;
       }
+      if (!card) return;
+      markProgressUpdate();
+      window.last_timeline_event = {
+        data: {
+          hash: hash,
+          road: road
+        },
+        ts: Date.now()
+      };
       var meta = getHashMeta(hash);
-      if (!card && meta && meta.card) {
-        card = meta.card;
-        if (this.isLoggingEnabled()) {
-          slog('Card restored from hash meta cache', card);
-        }
-      }
       if (card && hash) {
         var se = extractSeasonEpisode(card);
         var cachedMeta = meta || getHashMeta(hash);
@@ -10659,6 +10664,7 @@
       if (Lampa.Storage && Lampa.Storage.listener) {
         var activeToken = String(Lampa.Storage.get('trakt_token') || '');
         var invalidatePlaybackIdentity = function invalidatePlaybackIdentity() {
+          playbackIdentityGeneration++;
           activeToken = String(Lampa.Storage.get('trakt_token') || '');
           markPlaybackInstanceTerminal();
           currentPlaybackInstance = null;
@@ -10671,6 +10677,7 @@
         var _authChangeHandler = function _authChangeHandler(e) {
           if (!e) return;
           if (e.name === 'trakt_enable_watching' && !Lampa.Storage.field('trakt_enable_watching')) {
+            playbackIdentityGeneration++;
             markPlaybackInstanceTerminal();
             currentPlaybackInstance = null;
             scrobbler.scrobbleStop();
@@ -10804,7 +10811,12 @@
           var timeline = e && e.data && e.data.timeline;
           pendingInternalPlayback = null;
           scrobbler.setCurrentMedia(card);
-          pendingExternalPlayback = timeline && timeline.hash ? { media: card, hash: timeline.hash } : null;
+          pendingExternalPlayback = timeline && timeline.hash ? {
+            media: card,
+            hash: timeline.hash,
+            token: String(Lampa.Storage.get('trakt_token') || ''),
+            identityGeneration: playbackIdentityGeneration
+          } : null;
           if (pendingExternalPlayback) beginPlaybackInstance(card, timeline.hash, true);
         } catch (e) {
           logWarn('External player handler failed', e, {
