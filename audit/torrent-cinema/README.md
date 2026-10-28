@@ -2,17 +2,17 @@
 
 Branch `feat/issue-117-torrent-cinema`; visual acceptance follow-up to `ce50a4461cfd1270547ac8417ce71b4ab01cc9fa`. Development baseline f60132b, rebased onto fa378b3 (two inventory-only main commits).
 
-Canonical artifact SHA-256: `683fb0868402b4552c4a5bce39822d8cd6a0999fea976296884995c223cb6467`. Both browser modes routed the same changed bytes into the existing native Lampa runtime. Original tab/URL/display metrics restored; browser/profile kept running.
+Canonical artifact SHA-256: `31f957e6839b17b5b51761480812a155510b0943d003fac57492905d15de85bf`. Both browser modes routed the same changed bytes into the existing native Lampa runtime. Original tab/URL/display metrics restored; browser/profile kept running.
 
 | Check | Result |
 | --- | --- |
-| Focused automated regressions | 226 PASS / 0 FAIL; command in unit-results.json |
-| Canonical-only install, Hybrid/Buttons+/other visual scripts not executed | 24 PASS / 0 FAIL |
-| Hybrid integration | 24 PASS / 0 FAIL |
+| Focused automated regressions | 228 PASS / 0 FAIL; command in unit-results.json |
+| Canonical-only install, Hybrid/Buttons+/other visual scripts not executed | 28 PASS / 0 FAIL |
+| Hybrid integration | 28 PASS / 0 FAIL |
 | 1280×720, 1920×1080, 3840×2160 CSS at DPR 1 | PASS in both modes; independent PNG sizes match |
 | 1920×1080 CSS at DPR 2 | PASS; separate 3840×2160 PNG in both modes |
 | Single toolbar/style, native D-pad/OK, info/Back, Files/return, focus restore | PASS with controlled parser/transport data |
-| Owner approved reference comparison | Reviewed directly; row zones, two filter bands, badge order, restrained purple, four expanded sections reproduced |
+| Owner approved reference comparison | Reviewed directly; real release title, resolution/type/HDR/codec, audio, aligned availability/actions, two filter bands, restrained purple and four premium detail sections |
 | Empty/error/retry, delayed results, reopen, profile isolation, teardown | PASS |
 | Syntax/manifest/URL validator, artifact freshness, whitespace | PASS |
 | Physical Google TV, real providers/TorrServer/player/tracks/4K playback | UNVERIFIED |
@@ -31,7 +31,7 @@ Three scenario families run in each owner-required install mode. Native row OK i
 
 [Before 1080p](before-1920.png) · [Before 4K](before-3840.png) · [DPR 2 Hybrid](device-equivalent-1080-dpr2.png) · [DPR 2 standalone](standalone-device-equivalent-1080-dpr2.png).
 
-The reference comparison keeps its TV composition while applying the owner's requested deviations: quality and tracker controls are separate navigable rows; badges precede the release title; purple focus is muted; Files are factual metadata in the fourth details column and have no separate launch button. The rendered fixture has no poster/backdrop artwork, so the screenshot's surface cannot show the Last of Us image from the reference.
+The reference comparison keeps its TV composition while applying the owner's requested deviations: quality and tracker controls are separate navigable rows; the real title is parsed from the release's Title/Name field and shown above format badges; purple focus is muted; Files are factual metadata in the fourth details column and have no separate launch button. Release year and episode coverage appear only when supported by the release string or its metadata. Complete raw names remain in expanded details. The rendered fixture has no poster/backdrop artwork, so the screenshot's surface cannot show the Last of Us image from the reference.
 
 ## Size/performance
 

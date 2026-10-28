@@ -1,7 +1,7 @@
 {
   "commit": "44d5047e4d6adf104d454376d47d2310f67a94bb",
-  "tests": 226,
-  "passed": 226,
+  "tests": 228,
+  "passed": 228,
   "failed": 0,
   "command": "node --test --test-timeout=15000 tests/torrent-overlay.cjs tests/hybrid-ui.cjs tests/torrents-cinema.cjs tests/torrent-details.cjs tests/hybrid-torrent-discovery.cjs tests/torrent-search.cjs tests/parser-providers.cjs tests/ui-bootstrap.cjs tests/settings-census.cjs tests/settings-inventory.cjs tests/settings-registry.cjs tests/settings-hub-lifecycle.cjs",
   "static": [
@@ -10,5 +10,5 @@
     "git diff --check PASS"
   ],
   "note": "Existing Hybrid CI entry imports new lifecycle/inline and build-freshness tests. Workflows unchanged. Latest main inventory Markdown link formatting repaired after inherited validator failure; no inventory contents/configuration changed.",
-  "followUp": "Visual acceptance follow-up adds independent two-band quality/tracker filtering and four-column Video/Audio/Subtitles/Files details; both standalone and Hybrid real-browser runs pass 24/24."
+  "followUp": "Final visual refinements add actual release title/year/verified season coverage from torrent Title/Name, secondary technical badges, audio/dubbing, grouped right-side availability/actions, four-column expanded details, and independent two-band filters. Browser runs pass 28/28 in standalone and Hybrid."
 }

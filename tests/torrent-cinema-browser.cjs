@@ -64,6 +64,7 @@ async function geometry(page){return page.evaluate(()=>{
         };
         // Scenario 1: true independent layouts plus inline detail geometry.
         await open();await loaded();report.openMs=await page.evaluate(()=>performance.now()-__tcQa.opened);
+        check('release identity and metadata hierarchy',await page.evaluate(()=>{const row=document.querySelector('.sh-torrent-overlay:not([hidden]) .torrent-item');return row?.querySelector('.ctr-name')?.textContent==='Silent Orbit (2024)'&&/4K/.test(row.querySelector('.tc-secondary-row')?.textContent||'')&&/WEB-DL/.test(row.querySelector('.tc-secondary-row')?.textContent||'')&&/UA/.test(row.querySelector('.tc-priority-row')?.textContent||'')&&row.querySelector('.tc-audio-label')?.textContent.includes('Українська')&&row.querySelector('.tc-raw-title')?.textContent===row._ctrSource.Title;}));
         for(const [width,height] of [[1280,720],[1920,1080],[3840,2160]]){
             await setViewport(width,height);
             const layout=await geometry(page);layout.collapsed=await capture((standalone?'standalone-':'after-')+width+'.png');
@@ -71,6 +72,7 @@ async function geometry(page){return page.evaluate(()=>{
             assert.deepEqual(layout.collapsed.pixels,[width,height]);
             await enter('.sh-torrent-overlay:not([hidden]) .torrent-item .tc-info');
             check('inline opens '+width,await page.locator('.sh-torrent-overlay:not([hidden]) .tc-details:not([hidden])').count()===1);
+            check('expanded Video/Audio/Subtitles/Files sections '+width,await page.evaluate(()=>{const details=document.querySelector('.sh-torrent-overlay:not([hidden]) .tc-details:not([hidden])');return details?.querySelectorAll('.tc-section').length===4&&['Відео','Аудіо','Субтитри','Файли'].every(label=>details.textContent.includes(label))&&!details.querySelector('.tc-open-files')&&details.querySelector('.tc-raw-title')?.textContent===document.querySelector('.sh-torrent-overlay:not([hidden]) .torrent-item')?._ctrSource.Title;}));
             layout.expanded=await capture((standalone?'standalone-expanded-':'expanded-')+width+'.png');layout.expandedGeometry=await geometry(page);report.layouts.push(layout);
             await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.querySelector('.sh-torrent-overlay:not([hidden]) .tc-details:not([hidden])'));
         }

@@ -176,3 +176,43 @@
 .sh-torrent-overlay .tc-info{color:#c9c0d4}
 @media(max-width:1000px){.sh-torrent-overlay .ctr-row{grid-template-columns:3.5em minmax(0,1.15fr) minmax(0,.9fr) 5.6em 2.15em 1.2em;gap:.48em}.sh-torrent-overlay .ctr-name{font-size:.92em}.sh-torrent-overlay .ctr-chips{font-size:.65em}.sh-torrent-overlay .tc-audio{font-size:.68em}.sh-torrent-overlay .tc-details{margin-left:0}.sh-torrent-overlay .tc-section{padding-inline:.45em}}
 @media(max-width:700px){.sh-torrent-overlay .tc-technical{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:.6em}.sh-torrent-overlay .tc-section:nth-child(2){border-right:0}.sh-torrent-overlay .tc-section:nth-child(3){padding-left:0}}
+
+/* Final density pass: identity first, format second, strongly grouped availability/actions. */
+.sh-torrent-overlay .ctr-release-info{align-content:center;gap:.08em}
+.sh-torrent-overlay .ctr-release-info .ctr-chips{display:contents}
+.sh-torrent-overlay .tc-priority-row,.sh-torrent-overlay .tc-secondary-row{display:flex;align-items:center;gap:.28em;min-width:0;max-width:100%;flex-wrap:wrap}
+.sh-torrent-overlay .tc-priority-row{order:1}
+.sh-torrent-overlay .ctr-release-info .ctr-name{order:2;margin:.02em 0;font-size:1.08em;font-weight:750;line-height:1.26;letter-spacing:.005em;color:#f6f2fb;-webkit-line-clamp:2}
+.sh-torrent-overlay .tc-secondary-row{order:3;margin-top:.04em}
+.sh-torrent-overlay .tc-priority-row .ctr-chip{padding:.13em .52em;font-weight:700}
+.sh-torrent-overlay .tc-priority-row .tc-ua-badge{color:#eff7ff;background:linear-gradient(90deg,#2e67b557 0 48%,#f0cb3150 52% 100%);border-color:#b9a458a1;text-shadow:0 1px 5px #000}
+.sh-torrent-overlay .tc-priority-row .tc-tracker-badge{font-weight:700}
+.sh-torrent-overlay .tc-priority-row .tc-coverage{color:#e5dbf6;background:#46365d;border-color:#8f79aa80}
+.sh-torrent-overlay .tc-secondary-row .ctr-chip{padding:.09em .4em;border-color:#ffffff12;background:#0d0c14a8;color:#aaa4b3;font-size:.94em}
+.sh-torrent-overlay .tc-secondary-row .tc-resolution{color:#c9c2d3}
+.sh-torrent-overlay .tc-audio{align-self:stretch;display:flex;flex-direction:column;justify-content:center;padding-left:.68em;border-left:1px solid #ffffff1b;line-height:1.42}
+.sh-torrent-overlay .tc-audio-label{display:flex;align-items:flex-start;gap:.38em;font-size:.98em;font-weight:700;color:#eee9f4}
+.sh-torrent-overlay .tc-audio-label.is-ua::before{content:'◖';color:#f2ce34;font-size:1.2em;line-height:1.1}
+.sh-torrent-overlay .tc-voice{color:#c4b9d0;font-size:.88em;line-height:1.35}
+.sh-torrent-overlay .tc-subtitles{color:#9892a5;font-size:.82em;line-height:1.35}
+.sh-torrent-overlay .ctr-metrics{display:flex;flex-direction:column;justify-content:center;gap:.24em;align-self:stretch;min-width:0;padding:.35em .48em .35em .58em;border-left:1px solid #ffffff1b;border-radius:.42em;background:linear-gradient(90deg,#ffffff07,#ffffff02);font-variant-numeric:tabular-nums}
+.sh-torrent-overlay .tc-health{display:flex;flex-direction:column;align-items:flex-end;gap:.05em;line-height:1.25;white-space:nowrap}
+.sh-torrent-overlay .tc-seeds{font-size:.82em;font-weight:750;color:#66d7b0}
+.sh-torrent-overlay .tc-peers{font-size:.7em;color:#a6bbaa}
+.sh-torrent-overlay .ctr-size{padding-top:.16em;border-top:1px solid #ffffff12;font-size:.96em;line-height:1.25}
+.sh-torrent-overlay .tc-play{width:2.45em;height:2.45em;background:linear-gradient(145deg,#67527d,#40344e);border:1px solid #ad99bf70;box-shadow:inset 0 1px 0 #ffffff27;color:#fff}
+.sh-torrent-overlay .tc-info{width:2.05em;min-height:2.05em;border:1px solid #ffffff22;border-radius:50%;background:#ffffff07;color:#d5cddd}
+.sh-torrent-overlay .ctr-best{background:linear-gradient(135deg,#66522d,#3b3020);border-color:#c9a75385;color:#f4d878;box-shadow:inset 0 1px 0 #fff2,0 .15em .45em #b38c2518}
+.sh-torrent-overlay .tc-details{padding:.75em .78em .65em;border:1px solid #ffffff19;border-radius:.7em;background:linear-gradient(135deg,#282231,#1c1925 60%,#17151f);box-shadow:inset 0 1px 0 #ffffff09}
+.sh-torrent-overlay .tc-raw-title{font-size:.93em;font-weight:650;color:#eee9f5;line-height:1.45;overflow-wrap:anywhere;word-break:break-word;margin-bottom:.55em}
+.sh-torrent-overlay .tc-technical{gap:.42em;padding-top:.05em}
+.sh-torrent-overlay .tc-section{min-height:5.2em;padding:.52em .68em .45em;border:1px solid #ffffff15;border-radius:.52em;background:linear-gradient(150deg,#ffffff0b,#ffffff03);box-shadow:inset 0 1px 0 #ffffff08}
+.sh-torrent-overlay .tc-section:first-child{padding-left:.68em}
+.sh-torrent-overlay .tc-section-head{gap:.45em;margin-bottom:.34em;color:#f0ebf7}
+.sh-torrent-overlay .tc-section-icon{width:1.45em;height:1.45em;border-radius:.35em;background:#a38cb323;color:#c7b3dc}
+.sh-torrent-overlay .tc-audio-section .tc-section-icon{color:#f0d165;background:#b6973325}
+.sh-torrent-overlay .tc-subtitle-section .tc-section-icon{color:#a9c7f2;background:#5d82ba22}
+.sh-torrent-overlay .tc-files-section .tc-section-icon{color:#b9b0c8;background:#ffffff0c}
+.sh-torrent-overlay .tc-section-line{font-size:.8em;line-height:1.45;color:#c7c0d1;overflow-wrap:anywhere;word-break:break-word}
+.sh-torrent-overlay .tc-match-note{padding:.3em .48em;border-left:2px solid #c8a34f66;background:#c8a34f0a}
+@media(max-width:1000px){.sh-torrent-overlay .ctr-row{grid-template-columns:3.5em minmax(0,1.2fr) minmax(0,.95fr) 5.7em 2.1em 1.2em}.sh-torrent-overlay .ctr-release-info .ctr-name{font-size:.96em}.sh-torrent-overlay .tc-audio{padding-left:.42em}.sh-torrent-overlay .ctr-metrics{padding-inline:.34em}.sh-torrent-overlay .tc-section{padding:.4em .45em}.sh-torrent-overlay .tc-section:first-child{padding-left:.45em}}

@@ -15,6 +15,22 @@ test('missing popup adapter leaves native Torrent button unclaimed instead of mo
 const movie={id:47,title:'Дюна',original_title:'Dune',release_date:'2021-01-01',media_type:'movie'},tv={id:48,name:'Frieren',original_name:'Frieren',first_air_date:'2023-01-01',media_type:'tv'};
 test('full release title preserves parser spelling, edition, year and raw transport exactly',()=>{const {api}=apiFixture(),source=Object.freeze({Title:'Dune.2021.2160p.WEB-DL.HDR.HEVC.Ukr.Eng',MagnetUri:'magnet:?xt=urn:btih:abc&dn=raw',InfoHash:'a'.repeat(40),Seeders:40});const before=JSON.stringify(source),view=api.releaseView(source,movie,'movie');assert.equal(view.title,source.Title);assert.match(view.release,/WEB-DL.*HDR/);assert.equal(view.raw,source.Title);assert.equal(JSON.stringify(source),before);});
 test('foreign release does not borrow the current movie title/year',()=>{const {api}=apiFixture();assert(!api.releaseView({Title:'Alien.1979.1080p'},movie,'movie').title.includes('Дюна'));assert.equal(api.releaseView({Title:'Alien.1979.1080p'},movie,'movie').title,'Alien.1979.1080p');});
+test('display identity uses only the torrent title, verified year, coverage and technical tokens',()=>{
+ const {api}=apiFixture(),cases=[
+  [{Title:'Dune.2021.2160p.WEB-DL.HDR.HEVC.Ukr.Eng'},'movie',{name:'Dune',year:2021,coverage:''}],
+  [{Name:'Дюна.2021.1080p.BluRay'},'movie',{name:'Дюна',year:2021,coverage:''}],
+  [{Title:'The.Last.of.Us.S02E01-E03.2025.1080p.WEB-DL'},'tv',{name:'The Last of Us',year:2025,coverage:'S02E01–E03'}],
+  [{Title:'Frieren.S01-S03.2023.2160p.WEB-DL'},'tv',{name:'Frieren',year:2023,coverage:'S01–S03'}],
+  [{Title:'Blue.Eye.Samurai.Complete.Season.2.1080p.WEBRip'},'tv',{name:'Blue Eye Samurai',coverage:'Complete Season 2'}],
+  [{Title:'葬送のフリーレン.S01E03.2023.1080p.WEB-DL'},'tv',{name:'葬送のフリーレン',year:2023,coverage:'S01E03'}],
+  [{Title:'이상한 변호사 우영우 2022 1080p WEB-DL'},'tv',{name:'이상한 변호사 우영우',year:2022,coverage:''}],
+  [{Title:'Невідомий мультфільм українською'},'movie',{name:'Невідомий мультфільм українською',year:null,coverage:''}],
+  [{Title:'超長い映画の題名 非常に長い多言語のリリース名 '.repeat(18)+'2160p WEB-DL'},'movie',{name:'超長い映画の題名 非常に長い多言語のリリース名 '.repeat(18).trim(),coverage:''}]
+ ];
+ for(const [source,kind,want] of cases){const identity=api.releaseView(source,movie,kind).identity;for(const [key,value]of Object.entries(want))assert.equal(identity[key],value,source.Title);}
+ const technical=api.releaseView({Title:'Dune.2021.2160p.WEB-DL.HDR10.DV.HEVC.Ukr.Eng'},movie,'movie').identity;assert.equal(technical.resolution,'2160');assert.equal(technical.releaseType,'WEB-DL');assert.deepEqual(Array.from(technical.flags),['HDR10','Dolby Vision']);assert.equal(technical.codec,'HEVC');
+ const raw='超長い映画の題名 非常に長い多言語のリリース名 '.repeat(18)+'2160p WEB-DL';assert.equal(api.releaseView({Title:raw},movie,'movie').raw,raw,'expanded details retain the full, unmodified source title');
+});
 for(const [raw,want] of [['Frieren.S01E03.1080p','S01E03'],['Frieren.S02E01-E12.2160p','S02E01–E12'],['Frieren.S01E01-S01E12','S01E01–E12'],['Frieren.1x03','S01E03'],['Frieren.Season 2','S02'],['Frieren.Сезон 2','S02'],['Frieren.1 сезон, 1-12 серії','S01E01–E12'],['Frieren.[01-12].1080p','E01–E12'],['Frieren.S01-S03','S01–S03'],['Frieren.E05','E05'],['Frieren.2023.1080p.x265.10bit','епізоди не визначено']])test('verified release coverage: '+raw,()=>assert.equal(apiFixture().api.coverage(raw,{}),want));
 test('localized anime/dorama and unknown titles remain readable without inventing a season',()=>{const {api}=apiFixture();for(const title of ['葬送のフリーレン','이상한 변호사 우영우']){const meta={...tv,name:title,original_name:title};assert.equal(api.releaseView({Title:title+'.2023.1080p'},meta,'tv').title,title+'.2023.1080p');}});
 test('cache identity isolates account/profile/title/type/source/query/season/episode/epoch',()=>{const {api,c}=apiFixture(),params={movie,search:'Dune'};const key=api.key(params,'movie',0);for(const p of [{...params,movie:{...movie,id:48}},{...params,movie:{...movie,source:'cub'}},{...params,search:'Other'},{...params,season:2},{...params,episode:3},{...params,filter_episode:4}])assert.notEqual(api.key(p,'movie',0),key);assert.notEqual(api.key(params,'tv',0),key);assert.notEqual(api.key(params,'movie',1),key);c.Lampa.Account.Permit.account.profile.id='b';assert.notEqual(api.key(params,'movie',0),key);c.Lampa.Account.Permit.account.id=2;assert.notEqual(api.key(params,'movie',0),key);assert(!key.includes('token'));});

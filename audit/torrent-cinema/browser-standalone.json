@@ -44,19 +44,23 @@
     "/lampa/torrents-redesign.js",
     "/lampa/loader.js"
   ],
-  "commit": "44d5047e4d6adf104d454376d47d2310f67a94bb",
+  "commit": "3a541694d4712151b1a65a54911510300e4fcd89",
   "branch": "feat/issue-117-torrent-cinema",
   "fixture": true,
   "assets": {
     "ui/torrent-cinema.js": {
       "url": "https://gorlim590.github.io/lampa/ui/torrent-cinema.js",
-      "sha256": "683fb0868402b4552c4a5bce39822d8cd6a0999fea976296884995c223cb6467",
-      "bytes": 139476
+      "sha256": "31f957e6839b17b5b51761480812a155510b0943d003fac57492905d15de85bf",
+      "bytes": 147934
     }
   },
   "checks": [
     {
       "name": "installation boundary",
+      "status": "PASS"
+    },
+    {
+      "name": "release identity and metadata hierarchy",
       "status": "PASS"
     },
     {
@@ -80,25 +84,25 @@
           "x": 100.75,
           "y": 221.9375,
           "width": 1078.375,
-          "height": 102.125,
+          "height": 128.875,
           "right": 1179.125,
-          "bottom": 324.0625
+          "bottom": 350.8125
         },
         "lastVisibleRow": {
           "x": 100.75,
-          "y": 514.875,
+          "y": 465.8125,
           "width": 1078.375,
-          "height": 85.375,
+          "height": 101.625,
           "right": 1179.125,
-          "bottom": 600.25
+          "bottom": 567.4375
         },
         "focus": {
           "x": 100.75,
           "y": 221.9375,
           "width": 1078.375,
-          "height": 102.125,
+          "height": 128.875,
           "right": 1179.125,
-          "bottom": 324.0625
+          "bottom": 350.8125
         },
         "filters": {
           "x": 96.75,
@@ -108,7 +112,7 @@
           "right": 1183.125,
           "bottom": 210.5
         },
-        "visibleRows": 4,
+        "visibleRows": 3,
         "filterOverflow": 0,
         "horizontalOverflow": 0,
         "font": 16,
@@ -149,25 +153,25 @@
             "x": 100.75,
             "y": 221.9375,
             "width": 1078.375,
-            "height": 253.875,
+            "height": 295.375,
             "right": 1179.125,
-            "bottom": 475.8125
+            "bottom": 517.3125
           },
           "lastVisibleRow": {
             "x": 100.75,
-            "y": 574.5625,
+            "y": 524,
             "width": 1078.375,
-            "height": 85.375,
+            "height": 101.625,
             "right": 1179.125,
-            "bottom": 659.9375
+            "bottom": 625.625
           },
           "focus": {
             "x": 1142.6875,
-            "y": 260.1875,
-            "width": 21.5625,
-            "height": 25.5625,
-            "right": 1164.25,
-            "bottom": 285.75
+            "y": 273.25,
+            "width": 26.1875,
+            "height": 26.1875,
+            "right": 1168.875,
+            "bottom": 299.4375
           },
           "filters": {
             "x": 96.75,
@@ -177,7 +181,7 @@
             "right": 1183.125,
             "bottom": 210.5
           },
-          "visibleRows": 3,
+          "visibleRows": 2,
           "filterOverflow": 0,
           "horizontalOverflow": 0,
           "font": 16,
@@ -191,6 +195,10 @@
     },
     {
       "name": "inline opens 1280",
+      "status": "PASS"
+    },
+    {
+      "name": "expanded Video/Audio/Subtitles/Files sections 1280",
       "status": "PASS"
     },
     {
@@ -214,25 +222,25 @@
           "x": 152.0625,
           "y": 308.375,
           "width": 1615.8125,
-          "height": 131.6875,
+          "height": 165.5625,
           "right": 1767.875,
-          "bottom": 440.0625
+          "bottom": 473.9375
         },
         "lastVisibleRow": {
           "x": 152.0625,
-          "y": 820.125,
+          "y": 772.375,
           "width": 1615.8125,
-          "height": 114.4375,
+          "height": 135.4375,
           "right": 1767.875,
-          "bottom": 934.5625
+          "bottom": 907.8125
         },
         "focus": {
           "x": 152.0625,
           "y": 308.375,
           "width": 1615.8125,
-          "height": 131.6875,
+          "height": 165.5625,
           "right": 1767.875,
-          "bottom": 440.0625
+          "bottom": 473.9375
         },
         "filters": {
           "x": 146.625,
@@ -242,7 +250,7 @@
           "right": 1773.3125,
           "bottom": 292.6875
         },
-        "visibleRows": 5,
+        "visibleRows": 4,
         "filterOverflow": 0,
         "horizontalOverflow": 0,
         "font": 22,
@@ -283,25 +291,25 @@
             "x": 152.0625,
             "y": 308.375,
             "width": 1615.8125,
-            "height": 338.75,
+            "height": 388.75,
             "right": 1767.875,
-            "bottom": 647.125
+            "bottom": 697.125
           },
           "lastVisibleRow": {
             "x": 152.0625,
-            "y": 779.9375,
+            "y": 850.9375,
             "width": 1615.8125,
-            "height": 114.4375,
+            "height": 135.4375,
             "right": 1767.875,
-            "bottom": 894.375
+            "bottom": 986.375
           },
           "focus": {
             "x": 1719.25,
-            "y": 356.625,
-            "width": 29.6875,
-            "height": 35.1875,
-            "right": 1748.9375,
-            "bottom": 391.8125
+            "y": 373.125,
+            "width": 36.0625,
+            "height": 36.0625,
+            "right": 1755.3125,
+            "bottom": 409.1875
           },
           "filters": {
             "x": 146.625,
@@ -328,6 +336,10 @@
       "status": "PASS"
     },
     {
+      "name": "expanded Video/Audio/Subtitles/Files sections 1920",
+      "status": "PASS"
+    },
+    {
       "name": "layout 3840",
       "status": "PASS",
       "details": {
@@ -348,25 +360,25 @@
           "x": 300.25,
           "y": 587.5,
           "width": 3239.4375,
-          "height": 239.9375,
+          "height": 299.8125,
           "right": 3539.6875,
-          "bottom": 827.4375
+          "bottom": 887.3125
         },
         "lastVisibleRow": {
           "x": 300.25,
-          "y": 1564,
+          "y": 1460.5,
           "width": 3239.4375,
-          "height": 220.9375,
+          "height": 258.9375,
           "right": 3539.6875,
-          "bottom": 1784.9375
+          "bottom": 1719.4375
         },
         "focus": {
           "x": 300.25,
           "y": 587.5,
           "width": 3239.4375,
-          "height": 239.9375,
+          "height": 299.8125,
           "right": 3539.6875,
-          "bottom": 827.4375
+          "bottom": 887.3125
         },
         "filters": {
           "x": 289.3125,
@@ -376,7 +388,7 @@
           "right": 3550.625,
           "bottom": 556
         },
-        "visibleRows": 5,
+        "visibleRows": 4,
         "filterOverflow": 0,
         "horizontalOverflow": 0,
         "font": 44,
@@ -417,25 +429,25 @@
             "x": 300.25,
             "y": 587.5,
             "width": 3239.4375,
-            "height": 651.25,
+            "height": 731.0625,
             "right": 3539.6875,
-            "bottom": 1238.75
+            "bottom": 1318.5625
           },
           "lastVisibleRow": {
             "x": 300.25,
-            "y": 1735.9375,
+            "y": 1614.375,
             "width": 3239.4375,
-            "height": 220.9375,
+            "height": 258.9375,
             "right": 3539.6875,
-            "bottom": 1956.875
+            "bottom": 1873.3125
           },
           "focus": {
             "x": 3446.4375,
-            "y": 672.25,
-            "width": 59.375,
-            "height": 70.375,
-            "right": 3505.8125,
-            "bottom": 742.625
+            "y": 701.3125,
+            "width": 72.125,
+            "height": 72.125,
+            "right": 3518.5625,
+            "bottom": 773.4375
           },
           "filters": {
             "x": 289.3125,
@@ -445,7 +457,7 @@
             "right": 3550.625,
             "bottom": 556
           },
-          "visibleRows": 4,
+          "visibleRows": 3,
           "filterOverflow": 0,
           "horizontalOverflow": 0,
           "font": 44,
@@ -459,6 +471,10 @@
     },
     {
       "name": "inline opens 3840",
+      "status": "PASS"
+    },
+    {
+      "name": "expanded Video/Audio/Subtitles/Files sections 3840",
       "status": "PASS"
     },
     {
@@ -575,25 +591,25 @@
         "x": 100.75,
         "y": 221.9375,
         "width": 1078.375,
-        "height": 102.125,
+        "height": 128.875,
         "right": 1179.125,
-        "bottom": 324.0625
+        "bottom": 350.8125
       },
       "lastVisibleRow": {
         "x": 100.75,
-        "y": 514.875,
+        "y": 465.8125,
         "width": 1078.375,
-        "height": 85.375,
+        "height": 101.625,
         "right": 1179.125,
-        "bottom": 600.25
+        "bottom": 567.4375
       },
       "focus": {
         "x": 100.75,
         "y": 221.9375,
         "width": 1078.375,
-        "height": 102.125,
+        "height": 128.875,
         "right": 1179.125,
-        "bottom": 324.0625
+        "bottom": 350.8125
       },
       "filters": {
         "x": 96.75,
@@ -603,7 +619,7 @@
         "right": 1183.125,
         "bottom": 210.5
       },
-      "visibleRows": 4,
+      "visibleRows": 3,
       "filterOverflow": 0,
       "horizontalOverflow": 0,
       "font": 16,
@@ -644,25 +660,25 @@
           "x": 100.75,
           "y": 221.9375,
           "width": 1078.375,
-          "height": 253.875,
+          "height": 295.375,
           "right": 1179.125,
-          "bottom": 475.8125
+          "bottom": 517.3125
         },
         "lastVisibleRow": {
           "x": 100.75,
-          "y": 574.5625,
+          "y": 524,
           "width": 1078.375,
-          "height": 85.375,
+          "height": 101.625,
           "right": 1179.125,
-          "bottom": 659.9375
+          "bottom": 625.625
         },
         "focus": {
           "x": 1142.6875,
-          "y": 260.1875,
-          "width": 21.5625,
-          "height": 25.5625,
-          "right": 1164.25,
-          "bottom": 285.75
+          "y": 273.25,
+          "width": 26.1875,
+          "height": 26.1875,
+          "right": 1168.875,
+          "bottom": 299.4375
         },
         "filters": {
           "x": 96.75,
@@ -672,7 +688,7 @@
           "right": 1183.125,
           "bottom": 210.5
         },
-        "visibleRows": 3,
+        "visibleRows": 2,
         "filterOverflow": 0,
         "horizontalOverflow": 0,
         "font": 16,
@@ -701,25 +717,25 @@
         "x": 152.0625,
         "y": 308.375,
         "width": 1615.8125,
-        "height": 131.6875,
+        "height": 165.5625,
         "right": 1767.875,
-        "bottom": 440.0625
+        "bottom": 473.9375
       },
       "lastVisibleRow": {
         "x": 152.0625,
-        "y": 820.125,
+        "y": 772.375,
         "width": 1615.8125,
-        "height": 114.4375,
+        "height": 135.4375,
         "right": 1767.875,
-        "bottom": 934.5625
+        "bottom": 907.8125
       },
       "focus": {
         "x": 152.0625,
         "y": 308.375,
         "width": 1615.8125,
-        "height": 131.6875,
+        "height": 165.5625,
         "right": 1767.875,
-        "bottom": 440.0625
+        "bottom": 473.9375
       },
       "filters": {
         "x": 146.625,
@@ -729,7 +745,7 @@
         "right": 1773.3125,
         "bottom": 292.6875
       },
-      "visibleRows": 5,
+      "visibleRows": 4,
       "filterOverflow": 0,
       "horizontalOverflow": 0,
       "font": 22,
@@ -770,25 +786,25 @@
           "x": 152.0625,
           "y": 308.375,
           "width": 1615.8125,
-          "height": 338.75,
+          "height": 388.75,
           "right": 1767.875,
-          "bottom": 647.125
+          "bottom": 697.125
         },
         "lastVisibleRow": {
           "x": 152.0625,
-          "y": 779.9375,
+          "y": 850.9375,
           "width": 1615.8125,
-          "height": 114.4375,
+          "height": 135.4375,
           "right": 1767.875,
-          "bottom": 894.375
+          "bottom": 986.375
         },
         "focus": {
           "x": 1719.25,
-          "y": 356.625,
-          "width": 29.6875,
-          "height": 35.1875,
-          "right": 1748.9375,
-          "bottom": 391.8125
+          "y": 373.125,
+          "width": 36.0625,
+          "height": 36.0625,
+          "right": 1755.3125,
+          "bottom": 409.1875
         },
         "filters": {
           "x": 146.625,
@@ -827,25 +843,25 @@
         "x": 300.25,
         "y": 587.5,
         "width": 3239.4375,
-        "height": 239.9375,
+        "height": 299.8125,
         "right": 3539.6875,
-        "bottom": 827.4375
+        "bottom": 887.3125
       },
       "lastVisibleRow": {
         "x": 300.25,
-        "y": 1564,
+        "y": 1460.5,
         "width": 3239.4375,
-        "height": 220.9375,
+        "height": 258.9375,
         "right": 3539.6875,
-        "bottom": 1784.9375
+        "bottom": 1719.4375
       },
       "focus": {
         "x": 300.25,
         "y": 587.5,
         "width": 3239.4375,
-        "height": 239.9375,
+        "height": 299.8125,
         "right": 3539.6875,
-        "bottom": 827.4375
+        "bottom": 887.3125
       },
       "filters": {
         "x": 289.3125,
@@ -855,7 +871,7 @@
         "right": 3550.625,
         "bottom": 556
       },
-      "visibleRows": 5,
+      "visibleRows": 4,
       "filterOverflow": 0,
       "horizontalOverflow": 0,
       "font": 44,
@@ -896,25 +912,25 @@
           "x": 300.25,
           "y": 587.5,
           "width": 3239.4375,
-          "height": 651.25,
+          "height": 731.0625,
           "right": 3539.6875,
-          "bottom": 1238.75
+          "bottom": 1318.5625
         },
         "lastVisibleRow": {
           "x": 300.25,
-          "y": 1735.9375,
+          "y": 1614.375,
           "width": 3239.4375,
-          "height": 220.9375,
+          "height": 258.9375,
           "right": 3539.6875,
-          "bottom": 1956.875
+          "bottom": 1873.3125
         },
         "focus": {
           "x": 3446.4375,
-          "y": 672.25,
-          "width": 59.375,
-          "height": 70.375,
-          "right": 3505.8125,
-          "bottom": 742.625
+          "y": 701.3125,
+          "width": 72.125,
+          "height": 72.125,
+          "right": 3518.5625,
+          "bottom": 773.4375
         },
         "filters": {
           "x": 289.3125,
@@ -924,7 +940,7 @@
           "right": 3550.625,
           "bottom": 556
         },
-        "visibleRows": 4,
+        "visibleRows": 3,
         "filterOverflow": 0,
         "horizontalOverflow": 0,
         "font": 44,
@@ -947,7 +963,7 @@
   "hostStartupExceptions": [
     "SyntaxError: Failed to execute 'appendChild' on 'Node': Unexpected token '&'\n    at [URL]"
   ],
-  "openMs": 270.8999999994412,
+  "openMs": 381.59999999962747,
   "deviceEquivalent": {
     "viewport": [
       1920,
@@ -966,25 +982,25 @@
       "x": 152.0625,
       "y": 308.375,
       "width": 1615.8125,
-      "height": 131.6875,
+      "height": 165.5625,
       "right": 1767.875,
-      "bottom": 440.0625
+      "bottom": 473.9375
     },
     "lastVisibleRow": {
       "x": 152.0625,
-      "y": 820.125,
+      "y": 772.375,
       "width": 1615.8125,
-      "height": 114.4375,
+      "height": 135.4375,
       "right": 1767.875,
-      "bottom": 934.5625
+      "bottom": 907.8125
     },
     "focus": {
       "x": 152.0625,
       "y": 308.375,
       "width": 1615.8125,
-      "height": 131.6875,
+      "height": 165.5625,
       "right": 1767.875,
-      "bottom": 440.0625
+      "bottom": 473.9375
     },
     "filters": {
       "x": 146.625,
@@ -994,7 +1010,7 @@
       "right": 1773.3125,
       "bottom": 292.6875
     },
-    "visibleRows": 5,
+    "visibleRows": 4,
     "filterOverflow": 0,
     "horizontalOverflow": 0,
     "font": 22,

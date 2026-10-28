@@ -179,7 +179,7 @@ test('Hybrid popup rows display confirmed anime audio/studio tracks and reject t
   const chips = amanogawa.row.textContent;
   assert.match(amanogawa.row.querySelector('.tc-audio-label').textContent, /Українська \/ Японська/);
   assert.match(chips, /Амоногава/);
-  assert.doesNotMatch(chips, /Багатоголосе/);
+  assert.match(amanogawa.row.querySelector('.tc-voice').textContent, /Багатоголосе/);
   assert.match(amanogawa.row.querySelector('.tc-subtitles').textContent, /English/);
   assert.equal(wrongSeason.row.classList.contains('is-best'), false);
   assert.doesNotMatch(ambiguousGroup.row.textContent, /Студія невідома/);
@@ -438,6 +438,18 @@ test('quality and tracker filter bands remain independent and ordered for remote
  f.st.last=qualityAll;f.context.streamMove(f.record,'down');assert.equal(f.focus.current,f.st.displayRows[0],'down from quality row enters the release list');
 });
 
+test('compact cards lead with the actual release identity, then technical badges and verified audio',()=>{
+ const f=fixture(),source=f.release('The.Last.of.Us.S02E01-E03.2025.2160p.WEB-DL.HDR10.DV.HEVC.Ukr.Eng','Toloka',{AudioLanguages:['uk','en'],VoiceoverType:'multi-voice',VoiceoverStudio:'Контрольна студія'});
+ f.context.streamUpdateRows(f.st);const row=source.row,raw=source.source.Title;
+ assert.equal(row.querySelector('.ctr-name').textContent,'The Last of Us (2025)');
+ assert.match(row.querySelector('.tc-priority-row').textContent,/S02E01–E03/);
+ assert.match(row.querySelector('.tc-priority-row').textContent,/UA/);
+ assert.match(row.querySelector('.tc-priority-row').textContent,/Toloka/);
+ assert.match(row.querySelector('.tc-secondary-row').textContent,/4K/);assert.match(row.querySelector('.tc-secondary-row').textContent,/WEB-DL/);assert.match(row.querySelector('.tc-secondary-row').textContent,/HDR10/);assert.match(row.querySelector('.tc-secondary-row').textContent,/HEVC/);
+ assert.match(row.querySelector('.tc-audio-label').textContent,/Українська \/ English/);assert.match(row.querySelector('.tc-voice').textContent,/Багатоголосе · Контрольна студія/);
+ assert.equal(row.querySelector('.tc-raw-title').textContent,raw,'expanded detail preserves the original torrent title');
+});
+
 
 test('streaming replacement restores the selected source identity without reusing a different row',()=>{
  const f=fixture(),first=f.release('The Others (2001) 1080p','Toloka',{InfoHash:'a'.repeat(40)}),second=f.release('The Others (2001) 720p','Mazepa',{InfoHash:'b'.repeat(40)});
@@ -452,7 +464,7 @@ test('streaming replacement restores the selected source identity without reusin
 test('expanded video details retain quality, HDR/Dolby Vision and codec from the existing metadata adapter',()=>{
  const f=fixture(),release=f.release('The Others (2001) 2160p WEB-DL HDR10 Dolby Vision HEVC','Toloka',{AudioLanguages:['uk']});
  f.context.streamUpdateRows(f.st);const details=release.row.querySelector('.tc-technical').textContent;
-  assert.match(details,/ВідеоHEVC2160p \/ 4K/);assert.match(details,/HDR10/);assert.match(details,/DV/);assert.match(details,/HEVC/);
+  assert.match(details,/Відео2160p \/ 4K/);assert.match(details,/HDR10/);assert.match(details,/Dolby Vision/);assert.match(details,/HEVC/);
   assert.match(details,/АудіоУкраїнська/);assert.match(details,/Субтитри/);assert.match(details,/Файли/);
  assert.equal(release.row.querySelector('.tc-open-files'),null);
 });
