@@ -14,7 +14,7 @@ test('description action is outside ButtonsPlus generic movie-action rewriting',
 test('native enter toggles inline expansion without replacing text or changing focus',()=>{const f=fixture();f.context.setupDescription(f.record,f.description);const button=f.buttons[0],enter=f.handlers.get(button);enter();assert.equal(button.getAttribute('aria-expanded'),'true');assert.equal(button.textContent,'Показати менше');assert(f.classes.has('sh-description-expanded'));enter();assert.equal(button.textContent,'Показати більше');assert.equal(button.getAttribute('aria-expanded'),'false');});
 test('theme cleanup removes the exact action/handler and reactivation is collapsed',()=>{const f=fixture();f.context.setupDescription(f.record,f.description);f.handlers.get(f.buttons[0])();f.context.clearDescription(f.record);assert.equal(f.buttons.length,0);assert.equal(f.handlers.size,0);assert.equal(f.record.descriptionToggle,null);assert(!f.classes.has('sh-description-expanded'));f.context.setupDescription(f.record,f.description);assert.equal(f.buttons[0].getAttribute('aria-expanded'),'false');});
 test('description state is owned by one detail instance, not shared by media type',()=>{const f=fixture(),other={root:f.root};f.context.setupDescription(f.record,f.description);f.context.setupDescription(other,f.description);f.handlers.get(f.record.descriptionToggle)();assert.equal(other.descriptionToggle.getAttribute('aria-expanded'),'false');});
-test('profile Select never inherits the focused torrent filter surface',()=>{let cleared=0;const context={menuOpen:true,clearStreamSelect:()=>cleared++};vm.createContext(context);vm.runInContext(source.slice(source.indexOf('    function onStreamSelect('),source.indexOf('    function setupStreamTools(')),context);context.onStreamSelect({});assert.equal(cleared,1);});
+test('profile Select never inherits the focused torrent filter surface',()=>{let cleared=0;const runtime=fs.readFileSync(__dirname+'/../ui/torrent-cinema/runtime.js','utf8'),context={Lampa:{Controller:{enabled:()=>({name:'sh_profile'})}},clearStreamSelect:()=>cleared++};vm.createContext(context);vm.runInContext(runtime.slice(runtime.indexOf('    function onStreamSelect('),runtime.indexOf('    function setupStreamTools(')),context);context.onStreamSelect({});assert.equal(cleared,1);});
 
 function nativeReadinessFixture(max=3){
  const timers=new Map(),listeners=[];let id=0,prepared=0,removed=0;
@@ -53,7 +53,7 @@ test('Up from every native action visits personal rating before delegating to th
 test('Native menu controller expands the existing sidebar and leaving it restores the compact rail',()=>{
  const classes=new Set(),context={document:{body:{classList:{toggle:(name,on)=>on?classes.add(name):classes.delete(name)}}},movieRecords:[],Lampa:{}};
  const sync=source.match(/    function syncNavigationState\(name\) \{[\s\S]*?\n    \}/)[0];
- const start=source.indexOf('    function onStreamController(event) {'),end=source.indexOf('    function onStreamProfile(',start);
+ const start=source.indexOf('    function onStreamController(event) {'),end=source.indexOf('    function actionLabel(',start);
  vm.createContext(context);vm.runInContext(sync+'\n'+source.slice(start,end),context);
  context.onStreamController({name:'menu'});assert(classes.has('sh-navigation-expanded'));
  context.onStreamController({name:'main'});assert(!classes.has('sh-navigation-expanded'));
@@ -78,3 +78,7 @@ test('Hybrid Settings rail skips explicitly hidden folders and isolates plugin c
  assert.equal(activeRail.children[0].getAttribute('data-sh-settings-component'),'bandera_online');
  activeRail.children[0].focused=true;c.focusSettingsCategory(1);assert.equal(activeRail.querySelector('.focus').textContent,'UaKomentsY');
 });
+
+// The existing Hybrid CI boundary also verifies the independently owned torrent UI.
+require('./torrent-cinema-lifecycle.cjs');
+require('./torrent-cinema-inline.cjs');

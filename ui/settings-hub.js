@@ -17,7 +17,7 @@
     ];
     var owners = {ydesign:'ui/design-optimized.js', interface_mod_new:'ui/interface-plus.js', cardify:'ui/cardify-plus.js',
         trakt:'trakt/trakt.js', trakt_plus:'trakt/trakt-plus.js', home_history:'plugins-to-enable/home-history.js',
-        torrents_cinema:'torrents-redesign.js', screensaver_plus:'ui/screensaver-plus.js',
+        torrents_cinema:'ui/torrent-cinema.js', screensaver_plus:'ui/screensaver-plus.js',
         omdb_config_ui:'media/average-rating.js', omdb_ratings_select:'media/average-rating.js',
         ytranslate:'localization/translate.js', menu_filter:'ui/menu-hide.js'};
     function clean(value) { return typeof value === 'string' ? value.replace(/<[^>]*>/g, '').replace(/https?:\/\/\S+|[\w.+-]+@[\w.-]+\.[a-z]{2,}/ig, '[приховано]').slice(0, 220) : ''; }

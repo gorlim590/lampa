@@ -1,3 +1,5 @@
+> **Torrent Cinema 2.0 (#117):** встановлюйте тільки <https://gorlim590.github.io/lampa/ui/torrent-cinema.js>. Hybrid завантажує його автоматично. `torrents-redesign.js` і `ui/torrent-overlay.js` — короткі compatibility aliases до одного owner. Стару custom standalone-панель прибрано, native torrent/Files/player збережено. [Поточна архітектура, міграція й перевірки](docs/torrent-cinema.md). Нижче залишено попередні контрольні точки.
+
 # Торенти · Кіно 1.2.0-audit
 
 Локальна версія для перегляду й тестування в Lampa на Google TV. Основний файл — `torrents-redesign.js`, зі своїми стилями, без нових бібліотек і зовнішніх шрифтів. Результат аудиту призначений для окремої гілки `audit/torrents-cinema-20261022`; main не змінюється.

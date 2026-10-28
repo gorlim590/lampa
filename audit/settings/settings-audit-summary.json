@@ -20,9 +20,9 @@
     "recordedDuplicateIds": 5,
     "distinctControlsExercised": 65,
     "phaseDistinctControlsExercised": 26,
-    "verifiedInIsolation": 62,
+    "verifiedInIsolation": 54,
     "partiallyExercisedInIsolation": 3,
-    "phaseVerifiedInIsolation": 24,
+    "phaseVerifiedInIsolation": 16,
     "phasePartiallyExercisedInIsolation": 2
   },
   "functionalTests": {
@@ -127,13 +127,13 @@
     },
     "torrents": {
       "total": 62,
-      "verifiedIsolated": 18,
+      "verifiedIsolated": 10,
       "verifiedRuntime": 0,
       "broken": 0,
       "partial": 0,
       "fixedSourceRuntimeUnverified": 0,
       "unsupported": 0,
-      "unverified": 44,
+      "unverified": 52,
       "unavailable": 0
     },
     "trakt": {
@@ -1320,8 +1320,8 @@
       "label": "Тема",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "registration",
-      "status": "Verified in isolated tests",
-      "evidence": "Actual minimum-theme resolver reads disposable Storage",
+      "status": "Retired in Torrent Cinema 2.0; stored value preserved",
+      "evidence": "Canonical settings omit obsolete standalone controls; stored values remain untouched for rollback.",
       "liveRuntimeStatus": "Not verified",
       "testFile": "tests/settings-functional.cjs",
       "mockedDependencies": [
@@ -1379,8 +1379,8 @@
       "label": "Інтенсивність акцентного сяйва",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Verified in isolated tests",
-      "evidence": "Actual presentation owner maps intensity setting to CSS variable",
+      "status": "Retired in Torrent Cinema 2.0; stored value preserved",
+      "evidence": "Canonical settings omit obsolete standalone controls; stored values remain untouched for rollback.",
       "liveRuntimeStatus": "Not verified",
       "testFile": "tests/settings-functional.cjs",
       "mockedDependencies": [
@@ -1404,8 +1404,8 @@
       "label": "Непрозорість панелі (Google TV)",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Verified in isolated tests",
-      "evidence": "Actual presentation owner maps panel opacity setting to CSS variable",
+      "status": "Retired in Torrent Cinema 2.0; stored value preserved",
+      "evidence": "Canonical settings omit obsolete standalone controls; stored values remain untouched for rollback.",
       "liveRuntimeStatus": "Not verified",
       "testFile": "tests/settings-functional.cjs",
       "mockedDependencies": [
@@ -1429,8 +1429,8 @@
       "label": "Затемнення фону",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Verified in isolated tests",
-      "evidence": "Actual presentation owner maps backdrop darkness setting to CSS variable",
+      "status": "Retired in Torrent Cinema 2.0; stored value preserved",
+      "evidence": "Canonical settings omit obsolete standalone controls; stored values remain untouched for rollback.",
       "liveRuntimeStatus": "Not verified",
       "testFile": "tests/settings-functional.cjs",
       "mockedDependencies": [
@@ -1454,8 +1454,8 @@
       "label": "Картки",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Verified in isolated tests",
-      "evidence": "Actual presentation owner maps card density to row padding",
+      "status": "Retired in Torrent Cinema 2.0; stored value preserved",
+      "evidence": "Canonical settings omit obsolete standalone controls; stored values remain untouched for rollback.",
       "liveRuntimeStatus": "Not verified",
       "testFile": "tests/settings-functional.cjs",
       "mockedDependencies": [
@@ -1479,8 +1479,8 @@
       "label": "Рядків назви (повна назва у фокусі)",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Verified in isolated tests",
-      "evidence": "Actual presentation owner maps title-lines value to CSS variable",
+      "status": "Retired in Torrent Cinema 2.0; stored value preserved",
+      "evidence": "Canonical settings omit obsolete standalone controls; stored values remain untouched for rollback.",
       "liveRuntimeStatus": "Not verified",
       "testFile": "tests/settings-functional.cjs",
       "mockedDependencies": [
@@ -1545,8 +1545,8 @@
       "label": "Анімації",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Verified in isolated tests",
-      "evidence": "Actual presentation owner toggles motion class from mock Storage",
+      "status": "Retired in Torrent Cinema 2.0; stored value preserved",
+      "evidence": "Canonical settings omit obsolete standalone controls; stored values remain untouched for rollback.",
       "liveRuntimeStatus": "Not verified",
       "testFile": "tests/settings-functional.cjs",
       "mockedDependencies": [
@@ -1770,8 +1770,8 @@
       "label": "Оптимізація Google TV (без blur і масштабування)",
       "owner": "torrents-redesign.js",
       "ownerEvidence": "handler function fingerprint",
-      "status": "Verified in isolated tests",
-      "evidence": "Actual TV presentation owner toggles reduced-effects class from mock Storage",
+      "status": "Retired in Torrent Cinema 2.0; stored value preserved",
+      "evidence": "Canonical settings omit obsolete standalone controls; stored values remain untouched for rollback.",
       "liveRuntimeStatus": "Not verified",
       "testFile": "tests/settings-functional.cjs",
       "mockedDependencies": [
