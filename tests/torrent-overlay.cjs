@@ -59,3 +59,11 @@ test('each release rearms native Files return after the previous close consumed 
 function returnFixture(){const f=lifecycle();f.c.loadStreams(f.record);let recovered=0;const controller={},r=f.record;r.page={classList:{contains:()=>true}};f.c.movieRecords=[r];f.c.Lampa.Controller.enabled=()=>({controller});f.c.streamActivate=()=>{recovered++};vm.runInContext(hybrid.slice(hybrid.indexOf('    function onStreamController('),hybrid.indexOf('    function onStreamProfile(')),f.c);return {...f,get recovered(){return recovered}};}
 test('native player/content return restores the visible overlay controller',()=>{const f=returnFixture();for(const name of ['full_start','content'])f.c.onStreamController({name});assert.equal(f.recovered,2);for(const name of ['modal','select','player','player-loading','head'])f.c.onStreamController({name});assert.equal(f.recovered,2);});
 test('closed popup and obsolete activities cannot reclaim remote focus',()=>{for(const mode of ['closed','closing','obsolete','profile']){const f=returnFixture();if(mode==='closed')f.record.streamView.close();if(mode==='closing')f.record.streamChild.wantFocus=false;if(mode==='obsolete')f.active.activity={};if(mode==='profile')f.c.Lampa.Account.Permit.account.profile.id='b';f.c.onStreamController({name:'full_start'});assert.equal(f.recovered,0,mode);}});
+
+test('native Files modal has a higher stacking level than Torrent Cinema',()=>{
+ const css=fs.readFileSync(__dirname+'/../ui/torrent-cinema/style.css','utf8');
+ const overlay=/\.sh-torrent-overlay\{[^}]*z-index\s*:\s*(\d+)/.exec(css);
+ const files=/\.sh-files-modal\{[^}]*z-index\s*:\s*(\d+)\s*!important/.exec(css);
+ assert(overlay&&files,'both stacking levels must be explicit');
+ assert(Number(files[1])>Number(overlay[1]),'Files modal must stack above Torrent overlay');
+});
