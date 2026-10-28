@@ -2072,6 +2072,22 @@
     function cardRenderCurrent(el, data, render, id) {
         return el.isConnected && el._ydesign_render === render && el._ydesign_data === data && String(data.id) === id;
     }
+    function renderInitialCardPreview(el, data, contentLayer, applyBackground) {
+        var poster = data.poster_path || data.backdrop_path || ownImg(data);
+        if (poster) applyBackground(poster);
+        var title = data.title || data.name || data.original_title || data.original_name || '';
+        var preview = null;
+        if (title) {
+            preview = document.createElement('div');
+            preview.className = 'ydesign-initial-title ydesign-text-title';
+            preview.textContent = String(title);
+            contentLayer.appendChild(preview);
+        }
+        // The native poster is intentionally replaced by YDesign. Make its
+        // source poster/title visible immediately while optional detail data loads.
+        el.classList.add('ydesign-ready');
+        return preview;
+    }
     function buildCardCustomDOM(cardHtml, data) {
         var el = cardHtml[0] || cardHtml;
 
@@ -2127,8 +2143,20 @@
                 if (el._ydesign_bg_applied === fullUrl) return;
                 el._ydesign_bg_applied = fullUrl;
 
+                // Start the actual poster request alongside metadata/color work.
+                // Previously the image request waited for color extraction, which
+                // itself could wait up to three seconds on a separate small image.
+                var img = new Image();
+                img.decoding = 'async';
+                img.onload = function () {
+                    if (!current() || el._ydesign_bg_applied !== fullUrl) return;
+                    imgLayer.style.setProperty('--loaded-bg', 'url(' + fullUrl + ')');
+                    imgLayer.classList.add('loaded');
+                };
+                img.src = fullUrl;
+
                 getProminentColorAsync(path).then(function (color) {
-                    if (!current()) return;
+                    if (!current() || el._ydesign_bg_applied !== fullUrl) return;
                     if (color) {
                         view.style.backgroundColor = color;
                         el.style.setProperty('--yd-glow', color);
@@ -2137,20 +2165,13 @@
                         gradientLayer.style.background = 'linear-gradient(to top, ' + color + ' 0%, ' + rgba95 + ' 45%, transparent 100%)';
                         contentLayer.style.background = 'linear-gradient(to top, ' + color + ' 10%, transparent 100%)';
                     }
-
-                    var img = new Image();
-                    img.decoding = 'async';
-                    img.onload = function () {
-                        if (!current()) return;
-                        imgLayer.style.setProperty('--loaded-bg', 'url(' + fullUrl + ')');
-                        imgLayer.classList.add('loaded');
-                    };
-                    img.src = fullUrl;
                 });
             };
 
+            var initialPreview = renderInitialCardPreview(el, data, contentLayer, applyBg);
             fetchExtendedData(data.id, type).then(function (extData) {
                 if (!current()) return;
+                if (initialPreview && initialPreview.parentNode === contentLayer) contentLayer.removeChild(initialPreview);
                 if (extData) {
                     // Якщо детальна відповідь не містить опису/жанрів, використовуємо дані картки.
                     if (!Array.isArray(extData.genres) || !extData.genres.length) extData.genres = fallbackGenres(data, type);
