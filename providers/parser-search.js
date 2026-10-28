@@ -26,7 +26,7 @@
                 var key = identity(row, slot.spec, index), existing = seen[key], provenance = { id: slot.spec.id, label: slot.spec.label, type: slot.spec.type };
                 if (existing) {
                     if (!existing.parser_sources.some(function (source) { return source.id === provenance.id; })) existing.parser_sources.push(provenance);
-                    ['AudioLanguages','audioLanguages','audio_languages','AudioTracks','audioTracks','audio_tracks','SubtitleLanguages','subtitleLanguages','subtitle_languages','Voices','voices','ReleaseGroup','release_group','VoiceoverStudio','voiceoverStudio','voiceover_studio','VoiceoverStudios','voiceoverStudios','voiceover_studios','VoiceoverTeams','voiceoverTeams','voiceover_teams','VoiceoverGroups','voiceoverGroups','voiceover_groups','VoiceoverType','voiceoverType','voiceover_type','DubbingStudio','dubbingStudio','dubbing_studio','DubbingType','dubbingType','dubbing_type','ffprobe','info','Resolution','resolution','Season','season','Episode','episode','InfoHash'].forEach(function (field) { if (existing[field] == null && row[field] != null) existing[field] = row[field]; });
+                    ['MagnetUri','Link','DownloadUrl','AudioLanguages','audioLanguages','audio_languages','AudioTracks','audioTracks','audio_tracks','SubtitleLanguages','subtitleLanguages','subtitle_languages','Voices','voices','ReleaseGroup','release_group','VoiceoverStudio','voiceoverStudio','voiceover_studio','VoiceoverStudios','voiceoverStudios','voiceover_studios','VoiceoverTeams','voiceoverTeams','voiceover_teams','VoiceoverGroups','voiceoverGroups','voiceover_groups','VoiceoverType','voiceoverType','voiceover_type','DubbingStudio','dubbingStudio','dubbing_studio','DubbingType','dubbingType','dubbing_type','ffprobe','info','Resolution','resolution','Season','season','Episode','episode','InfoHash'].forEach(function (field) { if ((existing[field] == null || existing[field] === '') && row[field] != null) existing[field] = row[field]; });
                     existing.parser_originals.push(row); return;
                 }
                 var item = clone(row);
@@ -40,8 +40,13 @@
             var pending = active.pending > 0; active.dead = true; active.slots.forEach(function (slot) { clearTimeout(slot.timer); if (slot.request && slot.status === 'loading') slot.request.clear(); }); active = null;
             if (pending && stopNative) stopNative.call(L.Parser); return pending;
         }
-        function specKey(spec) { return JSON.stringify([spec.type, spec.url, spec.key]); } // memory only; never persisted/logged
+        function specKey(spec) { return JSON.stringify([spec.type, String(spec.url||'').replace(/^(https?:\/\/[^/]+)/i,function(host){return host.toLowerCase();}).replace(/\/+$/,''), spec.key]); } // memory only; never persisted/logged
+        function read(key) {
+            var entry=memo[key];if(!entry||entry.expires<=Date.now())return null;
+            var index=cacheKeys.indexOf(key);if(index>=0)cacheKeys.splice(index,1);cacheKeys.push(key);return entry;
+        }
         function put(key, rows) {
+            try { if(JSON.stringify(rows).length>256000)return; } catch(e) { return; }
             var index = cacheKeys.indexOf(key); if (index >= 0) cacheKeys.splice(index, 1); cacheKeys.push(key);
             memo[key] = { rows: rows, expires: Date.now() + (rows.length ? 120000 : 10000) };
             while (cacheKeys.length > MAX_CACHE) delete memo[cacheKeys.shift()];
@@ -52,12 +57,29 @@
         function emit(job) {
             if (job.dead || job.epoch !== epoch) return;
             var data = snapshot(job), success = job.slots.some(function (slot) { return slot.status === 'ready' || slot.status === 'empty'; });
-            job.stats.pending = job.pending;
+            job.stats.pending = job.pending;job.stats.sources=data.parser_status;if(!job.pending)job.stats.settledMs=Date.now()-job.stats.started;
             if (job.pending && !data.Results.length) return;
-            if (!job.pending && !success) { job.subscribers.forEach(function (sub) { if (sub.fail) sub.fail('Налаштовані джерела недоступні'); }); return; }
+            if (!job.pending && job.slots.length && !success) { job.subscribers.forEach(function (sub) { if (sub.fail) sub.fail('Налаштовані джерела недоступні'); }); return; }
             if (data.Results.length && job.stats.firstResultMs == null) job.stats.firstResultMs = Date.now() - job.stats.started;
-            job.stats.results = data.Results.length; job.stats.pending = job.pending;
+            job.stats.results = data.Results.length; job.stats.pending = job.pending; if (!job.pending) job.stats.settledMs = Date.now() - job.stats.started;
             job.subscribers.forEach(function (sub) { if (!data.parser_pending || sub.streaming) sub.done(data); });
+        }
+        // Native jackett() uses one private shared Reguest and exposes no abort handle.
+        // Keep its wire/result contract here, but own a Reguest per queued slot.
+        function jackett(params, slot, ok, fail) {
+            var request=slot.request=new L.Reguest(), movie=params.movie||{}, spec=slot.spec;
+            var args=[{name:'apikey',value:spec.key||''},{name:'Query',value:params.search||''}];
+            if(!params.from_search){
+                if(!params.clarification){args.push({name:'title',value:movie.title||''},{name:'title_original',value:movie.original_title||''});}
+                args.push({name:'year',value:String(movie.first_air_date||movie.release_date||'0000').slice(0,4)},{name:'is_serial',value:movie.original_name?'2':params.other?'0':'1'},{name:'genres',value:(movie.genres||[]).map(function(g){return g.name;}).join(',')});
+                if(!params.global)args.push({name:'Category[]',value:(movie.number_of_seasons>0?'5000':'2000')+(/^(ja|zh)$/.test(movie.original_language||'')&&(movie.genres||[]).some(function(g){return g.id===16;})?',5070':'')});
+            }
+            var base=spec.url.replace(/\/+$/,''), index=L.Storage.field('jackett_interview')==='healthy'?'status:healthy':'all';
+            request.timeout(slot.timeout);
+            request.native(L.Utils.buildUrl(base,'/api/v2.0/indexers/'+index+'/results',args),function(data){
+                if(!data||!Array.isArray(data.Results)||data.Results.some(function(row){return !row||typeof row.Title!=='string';}))return fail('invalid');
+                ok({Results:data.Results.map(function(raw){var row=clone(raw);row.PublisTime=L.Utils.strToTime(row.PublishDate);row.hash=L.Utils.hash(row.Title);row.viewed=L.Storage.cache('torrents_view',5000,[]).indexOf(row.hash)>=0;if(L.Utils.bytesToSize)row.size=L.Utils.bytesToSize(row.Size);row.checked_at=Date.now();row.source_rank=spec.id==='primary'?0:1;return row;})});
+            },function(xhr){fail(xhr&&xhr.status===429?'rate-limit':xhr&&xhr.status>=500?'server-error':'network');});
         }
         function prowlarr(params, slot, ok, fail) {
             var request = slot.request = new L.Reguest(), spec = slot.spec, movie = params.movie || {};
@@ -88,41 +110,62 @@
         }
         function search(params, done, fail, nativeGet) {
             var configured = sources();
-            if (!configured || !configured.length || configured.some(function (s) { return s.type !== 'jackett' && s.type !== 'prowlarr'; })) return nativeGet(params, done, fail);
-            var queryKey = JSON.stringify([params.search, params.from_search, params.clarification, params.global, params.movie, params.params, params.season, params.episode]);
+            if (configured == null) return nativeGet(params, done, fail);
+            var account = L.Account && L.Account.Permit && L.Account.Permit.account || {};
+            var scope = JSON.stringify([account.id, account.profile && account.profile.id]);
+            // Alias fallbacks use at most four healthy responders from this owner's initial wave.
+            // This bounds multilingual work instead of multiplying every alias by the catalog.
+            if (params.clarification && params.torrent_search_owner && active && active.owner === params.torrent_search_owner && active.scope === scope) {
+                var healthy = active.slots.filter(function(slot){return slot.status === 'ready' || slot.status === 'empty';}).map(function(slot){return specKey(slot.spec);});
+                configured = configured.filter(function(spec){return healthy.indexOf(specKey(spec)) >= 0;}).slice(0,4);
+            }
+            var queryKey = scope + JSON.stringify([params.search, params.from_search, params.clarification, params.global, params.movie, params.params, params.season, params.episode]);
             var allKey = configured.map(specKey).join('|') + queryKey;
             if (active && !active.dead && active.pending && active.key === allKey) { active.subscribers.push({ done: done, fail: fail, streaming: !!params.parser_streaming }); if (params.parser_streaming && merged(active).length) done(snapshot(active)); return; }
             cancel();
-            var job = active = { key: allKey, epoch: epoch, dead: false, slots: configured.map(function (spec) { return { spec: spec, status: 'loading', rows: [] }; }), pending: configured.length, subscribers: [{ done: done, fail: fail, streaming: !!params.parser_streaming }], stats: { started: Date.now(), requests: 0, cacheHits: 0, firstResultMs: null, results: 0, pending: configured.length } }; lastStats = job.stats;
-            if (job.slots.every(function (slot) { var entry = memo[specKey(slot.spec) + queryKey]; return entry && entry.expires > Date.now(); })) {
-                job.slots.forEach(function (slot) { slot.rows = memo[specKey(slot.spec) + queryKey].rows; slot.status = slot.rows.length ? 'ready' : 'empty'; });
-                job.pending = 0; job.stats.cacheHits = job.slots.length; emit(job); return;
+            var cap = Math.max(1, Math.min(6, Math.floor(Number(L.Storage.field('parser_auto_concurrency'))) || 4));
+            var job = active = { key: allKey, scope: scope, owner: params.torrent_search_owner || params, epoch: epoch, dead: false, slots: configured.map(function (spec) { return { spec: spec, status: 'queued', rows: [] }; }), pending: configured.length, running: 0, cursor: 0, pumping: false, subscribers: [{ done: done, fail: fail, streaming: !!params.parser_streaming }], stats: { started: Date.now(), requests: 0, peakConcurrency: 0, cacheHits: 0, firstResultMs: null, results: 0, pending: configured.length } }; lastStats = job.stats;
+            if (job.slots.length && job.slots.every(function(slot){var entry=read(specKey(slot.spec)+queryKey);return entry&&entry.expires>Date.now();})) {
+                job.slots.forEach(function(slot){slot.rows=memo[specKey(slot.spec)+queryKey].rows;slot.status=slot.rows.length?'ready':'empty';});
+                job.pending=0;job.stats.cacheHits=job.slots.length;emit(job);return;
             }
             var runs = Object.create(null);
-            job.slots.forEach(function (slot) {
-                var key = specKey(slot.spec) + queryKey, cached = memo[key], finished = false;
+            function pump() {
+                if (job.pumping || job.dead || job.epoch !== epoch) return;
+                job.pumping = true;
+                while (job.running < cap && job.cursor < job.slots.length && !job.dead) start(job.slots[job.cursor++]);
+                job.pumping = false;
+                if (!job.pending) emit(job);
+            }
+            function start(slot) {
+                var key = specKey(slot.spec) + queryKey, cached = read(key), finished = false, running = false;
                 slot.timeout = Math.max(500, Math.min(15000, (Number(L.Storage.field('parse_timeout')) || 10) * 1000));
                 function complete(data, error) {
                     if (finished || job.dead || job.epoch !== epoch) return; finished = true; clearTimeout(slot.timer);
                     if (!error && (!data || !Array.isArray(data.Results) || data.Results.some(function (r) { return !r || typeof r.Title !== 'string'; }))) error = 'invalid';
                     slot.status = error || (data.Results.length ? 'ready' : 'empty');
-                    if (!error) { slot.rows = data.Results.map(clone); if (!cached) put(key, slot.rows); }
-                    else cooldown[specKey(slot.spec)] = Date.now() + 5000;
-                    job.pending--; emit(job);
+                    if (!error) { slot.rows = data.Results.map(clone); if (!cached || cached.expires <= Date.now()) put(key, slot.rows); }
+                    else if (error !== 'cooldown' && error !== 'unsupported') cooldown[specKey(slot.spec)] = Date.now() + 5000;
+                    if (running) job.running--;
+                    job.pending--;
+                    if (job.pending) emit(job);
+                    pump();
                 }
+                if (slot.spec.type !== 'jackett' && slot.spec.type !== 'prowlarr' || !/^https?:\/\//i.test(slot.spec.url || '') || window.location && window.location.protocol === 'https:' && /^http:/i.test(slot.spec.url)) { complete(null, 'unsupported'); return; }
                 if (cached && cached.expires > Date.now()) { job.stats.cacheHits++; complete({ Results: cached.rows }); return; }
-                cached = null;
                 if (cooldown[specKey(slot.spec)] > Date.now()) { complete(null, 'cooldown'); return; }
                 if (runs[key]) { runs[key].push(complete); return; }
-                runs[key] = [complete];
-                function reply(data, error) { var callbacks = runs[key]; if (!callbacks) return; delete runs[key]; callbacks.forEach(function (callback) { callback(data, error); }); }
-                slot.timer = setTimeout(function () { if (slot.request) slot.request.clear(); reply(null, 'timeout'); }, slot.timeout);
+                runs[key] = [complete]; running = true; job.running++; slot.status = 'loading';
+                job.stats.peakConcurrency = Math.max(job.stats.peakConcurrency, job.running);
+                function reply(data, error) { if(slot.expiring)error='timeout'; var callbacks = runs[key]; if (!callbacks) return; delete runs[key]; callbacks.forEach(function (callback) { callback(data, error); }); }
+                slot.timer = setTimeout(function () { slot.expiring=true; if (slot.request) slot.request.clear(); reply(null, 'timeout'); }, slot.timeout);
                 job.stats.requests++;
                 try {
-                    if (slot.spec.type === 'jackett') L.Parser.jackett(params, L.Utils.checkEmptyUrl ? L.Utils.checkEmptyUrl(slot.spec.url) : slot.spec.url.replace(/\/+$/, ''), slot.spec.key, slot.spec.id === 'primary' ? 0 : 1, function (data) { reply(data); }, function () { reply(null, 'network'); });
+                    if (slot.spec.type === 'jackett') jackett(params,slot,function(data){reply(data);},function(error){reply(null,error);});
                     else prowlarr(params, slot, function (data) { reply(data); }, function (error) { reply(null, error); });
                 } catch (e) { reply(null, 'invalid'); }
-            });
+            }
+            pump();
         }
         function installConsumer() {
             if (!L.Component || !L.Component.get || !L.Component.add) return;
@@ -137,7 +180,8 @@
                         try { done(data); } finally { child.activity.toggle = toggle; }
                         var root = child.render()[0], status = root.querySelector('.parser-search-status');
                         if (!status) { status = document.createElement('div'); status.className = 'parser-search-status'; status.setAttribute('role', 'status'); var filter = root.querySelector('.torrent-filter'); if (filter) filter.appendChild(status); }
-                        status.textContent = (data.parser_status || []).filter(function (s) { return s.status !== 'ready' && s.status !== 'empty'; }).map(function (s) { return s.label + ': ' + (s.status === 'loading' ? 'пошук…' : 'тимчасово недоступний'); }).join(' · ');
+                        var states=data.parser_status||[],ready=states.filter(function(s){return s.status==='ready'||s.status==='empty';}).length,pending=states.filter(function(s){return s.status==='loading'||s.status==='queued';}).length;
+                        status.textContent = 'Джерела: '+ready+'/'+states.length+' · очікують: '+pending+' · недоступні: '+(states.length-ready-pending);
                     }, fail); };
                     try { return parse.apply(child, arguments); } finally { L.Parser.get = get; }
                 };
@@ -155,6 +199,10 @@
             }
             Streaming.__parserStreaming = true; L.Component.add('torrents', Streaming);
         }
+        if (L.Account && L.Account.listener && L.Account.listener.follow) L.Account.listener.follow('profile_select',cancel);
+        if (L.Storage.listener && L.Storage.listener.follow) L.Storage.listener.follow('change', function (event) {
+            if (/^(parser_|jackett_|prowlarr_|ps_|bat_|account|profile)/.test(event.name || '')) cancel();
+        });
         installConsumer();
         if (L.Listener && L.Listener.follow) L.Listener.follow('torrent', function (event) {
             if (event.type !== 'render' || !event.element || !event.element.parser_sources) return;
@@ -163,7 +211,7 @@
             var label = document.createElement('span'); label.className = 'parser-provenance'; label.textContent = element.parser_sources.map(function (s) { return s.label; }).join(' + ');
             var host = node.querySelector('.torrent-item__tracker') || node; host.appendChild(label);
         });
-        var api = { search: search, cancel: cancel, stats: function () { return lastStats; }, identity: identity };
+        var api = { search: search, cancel: cancel, stats: function () { return lastStats; }, identity: identity, retry: function(){cancel();cooldown=Object.create(null);} };
         if (!window.LampaTorrentSearch) {
             var originalGet = L.Parser.get, originalClear = L.Parser.clear;
             var get = function (params, done, fail) { return search(params, done, fail, function (p, ok, no) { return originalGet.call(L.Parser, p, ok, no); }); }; get.__parserCoordinator = true;

@@ -1061,3 +1061,9 @@ Next publishupdatedPR50(mainmerge+marginfixonly),CI/merge;thenPR53retargettothat
 - Draft PR #119 opened: https://github.com/gorlim590/lampa/pull/119. Initial Season CI found an existing static loader assertion pinned to the previous cache-version literal; updated it to the new delivery version without changing Trakt code/dependency behavior. Targeted loader assertion rerun; browser evidence reused because product bytes are unchanged. CI recheck required on the new head.
 
 - Final review tightened streamed selection identity to accept only valid 40/64-character hashes (malformed shared hashes cannot select another release). Source ce50a44, artifact `fa5c1407087ad854a63f6a6c3a2719974289339dca069da1651c1dd4c99b3083`. Fresh 225 unit checks and fresh 24/24 standalone + 24/24 Hybrid runs PASS on these exact bytes; original browser restored. Five CI workflows on the preceding test-alignment head passed; final evidence update now queued for the current head.
+
+## Issue #120 — automatic enabled-source search (2026-10-28)
+
+- Dedicated branch `feat/issue-120-multi-parser` from latest main `901eef3`; previous #117 work is merged, not imported from its development branch. Ownership/minimum-change map and migration: `docs/issue-120-multi-parser.md`.
+- Extended the #17 coordinator with a default-four bounded queue, per-request cancellable Jackett/Prowlarr transports, profile/config isolation, bounded LRU/cache/cooldowns and healthy-source alias limits. Existing catalog/credentials and exclusions remain authoritative; auto defaults without rewriting legacy roles, manual troubleshooting retained.
+- Torrent Cinema integration limited to existing refresh/cancellation boundaries; native ranking/metadata/player/Files untouched. Exact-source standalone/browser fixture evidence in `audit/issue-120/`; real providers/TorrServer and physical Google TV unverified. No live parser configuration changes, merge or deployment authorized for this task.
