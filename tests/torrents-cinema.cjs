@@ -70,6 +70,22 @@ test('anime studio aliases and multiple confirmed audio tracks normalize without
   assert.equal(subtitlesOnly.parsed.voiceover, 'Невідомо');
 });
 
+test('camelCase provider track and dubbing metadata survives release normalization', () => {
+  const api = fixture().api;
+  const release = api.normalizeRelease({
+    Title: 'Frieren S01E03 1080p',
+    audioTracks: [{ language: 'uk', type: 'audio' }, { language: 'ja', type: 'audio' }],
+    subtitleLanguages: ['en'],
+    voiceoverStudios: ['Амоногава', 'Далі Буде'],
+    voiceoverType: 'multi-voice',
+    dubbingStudio: 'Ignored duplicate studio'
+  });
+  assert.deepEqual(Array.from(release.parsed.audio.languages), ['Українська', 'Японська']);
+  assert.equal(release.parsed.subs.label, 'English');
+  assert.equal(release.parsed.voiceover, 'Амоногава / Далі Буде');
+  assert.equal(release.parsed.voiceoverType, 'Багатоголосе');
+});
+
 test('recommendation prioritizes confirmed Ukrainian audio, then Toloka before Mazepa', () => {
   const api = fixture().api;
   const match = { eligible: true, similarity: 1 };
