@@ -3,6 +3,9 @@
 // No replacement application/HTML page, account request, real torrent or player.
 module.exports=function installFixture(){
     const L=Lampa,qa=window.__tcQa={mode:'ready',parserCalls:0,pending:[],selected:null,returnFn:null};
+    // Test-only setting override is held by the runner's shadow Storage and
+    // keeps the existing user's filter out of fixture assumptions.
+    L.Storage.set('torrents_cinema_tracker','all');
     const movie={id:99117001,title:'Тиха орбіта',original_title:'Silent Orbit',media_type:'movie',source:'tmdb',release_date:'2024-01-01',overview:'Контрольний фільм для перевірки Torrent Cinema. Метадані релізів синтетичні; відтворення не запускається.',genres:[],runtime:112,vote_average:7.5,images:{logos:[]},production_companies:[],production_countries:[],origin_country:[],spoken_languages:[],status:'Released'};
     qa.movie=movie;qa.originalFull=L.Api.full;qa.originalParser=L.Parser.get;
     L.Api.full=function(params,done){
@@ -16,6 +19,18 @@ module.exports=function installFixture(){
         AudioLanguages:i===4?[]:i%3===0?['uk','en']:['en'],SubtitleLanguages:i%2?['uk']:['en'],VoiceoverStudio:i%3===0?'Контрольна студія':'',
         Quality:['4k','1080p','1080p','720p','1080p','4k'][i%6],PublishDate:'2024-02-01'
     }));
+    qa.baseMovie=Object.assign({},movie);qa.baseResults=JSON.parse(JSON.stringify(qa.results));
+    qa.restoreMovie=function(){Object.assign(movie,qa.baseMovie);qa.results=JSON.parse(JSON.stringify(qa.baseResults));qa.push();};
+    qa.installSeries=function(){
+        Object.assign(movie,{media_type:'tv',title:'Нічний архів',original_title:'夜のアーカイブ',name:'Нічний архів',original_name:'夜のアーカイブ',first_air_date:'2021-01-01'});
+        qa.results[0]={Title:'Нічний архів / Night Archive — 夜のアーカイブ — 별빛 항로 — S02E01-E03 2024 1080p WEB-DL HEVC Ukr Eng DVO',Tracker:'toloka.to',Size:7340032000,Seeders:84,Peers:11,InfoHash:'9'.repeat(40),MagnetUri:'magnet:?xt=urn:btih:'+'9'.repeat(40),hash:'9'.repeat(40),AudioLanguages:['uk','en'],SubtitleLanguages:['uk'],VoiceoverStudio:'Студія Переклад / Studio Переклад',Quality:'1080p',PublishDate:'2024-02-01'};
+        qa.push();
+    };
+    qa.installCase=function(testCase){
+        Object.assign(movie,{media_type:testCase.kind==='tv'?'tv':'movie',title:'Catalog title must not replace release name',original_title:'Catalog title must not replace release name',name:'Catalog title must not replace release name',original_name:'Catalog title must not replace release name',release_date:'2024-01-01',first_air_date:'2024-01-01'});
+        qa.results[0]=Object.assign({Tracker:'toloka.to',Size:7340032000,Seeders:84,Peers:11,InfoHash:'8'.repeat(40),MagnetUri:'magnet:?xt=urn:btih:'+'8'.repeat(40),hash:'8'.repeat(40),AudioLanguages:['uk','en'],SubtitleLanguages:['uk'],VoiceoverStudio:'Переклад UA',Quality:'1080p',PublishDate:'2024-02-01'},testCase.source);
+        qa.push();
+    };
     L.Parser.get=function(params,done,fail){
         if(Number(params.movie?.id)!==movie.id)return qa.originalParser.apply(this,arguments);
         qa.parserCalls++;const mode=qa.mode;
@@ -37,5 +52,5 @@ module.exports=function installFixture(){
     // Hide only the pre-existing host delivery toast for feature screenshots.
     // Its failure diagnostics are captured separately; no source error is ignored.
     const noty=L.Noty.render();qa.hiddenToast=!!noty?.length;if(noty?.css)noty.css('visibility','hidden');
-    qa.push=()=>L.Activity.push({component:'full',id:movie.id,method:'movie',source:'tmdb',card:movie});qa.push();
+    qa.push=()=>L.Activity.push({component:'full',id:movie.id,method:movie.media_type==='tv'?'tv':'movie',source:'tmdb',card:movie});qa.push();
 };

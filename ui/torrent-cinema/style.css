@@ -177,6 +177,18 @@
 @media(max-width:1000px){.sh-torrent-overlay .ctr-row{grid-template-columns:3.5em minmax(0,1.15fr) minmax(0,.9fr) 5.6em 2.15em 1.2em;gap:.48em}.sh-torrent-overlay .ctr-name{font-size:.92em}.sh-torrent-overlay .ctr-chips{font-size:.65em}.sh-torrent-overlay .tc-audio{font-size:.68em}.sh-torrent-overlay .tc-details{margin-left:0}.sh-torrent-overlay .tc-section{padding-inline:.45em}}
 @media(max-width:700px){.sh-torrent-overlay .tc-technical{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:.6em}.sh-torrent-overlay .tc-section:nth-child(2){border-right:0}.sh-torrent-overlay .tc-section:nth-child(3){padding-left:0}}
 
+/* Keep every row label inside its card at HD TV dimensions. The previous fixed
+   row height let wrapped technical/audio text paint under the next card. */
+@media(max-width:1350px){
+  .sh-torrent-overlay .ctr-row{min-height:6.1em;align-items:stretch}
+  .sh-torrent-overlay .ctr-release-info{min-width:0;justify-content:center}
+  .sh-torrent-overlay .tc-priority-row,.sh-torrent-overlay .tc-secondary-row{line-height:1.45;row-gap:.28em}
+  .sh-torrent-overlay .tc-secondary-row .ctr-chip{white-space:normal;overflow:visible;text-overflow:clip;font-size:1.08em;color:#ded8e8!important;background:#24212dbf;border-color:#ffffff28}
+  .sh-torrent-overlay .tc-audio{font-size:.77em;line-height:1.4;justify-content:center;overflow-wrap:anywhere}
+  .sh-torrent-overlay .tc-voice,.sh-torrent-overlay .tc-subtitles{display:block;overflow:visible;white-space:normal;overflow-wrap:anywhere;line-height:1.4}
+  .sh-torrent-overlay .tc-info{align-self:center;width:2.15em;height:2.15em;min-height:2.15em;aspect-ratio:1}
+}
+
 /* Final density pass: identity first, format second, strongly grouped availability/actions. */
 .sh-torrent-overlay .ctr-release-info{align-content:center;gap:.08em}
 .sh-torrent-overlay .ctr-release-info .ctr-chips{display:contents}
@@ -216,3 +228,4 @@
 .sh-torrent-overlay .tc-section-line{font-size:.8em;line-height:1.45;color:#c7c0d1;overflow-wrap:anywhere;word-break:break-word}
 .sh-torrent-overlay .tc-match-note{padding:.3em .48em;border-left:2px solid #c8a34f66;background:#c8a34f0a}
 @media(max-width:1000px){.sh-torrent-overlay .ctr-row{grid-template-columns:3.5em minmax(0,1.2fr) minmax(0,.95fr) 5.7em 2.1em 1.2em}.sh-torrent-overlay .ctr-release-info .ctr-name{font-size:.96em}.sh-torrent-overlay .tc-audio{padding-left:.42em}.sh-torrent-overlay .ctr-metrics{padding-inline:.34em}.sh-torrent-overlay .tc-section{padding:.4em .45em}.sh-torrent-overlay .tc-section:first-child{padding-left:.45em}}
+@media(max-width:1350px){.sh-torrent-overlay .tc-info{width:2.05em;height:2.05em;min-height:2.05em;aspect-ratio:1;padding:0;align-self:center}}

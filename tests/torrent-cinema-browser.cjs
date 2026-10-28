@@ -16,8 +16,13 @@ async function geometry(page){return page.evaluate(()=>{
     const modal=[...document.querySelectorAll('.sh-torrent-overlay')].find(n=>!n.hidden),rect=n=>{if(!n)return null;const r=n.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom};};
     const list=[...modal.querySelectorAll('.torrent-item')].filter(n=>n.getBoundingClientRect().height>0),tools=modal.querySelector('.ctr-tools'),viewport=modal.querySelector('.torrent-list')?.closest('.scroll')?.getBoundingClientRect();
     const visible=list.filter(n=>{const r=n.getBoundingClientRect();return r.top>=(viewport?.top||0)&&r.bottom<=(viewport?.bottom||innerHeight);});
-    return {viewport:[innerWidth,innerHeight],dpr:devicePixelRatio,modal:rect(modal),firstRow:rect(list[0]),lastVisibleRow:rect(visible.at(-1)),focus:rect(modal.querySelector('.focus')),filters:rect(tools),visibleRows:visible.length,filterOverflow:tools.scrollWidth-tools.clientWidth,horizontalOverflow:document.documentElement.scrollWidth-innerWidth,font:parseFloat(getComputedStyle(modal).fontSize),toolbars:modal.querySelectorAll('.ctr-tools').length,inlineFilesButtons:modal.querySelectorAll('.tc-open-files').length,controller:Lampa.Controller.enabled().name,styleCount:document.querySelectorAll('#torrent-cinema-style').length,legacyStyles:document.querySelectorAll('#torrents-redesign-style,#sh-torrent-overlay-style').length};
+    const info=rect(modal.querySelector('.torrent-item:not([hidden]) .tc-info'));
+    return {viewport:[innerWidth,innerHeight],dpr:devicePixelRatio,modal:rect(modal),firstRow:rect(list[0]),lastVisibleRow:rect(visible.at(-1)),focus:rect(modal.querySelector('.focus')),filters:rect(tools),visibleRows:visible.length,filterOverflow:tools.scrollWidth-tools.clientWidth,horizontalOverflow:document.documentElement.scrollWidth-innerWidth,font:parseFloat(getComputedStyle(modal).fontSize),toolbars:modal.querySelectorAll('.ctr-tools').length,inlineFilesButtons:modal.querySelectorAll('.tc-open-files').length,controller:Lampa.Controller.enabled().name,styleCount:document.querySelectorAll('#torrent-cinema-style').length,legacyStyles:document.querySelectorAll('#torrents-redesign-style,#sh-torrent-overlay-style').length,info,infoRound:!!info&&Math.abs(info.width-info.height)<=1};
 });}
+async function rowTextGeometry(page,expanded=false){return page.evaluate(expanded=>{
+    const row=document.querySelector('.sh-torrent-overlay:not([hidden]) .torrent-item:not([hidden])'),targets=expanded?['.tc-raw-title']:['.ctr-name','.tc-secondary-row','.tc-audio-label','.tc-voice','.tc-subtitles'],clip=expanded?row.querySelector('.tc-details'):row,box=n=>{const r=n.getBoundingClientRect();return{x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height}},inside=(r,c)=>r.x>=c.x-1&&r.y>=c.y-1&&r.right<=c.right+1&&r.bottom<=c.bottom+1;
+    return targets.map(selector=>{const n=row.querySelector(selector);if(!n||!n.textContent.trim())return{selector,present:!!n,empty:!!n};const r=box(n),c=box(clip),style=getComputedStyle(n),range=document.createRange();range.selectNodeContents(n);const textRects=[...range.getClientRects()].map(x=>({x:x.x,y:x.y,right:x.right,bottom:x.bottom,width:x.width,height:x.height}));return{selector,text:n.textContent.trim(),rect:r,clip:c,visible:!!r.width&&!!r.height&&style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity)>0&&textRects.some(x=>x.width&&x.height&&inside(x,c)),textRects,scroll:[n.scrollWidth,n.scrollHeight],client:[n.clientWidth,n.clientHeight]};});
+},expanded);}
 (async()=>{
     let page,cdp,preload,original,route,errorListener,initialMetrics;
     fs.mkdirSync(dir,{recursive:true});
@@ -68,15 +73,51 @@ async function geometry(page){return page.evaluate(()=>{
         for(const [width,height] of [[1280,720],[1920,1080],[3840,2160]]){
             await setViewport(width,height);
             const layout=await geometry(page);layout.collapsed=await capture((standalone?'standalone-':'after-')+width+'.png');
-            check('layout '+width,layout.modal.width>width*.85&&layout.modal.width<width*.91&&layout.horizontalOverflow<=1&&layout.filterOverflow<=1&&layout.toolbars===1&&layout.styleCount===1&&layout.legacyStyles===0&&layout.inlineFilesButtons===0,layout);
+            check('layout '+width,layout.modal.width>width*.85&&layout.modal.width<width*.91&&layout.horizontalOverflow<=1&&layout.filterOverflow<=1&&layout.toolbars===1&&layout.styleCount===1&&layout.legacyStyles===0&&layout.inlineFilesButtons===0&&(width!==1280||layout.infoRound),layout);
+            if(width===1280){const texts=await rowTextGeometry(page);check('720p release, format, audio and subtitle text stays visible inside row',texts.length===5&&texts.every(item=>item.visible),texts);
+                const effects=await page.evaluate(async()=>{const row=document.querySelector('.sh-torrent-overlay:not([hidden]) .torrent-item'),diag=()=>JSON.stringify(LampaTorrentCinema.diagnostics()),before=diag(),measure=()=>({animation:getComputedStyle(row).animationName,transform:getComputedStyle(row).transform,backdropFilter:getComputedStyle(document.querySelector('.sh-torrent-overlay')).backdropFilter,styles:document.querySelectorAll('#torrent-cinema-style').length,subscriptions:LampaTorrentCinema.diagnostics().subscriptions});localStorage.setItem('torrents_cinema_tv','true');localStorage.setItem('torrents_cinema_animations','true');LampaTorrentCinema.applySettings();const on=measure();localStorage.setItem('torrents_cinema_tv','false');localStorage.setItem('torrents_cinema_animations','false');LampaTorrentCinema.applySettings();const off=measure();return{on,off,diagnosticsStable:before===diag()};});
+                check('retired TV/animation toggles add no effects, styles or subscriptions',effects.on.animation==='none'&&effects.off.animation==='none'&&effects.on.transform==='none'&&effects.off.transform==='none'&&effects.on.backdropFilter==='none'&&effects.off.backdropFilter==='none'&&effects.on.styles===1&&effects.off.styles===1&&effects.on.subscriptions===effects.off.subscriptions&&effects.diagnosticsStable,effects);
+            }
             assert.deepEqual(layout.collapsed.pixels,[width,height]);
             await enter('.sh-torrent-overlay:not([hidden]) .torrent-item .tc-info');
             check('inline opens '+width,await page.locator('.sh-torrent-overlay:not([hidden]) .tc-details:not([hidden])').count()===1);
             check('expanded Video/Audio/Subtitles/Files sections '+width,await page.evaluate(()=>{const details=document.querySelector('.sh-torrent-overlay:not([hidden]) .tc-details:not([hidden])');return details?.querySelectorAll('.tc-section').length===4&&['Відео','Аудіо','Субтитри','Файли'].every(label=>details.textContent.includes(label))&&!details.querySelector('.tc-open-files')&&details.querySelector('.tc-raw-title')?.textContent===document.querySelector('.sh-torrent-overlay:not([hidden]) .torrent-item')?._ctrSource.Title;}));
             layout.expanded=await capture((standalone?'standalone-expanded-':'expanded-')+width+'.png');layout.expandedGeometry=await geometry(page);report.layouts.push(layout);
+            if(width===1280){const texts=await rowTextGeometry(page,true);check('720p expanded raw release title stays visible inside details',texts.length===1&&texts[0].visible,texts);}
             await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.querySelector('.sh-torrent-overlay:not([hidden]) .tc-details:not([hidden])'));
         }
         await setViewport(1920,1080,2);const equivalent=await geometry(page);equivalent.capture=await capture((standalone?'standalone-':'')+'device-equivalent-1080-dpr2.png');report.deviceEquivalent=equivalent;assert.deepEqual(equivalent.capture.pixels,[3840,2160]);
+        // A long multilingual series release must remain legible in the compact
+        // row and retain the exact unmodified name in its expanded details.
+        await setViewport(1920,1080);await page.keyboard.press('Escape');await page.evaluate(()=>__tcQa.installSeries());await ready();await open();await loaded();
+        const series=await page.evaluate(()=>{const row=document.querySelector('.sh-torrent-overlay:not([hidden]) .torrent-item:not([hidden])'),text=row?.querySelector('.ctr-name')?.textContent||'',badges=row?.querySelector('.tc-priority-row')?.textContent||'',technical=row?.querySelector('.tc-secondary-row')?.textContent||'',audio=row?.querySelector('.tc-audio')?.textContent||'';return{raw:row?._ctrSource.Title,title:text,badges,technical,audio,kind:window.__tcQa.movie.media_type};});
+        check('series fixture shows Ukrainian and English release names, year, verified range, quality and voiceover',series.kind==='tv'&&series.title.includes('Нічний архів')&&series.title.includes('Night Archive')&&series.title.includes('(2024)')&&series.badges.includes('S02E01–E03')&&/1080p/.test(series.technical)&&series.audio.includes('Студія Переклад'),series);
+        const seriesShot=await capture((standalone?'standalone-':'')+'series-long-1920.png');assert.deepEqual(seriesShot.pixels,[1920,1080]);
+        await enter('.sh-torrent-overlay:not([hidden]) .torrent-item .tc-info');const seriesExpanded=await page.evaluate(()=>{const details=document.querySelector('.sh-torrent-overlay:not([hidden]) .tc-details:not([hidden])'),raw=details?.querySelector('.tc-raw-title');return{raw:raw?.textContent,wrap:getComputedStyle(raw).overflowWrap,scroll:[raw?.scrollWidth,raw?.scrollHeight],client:[raw?.clientWidth,raw?.clientHeight]};});
+        check('series expanded details retain complete multilingual raw title without clipping',seriesExpanded.raw===series.raw&&seriesExpanded.wrap==='anywhere'&&seriesExpanded.scroll[0]<=seriesExpanded.client[0]+1,seriesExpanded);
+        const seriesExpandedShot=await capture((standalone?'standalone-':'')+'series-expanded-1920.png');assert.deepEqual(seriesExpandedShot.pixels,[1920,1080]);report.seriesFixture={compact:series,expanded:seriesExpanded,compactCapture:seriesShot,expandedCapture:seriesExpandedShot};
+        const cases=[
+            {id:'last-of-us',kind:'tv',source:{Title:'The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба'}},
+            {id:'multi-season-anime',kind:'tv',source:{Title:'葬送のフリーレン S01-S03 2023 2160p BluRay HEVC Jap Eng'}} ,
+            {id:'complete-season',kind:'tv',source:{Title:'Blue Eye Samurai Complete Season 2 2024 1080p WEBRip Ukr'}} ,
+            {id:'episode-pack',kind:'tv',source:{Title:'Arcane S01E01-E09 2021 1080p WEB-DL AVC Ukr DVO Коло'}} ,
+            {id:'anime',kind:'tv',source:{Title:'葬送のフリーレン S01E01-E28 2023 1080p WEB-DL H.265 Jap Eng'}},
+            {id:'dorama',kind:'tv',source:{Title:'이상한 변호사 우영우 S01E01-E16 2022 1080p WEB-DL HEVC Kor Eng'}},
+            {id:'movie',kind:'movie',source:{Title:'Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng'}},
+            {id:'unicode-long-movie',kind:'movie',source:{Title:'海辺の長い物語 — Довга історія біля моря — قصة طويلة على الشاطئ 2023 1080p WEB-DL AVC Ukr'}},
+            {id:'name-field',kind:'movie',source:{Name:'Amélie 2001 1080p BluRay AVC French Eng'}},
+            {id:'sparse-raw',kind:'tv',source:{Title:'未知の物語 — Невідома історія українською'}},
+            {id:'korean-series',kind:'tv',source:{Title:'무빙 Moving 2023 S01E01-E20 1080p WEB-DL DUAL-AUDIO Kor Eng'}},
+            {id:'latin-long-series',kind:'tv',source:{Title:'Зоряний архів / Star Archive — 星の書庫 — 별빛 기록 S03E01-E08 2026 720p WEBRip Ukr DVO Коло'}}
+        ];
+        report.mediaCases=[];
+        for(const testCase of cases){
+            await page.keyboard.press('Escape');await page.evaluate(testCase=>__tcQa.installCase(testCase),testCase);await ready();await open();await loaded();
+            const compact=await page.evaluate(()=>{const row=document.querySelector('.sh-torrent-overlay:not([hidden]) .torrent-item:not([hidden])'),name=row.querySelector('.ctr-name'),raw=row._ctrSource.Title||row._ctrSource.Name;return{raw,title:name.textContent,coverage:row.querySelector('.tc-priority-row').textContent,technical:row.querySelector('.tc-secondary-row').textContent,audio:row.querySelector('.tc-audio').textContent,clamp:getComputedStyle(name).webkitLineClamp};});
+            check('release case '+testCase.id+' uses torrent identity and readable compact title',compact.title&&compact.raw&&compact.raw.includes(compact.title.split(' (')[0])&&!compact.title.includes('Catalog title must not replace')&&compact.clamp==='2',compact);await enter('.sh-torrent-overlay:not([hidden]) .torrent-item .tc-info');
+            const details=await page.evaluate(()=>{const row=document.querySelector('.sh-torrent-overlay:not([hidden]) .torrent-item:not([hidden])'),title=row.querySelector('.tc-raw-title');return title?.textContent;});check('release case '+testCase.id+' keeps exact raw title in details',details===compact.raw,{expected:compact.raw,actual:details});report.mediaCases.push({id:testCase.id,kind:testCase.kind,compact,rawDetails:details});
+        }
+        await page.keyboard.press('Escape');await page.evaluate(()=>__tcQa.restoreMovie());await ready();await open();await loaded();
         // Scenario 2: native D-pad, info/Back, row OK, native Files template/modal, return.
         await setViewport(1920,1080);
         await page.keyboard.press('ArrowDown');await page.keyboard.press('ArrowUp');
