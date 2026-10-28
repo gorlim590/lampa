@@ -238,9 +238,9 @@ body.stremio-hybrid .sh-movie .full-start-new__details > div > div { margin:0 !i
 body.stremio-hybrid .sh-movie .full-start-new__details span:not(.full-start-new__split) { background:rgba(255,255,255,.07) !important; color:var(--sm-muted) !important; font-size:.95em !important; font-weight:400; border:0 !important; border-radius:2em !important; padding:.3em .8em !important; margin:0 !important; }
 body.stremio-hybrid .sh-movie .cardify__right-box { order:4; position:static !important; margin:0 0 .9em; gap:.7em; }
 body.stremio-hybrid .sh-movie .cardify__right-box > * { margin:0 !important; font-size:.8em; background:rgba(255,255,255,.06) !important; color:var(--sm-muted) !important; border:1px solid #ffffff26; padding:.2em .6em; border-radius:.3em; }
-body.stremio-hybrid .sh-movie .sh-movie-description { order:5; position:static !important; width:100% !important; max-width:49em; padding:0 !important; margin:0 0 1.5em; pointer-events:auto !important; border:0; border-radius:0; background:none; z-index:auto !important; }
+body.stremio-hybrid .sh-movie .sh-movie-description { order:6; position:static !important; width:100% !important; max-width:49em; padding:0 !important; margin:0 0 1.5em; pointer-events:auto !important; border:0; border-radius:0; background:none; z-index:auto !important; }
 body.stremio-hybrid .sh-movie .full-descr__text { color:#e0e0e8 !important; font-size:1em !important; line-height:1.65 !important; text-align:left !important; text-shadow:none !important; max-height:8.25em !important; padding:0 !important; margin:0 !important; width:100%; }
-body.stremio-hybrid .sh-movie .full-start-new__buttons { order:7; display:flex !important; flex-wrap:nowrap !important; align-items:center; gap:.6em !important; max-width:100%; overflow-x:auto; overflow-y:hidden; padding:.2em .2em 1.4em; margin:0 -.2em; scrollbar-width:none; }
+body.stremio-hybrid .sh-movie .full-start-new__buttons { order:5; display:flex !important; flex-wrap:nowrap !important; align-items:center; gap:.6em !important; max-width:100%; overflow-x:auto; overflow-y:hidden; padding:.2em .2em 1.4em; margin:0 -.2em; scrollbar-width:none; }
 body.stremio-hybrid .sh-movie .full-start__button { font-size:1em !important; flex:0 0 auto; display:flex; align-items:center; justify-content:center; min-height:2.9em !important; height:2.9em !important; width:3.1em; min-width:3.1em; margin:0 !important; padding:0 .85em !important; border-radius:.55em !important; background:rgba(255,255,255,.08) !important; border:1px solid #ffffff12; box-shadow:none; transform:none !important; }
 body.stremio-hybrid .sh-movie .full-start__button span, body.stremio-hybrid .sh-movie .full-start__button .full-start__text { display:none !important; }
 body.stremio-hybrid .sh-movie .full-start__button svg { width:1.25em !important; height:1.25em !important; margin:0 !important; color:inherit; }
@@ -282,7 +282,7 @@ body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; 
     css += `
 body.stremio-hybrid .sh-movie .full-descr__text{display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:3;max-height:4.95em!important;overflow:hidden;white-space:normal!important}
 body.stremio-hybrid .sh-movie.sh-description-expanded .full-descr__text{display:block!important;-webkit-line-clamp:unset;max-height:none!important;overflow:visible;white-space:pre-line!important}
-body.stremio-hybrid .sh-movie .sh-description-toggle{order:6;align-self:flex-start;margin:0 0 1.2em;display:flex;align-items:center;justify-content:center;width:auto;min-width:0;min-height:2.9em;flex:0 0 auto;font-size:.85em!important;color:var(--sm-text);padding:0 .8em!important;border-radius:.55em;background:#ffffff12;border:1px solid #ffffff18}\nbody.stremio-hybrid .sh-movie .sh-description-toggle.focus{background:var(--sh-focus-soft);box-shadow:0 0 0 .12em var(--sh-accent-soft)}
+body.stremio-hybrid .sh-movie .sh-description-toggle{order:7;align-self:flex-start;margin:0 0 1.2em;display:flex;align-items:center;justify-content:center;width:auto;min-width:0;min-height:2.9em;flex:0 0 auto;font-size:.85em!important;color:var(--sm-text);padding:0 .8em!important;border-radius:.55em;background:#ffffff12;border:1px solid #ffffff18}\nbody.stremio-hybrid .sh-movie .sh-description-toggle.focus{background:var(--sh-focus-soft);box-shadow:0 0 0 .12em var(--sh-accent-soft)}
 body.stremio-hybrid .head .head__title{max-width:20vw}
 body.stremio-hybrid .sh-profile-menu .selectbox__content{position:absolute;right:1.8em;top:5em;bottom:auto;left:auto;width:23em;max-width:90vw;max-height:calc(100vh - 7em);border:1px solid var(--sh-border);box-shadow:0 .7em 2em #0005}
 body.stremio-hybrid .selectbox-item{transition:opacity var(--sh-speed) var(--sh-ease)!important}
@@ -439,13 +439,20 @@ body.stremio-hybrid .tp-person-unknown{font-size:.8em;color:var(--sh-muted)}
         var record=movieRecords.filter(function(r){return r.root===root;})[0];
         if(!record){record={root:root,page:page,column:left,activity:active.activity,kind:active.method==='tv'?'tv':'movie',moves:[],labels:[]};movieRecords.push(record);}
         page.querySelectorAll('.full-descr__details').forEach(function(fields){if(fields.parentNode){record.moves.push({node:fields,parent:fields.parentNode,next:fields.nextSibling});fields.remove();}});
-        function move(node){if(node && node.parentNode!==left){record.moves.push({node:node,parent:node.parentNode,next:node.nextSibling});left.insertBefore(node,buttons);}}
+        function move(node,afterButtons){
+            if(!node)return;
+            var placed=node.parentNode===left&&(afterButtons?node.previousSibling===buttons:node.nextSibling===buttons);
+            if(placed)return;
+            if(!record.moves.some(function(item){return item.node===node;}))record.moves.push({node:node,parent:node.parentNode,next:node.nextSibling});
+            var reference=afterButtons?buttons.nextSibling:buttons;
+            if(reference!==node)left.insertBefore(node,reference);
+        }
         setupMovieBrand(record);
         root.classList.add('sh-movie');root.classList.toggle('sh-series',record.kind==='tv');consolidateMetadata(record);updateSeriesMetadata(record);root.classList.toggle('sh-movie-native',!page.querySelector('.cardify-effects-overlay')); page.classList.add('sh-movie-page');left.classList.add('sh-movie-column');
         var description=root.querySelector('.custom-ghost-main') || page.querySelector('.full-descr__text');
         var movie=streamMovie(record);
         if(!description&&movie._tp_omit_details&&movie.overview){description=document.createElement('div');description.className='full-descr__text sh-generated-description';description.textContent=movie.overview;}
-        if(description){description=plainDescription(record,description);move(description);record.description=description;description.classList.add('sh-movie-description');if(description.textContent.trim()&&typeof movie.overview==='string'&&movie.overview.trim())setupDescription(record,description);}
+        if(description){description=plainDescription(record,description);move(description,true);record.description=description;description.classList.add('sh-movie-description');if(description.textContent.trim()&&typeof movie.overview==='string'&&movie.overview.trim())setupDescription(record,description);}
         move(root.querySelector('.cardify__right-box'));
         root.querySelectorAll('.sh-movie-primary').forEach(function(n){n.classList.remove('sh-movie-primary');});
         var visible=Array.prototype.filter.call(buttons.querySelectorAll('.full-start__button'),function(n){return n.classList.contains('selector')&&!n.classList.contains('hide')&&!n.classList.contains('hidden')&&n.getAttribute('aria-disabled')!=='true'&&!n.disabled&&n.getClientRects().length>0&&getComputedStyle(n).visibility!=='hidden';});
