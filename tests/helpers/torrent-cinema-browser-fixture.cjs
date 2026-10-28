@@ -3,6 +3,7 @@
 // No replacement application/HTML page, account request, real torrent or player.
 module.exports=function installFixture(){
     const L=Lampa,qa=window.__tcQa={mode:'ready',parserCalls:0,pending:[],selected:null,returnFn:null};
+    qa.activityPushes=[];qa.originalActivityPush=L.Activity.push;L.Activity.push=function(params){if(params&&params.component==='torrents'){const active=L.Activity.active(),fullMovie=active?.activity?.component?.props?.get?.('movie'),page=active?.activity?.render?.()[0];qa.activityPushes.push({component:params.component,movieId:params.movie?.id||null,source:params.movie?.source||null,mediaType:params.movie?.media_type||null,search:params.search||'',activeComponent:active?.component||null,activeCardId:active?.card?.id||null,fullMovieId:fullMovie?.id||null,pageActive:!!page?.classList?.contains('activity--active'),diagnostics:LampaTorrentCinema.diagnostics(),hasStreamPane:!!document.querySelector('.sh-streams')});}return qa.originalActivityPush.apply(this,arguments);};
     // Isolated browser context only: enable the same feature prerequisites as the owner's configured install.
     L.Storage.set('parser_use',true);window.lampa_settings=window.lampa_settings||{};window.lampa_settings.torrents_use=true;
     qa.originalComponentCreate=L.Component.create;
@@ -56,17 +57,21 @@ module.exports=function installFixture(){
         function deliver(){if(mode==='error')fail('controlled offline provider');else done({Results:mode==='empty'?[]:JSON.parse(JSON.stringify(qa.results))});}
         if(mode==='delayed')qa.pending.push(deliver);else setTimeout(deliver,80);
     };
-    // Replace only the transport entry for synthetic releases. Native row OK,
-    // Template, Modal/controller and the return callback remain exercised.
-    qa.originalStart=L.Torrent.start;qa.originalBack=L.Torrent.back;
+    // Keep native Torrent.start, Loading, Template, Files, Modal and their
+    // controllers. Only the TorrServer wire methods and final Player.play call
+    // are shadowed; no live server or media is contacted.
+    qa.transportMode='success';qa.playRequested=null;
+    qa.originalBack=L.Torrent.back;
     L.Torrent.back=function(fn){qa.returnFn=fn;return qa.originalBack.apply(this,arguments);};
-    L.Torrent.start=function(element){
-        if(!qa.results.some(row=>row.InfoHash===element.InfoHash))throw Error('Refusing a non-fixture torrent selection');
-        qa.selected={title:element.Title,hash:element.InfoHash,magnet:element.MagnetUri};
-        const body=$('<div class="torrent-files"></div>');
-        const file=L.Template.get('torrent_file',{title:'Silent Orbit (2024).mkv',size:'18 ГБ',exe:'MKV'});body.append(file);
-        L.Modal.open({title:'Файли · контрольна відповідь',html:body,onBack:function(){L.Modal.close();const callback=qa.returnFn;qa.returnFn=null;if(callback)callback();}});
-    };
+    qa.setTransportMode=function(mode){qa.transportMode=String(mode||'success');};
+    qa.originalTorserver={url:L.Torserver.url,connected:L.Torserver.connected,hash:L.Torserver.hash,files:L.Torserver.files,ip:L.Torserver.ip,stream:L.Torserver.stream};
+    L.Torserver.url=()=> 'http://tc-fixture.invalid';
+    L.Torserver.ip=()=> 'tc-fixture.invalid';
+    L.Torserver.connected=function(done,fail){if(qa.transportMode==='server-failure')return setTimeout(()=>fail&&fail('controlled fixture failure'),20);setTimeout(()=>done&&done(),20);};
+    L.Torserver.hash=function(params,done){setTimeout(()=>done({hash:'a'.repeat(40)}),20);};
+    L.Torserver.files=function(hash,done){setTimeout(()=>done({file_stats:[{id:1,path:'Silent.Orbit.2024.mkv',path_human:'Silent Orbit (2024).mkv',length:19327352832}]}),qa.transportMode==='delayed-files'?800:30);};
+    L.Torserver.stream=function(path,hash,id){return 'http://tc-fixture.invalid/preload/'+encodeURIComponent(qa.transportMode)+'/'+id+'?preload';};
+    qa.originalPlayerPlay=L.Player.play;L.Player.play=function(element){qa.playRequested={title:element.title,urlHost:new URL(element.url).hostname};};
     if(L.Account?.Permit){qa.originalPermit=L.Account.Permit;qa.account={id:'qa117-account',profile:{id:'qa117-a'}};const permit=Object.create(qa.originalPermit);Object.defineProperty(permit,'account',{value:qa.account});L.Account.Permit=permit;qa.isolatedAccount=L.Account.Permit===permit;}
     // Hide only the pre-existing host delivery toast for feature screenshots.
     // Its failure diagnostics are captured separately; no source error is ignored.

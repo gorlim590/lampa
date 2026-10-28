@@ -2,14 +2,54 @@
 function createCinemaRuntime(metadata) {
     var movieRecords=[],running=false,frame=0,subscriptions=[];
     var filesOverlay=null;
+    function markNativeSurface(record,node,className){
+        if(!record||!node||!node.classList)return;
+        node.classList.add(className);record.nativeSurfaces=record.nativeSurfaces||[];
+        if(!record.nativeSurfaces.some(function(item){return item.node===node&&item.className===className;}))record.nativeSurfaces.push({node:node,className:className});
+    }
+    function clearNativeSurfaces(record,className){
+        if(!record||!record.nativeSurfaces)return;
+        record.nativeSurfaces=record.nativeSurfaces.filter(function(item){if(item.node&&item.node.classList&&(!className||item.className===className))item.node.classList.remove(item.className);return className&&item.className!==className;});
+    }
+    function scanTransitionSurfaces(record){
+        if(!record)return;
+        var loadingFound=false;
+        if(record.selectionArmed&&record.streamStage==='loading')document.querySelectorAll('.loading-layer,.media-loading--standalone').forEach(function(node){markNativeSurface(record,node,'tc-native-loading');loadingFound=true;});
+        if(record.streamFocused&&record.streamView&&record.streamView.isOpen()&&record.streamStage==='search')document.querySelectorAll('.search-box,.search').forEach(function(node){markNativeSurface(record,node,'tc-native-search');});
+        if(record.selectionArmed&&record.streamStage==='player')document.querySelectorAll('.player,.youtube-player').forEach(function(node){markNativeSurface(record,node,'tc-native-player');});
+        return loadingFound;
+    }
+    function watchTransitionSurfaces(record){
+        var loadingFound=scanTransitionSurfaces(record);if(record.nativeObserver||!document.body||typeof MutationObserver==='undefined'||record.streamStage==='loading'&&loadingFound)return;
+        record.nativeObserver=new MutationObserver(function(){var found=scanTransitionSurfaces(record);if(record.streamStage==='loading'&&found)stopWatchingSurfaces(record);});
+        record.nativeObserver.observe(document.body,{childList:true,subtree:true});
+        // Native Loading.start switches controller immediately, then inserts its
+        // generic surface after 500 ms (MediaLoading inserts synchronously). The
+        // observer only waits for that surface, not for the duration of playback.
+        record.nativeObserverTimer=setTimeout(function(){if(record.nativeObserver){record.nativeObserver.disconnect();record.nativeObserver=null;}record.nativeObserverTimer=0;},record.streamStage==='loading'?1500:10000);
+    }
+    function stopWatchingSurfaces(record){
+        if(!record)return;if(record.nativeObserver){record.nativeObserver.disconnect();record.nativeObserver=null;}
+        if(record.nativeObserverTimer){clearTimeout(record.nativeObserverTimer);record.nativeObserverTimer=0;}
+    }
     function streamRecord(){return movieRecords.filter(function(r){return r.streamChild&&!r.streamChild.dead&&r.page.classList.contains('activity--active');})[0];}
     function clearStreamFiles(){
         if(!filesOverlay)return;var node=filesOverlay.node;
-        node.classList.remove('sh-files-modal');node.querySelectorAll('.sh-files-summary,.sh-file-rating').forEach(function(n){n.remove();});
+        node.classList.remove('sh-files-modal','tc-native-torrent-modal');node.querySelectorAll('.sh-files-summary,.sh-file-rating').forEach(function(n){n.remove();});
         Object.keys(filesOverlay.tokens).forEach(function(key){var t=filesOverlay.tokens[key];if(node.style.getPropertyValue(key)===t.ours){if(t.before)node.style.setProperty(key,t.before);else node.style.removeProperty(key);}});filesOverlay=null;
+    }
+    function ownStreamFilesSurface(record,node){
+        if(!record||!node||!node.classList)return;
+        if(record.selectionArmed){
+            if(record.streamStage!=='player'&&record.streamStage!=='loading')record.streamStage=node.querySelector('.torrent-files')?'files':'torrent';
+            markNativeSurface(record,node,'tc-native-torrent-modal');
+            return;
+        }
+        if(record.streamFocused&&record.streamView&&record.streamView.isOpen()&&record.streamStage==='search'&&(node.matches('.search-box,.search')||node.querySelector('.search-box,.search')))markNativeSurface(record,node,'tc-native-search');
     }
     function onStreamFiles(event){
         var record=streamRecord(),node=event&&event.html&&(event.html[0]||event.html);
+        ownStreamFilesSurface(record,node);
         if(record&&node&&node.querySelector('.torrent-checklist')){record.streamPane.dataset.state='server-error';streamStatus(record,'TorrServer недоступний · Перевірте підключення у відкритій діагностиці');}
         if(record&&node&&node.querySelector('.torrent-error')){record.streamPane.dataset.state='playback-error';streamStatus(record,'Не вдалося відкрити реліз · Спробуйте інший реліз або повторіть вибір');}
         if(!node||!node.querySelector('.torrent-files'))return;
@@ -24,7 +64,7 @@ function createCinemaRuntime(metadata) {
         if(!filesOverlay.studios)filesOverlay.studios=[];
         var movie=streamMovie(record);if(summary)summary.textContent=(movie.title||movie.name||'')+' · Файлів: '+node.querySelectorAll('.torrent-serial,.torrent-file').length;
     }
-    function onStreamPlaybackError(){var record=streamRecord();if(record&&record.streamChild.started){record.streamPane.dataset.state='playback-error';streamStatus(record,'Помилка відтворення · Виберіть реліз повторно або спробуйте інший');}}
+    function onStreamPlaybackError(){var record=streamRecord();if(record&&record.streamChild.started){record.streamStage='player';watchTransitionSurfaces(record);record.streamPane.dataset.state='playback-error';streamStatus(record,'Помилка відтворення · Виберіть реліз повторно або спробуйте інший');}}
     function streamEpisodeDetails(record,params,season,episode,done){
         var seasons=params.seasons||{},current=seasons[season],found=current&&Array.isArray(current.episodes)?current.episodes.filter(function(item){return Number(item.episode_number)===episode&&(item.season_number==null||Number(item.season_number)===season);}):[];
         if(found.length===1)return done(found[0]);
@@ -115,8 +155,11 @@ function createCinemaRuntime(metadata) {
         if(st.error)return 'Парсер недоступний · Оновити — повторна спроба';
         if(st.total===0)return 'Джерел не знайдено';
         if(st.total==null)return 'Джерела';
-        var count='Знайдено: '+st.total,loaded=st.rows?st.rows.length:0;
-        if(loaded<st.total)count+=' · завантажено: '+loaded+' із '+st.total;
+        var loaded=(st.displayRows||st.rows||[]).length,filter=st.child&&st.child.getFilterData?st.child.getFilterData()||{}:{},season=Array.isArray(filter.season)?filter.season:filter.season==null?[]:[filter.season],quality=Array.isArray(filter.quality)?filter.quality:filter.quality==null?[]:[filter.quality],tracker=window.TorrentsRedesign&&window.TorrentsRedesign.selectedTrackerFilter?window.TorrentsRedesign.selectedTrackerFilter():'all',filtered=season.length>0||quality.length>0||!!st.uaOnly||tracker!=='all';
+        var count='Знайдено загалом: '+st.total;
+        if(filtered){var scope=[];if(season.length)scope.push('сезон '+season.map(function(value){var n=Number(value);return isFinite(n)?'S'+('0'+n).slice(-2):String(value);}).join(', '));if(quality.length||st.uaOnly||tracker!=='all')scope.push('поточні фільтри');count+=' · '+scope.join(' + ')+': завантажено '+loaded;}
+        else if(loaded<st.total)count+=' · завантажено '+loaded+' із '+st.total;
+        else count+=' · у списку '+loaded;
         return (st.partial?'Частина парсерів недоступна · ':'')+count;
     }
     function streamSession(){return window.LampaTorrentOverlay?LampaTorrentOverlay.session():String(streamGeneration);}
@@ -150,8 +193,9 @@ function createCinemaRuntime(metadata) {
     function streamQuery(st) {
         if(st.dead||st.queryFilter)return;
         // Reuse core Filter's clarification/keyboard UI, overriding only its result callback.
+        st.record.streamStage='search';watchTransitionSurfaces(st.record);
         var filter=st.queryFilter=new Lampa.Filter(st.params);
-        filter.onBack=function(){disposeStreamQuery(st);if(streamAlive(st))streamActivate(st.record);};
+        filter.onBack=function(){disposeStreamQuery(st);setTimeout(function(){if(streamAlive(st)&&Lampa.Controller.enabled().name==='sh_movie_streams'&&!(Lampa.Select.opened&&Lampa.Select.opened()))streamActivate(st.record);},0);};
         filter.onSearch=function(value,extra){
             disposeStreamQuery(st);if(st.dead)return;
             var record=st.record;record.streamQuery={search:String(value||''),clarification:true,global:!!(extra&&extra.global)};
@@ -235,14 +279,26 @@ function createCinemaRuntime(metadata) {
     function decorateStreamRows(st){st.rows.forEach(function(row){var data=st.sourceData.get(row);cinemaRows.decorate(row,data);row.classList.add('sh-cinema-row');});streamUpdateRows(st);}
 
 
-    var streamSelectOwner=null;
-    function clearStreamSelect(){
-
-        var st=streamSelectOwner;if(!st)return;streamSelectOwner=null;
+    var streamSelectOwner=null,streamSelectRestore=null;
+    function clearStreamSelect(keepOwner){
+        var st=streamSelectOwner;if(!st)return;if(!keepOwner)streamSelectOwner=null;
         if(st.selectNode){st.selectNode.classList.remove('sh-cinema-select');Object.keys(st.selectTokens||{}).forEach(function(key){var entry=st.selectTokens[key];if(st.selectNode.style.getPropertyValue(key)===entry.ours){if(entry.before)st.selectNode.style.setProperty(key,entry.before);else st.selectNode.style.removeProperty(key);}});st.selectNode=null;st.selectTokens=null;}
     }
+    function onStreamSelectHide(){
+        var st=streamSelectOwner;if(!st)return;
+        streamSelectRestore={state:st,node:st.selectNode};st.selectTransition=false;clearStreamSelect();
+    }
+    function onStreamSelectClose(){
+        var pending=streamSelectRestore;if(!pending)return;streamSelectRestore=null;
+        if(Lampa.Select.opened&&Lampa.Select.opened()||Lampa.Select.render&&Lampa.Select.render()[0]!==pending.node)return;
+        var st=pending.state;
+        if(!streamAlive(st)||!st.wantFocus)return;
+        var controller=Lampa.Controller.enabled().name;
+        if(controller==='select')Lampa.Controller.toggle('sh_movie_streams');
+        if(controller==='sh_movie_streams'||controller==='select')streamFocus(st,st.last);
+    }
     function onStreamSelect(event){
-        clearStreamSelect();
+        streamSelectRestore=null;clearStreamSelect();
         if(Lampa.Controller.enabled().name==='sh_profile')return; // Profile owns its compact native Select surface.
         var record=movieRecords.filter(function(r){return r.streamFocused&&r.streamChild&&!r.streamChild.dead&&r.page.classList.contains('activity--active');})[0];
         if(!record)return;var st=record.streamChild,node=event&&event.html&&(event.html[0]||event.html)||Lampa.Select.render()[0];if(!node)return;
@@ -276,19 +332,19 @@ function createCinemaRuntime(metadata) {
                 function apply(key,name){api.storeTrackerFilter(key.indexOf('source:')===0?'source:':key,name);decorateStreamRows(st);streamActivate(st.record);streamFocus(st,n);}
                 if(entry[0]!=='source'){apply(api.selectedTrackerFilter()===entry[0]?'all':entry[0],'');return;}
                 var options=api.trackerOptions(st.rows.map(function(row){return row._ctrData||{};})).filter(function(o){return o.key.indexOf('source:')===0;});
-                Lampa.Select.show({title:'Інші трекери',items:[{title:'Усі трекери',key:'all'}].concat(options.map(function(o){return {title:o.label+' · '+o.count,key:o.key,name:o.name};})),onBack:function(){streamActivate(st.record);streamFocus(st,n);},onSelect:function(o){apply(o.key,o.name);}});
+            Lampa.Select.show({title:'Інші трекери',items:[{title:'Усі трекери',key:'all'}].concat(options.map(function(o){return {title:o.label+' · '+o.count,key:o.key,name:o.name};})),onSelect:function(o){apply(o.key,o.name);}});
             },'ctr-tab');st.trackerButtons[entry[0]]=n;n.dataset.tracker=entry[0];tools.querySelector('.ctr-tracker-tabs').appendChild(n);
         });st.trackerButton=st.trackerButtons.all;
         st.sortButton=button('Сортування',function(){
             var items=[['recommended','Рекомендований'],['quality','Якість · 4K спочатку'],['seeders','Сіди · найбільше'],['size','Розмір · більший'],['date','Дата · новіші'],['tracker','Толока → Мазепа → інші']].map(function(entry){return {title:entry[1],key:entry[0]};});
-            Lampa.Select.show({title:'Сортування релізів',items:items,onBack:function(){streamActivate(st.record);streamFocus(st,st.sortButton);},onSelect:function(item){var api=window.TorrentsRedesign;if(api&&api.storeSort&&api.storeSort(item.key)){st.last=st.sortButton;decorateStreamRows(st);streamActivate(st.record);streamFocus(st,st.sortButton);}}});
+            Lampa.Select.show({title:'Сортування релізів',items:items,onSelect:function(item){var api=window.TorrentsRedesign;if(api&&api.storeSort&&api.storeSort(item.key)){st.last=st.sortButton;decorateStreamRows(st);}}});
         });menus.appendChild(st.sortButton);
 
-        menus.appendChild(button('⚲ Фільтри',function(){
+        var filterMenuButton=button('⚲ Фільтри',function(){
             var items=[['filter','Фільтри / трекери'],['parser','Джерело'],['search','Пошук']].filter(function(x){return st.root.querySelector('.filter--'+x[0]);}).map(function(x){return {title:x[1],native:x[0]};});
             var parsers=st.root.querySelectorAll('.filter--parser');if(st.providerBinding&&parsers.length>1)items.push({title:'Основний / додатковий парсер',node:parsers[parsers.length-1]});
-            Lampa.Select.show({title:'Фільтри та джерела',items:items,onBack:function(){streamActivate(st.record);},onSelect:function(item){streamActivate(st.record);(item.node||st.root.querySelector('.filter--'+item.native)).dispatchEvent(new Event('hover:enter'));}});
-        }));
+            Lampa.Select.show({title:'Фільтри та джерела',items:items,onSelect:function(item){st.record.streamStage=item.native==='search'?'search':'filter';watchTransitionSurfaces(st.record);(item.node||st.root.querySelector('.filter--'+item.native)).dispatchEvent(new Event('hover:enter'));}});
+        });filterMenuButton.dataset.navGroup='filters';menus.appendChild(filterMenuButton);
         var head=st.record.streamPane.querySelector('.sh-stream-head'),before=head.querySelector('.sh-stream-retry');while(menus.firstChild)head.insertBefore(menus.firstChild,before);
         st.root.querySelector('.explorer__files').insertBefore(tools,st.root.querySelector('.explorer__files').firstChild);
     }
@@ -314,39 +370,59 @@ function createCinemaRuntime(metadata) {
     }
     function streamFocus(st,node) {
         if(!streamAlive(st)||!st.wantFocus||!st.record.streamView?.isOpen())return;
-        Lampa.Controller.collectionSet(st.record.streamPane,false,true);
-        var target=node&&node.isConnected&&node.offsetParent!==null?node:st.last&&st.last.isConnected&&st.last.offsetParent!==null?st.last:st.root.querySelector('.torrent-item')||st.root.querySelector('.ctr-tools .selector')||st.root.querySelector('.selector:not(.hide)')||st.record.streamPane.querySelector('.sh-stream-head .selector');
-        if(target){st.last=target;if(st.tools&&st.tools.contains(target))target.scrollIntoView({block:'nearest',inline:'nearest'});Lampa.Controller.collectionFocus(target,st.record.streamPane);if(target.classList.contains('torrent-item'))st.selectedRow=target;}
+        if(streamSelectOwner===st||st.selectTransition||Lampa.Select.opened&&Lampa.Select.opened())return;
+        function usable(n){return !!(n&&n.isConnected&&!n.hidden&&!n.disabled&&n.getAttribute('aria-disabled')!=='true'&&n.offsetParent!==null&&getComputedStyle(n).visibility!=='hidden'&&getComputedStyle(n).display!=='none');}
+        var target=usable(node)?node:usable(st.last)?st.last:null;
+        if(!target)target=(st.displayRows||st.rows).filter(usable)[0]||Array.prototype.find.call(st.root.querySelectorAll('.ctr-tools .selector,.torrent-filter .selector,.sh-stream-head .selector'),usable);
+        if(target){target.scrollIntoView({block:'nearest',inline:'nearest'});if(!usable(target))return;Lampa.Controller.collectionSet(st.record.streamPane,false,true);st.last=target;Lampa.Controller.collectionFocus(target,st.record.streamPane);if(target.classList.contains('torrent-item'))st.selectedRow=target;}
+    }
+    function streamNavGroups(st){
+        function controls(selector){return Array.prototype.filter.call(st.record.streamPane.querySelectorAll(selector),function(n){return !n.hidden&&!n.disabled&&n.getAttribute('aria-disabled')!=='true'&&n.offsetParent!==null;});}
+        return [
+            controls('.sh-stream-head .selector:not([data-nav-group="filters"])'),
+            controls('.ctr-tabs:not(.ctr-tracker-tabs) .selector'),
+            controls('.ctr-tracker-tabs .selector'),
+            controls('.sh-stream-head [data-nav-group="filters"],.torrent-filter .selector,.parser-providers-toolbar .selector')
+        ].filter(function(group){return group.length;});
     }
     function streamMove(record,direction) {
-        var st=record.streamChild;if(!st)return;if(moveInline(st,direction))return;if(st.loading)st.navigatedWhileLoading=true;
-        var rows=st.displayRows||st.rows,index=rows.indexOf(st.last),filters=Array.prototype.filter.call(st.root.querySelectorAll('.ctr-tools .selector,.torrent-filter .selector'),function(n){return n.offsetParent!==null;}),headers=Array.prototype.slice.call(record.streamPane.querySelectorAll('.sh-stream-head .selector'));
+        var st=record.streamChild;if(!st||streamSelectOwner===st||st.selectTransition)return;if(st.loading)st.navigatedWhileLoading=true;
+        // The native remote controller may move its `.focus` marker before the
+        // overlay's focus listener runs. Use that live marker as the navigation
+        // origin so a stale row reference cannot skip the tracker band.
+        var focused=st.record.streamPane.querySelector('.focus.selector');
+        if(focused&&focused.classList.contains('tc-info'))focused=focused.closest('.torrent-item')||focused;
+        if(focused&&focused.offsetParent!==null)st.last=focused;
+        var rows=st.displayRows||st.rows,index=rows.indexOf(st.last),groups=streamNavGroups(st),rowIndex=-1;
         if(index>=0){
             if(direction==='right'){streamFocus(st,rows[index].querySelector('.tc-info'));return;}
-            if(direction==='left'){streamFocus(st,st.trackerButton||filters[0]||headers[0]);return;}
-            if(direction==='down'&&index+1>=rows.length)st.child.next();
+            if(direction==='left'){streamFocus(st,rows[index]);return;}
             var next=index+(direction==='down'?1:-1);
-            if(next<0){streamFocus(st,st.sortButton||filters[filters.length-1]||headers[headers.length-1]);return;}
+            if(direction==='down'&&next>=rows.length){st.child.next();next=index+1;}
+            if(next<0){var lastGroup=groups[groups.length-1]||[];streamFocus(st,lastGroup[lastGroup.length-1]||record.streamPane.querySelector('.sh-stream-head .selector'));return;}
             if(!rows[next]){streamFocus(st,rows[index]);return;}
             if(next<st.windowStart)streamWindow(st,Math.max(0,st.windowStart-20));
             if(next>=st.windowStart+40)streamWindow(st,st.windowStart+20);
             streamFocus(st,rows[next]);return;
         }
-        var group=headers.indexOf(st.last)>=0?headers:filters,at=group.indexOf(st.last);
-        if(direction==='left'||direction==='right')streamFocus(st,group[Math.max(0,Math.min(group.length-1,at+(direction==='right'?1:-1)))]||headers[0]);
-        else if(direction==='down')streamFocus(st,group===headers?filters[0]||rows[st.windowStart]:rows[st.windowStart]||headers[0]);
-        else streamFocus(st,headers[0]);
+        for(var i=0;i<groups.length;i++)if(groups[i].indexOf(st.last)>=0){rowIndex=i;break;}
+        if(rowIndex<0){streamFocus(st,rows[st.windowStart]||groups[0]&&groups[0][0]);return;}
+        var group=groups[rowIndex],at=group.indexOf(st.last);
+        if(direction==='left'||direction==='right')streamFocus(st,group[Math.max(0,Math.min(group.length-1,at+(direction==='right'?1:-1)))]);
+        else if(direction==='up'){var previous=groups[rowIndex-1];if(previous)streamFocus(st,previous[previous.length-1]);}
+        else if(direction==='down'){var following=groups[rowIndex+1];streamFocus(st,following?following[0]:rows[st.windowStart]);}
     }
 
     function streamActivate(record) {
         var st=record.streamChild;if(!st||!streamAlive(st)||!record.streamView?.isOpen())return;
+        if(streamSelectOwner===st||st.selectTransition||Lampa.Select.opened&&Lampa.Select.opened())return;
         st.wantFocus=true;record.streamFocused=true;
         var history=st.root.querySelector('.watched-history'),historyBody=history&&history.querySelector('.watched-history__body');if(historyBody)history.classList.toggle('sh-empty-history',historyBody.textContent.trim()===Lampa.Lang.translate('no_watch_history'));
         // Empty.start otherwise replaces start with a page-wide empty controller.
         st.child.start=function(){streamActivate(record);};
         Lampa.Controller.add('sh_movie_streams',{
             toggle:function(){streamFocus(st);},
-            up:function(){streamMove(record,'up');},down:function(){streamMove(record,'down');},left:function(){streamMove(record,'left');},right:function(){streamMove(record,'right');},back:function(){if(!collapseInline(st))closeStreamOverlay(record,true);}
+            up:function(){if(!moveInline(st,'up'))streamMove(record,'up');},down:function(){if(!moveInline(st,'down'))streamMove(record,'down');},left:function(){if(!moveInline(st,'left'))streamMove(record,'left');},right:function(){if(!moveInline(st,'right'))streamMove(record,'right');},back:function(){if(!collapseInline(st))closeStreamOverlay(record,true);}
         });
         Lampa.Controller.toggle('sh_movie_streams');
     }
@@ -424,10 +500,7 @@ function createCinemaRuntime(metadata) {
             st.onEnter=function(event){
                 if(inlineEnter(st,event))return;
                 if(event.target.closest('.torrent-item')){
-                    st.started=true;
-                    // Native Torrent.close consumes this callback after each Files session.
-                    // Arm it for every release, including a second selection after playback.
-                    Lampa.Torrent.back(function(){if(streamAlive(st)&&record.streamView.isOpen())streamActivate(record);});
+                    armRelease(st,event.target.closest('.torrent-item'));
                 }
                 if(event.target.closest('.filter--back')){event.stopImmediatePropagation();closeStreamOverlay(record,true);}else if(event.target.closest('.filter--search,.empty__footer')){event.stopImmediatePropagation();streamQuery(st);}
             };
@@ -447,6 +520,7 @@ function createCinemaRuntime(metadata) {
     }
     function removeStreams(record) {
         if(!record.streamPane)return;
+        stopWatchingSurfaces(record);clearNativeSurfaces(record);record.selectionArmed=false;record.streamStage='idle';
         if(Lampa.Controller.enabled().name==='sh_movie_streams')streamInfo(record);
         closeStreamOverlay(record,false);closeStreamChild(record);
         $(record.streamPane).off('.tcCinema');
@@ -489,13 +563,32 @@ function createCinemaRuntime(metadata) {
         onStreamController({name:Lampa.Controller.enabled().name});
     }
     function onStreamController(event) {
-
-        if(!event||!['full_start','content'].includes(event.name))return;
+        if(!event)return;
         var record=movieRecords.filter(function(r){return r.page.classList.contains('activity--active')&&r.streamPane;})[0];if(!record)return;
+        var previousStage=record.streamStage;
+        if(streamSelectRestore&&event.name!=='select'){
+            var pending=streamSelectRestore;streamSelectRestore=null;
+            if(event.name==='sh_movie_streams'&&!Lampa.Select.opened()&&streamAlive(pending.state)&&pending.state.wantFocus)streamFocus(pending.state,pending.state.last);
+        }
+        if(record.selectionArmed&&event.name==='loading'){record.streamStage='loading';watchTransitionSurfaces(record);}
+        if(record.selectionArmed&&['player','player_video','youtube'].indexOf(event.name)>=0){record.streamStage='player';watchTransitionSurfaces(record);}
+        if(record.streamFocused&&record.streamView&&record.streamView.isOpen()&&['search','keyboard'].indexOf(event.name)>=0){record.streamStage='search';watchTransitionSurfaces(record);}
+        if(previousStage==='loading'&&event.name!=='loading'){stopWatchingSurfaces(record);clearNativeSurfaces(record,'tc-native-loading');if(record.streamStage==='loading')record.streamStage='files';}
+        var settingsWasOwned=!!(record.nativeSurfaces&&record.nativeSurfaces.some(function(item){return item.className==='tc-native-settings';}));
+        if(record.streamFocused&&record.streamView&&record.streamView.isOpen()){
+            if(/settings/.test(event.name))document.querySelectorAll('.settings').forEach(function(node){markNativeSurface(record,node,'tc-native-settings');});
+            else if(record.nativeSurfaces&&record.nativeSurfaces.some(function(item){return item.className==='tc-native-settings';}))clearNativeSurfaces(record,'tc-native-settings');
+        }
+        if(settingsWasOwned&&event.name==='head'){
+            var settingsState=record.streamChild;
+            if(settingsState&&settingsState.wantFocus&&record.streamView&&record.streamView.isOpen()&&streamAlive(settingsState))streamActivate(record);
+            return;
+        }
+        if(!['full_start','content'].includes(event.name))return;
         // Native player/Files return may activate the underlying detail controller.
         // A visible overlay must retain remote ownership; leave inner menus/player alone.
         var st=record.streamChild;
-        if(st&&st.wantFocus&&record.streamView&&record.streamView.isOpen()&&streamAlive(st)){
+        if(st&&st.wantFocus&&streamSelectOwner!==st&&!st.selectTransition&&record.streamView&&record.streamView.isOpen()&&streamAlive(st)){
             streamActivate(record);return;
         }
         if(event.name!=='full_start')return;
@@ -506,7 +599,7 @@ function createCinemaRuntime(metadata) {
         // Preserve native Down to cast/recommendations; sources open through the real torrent action.
         record.streamDown=controller.down;
     }
-    function onStreamProfile(){streamGeneration++;streamCache=[];movieRecords.forEach(function(record){clearStreamEpisodePreviews(record);closeStreamOverlay(record,false);closeStreamChild(record);});}
+    function onStreamProfile(){streamGeneration++;streamCache=[];clearStreamSelect();streamSelectRestore=null;movieRecords.forEach(function(record){record.selectionArmed=false;record.streamStage='idle';stopWatchingSurfaces(record);clearNativeSurfaces(record);clearStreamEpisodePreviews(record);closeStreamOverlay(record,false);closeStreamChild(record);});}
     function onStreamSettings(event) {
         if(event&&/^(account|account_user|account_email)$/.test(event.name)){onStreamProfile();return;}
         if(event&&/^(jackett_|prowlarr_|parser_|parse_|ps_|bat_)/.test(event.name)){if(movieRecords.some(function(r){return r.streamChild&&r.streamChild.providerChanging;}))return;streamGeneration++;streamCache=[];movieRecords.forEach(function(r){closeStreamOverlay(r,false);closeStreamChild(r);});}
@@ -528,7 +621,8 @@ function createCinemaRuntime(metadata) {
     }
     function armRelease(st,row){
         st.started=true;st.selectedRow=row;
-        Lampa.Torrent.back(function(){if(streamAlive(st)&&st.record.streamView.isOpen())streamActivate(st.record);});
+        st.record.selectionArmed=true;st.record.streamStage='torrent';
+        Lampa.Torrent.back(function(){if(streamAlive(st)&&st.record.streamView.isOpen()){st.record.selectionArmed=false;st.record.streamStage='idle';stopWatchingSurfaces(st.record);clearNativeSurfaces(st.record);streamActivate(st.record);}});
     }
     function bindInline(st,row){
         $(row).find('.tc-info').off('.tcCinema').on('hover:enter.tcCinema click.tcCinema',function(event){inlineEnter(st,event);});
@@ -559,7 +653,12 @@ function createCinemaRuntime(metadata) {
         var node=event.item&&(event.item[0]||event.item),st=metadata.overlayState();
         if(node&&event.element&&st&&metadata.fileOwnerMatches(event,st.movie,st.kind))metadata.ratingNode(st,node,{season:event.element.season,episode:event.element.episode,ambiguous:!!(event.element.episodes&&event.element.episodes.length>1),verified:metadata.verifiedEpisode(event),filmVerified:st.kind!=='movie'||metadata.filmFileMatches(event,st.movie),path:event.element.path||''});
     }
-    function onFilesClose(){var st=metadata.overlayState();if(st)metadata.clearFileRatings(st);clearStreamFiles();}
+    function onFilesClose(){var st=metadata.overlayState();if(st)metadata.clearFileRatings(st);var record=streamRecord();clearStreamFiles();if(!record||!record.selectionArmed)return;
+        clearNativeSurfaces(record,'tc-native-torrent-modal');
+        // Files can close before the transport starts native Loading. Keep the
+        // release armed until Controller's native transition identifies Loading,
+        // player, Files return, or the registered Torrent.back callback runs.
+    }
     function start(){
         if(running)return;running=true;
         subscribe(Lampa.Listener,'activity',schedule);subscribe(Lampa.Listener,'full',schedule);
@@ -567,7 +666,7 @@ function createCinemaRuntime(metadata) {
         subscribe(Lampa.Modal.listener,'fullshow',onStreamFiles);subscribe(Lampa.Modal.listener,'update',onStreamFiles);subscribe(Lampa.Modal.listener,'close',onFilesClose);
         subscribe(Lampa.Listener,'torrent_file',fileEvent);
         if(Lampa.PlayerVideo)subscribe(Lampa.PlayerVideo.listener,'error',onStreamPlaybackError);
-        subscribe(Lampa.Select.listener,'fullshow',onStreamSelect);subscribe(Lampa.Select.listener,'hide',clearStreamSelect);
+        subscribe(Lampa.Select.listener,'fullshow',onStreamSelect);subscribe(Lampa.Select.listener,'hide',onStreamSelectHide);subscribe(Lampa.Select.listener,'close',onStreamSelectClose);
         subscribe(Lampa.Storage.listener,'change',onStreamSettings);
         if(Lampa.Account)subscribe(Lampa.Account.listener,'profile_select',onStreamProfile);
         if(Lampa.Search)subscribe(Lampa.Search.listener,'sources',onStreamProfile);
@@ -575,7 +674,7 @@ function createCinemaRuntime(metadata) {
     }
     function stop(){
         if(frame){cancelAnimationFrame(frame);frame=0;}
-        movieRecords.slice().forEach(removeStreams);movieRecords=[];
+        movieRecords.slice().forEach(removeStreams);movieRecords=[];streamSelectRestore=null;streamSelectOwner=null;
         removeStreamRoutes();clearStreamFiles();clearStreamSelect();streamCache=[];streamGeneration++;
         subscriptions.splice(0).reverse().forEach(function(remove){remove();});running=false;
         var style=document.getElementById('torrent-cinema-style');if(style)style.remove();
