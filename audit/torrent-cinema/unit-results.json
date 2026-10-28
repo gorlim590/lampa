@@ -1,7 +1,7 @@
 {
   "commit": "ce50a4461cfd1270547ac8417ce71b4ab01cc9fa",
-  "tests": 225,
-  "passed": 225,
+  "tests": 226,
+  "passed": 226,
   "failed": 0,
   "command": "node --test --test-timeout=15000 tests/torrent-overlay.cjs tests/hybrid-ui.cjs tests/torrents-cinema.cjs tests/torrent-details.cjs tests/hybrid-torrent-discovery.cjs tests/torrent-search.cjs tests/parser-providers.cjs tests/ui-bootstrap.cjs tests/settings-census.cjs tests/settings-inventory.cjs tests/settings-registry.cjs tests/settings-hub-lifecycle.cjs",
   "static": [
@@ -10,5 +10,5 @@
     "git diff --check PASS"
   ],
   "note": "Existing Hybrid CI entry imports new lifecycle/inline and build-freshness tests. Workflows unchanged. Latest main inventory Markdown link formatting repaired after inherited validator failure; no inventory contents/configuration changed.",
-  "followUp": "Strict streamed-row identity regression also passes; native loader cache-version assertion passes (CI failure corrected without changing Trakt code)."
+  "followUp": "Visual acceptance follow-up adds independent two-band quality/tracker filtering and four-column Video/Audio/Subtitles/Files details; both standalone and Hybrid real-browser runs pass 24/24."
 }

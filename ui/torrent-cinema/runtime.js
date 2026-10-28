@@ -269,6 +269,7 @@ function createCinemaRuntime(metadata) {
         st.uaButton=button('Українське аудіо',function(n){st.uaOnly=!st.uaOnly;n.classList.toggle('is-active',st.uaOnly);n.setAttribute('aria-pressed',String(st.uaOnly));decorateStreamRows(st);streamActivate(st.record);streamFocus(st,n);},'ctr-tab');
         tools.querySelector('.ctr-tabs').appendChild(st.uaButton);
         st.trackerButtons={};
+        var allTrackers=button('Усі трекери',function(n){var api=window.TorrentsRedesign;api.storeTrackerFilter('all','');decorateStreamRows(st);streamActivate(st.record);streamFocus(st,n);},'ctr-tab');allTrackers.dataset.tracker='all';tools.querySelector('.ctr-tracker-tabs').appendChild(allTrackers);st.trackerButtons.all=allTrackers;
         [['toloka','Толока'],['mazepa','Мазепа'],['source','Інші']].forEach(function(entry){
             var n=button(entry[1],function(){
                 var api=window.TorrentsRedesign;
@@ -277,7 +278,7 @@ function createCinemaRuntime(metadata) {
                 var options=api.trackerOptions(st.rows.map(function(row){return row._ctrData||{};})).filter(function(o){return o.key.indexOf('source:')===0;});
                 Lampa.Select.show({title:'Інші трекери',items:[{title:'Усі трекери',key:'all'}].concat(options.map(function(o){return {title:o.label+' · '+o.count,key:o.key,name:o.name};})),onBack:function(){streamActivate(st.record);streamFocus(st,n);},onSelect:function(o){apply(o.key,o.name);}});
             },'ctr-tab');st.trackerButtons[entry[0]]=n;n.dataset.tracker=entry[0];tools.querySelector('.ctr-tracker-tabs').appendChild(n);
-        });st.trackerButton=st.trackerButtons.toloka;
+        });st.trackerButton=st.trackerButtons.all;
         st.sortButton=button('Сортування',function(){
             var items=[['recommended','Рекомендований'],['quality','Якість · 4K спочатку'],['seeders','Сіди · найбільше'],['size','Розмір · більший'],['date','Дата · новіші'],['tracker','Толока → Мазепа → інші']].map(function(entry){return {title:entry[1],key:entry[0]};});
             Lampa.Select.show({title:'Сортування релізів',items:items,onBack:function(){streamActivate(st.record);streamFocus(st,st.sortButton);},onSelect:function(item){var api=window.TorrentsRedesign;if(api&&api.storeSort&&api.storeSort(item.key)){st.last=st.sortButton;decorateStreamRows(st);streamActivate(st.record);streamFocus(st,st.sortButton);}}});
@@ -299,6 +300,7 @@ function createCinemaRuntime(metadata) {
     }
     function syncStreamTrackerTools(st){
         if(!st.trackerButtons)return;var api=window.TorrentsRedesign,options=api.trackerOptions(st.rows.map(function(row){return row._ctrData||{};})),selected=api.selectedTrackerFilter(),counts={};options.forEach(function(o){counts[o.key]=o.count;});
+        var all=st.trackerButtons.all;all.textContent='Усі трекери · '+st.rows.length;all.classList.toggle('is-active',selected==='all');all.setAttribute('aria-pressed',String(selected==='all'));
         [['toloka','Толока'],['mazepa','Мазепа'],['source','Інші']].forEach(function(entry){var n=st.trackerButtons[entry[0]],count=entry[0]==='source'?options.filter(function(o){return o.key.indexOf('source:')===0;}).reduce(function(sum,o){return sum+o.count;},0):counts[entry[0]]||0,active=entry[0]==='source'?selected.indexOf('source:')===0:selected===entry[0];n.textContent=entry[1]+' · '+count;n.classList.toggle('is-active',active);n.setAttribute('aria-pressed',String(active));});
         st.tools.querySelectorAll('[data-quality]').forEach(function(n){var q=n.dataset.quality,count=st.rows.filter(function(row){return q==='all'||row._ctrData&&row._ctrData.parsed.quality===q;}).length;n.textContent=(q==='all'?'Усі':q==='2160'?'4K':q+'p')+' · '+count;});
         var uaCount=st.rows.filter(function(row){return row._ctrData&&row._ctrData.parsed.audio.ua;}).length;st.uaButton.textContent='🇺🇦 UA · '+uaCount;

@@ -121,11 +121,11 @@ test('Hybrid embedded list uses shared metadata, exact matching, tracker filters
   f.context.streamUpdateRows(f.st);
   assert.equal(f.st.displayRows.length, 3);
   assert.equal(f.st.displayRows[0], toloka.row, 'the confirmed Ukrainian-audio release is the single Best Choice');
-  assert.equal(toloka.row.textContent.includes('Аудіо: Українська'), true);
-  assert.equal(toloka.row.textContent.includes('UA Studio'), true);
-  assert.equal(toloka.row.textContent.includes('CC · Російська'), true);
-  assert.equal(mazepa.row.textContent.includes('Аудіо: Українська'), false, 'Ukrainian subtitles never become Ukrainian audio');
-  assert.equal(mazepa.row.textContent.includes('CC · Українська'), true);
+  assert.match(toloka.row.querySelector('.tc-audio-label').textContent, /Українська/);
+  assert.match(toloka.row.querySelector('.tc-voice').textContent, /UA Studio/);
+  assert.match(toloka.row.querySelector('.tc-subtitles').textContent, /Російська/);
+  assert.doesNotMatch(mazepa.row.querySelector('.tc-audio-label').textContent, /Українська/, 'Ukrainian subtitles never become Ukrainian audio');
+  assert.match(mazepa.row.querySelector('.tc-subtitles').textContent, /Українська/);
   assert.equal(wrongYear.row.classList.contains('is-best'), false);
   assert.equal(wrongYear.row.textContent.includes('Амоногава'), false, 'a release group alone is not a studio identity');
   f.api.storeSort('quality'); f.context.streamUpdateRows(f.st);
@@ -177,11 +177,10 @@ test('Hybrid popup rows display confirmed anime audio/studio tracks and reject t
   const nestedVoice = f.release('Frieren S01E03 1080p', 'Toloka', { info: { Voices: ['Далі Буде'] } });
   f.context.streamUpdateRows(f.st);
   const chips = amanogawa.row.textContent;
-  assert.match(chips, /Аудіо: Українська/);
-  assert.match(chips, /Аудіо: Українська \/ Японська/);
+  assert.match(amanogawa.row.querySelector('.tc-audio-label').textContent, /Українська \/ Японська/);
   assert.match(chips, /Амоногава/);
   assert.doesNotMatch(chips, /Багатоголосе/);
-  assert.match(chips, /Субтитри: English/);
+  assert.match(amanogawa.row.querySelector('.tc-subtitles').textContent, /English/);
   assert.equal(wrongSeason.row.classList.contains('is-best'), false);
   assert.doesNotMatch(ambiguousGroup.row.textContent, /Студія невідома/);
   assert.match(nestedVoice.row.textContent, /Далі Буде/);
@@ -345,7 +344,7 @@ test('Hybrid embedded controls invoke native tracker/sort handlers; async rows r
   f.context.streamUpdateRows(f.st);
   f.context.setupStreamTools(f.st);
   f.context.syncStreamTrackerTools(f.st);
-  const allButton = f.st.trackerButtons.toloka, tolokaButton = f.st.trackerButtons.toloka, mazepaButton = f.st.trackerButtons.mazepa, sourceButton = f.st.trackerButtons.source;
+  const allButton = f.st.trackerButtons.all, tolokaButton = f.st.trackerButtons.toloka, mazepaButton = f.st.trackerButtons.mazepa, sourceButton = f.st.trackerButtons.source;
   assert.match(tolokaButton.textContent, /Толока · 1/); assert.match(mazepaButton.textContent, /Мазепа · 1/);
   assert.match(sourceButton.textContent, /Інші · 1/);
   assert.equal(typeof tolokaButton.jqueryEnter,'function','native remote jQuery enter must be bound');tolokaButton.jqueryEnter({stopImmediatePropagation(){}});
@@ -424,6 +423,21 @@ test('embedded parser status distinguishes total results from currently loaded r
   assert.equal(f.context.streamResultStatus(st), 'Парсер недоступний · Оновити — повторна спроба');
 });
 
+test('quality and tracker filter bands remain independent and ordered for remote navigation',()=>{
+ const f=fixture();f.release('The Others (2001) 2160p','Toloka',{AudioLanguages:['uk']});f.release('The Others (2001) 1080p','Mazepa');
+ let quality=[];f.st.child.getFilterData=()=>({quality});f.st.child.setFilterData=value=>{quality=value.quality;};f.st.child.applyFilter=()=>{};
+ f.context.setupStreamTools(f.st);f.context.syncStreamTrackerTools(f.st);
+ const qualityAll=f.nodes['.ctr-tabs'].children.find(node=>node.dataset.quality==='all'),ua=f.nodes['.ctr-tabs'].children.at(-1),all=f.st.trackerButtons.all,mazepa=f.st.trackerButtons.mazepa;
+ assert.deepEqual(f.nodes['.ctr-tabs'].children.map(node=>node.dataset.quality),['all','2160','1080','720',undefined]);
+ assert.deepEqual(f.nodes['.ctr-tracker-tabs'].children.map(node=>node.dataset.tracker),['all','toloka','mazepa','source']);
+ f.nodes['.ctr-tabs'].children.find(node=>node.dataset.quality==='2160').dispatch('hover:enter');
+ assert.deepEqual(Array.from(quality),['4k']);
+ mazepa.dispatch('hover:enter');assert.equal(f.api.selectedTrackerFilter(),'mazepa');assert.deepEqual(Array.from(quality),['4k'],'tracker action cannot reset the quality filter');
+ all.dispatch('hover:enter');assert.equal(f.api.selectedTrackerFilter(),'all');assert.deepEqual(Array.from(quality),['4k'],'All trackers clears only the tracker filter');
+ f.st.last=all;f.context.streamMove(f.record,'left');assert.equal(f.focus.current,ua,'left from tracker row returns to the last quality action');
+ f.st.last=qualityAll;f.context.streamMove(f.record,'down');assert.equal(f.focus.current,f.st.displayRows[0],'down from quality row enters the release list');
+});
+
 
 test('streaming replacement restores the selected source identity without reusing a different row',()=>{
  const f=fixture(),first=f.release('The Others (2001) 1080p','Toloka',{InfoHash:'a'.repeat(40)}),second=f.release('The Others (2001) 720p','Mazepa',{InfoHash:'b'.repeat(40)});
@@ -438,6 +452,7 @@ test('streaming replacement restores the selected source identity without reusin
 test('expanded video details retain quality, HDR/Dolby Vision and codec from the existing metadata adapter',()=>{
  const f=fixture(),release=f.release('The Others (2001) 2160p WEB-DL HDR10 Dolby Vision HEVC','Toloka',{AudioLanguages:['uk']});
  f.context.streamUpdateRows(f.st);const details=release.row.querySelector('.tc-technical').textContent;
- assert.match(details,/Відео: 4K/);assert.match(details,/HDR10/);assert.match(details,/DV/);assert.match(details,/HEVC/);
+  assert.match(details,/ВідеоHEVC2160p \/ 4K/);assert.match(details,/HDR10/);assert.match(details,/DV/);assert.match(details,/HEVC/);
+  assert.match(details,/АудіоУкраїнська/);assert.match(details,/Субтитри/);assert.match(details,/Файли/);
  assert.equal(release.row.querySelector('.tc-open-files'),null);
 });

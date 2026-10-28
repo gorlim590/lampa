@@ -1,7 +1,7 @@
 {
   "installation": "Hybrid integration",
   "suppressedScripts": [],
-  "commit": "ce50a4461cfd1270547ac8417ce71b4ab01cc9fa",
+  "commit": "6ef14ba36f125df996517b8f5d4183a4d80b3f0c",
   "branch": "feat/issue-117-torrent-cinema",
   "fixture": true,
   "assets": {
@@ -17,8 +17,8 @@
     },
     "ui/torrent-cinema.js": {
       "url": "https://gorlim590.github.io/lampa/ui/torrent-cinema.js",
-      "sha256": "fa5c1407087ad854a63f6a6c3a2719974289339dca069da1651c1dd4c99b3083",
-      "bytes": 132094
+      "sha256": "683fb0868402b4552c4a5bce39822d8cd6a0999fea976296884995c223cb6467",
+      "bytes": 139476
     },
     "ui/stremio-hybrid.js": {
       "url": "https://gorlim590.github.io/lampa/ui/stremio-hybrid.js",
@@ -55,35 +55,35 @@
         },
         "firstRow": {
           "x": 100.75,
-          "y": 199.625,
+          "y": 221.9375,
           "width": 1078.375,
-          "height": 98.6875,
+          "height": 102.125,
           "right": 1179.125,
-          "bottom": 298.3125
+          "bottom": 324.0625
         },
         "lastVisibleRow": {
           "x": 100.75,
-          "y": 499.5625,
+          "y": 514.875,
           "width": 1078.375,
-          "height": 88.625,
+          "height": 85.375,
           "right": 1179.125,
-          "bottom": 588.1875
+          "bottom": 600.25
         },
         "focus": {
           "x": 100.75,
-          "y": 199.625,
+          "y": 221.9375,
           "width": 1078.375,
-          "height": 98.6875,
+          "height": 102.125,
           "right": 1179.125,
-          "bottom": 298.3125
+          "bottom": 324.0625
         },
         "filters": {
           "x": 96.75,
           "y": 131.4375,
           "width": 1086.375,
-          "height": 55.375,
+          "height": 79.0625,
           "right": 1183.125,
-          "bottom": 186.8125
+          "bottom": 210.5
         },
         "visibleRows": 4,
         "filterOverflow": 0,
@@ -124,35 +124,35 @@
           },
           "firstRow": {
             "x": 100.75,
-            "y": 199.625,
+            "y": 221.9375,
             "width": 1078.375,
-            "height": 208.8125,
+            "height": 253.875,
             "right": 1179.125,
-            "bottom": 408.4375
+            "bottom": 475.8125
           },
           "lastVisibleRow": {
             "x": 100.75,
-            "y": 513.0625,
+            "y": 574.5625,
             "width": 1078.375,
-            "height": 88.625,
+            "height": 85.375,
             "right": 1179.125,
-            "bottom": 601.6875
+            "bottom": 659.9375
           },
           "focus": {
-            "x": 1139.125,
-            "y": 236.1875,
-            "width": 24,
+            "x": 1142.6875,
+            "y": 260.1875,
+            "width": 21.5625,
             "height": 25.5625,
-            "right": 1163.125,
-            "bottom": 261.75
+            "right": 1164.25,
+            "bottom": 285.75
           },
           "filters": {
             "x": 96.75,
             "y": 131.4375,
             "width": 1086.375,
-            "height": 55.375,
+            "height": 79.0625,
             "right": 1183.125,
-            "bottom": 186.8125
+            "bottom": 210.5
           },
           "visibleRows": 3,
           "filterOverflow": 0,
@@ -189,35 +189,35 @@
         },
         "firstRow": {
           "x": 152.0625,
-          "y": 280.5,
+          "y": 308.375,
           "width": 1615.8125,
-          "height": 129.125,
+          "height": 131.6875,
           "right": 1767.875,
-          "bottom": 409.625
+          "bottom": 440.0625
         },
         "lastVisibleRow": {
           "x": 152.0625,
           "y": 820.125,
           "width": 1615.8125,
-          "height": 122.25,
+          "height": 114.4375,
           "right": 1767.875,
-          "bottom": 942.375
+          "bottom": 934.5625
         },
         "focus": {
           "x": 152.0625,
-          "y": 280.5,
+          "y": 308.375,
           "width": 1615.8125,
-          "height": 129.125,
+          "height": 131.6875,
           "right": 1767.875,
-          "bottom": 409.625
+          "bottom": 440.0625
         },
         "filters": {
           "x": 146.625,
           "y": 191.3125,
           "width": 1626.6875,
-          "height": 71.625,
+          "height": 101.375,
           "right": 1773.3125,
-          "bottom": 262.9375
+          "bottom": 292.6875
         },
         "visibleRows": 5,
         "filterOverflow": 0,
@@ -258,37 +258,37 @@
           },
           "firstRow": {
             "x": 152.0625,
-            "y": 280.5,
+            "y": 308.375,
             "width": 1615.8125,
-            "height": 278.6875,
+            "height": 338.75,
             "right": 1767.875,
-            "bottom": 559.1875
+            "bottom": 647.125
           },
           "lastVisibleRow": {
             "x": 152.0625,
-            "y": 836.5,
+            "y": 779.9375,
             "width": 1615.8125,
-            "height": 122.25,
+            "height": 114.4375,
             "right": 1767.875,
-            "bottom": 958.75
+            "bottom": 894.375
           },
           "focus": {
-            "x": 1710,
-            "y": 327.4375,
-            "width": 37.375,
+            "x": 1719.25,
+            "y": 356.625,
+            "width": 29.6875,
             "height": 35.1875,
-            "right": 1747.375,
-            "bottom": 362.625
+            "right": 1748.9375,
+            "bottom": 391.8125
           },
           "filters": {
             "x": 146.625,
             "y": 191.3125,
             "width": 1626.6875,
-            "height": 71.625,
+            "height": 101.375,
             "right": 1773.3125,
-            "bottom": 262.9375
+            "bottom": 292.6875
           },
-          "visibleRows": 4,
+          "visibleRows": 3,
           "filterOverflow": 0,
           "horizontalOverflow": 0,
           "font": 22,
@@ -323,35 +323,35 @@
         },
         "firstRow": {
           "x": 300.25,
-          "y": 540.4375,
+          "y": 587.5,
           "width": 3239.4375,
-          "height": 242.6875,
+          "height": 239.9375,
           "right": 3539.6875,
-          "bottom": 783.125
+          "bottom": 827.4375
         },
         "lastVisibleRow": {
           "x": 300.25,
-          "y": 1580.9375,
+          "y": 1564,
           "width": 3239.4375,
-          "height": 236.6875,
+          "height": 220.9375,
           "right": 3539.6875,
-          "bottom": 1817.625
+          "bottom": 1784.9375
         },
         "focus": {
           "x": 300.25,
-          "y": 540.4375,
+          "y": 587.5,
           "width": 3239.4375,
-          "height": 242.6875,
+          "height": 239.9375,
           "right": 3539.6875,
-          "bottom": 783.125
+          "bottom": 827.4375
         },
         "filters": {
           "x": 289.3125,
           "y": 372.375,
           "width": 3261.3125,
-          "height": 132.875,
+          "height": 183.625,
           "right": 3550.625,
-          "bottom": 505.25
+          "bottom": 556
         },
         "visibleRows": 5,
         "filterOverflow": 0,
@@ -392,35 +392,35 @@
           },
           "firstRow": {
             "x": 300.25,
-            "y": 540.4375,
+            "y": 587.5,
             "width": 3239.4375,
-            "height": 468.9375,
+            "height": 651.25,
             "right": 3539.6875,
-            "bottom": 1009.375
+            "bottom": 1238.75
           },
           "lastVisibleRow": {
             "x": 300.25,
-            "y": 1548.5625,
+            "y": 1735.9375,
             "width": 3239.4375,
-            "height": 236.6875,
+            "height": 220.9375,
             "right": 3539.6875,
-            "bottom": 1785.25
+            "bottom": 1956.875
           },
           "focus": {
-            "x": 3427.9375,
-            "y": 626.5625,
-            "width": 74.75,
+            "x": 3446.4375,
+            "y": 672.25,
+            "width": 59.375,
             "height": 70.375,
-            "right": 3502.6875,
-            "bottom": 696.9375
+            "right": 3505.8125,
+            "bottom": 742.625
           },
           "filters": {
             "x": 289.3125,
             "y": 372.375,
             "width": 3261.3125,
-            "height": 132.875,
+            "height": 183.625,
             "right": 3550.625,
-            "bottom": 505.25
+            "bottom": 556
           },
           "visibleRows": 4,
           "filterOverflow": 0,
@@ -550,35 +550,35 @@
       },
       "firstRow": {
         "x": 100.75,
-        "y": 199.625,
+        "y": 221.9375,
         "width": 1078.375,
-        "height": 98.6875,
+        "height": 102.125,
         "right": 1179.125,
-        "bottom": 298.3125
+        "bottom": 324.0625
       },
       "lastVisibleRow": {
         "x": 100.75,
-        "y": 499.5625,
+        "y": 514.875,
         "width": 1078.375,
-        "height": 88.625,
+        "height": 85.375,
         "right": 1179.125,
-        "bottom": 588.1875
+        "bottom": 600.25
       },
       "focus": {
         "x": 100.75,
-        "y": 199.625,
+        "y": 221.9375,
         "width": 1078.375,
-        "height": 98.6875,
+        "height": 102.125,
         "right": 1179.125,
-        "bottom": 298.3125
+        "bottom": 324.0625
       },
       "filters": {
         "x": 96.75,
         "y": 131.4375,
         "width": 1086.375,
-        "height": 55.375,
+        "height": 79.0625,
         "right": 1183.125,
-        "bottom": 186.8125
+        "bottom": 210.5
       },
       "visibleRows": 4,
       "filterOverflow": 0,
@@ -619,35 +619,35 @@
         },
         "firstRow": {
           "x": 100.75,
-          "y": 199.625,
+          "y": 221.9375,
           "width": 1078.375,
-          "height": 208.8125,
+          "height": 253.875,
           "right": 1179.125,
-          "bottom": 408.4375
+          "bottom": 475.8125
         },
         "lastVisibleRow": {
           "x": 100.75,
-          "y": 513.0625,
+          "y": 574.5625,
           "width": 1078.375,
-          "height": 88.625,
+          "height": 85.375,
           "right": 1179.125,
-          "bottom": 601.6875
+          "bottom": 659.9375
         },
         "focus": {
-          "x": 1139.125,
-          "y": 236.1875,
-          "width": 24,
+          "x": 1142.6875,
+          "y": 260.1875,
+          "width": 21.5625,
           "height": 25.5625,
-          "right": 1163.125,
-          "bottom": 261.75
+          "right": 1164.25,
+          "bottom": 285.75
         },
         "filters": {
           "x": 96.75,
           "y": 131.4375,
           "width": 1086.375,
-          "height": 55.375,
+          "height": 79.0625,
           "right": 1183.125,
-          "bottom": 186.8125
+          "bottom": 210.5
         },
         "visibleRows": 3,
         "filterOverflow": 0,
@@ -676,35 +676,35 @@
       },
       "firstRow": {
         "x": 152.0625,
-        "y": 280.5,
+        "y": 308.375,
         "width": 1615.8125,
-        "height": 129.125,
+        "height": 131.6875,
         "right": 1767.875,
-        "bottom": 409.625
+        "bottom": 440.0625
       },
       "lastVisibleRow": {
         "x": 152.0625,
         "y": 820.125,
         "width": 1615.8125,
-        "height": 122.25,
+        "height": 114.4375,
         "right": 1767.875,
-        "bottom": 942.375
+        "bottom": 934.5625
       },
       "focus": {
         "x": 152.0625,
-        "y": 280.5,
+        "y": 308.375,
         "width": 1615.8125,
-        "height": 129.125,
+        "height": 131.6875,
         "right": 1767.875,
-        "bottom": 409.625
+        "bottom": 440.0625
       },
       "filters": {
         "x": 146.625,
         "y": 191.3125,
         "width": 1626.6875,
-        "height": 71.625,
+        "height": 101.375,
         "right": 1773.3125,
-        "bottom": 262.9375
+        "bottom": 292.6875
       },
       "visibleRows": 5,
       "filterOverflow": 0,
@@ -745,37 +745,37 @@
         },
         "firstRow": {
           "x": 152.0625,
-          "y": 280.5,
+          "y": 308.375,
           "width": 1615.8125,
-          "height": 278.6875,
+          "height": 338.75,
           "right": 1767.875,
-          "bottom": 559.1875
+          "bottom": 647.125
         },
         "lastVisibleRow": {
           "x": 152.0625,
-          "y": 836.5,
+          "y": 779.9375,
           "width": 1615.8125,
-          "height": 122.25,
+          "height": 114.4375,
           "right": 1767.875,
-          "bottom": 958.75
+          "bottom": 894.375
         },
         "focus": {
-          "x": 1710,
-          "y": 327.4375,
-          "width": 37.375,
+          "x": 1719.25,
+          "y": 356.625,
+          "width": 29.6875,
           "height": 35.1875,
-          "right": 1747.375,
-          "bottom": 362.625
+          "right": 1748.9375,
+          "bottom": 391.8125
         },
         "filters": {
           "x": 146.625,
           "y": 191.3125,
           "width": 1626.6875,
-          "height": 71.625,
+          "height": 101.375,
           "right": 1773.3125,
-          "bottom": 262.9375
+          "bottom": 292.6875
         },
-        "visibleRows": 4,
+        "visibleRows": 3,
         "filterOverflow": 0,
         "horizontalOverflow": 0,
         "font": 22,
@@ -802,35 +802,35 @@
       },
       "firstRow": {
         "x": 300.25,
-        "y": 540.4375,
+        "y": 587.5,
         "width": 3239.4375,
-        "height": 242.6875,
+        "height": 239.9375,
         "right": 3539.6875,
-        "bottom": 783.125
+        "bottom": 827.4375
       },
       "lastVisibleRow": {
         "x": 300.25,
-        "y": 1580.9375,
+        "y": 1564,
         "width": 3239.4375,
-        "height": 236.6875,
+        "height": 220.9375,
         "right": 3539.6875,
-        "bottom": 1817.625
+        "bottom": 1784.9375
       },
       "focus": {
         "x": 300.25,
-        "y": 540.4375,
+        "y": 587.5,
         "width": 3239.4375,
-        "height": 242.6875,
+        "height": 239.9375,
         "right": 3539.6875,
-        "bottom": 783.125
+        "bottom": 827.4375
       },
       "filters": {
         "x": 289.3125,
         "y": 372.375,
         "width": 3261.3125,
-        "height": 132.875,
+        "height": 183.625,
         "right": 3550.625,
-        "bottom": 505.25
+        "bottom": 556
       },
       "visibleRows": 5,
       "filterOverflow": 0,
@@ -871,35 +871,35 @@
         },
         "firstRow": {
           "x": 300.25,
-          "y": 540.4375,
+          "y": 587.5,
           "width": 3239.4375,
-          "height": 468.9375,
+          "height": 651.25,
           "right": 3539.6875,
-          "bottom": 1009.375
+          "bottom": 1238.75
         },
         "lastVisibleRow": {
           "x": 300.25,
-          "y": 1548.5625,
+          "y": 1735.9375,
           "width": 3239.4375,
-          "height": 236.6875,
+          "height": 220.9375,
           "right": 3539.6875,
-          "bottom": 1785.25
+          "bottom": 1956.875
         },
         "focus": {
-          "x": 3427.9375,
-          "y": 626.5625,
-          "width": 74.75,
+          "x": 3446.4375,
+          "y": 672.25,
+          "width": 59.375,
           "height": 70.375,
-          "right": 3502.6875,
-          "bottom": 696.9375
+          "right": 3505.8125,
+          "bottom": 742.625
         },
         "filters": {
           "x": 289.3125,
           "y": 372.375,
           "width": 3261.3125,
-          "height": 132.875,
+          "height": 183.625,
           "right": 3550.625,
-          "bottom": 505.25
+          "bottom": 556
         },
         "visibleRows": 4,
         "filterOverflow": 0,
@@ -924,7 +924,7 @@
   "hostStartupExceptions": [
     "SyntaxError: Failed to execute 'appendChild' on 'Node': Unexpected token '&'\n    at [URL]"
   ],
-  "openMs": 349.70000000018626,
+  "openMs": 340.59999999962747,
   "deviceEquivalent": {
     "viewport": [
       1920,
@@ -941,35 +941,35 @@
     },
     "firstRow": {
       "x": 152.0625,
-      "y": 280.5,
+      "y": 308.375,
       "width": 1615.8125,
-      "height": 129.125,
+      "height": 131.6875,
       "right": 1767.875,
-      "bottom": 409.625
+      "bottom": 440.0625
     },
     "lastVisibleRow": {
       "x": 152.0625,
       "y": 820.125,
       "width": 1615.8125,
-      "height": 122.25,
+      "height": 114.4375,
       "right": 1767.875,
-      "bottom": 942.375
+      "bottom": 934.5625
     },
     "focus": {
       "x": 152.0625,
-      "y": 280.5,
+      "y": 308.375,
       "width": 1615.8125,
-      "height": 129.125,
+      "height": 131.6875,
       "right": 1767.875,
-      "bottom": 409.625
+      "bottom": 440.0625
     },
     "filters": {
       "x": 146.625,
       "y": 191.3125,
       "width": 1626.6875,
-      "height": 71.625,
+      "height": 101.375,
       "right": 1773.3125,
-      "bottom": 262.9375
+      "bottom": 292.6875
     },
     "visibleRows": 5,
     "filterOverflow": 0,

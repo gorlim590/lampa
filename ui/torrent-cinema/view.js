@@ -43,12 +43,12 @@ function createCinemaView() {
         if(!chips)return view;
         chips.textContent='';
         function chip(label,cls){var n=document.createElement('span');n.className='ctr-chip '+(cls||'');n.textContent=label;chips.appendChild(n);}
-        if(kind==='tv')chip(coverage(view.raw,source));
+        if(kind==='tv')chip(coverage(view.raw,source),'tc-coverage');
         var audio=parsed.audio||{},subs=parsed.subs||{};
-        chip(audio.languages&&audio.languages.length?'Аудіо: '+audio.languages.join(' / '):'Аудіо не визначено','is-audio'+(audio.ua?' is-ua':' is-unknown'));
-        if(data&&data.tracker)chip(data.tracker,'tc-tracker');
-        if(parsed.codec)chip(parsed.codec);
-        if((parsed.flags||[]).length)chip(parsed.flags.slice(0,2).join(' · '));
+        if(audio.ua)chip('🇺🇦 UA','tc-ua-badge');
+        if(data&&data.tracker)chip(data.tracker,'tc-tracker-badge '+(/toloka/i.test(data.tracker)?'is-toloka':/mazepa/i.test(data.tracker)?'is-mazepa':''));
+        if(parsed.codec)chip(parsed.codec,'tc-tech-badge');
+        if((parsed.flags||[]).length)chip(parsed.flags.slice(0,2).join(' · '),'tc-tech-badge');
         var size=data&&data.bytes!=null?(data.bytes>=1073741824?(data.bytes/1073741824).toFixed(2)+' ГБ':(data.bytes/1048576).toFixed(1)+' МБ'):'';
         var metrics=row.querySelector('.ctr-metrics');if(metrics){metrics.textContent='';var health=document.createElement('div');health.className='ctr-peers'+(data&&data.seeds>0?' is-good':'');health.textContent=data&&data.seeds!=null?data.seeds+' сідів'+(data.peers!=null?' · '+data.peers+' пірів':''):'Доступність не визначено';metrics.appendChild(health);var bytes=document.createElement('div');bytes.className='ctr-size';bytes.textContent=size||'Розмір невідомий';metrics.appendChild(bytes);}
         var audioBlock=row.querySelector('.tc-audio');if(!audioBlock){audioBlock=document.createElement('div');audioBlock.className='tc-audio';row.querySelector('.ctr-row').insertBefore(audioBlock,row.querySelector('.ctr-metrics'));}
@@ -66,14 +66,13 @@ function createCinemaView() {
         // textContent only: release titles and provider fields are untrusted text.
         details.textContent='';var raw=document.createElement('div');raw.className='tc-raw-title';raw.textContent=view.raw;details.appendChild(raw);
         var technical=document.createElement('div');technical.className='tc-technical';
-        function detail(label,value){if(!value)return;var n=document.createElement('span');n.textContent=label+': '+value;technical.appendChild(n);}
-        detail('Відео',[(parsed.quality==='2160'?'4K':parsed.quality?parsed.quality+'p':''),parsed.name!=='Відеореліз'?parsed.name:'',parsed.codec].filter(Boolean).join(' · '));
-        detail('Аудіо',audio.languages&&audio.languages.length?audio.languages.join(' / '):'Не визначено');
-        detail('Субтитри',subs.languages&&subs.languages.join(' / '));
-        detail('Озвучення',(row._shVerifiedStudios||[]).join(', ')||(parsed.voiceover!=='Невідомо'?parsed.voiceover:''));
-        if(kind==='tv')detail('Епізоди',coverage(view.raw,source));
-        detail('Трекер',data&&data.tracker);detail('Розмір',size);detail('Сіди',data&&data.seeds!=null?String(data.seeds):'');detail('Піри',data&&data.peers!=null?String(data.peers):'');
-        if(view.match&&view.match.reasons&&window.TorrentsRedesign.flag('suspect',true))detail('Перевірте відповідність',view.match.reasons.join(' · '));
+        function section(cls,icon,title,lines){var box=document.createElement('section');box.className='tc-section '+cls;var head=document.createElement('div');head.className='tc-section-head';var glyph=document.createElement('span');glyph.className='tc-section-icon';glyph.setAttribute('aria-hidden','true');glyph.textContent=icon;var label=document.createElement('strong');label.textContent=title;head.appendChild(glyph);head.appendChild(label);box.appendChild(head);lines.filter(Boolean).forEach(function(value){var line=document.createElement('div');line.className='tc-section-line';line.textContent=value;box.appendChild(line);});technical.appendChild(box);}
+        section('tc-video','▣','Відео',[(parsed.codec||''),[(parsed.quality==='2160'?'2160p / 4K':parsed.quality?parsed.quality+'p':''),(parsed.flags||[]).join(' · ')].filter(Boolean).join(' · '),parsed.name!=='Відеореліз'?parsed.name:''].filter(Boolean));
+        section('tc-audio-section','◖','Аудіо',[(audio.languages&&audio.languages.length?audio.languages.join(' / '):'Мови не визначено'),(row._shVerifiedStudios||[]).join(', ')||(parsed.voiceover!=='Невідомо'?parsed.voiceover:'')].filter(Boolean));
+        section('tc-subtitle-section','☷','Субтитри',[subs.languages&&subs.languages.length?subs.languages.join(' / '):'Не визначено']);
+        var files=source.Files||source.files||[],fileCount=Array.isArray(files)?files.length:Number(source.FileCount||source.file_count)||0;
+        section('tc-files-section','▤','Файли',[fileCount?fileCount+' файли':'Кількість не визначено',size?'Загалом · '+size:'',kind==='tv'?coverage(view.raw,source):''].filter(Boolean));
+        if(view.match&&view.match.reasons&&window.TorrentsRedesign.flag('suspect',true)){var note=document.createElement('div');note.className='tc-match-note';note.textContent='Перевірте відповідність · '+view.match.reasons.join(' · ');details.appendChild(note);}
         details.appendChild(technical);
         return view;
     }
