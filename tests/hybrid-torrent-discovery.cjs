@@ -34,7 +34,7 @@ class Node {
   getAttribute(key) { return this.attrs[key] == null ? null : this.attrs[key]; }
   addEventListener(type, fn) { this.listeners[type] = fn; }
   dispatch(type) { this.listeners[type]({ stopImmediatePropagation() {} }); }
-  querySelector(selector) { return this.nodes && this.nodes[selector] || null; }
+  querySelector(selector) { if (this.nodes && this.nodes[selector]) return this.nodes[selector]; if (selector === '[data-ctr-role="studio"]') { const queue = Object.values(this.nodes || {}).concat(this.children); while (queue.length) { const node = queue.shift(); if (node.getAttribute && node.getAttribute('data-ctr-role') === 'studio') return node; queue.push(...(node.children || [])); } } return null; }
   querySelectorAll(selector) { if (selector === '.torrent-item') return this.children.filter(n => n.classList.contains('torrent-item')); return []; }
   closest(selector) { return selector === '.scroll' ? this.scroll || null : null; }
   remove() { if (this.parentNode) this.parentNode.removeChild(this); this.isConnected = false; }
@@ -81,7 +81,7 @@ function fixture() {
   record.streamChild = st;
   function release(title, tracker, extra = {}) {
     const row = new Node('torrent-item selector'); row.nodes = { '.ctr-name': new Node('ctr-name'), '.ctr-chips': new Node('ctr-chips'), '.ctr-best': new Node('ctr-best'), '.torrent-item__title': new Node() };
-    row.querySelector = selector => row.nodes[selector] || null;
+    row.querySelector = selector => row.nodes[selector] || Node.prototype.querySelector.call(row, selector);
     const source = { Title: title, Tracker: tracker, Seeders: 10, Peers: 2, Size: 1000000000, ...extra };
     st.rows.push(row); st.sourceData.set(row, source); return { row, source };
   }
@@ -91,9 +91,14 @@ function fixture() {
   // Template-backed toolbar fixture: preserve the production setupStreamTools handlers.
   const filesInsert = files.insertBefore.bind(files);
   files.insertBefore = (node, before) => { node.nodes = nodes; node.querySelector = selector => nodes[selector] || null; node.classList.add('ctr-tools'); return filesInsert(node, before); };
-  const sourceFunctions = ['streamSession', 'streamAlive', 'streamTrackerKey', 'streamSortKey', 'streamWindow', 'streamUpdateRows', 'decorateStreamRows', 'syncStreamTrackerTools', 'streamFocus', 'streamMove', 'setupStreamTools'];
+  const sourceFunctions = ['streamSession', 'streamAlive', 'streamTrackerKey', 'streamSortKey', 'streamWindow', 'streamUpdateRows', 'decorateStreamRows', 'syncStreamTrackerTools', 'streamFocus', 'streamMove', 'setupStreamTools', 'streamEpisodeDetails', 'applyStreamEpisodePreview', 'applyStreamFileStudios', 'onStreamFile'];
   context.streamActivate = () => {};
   context.streamSelectOwner = null;
+  context.streamRecord = () => record;
+  context.streamMovie = () => record.movie;
+  context.filesOverlay = null;
+  record.kind = 'tv'; record.movie = {id:55,source:'tmdb',name:'Frieren'}; record.page.classList.contains = name => name === 'activity--active';
+  Lampa.Api = {img:(path,size)=>'https://image.tmdb.org/t/p/'+size+path,sources:{tmdb:{seasons:(movie,seasons,done)=>{record.seasonRequests=(record.seasonRequests||0)+1;record.seasonCallback=done;}}}};
   vm.runInContext(sourceFunctions.map(name => extract(hybrid, name)).join('\n'), context);
   // setupStreamTools uses innerHTML to create these three native control groups.
   Object.defineProperty(Node.prototype, 'innerHTML', { set() { this.nodes = nodes; this.querySelector = selector => nodes[selector] || null; }, configurable: true });
@@ -109,7 +114,7 @@ test('Hybrid embedded list uses shared metadata, exact matching, tracker filters
   assert.equal(f.st.displayRows.length, 3);
   assert.equal(f.st.displayRows[0], toloka.row, 'the confirmed Ukrainian-audio release is the single Best Choice');
   assert.equal(toloka.row.nodes['.ctr-chips'].textContent.includes('Аудіо: Українська'), true);
-  assert.equal(toloka.row.nodes['.ctr-chips'].textContent.includes('Озвучення: UA Studio'), true);
+  assert.equal(toloka.row.nodes['.ctr-chips'].textContent.includes('🎙 UA Studio'), true);
   assert.equal(toloka.row.nodes['.ctr-chips'].textContent.includes('Субтитри: Російська'), true);
   assert.equal(mazepa.row.nodes['.ctr-chips'].textContent.includes('Аудіо: Українська'), false, 'Ukrainian subtitles never become Ukrainian audio');
   assert.equal(mazepa.row.nodes['.ctr-chips'].textContent.includes('Субтитри: Українська'), true);
@@ -166,12 +171,63 @@ test('Hybrid popup rows display confirmed anime audio/studio tracks and reject t
   const chips = amanogawa.row.nodes['.ctr-chips'].textContent;
   assert.match(chips, /Аудіо: Українська/);
   assert.doesNotMatch(chips, /Аудіо: Українська \/ Японська/);
-  assert.match(chips, /Озвучення: Амоногава/);
+  assert.match(chips, /🎙 Амоногава/);
   assert.doesNotMatch(chips, /Багатоголосе/);
   assert.match(chips, /Субтитри: English/);
   assert.equal(wrongSeason.row.classList.contains('is-best'), false);
   assert.match(ambiguousGroup.row.nodes['.ctr-chips'].textContent, /Студія невідома/);
-  assert.match(nestedVoice.row.nodes['.ctr-chips'].textContent, /Озвучення: Далі Буде/);
+  assert.match(nestedVoice.row.nodes['.ctr-chips'].textContent, /🎙 Далі Буде/);
+});
+
+test('generic voice tags are not presented as studios, while dedicated studio fields remain supported', () => {
+  const f = fixture();
+  const generic = f.api.normalizeRelease({Title:'Anime S01E01 1080p', info:{Voices:['Tori','UKR']}});
+  const explicit = f.api.normalizeRelease({Title:'Anime S01E01 1080p', VoiceoverStudio:'Tori'});
+  const named = f.api.normalizeRelease({Title:'Anime S01E01 1080p [Далі Буде]', voices:['UKR']});
+  const many = f.api.normalizeRelease({Title:'Anime S01E01 1080p', VoiceoverStudios:'Amanogawa, Dali Bude, UKR'});
+  const marked = f.api.normalizeRelease({Title:'Anime S01E01 1080p Озвучення: Nova Team'});
+  assert.equal(generic.parsed.voiceover, 'Невідомо');
+  assert.equal(explicit.parsed.voiceover, 'Tori');
+  assert.equal(named.parsed.voiceover, 'Далі Буде');
+  assert.equal(many.parsed.voiceover, 'Амоногава, Далі Буде');
+  assert.equal(marked.parsed.voiceover, 'Nova Team');
+});
+
+test('real Hybrid torrent_file handler applies exact episode stills and verified studios from filenames', () => {
+  const f = fixture();
+  f.st.params.movie = {id:55,source:'tmdb',media_type:'tv',name:'Frieren',seasons:[{season_number:3}]};
+  f.st.selectedRow = f.release('Frieren S03E01 1080p', 'Toloka', {VoiceoverStudio:'Tori'}).row;
+  f.st.selectedRow.setAttribute('data-ctr-role','studio');
+  const chips = f.st.selectedRow.nodes['.ctr-chips'];
+  const studio = new Node('ctr-chip is-studio'); studio.setAttribute('data-ctr-role','studio'); studio.textContent='🎙 Tori'; chips.appendChild(studio);
+  const content = new Node(), image = new Node(); image.setAttribute('src','');
+  const item = new Node('torrent-serial'); item.nodes={'.torrent-serial__img':image,'.torrent-serial__content':content};
+  item.querySelector = selector => item.nodes[selector] || null;
+  const metadata={id:301,season_number:3,episode_number:1,still_path:'/episode-301.jpg',vote_average:0};
+  f.context.onStreamFile({type:'render',params:{movie:f.st.params.movie,seasons:{3:{episodes:[metadata]}}},element:{season:3,episode:1,title:'Frieren S03E01 [Далі Буде].mkv'},item});
+  assert.equal(image.getAttribute('src'),'https://image.tmdb.org/t/p/w300/episode-301.jpg');
+  assert.equal(f.record.seasonRequests||0,0,'already available episode metadata does not trigger another request');
+  assert.equal(studio.textContent,'🎙 Далі Буде');
+  f.context.onStreamFile({type:'render',params:{movie:f.st.params.movie,seasons:{3:{episodes:[metadata]}}},element:{season:3,episode:2,title:'Frieren S03E02 [Amanogawa].mkv'},item:{0:item}});
+  assert.equal(studio.textContent,'🎙 Далі Буде, Амоногава');
+  f.overlay.decorate(f.st.selectedRow,f.st.selectedRow._ctrSource,f.st.params.movie,'tv',{});
+  assert.equal(f.st.selectedRow.querySelector('[data-ctr-role="studio"]').textContent,'🎙 Далі Буде, Амоногава','verified file names survive overlay redecoration');
+});
+
+test('missing season metadata is requested once and stale file rows are not decorated after removal', () => {
+  const f = fixture();
+  const selected=f.release('Frieren S03E01 1080p','Toloka').row;f.st.selectedRow=selected;
+  const image=new Node();image.setAttribute('src','');const item=new Node('torrent-serial');item.nodes={'.torrent-serial__img':image};item.querySelector=selector=>item.nodes[selector]||null;
+  const event={type:'render',params:{movie:{id:55,source:'tmdb'}},element:{season:3,episode:1,title:'Frieren S03E01'},item};
+  f.context.onStreamFile(event);f.context.onStreamFile({...event,element:{season:3,episode:2,title:'Frieren S03E02'}});
+  assert.equal(f.record.seasonRequests,1,'the same season is fetched once for multiple file rows');
+  f.record.seasonCallback({3:{episodes:[{season_number:3,episode_number:1,still_path:'/one.jpg'},{season_number:3,episode_number:2,still_path:'/two.jpg'}]}});
+  assert.equal(image.getAttribute('src'),'https://image.tmdb.org/t/p/w300/one.jpg');
+  const staleImage=new Node();staleImage.setAttribute('src','');const staleItem=new Node('torrent-serial');staleItem.nodes={'.torrent-serial__img':staleImage};staleItem.querySelector=selector=>staleItem.nodes[selector]||null;
+  f.st.selectedRow=selected;
+  f.context.onStreamFile({...event,params:{movie:{id:55,source:'tmdb'}},item:staleItem,element:{season:4,episode:1,title:'Frieren S04E01'}});
+  staleItem.isConnected=false;f.record.seasonCallback({4:{episodes:[{season_number:4,episode_number:1,still_path:'/stale.jpg'}]}});
+  assert.equal(staleImage.getAttribute('src'),'','closed/stale episode DOM is not mutated');
 });
 
 test('Hybrid embedded controls invoke native tracker/sort handlers; async rows re-rank and empty/singleton results are safe', async () => {
