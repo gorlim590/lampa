@@ -86,7 +86,7 @@
 .sh-files-modal .time-line>div{background:var(--acc)!important;height:100%!important;border-radius:inherit}
 .sh-files-modal .torrent-file{grid-template-columns:minmax(0,1fr) auto;min-height:3.5em!important}
 .sh-files-modal .torrent-file__size{position:static!important;float:none!important}
-.sh-files-modal{position:fixed!important;width:100vw!important;height:100vh!important;transform:none!important}
+.sh-files-modal{position:fixed!important;z-index:101!important;width:100vw!important;height:100vh!important;transform:none!important}
 .sh-files-modal .modal__content{transform:none!important}
 @media(max-width:800px){.sh-files-modal .modal__content{width:91vw!important}}
 .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9em}
