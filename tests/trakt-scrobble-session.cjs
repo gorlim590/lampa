@@ -105,8 +105,8 @@ function integrationFixture() {
   const f = fixture();
   f.context.shouldSendProgress = () => f.context.throttleState.lastSendTime === 0;
   const values = { trakt_enable_watching: true, trakt_token: 'synthetic-token', trakt_min_progress: 90 };
-  const player = Object.create(null), timelineHandlers = Object.create(null), globalListeners = Object.create(null), storageListeners = [], documentListeners = Object.create(null);
-  let activityCard = null;
+  const player = Object.create(null), timelineHandlers = Object.create(null), globalListeners = Object.create(null), accountListeners = Object.create(null), storageListeners = [], documentListeners = Object.create(null);
+  let activityCard = null, activeVideo = null, playerOpened = false;
   const on = map => (name, fn) => { (map[name] || (map[name] = [])).push(fn); };
   const remove = map => (name, fn) => { map[name] = (map[name] || []).filter(item => item !== fn); };
   const storage = {
@@ -116,9 +116,11 @@ function integrationFixture() {
   const Lampa = {
     Storage: storage,
     Activity: { active: () => ({ movie: activityCard, card: activityCard }) },
-    Player: { listener: { follow: on(player), remove: remove(player) } },
+    Player: { opened: () => playerOpened, listener: { follow: on(player), remove: remove(player) } },
+    PlayerVideo: { video: () => activeVideo },
     Timeline: { listener: { follow: on(timelineHandlers), remove: remove(timelineHandlers) } },
     Listener: { follow: on(globalListeners), remove: remove(globalListeners) },
+    Account: { listener: { follow: on(accountListeners), remove: remove(accountListeners) } },
     Utils: { hash: value => String(value) }
   };
   const meta = Object.create(null);
@@ -134,14 +136,21 @@ function integrationFixture() {
     isInitialized: false,
     isInitialized$1: false,
     pendingExternalPlayback: null, pendingInternalPlayback: null, timelineProgressSamples: {},
+    playbackInstanceSequence: 0, currentPlaybackInstance: null, terminalPlaybackInstanceId: null, terminalPlaybackHash: null,
     setHashMeta: (hash, value) => { meta[hash] = value; }, getHashMeta: hash => meta[hash] || null,
     extractSeasonEpisode: media => ({ season: media.season_number, episode: media.episode_number }),
     resolveSeasonEpisode: () => ({}), loadSessionCache: () => {}, loadHashMetaCache: () => {},
     scrobbleQueue: { init: () => {}, clear: () => { f.context.queueClearCount = (f.context.queueClearCount || 0) + 1; } },
     slog: () => {}, logWarn: (...args) => { f.context.lastWarning = args; f.context.lastWarningMessage = String(args[1]); }, logDebugOnce: () => {},
-    getCompletionKey: () => null, markFinishIntent: () => {}, finish: () => Promise.resolve(),
+    getCompletionKey: () => 'synthetic-completion',
+    markFinishIntent: () => { f.context.finishIntentCount = (f.context.finishIntentCount || 0) + 1; },
+    finish: () => { f.context.finishCallCount = (f.context.finishCallCount || 0) + 1; return Promise.resolve(); },
     documentListeners, storageListeners, playerHandlers: player, activityCard
   });
+  const instanceHelpersStart = source.indexOf('  function beginPlaybackInstance(');
+  const instanceHelpersEnd = source.indexOf('\n\n  /**\n   * Модуль для відстеження перегляду', instanceHelpersStart);
+  assert(instanceHelpersStart >= 0 && instanceHelpersEnd > instanceHelpersStart, 'production playback-instance helpers exist');
+  vm.runInContext(source.slice(instanceHelpersStart, instanceHelpersEnd), f.context);
   vm.runInContext('var onPlayerStart = ' + productionMethod('watching', 'onPlayerStart') + '; var processTimelineUpdate = ' + productionMethod('watching', 'processTimelineUpdate') + '; var watchingInit = ' + productionMethod('watching', 'init') + '; var eventInit = ' + productionMethod('events', 'init') + ';', f.context);
   const watching = {
     isLoggingEnabled: () => false,
@@ -156,7 +165,10 @@ function integrationFixture() {
   watching.init.call(watching);
   const events = { _cleanups: [], onAppReady: () => {}, init: f.context.eventInit };
   events.init.call(events);
-  const playerEvent = (type, data) => (player[type] || []).slice().forEach(fn => fn(data || {}));
+  const playerEvent = (type, data) => {
+    if (type === 'destroy' || type === 'error' || type === 'ended') playerOpened = false;
+    (player[type] || []).slice().forEach(fn => fn(data || {}));
+  };
   const storageChange = name => storageListeners.slice().forEach(fn => fn({ name }));
   const timeline = (hash, time, percent) => {
     activityCard = f.currentCard || activityCard;
@@ -165,9 +177,11 @@ function integrationFixture() {
   };
   const launch = (media, hash) => {
     activityCard = media; f.currentCard = media; f.context.activityCard = media;
+    activeVideo = { currentTime: 0, duration: 1000, paused: true, seeking: false };
+    playerOpened = true;
     (player.start || []).slice().forEach(fn => fn({ card: media, timeline: { hash, percent: 0 } }));
   };
-  return { ...f, values, player, playerEvent, storageChange, documentListeners, timeline, launch, watching, events };
+  return { ...f, values, player, playerEvent, storageChange, documentListeners, accountListeners, timeline, launch, video: () => activeVideo, watching, events };
 }
 
 async function flush() { for (let i = 0; i < 12; i++) await Promise.resolve(); }
@@ -186,13 +200,61 @@ test('production player launch does not START until Timeline advances; advancing
   assert.deepEqual(f.calls.map(call => call.action), ['start']);
 });
 
-test('a real media-element play event is an accepted playback confirmation', async () => {
+test('the active Lampa video playing event is an accepted playback confirmation', async () => {
   const f = integrationFixture(), media = movie(13);
   f.launch(media, 'play-event');
-  f.documentListeners.play[0]({ target: { currentTime: 125, duration: 1000, paused: false } });
+  Object.assign(f.video(), { currentTime: 125, duration: 1000, paused: false });
+  f.documentListeners.playing[0]({ target: f.video() });
   await flush();
   assert.deepEqual(f.calls.map(call => call.action), ['start']);
   assert.equal(f.calls[0].progress, 12.5);
+});
+
+test('completion terminal state prevents repeated START/STOP while allowing a fresh replay of the same movie', async () => {
+  const f = integrationFixture(), media = movie(44);
+  f.launch(media, 'completion-run-1');
+  f.timeline('completion-run-1', 880, 88);
+  f.timeline('completion-run-1', 890, 89); await flush();
+  f.timeline('completion-run-1', 900, 90); await flush();
+  for (const percent of [91, 95, 100]) f.timeline('completion-run-1', percent * 10, percent);
+  await flush();
+  assert.deepEqual(f.calls.map(call => call.action), ['start', 'stop']);
+  assert.equal(f.context.finishCallCount, 1);
+
+  f.launch(media, 'completion-run-2');
+  f.timeline('completion-run-2', 880, 88);
+  f.timeline('completion-run-2', 890, 89); await flush();
+  f.timeline('completion-run-2', 900, 90); await flush();
+  assert.deepEqual(f.calls.map(call => call.action), ['start', 'stop', 'start', 'stop']);
+  assert.equal(f.context.finishCallCount, 2, 'new player instance may complete the same media again');
+});
+
+test('unrelated and repeated media playing events cannot resume or restart the tracked player', async () => {
+  const f = integrationFixture(), media = movie(45);
+  f.launch(media, 'tracked-video');
+  Object.assign(f.video(), { currentTime: 100, duration: 1000, paused: false });
+  const playing = f.documentListeners.playing[0];
+  playing({ target: f.video() }); await flush();
+  assert.deepEqual(f.calls.map(call => call.action), ['start']);
+  f.video().paused = true;
+  f.documentListeners.pause[0]({ target: f.video() }); await flush();
+  assert.deepEqual(f.calls.map(call => call.action), ['start', 'pause']);
+
+  playing({ target: { currentTime: 400, duration: 1000, paused: false } }); await flush();
+  assert.deepEqual(f.calls.map(call => call.action), ['start', 'pause'], 'auxiliary trailer/video is not Lampa PlayerVideo.video()');
+  f.documentListeners.pause[0]({ target: { seeking: false, currentTime: 400, duration: 1000 } }); await flush();
+  assert.deepEqual(f.calls.map(call => call.action), ['start', 'pause'], 'auxiliary video pause cannot pause the tracked session');
+  Object.assign(f.video(), { currentTime: 120, paused: false });
+  playing({ target: f.video() }); await flush();
+  playing({ target: f.video() }); await flush();
+  assert.deepEqual(f.calls.map(call => call.action), ['start', 'pause', 'start']);
+  assert.equal(f.calls[2].progress, 12);
+
+  f.playerEvent('destroy', { type: 'destroy' }); await flush();
+  playing({ target: f.video() });
+  f.playerEvent('error', { type: 'error' });
+  await flush();
+  assert.deepEqual(f.calls.map(call => call.action), ['start', 'pause', 'start', 'stop'], 'post-stop callbacks are inert');
 });
 
 test('production pause, seek, and resume handlers use real progress and distinct events', async () => {
@@ -206,16 +268,19 @@ test('production pause, seek, and resume handlers use real progress and distinct
   f.context.throttleState.lastProgressUpdateAt = 1234;
   assert.equal(f.api.getCurrentProgress().time, 1234, 'getter returns the stored Timeline timestamp, not a fresh Date.now()');
   f.context.throttleState.lastProgressUpdateAt = actualProgressUpdateAt;
-  const pause = f.documentListeners.pause[0], play = f.documentListeners.play[0];
-  pause({ target: { seeking: false, currentTime: 110, duration: 1000 } });
+  const pause = f.documentListeners.pause[0], play = f.documentListeners.playing[0];
+  Object.assign(f.video(), { seeking: false, currentTime: 110, duration: 1000 });
+  pause({ target: f.video() });
   await flush();
   assert.deepEqual(f.calls.map(call => call.action), ['start', 'pause']);
   assert.equal(f.calls[1].progress, 11);
   const beforeSeek = f.calls.length;
-  pause({ target: { seeking: true } });
+  f.video().seeking = true;
+  pause({ target: f.video() });
   await flush();
   assert.equal(f.calls.length, beforeSeek);
-  play({ target: { currentTime: 120, duration: 1000, paused: false } });
+  Object.assign(f.video(), { seeking: false, currentTime: 120, duration: 1000, paused: false });
+  play({ target: f.video() });
   await flush();
   assert.deepEqual(f.calls.map(call => call.action), ['start', 'pause', 'start']);
   assert.equal(f.calls[2].progress, 12);
@@ -234,6 +299,9 @@ test('production destroy and error handlers STOP the confirmed session', async (
     f.launch(media, endEvent); f.timeline(endEvent, 1, 1); f.timeline(endEvent, 2, 2); await flush();
     assert.ok(f.api.getActiveSession(), 'active session before ' + endEvent);
     f.playerEvent(endEvent, { type: endEvent }); await flush();
+    f.playerEvent(endEvent, { type: endEvent });
+    f.playerEvent(endEvent === 'destroy' ? 'error' : 'destroy', { type: endEvent === 'destroy' ? 'error' : 'destroy' });
+    await flush();
     assert.deepEqual(f.calls.map(call => call.action), ['start', 'stop'], endEvent + ' ' + f.context.lastWarningMessage);
   }
 });
@@ -260,6 +328,9 @@ test('external handoff is retained through player destroy and needs advancing Ti
   assert.deepEqual(f.calls.map(call => call.action), ['start']);
   assert.equal(f.api.getActiveSession().external, true);
   f.playerEvent('visibility', { hidden: false }); await flush();
+  f.playerEvent('visibility', { hidden: false });
+  f.playerEvent('destroy', { type: 'destroy' });
+  await flush();
   assert.deepEqual(f.calls.map(call => call.action), ['start', 'stop']);
   assert.equal(f.context.pendingExternalPlayback, null);
 });
@@ -281,10 +352,23 @@ test('account change invalidates a not-yet-sent production START and its pending
   f.launch(media, 'account-switch'); f.timeline('account-switch', 1, 1); f.timeline('account-switch', 2, 2);
   f.values.trakt_token = 'different-synthetic-token';
   f.storageChange('trakt_token');
+  f.timeline('account-switch', 3, 3);
+  f.timeline('account-switch', 4, 4);
   await flush();
   assert.deepEqual(f.calls, []);
   assert.equal(f.context.queueClearCount, 1);
   assert.equal(f.api.getActiveSession(), null);
+});
+
+test('profile switch invalidates active session and stale Timeline cannot restart it under the same token', async () => {
+  const f = integrationFixture(), media = movie(11);
+  f.launch(media, 'profile-switch'); f.timeline('profile-switch', 1, 1); f.timeline('profile-switch', 2, 2); await flush();
+  assert.deepEqual(f.calls.map(call => call.action), ['start']);
+  (f.accountListeners.profile_select || []).slice().forEach(fn => fn({}));
+  f.timeline('profile-switch', 3, 3); f.timeline('profile-switch', 4, 4); await flush();
+  assert.deepEqual(f.calls.map(call => call.action), ['start']);
+  assert.equal(f.api.getActiveSession(), null);
+  assert.equal(f.context.queueClearCount, 1);
 });
 
 test('season zero specials retain exact identity in production session keys', async () => {
