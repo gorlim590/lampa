@@ -752,7 +752,7 @@ function createCinemaRuntime(metadata) {
             if(event.target.closest('.view--torrent')&&record.root.contains(event.target)){event.stopImmediatePropagation();loadStreams(record);}
             else if(event.target.closest('.sh-stream-close')){event.stopImmediatePropagation();closeStreamOverlay(record,true);}
             else if(event.target===record.streamLoad){event.stopImmediatePropagation();loadStreams(record);}
-            else if(event.target.closest('.sh-stream-retry')){event.stopImmediatePropagation();var key=record.streamChild&&record.streamChild.key;streamCache=streamCache.filter(function(item){return item.key!==key;});closeStreamChild(record);loadStreams(record);}
+            else if(event.target.closest('.sh-stream-retry')){event.stopImmediatePropagation();if(window.ParserProviders&&window.ParserProviders.retry)window.ParserProviders.retry();var key=record.streamChild&&record.streamChild.key;streamCache=streamCache.filter(function(item){return item.key!==key;});closeStreamChild(record);loadStreams(record);}
         };
         record.page.addEventListener('hover:enter',record.streamEnter,true);
         pane.addEventListener('hover:enter',record.streamEnter,true);
@@ -785,7 +785,7 @@ function createCinemaRuntime(metadata) {
     function onStreamProfile(){streamGeneration++;streamCache=[];movieRecords.forEach(function(record){clearStreamEpisodePreviews(record);closeStreamOverlay(record,false);closeStreamChild(record);});}
     function onStreamSettings(event) {
         if(event&&/^(account|account_user|account_email)$/.test(event.name)){onStreamProfile();return;}
-        if(event&&/^(jackett_|prowlarr_|parser_|parse_)/.test(event.name)){if(movieRecords.some(function(r){return r.streamChild&&r.streamChild.providerChanging;}))return;streamGeneration++;streamCache=[];movieRecords.forEach(function(r){closeStreamOverlay(r,false);closeStreamChild(r);});}
+        if(event&&/^(jackett_|prowlarr_|parser_|parse_|ps_|bat_)/.test(event.name)){if(movieRecords.some(function(r){return r.streamChild&&r.streamChild.providerChanging;}))return;streamGeneration++;streamCache=[];movieRecords.forEach(function(r){closeStreamOverlay(r,false);closeStreamChild(r);});}
     }
 
 

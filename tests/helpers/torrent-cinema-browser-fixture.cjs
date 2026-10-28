@@ -3,6 +3,8 @@
 // No replacement application/HTML page, account request, real torrent or player.
 module.exports=function installFixture(){
     const L=Lampa,qa=window.__tcQa={mode:'ready',parserCalls:0,pending:[],selected:null,returnFn:null};
+    // Isolated browser context only: enable the same feature prerequisites as the owner's configured install.
+    L.Storage.set('parser_use',true);window.lampa_settings=window.lampa_settings||{};window.lampa_settings.torrents_use=true;
     qa.originalComponentCreate=L.Component.create;
     L.Component.create=function(params){
         const child=qa.originalComponentCreate.apply(this,arguments);

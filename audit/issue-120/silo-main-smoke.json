@@ -1,0 +1,56 @@
+{
+  "series": "Таємниця бункера / Silo",
+  "tmdbTvId": 125988,
+  "runtime": "Existing main-branch Lampa browser; not the PR #124 local artifact",
+  "fixture": false,
+  "playbackOrDownload": false,
+  "settingsChanged": false,
+  "savedNativeFilter": {
+    "season": ["1"],
+    "year": null
+  },
+  "queries": [
+    {
+      "query": "Silo S02",
+      "httpStatus": 200,
+      "responseMs": 85,
+      "rawReleaseCount": 40,
+      "seasonTitleMatches": 31,
+      "uiStatus": "Знайдено: 40 · завантажено: 6 із 40",
+      "samples": [
+        {
+          "title": "Бункер / Таємниця бункера (S2) / Silo (S2) (2024) WEB-DL 1080p 3xUkr/Eng | Sub Ukr/Eng",
+          "tracker": "Toloka.to",
+          "seeders": 99
+        },
+        {
+          "title": "Silo (S2) (2024) WEB-DL 1080p 3xUkr/Eng",
+          "tracker": "Mazepa",
+          "seeders": 8
+        }
+      ]
+    },
+    {
+      "query": "Silo S03",
+      "httpStatus": 200,
+      "responseMs": 88,
+      "rawReleaseCount": 34,
+      "seasonTitleMatches": 27,
+      "uiStatus": "Знайдено: 34 · завантажено: 5 із 34",
+      "samples": [
+        {
+          "title": "Бункер (S3) / Silo (S3) (2026) WEB-DL 1080p H.265 Ukr/Eng | Sub Ukr/Eng",
+          "tracker": "Toloka.to",
+          "seeders": 94
+        },
+        {
+          "title": "Silo (S3) (2026) WEB-DL 1080p Ukr/Eng",
+          "tracker": "Mazepa",
+          "seeders": 8
+        }
+      ]
+    }
+  ],
+  "finding": "Real parser responses contain S02 and S03 releases with 2024/2026 release years. The stored per-title native torrent season filter is set to season 1, and the UI only exposed S01 rows in the first page. The evidence does not show an all-enabled multi-parser run from PR #124.",
+  "privacy": "No parser URLs, addresses, API keys, credentials, magnets, or download links are recorded."
+}
