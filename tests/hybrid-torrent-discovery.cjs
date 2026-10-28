@@ -287,6 +287,26 @@ test('profile teardown restores the non-spoiler image and invalidates pending ep
   assert.equal(f.record.streamEpisodePreviewNodes.length, 0);
 });
 
+test('native replacement image survives watched, unwatched, watched DOM reuse and account change', () => {
+  const f = fixture(), image = new Node(); image.setAttribute('src', 'https://image.invalid/native-placeholder-a.jpg');
+  const item = new Node('torrent-serial'); item.nodes = { '.torrent-serial__img': image }; item.querySelector = selector => item.nodes[selector] || null;
+  const movie = { id: 55, source: 'tmdb', media_type: 'tv' };
+  const render = (episode, watched, still) => {
+    f.trakt.progress = { watched: false, episodes: watched ? [{ season: 3, episode }] : [] };
+    f.context.onStreamFile({ type: 'render', params: { movie, seasons: { 3: { episodes: [{ season_number: 3, episode_number: episode, still_path: still }] } } }, element: { season: 3, episode }, item });
+  };
+  render(1, true, '/episode-one.jpg');
+  assert.equal(image.getAttribute('src'), 'https://image.tmdb.org/t/p/w300/episode-one.jpg');
+  image.setAttribute('src', 'https://image.invalid/native-placeholder-b.jpg'); // native row reuse changed its placeholder
+  render(2, false, '/episode-two-hidden.jpg');
+  assert.equal(image.getAttribute('src'), 'https://image.invalid/native-placeholder-b.jpg');
+  render(3, true, '/episode-three.jpg');
+  assert.equal(image.getAttribute('src'), 'https://image.tmdb.org/t/p/w300/episode-three.jpg');
+  f.trakt.progress = { watched: false, episodes: [] }; // account/profile no longer confirms the preview
+  f.context.clearStreamEpisodePreviews(f.record);
+  assert.equal(image.getAttribute('src'), 'https://image.invalid/native-placeholder-b.jpg');
+});
+
 test('Hybrid embedded controls invoke native tracker/sort handlers; async rows re-rank and empty/singleton results are safe', async () => {
   const f = fixture();
   const toloka = f.release('The Others (2001) 1080p', 'Toloka', { AudioLanguages: ['en'], Seeders: 5 });

@@ -758,9 +758,11 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
     function restoreStreamEpisodePreview(node){
         var image=node&&node.querySelector('.torrent-serial__img');if(!image)return;
         if(image.getAttribute('data-sh-episode-preview')==='tmdb'){
+            var current=image.getAttribute('src'),preview=image.__shEpisodePreviewSrc;
+            if(current!==preview)image.__shEpisodePreviewBaseSrc=current;
             var base=image.__shEpisodePreviewBaseSrc;
             if(base==null)image.removeAttribute('src');else image.setAttribute('src',base);
-            image.removeAttribute('data-sh-episode-preview');
+            image.removeAttribute('data-sh-episode-preview');image.__shEpisodePreviewSrc=undefined;
         }
     }
     function clearStreamEpisodePreviews(record){
@@ -771,9 +773,11 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
     function applyStreamEpisodePreview(record,node,params,season,episode){
         if(!node)return;
         var image=node.querySelector('.torrent-serial__img');if(!image)return;
-        record.streamEpisodePreviewNodes=record.streamEpisodePreviewNodes||[];if(record.streamEpisodePreviewNodes.indexOf(node)<0)record.streamEpisodePreviewNodes.push(node);
-        if(image.__shEpisodePreviewBaseSrc===undefined)image.__shEpisodePreviewBaseSrc=image.getAttribute('src');
+        record.streamEpisodePreviewNodes=record.streamEpisodePreviewNodes||[];
+        var currentSrc=image.getAttribute('src');
+        if(image.__shEpisodePreviewBaseSrc===undefined||image.getAttribute('data-sh-episode-preview')!=='tmdb'&&currentSrc!==image.__shEpisodePreviewBaseSrc)image.__shEpisodePreviewBaseSrc=currentSrc;
         restoreStreamEpisodePreview(node);
+        var trackedIndex=record.streamEpisodePreviewNodes.indexOf(node);if(trackedIndex>=0)record.streamEpisodePreviewNodes.splice(trackedIndex,1);
         var token=(record.streamPreviewSequence||0)+1;record.streamPreviewSequence=token;node.__shEpisodePreviewToken=token;
         if(!streamEpisodeWatched(record,params,season,episode))return;
         var selected=record.streamChild&&record.streamChild.selectedRow,movie=params&&params.movie,identity=[movie&&movie.source||'tmdb',movie&&movie.id,season,episode].join(':');node.__shEpisodePreviewIdentity=identity;
@@ -782,7 +786,8 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
             if(selected&&record.streamChild&&record.streamChild.selectedRow!==selected)return;
             if(!streamEpisodeWatched(record,params,season,episode))return;
             var src=Lampa.Api.img(metadata.still_path,'w300');if(!src)return;
-            image.setAttribute('src',src);image.setAttribute('data-sh-episode-preview','tmdb');
+            image.setAttribute('src',src);image.__shEpisodePreviewSrc=src;image.setAttribute('data-sh-episode-preview','tmdb');
+            if(record.streamEpisodePreviewNodes.indexOf(node)<0)record.streamEpisodePreviewNodes.push(node);
         });
     }
     function applyStreamFileStudios(record,file){
