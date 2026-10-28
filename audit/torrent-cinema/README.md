@@ -2,16 +2,19 @@
 
 Branch `feat/issue-117-torrent-cinema`; visual acceptance follow-up to `ce50a4461cfd1270547ac8417ce71b4ab01cc9fa`. Development baseline f60132b, rebased onto fa378b3 (two inventory-only main commits).
 
-Canonical artifact SHA-256: `31f957e6839b17b5b51761480812a155510b0943d003fac57492905d15de85bf`. Both browser modes routed the same changed bytes into the existing native Lampa runtime. Original tab/URL/display metrics restored; browser/profile kept running.
+Canonical artifact SHA-256: `ef020d3b953646d1a2527385ae346aa9fb366cf85b64680b1809faa89912da47`. Both browser modes routed the same changed bytes into the existing native Lampa runtime. Original tab/URL/display metrics restored; browser/profile kept running.
 
 | Check | Result |
 | --- | --- |
-| Focused automated regressions | 228 PASS / 0 FAIL; command in unit-results.json |
-| Canonical-only install, Hybrid/Buttons+/other visual scripts not executed | 28 PASS / 0 FAIL |
-| Hybrid integration | 28 PASS / 0 FAIL |
+| Focused automated regressions | 229 PASS / 0 FAIL; command in unit-results.json |
+| Canonical-only install, Hybrid/Buttons+/other visual scripts not executed | 57 PASS / 0 FAIL |
+| Hybrid integration | 57 PASS / 0 FAIL |
 | 1280×720, 1920×1080, 3840×2160 CSS at DPR 1 | PASS in both modes; independent PNG sizes match |
 | 1920×1080 CSS at DPR 2 | PASS; separate 3840×2160 PNG in both modes |
 | Single toolbar/style, native D-pad/OK, info/Back, Files/return, focus restore | PASS with controlled parser/transport data |
+| 720p text geometry | Actual title, technical badges, audio, voiceover and subtitles fit the row; info control is circular; expanded raw title fits its panel |
+| Release-name fixtures | 12 film/series/anime/dorama, season/episode pack, long multilingual and sparse name cases; compact title and exact expanded raw title checked in both modes |
+| Retired Google TV appearance settings | Eight settings remain inert and stored; toggling former TV/animation values leaves styles/subscriptions stable, without animation, transform or backdrop filter |
 | Owner approved reference comparison | Reviewed directly; real release title, resolution/type/HDR/codec, audio, aligned availability/actions, two filter bands, restrained purple and four premium detail sections |
 | Empty/error/retry, delayed results, reopen, profile isolation, teardown | PASS |
 | Syntax/manifest/URL validator, artifact freshness, whitespace | PASS |
@@ -33,9 +36,13 @@ Three scenario families run in each owner-required install mode. Native row OK i
 
 The reference comparison keeps its TV composition while applying the owner's requested deviations: quality and tracker controls are separate navigable rows; the real title is parsed from the release's Title/Name field and shown above format badges; purple focus is muted; Files are factual metadata in the fourth details column and have no separate launch button. Release year and episode coverage appear only when supported by the release string or its metadata. Complete raw names remain in expanded details. The rendered fixture has no poster/backdrop artwork, so the screenshot's surface cannot show the Last of Us image from the reference.
 
+The final HD pass gives wrapped text enough row height, brightens technical badges and keeps the info action circular. A browser regression measures actual text rectangles against the card/details bounds, beyond checking document overflow. A long series fixture renders `Нічний архів / Night Archive` with verified 2024, S02E01–E03, 1080p, Ukrainian/English audio and studio; its expanded details retain the full multilingual raw torrent title. Twelve additional release cases are tested in both installation modes.
+
+Series captures: [compact 1080p](series-long-1920.png) · [expanded 1080p](series-expanded-1920.png) · [standalone compact](standalone-series-long-1920.png) · [standalone expanded](standalone-series-expanded-1920.png).
+
 ## Size/performance
 
-Raw shared presentation source changes from 299,568 to 251,859 bytes (47,709 fewer; 15.9%). Legacy installed URLs may add tiny alias requests, never another owner. Four complete rows fit at 720p and five at 1080p/4K; the 4K modal uses 44px typography.
+Raw shared presentation source changes from 299,568 to 252,970 bytes (46,598 fewer; 15.6%). Legacy installed URLs may add tiny alias requests, never another owner. Three complete rows fit at 720p and five at 1080p/4K; the taller HD rows prevent technical/audio clipping. The 4K modal uses 44px typography.
 
 Single first-open observations: 268.3ms before, 349.7ms Hybrid, 347.5ms standalone. Host/protocol polling differs, so latency comparison is **INCONCLUSIVE**. No startup/FPS/memory/device gain claimed. The active runtime has 13 removable subscriptions and one scoped stylesheet; disabling removes these, retaining only its reversible enable-setting listener until destroy.
 

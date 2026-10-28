@@ -44,14 +44,14 @@
     "/lampa/torrents-redesign.js",
     "/lampa/loader.js"
   ],
-  "commit": "617e68feb921f734a5c0c9d2b8479bb8db88457b",
+  "commit": "98346e41b45e2264eb4881c8bb20fe7213a5b983",
   "branch": "feat/issue-117-torrent-cinema",
   "fixture": true,
   "assets": {
     "ui/torrent-cinema.js": {
       "url": "https://gorlim590.github.io/lampa/ui/torrent-cinema.js",
-      "sha256": "31f957e6839b17b5b51761480812a155510b0943d003fac57492905d15de85bf",
-      "bytes": 147934
+      "sha256": "241e1c1e623f3fc93092e731b2e0d521a2e2205b1536f00d6dbe42122b8be62a",
+      "bytes": 149099
     }
   },
   "checks": [
@@ -90,11 +90,11 @@
         },
         "lastVisibleRow": {
           "x": 100.75,
-          "y": 465.8125,
+          "y": 486.375,
           "width": 1078.375,
-          "height": 101.625,
+          "height": 122.1875,
           "right": 1179.125,
-          "bottom": 567.4375
+          "bottom": 608.5625
         },
         "focus": {
           "x": 100.75,
@@ -121,6 +121,15 @@
         "controller": "sh_movie_streams",
         "styleCount": 1,
         "legacyStyles": 0,
+        "info": {
+          "x": 1142.6875,
+          "y": 273.25,
+          "width": 26.1875,
+          "height": 26.1875,
+          "right": 1168.875,
+          "bottom": 299.4375
+        },
+        "infoRound": true,
         "collapsed": {
           "file": "standalone-1280.png",
           "pixels": [
@@ -161,9 +170,9 @@
             "x": 100.75,
             "y": 524,
             "width": 1078.375,
-            "height": 101.625,
+            "height": 122.1875,
             "right": 1179.125,
-            "bottom": 625.625
+            "bottom": 646.1875
           },
           "focus": {
             "x": 1142.6875,
@@ -189,8 +198,295 @@
           "inlineFilesButtons": 0,
           "controller": "sh_movie_streams",
           "styleCount": 1,
-          "legacyStyles": 0
+          "legacyStyles": 0,
+          "info": {
+            "x": 1142.6875,
+            "y": 273.25,
+            "width": 26.1875,
+            "height": 26.1875,
+            "right": 1168.875,
+            "bottom": 299.4375
+          },
+          "infoRound": true
         }
+      }
+    },
+    {
+      "name": "720p release, format, audio and subtitle text stays visible inside row",
+      "status": "PASS",
+      "details": [
+        {
+          "selector": ".ctr-name",
+          "text": "Silent Orbit (2024)",
+          "rect": {
+            "x": 192.6875,
+            "y": 290.8125,
+            "right": 343.875,
+            "bottom": 312.5,
+            "width": 151.1875,
+            "height": 21.6875
+          },
+          "clip": {
+            "x": 100.75,
+            "y": 221.9375,
+            "right": 1179.125,
+            "bottom": 350.8125,
+            "width": 1078.375,
+            "height": 128.875
+          },
+          "visible": true,
+          "textRects": [
+            {
+              "x": 192.6875,
+              "y": 290.8125,
+              "right": 343.875,
+              "bottom": 310.8125,
+              "width": 151.1875,
+              "height": 20
+            }
+          ],
+          "scroll": [
+            151,
+            22
+          ],
+          "client": [
+            151,
+            22
+          ]
+        },
+        {
+          "selector": ".tc-secondary-row",
+          "text": "4KWEB-DLHDRHEVC",
+          "rect": {
+            "x": 192.6875,
+            "y": 314.5,
+            "right": 365.5625,
+            "bottom": 338.5,
+            "width": 172.875,
+            "height": 24
+          },
+          "clip": {
+            "x": 100.75,
+            "y": 221.9375,
+            "right": 1179.125,
+            "bottom": 350.8125,
+            "width": 1078.375,
+            "height": 128.875
+          },
+          "visible": true,
+          "textRects": [
+            {
+              "x": 192.6875,
+              "y": 314.5,
+              "right": 221.4375,
+              "bottom": 338.5,
+              "width": 28.75,
+              "height": 24
+            },
+            {
+              "x": 200.875,
+              "y": 319.4375,
+              "right": 213.25,
+              "bottom": 327.4375,
+              "width": 12.375,
+              "height": 8
+            },
+            {
+              "x": 224.5625,
+              "y": 314.5,
+              "right": 279,
+              "bottom": 338.5,
+              "width": 54.4375,
+              "height": 24
+            },
+            {
+              "x": 232.75,
+              "y": 319.4375,
+              "right": 270.8125,
+              "bottom": 327.4375,
+              "width": 38.0625,
+              "height": 8
+            },
+            {
+              "x": 282.125,
+              "y": 314.5,
+              "right": 319.8125,
+              "bottom": 338.5,
+              "width": 37.6875,
+              "height": 24
+            },
+            {
+              "x": 290.3125,
+              "y": 319.4375,
+              "right": 311.625,
+              "bottom": 327.4375,
+              "width": 21.3125,
+              "height": 8
+            },
+            {
+              "x": 322.9375,
+              "y": 314.5,
+              "right": 365.5625,
+              "bottom": 338.5,
+              "width": 42.625,
+              "height": 24
+            },
+            {
+              "x": 331.125,
+              "y": 319.4375,
+              "right": 357.375,
+              "bottom": 327.4375,
+              "width": 26.25,
+              "height": 8
+            }
+          ],
+          "scroll": [
+            173,
+            24
+          ],
+          "client": [
+            173,
+            24
+          ]
+        },
+        {
+          "selector": ".tc-audio-label",
+          "text": "♫ Українська / English",
+          "rect": {
+            "x": 644.4375,
+            "y": 262.125,
+            "right": 949.0625,
+            "bottom": 279.25,
+            "width": 304.625,
+            "height": 17.125
+          },
+          "clip": {
+            "x": 100.75,
+            "y": 221.9375,
+            "right": 1179.125,
+            "bottom": 350.8125,
+            "width": 1078.375,
+            "height": 128.875
+          },
+          "visible": true,
+          "textRects": [
+            {
+              "x": 657.75,
+              "y": 262.125,
+              "right": 785.3125,
+              "bottom": 278.125,
+              "width": 127.5625,
+              "height": 16
+            }
+          ],
+          "scroll": [
+            305,
+            17
+          ],
+          "client": [
+            305,
+            17
+          ]
+        },
+        {
+          "selector": ".tc-voice",
+          "text": "Контрольна студія",
+          "rect": {
+            "x": 644.4375,
+            "y": 280.875,
+            "right": 949.0625,
+            "bottom": 295.4375,
+            "width": 304.625,
+            "height": 14.5625
+          },
+          "clip": {
+            "x": 100.75,
+            "y": 221.9375,
+            "right": 1179.125,
+            "bottom": 350.8125,
+            "width": 1078.375,
+            "height": 128.875
+          },
+          "visible": true,
+          "textRects": [
+            {
+              "x": 644.4375,
+              "y": 276.875,
+              "right": 737.3125,
+              "bottom": 292.875,
+              "width": 92.875,
+              "height": 16
+            }
+          ],
+          "scroll": [
+            305,
+            15
+          ],
+          "client": [
+            305,
+            15
+          ]
+        },
+        {
+          "selector": ".tc-subtitles",
+          "text": "CC · English",
+          "rect": {
+            "x": 644.4375,
+            "y": 296.9375,
+            "right": 949.0625,
+            "bottom": 310.5625,
+            "width": 304.625,
+            "height": 13.625
+          },
+          "clip": {
+            "x": 100.75,
+            "y": 221.9375,
+            "right": 1179.125,
+            "bottom": 350.8125,
+            "width": 1078.375,
+            "height": 128.875
+          },
+          "visible": true,
+          "textRects": [
+            {
+              "x": 644.4375,
+              "y": 296.9375,
+              "right": 696.125,
+              "bottom": 304.9375,
+              "width": 51.6875,
+              "height": 8
+            }
+          ],
+          "scroll": [
+            305,
+            14
+          ],
+          "client": [
+            305,
+            14
+          ]
+        }
+      ]
+    },
+    {
+      "name": "retired TV/animation toggles add no effects, styles or subscriptions",
+      "status": "PASS",
+      "details": {
+        "on": {
+          "animation": "none",
+          "transform": "none",
+          "backdropFilter": "none",
+          "styles": 1,
+          "subscriptions": 13
+        },
+        "off": {
+          "animation": "none",
+          "transform": "none",
+          "backdropFilter": "none",
+          "styles": 1,
+          "subscriptions": 13
+        },
+        "diagnosticsStable": true
       }
     },
     {
@@ -200,6 +496,51 @@
     {
       "name": "expanded Video/Audio/Subtitles/Files sections 1280",
       "status": "PASS"
+    },
+    {
+      "name": "720p expanded raw release title stays visible inside details",
+      "status": "PASS",
+      "details": [
+        {
+          "selector": ".tc-raw-title",
+          "text": "Silent Orbit (2024) 2160p WEB-DL HDR HEVC Ukr Eng",
+          "rect": {
+            "x": 195.4375,
+            "y": 360.8125,
+            "right": 1149.6875,
+            "bottom": 379.0625,
+            "width": 954.25,
+            "height": 18.25
+          },
+          "clip": {
+            "x": 180.875,
+            "y": 346.625,
+            "right": 1164.25,
+            "bottom": 503.9375,
+            "width": 983.375,
+            "height": 157.3125
+          },
+          "visible": true,
+          "textRects": [
+            {
+              "x": 195.4375,
+              "y": 360.8125,
+              "right": 510.5625,
+              "bottom": 376.8125,
+              "width": 315.125,
+              "height": 16
+            }
+          ],
+          "scroll": [
+            954,
+            18
+          ],
+          "client": [
+            954,
+            18
+          ]
+        }
+      ]
     },
     {
       "name": "layout 1920",
@@ -259,6 +600,15 @@
         "controller": "sh_movie_streams",
         "styleCount": 1,
         "legacyStyles": 0,
+        "info": {
+          "x": 1719.25,
+          "y": 373.125,
+          "width": 36.0625,
+          "height": 36.0625,
+          "right": 1755.3125,
+          "bottom": 409.1875
+        },
+        "infoRound": true,
         "collapsed": {
           "file": "standalone-1920.png",
           "pixels": [
@@ -327,7 +677,16 @@
           "inlineFilesButtons": 0,
           "controller": "sh_movie_streams",
           "styleCount": 1,
-          "legacyStyles": 0
+          "legacyStyles": 0,
+          "info": {
+            "x": 1719.25,
+            "y": 373.125,
+            "width": 36.0625,
+            "height": 36.0625,
+            "right": 1755.3125,
+            "bottom": 409.1875
+          },
+          "infoRound": true
         }
       }
     },
@@ -397,6 +756,15 @@
         "controller": "sh_movie_streams",
         "styleCount": 1,
         "legacyStyles": 0,
+        "info": {
+          "x": 3446.4375,
+          "y": 701.3125,
+          "width": 72.125,
+          "height": 72.125,
+          "right": 3518.5625,
+          "bottom": 773.4375
+        },
+        "infoRound": true,
         "collapsed": {
           "file": "standalone-3840.png",
           "pixels": [
@@ -465,7 +833,16 @@
           "inlineFilesButtons": 0,
           "controller": "sh_movie_streams",
           "styleCount": 1,
-          "legacyStyles": 0
+          "legacyStyles": 0,
+          "info": {
+            "x": 3446.4375,
+            "y": 701.3125,
+            "width": 72.125,
+            "height": 72.125,
+            "right": 3518.5625,
+            "bottom": 773.4375
+          },
+          "infoRound": true
         }
       }
     },
@@ -476,6 +853,274 @@
     {
       "name": "expanded Video/Audio/Subtitles/Files sections 3840",
       "status": "PASS"
+    },
+    {
+      "name": "series fixture shows Ukrainian and English release names, year, verified range, quality and voiceover",
+      "status": "PASS",
+      "details": {
+        "raw": "Нічний архів / Night Archive — 夜のアーカイブ — 별빛 항로 — S02E01-E03 2024 1080p WEB-DL HEVC Ukr Eng DVO",
+        "title": "Нічний архів / Night Archive — 夜のアーカイブ — 별빛 항로 (2024)",
+        "badges": "S02E01–E03🇺🇦 UAtoloka.to",
+        "technical": "1080pWEB-DLHEVC",
+        "audio": "♫ Українська / EnglishСтудія Переклад / Studio ПерекладCC · Українська",
+        "kind": "tv"
+      }
+    },
+    {
+      "name": "series expanded details retain complete multilingual raw title without clipping",
+      "status": "PASS",
+      "details": {
+        "raw": "Нічний архів / Night Archive — 夜のアーカイブ — 별빛 항로 — S02E01-E03 2024 1080p WEB-DL HEVC Ukr Eng DVO",
+        "wrap": "anywhere",
+        "scroll": [
+          1451,
+          25
+        ],
+        "client": [
+          1451,
+          25
+        ]
+      }
+    },
+    {
+      "name": "release case last-of-us uses torrent identity and readable compact title",
+      "status": "PASS",
+      "details": {
+        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "title": "The Last of Us (2025)",
+        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
+        "technical": "4KWEB-DLHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      }
+    },
+    {
+      "name": "release case last-of-us keeps exact raw title in details",
+      "status": "PASS",
+      "details": {
+        "expected": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "actual": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+      }
+    },
+    {
+      "name": "release case multi-season-anime uses torrent identity and readable compact title",
+      "status": "PASS",
+      "details": {
+        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "title": "The Last of Us (2025)",
+        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
+        "technical": "4KWEB-DLHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      }
+    },
+    {
+      "name": "release case multi-season-anime keeps exact raw title in details",
+      "status": "PASS",
+      "details": {
+        "expected": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "actual": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+      }
+    },
+    {
+      "name": "release case complete-season uses torrent identity and readable compact title",
+      "status": "PASS",
+      "details": {
+        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "title": "The Last of Us (2025)",
+        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
+        "technical": "4KWEB-DLHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      }
+    },
+    {
+      "name": "release case complete-season keeps exact raw title in details",
+      "status": "PASS",
+      "details": {
+        "expected": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "actual": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+      }
+    },
+    {
+      "name": "release case episode-pack uses torrent identity and readable compact title",
+      "status": "PASS",
+      "details": {
+        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "title": "The Last of Us (2025)",
+        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
+        "technical": "4KWEB-DLHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      }
+    },
+    {
+      "name": "release case episode-pack keeps exact raw title in details",
+      "status": "PASS",
+      "details": {
+        "expected": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "actual": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+      }
+    },
+    {
+      "name": "release case anime uses torrent identity and readable compact title",
+      "status": "PASS",
+      "details": {
+        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "title": "The Last of Us (2025)",
+        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
+        "technical": "4KWEB-DLHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      }
+    },
+    {
+      "name": "release case anime keeps exact raw title in details",
+      "status": "PASS",
+      "details": {
+        "expected": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "actual": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+      }
+    },
+    {
+      "name": "release case dorama uses torrent identity and readable compact title",
+      "status": "PASS",
+      "details": {
+        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "title": "The Last of Us (2025)",
+        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
+        "technical": "4KWEB-DLHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      }
+    },
+    {
+      "name": "release case dorama keeps exact raw title in details",
+      "status": "PASS",
+      "details": {
+        "expected": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "actual": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+      }
+    },
+    {
+      "name": "release case movie uses torrent identity and readable compact title",
+      "status": "PASS",
+      "details": {
+        "raw": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng",
+        "title": "Dune Part Two (2024)",
+        "coverage": "🇺🇦 UAtoloka.to",
+        "technical": "4KBluRayHDR10+ · Dolby VisionHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      }
+    },
+    {
+      "name": "release case movie keeps exact raw title in details",
+      "status": "PASS",
+      "details": {
+        "expected": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng",
+        "actual": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng"
+      }
+    },
+    {
+      "name": "release case unicode-long-movie uses torrent identity and readable compact title",
+      "status": "PASS",
+      "details": {
+        "raw": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng",
+        "title": "Dune Part Two (2024)",
+        "coverage": "🇺🇦 UAtoloka.to",
+        "technical": "4KBluRayHDR10+ · Dolby VisionHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      }
+    },
+    {
+      "name": "release case unicode-long-movie keeps exact raw title in details",
+      "status": "PASS",
+      "details": {
+        "expected": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng",
+        "actual": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng"
+      }
+    },
+    {
+      "name": "release case name-field uses torrent identity and readable compact title",
+      "status": "PASS",
+      "details": {
+        "raw": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng",
+        "title": "Dune Part Two (2024)",
+        "coverage": "🇺🇦 UAtoloka.to",
+        "technical": "4KBluRayHDR10+ · Dolby VisionHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      }
+    },
+    {
+      "name": "release case name-field keeps exact raw title in details",
+      "status": "PASS",
+      "details": {
+        "expected": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng",
+        "actual": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng"
+      }
+    },
+    {
+      "name": "release case sparse-raw uses torrent identity and readable compact title",
+      "status": "PASS",
+      "details": {
+        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "title": "The Last of Us (2025)",
+        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
+        "technical": "4KWEB-DLHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      }
+    },
+    {
+      "name": "release case sparse-raw keeps exact raw title in details",
+      "status": "PASS",
+      "details": {
+        "expected": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "actual": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+      }
+    },
+    {
+      "name": "release case korean-series uses torrent identity and readable compact title",
+      "status": "PASS",
+      "details": {
+        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "title": "The Last of Us (2025)",
+        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
+        "technical": "4KWEB-DLHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      }
+    },
+    {
+      "name": "release case korean-series keeps exact raw title in details",
+      "status": "PASS",
+      "details": {
+        "expected": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "actual": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+      }
+    },
+    {
+      "name": "release case latin-long-series uses torrent identity and readable compact title",
+      "status": "PASS",
+      "details": {
+        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "title": "The Last of Us (2025)",
+        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
+        "technical": "4KWEB-DLHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      }
+    },
+    {
+      "name": "release case latin-long-series keeps exact raw title in details",
+      "status": "PASS",
+      "details": {
+        "expected": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "actual": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+      }
     },
     {
       "name": "native row navigation retains one focused release",
@@ -597,11 +1242,11 @@
       },
       "lastVisibleRow": {
         "x": 100.75,
-        "y": 465.8125,
+        "y": 486.375,
         "width": 1078.375,
-        "height": 101.625,
+        "height": 122.1875,
         "right": 1179.125,
-        "bottom": 567.4375
+        "bottom": 608.5625
       },
       "focus": {
         "x": 100.75,
@@ -628,6 +1273,15 @@
       "controller": "sh_movie_streams",
       "styleCount": 1,
       "legacyStyles": 0,
+      "info": {
+        "x": 1142.6875,
+        "y": 273.25,
+        "width": 26.1875,
+        "height": 26.1875,
+        "right": 1168.875,
+        "bottom": 299.4375
+      },
+      "infoRound": true,
       "collapsed": {
         "file": "standalone-1280.png",
         "pixels": [
@@ -668,9 +1322,9 @@
           "x": 100.75,
           "y": 524,
           "width": 1078.375,
-          "height": 101.625,
+          "height": 122.1875,
           "right": 1179.125,
-          "bottom": 625.625
+          "bottom": 646.1875
         },
         "focus": {
           "x": 1142.6875,
@@ -696,7 +1350,16 @@
         "inlineFilesButtons": 0,
         "controller": "sh_movie_streams",
         "styleCount": 1,
-        "legacyStyles": 0
+        "legacyStyles": 0,
+        "info": {
+          "x": 1142.6875,
+          "y": 273.25,
+          "width": 26.1875,
+          "height": 26.1875,
+          "right": 1168.875,
+          "bottom": 299.4375
+        },
+        "infoRound": true
       }
     },
     {
@@ -754,6 +1417,15 @@
       "controller": "sh_movie_streams",
       "styleCount": 1,
       "legacyStyles": 0,
+      "info": {
+        "x": 1719.25,
+        "y": 373.125,
+        "width": 36.0625,
+        "height": 36.0625,
+        "right": 1755.3125,
+        "bottom": 409.1875
+      },
+      "infoRound": true,
       "collapsed": {
         "file": "standalone-1920.png",
         "pixels": [
@@ -822,7 +1494,16 @@
         "inlineFilesButtons": 0,
         "controller": "sh_movie_streams",
         "styleCount": 1,
-        "legacyStyles": 0
+        "legacyStyles": 0,
+        "info": {
+          "x": 1719.25,
+          "y": 373.125,
+          "width": 36.0625,
+          "height": 36.0625,
+          "right": 1755.3125,
+          "bottom": 409.1875
+        },
+        "infoRound": true
       }
     },
     {
@@ -880,6 +1561,15 @@
       "controller": "sh_movie_streams",
       "styleCount": 1,
       "legacyStyles": 0,
+      "info": {
+        "x": 3446.4375,
+        "y": 701.3125,
+        "width": 72.125,
+        "height": 72.125,
+        "right": 3518.5625,
+        "bottom": 773.4375
+      },
+      "infoRound": true,
       "collapsed": {
         "file": "standalone-3840.png",
         "pixels": [
@@ -948,7 +1638,16 @@
         "inlineFilesButtons": 0,
         "controller": "sh_movie_streams",
         "styleCount": 1,
-        "legacyStyles": 0
+        "legacyStyles": 0,
+        "info": {
+          "x": 3446.4375,
+          "y": 701.3125,
+          "width": 72.125,
+          "height": 72.125,
+          "right": 3518.5625,
+          "bottom": 773.4375
+        },
+        "infoRound": true
       }
     }
   ],
@@ -963,7 +1662,7 @@
   "hostStartupExceptions": [
     "SyntaxError: Failed to execute 'appendChild' on 'Node': Unexpected token '&'\n    at [URL]"
   ],
-  "openMs": 309.09999999962747,
+  "openMs": 269,
   "deviceEquivalent": {
     "viewport": [
       1920,
@@ -1019,6 +1718,15 @@
     "controller": "sh_movie_streams",
     "styleCount": 1,
     "legacyStyles": 0,
+    "info": {
+      "x": 1719.25,
+      "y": 373.125,
+      "width": 36.0625,
+      "height": 36.0625,
+      "right": 1755.3125,
+      "bottom": 409.1875
+    },
+    "infoRound": true,
     "capture": {
       "file": "standalone-device-equivalent-1080-dpr2.png",
       "pixels": [
@@ -1027,6 +1735,200 @@
       ]
     }
   },
+  "seriesFixture": {
+    "compact": {
+      "raw": "Нічний архів / Night Archive — 夜のアーカイブ — 별빛 항로 — S02E01-E03 2024 1080p WEB-DL HEVC Ukr Eng DVO",
+      "title": "Нічний архів / Night Archive — 夜のアーカイブ — 별빛 항로 (2024)",
+      "badges": "S02E01–E03🇺🇦 UAtoloka.to",
+      "technical": "1080pWEB-DLHEVC",
+      "audio": "♫ Українська / EnglishСтудія Переклад / Studio ПерекладCC · Українська",
+      "kind": "tv"
+    },
+    "expanded": {
+      "raw": "Нічний архів / Night Archive — 夜のアーカイブ — 별빛 항로 — S02E01-E03 2024 1080p WEB-DL HEVC Ukr Eng DVO",
+      "wrap": "anywhere",
+      "scroll": [
+        1451,
+        25
+      ],
+      "client": [
+        1451,
+        25
+      ]
+    },
+    "compactCapture": {
+      "file": "standalone-series-long-1920.png",
+      "pixels": [
+        1920,
+        1080
+      ]
+    },
+    "expandedCapture": {
+      "file": "standalone-series-expanded-1920.png",
+      "pixels": [
+        1920,
+        1080
+      ]
+    }
+  },
+  "mediaCases": [
+    {
+      "id": "last-of-us",
+      "kind": "tv",
+      "compact": {
+        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "title": "The Last of Us (2025)",
+        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
+        "technical": "4KWEB-DLHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      },
+      "rawDetails": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+    },
+    {
+      "id": "multi-season-anime",
+      "kind": "tv",
+      "compact": {
+        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "title": "The Last of Us (2025)",
+        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
+        "technical": "4KWEB-DLHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      },
+      "rawDetails": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+    },
+    {
+      "id": "complete-season",
+      "kind": "tv",
+      "compact": {
+        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "title": "The Last of Us (2025)",
+        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
+        "technical": "4KWEB-DLHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      },
+      "rawDetails": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+    },
+    {
+      "id": "episode-pack",
+      "kind": "tv",
+      "compact": {
+        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "title": "The Last of Us (2025)",
+        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
+        "technical": "4KWEB-DLHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      },
+      "rawDetails": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+    },
+    {
+      "id": "anime",
+      "kind": "tv",
+      "compact": {
+        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "title": "The Last of Us (2025)",
+        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
+        "technical": "4KWEB-DLHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      },
+      "rawDetails": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+    },
+    {
+      "id": "dorama",
+      "kind": "tv",
+      "compact": {
+        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "title": "The Last of Us (2025)",
+        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
+        "technical": "4KWEB-DLHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      },
+      "rawDetails": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+    },
+    {
+      "id": "movie",
+      "kind": "movie",
+      "compact": {
+        "raw": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng",
+        "title": "Dune Part Two (2024)",
+        "coverage": "🇺🇦 UAtoloka.to",
+        "technical": "4KBluRayHDR10+ · Dolby VisionHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      },
+      "rawDetails": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng"
+    },
+    {
+      "id": "unicode-long-movie",
+      "kind": "movie",
+      "compact": {
+        "raw": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng",
+        "title": "Dune Part Two (2024)",
+        "coverage": "🇺🇦 UAtoloka.to",
+        "technical": "4KBluRayHDR10+ · Dolby VisionHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      },
+      "rawDetails": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng"
+    },
+    {
+      "id": "name-field",
+      "kind": "movie",
+      "compact": {
+        "raw": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng",
+        "title": "Dune Part Two (2024)",
+        "coverage": "🇺🇦 UAtoloka.to",
+        "technical": "4KBluRayHDR10+ · Dolby VisionHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      },
+      "rawDetails": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng"
+    },
+    {
+      "id": "sparse-raw",
+      "kind": "tv",
+      "compact": {
+        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "title": "The Last of Us (2025)",
+        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
+        "technical": "4KWEB-DLHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      },
+      "rawDetails": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+    },
+    {
+      "id": "korean-series",
+      "kind": "tv",
+      "compact": {
+        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "title": "The Last of Us (2025)",
+        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
+        "technical": "4KWEB-DLHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      },
+      "rawDetails": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+    },
+    {
+      "id": "latin-long-series",
+      "kind": "tv",
+      "compact": {
+        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
+        "title": "The Last of Us (2025)",
+        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
+        "technical": "4KWEB-DLHEVC",
+        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "clamp": "2"
+      },
+      "rawDetails": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+    }
+  ],
   "finalDiagnostics": {
     "running": true,
     "records": 1,
