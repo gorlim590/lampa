@@ -3,6 +3,7 @@
     'use strict';
     if (window.LampaHomeHistory) return;
     var L = window.Lampa, timer = null, hooks = [], installed = false, policy = null;
+    var contentBatch = null, currentContentBatch = null, contentRevision = 0, rowSnapshot = null;
     var entryUrl = document.currentScript && document.currentScript.src;
     var titles = { resume: 'Продовжити перегляд', watched: 'Переглянуто', rated: 'Мої оцінки · Trakt' };
     var lists = ['history', 'viewed', 'look', 'continued', 'book', 'like', 'scheduled'];
@@ -218,6 +219,25 @@
         result.resume = result.resume.map(function (r) { return r.card; });
         result.watched.sort(function (a, b) { return b.home_history_watched_at - a.home_history_watched_at; }); return result;
     }
+    function copyRows(rows) {
+        function copyCard(card) {
+            var copy = Object.assign({}, card);
+            if (card.ids) copy.ids = Object.assign({}, card.ids);
+            if (card.home_history_resume) copy.home_history_resume = Object.assign({}, card.home_history_resume);
+            if (card.params) {
+                copy.params = Object.assign({}, card.params);
+                if (card.params.emit) copy.params.emit = Object.assign({}, card.params.emit);
+            }
+            return copy;
+        }
+        return { resume: rows.resume.map(copyCard), watched: rows.watched.map(copyCard) };
+    }
+    function buildRowsForRevision() {
+        var currentScope = scope();
+        if (rowSnapshot && rowSnapshot.revision === contentRevision && rowSnapshot.scope === currentScope) return copyRows(rowSnapshot.rows);
+        rowSnapshot = { revision: contentRevision, scope: currentScope, rows: buildRows() };
+        return copyRows(rowSnapshot.rows);
+    }
     function node(line) { var el = line.render(true); return el && (el[0] || el); }
     function payload(kind, cards) {
         return { title: titles[kind] + ' (' + cards.length + ')', results: cards, home_history: kind, home_row_id: kind === 'rated' ? 'TraktPlusRated' : 'home_history_' + kind, home_row_origin: kind === 'rated' ? 'trakt' : 'history',
@@ -257,7 +277,7 @@
             var record = { component: component, hook: { onBuild: queue, onAppend: queue, onDestroy: function () { hooks.splice(hooks.indexOf(record), 1); } } };
             hooks.push(record); component.use(record.hook);
         }
-        var rows = buildRows(), changed = false;
+        var rows = buildRowsForRevision(), changed = false;
         ['resume', 'watched'].forEach(function (kind) { if (paint(component, kind, rows[kind])) changed = true; });
         if (window.TraktPlus && typeof window.TraktPlus.cachedRatedCards === 'function') {
             var rated = window.TraktPlus.cachedRatedCards();
@@ -266,7 +286,7 @@
         if (policy) policy.apply(component);
         if (changed) component.emit('homeHistoryChanged');
     }
-    function queue() { if (!timer) timer = setTimeout(refresh, 120); }
+    function queue() { contentRevision++; rowSnapshot = null; if (currentContentBatch) currentContentBatch.rows = null; if (!timer) timer = setTimeout(refresh, 120); }
     function install() {
         if (installed || !L || !L.ContentRows || !L.ContentRows.call) return;
         installed = true; window.LampaHomeHistory.active = true; var originalCall = L.ContentRows.call;
@@ -276,7 +296,13 @@
         L.ContentRows.call = function (screen, params, calls) {
             if (screen !== 'main') return originalCall.apply(this, arguments);
             if (policy) policy.prepare(calls);
-            var previous = calls.slice(); originalCall.apply(this, arguments);
+            if (currentContentBatch) currentContentBatch.rows = null;
+            var previousBatch = contentBatch;
+            var batch = { revision: contentRevision, scope: scope(), rows: null, remaining: 0 };
+            contentBatch = batch; currentContentBatch = batch;
+            var previous = calls.slice();
+            try { originalCall.apply(this, arguments); }
+            finally { contentBatch = previousBatch; }
             for (var i = calls.length - 1; i >= 0; i--) {
                 var callback = calls[i]; if (typeof callback !== 'function') continue;
                 var wrapped = policy ? policy.wrap(callback, previous.indexOf(callback) < 0) : callback;
@@ -285,7 +311,13 @@
         };
         ['resume', 'watched'].forEach(function (kind, i) {
             L.ContentRows.add({ name: 'home_history_' + kind, title: titles[kind], index: 2 + i, screen: ['main'], call: function () {
-                return function (callback) { callback(payload(kind, buildRows()[kind])); };
+                var batch = contentBatch;
+                if (batch) batch.remaining++;
+                return function (callback) {
+                    var rows = batch && batch === currentContentBatch && batch.revision === contentRevision && batch.scope === scope() ? (batch.rows || (batch.rows = buildRowsForRevision())) : buildRows();
+                    try { callback(payload(kind, rows[kind])); }
+                    finally { if (batch && --batch.remaining <= 0) { batch.rows = null; if (batch === currentContentBatch) currentContentBatch = null; } }
+                };
             } });
         });
         L.Listener.follow('activity', queue);

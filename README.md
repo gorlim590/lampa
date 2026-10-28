@@ -4,12 +4,14 @@
 
 ## Швидкий старт: loader.js
 
-Найпростіше підключити лише один файл — `loader.js`. Він вантажить плагіни по черзі у правильному порядку (Trakt → Trakt+ → torrent aliases → Interface+ → YDesign → Average Rating (пункт «OMDB & MDBList» в меню «Інтерфейс») → Cardify+ → переклад), не зупиняється на помилці окремого плагіна й додає `?v=` до URL, щоб ТВ не тримав старий кеш.
+У **Lampa → Налаштування → Розширення** додай одну адресу: https://gorlim590.github.io/lampa/loader.js. Loader одразу запускає критичну послідовність **Hybrid → Interface+ → YDesign**, не очікуючи `appready`; Hybrid одразу застосовує збережену тему, якщо Lampa Storage уже доступне. Потім він чекає нативний `appready` і запускає окремо сервіси: Trakt Core → Trakt+ та незалежний список парсерів/рейтингу/Cardify+/перекладу. Помилка або таймаут необов’язкового файла не блокує shell. Щоб перейти на один loader без втрати інших розширень, спершу вручну запиши список URL у розділі **Розширення**, потім прибери лише точні дублікати цих модулів: `ui/stremio-hybrid.js`, `ui/interface-plus.js`, `ui/design-optimized.js`, `trakt/trakt.js`, `trakt/trakt-plus.js`, `providers/torrent-search.js`, `media/average-rating.js`, `ui/cardify-plus.js`, `localization/translate.js`. Залиш усі інші URL, зокрема Torrent Cinema, сторонні parser/provider plugins, Screensaver+, BWA, Lampa core, player і TorrServer extensions. Не прибирай схожий за назвою URL, якщо це інший шлях/плагін. `settings-hub.js` і `torrent-overlay.js` завантажуються Hybrid внутрішньо. Loader не змінює список розширень автоматично; Storage і credentials не читаються migration-кроком.
 
-- Змінити список: `window.LAMPA_PLUGINS_LIST = ['ui/design-optimized.js', ...]` до підключення loader або `Lampa.Storage` ключ `gl_loader_plugins` (шляхи через кому).
+- Змінити необов’язкові сервіси: `window.LAMPA_PLUGINS_LIST = ['providers/torrent-search.js', ...]` до підключення loader або `Lampa.Storage` ключ `gl_loader_plugins` (шляхи через кому). Критичні UI-файли завжди завантажуються першими; повтори прибираються. Trakt+ пропускається, якщо Trakt Core не завантажився.
 - Скинути кеш після оновлення: змінити `window.LAMPA_PLUGINS_VERSION`.
 - Інша адреса репозиторію (дзеркало): `window.LAMPA_PLUGINS_BASE`.
-- Не підключай окремо ті самі плагіни ще раз — глобальні guard-и захищають від подвійної ініціалізації, але зайве навантаження лишається.
+- Відкат: у налаштуваннях розширень видали URL `loader.js` і поверни попередні окремі URL модулів зі списку вище. Не очищай Storage або облікові дані. Збережене `stremio_hybrid_enabled` і окремий opt-in `stremio_hybrid_primary_settings` не змінюються.
+- Відтворений запуск мав окрему пряму доставку Hybrid поряд із preview/extension loader. Loader усередині має singleton та дедуплікацію, але не може зупинити інший host extension від повторного додавання скрипта. Точний URL другого дубліката в записі того запуску не зберігся; migration треба виконувати вручну і перевірити в UI Extensions.
+- Цей шлях упорядковує розширення **до `appready`**, але не може гарантувати відсутність першого нативного кадру, якщо сам host вставляє плагіни після першої фарби екрана. Без підтримуваного host pre-paint entrypoint надійно прибрати цей кадр кодом plugin неможливо. Практичне пом’якшення — один ранній URL loader і видалення лише дубльованих URL; чорний екран або глобальні CSS-пастки не використовуються.
 
 ## TMDB-ключ
 
@@ -76,13 +78,11 @@
 
 ## Рекомендований порядок і сумісність UI
 
-Плагіни підключаються через `loader.js` або вручну в налаштуваннях Lampa. Loader послідовно виконує свій список; ручні та додаткові підключення можуть змінювати фактичний порядок. Використовуй цей порядок як базову конфігурацію:
+Для нового встановлення додавай лише `loader.js`. Він виконує критичні UI-скрипти до `appready`; кожен модуль зберігається окремим файлом. Для ручного встановлення дотримуйся такого графа:
 
-1. trakt/trakt.js — базовий Trakt.
-2. trakt/trakt-plus.js — надбудова, яка прямо вимагає базовий Trakt раніше.
-3. ui/interface-plus.js — додаткові параметри інтерфейсу.
-4. ui/design-optimized.js (YDesign) — основний візуальний шар карток і бейджів; завантажувати після Interface+, щоб стилі YDesign застосовувалися поверх.
-5. Додаткові плагіни лише за потреби.
+1. **Критично до appready:** `ui/stremio-hybrid.js` → `ui/interface-plus.js` → `ui/design-optimized.js` (YDesign).
+2. **Після appready, дві обмежені черги:** Trakt Core → Trakt+ (Trakt+ запускається лише після успіху Core); незалежні модулі послідовно — `providers/torrent-search.js` → `media/average-rating.js` → `ui/cardify-plus.js` → `localization/translate.js`.
+3. Інші optional або сторонні модулі — лише після перевірки власних залежностей і без паралельного дублювання UI owners.
 
 | Плагін | Що врахувати |
 | --- | --- |

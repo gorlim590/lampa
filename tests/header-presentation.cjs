@@ -12,11 +12,11 @@ function fixture(){
 }
 test('Both load orders transfer the whole header to one canonical stylesheet',()=>{
  for(const order of ['interface-first','hybrid-first']){const f=fixture();if(order==='interface-first'){f.legacy();assert.equal(f.styles('ifx_header_css').length,1);f.canonical();f.c.applyShell(true);}else{f.canonical();f.c.applyShell(true);f.legacy();}
- assert.equal(f.styles('ifx_header_css').length,0,order);assert.equal(f.styles('stremio-hybrid-style').length,1);assert.equal(f.c.window.StremioHybrid.ownsPresentation('header'),true);assert.equal(f.c.window.StremioHybrid.ownsPresentation('details'),false);assert.equal(f.c.bootStats.presentationFailures,0);}
+ assert.equal(f.styles('ifx_header_css').length,0,order);assert.equal(f.styles('stremio-hybrid-style').length,1);assert.equal(f.c.window.StremioHybrid.ownsPresentation('header'),true);assert.equal(f.c.window.StremioHybrid.ownsPresentation('navigation'),true);assert.equal(f.c.window.StremioHybrid.ownsPresentation('details'),false);assert.equal(f.c.bootStats.presentationFailures,0);}
 });
 test('Off/on and same-state refresh preserve exact standalone CSS with no accumulating styles or frames',()=>{
  const f=fixture();f.canonical();f.c.applyShell(true);f.legacy();const canonical=f.styles('stremio-hybrid-style')[0];for(let i=0;i<8;i++)f.c.applyShell(true);assert.equal(f.styles('stremio-hybrid-style')[0],canonical);assert.equal(f.frames.size,1);assert.equal(f.c.bootStats.styleInsertions,1);
- for(let i=0;i<3;i++){f.c.applyShell(false);assert.equal(f.nodes.length,1);const old=f.styles('ifx_header_css')[0];assert.equal(crypto.createHash('sha256').update(old.textContent).digest('hex'),'0faf016c458d1463a560a4f3776e2bc5d132371d36810f52c856ad89c7be799f');f.c.applyShell(false);assert.equal(f.styles('ifx_header_css')[0],old);assert.equal(f.frames.size,0);f.c.applyShell(true);assert.equal(f.nodes.length,1);assert.equal(f.styles('ifx_header_css').length,0);}
+ for(let i=0;i<3;i++){f.c.applyShell(false);assert.equal(f.nodes.length,1);const old=f.styles('ifx_header_css')[0];assert.equal(crypto.createHash('sha256').update(old.textContent).digest('hex'),'8ab67c06fa65589f67a2a9cf00a9074b67e3acb33324d91039bf7ef752f420e5');assert.match(old.textContent,/body:not\(\.stremio-hybrid\) \.head/);f.c.applyShell(false);assert.equal(f.styles('ifx_header_css')[0],old);assert.equal(f.frames.size,0);f.c.applyShell(true);assert.equal(f.nodes.length,1);assert.equal(f.styles('ifx_header_css').length,0);}
  f.c.applyShell(false);f.c.destroyed=true;assert.equal(f.c.window.StremioHybrid.ownsPresentation('header'),false);f.c.applyShell(true);assert.equal(f.styles('ifx_header_css').length,1);
 });
 test('Absent/old/incompatible or failing canonical owner leaves Interface standalone header available',()=>{
@@ -33,4 +33,11 @@ test('Canonical header contains transferred parity rules and adapter never creat
  assert(hybrid.includes('.head .head__time > div:last-child{text-align:left}'));
  assert(hybrid.includes('font-feature-settings:"tnum"'));
  assert(!/Storage|setInterval|setTimeout|MutationObserver|addEventListener|Listener|\.on\(/.test(legacy));
+});
+test('Hybrid is the declared active owner for both header and left navigation with one rail color token',()=>{
+ const f=fixture();f.canonical();f.c.applyShell(true);
+ assert(f.c.css.includes('--sh-rail:#090a12'));
+ assert.equal((f.c.css.match(/\.wrap__left\s*\{[^}]*background:/g)||[]).length,1,'sidebar background is declared once in the canonical shell');
+ assert(!f.c.css.includes('wrap__left{background:#090a12!important}'),'no later hard-coded sidebar override');
+ f.c.applyShell(false);assert.equal(f.c.window.StremioHybrid.ownsPresentation('navigation'),false);
 });

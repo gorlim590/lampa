@@ -1,0 +1,463 @@
+{
+  "commit": "152f81d51ae4e49f07c94916a218ce6a221b409f",
+  "mode": "existing-CDP-tab; synthetic media/metadata; Trakt and torrent providers blocked/mocked",
+  "viewport": {
+    "width": 7680,
+    "height": 4320,
+    "dpr": 0.25
+  },
+  "assets": {
+    "audit/settings/phase6-browser/preview-loader.js": {
+      "sha256": "2e805166d371bf84ba5ff5a488965fae41e7a369429a6eaa92e4855c482c7c0c",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "media/seasons-info.js": {
+      "sha256": "76b263185258ed58a64c474ab644c04000c86120baf1612cda2edc5c6f0fbeb4",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "community/imdb-trailers.js": {
+      "sha256": "889804eb5d244b7257743cbfdc56e438e6ca059f32d8905ea9338365c349ea06",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "community/new-category.js": {
+      "sha256": "991be1b3ac028b048e7529f37aaf14b13ce9da94c5fff52724525af3fbb364d1",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "filters/anti-dmca.js": {
+      "sha256": "b550846040e1a4deae9eb3eb8498d55b09d90fbb128994bdd763e0dac0356856",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "filters/hide-content.js": {
+      "sha256": "349c22a5ccba1bcab164dd3291aa92e15ea97ccc66ce876d312a5c0cf1e79efa",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "filters/lampac-source-filter.js": {
+      "sha256": "d7727c5fd3c361bd5251c5640afa14fc93813ff12285d0b2aeb6b41f022cdb0b",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "filters/search-sanitizer.js": {
+      "sha256": "65092f71b450fbf6eac8fd8d6925055b8264b6c35d45f8f03f1c4902f0831ca0",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "filters/source-sort.js": {
+      "sha256": "e7bdb913b475cf9d7cac1b864641b097583a48a587e377d2a9ec6314d55802dc",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "filters/trash-filter.js": {
+      "sha256": "186f5713898850af9acae1eecc6ba9cc93ca8cbbe8762b6740a38c1359d24a6c",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "media/custom-favorites.js": {
+      "sha256": "ad656db4b5e5b7f65ecc87776f23c02f845b5f29ff3296fd828d7d57b1599a4f",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "media/studio-picks.js": {
+      "sha256": "726002abde7996ea7960baaa8e2802e9792c697ff9d326b397c595b42ceb45d9",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "providers/parsers.js": {
+      "sha256": "d3496f227af0e70a1d3e03e90591f1b8d1f2da670761f72f09160b6db165ffbf",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "providers/tmdb-networks.js": {
+      "sha256": "72821eae92f0f92e81a8dbea4ec1f8870b8fe75bc8d44cfb4d3cd4de55e53d90",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "providers/ts-tracks.js": {
+      "sha256": "5ac2c1934578cff17bc79cff697ac011fbebe5d97b1cfd199ad3e7f0f60dc19e",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "providers/tryzub-tv.js": {
+      "sha256": "2fa077c64463b6c60483fe463cc0e58ee729f1e5d0502f241a3c03c29ccd3433",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "ui/buttons-plus.js": {
+      "sha256": "d8f36832b021642758fa57dd0020fd347413aabd50562b1bdad16e6329873915",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "ui/menu-hide.js": {
+      "sha256": "536ea93e661c4abfdeba95c703ef7fe38ee4b788fc47f1d3dd074bc13baf00d4",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "ui/screensaver-plus.js": {
+      "sha256": "1cc40ac0ea6e6ae7c86fa54a76428568f984c4b49d2c785bd62604cdc6c9919b",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "ui/tv-status.js": {
+      "sha256": "29786ac6f4d220e412ca94ecd6d4032d9c76d3c72be26a143bf97ac3a643a880",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "media/ua-comments.js": {
+      "sha256": "9a7f81d66a73599e4fa7d103829cfc88f5aa7bb5931789ebb38e7a297dcf2498",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "torrents-redesign.js": {
+      "sha256": "9e9fe5a81d2a1a1577fc513a6372dce0507a43849a359e39284afbcc67358a61",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "ui/stremio-hybrid.js": {
+      "sha256": "3c93ab88f43b9b41ea17a6a35ae0629aad631542bfa756e8c7337efb96f6321a",
+      "status": 200,
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "audit/settings/phase6-browser/manifest.json": {
+      "sha256": "aae9accd18016ffc1e6708843aa2c49cf256cbddbe702f45f83b70294240e440",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "providers/parser-search.js": {
+      "sha256": "e3403004cdc1e3e98e7961deed5acb0915ac0af129b232607cb4151095bf1c8e",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "trakt/trakt.js": {
+      "sha256": "f0bde4e94f87a9aa6c6e3fe6ca58432284254707fb24b2472099b730f0a3794c",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "trakt/trakt-plus.js": {
+      "sha256": "2bfe8ae58a3619de30d298951638a69640b686ade98e1483f838d4c84c7bee8e",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "ui/interface-plus.js": {
+      "sha256": "b5de56792da0d7e32b7f6b243ca23c7ad4326186ded4464546668a714edca985",
+      "status": 200,
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "ui/design-optimized.js": {
+      "sha256": "7d37ecf325ae71104d281a5c5ca5824ba5b3c77d59272eac9a4a0a54fa081a76",
+      "status": 200,
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "media/average-rating.js": {
+      "sha256": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "ui/cardify-plus.js": {
+      "sha256": "57bb4ca9572d1a185a55b2190a00229c7dec45aac7c99ff27dccc1e1c50afde2",
+      "status": 200,
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "plugins-to-enable/home-history.js": {
+      "sha256": "6ad4f518561ea024b1b842349c88861d05565c30c9787e21f5d08199b5ddd3d0",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "localization/translate.js": {
+      "sha256": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "ui/torrent-overlay.js": {
+      "sha256": "6796b4b110c25ab3a911487bef050ccabca9db3ceb152cbc71d4020c40dda857",
+      "status": 200,
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "ui/settings-hub.js": {
+      "sha256": "aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288",
+      "status": 200,
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    },
+    "plugins-to-enable/home-policy.js": {
+      "sha256": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+      "sourceCommit": "152f81d51ae4e49f07c94916a218ce6a221b409f"
+    }
+  },
+  "modulesLoaded": 13,
+  "checks": [
+    {
+      "name": "Exact PR Hybrid, YDesign, Interface+, Cardify+, Hub and Torrent modules loaded",
+      "status": "PASS",
+      "details": {
+        "ui/design-optimized.js": "7d37ecf325ae71104d281a5c5ca5824ba5b3c77d59272eac9a4a0a54fa081a76",
+        "ui/stremio-hybrid.js": "3c93ab88f43b9b41ea17a6a35ae0629aad631542bfa756e8c7337efb96f6321a",
+        "ui/interface-plus.js": "b5de56792da0d7e32b7f6b243ca23c7ad4326186ded4464546668a714edca985",
+        "ui/cardify-plus.js": "57bb4ca9572d1a185a55b2190a00229c7dec45aac7c99ff27dccc1e1c50afde2",
+        "ui/settings-hub.js": "aeb9e77bb50622e5811b9e0210499c0dec0bf1b6663cde7d43df97e993986288",
+        "ui/torrent-overlay.js": "6796b4b110c25ab3a911487bef050ccabca9db3ceb152cbc71d4020c40dda857"
+      }
+    },
+    {
+      "name": "Changed visual assets returned successfully without failed requests",
+      "status": "PASS",
+      "details": {
+        "statuses": {
+          "ui/design-optimized.js": 200,
+          "ui/stremio-hybrid.js": 200,
+          "ui/interface-plus.js": 200,
+          "ui/cardify-plus.js": 200,
+          "ui/settings-hub.js": 200,
+          "ui/torrent-overlay.js": 200
+        },
+        "failures": 0
+      }
+    },
+    {
+      "name": "Hybrid and YDesign are active with one YDesign stylesheet",
+      "status": "PASS",
+      "details": {
+        "hybrid": true,
+        "ydesign": true,
+        "styles": 1,
+        "activity": "main",
+        "controller": "content"
+      }
+    },
+    {
+      "name": "First native Home card becomes focusable after data arrives",
+      "status": "PASS",
+      "details": {
+        "ready": true,
+        "elapsed": 176.80000001192093
+      }
+    },
+    {
+      "name": "All synthetic Home cards show title and source poster before delayed TMDb detail responses",
+      "status": "PASS",
+      "details": [
+        {
+          "ready": true,
+          "title": true,
+          "sourcePoster": true,
+          "enriched": false
+        },
+        {
+          "ready": true,
+          "title": true,
+          "sourcePoster": true,
+          "enriched": false
+        },
+        {
+          "ready": true,
+          "title": true,
+          "sourcePoster": true,
+          "enriched": false
+        },
+        {
+          "ready": true,
+          "title": true,
+          "sourcePoster": true,
+          "enriched": false
+        }
+      ]
+    },
+    {
+      "name": "Delayed metadata enriches the matching poster and 503 keeps source poster/title",
+      "status": "PASS",
+      "details": {
+        "successes": 3,
+        "failedFallback": true
+      }
+    },
+    {
+      "name": "Trakt watched-state logic accepts the matching synthetic TMDB identity and updates its UI",
+      "status": "PASS"
+    },
+    {
+      "name": "Fixture Home uses native Lampa item controller",
+      "status": "PASS",
+      "details": "items_line"
+    },
+    {
+      "name": "D-pad Right moves native focus to another card",
+      "status": "PASS"
+    },
+    {
+      "name": "Movie Details run 1 opens native Full through the focused card",
+      "status": "PASS",
+      "details": {
+        "controller": "full_start",
+        "torrentAction": true,
+        "details": true,
+        "kind": "movie"
+      }
+    },
+    {
+      "name": "Movie Details run 1 Back restores the same card, poster and row scroll without duplicates",
+      "status": "PASS",
+      "details": {
+        "sameNode": true,
+        "count": 4,
+        "left": 0,
+        "top": 0,
+        "poster": "https://image.tmdb.org/t/p/w300/issue79-enriched-990010101.svg"
+      }
+    },
+    {
+      "name": "Movie Details run 2 opens native Full through the focused card",
+      "status": "PASS",
+      "details": {
+        "controller": "full_start",
+        "torrentAction": true,
+        "details": true,
+        "kind": "movie"
+      }
+    },
+    {
+      "name": "Movie Details run 2 Back restores the same card, poster and row scroll without duplicates",
+      "status": "PASS",
+      "details": {
+        "sameNode": true,
+        "count": 4,
+        "left": 0,
+        "top": 0,
+        "poster": "https://image.tmdb.org/t/p/w300/issue79-enriched-990010101.svg"
+      }
+    },
+    {
+      "name": "TV Details run 1 opens native Full through the focused card",
+      "status": "PASS",
+      "details": {
+        "controller": "full_start",
+        "torrentAction": true,
+        "details": true,
+        "kind": "tv"
+      }
+    },
+    {
+      "name": "TV Details run 1 Back restores the same card, poster and row scroll without duplicates",
+      "status": "PASS",
+      "details": {
+        "sameNode": true,
+        "count": 4,
+        "left": 0,
+        "top": 0,
+        "poster": "https://image.tmdb.org/t/p/w300/issue79-enriched-990010102.svg"
+      }
+    },
+    {
+      "name": "TV Details run 2 opens native Full through the focused card",
+      "status": "PASS",
+      "details": {
+        "controller": "full_start",
+        "torrentAction": true,
+        "details": true,
+        "kind": "tv"
+      }
+    },
+    {
+      "name": "TV Details run 2 Back restores the same card, poster and row scroll without duplicates",
+      "status": "PASS",
+      "details": {
+        "sameNode": true,
+        "count": 4,
+        "left": 0,
+        "top": 0,
+        "poster": "https://image.tmdb.org/t/p/w300/issue79-enriched-990010102.svg"
+      }
+    },
+    {
+      "name": "Movie Details for Torrent Popup opens native Full through the focused card",
+      "status": "PASS",
+      "details": {
+        "controller": "full_start",
+        "torrentAction": true,
+        "details": true,
+        "kind": "movie"
+      }
+    },
+    {
+      "name": "Native Details exposes the Torrent action",
+      "status": "PASS"
+    },
+    {
+      "name": "Torrent button opens one real Hybrid Torrent Popup without live parser calls",
+      "status": "PASS",
+      "details": {
+        "count": 1,
+        "controller": "sh_movie_streams",
+        "parserCalls": 5
+      }
+    },
+    {
+      "name": "Popup Back returns to native Full Details",
+      "status": "PASS"
+    },
+    {
+      "name": "Torrent Popup Back restores the same card, poster and row scroll without duplicates",
+      "status": "PASS",
+      "details": {
+        "sameNode": true,
+        "count": 4,
+        "left": 0,
+        "top": 0,
+        "poster": "https://image.tmdb.org/t/p/w300/issue79-enriched-990010101.svg"
+      }
+    },
+    {
+      "name": "Repeated routes leave one YDesign style and the original Home card count",
+      "status": "PASS",
+      "details": {
+        "cards": 4,
+        "ydesignStyles": 1,
+        "hybrid": true,
+        "controller": "items_line"
+      }
+    },
+    {
+      "name": "No uncaught JavaScript exceptions during exercised navigation",
+      "status": "PASS",
+      "details": {
+        "count": 0
+      }
+    },
+    {
+      "name": "Original single Lampa tab and dedicated Chromium process survive cleanup",
+      "status": "PASS",
+      "details": {
+        "lampaTabs": 1,
+        "processSurvived": true
+      }
+    }
+  ],
+  "metrics": {
+    "tmdbFixtureRequests": 6,
+    "homeDataToFirstPosterMs": 171.60000002384186,
+    "homeDataToFirstUsableFocusMs": 176.80000001192093,
+    "navigation": [
+      {
+        "homeToDetailsMs": 343,
+        "detailsToHomeMs": 76
+      },
+      {
+        "homeToDetailsMs": 209,
+        "detailsToHomeMs": 80
+      },
+      {
+        "homeToDetailsMs": 247,
+        "detailsToHomeMs": 288
+      },
+      {
+        "homeToDetailsMs": 172,
+        "detailsToHomeMs": 128
+      },
+      {
+        "torrentPopupBackMs": 67
+      }
+    ],
+    "afterNavigation": {
+      "cards": 4,
+      "ydesignStyles": 1,
+      "hybrid": true,
+      "controller": "items_line"
+    }
+  },
+  "screenshots": {
+    "capture": "element crops from the existing viewport; no viewport change; synthetic content only",
+    "files": [
+      "issue79-home-fixture.png",
+      "issue79-home-enriched.png",
+      "issue79-details-movie.png",
+      "issue79-torrent-popup.png"
+    ]
+  },
+  "exceptions": [],
+  "consoleDiagnostics": {
+    "mixedContentBlocked": 90,
+    "certificateErrors": 2,
+    "http404": 10,
+    "accountRequestFailures": 2,
+    "otherConsoleErrors": 30
+  },
+  "changedAssetFailures": [],
+  "limits": [
+    "No baseline comparison in this run",
+    "Synthetic metadata/parser responses",
+    "Physical Google TV not tested"
+  ]
+}

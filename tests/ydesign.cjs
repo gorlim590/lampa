@@ -1,7 +1,24 @@
 'use strict';
-const assert=require('node:assert/strict'),test=require('node:test'),fs=require('node:fs'),path=require('node:path');
+const assert=require('node:assert/strict'),test=require('node:test'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const{fixture}=require('./helpers/ydesign-fixture.cjs');
 const source=fs.readFileSync(path.join(__dirname,'../ui/design-optimized.js'),'utf8');
+test('first visible YDesign card paints its source poster and safe title before async detail enrichment',()=>{
+ const imageStart=source.indexOf('    function ownImg('),imageEnd=source.indexOf('\n    // Presentation remembers',imageStart),previewStart=source.indexOf('    function renderInitialCardPreview('),previewEnd=source.indexOf('\n    function buildCardCustomDOM',previewStart);
+ assert(imageStart>=0&&imageEnd>imageStart&&previewStart>=0&&previewEnd>previewStart);
+ const nodes=[],steps=[],classes=new Set(),layer={appendChild(node){node.parentNode=this;nodes.push(node)},removeChild(node){node.parentNode=null;nodes.splice(nodes.indexOf(node),1)}};
+ const context=vm.createContext({document:{createElement:()=>({className:'',textContent:'',parentNode:null})},ownImg:null});
+ vm.runInContext(source.slice(imageStart,imageEnd)+source.slice(previewStart,previewEnd),context);
+ const el={classList:{add:name=>classes.add(name)}};
+ const preview=context.renderInitialCardPreview(el,{poster_path:'/poster.jpg',title:'<Dune>'},layer,path=>steps.push(path));
+ assert.deepEqual(steps,['/poster.jpg'],'poster loading starts synchronously, without awaiting metadata or color extraction');
+ assert.equal(preview.textContent,'<Dune>','title is inserted as text, not markup');
+ assert(classes.has('ydesign-ready'),'poster/title card is visible before metadata resolves');
+ assert.equal(nodes.length,1);
+ const renderer=source.slice(previewStart,source.indexOf('\n    // ========',previewStart));
+ assert(renderer.indexOf('renderInitialCardPreview(el, data, contentLayer, applyBg)')<renderer.indexOf('fetchExtendedData(data.id, type)'));
+ const applyStart=renderer.indexOf('var applyBg = function (path)'),bgImageStart=renderer.indexOf('var img = new Image()',applyStart),colorWait=renderer.indexOf('getProminentColorAsync(path).then',applyStart);
+ assert(applyStart>=0&&bgImageStart>applyStart&&colorWait>bgImageStart,'poster request is started before awaiting color extraction');
+});
 test('legacy orientations migrate to vertical without resetting unrelated settings',()=>{const f=fixture({storage:{ydesign_card_type_main:'horizontal',ydesign_card_type_other:'horizontal',ydesign_v_show_genres:true,ydesign_font:'custom',custom:'keep'}});f.api.migrateVertical();assert.equal(f.store.ydesign_card_type_main,'vertical');assert.equal(f.store.ydesign_card_type_other,'vertical');assert.equal(f.store.ydesign_font,'custom');assert.equal(f.store.custom,'keep');assert.deepEqual(f.writes,['ydesign_card_type_main','ydesign_card_type_other']);});
 test('retired orientation never becomes a render/default/settings branch',()=>{const f=fixture();assert(!Object.hasOwn(f.api.DefaultSettings,'ydesign_card_type_main'));assert(!Object.keys(f.api.DefaultSettings).some(k=>/^ydesign_h_/.test(k)));const runtime=source.replace(/    function migrateVertical\(el\) \{[\s\S]*?\n    }/,'');assert(!/isHorz|ydesign-horizontal|ydesign_h_|ydesign_horizontal/.test(runtime));});
 test('retired background has no runtime/style/settings references and legacy value is ignored',()=>{const f=fixture({storage:{ydesign_ambient:true}});assert(!Object.hasOwn(f.api.DefaultSettings,'ydesign_ambient'));assert(!/Ambient|ambient|ydesign-amb-layer/.test(source));assert.equal(f.store.ydesign_ambient,true);});

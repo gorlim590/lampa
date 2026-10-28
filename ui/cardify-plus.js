@@ -1,6 +1,11 @@
 (function () {
 	"use strict";
 
+	// The loader and an installed legacy extension can deliver this same module.
+	// Claim the page instance before registering templates, settings or listeners.
+	if (window.__lampaCardifyPlusStarted) return;
+	window.__lampaCardifyPlusStarted = true;
+
 	function _classCallCheck(instance, Constructor) {
 		if (!(instance instanceof Constructor)) {
 			throw new TypeError("Cannot call a class as a function");

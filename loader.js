@@ -1,17 +1,7 @@
 /*
- * lampa loader — один плагін замість десяти.
- *
- * Підключи в Lampa лише цей файл. Він вантажить плагіни по черзі у фіксованому
- * порядку, ізолює помилки (один зламаний плагін не зупиняє решту) і додає ?v=
- * до URL, щоб ТВ-браузер не тримав застарілий кеш.
- *
- * Налаштування (необов'язково, ставляться до підключення loader.js):
- *   window.LAMPA_PLUGINS_BASE    — базовий URL репозиторію (за замовчуванням GitHub Pages)
- *   window.LAMPA_PLUGINS_VERSION — рядок для ?v= (змінюй, щоб скинути кеш)
- *   window.LAMPA_PLUGINS_LIST    — масив шляхів, що замінює список за замовчуванням
- *   Lampa.Storage 'gl_loader_plugins' — те саме, але рядком через кому
- *
- * Код у ES5 (без async/arrow) для старих Smart TV / Android TV.
+ * Lampa single-entry loader. Keep startup-critical code ES5 for TV WebViews.
+ * Hybrid and its essential presentation adapters load before appready; optional
+ * providers wait for the native app lifecycle and never block the first shell.
  */
 (function () {
   'use strict';
@@ -20,81 +10,257 @@
   window.LampaLoaderStarted = true;
 
   var BASE = String(window.LAMPA_PLUGINS_BASE || 'https://gorlim590.github.io/lampa/').replace(/\/?$/, '/');
-  var VERSION = String(window.LAMPA_PLUGINS_VERSION || '20261026-ua-badge-3.4.8');
+  var VERSION = String(window.LAMPA_PLUGINS_VERSION || '20261027-ui-first-1');
   var TIMEOUT_MS = 8000;
-
-  // Базовий порядок з README: Trakt → Trakt+ → Interface+ → YDesign → решта за потреби.
-  var DEFAULT_LIST = [
-    'trakt/trakt.js',
-    'trakt/trakt-plus.js',
-    'providers/torrent-search.js',
-    'ui/interface-plus.js',
-    'ui/design-optimized.js',
-    'media/average-rating.js',
-    'ui/cardify-plus.js',
-    'localization/translate.js'
+  var READY_CHECK_MS = 100;
+  var READY_MAX_CHECKS = 300;
+  var CRITICAL = ['ui/stremio-hybrid.js', 'ui/interface-plus.js', 'ui/design-optimized.js'];
+  var DEFAULT_DEFERRED = [
+    'trakt/trakt.js', 'trakt/trakt-plus.js', 'providers/torrent-search.js',
+    'media/average-rating.js', 'ui/cardify-plus.js', 'localization/translate.js'
   ];
+  var seen = {};
+  var state = {
+    version: VERSION, startedAt: now(), appreadyAtStart: !!window.appready,
+    stage: 'critical', criticalStartedAt: now(),
+    criticalFinishedAt: null, deferredStartedAt: null, deferredFinishedAt: null,
+    waitingForAppReady: false, requested: 0, loaded: 0, failed: 0, timedOut: 0,
+    lateLoads: 0, skipped: 0, activeDeferredLanes: 0,
+    readinessChecks: 0, readinessFailure: null
+  };
+  window.LampaLoaderDiagnostics = state;
+  var readinessTimer = null, readinessListener = null, readinessOwner = null, readinessActive = false;
 
-  function readList() {
-    if (Object.prototype.toString.call(window.LAMPA_PLUGINS_LIST) === '[object Array]') return window.LAMPA_PLUGINS_LIST;
-    try {
-      var stored = window.Lampa && Lampa.Storage && Lampa.Storage.get('gl_loader_plugins');
-      if (stored) {
-        var parts = String(stored).split(',');
-        var out = [];
-        for (var i = 0; i < parts.length; i++) {
-          var p = parts[i].replace(/^\s+|\s+$/g, '');
-          if (p) out.push(p);
-        }
-        if (out.length) return out;
-      }
-    } catch (e) { /* ігноруємо — візьмемо список за замовчуванням */ }
-    return DEFAULT_LIST;
+  function now() {
+    try { if (window.performance && typeof window.performance.now === 'function') return Math.round(window.performance.now() * 10) / 10; }
+    catch (e) { /* Use the legacy clock below. */ }
+    return new Date().getTime();
   }
 
-  function log(msg) {
-    try { if (window.console && console.log) console.log('[lampa-loader] ' + msg); } catch (e) { /* ігноруємо */ }
+  function log(stage, index, result) {
+    try { if (window.console && console.log) console.log('[lampa-loader] ' + stage + ' ' + index + ' ' + result); }
+    catch (e) { /* Startup must not depend on diagnostics. */ }
+  }
+
+  function pathKey(path) {
+    var value = String(path || '').replace(/^\s+|\s+$/g, '');
+    try {
+      var base = new URL(BASE, document.location && document.location.href);
+      var url = new URL(value, base.href);
+      var pathname = url.pathname.replace(/^\//, '');
+      var known = CRITICAL.concat(DEFAULT_DEFERRED);
+      for (var i = 0; i < known.length; i++) if (pathname === known[i] || pathname.slice(-known[i].length) === known[i]) return known[i];
+      if (url.origin === base.origin && url.pathname.indexOf(base.pathname) === 0) return url.pathname.slice(base.pathname.length);
+      return url.origin + url.pathname;
+    } catch (e) {
+      return value.split(/[?#]/)[0];
+    }
+  }
+
+  function isCritical(path) {
+    var key = pathKey(path);
+    for (var i = 0; i < CRITICAL.length; i++) if (key === CRITICAL[i]) return true;
+    return false;
+  }
+
+  function readDeferredList() {
+    var list = null, explicit = false;
+    if (Object.prototype.toString.call(window.LAMPA_PLUGINS_LIST) === '[object Array]') { list = window.LAMPA_PLUGINS_LIST; explicit = true; }
+    else {
+      try {
+        var stored = window.Lampa && Lampa.Storage && Lampa.Storage.get('gl_loader_plugins');
+        if (stored) {
+          var parts = String(stored).split(',');
+          list = [];
+          for (var i = 0; i < parts.length; i++) {
+            var part = parts[i].replace(/^\s+|\s+$/g, '');
+            if (part) list.push(part);
+          }
+        }
+      } catch (e) { list = null; }
+    }
+    if (!list || !list.length && !explicit) list = DEFAULT_DEFERRED;
+    var output = [], localSeen = {};
+    for (var n = 0; n < list.length; n++) {
+      var item = String(list[n] || '').replace(/^\s+|\s+$/g, '');
+      if (!item || !/^https?:\/\//i.test(item) && /^[a-z]+:/i.test(item)) continue;
+      var key = pathKey(item);
+      if (isCritical(item) || localSeen[key]) continue;
+      localSeen[key] = true;
+      output.push(item);
+    }
+    return output;
   }
 
   function buildUrl(path) {
-    if (/^https?:\/\//i.test(path)) return path;
-    var sep = path.indexOf('?') === -1 ? '?' : '&';
-    return BASE + path.replace(/^\//, '') + sep + 'v=' + encodeURIComponent(VERSION);
+    var value = String(path || '').replace(/^\s+|\s+$/g, '');
+    if (/^https?:\/\//i.test(value)) return value;
+    var separator = value.indexOf('?') === -1 ? '?' : '&';
+    return BASE + value.replace(/^\//, '') + separator + 'v=' + encodeURIComponent(VERSION);
   }
 
-  function loadOne(path, done) {
-    var finished = false;
-    function finish(ok) {
-      if (finished) return;
+  function loadOne(path, stage, index, done) {
+    var key = pathKey(path);
+    if (seen[key]) {
+      state.skipped++;
+      done('duplicate');
+      return;
+    }
+    seen[key] = true;
+    var script, timer, finished = false, timedOut = false;
+    state.requested++;
+
+    function finish(result) {
+      if (finished) return false;
       finished = true;
-      clearTimeout(timer);
-      log((ok ? 'OK  ' : 'FAIL ') + path);
-      done();
+      if (timer) clearTimeout(timer);
+      if (result === 'loaded') state.loaded++;
+      else if (result === 'timeout') { state.failed++; state.timedOut++; timedOut = true; }
+      else state.failed++;
+      log(stage, index, result);
+      done(result);
+      return true;
     }
-    var timer = setTimeout(function () { finish(false); }, TIMEOUT_MS);
+
     try {
-      Lampa.Utils.putScriptAsync([buildUrl(path)], function () { finish(true); }, function () { finish(false); });
+      script = document.createElement('script');
+      script.async = false;
+      script.src = buildUrl(path);
+      script.onload = function () {
+        if (!finish('loaded')) { if (timedOut) state.lateLoads++; }
+      };
+      script.onerror = function () {
+        if (!finish('failed') && timedOut) state.lateLoads++;
+        if (script.parentNode && script.parentNode.removeChild) script.parentNode.removeChild(script);
+      };
+      timer = setTimeout(function () { finish('timeout'); }, TIMEOUT_MS);
+      var parent = document.head || document.getElementsByTagName('head')[0] || document.documentElement;
+      if (!parent || !parent.appendChild) throw new Error('script host unavailable');
+      parent.appendChild(script);
     } catch (e) {
-      finish(false);
+      finish('failed');
+      if (script && script.parentNode && script.parentNode.removeChild) script.parentNode.removeChild(script);
     }
   }
 
-  function run() {
-    var list = readList();
-    var index = 0;
-    (function next() {
-      if (index >= list.length) {
-        // Explicit, read-only audit opt-in; normal startup makes no extra request.
-        if (window.location && /(?:^|[?&])settings_audit=1(?:&|$)/.test(window.location.search)) loadOne('audit/settings/runtime-census.js?audit_rev=2', function () {});
-        return;
-      }
-      var path = list[index++];
-      loadOne(path, next);
-    })();
+  function loadSeries(list, stage, index, done) {
+    if (index >= list.length) { done(); return; }
+    loadOne(list[index], stage, index + 1, function () { loadSeries(list, stage, index + 1, done); });
   }
 
-  if (window.appready) run();
-  else if (window.Lampa && Lampa.Listener) {
-    Lampa.Listener.follow('app', function (e) { if (e.type === 'ready') run(); });
+  function removeReadyListener() {
+    if (!readinessListener) return;
+    try {
+      if (readinessOwner && readinessOwner.remove) readinessOwner.remove('app', readinessListener);
+    } catch (e) { state.readinessListenerRemoveFailed = true; }
+    readinessListener = null;
+    readinessOwner = null;
   }
+
+  function finishReadiness() {
+    if (readinessTimer !== null) clearTimeout(readinessTimer);
+    readinessTimer = null;
+    readinessActive = false;
+    state.waitingForAppReady = false;
+    removeReadyListener();
+  }
+
+  function onNativeReady() {
+    if (!readinessActive || !window.Lampa) return;
+    finishReadiness();
+    startDeferred();
+  }
+
+  function checkNativeReady() {
+    if (!readinessActive) return;
+    state.readinessChecks++;
+    if (window.appready && window.Lampa) { onNativeReady(); return; }
+
+    var L = window.Lampa;
+    if (!readinessListener && L && L.Listener && L.Listener.follow && L.Listener.remove) {
+      readinessOwner = L.Listener;
+      readinessListener = function (event) {
+        if (event && event.type === 'ready') onNativeReady();
+      };
+      try { readinessOwner.follow('app', readinessListener); }
+      catch (e) {
+        readinessListener = null;
+        readinessOwner = null;
+        state.readinessSubscribeFailed = true;
+      }
+      if (window.appready && window.Lampa) { onNativeReady(); return; }
+    }
+
+    if (state.readinessChecks >= READY_MAX_CHECKS) {
+      finishReadiness();
+      state.readinessFailure = 'lampa-readiness-timeout';
+      state.stage = 'deferred-unavailable';
+      log('readiness', 0, 'timeout');
+      return;
+    }
+    readinessTimer = setTimeout(checkNativeReady, READY_CHECK_MS);
+  }
+
+  function startDeferred() {
+    if (state.deferredStartedAt !== null) return;
+    state.waitingForAppReady = false;
+    state.stage = 'deferred';
+    state.deferredStartedAt = now();
+    var configured = readDeferredList();
+    var traktCore = [], traktPlus = [], independent = [];
+    for (var i = 0; i < configured.length; i++) {
+      var key = pathKey(configured[i]);
+      if (key === 'trakt/trakt.js') traktCore.push(configured[i]);
+      else if (key === 'trakt/trakt-plus.js') traktPlus.push(configured[i]);
+      else independent.push(configured[i]);
+    }
+    state.activeDeferredLanes = 0;
+    var completed = 0;
+    function laneDone() {
+      completed++;
+      if (completed === 2) {
+        state.activeDeferredLanes = 0;
+        state.deferredFinishedAt = now();
+        state.stage = 'complete';
+      }
+    }
+
+    state.activeDeferredLanes = 2;
+    var coreOk = traktCore.length === 0;
+    function finishTraktCore() {
+      if (traktCore.length) {
+        loadOne(traktCore[0], 'deferred', 1, function (result) {
+          coreOk = result === 'loaded';
+          if (traktPlus.length && coreOk) loadOne(traktPlus[0], 'deferred', 2, function () { laneDone(); });
+          else {
+            if (traktPlus.length) state.skipped++;
+            laneDone();
+          }
+        });
+      } else if (traktPlus.length && coreOk) {
+        state.skipped++;
+        laneDone();
+      } else laneDone();
+    }
+
+    function finishIndependent() {
+      loadSeries(independent, 'deferred', 0, laneDone);
+    }
+    finishTraktCore();
+    finishIndependent();
+  }
+
+  function waitForAppReady() {
+    if (readinessActive || state.deferredStartedAt !== null) return;
+    readinessActive = true;
+    state.waitingForAppReady = true;
+    state.stage = 'waiting-for-appready';
+    checkNativeReady();
+  }
+
+  loadSeries(CRITICAL, 'critical', 0, function () {
+    state.criticalFinishedAt = now();
+    state.stage = 'waiting-for-appready';
+    waitForAppReady();
+  });
 })();

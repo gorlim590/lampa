@@ -16,6 +16,29 @@ test('theme cleanup removes the exact action/handler and reactivation is collaps
 test('description state is owned by one detail instance, not shared by media type',()=>{const f=fixture(),other={root:f.root};f.context.setupDescription(f.record,f.description);f.context.setupDescription(other,f.description);f.handlers.get(f.record.descriptionToggle)();assert.equal(other.descriptionToggle.getAttribute('aria-expanded'),'false');});
 test('profile Select never inherits the focused torrent filter surface',()=>{let cleared=0;const context={menuOpen:true,clearStreamSelect:()=>cleared++};vm.createContext(context);vm.runInContext(source.slice(source.indexOf('    function onStreamSelect('),source.indexOf('    function setupStreamTools(')),context);context.onStreamSelect({});assert.equal(cleared,1);});
 
+function nativeReadinessFixture(max=3){
+ const timers=new Map(),listeners=[];let id=0,prepared=0,removed=0;
+ const context={window:{appready:false},ready:false,destroyed:false,waiting:false,nativeWaitTimer:0,nativeWaitAttempts:0,NATIVE_WAIT_MS:100,NATIVE_WAIT_MAX:max,bootStats:{},document:{removeEventListener(){},addEventListener(){}},setTimeout(fn,ms){const key=++id;timers.set(key,{fn,ms});return key;},clearTimeout(key){timers.delete(key);},prepareShell(){prepared++;},init(){context.ready=true;context.stopWaiting();}};
+ Object.defineProperty(context,'Lampa',{get(){return context.window.Lampa;}});
+ vm.createContext(context);vm.runInContext(source.slice(source.indexOf('    function stopWaiting()'),source.indexOf('    function init()')),context);
+ return{context,timers,listeners,prepared:()=>prepared,removed:()=>removed,install(){context.window.Lampa={SettingsApi:{},Listener:{follow(name,fn){listeners.push({name,fn});},remove(name,fn){removed++;const i=listeners.findIndex(x=>x.name===name&&x.fn===fn);if(i>=0)listeners.splice(i,1);}},Storage:{get(){return true;}}};},tick(){const entry=[...timers.entries()][0];assert(entry,'Expected one pending bounded readiness timer');timers.delete(entry[0]);entry[1].fn();}};
+}
+
+test('Hybrid loaded before Lampa API recovers after DOM readiness and subscribes once',()=>{
+ const f=nativeReadinessFixture();f.context.checkNativeReadiness();
+ assert.equal(f.context.ready,false);assert.equal(f.prepared(),1);assert.equal(f.timers.size,1);
+ f.install();f.tick();
+ assert.equal(f.listeners.length,1);assert.equal(f.context.waiting,true);assert.equal(f.timers.size,1);
+ f.context.window.appready=true;f.listeners[0].fn({type:'ready'});
+ assert.equal(f.context.ready,true);assert.equal(f.removed(),1);assert.equal(f.timers.size,0);
+ f.context.checkNativeReadiness();assert.equal(f.listeners.length,0,'readiness completion cannot subscribe again');
+});
+
+test('Hybrid late native API wait terminates at its configured bound',()=>{
+ const f=nativeReadinessFixture(2);f.context.checkNativeReadiness();f.tick();
+ assert.equal(f.context.bootStats.nativeReadinessTimedOut,true);assert.equal(f.context.nativeWaitTimer,0);assert.equal(f.timers.size,0);
+});
+
 test('a replaced action bar releases its detached handler before rebuilding',()=>{const f=fixture();f.context.setupDescription(f.record,f.description);const old=f.record.descriptionToggle;old.isConnected=false;f.context.setupDescription(f.record,f.description);assert.notEqual(f.record.descriptionToggle,old);assert(!f.handlers.has(old));assert.equal(f.handlers.size,1);assert.equal(f.record.descriptionToggle.getAttribute('aria-expanded'),'false');});
 
 function focusFixture(){const torrent={classList:{contains:x=>x==='view--torrent'}},other={classList:{contains:()=>false}},root={current:null,querySelector(){return this.current},contains:n=>[torrent,other].includes(n)},link={last:null},controller={name:'full_start',controller:{link}},calls=[],c={Lampa:{Controller:{enabled:()=>controller,collectionSet(){},collectionFocus:n=>{calls.push(n);root.current=n}}}};vm.createContext(c);vm.runInContext(source.slice(source.indexOf('    function focusMovieActions('),source.indexOf('    function movieButtonFocus(')),c);return{c,root,link,controller,calls,torrent,other,record:{root}};}
@@ -26,6 +49,19 @@ test('synopsis presentation has no copied selectors, tabindex, click handlers or
 
 test('primary action row retains native scrolling after description action moves below the synopsis',()=>{const button={classList:{contains:()=>false},getAttribute:()=>null,textContent:'Онлайн',getBoundingClientRect:()=>({left:270,right:410})},row={scrollLeft:0,contains:()=>true,setAttribute(){},getBoundingClientRect:()=>({left:0,right:300})},c={};vm.createContext(c);vm.runInContext(source.slice(source.indexOf('    function movieButtonFocus('),source.indexOf('    function ratingFallback(')),c);c.movieButtonFocus({currentTarget:row,target:{closest:selector=>selector.includes('full-start__button')?button:null}});assert.equal(row.scrollLeft,118);});
 test('Up from every native action visits personal rating before delegating to the header',()=>{let onAction=true,up=0;const rating={getClientRects:()=>[{}]},focuses=[],controller={link:{},up:()=>up++},root={isConnected:true,querySelector:s=>s.includes('buttons')?(onAction?{}:null):rating},record={root};const c={Lampa:{Controller:{collectionSet:()=>{},collectionFocus:n=>focuses.push(n)}}};vm.createContext(c);vm.runInContext(source.slice(source.indexOf('    function bindRatingNavigation('),source.indexOf('    function movieButtonFocus(')),c);c.bindRatingNavigation(record,controller);const wrapper=controller.up;c.bindRatingNavigation(record,controller);assert.equal(controller.up,wrapper);controller.up();assert.equal(focuses[0],rating);assert.equal(controller.link.last,rating);assert.equal(up,0);onAction=false;controller.up();assert.equal(up,1);root.isConnected=false;onAction=true;controller.up();assert.equal(up,2);});
+
+test('Native menu controller expands the existing sidebar and leaving it restores the compact rail',()=>{
+ const classes=new Set(),context={document:{body:{classList:{toggle:(name,on)=>on?classes.add(name):classes.delete(name)}}},movieRecords:[],Lampa:{}};
+ const sync=source.match(/    function syncNavigationState\(name\) \{[\s\S]*?\n    \}/)[0];
+ const start=source.indexOf('    function onStreamController(event) {'),end=source.indexOf('    function onStreamProfile(',start);
+ vm.createContext(context);vm.runInContext(sync+'\n'+source.slice(start,end),context);
+ context.onStreamController({name:'menu'});assert(classes.has('sh-navigation-expanded'));
+ context.onStreamController({name:'main'});assert(!classes.has('sh-navigation-expanded'));
+ assert(source.includes('.sh-navigation-expanded .wrap__left .menu__text { display:block !important;'));
+ assert(source.includes('.menu__item.traverse:not(.focus) { box-shadow:inset .18em 0 var(--sh-accent); }'));
+ assert(source.includes('@media(prefers-reduced-motion:reduce){body.stremio-hybrid .wrap__left'));
+ assert(source.includes("classList.remove('sh-movie-active','sh-navigation-expanded')"),'Hybrid teardown must restore the compact rail');
+});
 
 test('Hybrid Settings rail skips explicitly hidden folders and isolates plugin component IDs',()=>{
  const makeFolder=(component,label,display='',hiddenClass=false)=>({component,label,style:{display},classList:{contains:name=>(name==='hide'&&hiddenClass)},getAttribute:name=>name==='data-component'?component:null,querySelector:()=>({textContent:label})});

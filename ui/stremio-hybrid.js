@@ -12,9 +12,10 @@
         var version=new URL(overlayScriptURL||url.href).searchParams.get('v');url.search='';if(version)url.searchParams.set('v',version);script.src=url.href;script.onload=function(){if(!destroyed&&watching){movieRecords.forEach(removeStreams);scheduleMovie();}};
         script.onerror=function(){overlayLoading=false;};document.head.appendChild(script);
     }
-    var style, ready = false, destroyed = false, waiting = false, watching = false, moreButton = null, menuOpen = false, searchNode = null, searchReturn = false, settingsRail = null, settingsFrame = 0, settingsParameter = null, settingsCategory = 'interface', settingsLeftConsumed = false, settingsPrimaryRouting = false, searchSources = null, searchRoots = [];
+    var style, ready = false, destroyed = false, waiting = false, watching = false, nativeWaitTimer = 0, nativeWaitAttempts = 0, moreButton = null, menuOpen = false, searchNode = null, searchReturn = false, settingsRail = null, settingsFrame = 0, settingsParameter = null, settingsCategory = 'interface', settingsLeftConsumed = false, settingsPrimaryRouting = false, searchSources = null, searchRoots = [];
+    var NATIVE_WAIT_MS=100, NATIVE_WAIT_MAX=300;
     var css = `
-body.stremio-hybrid { --sh-bg:#121023; --sh-panel:#211d35; --sh-accent:#9775fa; --sh-muted:#aba7bd; --sh-rail:#0c0b16; --sh-text:#f0eef8; --sh-border:#ffffff16; --sh-radius:.7em; --sh-pill:2em; --sh-gap:1.1em; --sh-speed:160ms; --sh-ring:#9775fa66; --sh-focus:#7960c9; --sh-focus-soft:#3e315b; --sh-header:transparent; --sh-panel-raised:#29233e; --sh-accent-soft:#b79bff; --sh-focus-text:#e9e0ff; --sh-focus-ink:#201536; --sh-inactive:#726d86; --sh-secondary:#d0cadf; --sh-inset:1.8em; --sh-ease:ease-out; background:#121023 !important; color:#f0eef8; }
+body.stremio-hybrid { --sh-bg:#121023; --sh-panel:#211d35; --sh-accent:#9775fa; --sh-muted:#aba7bd; --sh-rail:#090a12; --sh-text:#f0eef8; --sh-border:#ffffff16; --sh-radius:.7em; --sh-pill:2em; --sh-gap:1.1em; --sh-speed:160ms; --sh-ring:#9775fa66; --sh-focus:#7960c9; --sh-focus-soft:#3e315b; --sh-header:transparent; --sh-panel-raised:#29233e; --sh-accent-soft:#b79bff; --sh-focus-text:#e9e0ff; --sh-focus-ink:#201536; --sh-inactive:#726d86; --sh-secondary:#d0cadf; --sh-inset:1.8em; --sh-ease:ease-out; background:#121023 !important; color:#f0eef8; }
 body.stremio-hybrid .background { opacity:.12 !important; }
 body.stremio-hybrid .head { color:#f4f4f7; background:transparent !important; background-image:none !important; border:0 !important; box-shadow:none !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
 /* The native collapsed navigation rail occupies 4.4em. The header itself spans
@@ -26,6 +27,7 @@ body.stremio-hybrid .wrap { background:var(--sh-bg); }
 body.stremio-hybrid .wrap__left { background:var(--sh-rail) !important; visibility:visible !important; }
 body.stremio-hybrid .menu__item { margin:.15em .45em; border-radius:var(--sh-radius) !important; min-height:2.8em; color:var(--sh-inactive); }
 body.stremio-hybrid .menu__item.focus, body.stremio-hybrid .menu__item.traverse { background:var(--sh-panel-raised) !important; color:var(--sh-accent-soft) !important; }
+body.stremio-hybrid .menu__item.traverse:not(.focus) { box-shadow:inset .18em 0 var(--sh-accent); }
 body.stremio-hybrid .menu__ico { opacity:1; }
 body.stremio-hybrid .items-line { padding-bottom:2.4em; }
 body.stremio-hybrid .items-line__head { padding:0 1.8em 1em; }
@@ -160,6 +162,12 @@ body.stremio-hybrid .menu__item, body.stremio-hybrid .head__action, body.stremio
  body.stremio-hybrid .wrap__left--hidden .menu__ico { margin:0; }
  body.stremio-hybrid .wrap__left--hidden .menu__text { display:none; }
  body.stremio-hybrid .wrap__left--hidden .menu__version { font-size:.45em; }
+ body.stremio-hybrid .wrap__left { transition:width var(--sh-speed) var(--sh-ease),min-width var(--sh-speed) var(--sh-ease); }
+ body.stremio-hybrid.sh-navigation-expanded .wrap__left { position:fixed; inset:0 auto 0 0; z-index:50; width:15em !important; min-width:15em; box-shadow:.8em 0 2em #0007; }
+ body.stremio-hybrid.sh-navigation-expanded .wrap__left .menu { width:15em !important; }
+ body.stremio-hybrid.sh-navigation-expanded .wrap__left .menu__item { justify-content:flex-start; padding:.8em 1em; }
+ body.stremio-hybrid.sh-navigation-expanded .wrap__left .menu__ico { width:1.35em; margin:0 .8em 0 0; flex:0 0 1.35em; }
+ body.stremio-hybrid.sh-navigation-expanded .wrap__left .menu__text { display:block !important; opacity:1; max-width:11em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
  body.stremio-hybrid .items-line:not(.vinyl-line) .card.ydesign-vertical { width:calc((100% + var(--ydesign-card-gap,var(--sh-gap))) / var(--ydesign-grid-items-v,5) - var(--ydesign-card-gap,var(--sh-gap))) !important; margin-left:0 !important; margin-right:0 !important; }
  body.stremio-hybrid .mapping--grid .card.ydesign-vertical { width:calc(100% / var(--ydesign-grid-items-v,5)) !important; }
 }
@@ -378,8 +386,7 @@ body.stremio-hybrid .head .head__title{max-width:20vw}
 body.stremio-hybrid .sh-profile-menu .selectbox__content{position:absolute;right:1.8em;top:5em;bottom:auto;left:auto;width:23em;max-width:90vw;max-height:calc(100vh - 7em);border:1px solid var(--sh-border);box-shadow:0 .7em 2em #0005}
 body.stremio-hybrid .selectbox-item{transition:opacity var(--sh-speed) var(--sh-ease)!important}
 body.stremio-hybrid .selectbox-item__title{white-space:normal;overflow-wrap:anywhere}
-body.stremio-hybrid .wrap__left{background:#090a12!important}
-@media(prefers-reduced-motion:reduce){body.stremio-hybrid .selectbox,body.stremio-hybrid .selectbox-item,body.stremio-hybrid .sh-movie-page .full-start__background{transition:none!important;animation:none!important}}
+@media(prefers-reduced-motion:reduce){body.stremio-hybrid .wrap__left,body.stremio-hybrid .selectbox,body.stremio-hybrid .selectbox-item,body.stremio-hybrid .sh-movie-page .full-start__background{transition:none!important;animation:none!important}}
 `;
     css += `
 body.stremio-hybrid .full-person:not(.full-person--small){width:9.5em;display:flex;flex-direction:column;align-items:stretch;gap:.55em;padding:.45em;border-radius:.75em;background:#ffffff06;transition:transform var(--sh-speed) ease-out}
@@ -1103,6 +1110,7 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         onStreamController({name:Lampa.Controller.enabled().name});
     }
     function onStreamController(event) {
+        syncNavigationState(event&&event.name);
         if(!event||!['full_start','content'].includes(event.name))return;
         var record=movieRecords.filter(function(r){return r.page.classList.contains('activity--active')&&r.streamPane;})[0];if(!record)return;
         // Native player/Files return may activate the underlying detail controller.
@@ -1257,6 +1265,11 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         var active = Lampa.Activity.active();
         document.body.setAttribute('data-sh-page', active ? active.component : 'main');
         document.body.classList.toggle('sh-movie-active',!!(active&&active.component==='full'&&(active.method==='movie'||active.method==='tv')));
+        var controller=Lampa.Controller.enabled();
+        syncNavigationState(controller&&controller.name);
+    }
+    function syncNavigationState(name) {
+        if(document.body)document.body.classList.toggle('sh-navigation-expanded',name==='menu');
     }
     css += '\nbody.stremio-hybrid .sh-home-duplicate{display:none!important}';
     var homePolicies=[],headTimeMove=null;
@@ -1358,7 +1371,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         if(headTimeMove){var t=headTimeMove;headTimeMove=null;t.parent.insertBefore(t.node,t.next&&t.next.parentNode===t.parent?t.next:null);}
         if (moreButton) { $(moreButton).off('hover:enter', openActions).remove(); moreButton=null; }
         document.querySelectorAll('.sh-head-secondary').forEach(function (node) { node.classList.remove('sh-head-secondary'); });
-        document.body.removeAttribute('data-sh-page');document.body.classList.remove('sh-movie-active');
+        document.body.removeAttribute('data-sh-page');document.body.classList.remove('sh-movie-active','sh-navigation-expanded');
     }
     // Categories route through the native folder callbacks. Parameters are never cloned.
     function nativeSettingsFolders() {
@@ -1560,18 +1573,30 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
     }
     function setEnabled(on) { Lampa.Storage.set('stremio_hybrid_enabled', !!on); apply(!!on); }
     function stopWaiting() {
+        if(nativeWaitTimer){clearTimeout(nativeWaitTimer);nativeWaitTimer=0;}
         document.removeEventListener('DOMContentLoaded', onDOM);
         if (waiting && window.Lampa && Lampa.Listener) Lampa.Listener.remove('app', onApp);
         waiting = false;
     }
     function onApp(event) { if (event && event.type === 'ready') init(); }
-    function onDOM() {
+    function scheduleNativeReadiness() {
+        if(nativeWaitTimer || ready || destroyed)return;
+        nativeWaitTimer=setTimeout(function(){nativeWaitTimer=0;checkNativeReadiness();},NATIVE_WAIT_MS);
+    }
+    function checkNativeReadiness() {
+        if(ready || destroyed)return;
+        nativeWaitAttempts++;
         prepareShell();
-        if (window.appready) init();
-        else if (!waiting && window.Lampa && Lampa.Listener) {
-            Lampa.Listener.follow('app', onApp);
-            waiting = true;
+        if(window.appready && window.Lampa && Lampa.SettingsApi){init();return;}
+        if(window.Lampa && Lampa.Listener && Lampa.Listener.follow && Lampa.Listener.remove && !waiting){
+            try{waiting=true;Lampa.Listener.follow('app',onApp);}
+            catch(e){waiting=false;bootStats.readinessSubscribeFailures=(bootStats.readinessSubscribeFailures||0)+1;}
         }
+        if(nativeWaitAttempts>=NATIVE_WAIT_MAX){bootStats.nativeReadinessTimedOut=true;stopWaiting();return;}
+        scheduleNativeReadiness();
+    }
+    function onDOM() {
+        checkNativeReadiness();
     }
     function init() {
         if (ready || destroyed || !window.Lampa || !Lampa.SettingsApi) return;
@@ -1597,11 +1622,11 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         version: UI_VERSION,
         settingsHubVersion: 1,
         presentationVersion: 1,
-        ownsPresentation: function (region) { return region==='header' && !destroyed && !!style && !!document.body && document.body.classList.contains('stremio-hybrid'); },
+        ownsPresentation: function (region) { return (region==='header' || region==='navigation') && !destroyed && !!style && !!document.body && document.body.classList.contains('stremio-hybrid'); },
         openUtilities: openHeaderUtilities,
         setEnabled: setEnabled,
         refresh: function () { if (ready) apply(enabled()); },
-        diagnostics: function () {return {version:UI_VERSION,scriptStartMs:bootStats.scriptStartMs,shellAppliedMs:bootStats.shellAppliedMs,firstShellFrameMs:bootStats.firstShellFrameMs,readyMs:bootStats.readyMs,initCount:bootStats.initCount,styleInsertions:bootStats.styleInsertions,shellTransitions:bootStats.shellTransitions,settingsLoads:bootStats.settingsLoads,settingsMounts:bootStats.settingsMounts,settingsUnmounts:bootStats.settingsUnmounts,settingsFailures:bootStats.settingsFailures,presentationFailures:bootStats.presentationFailures||0};},
+        diagnostics: function () {return {version:UI_VERSION,scriptStartMs:bootStats.scriptStartMs,shellAppliedMs:bootStats.shellAppliedMs,firstShellFrameMs:bootStats.firstShellFrameMs,readyMs:bootStats.readyMs,initCount:bootStats.initCount,styleInsertions:bootStats.styleInsertions,shellTransitions:bootStats.shellTransitions,settingsLoads:bootStats.settingsLoads,settingsMounts:bootStats.settingsMounts,settingsUnmounts:bootStats.settingsUnmounts,settingsFailures:bootStats.settingsFailures,presentationFailures:bootStats.presentationFailures||0,nativeReadinessTimedOut:!!bootStats.nativeReadinessTimedOut,readinessSubscribeFailures:bootStats.readinessSubscribeFailures||0};},
         destroy: function () {
             apply(false);
             removeHeaderUtilitiesSetting();
@@ -1613,7 +1638,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         }
     };
     prepareShell();
-    if (window.appready) init();
+    if (window.appready && window.Lampa && Lampa.SettingsApi) init();
     else {
         onDOM();
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', onDOM);
