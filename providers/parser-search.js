@@ -3,7 +3,7 @@
     'use strict';
     if (window.createParserCoordinator) return;
     window.createParserCoordinator = function (L, sources) {
-        var active = null, epoch = 0, memo = Object.create(null), cooldown = Object.create(null), cacheKeys = [], MAX_CACHE = 24;
+        var active = null, epoch = 0, memo = Object.create(null), cooldown = Object.create(null), cacheKeys = [], MAX_CACHE = 24, MAX_ALIAS_ENDPOINTS = 4, MAX_ALIAS_WAVES = 2, ownerStates = new WeakMap();
         var lastStats = null, stopNative = window.LampaTorrentSearch && window.LampaTorrentSearch.nativeClear || L.Parser.clear;
         function clone(row) { var r = {}; Object.keys(row || {}).forEach(function (key) { r[key] = row[key]; }); return r; }
         function hash(value) {
@@ -37,7 +37,8 @@
         }
         function cancel() {
             epoch++; if (!active) return false;
-            var pending = active.pending > 0; active.dead = true; active.slots.forEach(function (slot) { clearTimeout(slot.timer); if (slot.request && slot.status === 'loading') slot.request.clear(); }); active = null;
+            var job=active,pending = job.pending > 0; job.dead = true; job.slots.forEach(function (slot) { clearTimeout(slot.timer); if (slot.request && slot.status === 'loading') slot.request.clear(); }); active = null;
+            if (pending && job.ownerState && !job.isAlias) job.ownerState.invalidated = true;
             if (pending && stopNative) stopNative.call(L.Parser); return pending;
         }
         function specKey(spec) { return JSON.stringify([spec.type, String(spec.url||'').replace(/^(https?:\/\/[^/]+)/i,function(host){return host.toLowerCase();}).replace(/\/+$/,''), spec.key]); } // memory only; never persisted/logged
@@ -52,13 +53,14 @@
             while (cacheKeys.length > MAX_CACHE) delete memo[cacheKeys.shift()];
         }
         function snapshot(job) {
-            return { Results: merged(job), parser_pending: job.pending > 0, parser_status: job.slots.map(function (slot) { return { id: slot.spec.id, label: slot.spec.label, type: slot.spec.type, status: slot.status }; }) };
+            return { Results: merged(job), parser_pending: job.pending > 0, parser_status: job.slots.map(function (slot) { return { id: slot.spec.id, label: slot.spec.label, type: slot.spec.type, status: slot.status, count:slot.count||0 }; }) };
         }
         function emit(job) {
             if (job.dead || job.epoch !== epoch) return;
             var data = snapshot(job), success = job.slots.some(function (slot) { return slot.status === 'ready' || slot.status === 'empty'; });
             job.stats.pending = job.pending;job.stats.sources=data.parser_status;if(!job.pending)job.stats.settledMs=Date.now()-job.stats.started;
             if (job.pending && !data.Results.length) return;
+            if(!job.pending&&job.isAlias)job.ownerState.doneAliases[job.aliasKey]=true;
             if (!job.pending && job.slots.length && !success) { job.subscribers.forEach(function (sub) { if (sub.fail) sub.fail('Налаштовані джерела недоступні'); }); return; }
             if (data.Results.length && job.stats.firstResultMs == null) job.stats.firstResultMs = Date.now() - job.stats.started;
             job.stats.results = data.Results.length; job.stats.pending = job.pending; if (!job.pending) job.stats.settledMs = Date.now() - job.stats.started;
@@ -79,7 +81,7 @@
             request.native(L.Utils.buildUrl(base,'/api/v2.0/indexers/'+index+'/results',args),function(data){
                 if(!data||!Array.isArray(data.Results)||data.Results.some(function(row){return !row||typeof row.Title!=='string';}))return fail('invalid');
                 ok({Results:data.Results.map(function(raw){var row=clone(raw);row.PublisTime=L.Utils.strToTime(row.PublishDate);row.hash=L.Utils.hash(row.Title);row.viewed=L.Storage.cache('torrents_view',5000,[]).indexOf(row.hash)>=0;if(L.Utils.bytesToSize)row.size=L.Utils.bytesToSize(row.Size);row.checked_at=Date.now();row.source_rank=spec.id==='primary'?0:1;return row;})});
-            },function(xhr){fail(xhr&&xhr.status===429?'rate-limit':xhr&&xhr.status>=500?'server-error':'network');});
+            },function(xhr){fail(xhr&&(xhr.status===401||xhr.status===403)?'auth-error':xhr&&xhr.status===429?'rate-limit':xhr&&xhr.status>=500?'server-error':'network');});
         }
         function prowlarr(params, slot, ok, fail) {
             var request = slot.request = new L.Reguest(), spec = slot.spec, movie = params.movie || {};
@@ -106,27 +108,44 @@
                     item.VoiceoverType = r.VoiceoverType || r.voiceoverType || r.voiceover_type;
                     item.parser_original = r; return item;
                 }) });
-            }, function (xhr) { fail(xhr && xhr.status === 429 ? 'rate-limit' : xhr && xhr.status >= 500 ? 'server-error' : 'network'); });
+            }, function (xhr) { fail(xhr&&(xhr.status===401||xhr.status===403)?'auth-error':xhr && xhr.status === 429 ? 'rate-limit' : xhr && xhr.status >= 500 ? 'server-error' : 'network'); });
         }
         function search(params, done, fail, nativeGet) {
             var configured = sources();
             if (configured == null) return nativeGet(params, done, fail);
             var account = L.Account && L.Account.Permit && L.Account.Permit.account || {};
             var scope = JSON.stringify([account.id, account.profile && account.profile.id]);
-            // Alias fallbacks use at most four healthy responders from this owner's initial wave.
-            // This bounds multilingual work instead of multiplying every alias by the catalog.
-            if (params.clarification && params.torrent_search_owner && active && active.owner === params.torrent_search_owner && active.scope === scope) {
-                var healthy = active.slots.filter(function(slot){return slot.status === 'ready' || slot.status === 'empty';}).map(function(slot){return specKey(slot.spec);});
-                configured = configured.filter(function(spec){return healthy.indexOf(specKey(spec)) >= 0;}).slice(0,4);
+            var isAlias=!!(params.clarification&&params.torrent_search_owner),ownerToken=isAlias?params.torrent_search_owner:params,ownerState=isAlias?ownerStates.get(ownerToken):null,aliasKey='';
+            // The original owner's bounded alias budget survives settlement, but is invalidated
+            // by cancellation/config changes. Never fall back to the whole current catalog.
+            if(isAlias){
+                if(!ownerState||ownerState.invalidated||ownerState.scope!==scope||(active&&active.pending&&active.owner!==ownerToken)){
+                    done({Results:[],parser_pending:false,parser_status:[]});return;
+                }
+                aliasKey=String(params.search||'').trim().toLowerCase();
+                if(ownerState.doneAliases[aliasKey]){done({Results:[],parser_pending:false,parser_status:[]});return;}
+                if(!ownerState.aliases[aliasKey]){
+                    if(ownerState.aliasCount>=MAX_ALIAS_WAVES||ownerState.aliasRequests>=ownerState.aliasLimit){done({Results:[],parser_pending:false,parser_status:[]});return;}
+                    ownerState.aliases[aliasKey]=true;ownerState.aliasCount++;
+                    var responders=ownerState.responders.slice(0,MAX_ALIAS_ENDPOINTS),available=Math.max(0,ownerState.aliasLimit-ownerState.aliasRequests);
+                    configured=responders.slice(0,Math.min(MAX_ALIAS_ENDPOINTS,available));ownerState.aliasRequests+=configured.length;
+                }else{
+                    if(!(active&&!active.dead&&active.owner===ownerToken&&active.isAlias&&active.aliasKey===aliasKey)){done({Results:[],parser_pending:false,parser_status:[]});return;}
+                    configured=(ownerState.aliasSources[aliasKey]||[]).slice();
+                }
+                ownerState.aliasSources[aliasKey]=configured.slice();
+            }else{
+                ownerState={scope:scope,responders:[],aliases:Object.create(null),doneAliases:Object.create(null),aliasSources:Object.create(null),aliasCount:0,aliasRequests:0,aliasLimit:MAX_ALIAS_ENDPOINTS*MAX_ALIAS_WAVES,invalidated:false};
+                ownerStates.set(ownerToken,ownerState);
             }
             var queryKey = scope + JSON.stringify([params.search, params.from_search, params.clarification, params.global, params.movie, params.params, params.season, params.episode]);
             var allKey = configured.map(specKey).join('|') + queryKey;
             if (active && !active.dead && active.pending && active.key === allKey) { active.subscribers.push({ done: done, fail: fail, streaming: !!params.parser_streaming }); if (params.parser_streaming && merged(active).length) done(snapshot(active)); return; }
             cancel();
             var cap = Math.max(1, Math.min(6, Math.floor(Number(L.Storage.field('parser_auto_concurrency'))) || 4));
-            var job = active = { key: allKey, scope: scope, owner: params.torrent_search_owner || params, epoch: epoch, dead: false, slots: configured.map(function (spec) { return { spec: spec, status: 'queued', rows: [] }; }), pending: configured.length, running: 0, cursor: 0, pumping: false, subscribers: [{ done: done, fail: fail, streaming: !!params.parser_streaming }], stats: { started: Date.now(), requests: 0, peakConcurrency: 0, cacheHits: 0, firstResultMs: null, results: 0, pending: configured.length } }; lastStats = job.stats;
+            var job = active = { key: allKey, scope: scope, owner: ownerToken, ownerState: ownerState, isAlias:isAlias, aliasKey:aliasKey, epoch: epoch, dead: false, slots: configured.map(function (spec) { return { spec: spec, status: 'queued', rows: [] }; }), pending: configured.length, running: 0, cursor: 0, pumping: false, subscribers: [{ done: done, fail: fail, streaming: !!params.parser_streaming }], stats: { started: Date.now(), requests: 0, peakConcurrency: 0, cacheHits: 0, firstResultMs: null, results: 0, pending: configured.length } }; lastStats = job.stats;
             if (job.slots.length && job.slots.every(function(slot){var entry=read(specKey(slot.spec)+queryKey);return entry&&entry.expires>Date.now();})) {
-                job.slots.forEach(function(slot){slot.rows=memo[specKey(slot.spec)+queryKey].rows;slot.status=slot.rows.length?'ready':'empty';});
+                        job.slots.forEach(function(slot){slot.rows=memo[specKey(slot.spec)+queryKey].rows;slot.count=slot.rows.length;slot.status=slot.rows.length?'ready':'empty';if(!job.isAlias&&job.ownerState.responders.length<MAX_ALIAS_ENDPOINTS)job.ownerState.responders.push(slot.spec);});
                 job.pending=0;job.stats.cacheHits=job.slots.length;emit(job);return;
             }
             var runs = Object.create(null), finishedRuns = Object.create(null);
@@ -144,7 +163,7 @@
                     if (finished || job.dead || job.epoch !== epoch) return; finished = true; clearTimeout(slot.timer);
                     if (!error && (!data || !Array.isArray(data.Results) || data.Results.some(function (r) { return !r || typeof r.Title !== 'string'; }))) error = 'invalid';
                     slot.status = error || (data.Results.length ? 'ready' : 'empty');
-                    if (!error) { slot.rows = data.Results.map(clone); if (!cached || cached.expires <= Date.now()) put(key, slot.rows); }
+                    if (!error) { slot.rows = data.Results.map(clone);slot.count=slot.rows.length; if (!job.isAlias&&job.ownerState.responders.length<MAX_ALIAS_ENDPOINTS)job.ownerState.responders.push(slot.spec); if (!cached || cached.expires <= Date.now()) put(key, slot.rows); }
                     else if (error !== 'cooldown' && error !== 'unsupported') cooldown[specKey(slot.spec)] = Date.now() + 5000;
                     if (running) job.running--;
                     job.pending--;
@@ -182,7 +201,9 @@
                         var root = child.render()[0], status = root.querySelector('.parser-search-status');
                         if (!status) { status = document.createElement('div'); status.className = 'parser-search-status'; status.setAttribute('role', 'status'); var filter = root.querySelector('.torrent-filter'); if (filter) filter.appendChild(status); }
                         var states=data.parser_status||[],ready=states.filter(function(s){return s.status==='ready'||s.status==='empty';}).length,pending=states.filter(function(s){return s.status==='loading'||s.status==='queued';}).length;
+                        var labels={queued:'у черзі',loading:'пошук',ready:'відповідь',empty:'порожньо',timeout:'тайм-аут',network:'мережа/CORS',unsupported:'не підтримується',cooldown:'пауза',invalid:'некоректна відповідь','auth-error':'помилка доступу','server-error':'помилка сервера','rate-limit':'обмеження запитів',cancelled:'скасовано'};
                         status.textContent = 'Джерела: '+ready+'/'+states.length+' · очікують: '+pending+' · недоступні: '+(states.length-ready-pending);
+                        status.title=states.map(function(s){return s.label+': '+(labels[s.status]||s.status)+(s.count?' · '+s.count:'');}).join('\n');status.setAttribute('aria-label',status.title||status.textContent);
                     }, fail); };
                     try { return parse.apply(child, arguments); } finally { L.Parser.get = get; }
                 };

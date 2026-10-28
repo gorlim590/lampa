@@ -1036,8 +1036,8 @@ if(!window.ParserProviders)window.ParserProviders={version:'1.0.0',mount:embedde
 function searchSources(){
     if(Lampa.Storage.field('parser_torrent_type')==='torrserver')return null;
     if((Lampa.Storage.field('parser_search_mode')||'auto')==='auto'){
-        var flags=Lampa.Storage.get('parser_enabled_sources_v1',{});
-        return getParsers().reduce(function(result,p,i){if(p.enabled!==false&&p.enabled!=='false'&&p.disabled!==true&&p.disabled!=='true'&&flags[p.base]!==false&&flags[p.base]!=='false')result.push({id:'endpoint-'+i,label:'Джерело '+(i+1),type:p.settings&&p.settings.parser_torrent_type||'jackett',url:getFinalParserUrl(p,'primary'),key:p.settings&&p.settings.key||''});return result;},[]);
+        var flags=getAutoSourceFlags();
+        return getParsers().reduce(function(result,p,i){if(catalogSourceEnabled(p)&&flags[p.base]===true)result.push({id:'endpoint-'+i,label:'Джерело '+(i+1),type:p.settings&&p.settings.parser_torrent_type||'jackett',url:getFinalParserUrl(p,'primary'),key:p.settings&&p.settings.key||''});return result;},[]);
     }
     var use=Lampa.Storage.field('parser_use_link')||'one',result=[],list=getParsers();
     function add(role,parser,type,url,key){if(url)result.push({id:role,label:(role==='primary'?'Основний':'Додатковий')+' · '+(parser&&parser.shortName||parser&&parser.name||type),type:type,url:url,key:key||''});}
@@ -1047,15 +1047,26 @@ function searchSources(){
     if(use!=='one')add('secondary',secondary,secondaryType,secondary?getFinalParserUrl(secondary,'secondary'):Lampa.Storage.field(secondaryType==='prowlarr'?'prowlarr_url_two':'jackett_url_two'),secondary&&secondary.settings?secondary.settings.key:Lampa.Storage.field(secondaryType==='prowlarr'?'prowlarr_key_two':'jackett_key_two'));
     return result;
 }
+function catalogSourceEnabled(parser){return !!parser&&parser.enabled!==false&&parser.enabled!=='false'&&parser.disabled!==true&&parser.disabled!=='true';}
+function getAutoSourceFlags(){
+    var stored=Lampa.Storage.get('parser_enabled_sources_v1',null);
+    if(stored&&typeof stored==='object'&&!Array.isArray(stored))return stored;
+    // Safe legacy migration: only currently selected primary/secondary sources are included.
+    // Do not persist a derived map until the owner explicitly changes Auto Search inclusion.
+    var list=getParsers(),selected=Object.create(null),primary=getSelectedBase(),secondary=parseInt(Lampa.Storage.get(STORAGE_SEC_ACT,'-1'),10),flags=Object.create(null);
+    if(primary&&primary!==NO_PARSER)selected[primary]=true;
+    if(!isNaN(secondary)&&secondary>=0&&secondary<list.length)selected[list[secondary].base]=true;
+    list.forEach(function(parser){if(catalogSourceEnabled(parser)&&selected[parser.base])flags[parser.base]=true;});
+    return flags;
+}
 function initAutoSearchSettings(){
     Lampa.SettingsApi.addParam({component:'parser',param:{name:'parser_search_mode',type:'select',values:{auto:'Авто · усі увімкнені',manual:'Ручний · діагностика'},default:'auto'},field:{name:'Режим пошуку джерел'},onChange:function(){if(window.ParserProviders.cancel)window.ParserProviders.cancel();}});
     Lampa.SettingsApi.addParam({component:'parser',param:{name:'parser_auto_concurrency',type:'select',values:{4:'4',6:'6'},default:4},field:{name:'Одночасні джерела'}});
     Lampa.SettingsApi.addParam({component:'parser',param:{name:'parser_enabled_sources',type:'button'},field:{name:'Увімкнені джерела пошуку'},onChange:function(){
         var controller=Lampa.Controller.enabled().name;
-        function open(){var flags=Lampa.Storage.get('parser_enabled_sources_v1',{});Lampa.Select.show({title:'Джерела пошуку',items:getParsers().map(function(p,i){return {title:'Джерело '+(i+1),subtitle:p.enabled!==false&&p.enabled!=='false'&&p.disabled!==true&&p.disabled!=='true'&&flags[p.base]!==false&&flags[p.base]!=='false'?'Увімкнено':'Вимкнено',base:p.base,parser:p};}),onBack:function(){Lampa.Controller.toggle(controller);},onSelect:function(item){
-            var enabled=item.parser.enabled!==false&&item.parser.enabled!=='false'&&item.parser.disabled!==true&&item.parser.disabled!=='true'&&flags[item.base]!==false&&flags[item.base]!=='false';
-            flags[item.base]=!enabled;
-            if(!enabled){item.parser.enabled=true;item.parser.disabled=false;var list=getParsers();list.forEach(function(p){if(p.base===item.base){p.enabled=true;p.disabled=false;}});saveParsers(list);}
+        function open(){var flags=getAutoSourceFlags();Lampa.Select.show({title:'Джерела пошуку',items:getParsers().map(function(p,i){var available=catalogSourceEnabled(p);return {title:'Джерело '+(i+1),subtitle:!available?'Вимкнено в каталозі':flags[p.base]===true?'Увімкнено':'Вимкнено',base:p.base,parser:p,available:available};}),onBack:function(){Lampa.Controller.toggle(controller);},onSelect:function(item){
+            if(!item.available){open();return;}
+            flags[item.base]=flags[item.base]!==true;
             Lampa.Storage.set('parser_enabled_sources_v1',flags);if(window.ParserProviders.cancel)window.ParserProviders.cancel();open();
         }});}open();
     }});
