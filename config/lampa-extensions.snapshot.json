@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "kind": "observed-lampa-installed-extensions-snapshot",
+  "observedAt": "2026-10-28",
+  "status": "historical snapshot BEFORE user-reported cleanup; current post-cleanup installed state not verified",
+  "counts": {
+    "registered": 25,
+    "enabled": 23,
+    "disabled": 2
+  },
+  "notes": [
+    "This file captures the exact 25-extension list supplied in chat. It is a rollback reference, NOT a verified live inventory after subsequent plugin changes.",
+    "loader.js loads ui/stremio-hybrid.js, ui/interface-plus.js, ui/design-optimized.js, trakt/trakt.js, trakt/trakt-plus.js, providers/torrent-search.js, media/average-rating.js, ui/cardify-plus.js, localization/translate.js by default. Do not add these separately without checking for duplicate execution.",
+    "plugins.json in the repository is not identical to this client-local installed extension list. A Git push or changes to plugins.json cannot automatically detect manual TV extension edits without an opt-in export/sync mechanism.",
+    "Review each external HTTP endpoint for HTTPS mixed-content failures before restoring. Do not blindly enable every historical extension."
+  ],
+  "extensions": [
+    {
+      "order": 1,
+      "name": "Bandera",
+      "url": "https://lampame.github.io/main/bo.js",
+      "enabled": true
+    },
+    {
+      "order": 2,
+      "name": "BWA",
+      "url": "http://bwa.ad/rc",
+      "enabled": true
+    },
+    {
+      "order": 3,
+      "name": "LGBT",
+      "url": "https://cub.rip/plugin/lgbt",
+      "enabled": true
+    },
+    {
+      "order": 4,
+      "name": "loader.js",
+      "url": "https://gorlim590.github.io/lampa/loader.js",
+      "enabled": true
+    },
+    {
+      "order": 5,
+      "name": "parsers.js",
+      "url": "https://gorlim590.github.io/lampa/providers/parsers.js",
+      "enabled": true
+    },
+    {
+      "order": 6,
+      "name": "custom-favorites.js",
+      "url": "https://gorlim590.github.io/lampa/media/custom-favorites.js",
+      "enabled": true
+    },
+    {
+      "order": 7,
+      "name": "ua-comments.js",
+      "url": "https://gorlim590.github.io/lampa/media/ua-comments.js",
+      "enabled": true
+    },
+    {
+      "order": 8,
+      "name": "screensaver-plus.js",
+      "url": "https://gorlim590.github.io/lampa/ui/screensaver-plus.js",
+      "enabled": true
+    },
+    {
+      "order": 9,
+      "name": "seasons-info.js",
+      "url": "https://gorlim590.github.io/lampa/media/seasons-info.js",
+      "enabled": true
+    },
+    {
+      "order": 10,
+      "name": "tv-status.js",
+      "url": "https://gorlim590.github.io/lampa/ui/tv-status.js",
+      "enabled": true
+    },
+    {
+      "order": 11,
+      "name": "menu-hide.js",
+      "url": "https://gorlim590.github.io/lampa/ui/menu-hide.js",
+      "enabled": true
+    },
+    {
+      "order": 12,
+      "name": "ts-tracks.js",
+      "url": "https://gorlim590.github.io/lampa/providers/ts-tracks.js",
+      "enabled": true
+    },
+    {
+      "order": 13,
+      "name": "tmdb-networks.js",
+      "url": "https://gorlim590.github.io/lampa/providers/tmdb-networks.js",
+      "enabled": true
+    },
+    {
+      "order": 14,
+      "name": "studio-picks.js",
+      "url": "https://gorlim590.github.io/lampa/media/studio-picks.js",
+      "enabled": true
+    },
+    {
+      "order": 15,
+      "name": "trash-filter.js",
+      "url": "https://gorlim590.github.io/lampa/filters/trash-filter.js",
+      "enabled": true
+    },
+    {
+      "order": 16,
+      "name": "source-sort.js",
+      "url": "https://gorlim590.github.io/lampa/filters/source-sort.js",
+      "enabled": true
+    },
+    {
+      "order": 17,
+      "name": "search-sanitizer.js",
+      "url": "https://gorlim590.github.io/lampa/filters/search-sanitizer.js",
+      "enabled": true
+    },
+    {
+      "order": 18,
+      "name": "lampac-source-filter.js",
+      "url": "https://gorlim590.github.io/lampa/filters/lampac-source-filter.js",
+      "enabled": true
+    },
+    {
+      "order": 19,
+      "name": "hide-content.js",
+      "url": "https://gorlim590.github.io/lampa/filters/hide-content.js",
+      "enabled": true
+    },
+    {
+      "order": 20,
+      "name": "anti-dmca.js",
+      "url": "https://gorlim590.github.io/lampa/filters/anti-dmca.js",
+      "enabled": true
+    },
+    {
+      "order": 21,
+      "name": "imdb-trailers.js",
+      "url": "https://gorlim590.github.io/lampa/community/imdb-trailers.js",
+      "enabled": true
+    },
+    {
+      "order": 22,
+      "name": "buttons-plus.js",
+      "url": "https://gorlim590.github.io/lampa/ui/buttons-plus.js",
+      "enabled": true
+    },
+    {
+      "order": 23,
+      "name": "home-history.js",
+      "url": "https://gorlim590.github.io/lampa/plugins-to-enable/home-history.js",
+      "enabled": true
+    },
+    {
+      "order": 24,
+      "name": "LParty",
+      "url": "https://nrsua.github.io/lampa-nrs/lparty.js",
+      "enabled": false
+    },
+    {
+      "order": 25,
+      "name": "Vinyl",
+      "url": "https://lampame.github.io/main/music.js",
+      "enabled": false
+    }
+  ]
+}
