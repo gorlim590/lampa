@@ -111,7 +111,7 @@ function getFinalParserUrl(parser, targetType){
 function getParsers(){
     var s=Lampa.Storage.get(STORAGE_PARSERS,false);
     if(typeof s==='string'){ try{ s=JSON.parse(s); }catch(e){} }
-    return s&&Array.isArray(s)&&s.length ? s : JSON.parse(JSON.stringify(DEFAULT_PARSERS));
+    return s&&Array.isArray(s) ? s : JSON.parse(JSON.stringify(DEFAULT_PARSERS));
 }
 function saveParsers(list){ Lampa.Storage.set(STORAGE_PARSERS,list); }
 function getSelectedBase(){ return Lampa.Storage.get(STORAGE_PRI_ACT,NO_PARSER); }
@@ -1027,7 +1027,7 @@ function embeddedParserButton(root,context){
             if(changed&&alive()&&context.onChange)context.onChange();else back();
         }});
     }
-    function open(){if(!alive())return;Lampa.Select.show({title:'Джерела',items:[{title:'Основний парсер',kind:'primary'},{title:'Додатковий парсер',kind:'secondary'}],onBack:back,onSelect:function(item){choose(item.kind);}});}
+    function open(){if(!alive())return;if((Lampa.Storage.field('parser_search_mode')||'auto')==='auto'){Lampa.Settings.create('parser');return;}Lampa.Select.show({title:'Джерела',items:[{title:'Основний парсер',kind:'primary'},{title:'Додатковий парсер',kind:'secondary'}],onBack:back,onSelect:function(item){choose(item.kind);}});}
     button.addEventListener('hover:enter',open);line.appendChild(button);
     return {destroy:function(){dead=true;button.removeEventListener('hover:enter',open);if(button.parentNode)button.parentNode.removeChild(button);}};
 }
@@ -1035,6 +1035,10 @@ if(!window.ParserProviders)window.ParserProviders={version:'1.0.0',mount:embedde
 
 function searchSources(){
     if(Lampa.Storage.field('parser_torrent_type')==='torrserver')return null;
+    if((Lampa.Storage.field('parser_search_mode')||'auto')==='auto'){
+        var flags=getAutoSourceFlags();
+        return getParsers().reduce(function(result,p,i){if(catalogSourceEnabled(p)&&flags[p.base]===true)result.push({id:'endpoint-'+i,label:'Джерело '+(i+1),type:p.settings&&p.settings.parser_torrent_type||'jackett',url:getFinalParserUrl(p,'primary'),key:p.settings&&p.settings.key||''});return result;},[]);
+    }
     var use=Lampa.Storage.field('parser_use_link')||'one',result=[],list=getParsers();
     function add(role,parser,type,url,key){if(url)result.push({id:role,label:(role==='primary'?'Основний':'Додатковий')+' · '+(parser&&parser.shortName||parser&&parser.name||type),type:type,url:url,key:key||''});}
     var primary=getParserByBase(getSelectedBase()),type=Lampa.Storage.field('parser_torrent_type')||'jackett';
@@ -1043,8 +1047,32 @@ function searchSources(){
     if(use!=='one')add('secondary',secondary,secondaryType,secondary?getFinalParserUrl(secondary,'secondary'):Lampa.Storage.field(secondaryType==='prowlarr'?'prowlarr_url_two':'jackett_url_two'),secondary&&secondary.settings?secondary.settings.key:Lampa.Storage.field(secondaryType==='prowlarr'?'prowlarr_key_two':'jackett_key_two'));
     return result;
 }
+function catalogSourceEnabled(parser){return !!parser&&parser.enabled!==false&&parser.enabled!=='false'&&parser.disabled!==true&&parser.disabled!=='true';}
+function getAutoSourceFlags(){
+    var stored=Lampa.Storage.get('parser_enabled_sources_v1',null);
+    if(stored&&typeof stored==='object'&&!Array.isArray(stored))return stored;
+    // Safe legacy migration: only currently selected primary/secondary sources are included.
+    // Do not persist a derived map until the owner explicitly changes Auto Search inclusion.
+    var list=getParsers(),selected=Object.create(null),primary=getSelectedBase(),secondary=parseInt(Lampa.Storage.get(STORAGE_SEC_ACT,'-1'),10),flags=Object.create(null);
+    if(primary&&primary!==NO_PARSER)selected[primary]=true;
+    if(!isNaN(secondary)&&secondary>=0&&secondary<list.length)selected[list[secondary].base]=true;
+    list.forEach(function(parser){if(catalogSourceEnabled(parser)&&selected[parser.base])flags[parser.base]=true;});
+    return flags;
+}
+function initAutoSearchSettings(){
+    Lampa.SettingsApi.addParam({component:'parser',param:{name:'parser_search_mode',type:'select',values:{auto:'Авто · усі увімкнені',manual:'Ручний · діагностика'},default:'auto'},field:{name:'Режим пошуку джерел'},onChange:function(){if(window.ParserProviders.cancel)window.ParserProviders.cancel();}});
+    Lampa.SettingsApi.addParam({component:'parser',param:{name:'parser_auto_concurrency',type:'select',values:{4:'4',6:'6'},default:4},field:{name:'Одночасні джерела'}});
+    Lampa.SettingsApi.addParam({component:'parser',param:{name:'parser_enabled_sources',type:'button'},field:{name:'Увімкнені джерела пошуку'},onChange:function(){
+        var controller=Lampa.Controller.enabled().name;
+        function open(){var flags=getAutoSourceFlags();Lampa.Select.show({title:'Джерела пошуку',items:getParsers().map(function(p,i){var available=catalogSourceEnabled(p);return {title:'Джерело '+(i+1),subtitle:!available?'Вимкнено в каталозі':flags[p.base]===true?'Увімкнено':'Вимкнено',base:p.base,parser:p,available:available};}),onBack:function(){Lampa.Controller.toggle(controller);},onSelect:function(item){
+            if(!item.available){open();return;}
+            flags[item.base]=flags[item.base]!==true;
+            Lampa.Storage.set('parser_enabled_sources_v1',flags);if(window.ParserProviders.cancel)window.ParserProviders.cancel();open();
+        }});}open();
+    }});
+}
 function installSearch(){
-    function ready(){if(window.ParserProviders.search||!window.createParserCoordinator)return;var api=window.createParserCoordinator(Lampa,searchSources);window.ParserProviders.search=api.search;window.ParserProviders.cancel=api.cancel;window.ParserProviders.stats=api.stats;window.ParserProviders.version='1.1.0';}
+    function ready(){if(window.ParserProviders.search||!window.createParserCoordinator)return;var api=window.createParserCoordinator(Lampa,searchSources);window.ParserProviders.search=api.search;window.ParserProviders.cancel=api.cancel;window.ParserProviders.stats=api.stats;window.ParserProviders.retry=api.retry;window.ParserProviders.version='1.2.0';}
     if(window.createParserCoordinator)return ready();
     var script=document.createElement('script');script.src=entryUrl?entryUrl.replace(/parsers\.js(?=\?|$)/,'parser-search.js'):'https://gorlim590.github.io/lampa/providers/parser-search.js';script.onload=ready;document.head.appendChild(script);
 }
@@ -1059,6 +1087,7 @@ function initAll(){
     translate();
     initPrimarySettings();
     initSecondaryPlugin();
+    initAutoSearchSettings();
     installSearch();
     console.log('[CombinedParserPlugin V28 - Safe Polish & Bell] Loaded successfully');
 }

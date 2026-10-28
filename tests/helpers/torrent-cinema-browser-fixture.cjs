@@ -4,6 +4,8 @@
 module.exports=function installFixture(){
     const L=Lampa,qa=window.__tcQa={mode:'ready',parserCalls:0,pending:[],selected:null,returnFn:null};
     qa.activityPushes=[];qa.originalActivityPush=L.Activity.push;L.Activity.push=function(params){if(params&&params.component==='torrents'){const active=L.Activity.active(),fullMovie=active?.activity?.component?.props?.get?.('movie'),page=active?.activity?.render?.()[0];qa.activityPushes.push({component:params.component,movieId:params.movie?.id||null,source:params.movie?.source||null,mediaType:params.movie?.media_type||null,search:params.search||'',activeComponent:active?.component||null,activeCardId:active?.card?.id||null,fullMovieId:fullMovie?.id||null,pageActive:!!page?.classList?.contains('activity--active'),diagnostics:LampaTorrentCinema.diagnostics(),hasStreamPane:!!document.querySelector('.sh-streams')});}return qa.originalActivityPush.apply(this,arguments);};
+    // Isolated browser context only: enable the same feature prerequisites as the owner's configured install.
+    L.Storage.set('parser_use',true);window.lampa_settings=window.lampa_settings||{};window.lampa_settings.torrents_use=true;
     qa.originalComponentCreate=L.Component.create;
     L.Component.create=function(params){
         const child=qa.originalComponentCreate.apply(this,arguments);

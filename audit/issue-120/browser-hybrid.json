@@ -1,0 +1,587 @@
+{
+  "sourceCommit": "35d95a6a5387666877248931231190e7fd425a94",
+  "mode": "Hybrid",
+  "fixture": true,
+  "assets": {
+    "providers/parsers.js": {
+      "sha256": "493e01915ccd76c0fc85daff7240d8a36a04df0d776e21a8c913175aea2d73a2",
+      "bytes": 57260,
+      "evaluated": true
+    },
+    "providers/parser-search.js": {
+      "sha256": "303d227b2909216a80eb0e3439f67712001f57e2b7238cee57d1b0769b317f8f",
+      "bytes": 24303,
+      "delivered": true
+    },
+    "providers/torrent-search.js": {
+      "sha256": "e6b538806c460a05dfd2ec158b00e428323856e3d918d43c75ffbc6adcc9eaf0",
+      "bytes": 17944,
+      "delivered": true
+    },
+    "ui/torrent-cinema.js": {
+      "sha256": "2b0d3e87bf68284eef9dc584bb2e471db3215e42b7f4670874cbbf088c75693b",
+      "bytes": 149557,
+      "delivered": true,
+      "evaluated": true
+    },
+    "ui/stremio-hybrid.js": {
+      "sha256": "7851fd268a96a6f2e46dfdb7a2f1b17d5bfae23e922d2bc46f291bf580383b1e",
+      "bytes": 102692,
+      "delivered": true
+    }
+  },
+  "requests": [
+    {
+      "source": 0
+    },
+    {
+      "source": 1
+    },
+    {
+      "source": 2
+    },
+    {
+      "source": 3
+    },
+    {
+      "source": 4
+    },
+    {
+      "source": 5
+    }
+  ],
+  "checks": [
+    "actual loaded Lampa Jackett, buildUrl and anime helper inspected without endpoint requests",
+    "six endpoints, fast partial, slow peer, per-source 503 status, dedup, focus",
+    "720p / 1080p / 4K CSS viewport and DOM geometry; pixel-level visual review blocked by browser raster scale",
+    "native Files modal z-index, visible file and modal controller; Back restores focused release",
+    "D-pad and Back",
+    "exact local coordinator and canonical artifact delivered"
+  ],
+  "limits": [
+    "Synthetic endpoints and Files transport; no physical Google TV or live health verification"
+  ],
+  "emulation": {
+    "scaleCompensation": 4,
+    "requestedCssDpr": 1,
+    "originalDpr": 0.25
+  },
+  "nativeJackett": {
+    "jackett": {
+      "sha256": "6f42cdc4df13ece35cdc17c1c093a070abdaf20a409b5caa7fbb739eaa73ea1d",
+      "bytes": 2321
+    },
+    "buildUrl": {
+      "sha256": "a1606ab7a1ca8552e88167db503f4476bd6c82c6d9959d87ff948df8b70e5f63",
+      "bytes": 801
+    },
+    "isAnime": {
+      "sha256": "8112eb5f8cdbf00a04e3a7832d36d7b993c73e6c96d65e8a0ff8b85f48b3a89b",
+      "bytes": 355
+    }
+  },
+  "first": {
+    "stats": {
+      "started": 1793222508045,
+      "requests": 6,
+      "peakConcurrency": 4,
+      "cacheHits": 0,
+      "firstResultMs": 291,
+      "results": 2,
+      "pending": 1,
+      "sources": [
+        {
+          "id": "endpoint-0",
+          "label": "Джерело 1",
+          "type": "jackett",
+          "status": "loading",
+          "count": 0
+        },
+        {
+          "id": "endpoint-1",
+          "label": "Джерело 2",
+          "type": "prowlarr",
+          "status": "ready",
+          "count": 1
+        },
+        {
+          "id": "endpoint-2",
+          "label": "Джерело 3",
+          "type": "jackett",
+          "status": "ready",
+          "count": 1
+        },
+        {
+          "id": "endpoint-3",
+          "label": "Джерело 4",
+          "type": "prowlarr",
+          "status": "ready",
+          "count": 1
+        },
+        {
+          "id": "endpoint-4",
+          "label": "Джерело 5",
+          "type": "jackett",
+          "status": "ready",
+          "count": 1
+        },
+        {
+          "id": "endpoint-5",
+          "label": "Джерело 6",
+          "type": "prowlarr",
+          "status": "server-error",
+          "count": 0
+        }
+      ]
+    },
+    "hybrid": true
+  },
+  "final": {
+    "stats": {
+      "started": 1793222508045,
+      "requests": 6,
+      "peakConcurrency": 4,
+      "cacheHits": 0,
+      "firstResultMs": 291,
+      "results": 3,
+      "pending": 0,
+      "sources": [
+        {
+          "id": "endpoint-0",
+          "label": "Джерело 1",
+          "type": "jackett",
+          "status": "ready",
+          "count": 1
+        },
+        {
+          "id": "endpoint-1",
+          "label": "Джерело 2",
+          "type": "prowlarr",
+          "status": "ready",
+          "count": 1
+        },
+        {
+          "id": "endpoint-2",
+          "label": "Джерело 3",
+          "type": "jackett",
+          "status": "ready",
+          "count": 1
+        },
+        {
+          "id": "endpoint-3",
+          "label": "Джерело 4",
+          "type": "prowlarr",
+          "status": "ready",
+          "count": 1
+        },
+        {
+          "id": "endpoint-4",
+          "label": "Джерело 5",
+          "type": "jackett",
+          "status": "ready",
+          "count": 1
+        },
+        {
+          "id": "endpoint-5",
+          "label": "Джерело 6",
+          "type": "prowlarr",
+          "status": "server-error",
+          "count": 0
+        }
+      ],
+      "settledMs": 2038
+    },
+    "rows": 3,
+    "focus": true,
+    "controller": "sh_movie_streams"
+  },
+  "layouts": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "dpr": 1,
+      "overlay": {
+        "x": 76.75,
+        "y": 36,
+        "width": 1126.375,
+        "height": 648,
+        "right": 1203.125,
+        "bottom": 684
+      },
+      "rows": [
+        {
+          "x": 100.75,
+          "y": 221.9375,
+          "width": 1078.375,
+          "height": 128.875,
+          "visible": true,
+          "hitTest": true
+        },
+        {
+          "x": 100.75,
+          "y": 357.5,
+          "width": 1078.375,
+          "height": 122.1875,
+          "visible": true,
+          "hitTest": true
+        },
+        {
+          "x": 100.75,
+          "y": 486.375,
+          "width": 1078.375,
+          "height": 122.1875,
+          "visible": true,
+          "hitTest": true
+        }
+      ],
+      "filters": [
+        {
+          "className": "ctr-tab selector is-active",
+          "x": 139.5625,
+          "y": 134.5,
+          "width": 51.8125,
+          "height": 28.8125,
+          "scrollWidth": 44,
+          "clientWidth": 44
+        },
+        {
+          "className": "ctr-tab selector",
+          "x": 196.5,
+          "y": 134.5,
+          "width": 51.0625,
+          "height": 28.8125,
+          "scrollWidth": 43,
+          "clientWidth": 43
+        },
+        {
+          "className": "ctr-tab selector",
+          "x": 252.6875,
+          "y": 134.5,
+          "width": 69.5,
+          "height": 28.8125,
+          "scrollWidth": 62,
+          "clientWidth": 62
+        },
+        {
+          "className": "ctr-tab selector",
+          "x": 327.3125,
+          "y": 134.5,
+          "width": 63.25,
+          "height": 28.8125,
+          "scrollWidth": 55,
+          "clientWidth": 55
+        },
+        {
+          "className": "ctr-tab selector is-active",
+          "x": 149.25,
+          "y": 169.75,
+          "width": 91.375,
+          "height": 27.5625,
+          "scrollWidth": 83,
+          "clientWidth": 83
+        },
+        {
+          "className": "ctr-tab selector",
+          "x": 245.75,
+          "y": 169.75,
+          "width": 70.625,
+          "height": 27.5625,
+          "scrollWidth": 63,
+          "clientWidth": 63
+        },
+        {
+          "className": "ctr-tab selector",
+          "x": 321.5,
+          "y": 169.75,
+          "width": 72.8125,
+          "height": 27.5625,
+          "scrollWidth": 65,
+          "clientWidth": 65
+        },
+        {
+          "className": "ctr-tab selector",
+          "x": 399.4375,
+          "y": 169.75,
+          "width": 56.0625,
+          "height": 27.5625,
+          "scrollWidth": 48,
+          "clientWidth": 48
+        }
+      ],
+      "sourceStatus": "Джерело 1: відповідь · 1\nДжерело 2: відповідь · 1\nДжерело 3: відповідь · 1\nДжерело 4: відповідь · 1\nДжерело 5: відповідь · 1\nДжерело 6: помилка сервера",
+      "screenshot": {
+        "width": 1280,
+        "height": 720,
+        "bytes": 40053
+      }
+    },
+    {
+      "viewport": [
+        1920,
+        1080
+      ],
+      "dpr": 1,
+      "overlay": {
+        "x": 115.1875,
+        "y": 54,
+        "width": 1689.5625,
+        "height": 972,
+        "right": 1804.75,
+        "bottom": 1026
+      },
+      "rows": [
+        {
+          "x": 152.0625,
+          "y": 308.375,
+          "width": 1615.8125,
+          "height": 165.5625,
+          "visible": true,
+          "hitTest": true
+        },
+        {
+          "x": 152.0625,
+          "y": 483.125,
+          "width": 1615.8125,
+          "height": 135.4375,
+          "visible": true,
+          "hitTest": true
+        },
+        {
+          "x": 152.0625,
+          "y": 627.75,
+          "width": 1615.8125,
+          "height": 135.4375,
+          "visible": true,
+          "hitTest": true
+        }
+      ],
+      "filters": [
+        {
+          "className": "ctr-tab selector is-active",
+          "x": 205.5625,
+          "y": 195.5,
+          "width": 68.5,
+          "height": 36.75,
+          "scrollWidth": 61,
+          "clientWidth": 61
+        },
+        {
+          "className": "ctr-tab selector",
+          "x": 281.125,
+          "y": 195.5,
+          "width": 67.4375,
+          "height": 36.75,
+          "scrollWidth": 59,
+          "clientWidth": 59
+        },
+        {
+          "className": "ctr-tab selector",
+          "x": 355.625,
+          "y": 195.5,
+          "width": 92.9375,
+          "height": 36.75,
+          "scrollWidth": 85,
+          "clientWidth": 85
+        },
+        {
+          "className": "ctr-tab selector",
+          "x": 455.625,
+          "y": 195.5,
+          "width": 84.3125,
+          "height": 36.75,
+          "scrollWidth": 76,
+          "clientWidth": 76
+        },
+        {
+          "className": "ctr-tab selector is-active",
+          "x": 218.875,
+          "y": 241.0625,
+          "width": 122.375,
+          "height": 35,
+          "scrollWidth": 114,
+          "clientWidth": 114
+        },
+        {
+          "className": "ctr-tab selector",
+          "x": 348.3125,
+          "y": 241.0625,
+          "width": 93.875,
+          "height": 35,
+          "scrollWidth": 86,
+          "clientWidth": 86
+        },
+        {
+          "className": "ctr-tab selector",
+          "x": 449.25,
+          "y": 241.0625,
+          "width": 96.9375,
+          "height": 35,
+          "scrollWidth": 89,
+          "clientWidth": 89
+        },
+        {
+          "className": "ctr-tab selector",
+          "x": 553.25,
+          "y": 241.0625,
+          "width": 73.9375,
+          "height": 35,
+          "scrollWidth": 66,
+          "clientWidth": 66
+        }
+      ],
+      "sourceStatus": "Джерело 1: відповідь · 1\nДжерело 2: відповідь · 1\nДжерело 3: відповідь · 1\nДжерело 4: відповідь · 1\nДжерело 5: відповідь · 1\nДжерело 6: помилка сервера",
+      "screenshot": {
+        "width": 1920,
+        "height": 1080,
+        "bytes": 67152
+      }
+    },
+    {
+      "viewport": [
+        3840,
+        2160
+      ],
+      "dpr": 1,
+      "overlay": {
+        "x": 230.375,
+        "y": 108,
+        "width": 3379.1875,
+        "height": 1944,
+        "right": 3609.5625,
+        "bottom": 2052
+      },
+      "rows": [
+        {
+          "x": 300.25,
+          "y": 587.5,
+          "width": 3239.4375,
+          "height": 299.8125,
+          "visible": true,
+          "hitTest": true
+        },
+        {
+          "x": 300.25,
+          "y": 905.75,
+          "width": 3239.4375,
+          "height": 258.9375,
+          "visible": true,
+          "hitTest": true
+        },
+        {
+          "x": 300.25,
+          "y": 1183.125,
+          "width": 3239.4375,
+          "height": 258.9375,
+          "visible": true,
+          "hitTest": true
+        }
+      ],
+      "filters": [
+        {
+          "className": "ctr-tab selector is-active",
+          "x": 407.3125,
+          "y": 380.875,
+          "width": 129.0625,
+          "height": 65.875,
+          "scrollWidth": 121,
+          "clientWidth": 121
+        },
+        {
+          "className": "ctr-tab selector",
+          "x": 550.5625,
+          "y": 380.875,
+          "width": 126.9375,
+          "height": 65.875,
+          "scrollWidth": 119,
+          "clientWidth": 119
+        },
+        {
+          "className": "ctr-tab selector",
+          "x": 691.6875,
+          "y": 380.875,
+          "width": 178,
+          "height": 65.875,
+          "scrollWidth": 170,
+          "clientWidth": 170
+        },
+        {
+          "className": "ctr-tab selector",
+          "x": 883.875,
+          "y": 380.875,
+          "width": 160.75,
+          "height": 65.875,
+          "scrollWidth": 153,
+          "clientWidth": 153
+        },
+        {
+          "className": "ctr-tab selector is-active",
+          "x": 433.9375,
+          "y": 464.5625,
+          "width": 237.75,
+          "height": 62.0625,
+          "scrollWidth": 230,
+          "clientWidth": 230
+        },
+        {
+          "className": "ctr-tab selector",
+          "x": 685.875,
+          "y": 464.5625,
+          "width": 180.5,
+          "height": 62.0625,
+          "scrollWidth": 173,
+          "clientWidth": 173
+        },
+        {
+          "className": "ctr-tab selector",
+          "x": 880.5625,
+          "y": 464.5625,
+          "width": 186.5625,
+          "height": 62.0625,
+          "scrollWidth": 179,
+          "clientWidth": 179
+        },
+        {
+          "className": "ctr-tab selector",
+          "x": 1081.3125,
+          "y": 464.5625,
+          "width": 140.3125,
+          "height": 62.0625,
+          "scrollWidth": 132,
+          "clientWidth": 132
+        }
+      ],
+      "sourceStatus": "Джерело 1: відповідь · 1\nДжерело 2: відповідь · 1\nДжерело 3: відповідь · 1\nДжерело 4: відповідь · 1\nДжерело 5: відповідь · 1\nДжерело 6: помилка сервера",
+      "screenshot": {
+        "width": 3840,
+        "height": 2160,
+        "bytes": 199674
+      }
+    }
+  ],
+  "domLayoutGeometry": "PASS",
+  "visualHitTesting": "BLOCKED: screenshot inspection shows the attached Chromium raster remains at its original 0.25 scale; viewport DOM geometry passes but screenshots are not valid visual acceptance evidence",
+  "filesLayer": {
+    "modalZ": "110",
+    "overlayZ": "100",
+    "modalVisible": true,
+    "fileVisible": true,
+    "files": 1,
+    "controller": "modal"
+  },
+  "geometry": {
+    "viewport": [
+      1920,
+      1080
+    ],
+    "dpr": 1,
+    "overlay": {
+      "x": 115.1875,
+      "y": 54,
+      "width": 1689.5625,
+      "height": 972
+    }
+  },
+  "status": "PASS"
+}
