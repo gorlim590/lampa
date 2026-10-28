@@ -86,20 +86,22 @@ function fixture() {
   const st = { record, params: { movie }, child, root: rootNode, rows: [], sourceData: new WeakMap(), windowStart: 0, dead: false, wantFocus: true, session: context.LampaTorrentOverlay.session(), trackerButtons: null };
   record.streamChild = st;
   function release(title, tracker, extra = {}) {
-    const row = new Node('torrent-item selector'); row.nodes = { '.ctr-name': new Node('ctr-name'), '.ctr-chips': new Node('ctr-chips'), '.ctr-best': new Node('ctr-best'), '.torrent-item__title': new Node() };
+    const row = new Node('torrent-item selector'); row.nodes = { '.ctr-name': new Node('ctr-name'), '.ctr-chips': new Node('ctr-chips'), '.ctr-best': new Node('ctr-best'), '.torrent-item__title': new Node(), '.tc-info': new Node('tc-info selector') };
     row.querySelector = selector => row.nodes[selector] || Node.prototype.querySelector.call(row, selector);
     const source = { Title: title, Tracker: tracker, Seeders: 10, Peers: 2, Size: 1000000000, ...extra };
-    const wrap=new Node('ctr-row'),info=new Node('ctr-release-info'),metrics=new Node('ctr-metrics');info.appendChild(row.nodes['.ctr-best']);info.appendChild(row.nodes['.ctr-name']);info.appendChild(row.nodes['.ctr-chips']);wrap.appendChild(info);wrap.appendChild(metrics);row.appendChild(wrap);row.setAttribute('data-parsed','1');
+    const wrap=new Node('ctr-row'),info=new Node('ctr-release-info'),metrics=new Node('ctr-metrics');info.appendChild(row.nodes['.ctr-best']);info.appendChild(row.nodes['.ctr-name']);info.appendChild(row.nodes['.ctr-chips']);wrap.appendChild(info);wrap.appendChild(metrics);wrap.appendChild(row.nodes['.tc-info']);row.appendChild(wrap);row.setAttribute('data-parsed','1');
     st.rows.push(row); st.sourceData.set(row, source); return { row, source };
   }
   const nodes = {
     '.ctr-tabs': new Node('ctr-tabs'), '.ctr-tracker-tabs': new Node('ctr-tabs ctr-tracker-tabs'), '.ctr-menus': new Node('ctr-menus')
   };
+  pane.querySelectorAll=selector=>selector.includes('.ctr-tabs:not(.ctr-tracker-tabs)')?nodes['.ctr-tabs'].children:selector.includes('.ctr-tracker-tabs')?nodes['.ctr-tracker-tabs'].children:selector.includes('.sh-stream-head .selector')?head.querySelectorAll('.selector'):[];
+  pane.querySelector=selector=>selector==='.focus.selector'?(focus.current?.classList.contains('focus')?focus.current:pane.querySelectorAll('.ctr-tabs:not(.ctr-tracker-tabs) .selector,.ctr-tracker-tabs .selector,.sh-stream-head .selector').find(node=>node.classList.contains('focus'))||null):pane.nodes[selector]||null;
   // Template-backed toolbar fixture: preserve the production setupStreamTools handlers.
   const filesInsert = files.insertBefore.bind(files);
   files.insertBefore = (node, before) => { node.nodes = nodes; node.querySelector = selector => nodes[selector] || null; node.classList.add('ctr-tools'); return filesInsert(node, before); };
-  const sourceFunctions = ['streamRowKey', 'streamSession', 'streamAlive', 'streamTrackerKey', 'streamSortKey', 'streamWindow', 'streamUpdateRows', 'decorateStreamRows', 'syncStreamTrackerTools', 'streamFocus', 'streamMove', 'setupStreamTools', 'streamEpisodeDetails', 'streamEpisodeWatched', 'restoreStreamEpisodePreview', 'clearStreamEpisodePreviews', 'applyStreamEpisodePreview', 'applyStreamFileStudios', 'onStreamFile'];
-  context.$=node=>({on(type,fn){node.jqueryEnter=fn;return this;}});context.running=true;context.metadata=context.TorrentsRedesign;context.bindInline=()=>{};context.collapseInline=()=>false;context.moveInline=()=>false;
+  const sourceFunctions = ['streamRowKey', 'streamSession', 'streamAlive', 'streamTrackerKey', 'streamSortKey', 'streamWindow', 'streamUpdateRows', 'decorateStreamRows', 'syncStreamTrackerTools', 'streamFocus', 'streamNavGroups', 'streamMove', 'moveInline', 'setupStreamTools', 'streamEpisodeDetails', 'streamEpisodeWatched', 'restoreStreamEpisodePreview', 'clearStreamEpisodePreviews', 'applyStreamEpisodePreview', 'applyStreamFileStudios', 'onStreamFile'];
+  context.$=node=>({on(type,fn){node.jqueryEnter=fn;return this;}});context.running=true;context.metadata=context.TorrentsRedesign;context.getComputedStyle=()=>({visibility:'visible',display:'block'});context.bindInline=()=>{};context.collapseInline=()=>false;
   context.streamActivate = () => {};
   context.streamSelectOwner = null;
   context.streamRecord = () => record;
@@ -373,12 +375,16 @@ test('Hybrid embedded controls invoke native tracker/sort handlers; async rows r
   assert.equal(f.st.displayRows[1], mazepa.row, 'the remaining rows follow the requested seeders sort');
   assert.equal(f.st.displayRows.includes(other.row), true);
   f.st.last = toloka.row; f.context.streamMove(f.record, 'left');
-  assert.equal(f.focus.current, allButton, 'D-pad left from a release returns to the tracker toolbar');
+  assert.equal(f.focus.current, toloka.row, 'D-pad left from a release keeps focus on the release row');
   assert.equal(f.st.root.querySelectorAll('.ctr-tracker-tabs .selector').includes(allButton), true, 'active tracker control belongs to the tracker group');
   f.st.last = allButton; f.context.streamMove(f.record, 'left');
-  assert.equal(f.focus.current, f.nodes['.ctr-tabs'].children.at(-1), 'D-pad left enters the preceding control in the unified toolbar');
+  assert.equal(f.focus.current, allButton, 'D-pad left stays within the tracker band');
+  f.st.last = allButton; f.context.streamMove(f.record, 'right');
+  assert.equal(f.focus.current, tolokaButton, 'D-pad right enters the next tracker control');
+  f.st.last = allButton; f.context.streamMove(f.record, 'up');
+  assert.equal(f.focus.current, f.st.uaButton, 'D-pad up from trackers enters the quality band');
   f.st.last = allButton; f.context.streamMove(f.record, 'down');
-  assert.equal(f.focus.current, toloka.row, 'D-pad down from the single toolbar enters the first release');
+  assert.equal(f.focus.current, toloka.row, 'D-pad down from the last visible control group enters the first release');
   f.st.last = toloka.row; f.context.streamMove(f.record, 'down');
   assert.equal(f.focus.current, mazepa.row, 'D-pad down selects the next release in the real sorted order');
   const third = f.release('The Others (2001) 1080p', 'Mazepa', { AudioLanguages: ['uk'], Seeders: 120 });
@@ -410,10 +416,10 @@ test('embedded parser status distinguishes total results from currently loaded r
   ].join('\n'), f.context);
 
   f.context.streamSyncRows(st);
-  assert.equal(status.textContent, 'Частина парсерів недоступна · Знайдено: 34 · завантажено: 2 із 34');
+  assert.equal(status.textContent, 'Частина парсерів недоступна · Знайдено загалом: 34 · завантажено 2 із 34');
   rows.push({}, {});
   f.context.streamSyncRows(st);
-  assert.equal(status.textContent, 'Частина парсерів недоступна · Знайдено: 34 · завантажено: 4 із 34');
+  assert.equal(status.textContent, 'Частина парсерів недоступна · Знайдено загалом: 34 · завантажено 4 із 34');
   st.loading = true;
   status.textContent = 'Пошук джерел…';
   f.context.streamSyncRows(st);
@@ -434,20 +440,45 @@ test('quality and tracker filter bands remain independent and ordered for remote
  assert.deepEqual(Array.from(quality),['4k']);
  mazepa.dispatch('hover:enter');assert.equal(f.api.selectedTrackerFilter(),'mazepa');assert.deepEqual(Array.from(quality),['4k'],'tracker action cannot reset the quality filter');
  all.dispatch('hover:enter');assert.equal(f.api.selectedTrackerFilter(),'all');assert.deepEqual(Array.from(quality),['4k'],'All trackers clears only the tracker filter');
- f.st.last=all;f.context.streamMove(f.record,'left');assert.equal(f.focus.current,ua,'left from tracker row returns to the last quality action');
- f.st.last=qualityAll;f.context.streamMove(f.record,'down');assert.equal(f.focus.current,f.st.displayRows[0],'down from quality row enters the release list');
+ f.st.last=all;f.context.streamMove(f.record,'left');assert.equal(f.focus.current,all,'left at the first tracker keeps focus within the tracker band');
+ f.st.last=all;f.context.streamMove(f.record,'up');assert.equal(f.focus.current,ua,'up from tracker band enters the last quality action');
+ f.st.last=qualityAll;f.context.streamMove(f.record,'down');assert.equal(f.focus.current,all,'down from quality band enters the first tracker');
+ f.st.last=all;f.context.streamMove(f.record,'down');assert.equal(f.focus.current,f.st.displayRows[0],'down from tracker band enters the release list when no native filter control is visible');
+ qualityAll.classList.add('focus');f.st.last=f.st.displayRows[0];f.context.streamMove(f.record,'down');assert.equal(f.focus.current,all,'navigation follows the actual focused quality control when the remembered row reference is stale');
+});
+
+test('D-pad stays on Info until vertical movement or Left returns to its release row',()=>{
+ const f=fixture(),first=f.release('The Others (2001) 1080p','Toloka'),second=f.release('The Others (2001) 720p','Mazepa');f.context.streamUpdateRows(f.st);
+ f.st.last=first.row;f.context.streamMove(f.record,'right');const info=first.row.querySelector('.tc-info');assert.equal(f.focus.current,info,'Right from a release enters its Info control');
+ assert.equal(f.context.moveInline(f.st,'right'),true);assert.equal(f.focus.current,info,'a second Right must not jump to the first release');
+ assert.equal(f.context.moveInline(f.st,'down'),true);assert.equal(f.focus.current,second.row,'Down from Info moves to the next release');
+ assert.equal(f.context.moveInline(f.st,'right'),false,'row controls are handled by the controller, not as Info');
+ f.st.last=info;assert.equal(f.context.moveInline(f.st,'left'),true);assert.equal(f.focus.current,first.row,'Left returns from Info to its owner row');
+ info.classList.add('focus');f.focus.current=info;f.st.last=first.row;f.context.streamMove(f.record,'down');assert.equal(f.focus.current,second.row,'the live Info focus marker resolves to its owner before moving down');
 });
 
 test('compact cards lead with the actual release identity, then technical badges and verified audio',()=>{
  const f=fixture(),source=f.release('The.Last.of.Us.S02E01-E03.2025.2160p.WEB-DL.HDR10.DV.HEVC.Ukr.Eng','Toloka',{AudioLanguages:['uk','en'],VoiceoverType:'multi-voice',VoiceoverStudio:'Контрольна студія'});
  f.context.streamUpdateRows(f.st);const row=source.row,raw=source.source.Title;
- assert.equal(row.querySelector('.ctr-name').textContent,'The Last of Us (2025)');
- assert.match(row.querySelector('.tc-priority-row').textContent,/S02E01–E03/);
+ assert.equal(row.querySelector('.ctr-name').textContent,'S02E01–E03 · The Last of Us (2025)');
+ assert.doesNotMatch(row.querySelector('.tc-priority-row').textContent,/S02E01–E03/,'coverage belongs in the visible release title, not a duplicate badge');
  assert.match(row.querySelector('.tc-priority-row').textContent,/UA/);
  assert.match(row.querySelector('.tc-priority-row').textContent,/Toloka/);
  assert.match(row.querySelector('.tc-secondary-row').textContent,/4K/);assert.match(row.querySelector('.tc-secondary-row').textContent,/WEB-DL/);assert.match(row.querySelector('.tc-secondary-row').textContent,/HDR10/);assert.match(row.querySelector('.tc-secondary-row').textContent,/HEVC/);
  assert.match(row.querySelector('.tc-audio-label').textContent,/Українська \/ English/);assert.match(row.querySelector('.tc-voice').textContent,/Багатоголосе · Контрольна студія/);
  assert.equal(row.querySelector('.tc-raw-title').textContent,raw,'expanded detail preserves the original torrent title');
+});
+
+test('compact torrent titles expose only verified episode, multi-season and complete-season coverage',()=>{
+ const cases=[
+  ['The.Last.of.Us.S02E01-E03.2025.1080p.WEB-DL','S02E01–E03 · The Last of Us (2025)'],
+  ['Frieren.S01-S03.2023.2160p.WEB-DL','S01–S03 · Frieren (2023)'],
+  ['Silo (S1-2) (2023-2024) WEB-DL 1080p Ukr/Eng','S01–S02 · Silo (2024)'],
+  ['Silo Seasons 1-3 2023-2026 WEB-DL 1080p','S01–S03 · Silo (2026)'],
+  ['Crash.Landing.on.You.Complete.Season.2.2020.1080p.WEBRip','Complete Season 2 · Crash Landing on You (2020)'],
+  ['별빛 항로.2024.1080p.WEB-DL','별빛 항로 (2024)']
+ ];
+ for(const [raw,expected] of cases){const f=fixture(),release=f.release(raw,'Toloka');f.context.streamUpdateRows(f.st);assert.equal(release.row.querySelector('.ctr-name').textContent,expected,raw);assert.equal(release.row.querySelector('.tc-raw-title').textContent,raw,'expanded title remains byte-for-byte parser input');}
 });
 
 

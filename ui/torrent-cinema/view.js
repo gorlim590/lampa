@@ -15,7 +15,8 @@ function createCinemaView() {
         var matches=Array.from(raw.matchAll(/\bS(\d{1,2})E(\d{1,3})(?:[ ._]*[-–][ ._]*(?:S(\d{1,2}))?E?(\d{1,3}))?/gi));
         if(matches.length){return matches.map(function(m){return 'S'+pad(+m[1])+'E'+pad(+m[2])+(m[4]?(m[3]&&+m[3]!==+m[1]?'–S'+pad(+m[3])+'E'+pad(+m[4]):+m[4]>=+m[2]?'–E'+pad(+m[4]):''):'');}).filter(function(v,i,a){return a.indexOf(v)===i;}).join(' · ');}
         var m=/\b(\d{1,2})x(\d{1,3})\b/i.exec(raw);if(m)return 'S'+pad(+m[1])+'E'+pad(+m[2]);
-        m=/\bS(\d{1,2})\s*[-–]\s*S(\d{1,2})\b/i.exec(raw);if(m&&+m[2]>=+m[1])return 'S'+pad(+m[1])+'–S'+pad(+m[2]);
+        m=/\bS(\d{1,2})\s*[-–]\s*S?(\d{1,2})\b/i.exec(raw);if(m&&+m[2]>=+m[1])return 'S'+pad(+m[1])+'–S'+pad(+m[2]);
+        m=/\b(?:Seasons?|Сезон(?:и)?)\s*(\d{1,2})\s*[-–]\s*(?:(?:Seasons?|Сезон(?:и)?)\s*)?(\d{1,2})/iu.exec(raw);if(m&&+m[2]>=+m[1])return 'S'+pad(+m[1])+'–S'+pad(+m[2]);
         m=/(?:\bS|\bSeason[ ._]*|Сезон[ ._:]*)(\d{1,2})(?!\d)|(?:^|[^\d])(\d{1,2})\s*сезон/iu.exec(raw);
         var season=m?+(m[1]||m[2]):null;
         var episode=/\bE(\d{1,3})(?:\s*[-–]\s*E?(\d{1,3}))?\b/i.exec(raw)||/\[(\d{1,3})\s*[-–]\s*(\d{1,3})\]/.exec(raw)||/(?:^|[^\d])(\d{1,3})\s*[-–]\s*(\d{1,3})\s*(?:сері[яїй]|эпизод|episodes)/iu.exec(raw);
@@ -34,7 +35,7 @@ function createCinemaView() {
     }
     function releaseIdentity(raw,source,kind,data) {
         source=source||{};raw=String(raw||'').trim();var clean=raw.replace(/[._]+/g,' ').replace(/\s+/g,' ').trim(),technical=/\b(?:2160p|1080p|720p|480p|4k|WEB[ .-]?DL|WEBRip|BDRemux|UHD[ .-]?BDRemux|Remux|BDRip|BluRay|BD[ .-]?Rip|HDRip|HDTV|DVDRip|HDR10?\+?|Dolby[ .-]?Vision|HEVC|AVC|x26[45]|H[ .]?26[45])\b/i.exec(clean),techAt=technical?technical.index:clean.length;
-        var episode=/\bS\d{1,2}E\d{1,3}(?:\s*[-–]\s*(?:S\d{1,2})?E?\d{1,3})?/i.exec(clean),pack=/\bS\d{1,2}\s*[-–]\s*S\d{1,2}\b/i.exec(clean),season=/\b(?:Season|Сезон)\s*\d{1,2}\b|\bS\d{1,2}\b|\b\d{1,2}x\d{1,3}\b/iu.exec(clean),complete=/\bComplete\s+Season\s+(\d{1,2})\b|Повний\s+сезон\s+(\d{1,2})/iu.exec(clean);
+        var episode=/\bS\d{1,2}E\d{1,3}(?:\s*[-–]\s*(?:S\d{1,2})?E?\d{1,3})?/i.exec(clean),pack=/\bS\d{1,2}\s*[-–]\s*S?\d{1,2}\b|\b(?:Seasons?|Сезон(?:и)?)\s*\d{1,2}\s*[-–]\s*\d{1,2}\b/iu.exec(clean),season=/\b(?:Seasons?|Сезон(?:и)?)\s*\d{1,2}\b|\bS\d{1,2}\b|\b\d{1,2}x\d{1,3}\b/iu.exec(clean),complete=/\bComplete\s+Season\s+(\d{1,2})\b|Повний\s+сезон\s+(\d{1,2})/iu.exec(clean);
         var cuts=[techAt];if(episode)cuts.push(episode.index);if(pack)cuts.push(pack.index);if(season)cuts.push(season.index);if(complete)cuts.push(complete.index);var years=Array.from(clean.matchAll(/\b(?:19|20)\d{2}\b/g)).filter(function(m){return m.index>0&&m.index<techAt;}),yearMatch=years.length?years[years.length-1]:null;
         if(yearMatch)cuts.push(yearMatch.index);var titleEnd=Math.min.apply(Math,cuts),name=clean.slice(0,titleEnd).replace(/[\s\-–—()[\]{}]+$/g,'').trim(),year=(data&&data.year)||null;
         if(!year&&yearMatch)year=Number(yearMatch[0]);if(!name)name=clean.slice(0,techAt).replace(/[\s\-–—()[\]{}]+$/g,'').trim();
@@ -53,11 +54,10 @@ function createCinemaView() {
         row._tcSignature=signature;
         row.title=view.raw;row.setAttribute('aria-label',view.title);
         var identity=view.identity||releaseIdentity(view.raw,source,kind,data);
-        if(name)name.textContent=identity.name+(identity.year?' ('+identity.year+')':'');
+        if(name)name.textContent=(kind==='tv'&&identity.coverage?identity.coverage+' · ':'')+identity.name+(identity.year?' ('+identity.year+')':'');
         if(!chips)return view;
         chips.textContent='';var priority=document.createElement('div');priority.className='tc-priority-row';var secondary=document.createElement('div');secondary.className='tc-secondary-row';chips.appendChild(priority);chips.appendChild(secondary);
         function chip(label,cls,target){var n=document.createElement('span');n.className='ctr-chip '+(cls||'');n.textContent=label;(target||priority).appendChild(n);}
-        if(kind==='tv'&&identity.coverage)chip(identity.coverage,'tc-coverage');
         var audio=parsed.audio||{},subs=parsed.subs||{};
         if(audio.ua)chip('🇺🇦 UA','tc-ua-badge');
         if(data&&data.tracker)chip(data.tracker,'tc-tracker-badge '+(/toloka/i.test(data.tracker)?'is-toloka':/mazepa/i.test(data.tracker)?'is-mazepa':''));

@@ -4,6 +4,7 @@
 /* Native surfaces receive these classes only while Torrent Cinema owns the
    corresponding transition. Unrelated Lampa/plugin dialogs keep native layers. */
 .tc-native-torrent-modal{z-index:130!important}
+.tc-native-settings{z-index:110!important}
 .tc-native-loading{position:fixed!important;inset:0!important;z-index:140!important}
 .tc-native-search{z-index:145!important}
 .tc-native-player{z-index:150!important}

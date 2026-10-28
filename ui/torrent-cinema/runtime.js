@@ -38,9 +38,18 @@ function createCinemaRuntime(metadata) {
         node.classList.remove('sh-files-modal','tc-native-torrent-modal');node.querySelectorAll('.sh-files-summary,.sh-file-rating').forEach(function(n){n.remove();});
         Object.keys(filesOverlay.tokens).forEach(function(key){var t=filesOverlay.tokens[key];if(node.style.getPropertyValue(key)===t.ours){if(t.before)node.style.setProperty(key,t.before);else node.style.removeProperty(key);}});filesOverlay=null;
     }
+    function ownStreamFilesSurface(record,node){
+        if(!record||!node||!node.classList)return;
+        if(record.selectionArmed){
+            if(record.streamStage!=='player'&&record.streamStage!=='loading')record.streamStage=node.querySelector('.torrent-files')?'files':'torrent';
+            markNativeSurface(record,node,'tc-native-torrent-modal');
+            return;
+        }
+        if(record.streamFocused&&record.streamView&&record.streamView.isOpen()&&record.streamStage==='search'&&(node.matches('.search-box,.search')||node.querySelector('.search-box,.search')))markNativeSurface(record,node,'tc-native-search');
+    }
     function onStreamFiles(event){
         var record=streamRecord(),node=event&&event.html&&(event.html[0]||event.html);
-        if(record&&node&&node.classList){if(record.selectionArmed){if(record.streamStage!=='player'&&record.streamStage!=='loading')record.streamStage=node.querySelector('.torrent-files')?'files':'torrent';markNativeSurface(record,node,'tc-native-torrent-modal');if(record.streamStage==='player')markNativeSurface(record,node,'tc-native-player');}else if(record.streamFocused&&record.streamView&&record.streamView.isOpen()&&record.streamStage==='search'&&(node.matches('.search-box,.search')||node.querySelector('.search-box,.search')))markNativeSurface(record,node,'tc-native-search');}
+        ownStreamFilesSurface(record,node);
         if(record&&node&&node.querySelector('.torrent-checklist')){record.streamPane.dataset.state='server-error';streamStatus(record,'TorrServer недоступний · Перевірте підключення у відкритій діагностиці');}
         if(record&&node&&node.querySelector('.torrent-error')){record.streamPane.dataset.state='playback-error';streamStatus(record,'Не вдалося відкрити реліз · Спробуйте інший реліз або повторіть вибір');}
         if(!node||!node.querySelector('.torrent-files'))return;
@@ -146,8 +155,11 @@ function createCinemaRuntime(metadata) {
         if(st.error)return 'Парсер недоступний · Оновити — повторна спроба';
         if(st.total===0)return 'Джерел не знайдено';
         if(st.total==null)return 'Джерела';
-        var count='Знайдено: '+st.total,loaded=st.rows?st.rows.length:0;
-        if(loaded<st.total)count+=' · завантажено: '+loaded+' із '+st.total;
+        var loaded=(st.displayRows||st.rows||[]).length,filter=st.child&&st.child.getFilterData?st.child.getFilterData()||{}:{},season=Array.isArray(filter.season)?filter.season:filter.season==null?[]:[filter.season],quality=Array.isArray(filter.quality)?filter.quality:filter.quality==null?[]:[filter.quality],tracker=window.TorrentsRedesign&&window.TorrentsRedesign.selectedTrackerFilter?window.TorrentsRedesign.selectedTrackerFilter():'all',filtered=season.length>0||quality.length>0||!!st.uaOnly||tracker!=='all';
+        var count='Знайдено загалом: '+st.total;
+        if(filtered){var scope=[];if(season.length)scope.push('сезон '+season.map(function(value){var n=Number(value);return isFinite(n)?'S'+('0'+n).slice(-2):String(value);}).join(', '));if(quality.length||st.uaOnly||tracker!=='all')scope.push('поточні фільтри');count+=' · '+scope.join(' + ')+': завантажено '+loaded;}
+        else if(loaded<st.total)count+=' · завантажено '+loaded+' із '+st.total;
+        else count+=' · у списку '+loaded;
         return (st.partial?'Частина парсерів недоступна · ':'')+count;
     }
     function streamSession(){return window.LampaTorrentOverlay?LampaTorrentOverlay.session():String(streamGeneration);}
@@ -280,7 +292,10 @@ function createCinemaRuntime(metadata) {
         var pending=streamSelectRestore;if(!pending)return;streamSelectRestore=null;
         if(Lampa.Select.opened&&Lampa.Select.opened()||Lampa.Select.render&&Lampa.Select.render()[0]!==pending.node)return;
         var st=pending.state;
-        if(streamAlive(st)&&st.wantFocus&&Lampa.Controller.enabled().name==='sh_movie_streams')streamFocus(st,st.last);
+        if(!streamAlive(st)||!st.wantFocus)return;
+        var controller=Lampa.Controller.enabled().name;
+        if(controller==='select')Lampa.Controller.toggle('sh_movie_streams');
+        if(controller==='sh_movie_streams'||controller==='select')streamFocus(st,st.last);
     }
     function onStreamSelect(event){
         streamSelectRestore=null;clearStreamSelect();
@@ -325,11 +340,11 @@ function createCinemaRuntime(metadata) {
             Lampa.Select.show({title:'Сортування релізів',items:items,onSelect:function(item){var api=window.TorrentsRedesign;if(api&&api.storeSort&&api.storeSort(item.key)){st.last=st.sortButton;decorateStreamRows(st);}}});
         });menus.appendChild(st.sortButton);
 
-        menus.appendChild(button('⚲ Фільтри',function(){
+        var filterMenuButton=button('⚲ Фільтри',function(){
             var items=[['filter','Фільтри / трекери'],['parser','Джерело'],['search','Пошук']].filter(function(x){return st.root.querySelector('.filter--'+x[0]);}).map(function(x){return {title:x[1],native:x[0]};});
             var parsers=st.root.querySelectorAll('.filter--parser');if(st.providerBinding&&parsers.length>1)items.push({title:'Основний / додатковий парсер',node:parsers[parsers.length-1]});
             Lampa.Select.show({title:'Фільтри та джерела',items:items,onSelect:function(item){st.record.streamStage=item.native==='search'?'search':'filter';watchTransitionSurfaces(st.record);(item.node||st.root.querySelector('.filter--'+item.native)).dispatchEvent(new Event('hover:enter'));}});
-        }));
+        });filterMenuButton.dataset.navGroup='filters';menus.appendChild(filterMenuButton);
         var head=st.record.streamPane.querySelector('.sh-stream-head'),before=head.querySelector('.sh-stream-retry');while(menus.firstChild)head.insertBefore(menus.firstChild,before);
         st.root.querySelector('.explorer__files').insertBefore(tools,st.root.querySelector('.explorer__files').firstChild);
     }
@@ -364,14 +379,20 @@ function createCinemaRuntime(metadata) {
     function streamNavGroups(st){
         function controls(selector){return Array.prototype.filter.call(st.record.streamPane.querySelectorAll(selector),function(n){return !n.hidden&&!n.disabled&&n.getAttribute('aria-disabled')!=='true'&&n.offsetParent!==null;});}
         return [
-            controls('.sh-stream-head .selector'),
+            controls('.sh-stream-head .selector:not([data-nav-group="filters"])'),
             controls('.ctr-tabs:not(.ctr-tracker-tabs) .selector'),
             controls('.ctr-tracker-tabs .selector'),
-            controls('.torrent-filter .selector,.parser-providers-toolbar .selector')
+            controls('.sh-stream-head [data-nav-group="filters"],.torrent-filter .selector,.parser-providers-toolbar .selector')
         ].filter(function(group){return group.length;});
     }
     function streamMove(record,direction) {
         var st=record.streamChild;if(!st||streamSelectOwner===st||st.selectTransition)return;if(st.loading)st.navigatedWhileLoading=true;
+        // The native remote controller may move its `.focus` marker before the
+        // overlay's focus listener runs. Use that live marker as the navigation
+        // origin so a stale row reference cannot skip the tracker band.
+        var focused=st.record.streamPane.querySelector('.focus.selector');
+        if(focused&&focused.classList.contains('tc-info'))focused=focused.closest('.torrent-item')||focused;
+        if(focused&&focused.offsetParent!==null)st.last=focused;
         var rows=st.displayRows||st.rows,index=rows.indexOf(st.last),groups=streamNavGroups(st),rowIndex=-1;
         if(index>=0){
             if(direction==='right'){streamFocus(st,rows[index].querySelector('.tc-info'));return;}
@@ -401,7 +422,7 @@ function createCinemaRuntime(metadata) {
         st.child.start=function(){streamActivate(record);};
         Lampa.Controller.add('sh_movie_streams',{
             toggle:function(){streamFocus(st);},
-            up:function(){streamMove(record,'up');},down:function(){streamMove(record,'down');},left:function(){streamMove(record,'left');},right:function(){streamMove(record,'right');},back:function(){if(!collapseInline(st))closeStreamOverlay(record,true);}
+            up:function(){if(!moveInline(st,'up'))streamMove(record,'up');},down:function(){if(!moveInline(st,'down'))streamMove(record,'down');},left:function(){if(!moveInline(st,'left'))streamMove(record,'left');},right:function(){if(!moveInline(st,'right'))streamMove(record,'right');},back:function(){if(!collapseInline(st))closeStreamOverlay(record,true);}
         });
         Lampa.Controller.toggle('sh_movie_streams');
     }
@@ -544,6 +565,7 @@ function createCinemaRuntime(metadata) {
     function onStreamController(event) {
         if(!event)return;
         var record=movieRecords.filter(function(r){return r.page.classList.contains('activity--active')&&r.streamPane;})[0];if(!record)return;
+        var previousStage=record.streamStage;
         if(streamSelectRestore&&event.name!=='select'){
             var pending=streamSelectRestore;streamSelectRestore=null;
             if(event.name==='sh_movie_streams'&&!Lampa.Select.opened()&&streamAlive(pending.state)&&pending.state.wantFocus)streamFocus(pending.state,pending.state.last);
@@ -551,7 +573,17 @@ function createCinemaRuntime(metadata) {
         if(record.selectionArmed&&event.name==='loading'){record.streamStage='loading';watchTransitionSurfaces(record);}
         if(record.selectionArmed&&['player','player_video','youtube'].indexOf(event.name)>=0){record.streamStage='player';watchTransitionSurfaces(record);}
         if(record.streamFocused&&record.streamView&&record.streamView.isOpen()&&['search','keyboard'].indexOf(event.name)>=0){record.streamStage='search';watchTransitionSurfaces(record);}
-        if(record.streamStage==='loading'&&event.name!=='loading'){stopWatchingSurfaces(record);clearNativeSurfaces(record,'tc-native-loading');record.streamStage='files';}
+        if(previousStage==='loading'&&event.name!=='loading'){stopWatchingSurfaces(record);clearNativeSurfaces(record,'tc-native-loading');if(record.streamStage==='loading')record.streamStage='files';}
+        var settingsWasOwned=!!(record.nativeSurfaces&&record.nativeSurfaces.some(function(item){return item.className==='tc-native-settings';}));
+        if(record.streamFocused&&record.streamView&&record.streamView.isOpen()){
+            if(/settings/.test(event.name))document.querySelectorAll('.settings').forEach(function(node){markNativeSurface(record,node,'tc-native-settings');});
+            else if(record.nativeSurfaces&&record.nativeSurfaces.some(function(item){return item.className==='tc-native-settings';}))clearNativeSurfaces(record,'tc-native-settings');
+        }
+        if(settingsWasOwned&&event.name==='head'){
+            var settingsState=record.streamChild;
+            if(settingsState&&settingsState.wantFocus&&record.streamView&&record.streamView.isOpen()&&streamAlive(settingsState))streamActivate(record);
+            return;
+        }
         if(!['full_start','content'].includes(event.name))return;
         // Native player/Files return may activate the underlying detail controller.
         // A visible overlay must retain remote ownership; leave inner menus/player alone.
