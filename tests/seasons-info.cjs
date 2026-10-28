@@ -13,6 +13,16 @@ function fixture({ready=true}={}){
  vm.createContext(context);vm.runInContext(source.replace('    function getSeasonProgress', '    window.__badgeFetch = fetchSeriesData;\n    function getSeasonProgress'),context);return{L,context,jobs,timers,observers,listeners,storage,settings,gets,selects,setActive:a=>payload=a,api:context.window.SeasonBadgePlugin.integrity,run:()=>vm.runInContext(source,context),alias:()=>vm.runInContext(alias,context),flush:()=>{while(timers.length)timers.shift()()}};
 }
 test('canonical + legacy + simultaneous duplicate execution registers only once',()=>{const f=fixture();f.run();f.alias();f.flush();assert.equal(f.context.document.head.children.length,1);assert.equal(f.settings.length,4);assert.equal(f.observers.length,2);assert.equal(f.jobs.length,0);});
+test('season badge uses YDesign metadata flow and never protrudes from native cards',()=>{
+ const fn=source.slice(source.indexOf('    function positionSeasonBadge('),source.indexOf('    function moveSeasonBadgesIntoMetadata('));
+ const c={};vm.createContext(c);vm.runInContext(fn+'\nthis.positionSeasonBadge=positionSeasonBadge;',c);
+ const row={children:[],appendChild(node){this.children.push(node);node.parentNode=this;}},view={children:[],querySelector(selector){return selector==='.ydesign-badges'?row:null;},appendChild(node){this.children.push(node);node.parentNode=this;}};
+ const badge={parentNode:view};assert.equal(c.positionSeasonBadge(view,badge),true);assert.equal(badge.parentNode,row);assert.deepEqual(row.children,[badge]);
+ const native={children:[],querySelector(){return null;},appendChild(node){this.children.push(node);node.parentNode=this;}},nativeBadge={parentNode:null};
+ assert.equal(c.positionSeasonBadge(native,nativeBadge),false);assert.equal(nativeBadge.parentNode,native);
+ assert.match(source,/\.ydesign-badges > \.card--season-complete,[\s\S]*?position: relative;/);
+ assert.match(source,/"        left: 0\.7em;\\n" \+\n\s+"        margin-left: 0;\\n"/);
+});
 test('ready events repeated do not add settings/listeners/observer bindings',()=>{const f=fixture({ready:false});for(let i=0;i<3;i++)for(const fn of f.listeners.app)fn({type:'ready'});f.flush();assert.equal(f.settings.length,4);assert.equal(f.observers[1].observes,1);});
 test('legacy alias coalesces pending canonical load and retries a failed load',()=>{const f=fixture();delete f.context.window.SeasonBadgePlugin;f.alias();f.alias();assert.equal(f.jobs.length,1);assert.match(f.jobs[0][0][0],/\/media\/seasons-info.js$/);f.jobs[0][2]();f.alias();assert.equal(f.jobs.length,2);});
 test('normalizes actual numbers, duplicate metadata, zero and sparse seasons without inventing missing seasons',()=>{const f=fixture(),m=tv(1,[3,1,0,1]);assert.deepEqual(JSON.parse(JSON.stringify(f.api.seasons(m))).map(s=>s.season_number),[0,1,3]);assert.equal(m.seasons.length,4);assert.equal(f.api.seasons({}),null);});
