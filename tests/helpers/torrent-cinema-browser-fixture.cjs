@@ -3,6 +3,16 @@
 // No replacement application/HTML page, account request, real torrent or player.
 module.exports=function installFixture(){
     const L=Lampa,qa=window.__tcQa={mode:'ready',parserCalls:0,pending:[],selected:null,returnFn:null};
+    qa.originalComponentCreate=L.Component.create;
+    L.Component.create=function(params){
+        const child=qa.originalComponentCreate.apply(this,arguments);
+        if(params&&params.component==='torrents')qa.lastTorrentChild=child;
+        if(params&&params.component==='torrents'&&qa.pendingSelectedSeason!=null&&typeof child.setFilterData==='function'){
+            child.setFilterData({season:[String(qa.pendingSelectedSeason)],voice:[],tracker:[]});
+            qa.lastNativeSeasonFilter=child.getFilterData();qa.pendingSelectedSeason=null;
+        }
+        return child;
+    };
     // Test-only setting override is held by the runner's shadow Storage and
     // keeps the existing user's filter out of fixture assumptions.
     L.Storage.set('torrents_cinema_tracker','all');
@@ -20,12 +30,18 @@ module.exports=function installFixture(){
         Quality:['4k','1080p','1080p','720p','1080p','4k'][i%6],PublishDate:'2024-02-01'
     }));
     qa.baseMovie=Object.assign({},movie);qa.baseResults=JSON.parse(JSON.stringify(qa.results));
-    qa.restoreMovie=function(){Object.assign(movie,qa.baseMovie);qa.results=JSON.parse(JSON.stringify(qa.baseResults));qa.push();};
+    qa.restoreMovie=function(){delete movie.number_of_seasons;Object.assign(movie,qa.baseMovie);qa.results=JSON.parse(JSON.stringify(qa.baseResults));L.Storage.set('torrents_filter',{season:[],voice:[],tracker:[]});qa.push();};
     qa.installSeries=function(){
         Object.assign(movie,{id:99117002,media_type:'tv',title:'Нічний архів',original_title:'Night Archive',name:'Нічний архів',original_name:'Night Archive',first_air_date:'2021-01-01'});
         qa.results=[{Title:'Нічний архів / Night Archive — 夜のアーカイブ — 별빛 항로 — S02E01-E03 2024 1080p WEB-DL HEVC Ukr Eng DVO',Tracker:'toloka.to',Size:7340032000,Seeders:84,Peers:11,InfoHash:'9'.repeat(40),MagnetUri:'magnet:?xt=urn:btih:'+'9'.repeat(40),hash:'9'.repeat(40),AudioLanguages:['uk','en'],SubtitleLanguages:['uk'],VoiceoverStudio:'Студія Переклад / Studio Переклад',Quality:'1080p',PublishDate:'2024-02-01'}];
         qa.push();
     };
+    qa.installSeasonContext=function(){
+        Object.assign(movie,{id:99117003,media_type:'tv',title:'Атака титанів',original_title:'Attack on Titan',name:'Атака титанів',original_name:'Attack on Titan',first_air_date:'2013-04-07',release_date:undefined,number_of_seasons:4});
+        qa.results=[{Title:'Attack on Titan (2018) S02E01-E12 1080p WEB-DL HEVC Ukr Eng',Tracker:'toloka.to',Size:7340032000,Seeders:84,Peers:11,InfoHash:'3'.repeat(40),MagnetUri:'magnet:?xt=urn:btih:'+'3'.repeat(40),hash:'3'.repeat(40),AudioLanguages:['uk','en'],SubtitleLanguages:['uk'],VoiceoverStudio:'ТакТреба',Quality:'1080p',PublishDate:'2018-04-01'}];
+        qa.push();
+    };
+    qa.selectSeasonForNextOpen=function(season){qa.pendingSelectedSeason=season;};
     qa.installCase=function(testCase){
         const mediaId=99117010+testCase.index,metadataName=testCase.metadataName||'Catalog Alias MUST NOT APPEAR';
         Object.assign(movie,{id:mediaId,media_type:testCase.kind==='tv'?'tv':'movie',title:metadataName,original_title:metadataName,name:metadataName,original_name:metadataName,release_date:testCase.premiere||'2024-01-01',first_air_date:testCase.premiere||'2024-01-01'});
