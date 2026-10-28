@@ -307,6 +307,30 @@ test('native replacement image survives watched, unwatched, watched DOM reuse an
   assert.equal(image.getAttribute('src'), 'https://image.invalid/native-placeholder-b.jpg');
 });
 
+test('latest native placeholder is retained when it changes while a confirmed still request is pending', () => {
+  const f = fixture(); f.trakt.progress = { watched: false, episodes: [{ season: 3, episode: 1 }] };
+  const image = new Node(); image.setAttribute('src', 'https://image.invalid/placeholder-a.jpg');
+  const item = new Node('torrent-serial'); item.nodes = { '.torrent-serial__img': image }; item.querySelector = selector => item.nodes[selector] || null;
+  f.context.onStreamFile({ type: 'render', params: { movie: { id: 55, source: 'tmdb', media_type: 'tv' }, seasons: {} }, element: { season: 3, episode: 1 }, item });
+  image.setAttribute('src', 'https://image.invalid/placeholder-b.jpg');
+  f.record.seasonCallback({ 3: { episodes: [{ season_number: 3, episode_number: 1, still_path: '/watched.jpg' }] } });
+  assert.equal(image.getAttribute('src'), 'https://image.tmdb.org/t/p/w300/watched.jpg');
+  f.context.clearStreamEpisodePreviews(f.record);
+  assert.equal(image.getAttribute('src'), 'https://image.invalid/placeholder-b.jpg', 'teardown restores the latest native source, not the earlier placeholder');
+});
+
+test('parallel watched episode rows still receive their own shared-season stills', () => {
+  const f = fixture(); f.trakt.progress = { watched: false, episodes: [{ season: 3, episode: 1 }, { season: 3, episode: 2 }] };
+  const makeItem = () => { const image = new Node(); const item = new Node('torrent-serial'); item.nodes = { '.torrent-serial__img': image }; item.querySelector = selector => item.nodes[selector] || null; return { image, item }; };
+  const first = makeItem(), second = makeItem(), params = { movie: { id: 55, source: 'tmdb', media_type: 'tv' }, seasons: {} };
+  f.context.onStreamFile({ type: 'render', params, element: { season: 3, episode: 1 }, item: first.item });
+  f.context.onStreamFile({ type: 'render', params, element: { season: 3, episode: 2 }, item: second.item });
+  assert.equal(f.record.seasonRequests, 1);
+  f.record.seasonCallback({ 3: { episodes: [{ season_number: 3, episode_number: 1, still_path: '/one.jpg' }, { season_number: 3, episode_number: 2, still_path: '/two.jpg' }] } });
+  assert.equal(first.image.getAttribute('src'), 'https://image.tmdb.org/t/p/w300/one.jpg');
+  assert.equal(second.image.getAttribute('src'), 'https://image.tmdb.org/t/p/w300/two.jpg');
+});
+
 test('Hybrid embedded controls invoke native tracker/sort handlers; async rows re-rank and empty/singleton results are safe', async () => {
   const f = fixture();
   const toloka = f.release('The Others (2001) 1080p', 'Toloka', { AudioLanguages: ['en'], Seeders: 5 });

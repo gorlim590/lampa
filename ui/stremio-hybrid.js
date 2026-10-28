@@ -766,7 +766,7 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         }
     }
     function clearStreamEpisodePreviews(record){
-        if(!record)return;record.streamPreviewSequence=(record.streamPreviewSequence||0)+1;
+        if(!record)return;record.streamPreviewSequence=(record.streamPreviewSequence||0)+1;record.streamPreviewEpoch=(record.streamPreviewEpoch||0)+1;
         (record.streamEpisodePreviewNodes||[]).forEach(function(node){if(node)node.__shEpisodePreviewToken=0;restoreStreamEpisodePreview(node);});
         record.streamEpisodePreviewNodes=[];
     }
@@ -780,11 +780,12 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         var trackedIndex=record.streamEpisodePreviewNodes.indexOf(node);if(trackedIndex>=0)record.streamEpisodePreviewNodes.splice(trackedIndex,1);
         var token=(record.streamPreviewSequence||0)+1;record.streamPreviewSequence=token;node.__shEpisodePreviewToken=token;
         if(!streamEpisodeWatched(record,params,season,episode))return;
-        var selected=record.streamChild&&record.streamChild.selectedRow,movie=params&&params.movie,identity=[movie&&movie.source||'tmdb',movie&&movie.id,season,episode].join(':');node.__shEpisodePreviewIdentity=identity;
+        var selected=record.streamChild&&record.streamChild.selectedRow,movie=params&&params.movie,identity=[movie&&movie.source||'tmdb',movie&&movie.id,season,episode].join(':'),generation=record.streamPreviewEpoch||0;node.__shEpisodePreviewIdentity=identity;
         streamEpisodeDetails(record,params,season,episode,function(metadata){
-            if(!node.isConnected||!record.page.classList.contains('activity--active')||!metadata||!metadata.still_path||Number(metadata.episode_number)!==episode||(metadata.season_number!=null&&Number(metadata.season_number)!==season)||node.__shEpisodePreviewToken!==token||node.__shEpisodePreviewIdentity!==identity)return;
+            if(!node.isConnected||!record.page.classList.contains('activity--active')||!metadata||!metadata.still_path||Number(metadata.episode_number)!==episode||(metadata.season_number!=null&&Number(metadata.season_number)!==season)||node.__shEpisodePreviewToken!==token||node.__shEpisodePreviewIdentity!==identity||(record.streamPreviewEpoch||0)!==generation)return;
             if(selected&&record.streamChild&&record.streamChild.selectedRow!==selected)return;
             if(!streamEpisodeWatched(record,params,season,episode))return;
+            var latestNativeSrc=image.getAttribute('src');if(image.getAttribute('data-sh-episode-preview')!=='tmdb'&&latestNativeSrc!==image.__shEpisodePreviewBaseSrc)image.__shEpisodePreviewBaseSrc=latestNativeSrc;
             var src=Lampa.Api.img(metadata.still_path,'w300');if(!src)return;
             image.setAttribute('src',src);image.__shEpisodePreviewSrc=src;image.setAttribute('data-sh-episode-preview','tmdb');
             if(record.streamEpisodePreviewNodes.indexOf(node)<0)record.streamEpisodePreviewNodes.push(node);
