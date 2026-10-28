@@ -430,6 +430,7 @@ test('streaming replacement restores the selected source identity without reusin
  f.context.streamUpdateRows(f.st);f.st.pendingSelectionKey=f.context.streamRowKey(second.source);
  const replacement=f.release('The Others (2001) 720p','Mazepa',{InfoHash:'b'.repeat(40)});f.st.rows=[first.row,replacement.row];f.context.streamUpdateRows(f.st);
  assert.equal(f.st.last,replacement.row);assert.equal(f.st.pendingSelectionKey,null);
+ const malformed='f'.repeat(42);assert.notEqual(f.context.streamRowKey({InfoHash:malformed,Title:'First release'}),f.context.streamRowKey({InfoHash:malformed,Title:'Another release'}),'malformed hashes cannot conflate streamed row identities');
  assert.notEqual(f.context.streamRowKey({Title:'Same title',Tracker:'Toloka',Size:1}),f.context.streamRowKey({Title:'Same title',Tracker:'Mazepa',Size:1}));
 });
 

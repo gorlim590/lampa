@@ -304,7 +304,7 @@ function createCinemaRuntime(metadata) {
         var uaCount=st.rows.filter(function(row){return row._ctrData&&row._ctrData.parsed.audio.ua;}).length;st.uaButton.textContent='🇺🇦 UA · '+uaCount;
         var labels={recommended:'↕ Рекомендовані',quality:'↕ Якість',seeders:'↕ Сіди',size:'↕ Розмір',date:'↕ Дата',tracker:'↕ Трекер'};st.sortButton.textContent=labels[streamSortKey()]||labels.recommended;
     }
-    function streamRowKey(source){source=source||{};var hash=String(source.InfoHash||source.infohash||source.hash||'').toLowerCase();return /^[a-f0-9]{40,64}$/.test(hash)?'hash:'+hash:JSON.stringify([source.Title||source.title||'',source.Tracker||source.tracker||'',source.Size||source.size||'']);}
+    function streamRowKey(source){source=source||{};var hash=String(source.InfoHash||source.infohash||source.hash||'').toLowerCase();return /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(hash)?'hash:'+hash:JSON.stringify([source.Title||source.title||'',source.Tracker||source.tracker||'',source.Size||source.size||'']);}
     function streamSyncRows(st) {
         st.root.querySelectorAll('.torrent-item').forEach(function(row){if(st.rows.indexOf(row)<0)st.rows.push(row);});
         decorateStreamRows(st);syncStreamTools(st);
