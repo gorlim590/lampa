@@ -16,10 +16,10 @@ const sourceKey=u=>u.pathname.endsWith('/stremio-hybrid.js')?'/ui/stremio-hybrid
  const onError=e=>{if(capture)r.errors.push(e.message.replace(/https?:\/\/\S+/g,'[URL]'))};p.on('response',onResponse);p.on('pageerror',onError);
  const setup=()=>p.evaluate(()=>{
   if(window.__issue10)return;const L=Lampa,s=window.__issue10={shadow:{},local:{},writes:[],selects:[]},get=L.Storage.get,field=L.Storage.field;
-  L.Storage.get=function(k,d){if(k in s.shadow)return s.shadow[k];if(k==='trakt_token')return s.authorized?'synthetic-browser-fixture':null;if(/^trakt_/.test(k))return k==='trakt_plus_enable'?s.authorized===true:false;if(k==='sbadger_settings_v1')return{};return get.call(this,k,d)};
+  L.Storage.get=function(k,d){if(k in s.shadow)return s.shadow[k];if(k==='trakt_token')return s.authorized?'synthetic-browser-fixture':null;if(/^trakt_/.test(k))return k==='trakt_plus_enable'?s.authorized===true:false;return get.call(this,k,d)};
   L.Storage.field=function(k){if(/^trakt_/.test(k))return k==='trakt_plus_enable'?s.authorized===true:false;if(k in s.shadow)return s.shadow[k];return field.call(this,k)};
   L.Storage.set=(k,v)=>{s.writes.push(k);s.shadow[k]=v};L.Favorite.add=L.Favorite.remove=()=>{};if(L.Socket)L.Socket.send=()=>{};
-  const localGet=Storage.prototype.getItem;Storage.prototype.getItem=function(k){if(k in s.local)return s.local[k];if(/^seasonBadgeCache|^trakt_/.test(k))return null;return localGet.call(this,k)};Storage.prototype.setItem=function(k,v){s.local[k]=String(v)};Storage.prototype.removeItem=function(k){s.local[k]=null};
+  const localGet=Storage.prototype.getItem;Storage.prototype.getItem=function(k){if(k in s.local)return s.local[k];if(/^trakt_/.test(k))return null;return localGet.call(this,k)};Storage.prototype.setItem=function(k,v){s.local[k]=String(v)};Storage.prototype.removeItem=function(k){s.local[k]=null};
   const show=L.Select.show;L.Select.show=function(o){s.selects.push(o.items.map(i=>({season:i.season,title:i.title})));return show.apply(this,arguments)};
  });
  const route=async route=>{
