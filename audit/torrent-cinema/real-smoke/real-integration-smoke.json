@@ -109,7 +109,13 @@
         "originalName": "100일의 거짓말",
         "configuredPrimaryLanguage": "df"
       },
-      "reason": "The native Details → Torrent attempt did not produce a captured final parser state before the browser-runner deadline. No release count, empty result, provider failure, or timeout is claimed for the parser itself."
+      "torrentUiAttempt": {
+        "observedForMs": 9009,
+        "visibleRows": 0,
+        "torrentStatusPanel": false,
+        "emptyOrErrorMessage": false
+      },
+      "reason": "The real Lampa Details → Torrent attempt exposed no results panel, status message, rows, or final parser state in 9.009 seconds. This is a blocked UI/parser handoff observation, not a confirmed zero-result search, provider timeout, or provider failure."
     }
   },
   "network": {
