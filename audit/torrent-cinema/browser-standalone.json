@@ -44,14 +44,14 @@
     "/lampa/torrents-redesign.js",
     "/lampa/loader.js"
   ],
-  "commit": "b58bfe0ea30b14e31b12683f16a833889b6c098a",
+  "commit": "8e84c0bb4f9896f72e69667de7c9cddfee732ed0",
   "branch": "feat/issue-117-torrent-cinema",
   "fixture": true,
   "assets": {
     "ui/torrent-cinema.js": {
       "url": "https://gorlim590.github.io/lampa/ui/torrent-cinema.js",
-      "sha256": "241e1c1e623f3fc93092e731b2e0d521a2e2205b1536f00d6dbe42122b8be62a",
-      "bytes": 149099
+      "sha256": "16dd3c98d21c83a4044782f2bcf460d746a920ce46dbb919a1abbfd08cf5bd78",
+      "bytes": 149250
     }
   },
   "checks": [
@@ -173,17 +173,17 @@
             "x": 100.75,
             "y": 221.9375,
             "width": 1078.375,
-            "height": 295.375,
+            "height": 271.625,
             "right": 1179.125,
-            "bottom": 517.3125
+            "bottom": 493.5625
           },
           "lastVisibleRow": {
             "x": 100.75,
-            "y": 524,
+            "y": 500.25,
             "width": 1078.375,
             "height": 122.1875,
             "right": 1179.125,
-            "bottom": 646.1875
+            "bottom": 622.4375
           },
           "focus": {
             "x": 1142.6875,
@@ -2745,9 +2745,9 @@
                 "x": 180.875,
                 "y": 346.625,
                 "right": 1164.25,
-                "bottom": 503.9375,
+                "bottom": 480.1875,
                 "width": 983.375,
-                "height": 157.3125
+                "height": 133.5625
               },
               "visible": true,
               "textRects": [
@@ -2872,17 +2872,17 @@
             "x": 152.0625,
             "y": 308.375,
             "width": 1615.8125,
-            "height": 388.75,
+            "height": 356,
             "right": 1767.875,
-            "bottom": 697.125
+            "bottom": 664.375
           },
           "lastVisibleRow": {
             "x": 152.0625,
-            "y": 850.9375,
+            "y": 818.1875,
             "width": 1615.8125,
             "height": 135.4375,
             "right": 1767.875,
-            "bottom": 986.375
+            "bottom": 953.625
           },
           "focus": {
             "x": 1719.25,
@@ -3028,17 +3028,17 @@
             "x": 300.25,
             "y": 587.5,
             "width": 3239.4375,
-            "height": 731.0625,
+            "height": 665.4375,
             "right": 3539.6875,
-            "bottom": 1318.5625
+            "bottom": 1252.9375
           },
           "lastVisibleRow": {
             "x": 300.25,
-            "y": 1614.375,
+            "y": 1548.75,
             "width": 3239.4375,
             "height": 258.9375,
             "right": 3539.6875,
-            "bottom": 1873.3125
+            "bottom": 1807.6875
           },
           "focus": {
             "x": 3446.4375,
@@ -4604,7 +4604,7 @@
       "status": "PASS"
     },
     {
-      "name": "actual selected season 2 UI context accepts later-year S02 release without false year/season warning",
+      "name": "actual selected season 2 UI context accepts later-year S02 release without a mismatch warning element",
       "status": "PASS",
       "details": {
         "season": 2,
@@ -4619,11 +4619,12 @@
         "raw": "Attack on Titan (2018) S02E01-E12 1080p WEB-DL HEVC Ukr Eng",
         "eligible": true,
         "reasons": [],
-        "note": "Перевірте відповідність · "
+        "warningElements": 0,
+        "note": ""
       }
     },
     {
-      "name": "actual release-row UI renders selected season 1 warning for an S02 release",
+      "name": "renderer-level negative context: selected season 1 shows the S02 mismatch warning",
       "status": "PASS",
       "details": {
         "season": 1,
@@ -4632,6 +4633,7 @@
         "reasons": [
           "Інший сезон або набір сезонів"
         ],
+        "warningElements": 1,
         "note": "Перевірте відповідність · Інший сезон або набір сезонів"
       }
     },
@@ -4742,17 +4744,17 @@
           "x": 100.75,
           "y": 221.9375,
           "width": 1078.375,
-          "height": 295.375,
+          "height": 271.625,
           "right": 1179.125,
-          "bottom": 517.3125
+          "bottom": 493.5625
         },
         "lastVisibleRow": {
           "x": 100.75,
-          "y": 524,
+          "y": 500.25,
           "width": 1078.375,
           "height": 122.1875,
           "right": 1179.125,
-          "bottom": 646.1875
+          "bottom": 622.4375
         },
         "focus": {
           "x": 1142.6875,
@@ -4886,17 +4888,17 @@
           "x": 152.0625,
           "y": 308.375,
           "width": 1615.8125,
-          "height": 388.75,
+          "height": 356,
           "right": 1767.875,
-          "bottom": 697.125
+          "bottom": 664.375
         },
         "lastVisibleRow": {
           "x": 152.0625,
-          "y": 850.9375,
+          "y": 818.1875,
           "width": 1615.8125,
           "height": 135.4375,
           "right": 1767.875,
-          "bottom": 986.375
+          "bottom": 953.625
         },
         "focus": {
           "x": 1719.25,
@@ -5030,17 +5032,17 @@
           "x": 300.25,
           "y": 587.5,
           "width": 3239.4375,
-          "height": 731.0625,
+          "height": 665.4375,
           "right": 3539.6875,
-          "bottom": 1318.5625
+          "bottom": 1252.9375
         },
         "lastVisibleRow": {
           "x": 300.25,
-          "y": 1614.375,
+          "y": 1548.75,
           "width": 3239.4375,
           "height": 258.9375,
           "right": 3539.6875,
-          "bottom": 1873.3125
+          "bottom": 1807.6875
         },
         "focus": {
           "x": 3446.4375,
@@ -5128,7 +5130,7 @@
       ]
     }
   },
-  "openMs": 326.80000000074506,
+  "openMs": 257.3999999985099,
   "deviceEquivalent": {
     "viewport": [
       1920,

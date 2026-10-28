@@ -1,13 +1,14 @@
 # Torrent Cinema 2.0 — acceptance evidence
 
-Branch `feat/issue-117-torrent-cinema`; selected-season and native `Name` compatibility follow-up tested at `b58bfe0ea30b14e31b12683f16a833889b6c098a` (parent acceptance test commit `91a5685915aba9003a44eb7c76c28f4d14c7654e`; runtime implementation remains `98346e41b45e2264eb4881c8bb20fe7213a5b983`). Development baseline f60132b, rebased onto fa378b3 (two inventory-only main commits).
+Branch `feat/issue-117-torrent-cinema`; empty-match-warning fix and final verification tested at `8e84c0bb4f9896f72e69667de7c9cddfee732ed0` (parent verification commit `b58bfe0ea30b14e31b12683f16a833889b6c098a`; primary runtime implementation remains `98346e41b45e2264eb4881c8bb20fe7213a5b983`). Development baseline f60132b, rebased onto fa378b3 (two inventory-only main commits).
 
-Canonical artifact `ui/torrent-cinema.js`: 149099 bytes; SHA-256 `241e1c1e623f3fc93092e731b2e0d521a2e2205b1536f00d6dbe42122b8be62a`. Rebuilt freshness check passed; both browser modes routed these exact local bytes into the existing native Lampa runtime. Original tab/URL/display metrics restored; browser/profile kept running.
+Canonical artifact `ui/torrent-cinema.js`: 149250 bytes; SHA-256 `16dd3c98d21c83a4044782f2bcf460d746a920ce46dbb919a1abbfd08cf5bd78`. Rebuilt freshness check passed; both browser modes routed these exact local bytes into the existing native Lampa runtime. Original tab/URL/display metrics restored; browser/profile kept running.
 
 | Check | Result |
 | --- | --- |
 | Broader focused automated suite at prior acceptance checkpoint | 230 PASS / 0 FAIL (commit `91a5685`) |
-| Final targeted name/search regressions | 64 PASS / 0 FAIL; `tests/torrent-overlay.cjs` + `tests/torrent-search.cjs` at `b58bfe0` |
+| Final targeted name/search regressions | 64 PASS / 0 FAIL; `tests/torrent-overlay.cjs` + `tests/torrent-search.cjs` |
+| Empty-match warning regression | PASS: valid S02 has zero `.tc-match-note`; season mismatch renders exactly one note with nonempty reasons |
 | Canonical-only install, Hybrid/Buttons+/other visual scripts not executed | 96 PASS / 0 FAIL |
 | Hybrid integration | 96 PASS / 0 FAIL |
 | 1280×720, 1920×1080, 3840×2160 CSS at DPR 1 | PASS in both modes; independent PNG sizes match |
@@ -16,7 +17,7 @@ Canonical artifact `ui/torrent-cinema.js`: 149099 bytes; SHA-256 `241e1c1e623f3f
 | 720p text geometry | Actual title, technical badges, audio, voiceover and subtitles fit the row; info control is circular; expanded raw title fits its panel |
 | Release-name fixtures | 15 independent film/series/anime/dorama, season/episode pack, long multilingual and sparse-name cases per mode; each has a unique media ID, exact parser Title/Name, one row, cacheHit=false, exact compact identity/verified metadata and exact expanded raw title |
 | Genuine Name-only compatibility boundary | Live native `torrents` component is unsupported: its parse and tracker-filter paths call `element.Title.toLowerCase()` without a Name fallback. No Name-only result is sent through that component. The Torrent Cinema adapter separately passes a Name-only `releaseView` unit fixture. |
-| Selected season UI matching | Selected season 2 with S02 release `(2018)` for series first aired 2013 shows no year/season warning. Selected season 1 renders the expected S02 mismatch warning. |
+| Selected season UI matching | Selected season 2 with S02 release `(2018)` for series first aired 2013 shows no warning element. Negative season 1 check is renderer-level: it calls `LampaTorrentOverlay.decorate` with `{season:1}` and confirms the S02 mismatch note; it does not change the native selected-season filter. |
 | Retired Google TV appearance settings | Eight settings remain inert and stored; toggling former TV/animation values leaves styles/subscriptions stable, without animation, transform or backdrop filter |
 | Owner approved reference comparison | Reviewed directly; real release title, resolution/type/HDR/codec, audio, aligned availability/actions, two filter bands, restrained purple and four premium detail sections |
 | Empty/error/retry, delayed results, reopen, profile isolation, teardown | PASS |
@@ -41,7 +42,7 @@ The reference comparison keeps its TV composition while applying the owner's req
 
 The final HD pass gives wrapped text enough row height, brightens technical badges and keeps the info action circular. A browser regression measures actual text rectangles for all 12 baseline rows, including a long-title row, against card bounds, beyond checking document overflow. A long series fixture renders `Нічний архів / Night Archive` with verified 2024, S02E01–E03, 1080p, Ukrainian/English audio and studio; its expanded details retain the full multilingual raw torrent title. Fifteen independent cases are tested in each installation mode, covering parser-provided bilingual, Ukrainian-only, English-only, Title+Name and long multilingual titles. A live compatibility check documents that native Lampa cannot consume a Name-only parser row: it unconditionally reads `Title` before Torrent Cinema decorates the result. The adapter's Name-only fallback remains covered directly by a unit fixture; no production parsing shim was added. No catalog alias is appended.
 
-For season context, the browser opens the real Details → Torrent overlay and sets the native component's season filter to 2 using its public `setFilterData` API. The exact S02 release is accepted despite its 2018 release year and 2013 series premiere, with no mismatch reason. The same row rendered with selected season 1 shows the expected `Інший сезон` warning.
+For the positive season context, the browser opens the real Details → Torrent overlay and sets the native component's season filter to 2 using its public `setFilterData` API. The exact S02 release is accepted despite its 2018 release year and 2013 series premiere; its `reasons` array is empty and no `.tc-match-note` element is rendered. The negative case is renderer-level validation: it calls the production row renderer with `{season:1}` for the same S02 release and confirms a mismatch warning with nonempty reasons. It does not perform a native filter transition.
 
 Series captures: [compact 1080p](series-long-1920.png) · [expanded 1080p](series-expanded-1920.png) · [standalone compact](standalone-series-long-1920.png) · [standalone expanded](standalone-series-expanded-1920.png).
 

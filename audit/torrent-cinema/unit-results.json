@@ -1,17 +1,26 @@
 {
-  "commit": "b58bfe0ea30b14e31b12683f16a833889b6c098a",
+  "commit": "8e84c0bb4f9896f72e69667de7c9cddfee732ed0",
   "targetedTests": 64,
   "targetedPassed": 64,
   "targetedFailed": 0,
   "targetedCommand": "node --test --test-timeout=15000 tests/torrent-overlay.cjs tests/torrent-search.cjs",
-  "syntax": "node --check tests/torrent-cinema-browser.cjs PASS",
-  "artifact": "node scripts/build-torrent-cinema.mjs --check PASS; no production source or generated artifact changed",
+  "syntax": [
+    "node --check ui/torrent-cinema.js PASS",
+    "node --check tests/torrent-cinema-browser.cjs PASS"
+  ],
+  "artifact": {
+    "build": "node scripts/build-torrent-cinema.mjs PASS",
+    "freshness": "node scripts/build-torrent-cinema.mjs --check PASS",
+    "bytes": 149250,
+    "sha256": "16dd3c98d21c83a4044782f2bcf460d746a920ce46dbb919a1abbfd08cf5bd78"
+  },
   "browser": {
     "hybrid": "96/96 PASS",
     "standalone": "96/96 PASS",
+    "validSelectedSeason2": "eligible, reasons=[], zero .tc-match-note elements",
+    "negativeSeason1": "renderer-level with explicit {season:1}; one nonempty mismatch warning; no native filter transition",
     "nativeNameOnlySupport": false,
-    "nativeCompatibility": "Live native component dereferences element.Title.toLowerCase() in parse and tracker-filter paths; Name-only row is not sent to native UI. Torrent Cinema adapter Name-only fallback covered by releaseView unit test.",
-    "seasonContext": "Actual Details → Torrent overlay; selected native season 2 + S02 release year 2018 / first-air 2013 has no mismatch reason. Selected season 1 renders the expected S02 season mismatch in the release-row details."
+    "nativeCompatibility": "Live native component dereferences element.Title.toLowerCase() in parse/filter; Name-only record is not sent to it. Canonical adapter Name-only fallback unit-tested."
   },
   "priorBroaderFocusedSuite": {
     "commit": "91a5685915aba9003a44eb7c76c28f4d14c7654e",
@@ -19,7 +28,5 @@
     "passed": 230,
     "failed": 0
   },
-  "artifactSha256": "241e1c1e623f3fc93092e731b2e0d521a2e2205b1536f00d6dbe42122b8be62a",
-  "artifactBytes": 149099,
-  "note": "Verification-only follow-up; no production parsing behavior changed. Browser test reports load the exact canonical local artifact and restore the authorized browser tab."
+  "note": "Parser-provided title policy unchanged; no aliases or generated names added. Production change only suppresses empty match-warning notes."
 }
