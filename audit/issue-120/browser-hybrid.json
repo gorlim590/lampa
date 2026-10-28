@@ -1,0 +1,166 @@
+{
+  "sourceCommit": "4e5f594e0135597aa396441b04c1c5aa00994474",
+  "mode": "Hybrid",
+  "fixture": true,
+  "assets": {
+    "providers/parsers.js": {
+      "sha256": "3ed54d127f52c8fba1885c5128c15c5b6bbac7d138f0084ad205b5074d60d949",
+      "bytes": 56746,
+      "evaluated": true
+    },
+    "providers/parser-search.js": {
+      "sha256": "d896eaa8ea2a199e0bc6917dd9b59b19838917171eabd52b03fc15dca18245c3",
+      "bytes": 21213,
+      "delivered": true
+    },
+    "providers/torrent-search.js": {
+      "sha256": "e6b538806c460a05dfd2ec158b00e428323856e3d918d43c75ffbc6adcc9eaf0",
+      "bytes": 17944,
+      "delivered": true
+    },
+    "ui/torrent-cinema.js": {
+      "sha256": "2b0d3e87bf68284eef9dc584bb2e471db3215e42b7f4670874cbbf088c75693b",
+      "bytes": 149557,
+      "delivered": true,
+      "evaluated": true
+    },
+    "ui/stremio-hybrid.js": {
+      "sha256": "7851fd268a96a6f2e46dfdb7a2f1b17d5bfae23e922d2bc46f291bf580383b1e",
+      "bytes": 102692,
+      "delivered": true
+    }
+  },
+  "requests": [
+    {
+      "source": 0
+    },
+    {
+      "source": 1
+    },
+    {
+      "source": 2
+    },
+    {
+      "source": 3
+    },
+    {
+      "source": 4
+    },
+    {
+      "source": 5
+    }
+  ],
+  "checks": [
+    "six endpoints, fast partial, slow peer, 503, dedup, focus",
+    "native info, Files fixture and Back focus",
+    "D-pad and Back",
+    "exact local coordinator and canonical artifact delivered"
+  ],
+  "limits": [
+    "Synthetic endpoints and Files transport; no physical Google TV or live health verification"
+  ],
+  "first": {
+    "stats": {
+      "started": 1793219809097,
+      "requests": 6,
+      "peakConcurrency": 4,
+      "cacheHits": 0,
+      "firstResultMs": 277,
+      "results": 2,
+      "pending": 1,
+      "sources": [
+        {
+          "id": "endpoint-0",
+          "label": "Джерело 1",
+          "type": "jackett",
+          "status": "loading"
+        },
+        {
+          "id": "endpoint-1",
+          "label": "Джерело 2",
+          "type": "prowlarr",
+          "status": "ready"
+        },
+        {
+          "id": "endpoint-2",
+          "label": "Джерело 3",
+          "type": "jackett",
+          "status": "ready"
+        },
+        {
+          "id": "endpoint-3",
+          "label": "Джерело 4",
+          "type": "prowlarr",
+          "status": "ready"
+        },
+        {
+          "id": "endpoint-4",
+          "label": "Джерело 5",
+          "type": "jackett",
+          "status": "ready"
+        },
+        {
+          "id": "endpoint-5",
+          "label": "Джерело 6",
+          "type": "prowlarr",
+          "status": "server-error"
+        }
+      ]
+    },
+    "hybrid": true
+  },
+  "final": {
+    "stats": {
+      "started": 1793219809097,
+      "requests": 6,
+      "peakConcurrency": 4,
+      "cacheHits": 0,
+      "firstResultMs": 277,
+      "results": 3,
+      "pending": 0,
+      "sources": [
+        {
+          "id": "endpoint-0",
+          "label": "Джерело 1",
+          "type": "jackett",
+          "status": "ready"
+        },
+        {
+          "id": "endpoint-1",
+          "label": "Джерело 2",
+          "type": "prowlarr",
+          "status": "ready"
+        },
+        {
+          "id": "endpoint-2",
+          "label": "Джерело 3",
+          "type": "jackett",
+          "status": "ready"
+        },
+        {
+          "id": "endpoint-3",
+          "label": "Джерело 4",
+          "type": "prowlarr",
+          "status": "ready"
+        },
+        {
+          "id": "endpoint-4",
+          "label": "Джерело 5",
+          "type": "jackett",
+          "status": "ready"
+        },
+        {
+          "id": "endpoint-5",
+          "label": "Джерело 6",
+          "type": "prowlarr",
+          "status": "server-error"
+        }
+      ],
+      "settledMs": 2026
+    },
+    "rows": 3,
+    "focus": true,
+    "controller": "sh_movie_streams"
+  },
+  "status": "PASS"
+}
