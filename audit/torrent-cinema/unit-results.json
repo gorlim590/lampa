@@ -1,27 +1,25 @@
 {
-  "commit": "91a5685915aba9003a44eb7c76c28f4d14c7654e",
-  "tests": 230,
-  "passed": 230,
-  "failed": 0,
-  "command": "node --test --test-timeout=15000 tests/torrent-overlay.cjs tests/hybrid-ui.cjs tests/torrents-cinema.cjs tests/torrent-details.cjs tests/hybrid-torrent-discovery.cjs tests/torrent-search.cjs tests/parser-providers.cjs tests/ui-bootstrap.cjs tests/settings-census.cjs tests/settings-inventory.cjs tests/settings-registry.cjs tests/settings-hub-lifecycle.cjs",
-  "static": [
-    "node scripts/build-torrent-cinema.mjs --check PASS",
-    "node --test tests/repository-checker.cjs PASS",
-    "git diff --check PASS"
-  ],
+  "commit": "b58bfe0ea30b14e31b12683f16a833889b6c098a",
+  "targetedTests": 64,
+  "targetedPassed": 64,
+  "targetedFailed": 0,
+  "targetedCommand": "node --test --test-timeout=15000 tests/torrent-overlay.cjs tests/torrent-search.cjs",
+  "syntax": "node --check tests/torrent-cinema-browser.cjs PASS",
+  "artifact": "node scripts/build-torrent-cinema.mjs --check PASS; no production source or generated artifact changed",
   "browser": {
-    "hybrid": "93/93 PASS",
-    "standalone": "93/93 PASS",
-    "independentMediaCasesPerMode": 15,
-    "exactFixtureSourceAndRawExpandedTitle": "PASS",
-    "cacheIsolation": "unique media IDs; parser called once per case; cacheHit=false",
-    "deliveredCanonicalBytes": {
-      "file": "ui/torrent-cinema.js",
-      "bytes": 149099,
-      "sha256": "241e1c1e623f3fc93092e731b2e0d521a2e2205b1536f00d6dbe42122b8be62a"
-    }
+    "hybrid": "96/96 PASS",
+    "standalone": "96/96 PASS",
+    "nativeNameOnlySupport": false,
+    "nativeCompatibility": "Live native component dereferences element.Title.toLowerCase() in parse and tracker-filter paths; Name-only row is not sent to native UI. Torrent Cinema adapter Name-only fallback covered by releaseView unit test.",
+    "seasonContext": "Actual Details → Torrent overlay; selected native season 2 + S02 release year 2018 / first-air 2013 has no mismatch reason. Selected season 1 renders the expected S02 season mismatch in the release-row details."
   },
-  "preFixtureException": "Both browser modes observe the same uncaught SyntaxError from host https://siaivo.isroot.in/app.min.js?v=1992455:44592:24 before fixture setup. CDP Runtime stack points to host bundle; no PR asset frame observed. No uncaught exception after fixture installation.",
-  "note": "No product runtime source changed in this focused acceptance correction. Tests reject stale results through exact Title/Name, compact title/metadata, one visible row and exact raw expanded-title assertions.",
-  "followUp": "15 independently isolated media identity cases in Hybrid and standalone; 720p text rectangles checked across all 12 baseline rows including long title; 2018 season 3 verified for 2013 premiere; parser-provided bilingual, Ukrainian-only, English-only, Name-only and multilingual titles tested without aliases."
+  "priorBroaderFocusedSuite": {
+    "commit": "91a5685915aba9003a44eb7c76c28f4d14c7654e",
+    "tests": 230,
+    "passed": 230,
+    "failed": 0
+  },
+  "artifactSha256": "241e1c1e623f3fc93092e731b2e0d521a2e2205b1536f00d6dbe42122b8be62a",
+  "artifactBytes": 149099,
+  "note": "Verification-only follow-up; no production parsing behavior changed. Browser test reports load the exact canonical local artifact and restore the authorized browser tab."
 }

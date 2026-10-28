@@ -1,7 +1,7 @@
 {
   "installation": "Hybrid integration",
   "suppressedScripts": [],
-  "commit": "91a5685915aba9003a44eb7c76c28f4d14c7654e",
+  "commit": "b58bfe0ea30b14e31b12683f16a833889b6c098a",
   "branch": "feat/issue-117-torrent-cinema",
   "fixture": true,
   "assets": {
@@ -35,6 +35,17 @@
     {
       "name": "installation boundary",
       "status": "PASS"
+    },
+    {
+      "name": "live native component compatibility boundary for a genuine Name-only parser result",
+      "status": "PASS",
+      "details": {
+        "componentAvailable": true,
+        "requiresTitle": true,
+        "directTitleFilter": true,
+        "supportsNameOnly": false,
+        "contract": "native torrent component dereferences element.Title during parse and filter construction; Torrent Cinema adapter independently accepts Name-only records"
+      }
     },
     {
       "name": "release identity and metadata hierarchy",
@@ -3831,7 +3842,7 @@
       }
     },
     {
-      "name": "case name-field uses exact parser field and exact release title",
+      "name": "case title-and-name uses exact parser field and exact release title",
       "status": "PASS",
       "details": {
         "expected": {
@@ -3861,7 +3872,7 @@
       }
     },
     {
-      "name": "case name-field matches verified year, coverage, resolution, and audio",
+      "name": "case title-and-name matches verified year, coverage, resolution, and audio",
       "status": "PASS",
       "details": {
         "expected": {
@@ -3891,7 +3902,7 @@
       }
     },
     {
-      "name": "case name-field is cache-isolated and has no previous result rows",
+      "name": "case title-and-name is cache-isolated and has no previous result rows",
       "status": "PASS",
       "details": [
         {
@@ -3903,7 +3914,7 @@
       ]
     },
     {
-      "name": "case name-field preserves the complete raw parser title",
+      "name": "case title-and-name preserves the complete raw parser title",
       "status": "PASS",
       "details": {
         "expected": {
@@ -4570,6 +4581,39 @@
       "status": "PASS"
     },
     {
+      "name": "actual selected season 2 UI context accepts later-year S02 release without false year/season warning",
+      "status": "PASS",
+      "details": {
+        "season": 2,
+        "firstAirDate": "2013-04-07",
+        "nativeFilter": {
+          "season": [
+            "2"
+          ],
+          "voice": [],
+          "tracker": []
+        },
+        "raw": "Attack on Titan (2018) S02E01-E12 1080p WEB-DL HEVC Ukr Eng",
+        "eligible": true,
+        "reasons": [],
+        "note": "Перевірте відповідність · "
+      }
+    },
+    {
+      "name": "actual release-row UI renders selected season 1 warning for an S02 release",
+      "status": "PASS",
+      "details": {
+        "season": 1,
+        "raw": "Attack on Titan (2018) S02E01-E12 1080p WEB-DL HEVC Ukr Eng",
+        "eligible": false,
+        "reasons": [
+          "Інший рік",
+          "Інший сезон"
+        ],
+        "note": "Перевірте відповідність · Інший рік · Інший сезон"
+      }
+    },
+    {
       "name": "canonical source bytes were actually delivered",
       "status": "PASS"
     },
@@ -5023,15 +5067,22 @@
   "browser": "Chrome/156.0.8078.4",
   "startupExceptionDetails": {
     "text": "Uncaught",
-    "exception": "SyntaxError: Failed to execute 'appendChild' on 'Node': Unexpected token '&'\n    at https://siaivo.isroot.in/app.min.js?v=1992455:44592:24",
+    "exception": "SyntaxError: Failed to execute 'appendChild' on 'Node': Unexpected token '&'\n    at https://siaivo.isroot.in/app.min.js?v=1992457:44592:24",
     "frames": [
       {
         "functionName": "",
-        "url": "https://siaivo.isroot.in/app.min.js?v=1992455",
+        "url": "https://siaivo.isroot.in/app.min.js?v=1992457",
         "line": 44592,
         "column": 24
       }
     ]
+  },
+  "nativeCompatibility": {
+    "componentAvailable": true,
+    "requiresTitle": true,
+    "directTitleFilter": true,
+    "supportsNameOnly": false,
+    "contract": "native torrent component dereferences element.Title during parse and filter construction; Torrent Cinema adapter independently accepts Name-only records"
   },
   "hostStartupExceptions": [
     "SyntaxError: Failed to execute 'appendChild' on 'Node': Unexpected token '&'\n    at https://siaivo.isroot.in/app.min.js"
@@ -5044,18 +5095,18 @@
     ],
     "runtimeException": {
       "text": "Uncaught",
-      "exception": "SyntaxError: Failed to execute 'appendChild' on 'Node': Unexpected token '&'\n    at https://siaivo.isroot.in/app.min.js?v=1992455:44592:24",
+      "exception": "SyntaxError: Failed to execute 'appendChild' on 'Node': Unexpected token '&'\n    at https://siaivo.isroot.in/app.min.js?v=1992457:44592:24",
       "frames": [
         {
           "functionName": "",
-          "url": "https://siaivo.isroot.in/app.min.js?v=1992455",
+          "url": "https://siaivo.isroot.in/app.min.js?v=1992457",
           "line": 44592,
           "column": 24
         }
       ]
     }
   },
-  "openMs": 402.80000000074506,
+  "openMs": 380.6000000014901,
   "deviceEquivalent": {
     "viewport": [
       1920,
@@ -5402,7 +5453,7 @@
       "rawDetails": "海辺の長い物語 / The Long Shore Story — قصة طويلة على الشاطئ 2023 1080p WEB-DL AVC Ukr"
     },
     {
-      "id": "name-field",
+      "id": "title-and-name",
       "kind": "movie",
       "expected": {
         "name": "Amélie",
@@ -5608,10 +5659,10 @@
   ],
   "finalDiagnostics": {
     "running": true,
-    "records": 1,
+    "records": 2,
     "subscriptions": 13,
-    "children": 1,
-    "cacheEntries": 1
+    "children": 0,
+    "cacheEntries": 2
   },
   "status": "PASS",
   "restoredOriginalTab": true

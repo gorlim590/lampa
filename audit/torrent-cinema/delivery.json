@@ -54,6 +54,7 @@
     "afterStandaloneSingleRecordedOpenMs": 347.5,
     "limits": "Single samples include host/protocol polling differences, not a controlled benchmark. No startup, FPS, smoothness or memory gain claimed."
   },
-  "acceptanceFollowupCommit": "91a5685915aba9003a44eb7c76c28f4d14c7654e",
-  "canonicalBuildCheck": "PASS"
+  "acceptanceFollowupCommit": "b58bfe0ea30b14e31b12683f16a833889b6c098a",
+  "canonicalBuildCheck": "PASS",
+  "verificationCommit": "b58bfe0ea30b14e31b12683f16a833889b6c098a"
 }
