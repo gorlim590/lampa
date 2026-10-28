@@ -249,7 +249,8 @@ function createCinemaView() {
         section('tc-subtitle-section','☷','Субтитри',[subs.languages&&subs.languages.length?subs.languages.join(' / '):'Не визначено']);
         var files=source.Files||source.files||[],fileCount=Array.isArray(files)?files.length:Number(source.FileCount||source.file_count)||0;
         section('tc-files-section','▤','Файли',[fileCount?fileCount+' файли':'Кількість не визначено',size?'Загалом · '+size:'',kind==='tv'?identity.coverage:''].filter(Boolean));
-        if(view.match&&view.match.reasons&&window.TorrentsRedesign.flag('suspect',true)){var note=document.createElement('div');note.className='tc-match-note';note.textContent='Перевірте відповідність · '+view.match.reasons.join(' · ');details.appendChild(note);}
+        var matchReasons=view.match&&Array.isArray(view.match.reasons)?view.match.reasons.filter(function(reason){return typeof reason==='string'&&reason.trim();}):[];
+        if(matchReasons.length&&window.TorrentsRedesign.flag('suspect',true)){var note=document.createElement('div');note.className='tc-match-note';note.textContent='Перевірте відповідність · '+matchReasons.join(' · ');details.appendChild(note);}
         details.appendChild(technical);
         return view;
     }
