@@ -31,6 +31,10 @@ test('display identity uses only the torrent title, verified year, coverage and 
  const technical=api.releaseView({Title:'Dune.2021.2160p.WEB-DL.HDR10.DV.HEVC.Ukr.Eng'},movie,'movie').identity;assert.equal(technical.resolution,'2160');assert.equal(technical.releaseType,'WEB-DL');assert.deepEqual(Array.from(technical.flags),['HDR10','Dolby Vision']);assert.equal(technical.codec,'HEVC');
  const raw='超長い映画の題名 非常に長い多言語のリリース名 '.repeat(18)+'2160p WEB-DL';assert.equal(api.releaseView({Title:raw},movie,'movie').raw,raw,'expanded details retain the full, unmodified source title');
 });
+test('visible title uses parser-provided Ukrainian/English names only and never adds catalog aliases',()=>{
+ const {api}=apiFixture(),catalog={title:'Catalog Ukrainian Alias',original_title:'Catalog English Alias',name:'Catalog Ukrainian Alias',original_name:'Catalog English Alias'},cases=[[{Title:'Українська назва 2024 1080p WEB-DL'},'Українська назва'],[{Name:'Only the English Name 2023 720p WEBRip'},'Only the English Name'],[{Title:'Українська назва / English Name 2025 4K WEB-DL'},'Українська назва / English Name'],[{Title:'Зоряний шлях / Star Trek — 星の航路 — 별빛 항로 2026 S02E01 1080p WEB-DL'},'Зоряний шлях / Star Trek — 星の航路 — 별빛 항로']];
+ for(const [source,name] of cases){const raw=source.Title||source.Name,view=api.releaseView(source,catalog,'movie');assert.equal(view.identity.name,name);assert.equal(view.title,raw);assert.equal(view.raw,raw);assert(!view.identity.name.includes('Catalog'));}
+});
 test('removed Google TV appearance keys are not read by the canonical runtime',()=>{
  const fs=require('node:fs'),path=require('node:path'),base=path.join(__dirname,'../ui/torrent-cinema'),sources=['entry.js','runtime.js','view.js','metadata.js','style.css'].map(file=>fs.readFileSync(path.join(base,file),'utf8')).join('\n');
  for(const key of ['torrents_cinema_theme','torrents_cinema_tv','torrents_cinema_animations','torrents_cinema_title_lines','torrents_cinema_cards','torrents_cinema_intensity','torrents_cinema_opacity','torrents_cinema_darkness'])assert(!sources.includes(key),key+' should stay inert after retirement');

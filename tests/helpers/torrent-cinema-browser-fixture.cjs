@@ -22,13 +22,14 @@ module.exports=function installFixture(){
     qa.baseMovie=Object.assign({},movie);qa.baseResults=JSON.parse(JSON.stringify(qa.results));
     qa.restoreMovie=function(){Object.assign(movie,qa.baseMovie);qa.results=JSON.parse(JSON.stringify(qa.baseResults));qa.push();};
     qa.installSeries=function(){
-        Object.assign(movie,{media_type:'tv',title:'Нічний архів',original_title:'夜のアーカイブ',name:'Нічний архів',original_name:'夜のアーカイブ',first_air_date:'2021-01-01'});
-        qa.results[0]={Title:'Нічний архів / Night Archive — 夜のアーカイブ — 별빛 항로 — S02E01-E03 2024 1080p WEB-DL HEVC Ukr Eng DVO',Tracker:'toloka.to',Size:7340032000,Seeders:84,Peers:11,InfoHash:'9'.repeat(40),MagnetUri:'magnet:?xt=urn:btih:'+'9'.repeat(40),hash:'9'.repeat(40),AudioLanguages:['uk','en'],SubtitleLanguages:['uk'],VoiceoverStudio:'Студія Переклад / Studio Переклад',Quality:'1080p',PublishDate:'2024-02-01'};
+        Object.assign(movie,{id:99117002,media_type:'tv',title:'Нічний архів',original_title:'Night Archive',name:'Нічний архів',original_name:'Night Archive',first_air_date:'2021-01-01'});
+        qa.results=[{Title:'Нічний архів / Night Archive — 夜のアーカイブ — 별빛 항로 — S02E01-E03 2024 1080p WEB-DL HEVC Ukr Eng DVO',Tracker:'toloka.to',Size:7340032000,Seeders:84,Peers:11,InfoHash:'9'.repeat(40),MagnetUri:'magnet:?xt=urn:btih:'+'9'.repeat(40),hash:'9'.repeat(40),AudioLanguages:['uk','en'],SubtitleLanguages:['uk'],VoiceoverStudio:'Студія Переклад / Studio Переклад',Quality:'1080p',PublishDate:'2024-02-01'}];
         qa.push();
     };
     qa.installCase=function(testCase){
-        Object.assign(movie,{media_type:testCase.kind==='tv'?'tv':'movie',title:'Catalog title must not replace release name',original_title:'Catalog title must not replace release name',name:'Catalog title must not replace release name',original_name:'Catalog title must not replace release name',release_date:'2024-01-01',first_air_date:'2024-01-01'});
-        qa.results[0]=Object.assign({Tracker:'toloka.to',Size:7340032000,Seeders:84,Peers:11,InfoHash:'8'.repeat(40),MagnetUri:'magnet:?xt=urn:btih:'+'8'.repeat(40),hash:'8'.repeat(40),AudioLanguages:['uk','en'],SubtitleLanguages:['uk'],VoiceoverStudio:'Переклад UA',Quality:'1080p',PublishDate:'2024-02-01'},testCase.source);
+        const mediaId=99117010+testCase.index,metadataName=testCase.metadataName||'Catalog Alias MUST NOT APPEAR';
+        Object.assign(movie,{id:mediaId,media_type:testCase.kind==='tv'?'tv':'movie',title:metadataName,original_title:metadataName,name:metadataName,original_name:metadataName,release_date:testCase.premiere||'2024-01-01',first_air_date:testCase.premiere||'2024-01-01'});
+        qa.results=[Object.assign({Tracker:'toloka.to',Size:7340032000,Seeders:84,Peers:11,InfoHash:String(mediaId).padStart(40,'0'),MagnetUri:'magnet:?xt=urn:btih:'+String(mediaId).padStart(40,'0'),hash:String(mediaId).padStart(40,'0'),AudioLanguages:testCase.audio||[],SubtitleLanguages:testCase.subtitles||[],VoiceoverStudio:testCase.studio||'',Quality:testCase.quality||'',PublishDate:'2024-02-01'},testCase.source)];
         qa.push();
     };
     L.Parser.get=function(params,done,fail){
