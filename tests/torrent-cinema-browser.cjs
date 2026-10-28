@@ -4,6 +4,7 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const {execFileSync}=require('node:child_process'),{chromium}=require('playwright');
 const standalone=process.argv.includes('--standalone');
+const isolated=process.argv.includes('--isolated');
 const root=path.resolve(__dirname,'..'),dir=path.join(root,'audit/torrent-cinema');
 const fixture=require('./helpers/torrent-cinema-browser-fixture.cjs');
 const hash=body=>crypto.createHash('sha256').update(body).digest('hex');
@@ -24,11 +25,11 @@ async function rowTextGeometry(page,expanded=false){return page.evaluate(expande
     return all.map((row,index)=>{const clip=expanded?row.querySelector('.tc-details'):row,raw=row._ctrSource?.Title||row._ctrSource?.Name||'',texts=targets.flatMap(selector=>{const n=row.querySelector(selector);if(!n||!n.textContent.trim())return[];const r=box(n),c=box(clip),style=getComputedStyle(n),range=document.createRange();range.selectNodeContents(n);const textRects=[...range.getClientRects()].map(x=>({x:x.x,y:x.y,right:x.right,bottom:x.bottom,width:x.width,height:x.height}));const naturalFit=selector==='.ctr-name'||selector==='.tc-raw-title'||(n.scrollWidth<=n.clientWidth+1&&n.scrollHeight<=n.clientHeight+1);return[{selector,text:n.textContent.trim(),rect:r,clip:c,visible:!!r.width&&!!r.height&&style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity)>0&&naturalFit&&textRects.some(x=>x.width&&x.height&&inside(x,c)),textRects,scroll:[n.scrollWidth,n.scrollHeight],client:[n.clientWidth,n.clientHeight]}];});return{index,raw,long:/Extended Edition|[\u3400-\u9fff].{12,}/u.test(raw)||raw.length>90,texts};});
 },expanded);}
 (async()=>{
-    let page,cdp,preload,original,route,errorListener,initialMetrics,exceptionListener;
+    let browser,page,cdp,preload,original,route,errorListener,initialMetrics,exceptionListener;
     fs.mkdirSync(dir,{recursive:true});
     try{
-        const browser=await chromium.connectOverCDP(process.env.LAMPA_TEST_CDP||'http://127.0.0.1:9222',{timeout:5000});
-        const pages=browser.contexts().flatMap(c=>c.pages()).filter(p=>p.url().startsWith('https://siaivo.isroot.in/'));assert.equal(pages.length,1,'reuse the one authorized Lampa tab');page=pages[0];original=page.url();
+        if(isolated){browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||'/usr/bin/chromium',headless:true,args:['--no-sandbox','--force-device-scale-factor=1']});const context=await browser.newContext({viewport:{width:1280,height:720},deviceScaleFactor:1});page=await context.newPage();original='https://siaivo.isroot.in/';await page.goto(original,{waitUntil:'domcontentloaded'});report.browserContext='isolated Playwright Chromium; native process DPR 1; no DPR emulation; ephemeral profile';}
+        else{browser=await chromium.connectOverCDP(process.env.LAMPA_TEST_CDP||'http://127.0.0.1:9222',{timeout:5000});const pages=browser.contexts().flatMap(c=>c.pages()).filter(p=>p.url().startsWith('https://siaivo.isroot.in/'));assert.equal(pages.length,1,'reuse the one authorized Lampa tab');page=pages[0];original=page.url();report.browserContext='existing authorized Lampa CDP tab';}
         cdp=await page.context().newCDPSession(page);initialMetrics=await cdp.send('Page.getLayoutMetrics');report.browser=(await cdp.send('Browser.getVersion')).product;
         errorListener=error=>report.exceptions.push(error.stack.replace(/https?:\/\/[^\s)]+/g,value=>{try{const u=new URL(value);return u.origin+u.pathname;}catch{return '[URL]';}}).slice(0,1000));page.on('pageerror',errorListener);
         await cdp.send('Runtime.enable');
@@ -37,7 +38,7 @@ async function rowTextGeometry(page,expanded=false){return page.evaluate(expande
             const request=intercepted.request(),url=new URL(request.url()),file=assets.get(path.posix.basename(url.pathname));
             if(standalone&&/\.js$/.test(url.pathname)&&url.hostname!=='siaivo.isroot.in'&&!url.pathname.includes('/providers/')&&path.posix.basename(url.pathname)!=='torrent-cinema.js'){report.suppressedScripts.push(url.hostname==='gorlim590.github.io'||url.hostname==='127.0.0.1'?url.pathname:'external optional script');return intercepted.fulfill({status:200,body:'/* isolated canonical-only test; restored after this run */',contentType:'application/javascript',headers:{'Access-Control-Allow-Origin':'*'}});}
             if(file&&(url.hostname==='gorlim590.github.io'||url.hostname==='127.0.0.1')){
-                const body=fs.readFileSync(path.join(root,file));report.assets[file]={url:url.origin+url.pathname,sha256:hash(body),bytes:body.length};
+                const body=fs.readFileSync(path.join(root,file));report.assets[file]={url:url.origin+url.pathname,source:'local repository bytes served by exact URL interception',sha256:hash(body),bytes:body.length};
                 return intercepted.fulfill({status:200,body,contentType:'application/javascript',headers:{'Access-Control-Allow-Origin':'*','Cache-Control':'no-store'}});
             }
             if(!['GET','HEAD','OPTIONS'].includes(request.method())){report.blockedWrites++;return intercepted.abort('blockedbyclient');}
@@ -45,7 +46,10 @@ async function rowTextGeometry(page,expanded=false){return page.evaluate(expande
         };
         await page.route('**/*',route);preload=(await cdp.send('Page.addScriptToEvaluateOnNewDocument',{source:shadow})).identifier;
         await page.reload({waitUntil:'domcontentloaded'});
+        if(isolated&&!await page.evaluate(()=>window.appready))await page.locator('.lang__selector-item[data-code="uk"]').click();
         await page.waitForFunction(()=>window.appready,null,{timeout:25000});
+        if(isolated&&!standalone&&!await page.evaluate(()=>!!window.StremioHybrid)){await page.addScriptTag({path:path.join(root,'ui/stremio-hybrid.js')});report.assets['ui/stremio-hybrid.js']={source:'isolated direct injection',sha256:hash(fs.readFileSync(path.join(root,'ui/stremio-hybrid.js'))),bytes:fs.statSync(path.join(root,'ui/stremio-hybrid.js')).size};}
+        if(isolated&&!await page.evaluate(()=>!!window.LampaTorrentCinema)){await page.addScriptTag({path:path.join(root,'ui/torrent-cinema.js')});report.assets['ui/torrent-cinema.js']={source:'isolated direct injection',sha256:hash(fs.readFileSync(path.join(root,'ui/torrent-cinema.js'))),bytes:fs.statSync(path.join(root,'ui/torrent-cinema.js')).size};}
         if(standalone)await page.addScriptTag({url:'https://gorlim590.github.io/lampa/ui/torrent-cinema.js?v=qa117-direct'});
         await page.waitForFunction(standalone=>window.LampaTorrentCinema&&(standalone?!window.StremioHybrid:!!window.StremioHybrid),standalone,{timeout:25000});
         check('installation boundary',await page.evaluate(standalone=>standalone?!window.StremioHybrid&&!window.ButtonsPlus:!!window.StremioHybrid,standalone));
@@ -54,15 +58,14 @@ async function rowTextGeometry(page,expanded=false){return page.evaluate(expande
         // The host restores its last route after appready; allow that native transition to settle.
         await page.waitForTimeout(3500);cdp.off('Runtime.exceptionThrown',exceptionListener);await cdp.send('Runtime.disable');report.hostStartupExceptions=report.exceptions.splice(0);report.preFixtureStartup={activity:await page.evaluate(()=>Lampa.Activity.active()?.component||null),scriptCount:await page.locator('script[src]').count(),hostErrors:report.hostStartupExceptions,runtimeException:report.startupExceptionDetails||null};
         await page.evaluate(fixture);
-        const ready=()=>page.waitForFunction(()=>Lampa.Activity.active()?.component==='full'&&Number(Lampa.Activity.active()?.id)===Number(window.__tcQa.movie.id)&&Lampa.Activity.active().activity.render()[0].querySelector('.view--torrent')&&document.querySelector('.sh-torrent-overlay'),null,{timeout:15000});
+        const ready=()=>page.waitForFunction(()=>Lampa.Activity.active()?.component==='full'&&Number(Lampa.Activity.active()?.id)===Number(window.__tcQa.movie.id)&&Lampa.Activity.active().activity.render()[0].querySelector('.view--torrent'),null,{timeout:15000});
         await ready();
         const enter=selector=>page.evaluate(selector=>{const n=document.querySelector(selector);if(!n)throw Error('Missing test control '+selector);$(n).trigger('hover:enter');},selector);
         const open=async()=>{await page.evaluate(()=>{window.__tcQa.opened=performance.now();const p=Lampa.Activity.active().activity.render()[0],button=p.querySelector('.view--torrent');Lampa.Controller.collectionFocus(button,p);button.dispatchEvent(new Event('hover:enter',{bubbles:true}));});};
         const loaded=(expected=12)=>page.waitForFunction(expected=>document.querySelectorAll('.sh-torrent-overlay:not([hidden]) .torrent-item:not([hidden])').length===expected,expected,{timeout:10000});
         const setViewport=async(width,height,dpr=1)=>{
-            const metrics=await cdp.send('Page.getLayoutMetrics'),zoom=metrics.cssVisualViewport.zoom||1;
-            await cdp.send('Emulation.setDeviceMetricsOverride',{width:Math.round(width*zoom),height:Math.round(height*zoom),deviceScaleFactor:dpr/zoom,mobile:false});
-            await page.waitForFunction(([w,h,d])=>innerWidth===w&&innerHeight===h&&devicePixelRatio===d,[width,height,dpr],{timeout:5000});
+            if(isolated){if(dpr!==1)throw Error('isolated browser uses native DPR 1');await page.setViewportSize({width,height});await page.waitForFunction(([w,h])=>innerWidth===w&&innerHeight===h&&devicePixelRatio===1,[width,height],{timeout:5000});}
+            else{const metrics=await cdp.send('Page.getLayoutMetrics'),zoom=metrics.cssVisualViewport.zoom||1;await cdp.send('Emulation.setDeviceMetricsOverride',{width:Math.round(width*zoom),height:Math.round(height*zoom),deviceScaleFactor:dpr/zoom,mobile:false});await page.waitForFunction(([w,h,d])=>innerWidth===w&&innerHeight===h&&devicePixelRatio===d,[width,height,dpr],{timeout:5000});}
             await page.waitForTimeout(900); // Native Lampa resize debounce.
         };
         const capture=async file=>{
@@ -90,7 +93,7 @@ async function rowTextGeometry(page,expanded=false){return page.evaluate(expande
             if(width===1280){const texts=await rowTextGeometry(page,true);check('720p expanded raw release title stays visible inside details',texts.length===1&&texts[0].texts.length===1&&texts[0].texts[0].visible,texts);}
             await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.querySelector('.sh-torrent-overlay:not([hidden]) .tc-details:not([hidden])'));
         }
-        await setViewport(1920,1080,2);const equivalent=await geometry(page);equivalent.capture=await capture((standalone?'standalone-':'')+'device-equivalent-1080-dpr2.png');report.deviceEquivalent=equivalent;assert.deepEqual(equivalent.capture.pixels,[3840,2160]);
+        await setViewport(1920,1080);const equivalent=await geometry(page);equivalent.capture=await capture((standalone?'standalone-':'')+'native-1920-dpr1.png');report.deviceEquivalent=equivalent;assert.deepEqual(equivalent.capture.pixels,[1920,1080]);
         // A long multilingual series release must remain legible in the compact
         // row and retain the exact unmodified name in its expanded details.
         await setViewport(1920,1080);await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.querySelector('.sh-torrent-overlay:not([hidden]) .tc-details:not([hidden])'));await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.querySelector('.sh-torrent-overlay:not([hidden])'));await page.evaluate(()=>__tcQa.installSeries());await ready();await open();await loaded(1);
@@ -145,10 +148,14 @@ async function rowTextGeometry(page,expanded=false){return page.evaluate(expande
         await page.keyboard.press('Escape');check('Back collapses before closing',await page.evaluate(()=>!!document.querySelector('.sh-torrent-overlay:not([hidden])')&&!document.querySelector('.tc-details:not([hidden])')));
         await page.keyboard.press('Enter');await page.waitForFunction(()=>Lampa.Controller.enabled().name==='modal');
         check('native selection preserves synthetic transport and opens Files modal',await page.evaluate(()=>__tcQa.selected?.magnet==='magnet:?xt=urn:btih:'+__tcQa.selected.hash&&!!document.querySelector('.sh-files-modal .torrent-file')));
-        const filesStack=await page.evaluate(()=>{const files=document.querySelector('.sh-files-modal'),overlay=document.querySelector('.sh-torrent-overlay:not([hidden])'),panel=files?.querySelector('.modal__content'),rect=panel?.getBoundingClientRect(),x=rect?.left+rect?.width/2,y=rect?.top+rect?.height/2,top=rect?document.elementFromPoint(x,y):null;return{filesVisible:!!files&&files.getClientRects().length>0,overlayVisible:!!overlay&&overlay.getClientRects().length>0,filesZ:files?Number(getComputedStyle(files).zIndex):null,overlayZ:overlay?Number(getComputedStyle(overlay).zIndex):null,actualTopmost:!!top&&files.contains(top)};});
-        check('native Files dialog renders in front of the still-open Torrent overlay',filesStack.filesVisible&&filesStack.overlayVisible&&filesStack.filesZ>filesStack.overlayZ&&filesStack.actualTopmost,filesStack);
-        const errorLayer=await page.evaluate(()=>{const overlay=document.querySelector('.sh-torrent-overlay:not([hidden])'),probe=document.createElement('div');probe.className='modal modal--large';probe.textContent='Помилка підключення';probe.style.cssText='position:fixed;inset:25vh 25vw;z-index:50;background:#111';document.body.appendChild(probe);const r=probe.getBoundingClientRect(),top=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2),result={overlayVisible:!!overlay&&overlay.getClientRects().length>0,modalZ:Number(getComputedStyle(probe).zIndex),overlayZ:Number(getComputedStyle(overlay).zIndex),modalHit:top===probe};probe.remove();return result;});
-        check('native connection errors render above the Torrent Cinema overlay',errorLayer.overlayVisible&&errorLayer.modalZ>errorLayer.overlayZ&&errorLayer.modalHit,errorLayer);
+        // Lampa's native remote-first modal has pointer-events:none. Its row
+        // therefore cannot be proven with elementFromPoint; use the native
+        // stacking order, controller owner and a real pixel capture instead.
+        const filesStack=await page.evaluate(()=>{const files=document.querySelector('.sh-files-modal'),overlay=document.querySelector('.sh-torrent-overlay:not([hidden])'),target=files?.querySelector('.torrent-file'),rect=target?.getBoundingClientRect();return{filesVisible:!!files&&files.getClientRects().length>0,overlayVisible:!!overlay&&overlay.getClientRects().length>0,filesZ:files?Number(getComputedStyle(files).zIndex):null,overlayZ:overlay?Number(getComputedStyle(overlay).zIndex):null,controller:Lampa.Controller.enabled().name,fileRowWithinViewport:!!rect&&rect.top>=0&&rect.bottom<=innerHeight,pointerEvents:{files:files&&getComputedStyle(files).pointerEvents,target:target&&getComputedStyle(target).pointerEvents}};});
+        filesStack.capture=await capture((standalone?'standalone-':'')+'files-1920.png');
+        check('native Files dialog renders in front of the still-open Torrent overlay',filesStack.filesVisible&&filesStack.overlayVisible&&filesStack.filesZ>filesStack.overlayZ&&filesStack.controller==='modal'&&filesStack.fileRowWithinViewport,filesStack);
+        const errorLayer=await page.evaluate(()=>{const overlay=document.querySelector('.sh-torrent-overlay:not([hidden])'),probe=document.createElement('div');probe.className='modal modal--large';probe.textContent='Помилка підключення';probe.style.cssText='position:fixed;inset:25vh 25vw;z-index:50;background:#111';document.body.appendChild(probe);const result={overlayVisible:!!overlay&&overlay.getClientRects().length>0,modalVisible:probe.getClientRects().length>0,modalZ:Number(getComputedStyle(probe).zIndex),overlayZ:Number(getComputedStyle(overlay).zIndex),pointerEvents:getComputedStyle(probe).pointerEvents};probe.remove();return result;});
+        check('native modal stacking rule keeps connection errors above the Torrent Cinema overlay',errorLayer.overlayVisible&&errorLayer.modalVisible&&errorLayer.modalZ>errorLayer.overlayZ,errorLayer);
         await page.keyboard.press('Escape');await page.waitForFunction(()=>Lampa.Controller.enabled().name==='sh_movie_streams');
         check('Files Back restores popup row',await page.locator('.sh-torrent-overlay:not([hidden]) .torrent-item.focus').count()===1);
         await page.keyboard.press('Escape');check('popup Back restores actual Torrent action',await page.evaluate(()=>!document.querySelector('.sh-torrent-overlay:not([hidden])')&&!!Lampa.Activity.active().activity.render()[0].querySelector('.view--torrent.focus')));
@@ -177,7 +184,8 @@ async function rowTextGeometry(page,expanded=false){return page.evaluate(expande
         await page.keyboard.press('Escape');
         await page.evaluate(()=>{window.StremioHybrid?.setEnabled(false);LampaTorrentCinema.setEnabled(false);});
         check('disable removes owned UI/style and runtime subscriptions',await page.evaluate(()=>document.querySelectorAll('.sh-torrent-overlay,#torrent-cinema-style').length===0&&LampaTorrentCinema.diagnostics().subscriptions===0));
-        await page.evaluate(()=>{LampaTorrentCinema.setEnabled(true);});await ready();await open();await loaded();
+        await page.evaluate(()=>{Lampa.Storage.set('parser_use',true);window.lampa_settings=window.lampa_settings||{};window.lampa_settings.torrents_use=true;LampaTorrentCinema.setEnabled(true);__tcQa.push();});
+        await page.waitForFunction(()=>LampaTorrentCinema.diagnostics().records>0&&!!document.querySelector('.sh-streams'),null,{timeout:5000});await ready();await open();await loaded();
         check('independent plugin works with Hybrid disabled',await page.evaluate(()=>!document.body.classList.contains('stremio-hybrid')&&document.querySelectorAll('#torrent-cinema-style').length===1&&Lampa.Controller.enabled().name==='sh_movie_streams'));
         await page.keyboard.press('Escape');await page.evaluate(()=>window.StremioHybrid?.setEnabled(true));
         await page.evaluate(()=>__tcQa.installSeasonContext());await ready();
@@ -195,17 +203,17 @@ async function rowTextGeometry(page,expanded=false){return page.evaluate(expande
         check('canonical source bytes were actually delivered',!!report.assets['ui/torrent-cinema.js']&&report.assets['ui/torrent-cinema.js'].sha256===hash(fs.readFileSync(path.join(root,'ui/torrent-cinema.js'))));
         check('changed-runtime scenario has no uncaught exception',report.exceptions.length===0,report.exceptions);
         report.finalDiagnostics=await page.evaluate(()=>LampaTorrentCinema.diagnostics());report.status='PASS';
-    }catch(error){if(page)try{report.failureState=await page.evaluate(()=>({controller:Lampa.Controller.enabled().name,activity:Lampa.Activity.active()?.component,diagnostics:window.LampaTorrentCinema?.diagnostics(),filter:window.TorrentsRedesign?.selectedTrackerFilter(),panes:[...document.querySelectorAll('.sh-torrent-overlay')].map(n=>({hidden:n.hidden,state:n.dataset.state,status:n.querySelector('.sh-stream-status')?.textContent,rows:n.querySelectorAll('.torrent-item').length})),pending:window.__tcQa?.pending.length,parserCalls:window.__tcQa?.parserCalls}));}catch{}report.status='FAIL';report.failure=error.stack.replace(/https?:\/\/\S+/g,'[URL]');console.error(error.message);process.exitCode=1;}
+    }catch(error){if(page)try{report.failureState=await page.evaluate(()=>({controller:Lampa.Controller.enabled().name,activity:Lampa.Activity.active()?.component,diagnostics:window.LampaTorrentCinema?.diagnostics(),prerequisites:{enabled:window.LampaTorrentCinema?.enabled?.(),parserUse:!!Lampa.Storage.field('parser_use'),torrentsUse:!!window.lampa_settings?.torrents_use,overlayAPI:!!window.LampaTorrentOverlay,activeComponent:Lampa.Activity.active()?.component,fullStart:!!Lampa.Activity.active()?.activity?.render?.()[0]?.querySelector('.full-start-new'),activePageClass:Lampa.Activity.active()?.activity?.render?.()[0]?.className,hasTorrentButton:!!Lampa.Activity.active()?.activity?.render?.()[0]?.querySelector('.view--torrent')},filter:window.TorrentsRedesign?.selectedTrackerFilter(),panes:[...document.querySelectorAll('.sh-torrent-overlay')].map(n=>({hidden:n.hidden,state:n.dataset.state,status:n.querySelector('.sh-stream-status')?.textContent,rows:n.querySelectorAll('.torrent-item').length})),pending:window.__tcQa?.pending.length,parserCalls:window.__tcQa?.parserCalls}));}catch{}report.status='FAIL';report.failure=error.stack.replace(/https?:\/\/\S+/g,'[URL]');console.error(error.message);process.exitCode=1;}
     finally{
         if(page)try{
             if(errorListener)page.off('pageerror',errorListener);
             if(preload)await cdp.send('Page.removeScriptToEvaluateOnNewDocument',{identifier:preload});
-            await cdp.send('Emulation.clearDeviceMetricsOverride');
+            if(!isolated)await cdp.send('Emulation.clearDeviceMetricsOverride');
             if(route)await page.unroute('**/*',route);
             // A reload discards all fixture/global/shadow changes, preserves stored data and the original URL.
-            await page.goto(original,{waitUntil:'domcontentloaded'});report.restoredOriginalTab=true;
+            if(!isolated){await page.goto(original,{waitUntil:'domcontentloaded'});report.restoredOriginalTab=true;}
         }catch(error){report.restoreFailure=error.message;process.exitCode=1;}
-        if(cdp)await cdp.detach();
+        if(cdp)await cdp.detach();if(isolated&&browser){await browser.close();report.isolatedBrowserClosed=true;}
         fs.writeFileSync(path.join(dir,standalone?'browser-standalone.json':'browser-results.json'),JSON.stringify(report,null,2));
         console.log(JSON.stringify({status:report.status,checks:report.checks.length,passed:report.checks.filter(c=>c.status==='PASS').length,restored:report.restoredOriginalTab,report:standalone?'audit/torrent-cinema/browser-standalone.json':'audit/torrent-cinema/browser-results.json'}));
     }

@@ -22,29 +22,34 @@ Alias budget tests also cover settled/failed originals, cancellation, replacemen
 
 ## Actual Lampa browser integration
 
-Both runs used the existing authorized test tab, the canonical Torrent Cinema artifact, six controlled synthetic endpoints and fixture-only Files transport. They exercised native Details → Torrent Cinema, fast partial results, a slow source, one HTTP 503, deduplication, source status, focus retention, D-pad, Files and Back.
+The initial live-tab harness run used six controlled synthetic endpoints and fixture-only Files transport. The updated visual acceptance was then rerun in a separately launched, ephemeral Chromium process at native DPR 1. It injects the current local canonical Torrent Cinema bytes and, for Hybrid, the current local Hybrid bytes. No screenshot is resized from another viewport. The isolated run exercises native Lampa Details → Torrent Cinema, filters, source status, D-pad, Files and Back, with deterministic synthetic provider data.
 
 | Mode | First visible results | Settled | Requests | Peak | Distinct rows |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Standalone | 279 ms | 2029 ms | 6 | 4 | 3 |
-| Hybrid | 291 ms | 2038 ms | 6 | 4 | 3 |
+| Standalone (prior authorized-tab run) | 279 ms | 2029 ms | 6 | 4 | 3 |
+| Hybrid (prior authorized-tab run) | 291 ms | 2038 ms | 6 | 4 | 3 |
 
-The loaded native `Lampa.Parser.jackett`, `Lampa.Utils.buildUrl` and `Lampa.Utils.isAnime` implementations were inspected in the same runtime. Their source SHA256 values and byte sizes are in the browser JSON reports. No parser endpoints or credentials were queried. Unit tests compare Jackett path, query, title/year/serial/genre/category fields, native animation category rule, proxy subpaths, errors, cancellation and preserved release transport fields.
+The loaded native `Lampa.Parser.jackett`, `Lampa.Utils.buildUrl` and `Lampa.Utils.isAnime` implementations were inspected in the same runtime. Their source SHA256 values and byte sizes are in the browser JSON reports. Those controlled browser runs did not query parser endpoints or credentials. Unit tests compare Jackett path, query, title/year/serial/genre/category fields, native animation category rule, proxy subpaths, errors, cancellation and preserved release transport fields.
 
-The browser harness set independent CSS viewports of 1280×720, 1920×1080 and 3840×2160, verified reported DPR 1, overlay/card/filter geometry, visible rows and the per-source error label in both modes. The Files modal reports z-index 110 over Torrent Cinema's 100, one visible file, modal controller ownership and Back restoration to the focused release.
+The visual harness runs each installation mode in isolated Chromium with native `deviceScaleFactor: 1`, then sets independent 1280×720, 1920×1080 and 3840×2160 CSS viewports. Reports confirm matching DPR, raster dimensions and CSS viewport; screenshots are actual browser renders. Torrent Cinema rendering, multi-source status, quality/tracker filters, scrolling, Files modal stacking, Back behavior and focus restoration passed 98 checks per mode. At 720p three rows are visible; at 1080p and 4K five rows are visible. The Files modal is visibly above the overlay in screenshots; DOM reports its z-index 110 vs. overlay 100, modal controller ownership and Back restoration. Native Lampa uses `pointer-events:none` for its remote-driven Files layer and file rows, so `elementFromPoint` cannot be used for those targets; screenshot and controller/stack geometry are the evidence used instead.
 
-**Pixel-level visual acceptance is BLOCKED.** The connected Chromium's original DPR is 0.25; CDP emulation reports the requested CSS viewport and DPR, but screenshots still rasterize at the original 0.25 scale. The screenshots were inspected and are not saved as acceptance evidence. DOM geometry and controller tests pass, but they do not substitute for valid screenshots at these resolutions.
+**Pixel-level visual acceptance: PASS for isolated desktop Chromium at native DPR 1.** This is not physical Google TV evidence. The first isolated run had a 1280×720 browser window; larger viewports were set in-page and independently rasterized at DPR 1 (not forced-device-metrics emulation). Live provider endpoints, live TorrServer and playback were not exercised.
 
 - [Standalone browser report](browser-standalone.json)
 - [Hybrid browser report](browser-hybrid.json)
 
 The harness restores the existing tab URL and original emulation metrics, removes routes/preload/shadow storage, and leaves the test browser running. Its six endpoint URLs and API keys are synthetic fixture values. It does not touch saved live parser configuration.
 
+## Live series investigation: Таємниця бункера / Silo
+
+Read-only smoke in the existing main Lampa browser used the installed main-branch runtime and real configured parser responses; it did **not** execute PR #124's local coordinator artifact. The saved native filter for TMDb TV card `125988` was `season: ["1"]`; its year filter was empty. This explains why the overlay showed only S01 rows while provider responses contained later seasons. No preference was changed. See [sanitized machine-readable results](silo-main-smoke.json).
+
+Manual query `Silo S02` returned HTTP 200 with 40 parser records (31 title matches including season-range packs); results include standalone S02 releases dated 2024. `Silo S03` returned HTTP 200 with 34 parser records (27 title matches); results include standalone S03 releases dated 2026, including Toloka and Mazepa entries. The UI showed `6/40` and `5/34` rows respectively because the saved native season-1 filter remained active. Thus the parser search is not limited to the 2023 first-air year. These are live endpoint observations, not PR #124 browser-acceptance evidence; no endpoint URL, key or authenticated address was recorded. No Files, download or playback action was started.
+
 ## Not tested / limitations
 
-- No live parser endpoint health/search smoke was sent; no real configured endpoint availability/authentication/CORS conclusion is made.
+- The Silo smoke confirms one live parser response per manual query; it does not establish health, authentication, or CORS behavior of every configured endpoint. PR #124's all-enabled-source behavior remains covered by deterministic fixtures only.
 - Live TorrServer, torrent download and playback are not tested.
-- Physical Google TV rendering is not tested.
-- Pixel screenshot review remains blocked by the connected browser raster scale. Re-run visual checks in a Chromium instance with native, non-forced viewport/DPR before marking PR #124 Ready for Review.
+- Physical Google TV rendering/performance remains unverified. Live parser/TorrServer behavior remains untested.
 
 See [implementation and rollback](../../docs/issue-120-multi-parser.md).
