@@ -1057,3 +1057,5 @@ Next publishupdatedPR50(mainmerge+marginfixonly),CI/merge;thenPR53retargettothat
 - Shared source 299568 → 234421 raw bytes (21.7% reduction). Latency samples INCONCLUSIVE; no speed/FPS/memory improvement claimed.
 - OAuth rejected workflow-file writes; workflows unchanged, new lifecycle/inline/build-freshness checks wired through existing Hybrid CI entry. No scope expansion/security change/CI bypass. Latest main inventory URLs needed Markdown formatting only to pass existing validator; inventory data unchanged.
 - Migration/rollback: `docs/torrent-cinema.md`; verification/screenshots: `audit/torrent-cinema/README.md`. Draft PR next; no merge, issue close or production deploy.
+
+- Draft PR #119 opened: https://github.com/gorlim590/lampa/pull/119. Initial Season CI found an existing static loader assertion pinned to the previous cache-version literal; updated it to the new delivery version without changing Trakt code/dependency behavior. Targeted loader assertion rerun; browser evidence reused because product bytes are unchanged. CI recheck required on the new head.
