@@ -4,7 +4,7 @@ const source=fs.readFileSync(__dirname+'/../ui/torrent-cinema/runtime.js','utf8'
 function extract(name){const start=source.indexOf('    function '+name+'('),end=source.indexOf('\n    function ',start+15);assert(start>=0);return source.slice(start,end);}
 function fixture(){
     const details={hidden:true},info={attrs:{},setAttribute(k,v){this.attrs[k]=v;},closest:()=>row},row={querySelector:s=>s==='.tc-details'?details:s==='.tc-info'?info:null},record={streamView:{isOpen:()=>true}},st={record,root:{querySelector:()=>null},child:{},wantFocus:true};record.streamChild=st;
-    let controller,closed=0;const context={streamAlive:()=>true,streamFocus:(state,node)=>state.last=node,closeStreamOverlay:()=>closed++,Lampa:{Controller:{add:(name,methods)=>controller=methods,toggle(){}}}};
+    let controller,closed=0;const context={streamSelectOwner:null,streamAlive:()=>true,streamFocus:(state,node)=>state.last=node,closeStreamOverlay:()=>closed++,Lampa:{Select:{opened:()=>false},Controller:{add:(name,methods)=>controller=methods,toggle(){}}}};
     vm.createContext(context);vm.runInContext(['collapseInline','toggleInline','inlineEnter','streamActivate'].map(extract).join('\n'),context);
     return {context,st,record,row,details,info,get controller(){return controller;},get closed(){return closed;}};
 }

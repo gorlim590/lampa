@@ -1,8 +1,12 @@
 /* Scoped to Torrent Cinema nodes; Hybrid tokens are optional fallbacks. */
 .sh-torrent-overlay[hidden]{display:none!important}
 .sh-torrent-overlay{--tc-accent:#8e7ba8;--tc-text:#f1eef9;--tc-muted:#b4afc4;--tc-border:#ffffff18;position:fixed!important;inset:5vh 6vw!important;width:88vw!important;height:90vh!important;max-height:none!important;z-index:100;box-sizing:border-box;padding:1.25em!important;border:1px solid #ffffff25;border-radius:1em;background:linear-gradient(112deg,rgba(18,16,29,.985),rgba(19,16,29,.98));box-shadow:0 0 0 100vmax #04030aab,0 1em 4em #0006;display:flex;flex-direction:column;gap:.65em;font:400 clamp(16px,1.145833vw,44px)/1.4 Manrope,system-ui,sans-serif;color:var(--tc-text);isolation:isolate}
-/* Native Lampa error/dialog modals must remain visible over the stream chooser. */
-body:has(> .sh-torrent-overlay:not([hidden])) > .modal:not(.sh-torrent-overlay){z-index:110!important}
+/* Native surfaces receive these classes only while Torrent Cinema owns the
+   corresponding transition. Unrelated Lampa/plugin dialogs keep native layers. */
+.tc-native-torrent-modal{z-index:130!important}
+.tc-native-loading{position:fixed!important;inset:0!important;z-index:140!important}
+.tc-native-search{z-index:145!important}
+.tc-native-player{z-index:150!important}
 .sh-torrent-overlay *{box-sizing:border-box}
 .sh-torrent-overlay .sh-stream-head{display:flex;align-items:center;gap:.65em;flex:none}
 .sh-torrent-overlay .sh-stream-head h2{margin:0;flex:1;min-width:0;font-size:1.3em;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -61,7 +65,7 @@ body:has(> .sh-torrent-overlay:not([hidden])) > .modal:not(.sh-torrent-overlay){
 @media(prefers-reduced-motion:reduce){.sh-torrent-overlay *{transition:none!important;animation:none!important}}
 
 /* Retained native Files and Select skins, now owned here only. */
-    css += `.sh-files-modal{--acc:#e0243a;--acc-rgb:224,36,58;--text:#eef1f8;--muted:#9099ad;font:clamp(1rem,1.04vw,2.6rem)/1.4 Manrope,system-ui,sans-serif;color:var(--text)}
+.sh-files-modal{--acc:#e0243a;--acc-rgb:224,36,58;--text:#eef1f8;--muted:#9099ad;font:clamp(1rem,1.04vw,2.6rem)/1.4 Manrope,system-ui,sans-serif;color:var(--text)}
 .sh-files-modal{background:linear-gradient(90deg,rgba(7,9,16,.08) 25%,rgba(7,9,16,.3) 55%,rgba(7,9,16,.6))!important;inset:0!important;padding:0!important}
 .sh-files-modal .modal__content{position:absolute!important;top:max(10vh,calc(var(--ctr-head-height,8vh) + 1.5vh));right:4.5vw;bottom:4.5vh;left:auto!important;width:60vw!important;max-width:none!important;max-height:none!important;margin:0!important;padding:1em!important;display:flex!important;flex-direction:column;background:rgba(9,12,22,.96)!important;border:1px solid rgba(255,255,255,.15);border-radius:1.1em;box-shadow:0 1em 3em rgba(0,0,0,.3)}
 .sh-files-modal .modal__head{padding:.2em .4em .75em!important;flex:none}
@@ -88,11 +92,11 @@ body:has(> .sh-torrent-overlay:not([hidden])) > .modal:not(.sh-torrent-overlay){
 .sh-files-modal .time-line>div{background:var(--acc)!important;height:100%!important;border-radius:inherit}
 .sh-files-modal .torrent-file{grid-template-columns:minmax(0,1fr) auto;min-height:3.5em!important}
 .sh-files-modal .torrent-file__size{position:static!important;float:none!important}
-.sh-files-modal{position:fixed!important;z-index:101!important;width:100vw!important;height:100vh!important;transform:none!important}
+.sh-files-modal{position:fixed!important;z-index:130!important;width:100vw!important;height:100vh!important;transform:none!important}
 .sh-files-modal .modal__content{transform:none!important}
 @media(max-width:800px){.sh-files-modal .modal__content{width:91vw!important}}
 .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9em}
-.sh-cinema-select{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;--acc:#e0243a;--acc-rgb:224,36,58;--text:#eef1f8;--muted:#9099ad;font:clamp(1rem,1.04vw,2.6rem)/1.4 Manrope,system-ui,sans-serif;color:var(--text)}
+.sh-cinema-select{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;z-index:120!important;--acc:#e0243a;--acc-rgb:224,36,58;--text:#eef1f8;--muted:#9099ad;font:clamp(1rem,1.04vw,2.6rem)/1.4 Manrope,system-ui,sans-serif;color:var(--text)}
 .sh-cinema-select:not(.animate){visibility:hidden!important;pointer-events:none!important}
 .sh-cinema-select .selectbox__layer{background:rgba(3,5,10,.38)!important}
 .sh-cinema-select .selectbox__content{position:absolute!important;top:max(10vh,calc(var(--ctr-head-height,8vh) + 1.5vh))!important;right:4.5vw!important;bottom:4.5vh!important;max-height:none!important;left:auto!important;width:38vw!important;min-width:min(26rem,91vw);height:auto!important;display:flex;flex-direction:column;padding:1em!important;background:rgba(9,12,22,.98)!important;border:1px solid rgba(255,255,255,.15);border-radius:1.1em;box-shadow:0 1em 3em rgba(0,0,0,.4);transform:none!important}
