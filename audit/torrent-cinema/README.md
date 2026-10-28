@@ -4,6 +4,8 @@
 
 Run against the current PR artifact and existing authorized Lampa Chromium session: [sanitized smoke report](real-smoke/README.md) with [machine-readable evidence](real-smoke/real-integration-smoke.json). The Others returned 15 releases and its native Files handoff returned one TorrServer file entry; Arcane returned 20 releases. The 100 днів омани parser run and real-provider filter/duplicate interactions remain explicitly unresolved/not tested. No playback was started.
 
+The final 30-second investigation resolves the UI concern: `100 днів омани` opened a visible loading overlay at 108 ms, then the actual configured parser returned 0 releases at 2.598 s and the UI displayed its empty state. A Korean drama control returned 28 releases. See [instrumented case results](real-smoke/targeted-100-days-investigation.json). The remaining zero-result response is external search coverage, not an Issue #119 overlay defect.
+
 Branch `feat/issue-117-torrent-cinema`; empty-match-warning fix and final verification tested at `8e84c0bb4f9896f72e69667de7c9cddfee732ed0` (parent verification commit `b58bfe0ea30b14e31b12683f16a833889b6c098a`; primary runtime implementation remains `98346e41b45e2264eb4881c8bb20fe7213a5b983`). Development baseline f60132b, rebased onto fa378b3 (two inventory-only main commits).
 
 Canonical artifact `ui/torrent-cinema.js`: 149250 bytes; SHA-256 `16dd3c98d21c83a4044782f2bcf460d746a920ce46dbb919a1abbfd08cf5bd78`. Rebuilt freshness check passed; both browser modes routed these exact local bytes into the existing native Lampa runtime. Original tab/URL/display metrics restored; browser/profile kept running.
