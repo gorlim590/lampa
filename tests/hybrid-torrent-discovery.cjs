@@ -32,6 +32,7 @@ class Node {
   removeChild(node) { const i = this.children.indexOf(node); if (i >= 0) this.children.splice(i, 1); node.parentNode = null; return node; }
   setAttribute(key, value) { this.attrs[key] = String(value); }
   getAttribute(key) { return this.attrs[key] == null ? null : this.attrs[key]; }
+  removeAttribute(key) { delete this.attrs[key]; }
   addEventListener(type, fn) { this.listeners[type] = fn; }
   dispatch(type) { this.listeners[type]({ stopImmediatePropagation() {} }); }
   querySelector(selector) { if (this.nodes && this.nodes[selector]) return this.nodes[selector]; if (selector === '[data-ctr-role="studio"]') { const queue = Object.values(this.nodes || {}).concat(this.children); while (queue.length) { const node = queue.shift(); if (node.getAttribute && node.getAttribute('data-ctr-role') === 'studio') return node; queue.push(...(node.children || [])); } } return null; }
@@ -51,7 +52,8 @@ function fixture() {
     Select: { show: options => selections.push(options) }, Noty: { show() {} }
   };
   const document = { createElement: () => new Node(), createTextNode: text => { const n = new Node(); n.textContent = text; return n; } };
-  const context = { window: { localStorage }, Lampa, document, console, Date, Set, WeakMap, Event: function () {} };
+  const trakt = { progress: { watched: null, episodes: [] }, reads: 0 };
+  const context = { window: { localStorage, TraktPlus: { cachedHomeProgress(card) { trakt.reads++; return String(card.id) === '55' ? trakt.progress : { watched: null, episodes: [] }; } } }, Lampa, document, console, Date, Set, WeakMap, Event: function () {} };
   vm.createContext(context); vm.runInContext(redesign, context);
   context.window.Lampa = Lampa; vm.runInContext(overlay, context);
   context.TorrentsRedesign = context.window.TorrentsRedesign; context.LampaTorrentOverlay = context.window.LampaTorrentOverlay;
@@ -91,7 +93,7 @@ function fixture() {
   // Template-backed toolbar fixture: preserve the production setupStreamTools handlers.
   const filesInsert = files.insertBefore.bind(files);
   files.insertBefore = (node, before) => { node.nodes = nodes; node.querySelector = selector => nodes[selector] || null; node.classList.add('ctr-tools'); return filesInsert(node, before); };
-  const sourceFunctions = ['streamSession', 'streamAlive', 'streamTrackerKey', 'streamSortKey', 'streamWindow', 'streamUpdateRows', 'decorateStreamRows', 'syncStreamTrackerTools', 'streamFocus', 'streamMove', 'setupStreamTools', 'streamEpisodeDetails', 'applyStreamEpisodePreview', 'applyStreamFileStudios', 'onStreamFile'];
+  const sourceFunctions = ['streamSession', 'streamAlive', 'streamTrackerKey', 'streamSortKey', 'streamWindow', 'streamUpdateRows', 'decorateStreamRows', 'syncStreamTrackerTools', 'streamFocus', 'streamMove', 'setupStreamTools', 'streamEpisodeDetails', 'streamEpisodeWatched', 'restoreStreamEpisodePreview', 'clearStreamEpisodePreviews', 'applyStreamEpisodePreview', 'applyStreamFileStudios', 'onStreamFile'];
   context.streamActivate = () => {};
   context.streamSelectOwner = null;
   context.streamRecord = () => record;
@@ -102,7 +104,7 @@ function fixture() {
   vm.runInContext(sourceFunctions.map(name => extract(hybrid, name)).join('\n'), context);
   // setupStreamTools uses innerHTML to create these three native control groups.
   Object.defineProperty(Node.prototype, 'innerHTML', { set() { this.nodes = nodes; this.querySelector = selector => nodes[selector] || null; }, configurable: true });
-  return { context, api: context.TorrentsRedesign, overlay: context.LampaTorrentOverlay, stored, selections, focus, list, scroll, files, record, st, movie, release, nodes };
+  return { context, api: context.TorrentsRedesign, overlay: context.LampaTorrentOverlay, stored, selections, focus, list, scroll, files, record, st, movie, release, nodes, trakt };
 }
 
 test('Hybrid embedded list uses shared metadata, exact matching, tracker filters, sorting and Best Choice pinning', () => {
@@ -196,6 +198,7 @@ test('generic voice tags are not presented as studios, while dedicated studio fi
 test('real Hybrid torrent_file handler applies exact episode stills and verified studios from filenames', () => {
   const f = fixture();
   f.st.params.movie = {id:55,source:'tmdb',media_type:'tv',name:'Frieren',seasons:[{season_number:3}]};
+  f.trakt.progress = { watched: false, episodes: [{ season: 3, episode: 1 }] };
   f.st.selectedRow = f.release('Frieren S03E01 1080p', 'Toloka', {VoiceoverStudio:'Tori'}).row;
   f.st.selectedRow.setAttribute('data-ctr-role','studio');
   const chips = f.st.selectedRow.nodes['.ctr-chips'];
@@ -209,25 +212,79 @@ test('real Hybrid torrent_file handler applies exact episode stills and verified
   assert.equal(f.record.seasonRequests||0,0,'already available episode metadata does not trigger another request');
   assert.equal(studio.textContent,'🎙 Далі Буде');
   f.context.onStreamFile({type:'render',params:{movie:f.st.params.movie,seasons:{3:{episodes:[metadata]}}},element:{season:3,episode:2,title:'Frieren S03E02 [Amanogawa].mkv'},item:{0:item}});
+  assert.equal(image.getAttribute('src'), '', 'an unwatched episode does not reuse the prior still');
   assert.equal(studio.textContent,'🎙 Далі Буде, Амоногава');
   f.overlay.decorate(f.st.selectedRow,f.st.selectedRow._ctrSource,f.st.params.movie,'tv',{});
   assert.equal(f.st.selectedRow.querySelector('[data-ctr-role="studio"]').textContent,'🎙 Далі Буде, Амоногава','verified file names survive overlay redecoration');
 });
 
-test('missing season metadata is requested once and stale file rows are not decorated after removal', () => {
+test('missing season metadata is requested once, episode callbacks retain identity, and detached rows stay untouched', () => {
   const f = fixture();
+  f.trakt.progress = { watched: false, episodes: [{ season: 3, episode: 1 }, { season: 3, episode: 2 }] };
   const selected=f.release('Frieren S03E01 1080p','Toloka').row;f.st.selectedRow=selected;
   const image=new Node();image.setAttribute('src','');const item=new Node('torrent-serial');item.nodes={'.torrent-serial__img':image};item.querySelector=selector=>item.nodes[selector]||null;
   const event={type:'render',params:{movie:{id:55,source:'tmdb'}},element:{season:3,episode:1,title:'Frieren S03E01'},item};
   f.context.onStreamFile(event);f.context.onStreamFile({...event,element:{season:3,episode:2,title:'Frieren S03E02'}});
   assert.equal(f.record.seasonRequests,1,'the same season is fetched once for multiple file rows');
   f.record.seasonCallback({3:{episodes:[{season_number:3,episode_number:1,still_path:'/one.jpg'},{season_number:3,episode_number:2,still_path:'/two.jpg'}]}});
-  assert.equal(image.getAttribute('src'),'https://image.tmdb.org/t/p/w300/one.jpg');
+  assert.equal(image.getAttribute('src'),'https://image.tmdb.org/t/p/w300/two.jpg','reused row shows only its most recently rendered episode');
   const staleImage=new Node();staleImage.setAttribute('src','');const staleItem=new Node('torrent-serial');staleItem.nodes={'.torrent-serial__img':staleImage};staleItem.querySelector=selector=>staleItem.nodes[selector]||null;
   f.st.selectedRow=selected;
   f.context.onStreamFile({...event,params:{movie:{id:55,source:'tmdb'}},item:staleItem,element:{season:4,episode:1,title:'Frieren S04E01'}});
   staleItem.isConnected=false;f.record.seasonCallback({4:{episodes:[{season_number:4,episode_number:1,still_path:'/stale.jpg'}]}});
   assert.equal(staleImage.getAttribute('src'),'','closed/stale episode DOM is not mutated');
+});
+
+test('episode stills require exact, current-account Trakt confirmation before metadata requests', () => {
+  for (const progress of [
+    { watched: null, episodes: [{ season: 3, episode: 1 }] }, // logged out, pending, failed or stale
+    { watched: false, episodes: [] }, // show is incomplete and this episode is not watched
+    { watched: true, episodes: [{ season: 2, episode: 1 }] }, // whole show says complete but exact episode is absent
+    null
+  ]) {
+    const f = fixture(); f.trakt.progress = progress;
+    const image = new Node(); image.setAttribute('src', 'https://image.invalid/non-spoiler.jpg');
+    const item = new Node('torrent-serial'); item.nodes = { '.torrent-serial__img': image }; item.querySelector = selector => item.nodes[selector] || null;
+    f.context.onStreamFile({ type: 'render', params: { movie: { id: 55, source: 'tmdb', media_type: 'tv' }, seasons: {} }, element: { season: 3, episode: 1 }, item });
+    assert.equal(f.record.seasonRequests || 0, 0, 'unconfirmed episode does not fetch spoiler still metadata');
+    assert.equal(image.getAttribute('src'), 'https://image.invalid/non-spoiler.jpg');
+    assert.equal(image.getAttribute('data-sh-episode-preview'), null);
+  }
+  const f = fixture(); f.trakt.progress = { watched: false, episodes: [{ season: 3, episode: 1 }] };
+  const image = new Node(); image.setAttribute('src', ''); const item = new Node('torrent-serial'); item.nodes = { '.torrent-serial__img': image }; item.querySelector = selector => item.nodes[selector] || null;
+  f.context.onStreamFile({ type: 'render', params: { movie: { id: 55, source: 'tmdb', media_type: 'tv', seasons: {} } }, element: { season: 3, episode: 1 }, item });
+  assert.equal(f.record.seasonRequests, 1, 'an exact cached episode starts a single metadata lookup');
+  f.trakt.progress = { watched: false, episodes: [] }; // active account/profile changed while the public request was pending
+  f.record.seasonCallback({ 3: { episodes: [{ season_number: 3, episode_number: 1, still_path: '/watched-only.jpg' }] } });
+  assert.equal(image.getAttribute('src'), '', 'a stale callback cannot reveal an episode after confirmation disappears');
+});
+
+test('reused file row invalidates an earlier async preview when its episode identity changes', () => {
+  const f = fixture(); f.trakt.progress = { watched: false, episodes: [{ season: 3, episode: 1 }, { season: 3, episode: 2 }] };
+  const image = new Node(); image.setAttribute('src', 'https://image.invalid/base.jpg');
+  const item = new Node('torrent-serial'); item.nodes = { '.torrent-serial__img': image }; item.querySelector = selector => item.nodes[selector] || null;
+  const params = { movie: { id: 55, source: 'tmdb', media_type: 'tv' } };
+  f.context.onStreamFile({ type: 'render', params, element: { season: 3, episode: 1 }, item });
+  f.context.onStreamFile({ type: 'render', params, element: { season: 3, episode: 2 }, item });
+  assert.equal(f.record.streamSeasonRequests['tmdb:55:3'].callbacks.length, 2, 'both current and stale row generations share one request');
+  f.record.seasonCallback({ 3: { episodes: [
+    { season_number: 3, episode_number: 1, still_path: '/stale.jpg' },
+    { season_number: 3, episode_number: 2, still_path: '/current.jpg' }
+  ] } });
+  assert.equal(image.getAttribute('src'), 'https://image.tmdb.org/t/p/w300/current.jpg', 'only the reused row current episode can receive its still');
+});
+
+test('profile teardown restores the non-spoiler image and invalidates pending episode callbacks', () => {
+  const f = fixture(); f.trakt.progress = { watched: false, episodes: [{ season: 3, episode: 1 }] };
+  const image = new Node(); image.setAttribute('src', 'https://image.invalid/base.jpg');
+  const item = new Node('torrent-serial'); item.nodes = { '.torrent-serial__img': image }; item.querySelector = selector => item.nodes[selector] || null;
+  const params = { movie: { id: 55, source: 'tmdb', media_type: 'tv' }, seasons: { 3: { episodes: [{ season_number: 3, episode_number: 1, still_path: '/watched.jpg' }] } } };
+  f.context.onStreamFile({ type: 'render', params, element: { season: 3, episode: 1 }, item });
+  assert.equal(image.getAttribute('data-sh-episode-preview'), 'tmdb');
+  f.context.clearStreamEpisodePreviews(f.record);
+  assert.equal(image.getAttribute('src'), 'https://image.invalid/base.jpg');
+  assert.equal(image.getAttribute('data-sh-episode-preview'), null);
+  assert.equal(f.record.streamEpisodePreviewNodes.length, 0);
 });
 
 test('Hybrid embedded controls invoke native tracker/sort handlers; async rows re-rank and empty/singleton results are safe', async () => {
