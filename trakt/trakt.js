@@ -8513,9 +8513,9 @@
     var isShow = media.method === 'tv' || media.method === 'show' || media.card_type === 'tv' || media.card_type === 'show' || !!media.original_name;
     var safeProgress = Math.max(0, Math.min(100, Number(progress) || 0));
     if (isShow) {
-      var season = media.season_number || media.season;
-      var episode = media.episode_number || media.episode;
-      if (!season || !episode) {
+      var season = media.season_number != null ? media.season_number : media.season;
+      var episode = media.episode_number != null ? media.episode_number : media.episode;
+      if (season == null || season === '' || episode == null || episode === '') {
         if (debugEnabled()) {
           logWarn('scrobble_queue: season/episode missing for show, skipping', {
             media: {
@@ -8768,6 +8768,13 @@
     getQueueLength: function getQueueLength() {
       return queue.length;
     },
+    isBusy: function isBusy() {
+      return isProcessing;
+    },
+    clear: function clear() {
+      queue = [];
+      persistQueue();
+    },
     destroy: function destroy() {
       if (processTimerId !== null) {
         clearTimeout(processTimerId);
@@ -8782,6 +8789,7 @@
   var throttleState = {
     lastSendTime: 0,
     lastSentPercent: 0,
+    lastProgressUpdateAt: 0,
     minInterval: 90000,
     // 90 seconds min between updates
     minPercentChange: 5,
@@ -8837,9 +8845,9 @@
         progress: safeProgress
       };
     }
-    var season = media.season_number || media.season;
-    var episode = media.episode_number || media.episode;
-    if (!season || !episode) {
+    var season = media.season_number != null ? media.season_number : media.season;
+    var episode = media.episode_number != null ? media.episode_number : media.episode;
+    if (season == null || season === '' || episode == null || episode === '') {
       if (debugEnabled()) {
         logWarn('scrobble: season/episode missing for show, skipping', {
           media: {
@@ -8914,12 +8922,19 @@
     throttleState.lastSendTime = Date.now();
     throttleState.lastSentPercent = percent;
   }
+  function markProgressUpdate() {
+    throttleState.lastProgressUpdateAt = Date.now();
+  }
 
   // ── Scrobble Actions ───────────────────────────────────────────────────────
 
   function performScrobble(action, media, progress) {
     var body = buildScrobbleBody(media, progress);
     if (!body) return Promise.resolve();
+    if (scrobbleQueue.getQueueLength() > 0 || scrobbleQueue.isBusy()) {
+      scrobbleQueue.enqueue({ type: action, media: media ? _objectSpread2({}, media) : null, progress: body.progress, created_at: Date.now() });
+      return Promise.resolve({ queued: true });
+    }
     return api$1.scrobble(action, body).then(function (result) {
       if (debugEnabled()) {
         logDebug("scrobble/".concat(action, " success"), {
@@ -8956,7 +8971,110 @@
         progress: body.progress,
         created_at: Date.now()
       });
+      return { queued: true };
     });
+  }
+
+  // Keep one ordered playback session so a switch always closes the previous
+  // Trakt activity before opening the next movie/episode.
+  var activePlaybackSession = null;
+  var playbackActionChain = Promise.resolve();
+  var playbackActionEpoch = 0;
+  function playbackSessionKey(media) {
+    if (!media || !media.id) return '';
+    var type = getContentType$2(media);
+    if (type === 'show') {
+      var season = media.season_number != null ? media.season_number : media.season;
+      var episode = media.episode_number != null ? media.episode_number : media.episode;
+      if (season == null || season === '' || episode == null || episode === '') return '';
+      return ['show', media.id, season, episode].join(':');
+    }
+    return ['movie', media.id].join(':');
+  }
+  function queuePlaybackAction(action, session, progress) {
+    var epoch = playbackActionEpoch;
+    var operation = playbackActionChain.then(function () {
+      if (epoch !== playbackActionEpoch) return;
+      if (action !== 'stop' && activePlaybackSession !== session) return;
+      if (action === 'stop' && !session.started) return;
+      return performScrobble(action, session.media, progress).then(function (result) {
+        if (action === 'start') session.started = true;
+        return result;
+      });
+    });
+    playbackActionChain = operation['catch'](function () {});
+    return operation;
+  }
+  function startPlaybackSession(media, progress, external) {
+    var key = playbackSessionKey(media);
+    if (!key) return Promise.resolve(false);
+    var safeProgress = Math.max(0, Math.min(100, Number(progress) || 0));
+    var previous = activePlaybackSession;
+    if (previous && previous.key === key && previous.state !== 'stopping') {
+      previous.media = media;
+      previous.progress = safeProgress;
+      if (external) previous.external = true;
+      if (previous.state === 'paused') return resumePlaybackSession();
+      return previous.promise || Promise.resolve(false);
+    }
+    var session = { key: key, media: media, progress: safeProgress, state: 'starting', started: false, external: !!external, promise: null };
+    activePlaybackSession = session;
+    var epoch = playbackActionEpoch;
+    var operation = playbackActionChain.then(function () {
+      if (epoch !== playbackActionEpoch) return;
+      if (previous && previous.started) return performScrobble('stop', previous.media, previous.progress);
+    }).then(function () {
+      if (epoch !== playbackActionEpoch || activePlaybackSession !== session) return false;
+      return performScrobble('start', session.media, session.progress).then(function (result) {
+        session.started = true;
+        if (activePlaybackSession === session && session.state === 'starting') session.state = 'playing';
+        return result;
+      });
+    });
+    session.promise = operation;
+    playbackActionChain = operation['catch'](function () {});
+    return operation;
+  }
+  function pausePlaybackSession(media, progress) {
+    var session = activePlaybackSession;
+    if (!session || media && playbackSessionKey(media) !== session.key || session.state === 'paused' || session.state === 'stopping') return Promise.resolve(false);
+    if (progress !== undefined && progress !== null) session.progress = Math.max(0, Math.min(100, Number(progress) || 0));
+    session.state = 'paused';
+    return queuePlaybackAction('pause', session, session.progress);
+  }
+  function resumePlaybackSession() {
+    var session = activePlaybackSession;
+    if (!session || session.state === 'playing' || session.state === 'starting' || session.state === 'stopping') return session && session.promise || Promise.resolve(false);
+    session.state = 'starting';
+    var operation = queuePlaybackAction('start', session, session.progress).then(function (result) {
+      if (activePlaybackSession === session && session.state === 'starting') session.state = 'playing';
+      return result;
+    });
+    session.promise = operation;
+    return operation;
+  }
+  function stopPlaybackSession(media, progress) {
+    var session = activePlaybackSession;
+    if (!session || media && playbackSessionKey(media) !== session.key) return Promise.resolve(false);
+    if (progress !== undefined && progress !== null) session.progress = Math.max(0, Math.min(100, Number(progress) || 0));
+    activePlaybackSession = null;
+    session.state = 'stopping';
+    return queuePlaybackAction('stop', session, session.progress);
+  }
+  function clearPlaybackSession() {
+    playbackActionEpoch++;
+    activePlaybackSession = null;
+    throttleState.currentMedia = null;
+    throttleState.lastProgressUpdateAt = 0;
+    throttleState.lastSendTime = 0;
+    throttleState.lastSentPercent = 0;
+  }
+  function updatePlaybackSession(media, progress) {
+    var session = activePlaybackSession;
+    if (!session || playbackSessionKey(media) !== session.key || session.state === 'stopping') return false;
+    session.media = media;
+    session.progress = Math.max(0, Math.min(100, Number(progress) || 0));
+    return true;
   }
 
   // ── Public API ─────────────────────────────────────────────────────────────
@@ -8966,6 +9084,7 @@
       throttleState.currentMedia = media || null;
       throttleState.lastSendTime = 0;
       throttleState.lastSentPercent = 0;
+      throttleState.lastProgressUpdateAt = 0;
       throttleState.timerId = null;
       if (debugEnabled()) {
         logDebug('scrobbler initialized', {
@@ -8973,8 +9092,8 @@
         });
       }
     },
-    scrobbleStart: function scrobbleStart(media, progress) {
-      return performScrobble('start', media, progress).then(function (result) {
+    scrobbleStart: function scrobbleStart(media, progress, external) {
+      return startPlaybackSession(media, progress, external).then(function (result) {
         if (result) {
           updateThrottleState(Number(progress) || 0);
         }
@@ -8982,12 +9101,19 @@
       });
     },
     scrobblePause: function scrobblePause(media, progress) {
-      return performScrobble('pause', media, progress);
+      return pausePlaybackSession(media, progress);
     },
     scrobbleStop: function scrobbleStop(media, progress) {
-      return performScrobble('stop', media, progress);
+      return stopPlaybackSession(media, progress);
     },
+    getActiveSession: function getActiveSession() {
+      return activePlaybackSession ? { key: activePlaybackSession.key, media: activePlaybackSession.media, progress: activePlaybackSession.progress, state: activePlaybackSession.state, external: activePlaybackSession.external } : null;
+    },
+    updatePlaybackSession: updatePlaybackSession,
+    resumePlaybackSession: resumePlaybackSession,
+    clearPlaybackSession: clearPlaybackSession,
     onProgressUpdate: function onProgressUpdate(hash, percent, road, media) {
+      markProgressUpdate();
       // Ignore early or empty progress
       var safePercent = Number(percent) || 0;
       if (safePercent < 1 || !media) {
@@ -9014,27 +9140,32 @@
           });
         }
         updateThrottleState(safePercent);
-
-        // Trakt uses /scrobble/start for progress updates with progress > 0
-        performScrobble('start', media, safePercent);
+        var session = activePlaybackSession;
+        if (session && playbackSessionKey(media) === session.key) {
+          updatePlaybackSession(media, safePercent);
+          // Trakt uses /scrobble/start for progress updates with progress > 0.
+          queuePlaybackAction('start', session, safePercent);
+        }
       }
     },
     getCurrentProgress: function getCurrentProgress() {
       return {
         percent: throttleState.lastSentPercent,
-        time: Date.now()
+        time: throttleState.lastProgressUpdateAt
       };
     },
     setCurrentMedia: function setCurrentMedia(media) {
       throttleState.currentMedia = media;
     },
     destroy: function destroy() {
+      stopPlaybackSession();
       if (throttleState.timerId !== null) {
         clearTimeout(throttleState.timerId);
         throttleState.timerId = null;
       }
       throttleState.lastSendTime = 0;
       throttleState.lastSentPercent = 0;
+      throttleState.lastProgressUpdateAt = 0;
       throttleState.currentMedia = null;
       if (debugEnabled()) {
         logDebug('scrobbler destroyed');
@@ -9197,8 +9328,8 @@
   }
   function extractSeasonEpisode(obj) {
     if (!obj) return {};
-    var season = obj.season_number || obj.season || obj.seasonNumber || obj.s;
-    var episode = obj.episode_number || obj.episode || obj.episodeNumber || obj.e;
+    var season = obj.season_number != null ? obj.season_number : obj.season != null ? obj.season : obj.seasonNumber != null ? obj.seasonNumber : obj.s;
+    var episode = obj.episode_number != null ? obj.episode_number : obj.episode != null ? obj.episode : obj.episodeNumber != null ? obj.episodeNumber : obj.e;
     return {
       season: season,
       episode: episode
@@ -9211,7 +9342,7 @@
    */
   function resolveSeasonEpisode(hash, originalName) {
     if (!hash || !originalName) return {};
-    for (var s = 1; s <= 30; s++) {
+    for (var s = 0; s <= 30; s++) {
       var sep = s > 10 ? ':' : '';
       for (var e = 1; e <= 60; e++) {
         var computed = Lampa.Utils.hash([s, sep, e, originalName].join(''));
@@ -9260,11 +9391,12 @@
       } else {
         // Prefer show trakt id + season/episode if present on card
         var showTrakt = ids && ids.trakt || media.show && media.show.ids && media.show.ids.trakt;
-        var s = media.season_number || media.season || media.seasonNumber;
-        var e = media.episode_number || media.episode || media.episodeNumber;
-        if (showTrakt && s && e) return "episode:trakt:".concat(showTrakt, ":S").concat(s, ":E").concat(e);
+        var s = media.season_number != null ? media.season_number : media.season != null ? media.season : media.seasonNumber;
+        var e = media.episode_number != null ? media.episode_number : media.episode != null ? media.episode : media.episodeNumber;
+        var hasEpisodeIdentity = s != null && s !== '' && e != null && e !== '';
+        if (showTrakt && hasEpisodeIdentity) return "episode:trakt:".concat(showTrakt, ":S").concat(s, ":E").concat(e);
         // fallback tmdb
-        if (media.id && s && e) return "episode:tmdb:".concat(media.id, ":S").concat(s, ":E").concat(e);
+        if (media.id && hasEpisodeIdentity) return "episode:tmdb:".concat(media.id, ":S").concat(s, ":E").concat(e);
         if (media.hash) return "episode:hash:".concat(media.hash);
       }
     } catch (e) {}
@@ -9674,9 +9806,9 @@
                       throw _e;
                     case 6:
                       traktShowId = _search[0].show.ids.trakt; // Prefer season/episode from media; otherwise try to resolve by timeline hash if available
-                      season = media.season_number || media.season || media.seasonNumber;
-                      episode = media.episode_number || media.episode || media.episodeNumber;
-                      if (!(!season || !episode)) {
+                      season = media.season_number != null ? media.season_number : media.season != null ? media.season : media.seasonNumber;
+                      episode = media.episode_number != null ? media.episode_number : media.episode != null ? media.episode : media.episodeNumber;
+                      if (!(season == null || season === '' || episode == null || episode === '')) {
                         _context4.n = 30;
                         break;
                       }
@@ -9792,7 +9924,7 @@
                       _iterator5.f();
                       return _context4.f(29);
                     case 30:
-                      if (!(!season || !episode)) {
+                      if (!(season == null || season === '' || episode == null || episode === '')) {
                         _context4.n = 31;
                         break;
                       }
@@ -9871,6 +10003,50 @@
   }
   var isAddingShowToWatching = false;
   var isInitialized$1 = false;
+  var pendingExternalPlayback = null;
+  var pendingInternalPlayback = null;
+  var timelineProgressSamples = {};
+  var playbackInstanceSequence = 0;
+  var playbackIdentityGeneration = 0;
+  var currentPlaybackInstance = null;
+  var terminalPlaybackInstanceId = null;
+
+  function beginPlaybackInstance(media, hash, external) {
+    if (!media) return null;
+    playbackInstanceSequence++;
+    currentPlaybackInstance = {
+      id: playbackInstanceSequence,
+      media: media,
+      hash: hash || null,
+      token: String(Lampa.Storage.get('trakt_token') || ''),
+      identityGeneration: playbackIdentityGeneration,
+      external: !!external
+    };
+    terminalPlaybackInstanceId = null;
+    timelineProgressSamples = Object.create(null);
+    return currentPlaybackInstance;
+  }
+
+  function isPlaybackInstanceTerminal() {
+    return !!(currentPlaybackInstance && terminalPlaybackInstanceId === currentPlaybackInstance.id);
+  }
+
+  function markPlaybackInstanceTerminal() {
+    if (!currentPlaybackInstance) return;
+    terminalPlaybackInstanceId = currentPlaybackInstance.id;
+  }
+
+  function isActiveLampaVideoEvent(event) {
+    try {
+      if (!event || !event.target || !Lampa.PlayerVideo || typeof Lampa.PlayerVideo.video !== 'function') return false;
+      var activeVideo = Lampa.PlayerVideo.video();
+      if (!activeVideo || event.target !== activeVideo) return false;
+      if (Lampa.Player && typeof Lampa.Player.opened === 'function' && !Lampa.Player.opened()) return false;
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 
   /**
    * Модуль для відстеження перегляду в Trakt.TV
@@ -9939,10 +10115,11 @@
       }
       var timeline = data && data.timeline;
       var hash = timeline && timeline.hash;
+      if (pendingExternalPlayback && (!hash || pendingExternalPlayback.hash !== hash)) pendingExternalPlayback = null;
       if (hash) {
         var se = extractSeasonEpisode(data);
         // Fallback: brute-force season/episode from hash using original name
-        if (!se.season || !se.episode) {
+        if (se.season == null || se.episode == null) {
           var origName = card.original_name || card.original_title || card.title;
           if (origName) {
             se = resolveSeasonEpisode(hash, origName);
@@ -9963,21 +10140,25 @@
         }
       }
 
-      // Scrobble: send start event to Trakt with saved progress if resuming
-      if (card && Lampa.Storage.field('trakt_enable_watching')) {
-        var token = Lampa.Storage.get('trakt_token');
-        if (token) {
-          // Build media with season/episode from hash meta
-          var metaHash = hash ? getHashMeta(hash) : null;
-          var mediaForStart = Object.assign({}, card);
-          if (metaHash) {
-            if (!card.season_number && metaHash.season) mediaForStart.season_number = metaHash.season;
-            if (!card.episode_number && metaHash.episode) mediaForStart.episode_number = metaHash.episode;
-          }
-          scrobbler.setCurrentMedia(mediaForStart);
-          var startProgress = timeline && timeline.percent || 0;
-          scrobbler.scrobbleStart(mediaForStart, startProgress);
+      // Player `start` means the player was opened, not that media is advancing.
+      // Keep its media association; Timeline/play events confirm playback later.
+      var token = Lampa.Storage.get('trakt_token');
+      if (card && Lampa.Storage.field('trakt_enable_watching') && token) {
+        // Build media with season/episode from hash meta
+        var metaHash = hash ? getHashMeta(hash) : null;
+        var mediaForStart = Object.assign({}, card);
+        if (metaHash) {
+          if (card.season_number == null && metaHash.season != null) mediaForStart.season_number = metaHash.season;
+          if (card.episode_number == null && metaHash.episode != null) mediaForStart.episode_number = metaHash.episode;
         }
+        scrobbler.setCurrentMedia(mediaForStart);
+        var externalHandoff = pendingExternalPlayback && pendingExternalPlayback.hash === hash;
+        beginPlaybackInstance(mediaForStart, hash, !!externalHandoff);
+        pendingInternalPlayback = externalHandoff ? null : { media: mediaForStart, hash: hash || null };
+      } else {
+        currentPlaybackInstance = null;
+        pendingInternalPlayback = null;
+        timelineProgressSamples = Object.create(null);
       }
     },
     /**
@@ -10005,15 +10186,10 @@
       var road = data.data.road || {};
       var percent = parseFloat(road.percent || 0);
       if (isNaN(percent)) percent = 0;
+      var timelinePosition = Number(road.time);
+      if (!isFinite(timelinePosition) || timelinePosition < 0) timelinePosition = percent;
       var token = Lampa.Storage.get('trakt_token');
       var minProgress = parseInt(Lampa.Storage.field('trakt_min_progress') || config.minProgress);
-      window.last_timeline_event = {
-        data: {
-          hash: hash,
-          road: road
-        },
-        ts: Date.now()
-      };
       if (this.isLoggingEnabled()) {
         slog('Processing timeline update', {
           hash: hash,
@@ -10028,19 +10204,40 @@
         }
         return;
       }
-      var card = this.getCurrentCard();
-      var meta = getHashMeta(hash);
-      if (!card && meta && meta.card) {
-        card = meta.card;
-        if (this.isLoggingEnabled()) {
-          slog('Card restored from hash meta cache', card);
-        }
+      var timelineInstance = currentPlaybackInstance;
+      // Timeline hashes are the identity boundary for playback side effects.
+      // Activity.active() may already point at a different episode/movie, so
+      // it must never be used to attribute a stale or unassociated callback.
+      var playbackInstanceMatches = !!(timelineInstance && timelineInstance.media && timelineInstance.hash && timelineInstance.hash === hash && timelineInstance.token === String(token) && timelineInstance.identityGeneration === playbackIdentityGeneration);
+      if (!playbackInstanceMatches) {
+        if (this.isLoggingEnabled()) slog('Ignoring Timeline update without current playback identity', { hash: hash });
+        return;
       }
+      var card = timelineInstance.media;
+      var externalPlayback = pendingExternalPlayback;
+      if (externalPlayback) {
+        if (externalPlayback.hash && externalPlayback.hash !== hash) {
+          return;
+        }
+        if (externalPlayback.token && externalPlayback.token !== String(token)) return;
+        if (externalPlayback.identityGeneration != null && externalPlayback.identityGeneration !== playbackIdentityGeneration) return;
+        card = externalPlayback.media;
+      }
+      if (!card) return;
+      markProgressUpdate();
+      window.last_timeline_event = {
+        data: {
+          hash: hash,
+          road: road
+        },
+        ts: Date.now()
+      };
+      var meta = getHashMeta(hash);
       if (card && hash) {
         var se = extractSeasonEpisode(card);
         var cachedMeta = meta || getHashMeta(hash);
-        var seasonValue = se.season || cachedMeta && cachedMeta.season;
-        var episodeValue = se.episode || cachedMeta && cachedMeta.episode;
+        var seasonValue = se.season != null ? se.season : cachedMeta && cachedMeta.season;
+        var episodeValue = se.episode != null ? se.episode : cachedMeta && cachedMeta.episode;
         var idsValue = card.ids || cachedMeta && cachedMeta.ids;
         setHashMeta(hash, {
           card: card,
@@ -10048,13 +10245,38 @@
           episode: episodeValue,
           ids: idsValue
         });
-        if (this.isLoggingEnabled() && (!se.season || !se.episode) && cachedMeta && (cachedMeta.season || cachedMeta.episode)) {
+        if (this.isLoggingEnabled() && (se.season == null || se.episode == null) && cachedMeta && (cachedMeta.season != null || cachedMeta.episode != null)) {
           slog('Hash meta preserved season/episode from cache', {
             hash: hash,
             season: seasonValue,
             episode: episodeValue
           });
         }
+      }
+      // Require advancing position, not merely a non-zero resume position.
+      // The first update establishes a baseline; the next greater position
+      // confirms playback and avoids false starts on player/Files opening.
+      var terminalForPlayback = isPlaybackInstanceTerminal();
+      var previousPosition = timelineProgressSamples[hash];
+      var advancing = playbackInstanceMatches && !terminalForPlayback && !cloudInjectInProgress && previousPosition != null && timelinePosition > previousPosition;
+      if (playbackInstanceMatches) timelineProgressSamples[hash] = timelinePosition;
+      var startedPlaybackOnUpdate = false;
+      if (card && advancing) {
+        var sessionMedia = Object.assign({}, card, { hash: hash });
+        if (meta) {
+          if (sessionMedia.season_number == null && meta.season != null) sessionMedia.season_number = meta.season;
+          if (sessionMedia.episode_number == null && meta.episode != null) sessionMedia.episode_number = meta.episode;
+          if (!sessionMedia.ids && meta.ids) sessionMedia.ids = meta.ids;
+        }
+        var active = scrobbler.getActiveSession && scrobbler.getActiveSession();
+        if (!active || active.key !== playbackSessionKey(sessionMedia) || active.state === 'paused') {
+          scrobbler.scrobbleStart(sessionMedia, percent, !!externalPlayback);
+          startedPlaybackOnUpdate = true;
+        } else {
+          scrobbler.updatePlaybackSession(sessionMedia, percent);
+        }
+        if (externalPlayback) pendingExternalPlayback = null;
+        if (pendingInternalPlayback && (!pendingInternalPlayback.hash || pendingInternalPlayback.hash === hash)) pendingInternalPlayback = null;
       }
       slog('Card from getCurrentCard:', card);
       if (!card) {
@@ -10066,7 +10288,9 @@
       }
 
       // Scrobble: throttled progress update (skip if cloud timeline inject)
-      if (card && percent > 0 && !cloudInjectInProgress) {
+      var progressSession = scrobbler.getActiveSession && scrobbler.getActiveSession();
+      var startRequestPending = progressSession && progressSession.state === 'starting' && playbackSessionKey(card) === progressSession.key;
+      if (card && percent > 0 && !cloudInjectInProgress && !startedPlaybackOnUpdate && !startRequestPending && !terminalForPlayback) {
         scrobbler.onProgressUpdate(hash, percent, road, card);
       }
 
@@ -10078,13 +10302,14 @@
       slog('Checking if should finish with idempotency, percent:', percent, 'minProgress:', minProgress);
       var watchedByPercent = (typeof percent === 'number' ? percent : 0) >= minProgress;
       var watchedByTime = road && road.time && road.duration ? road.time / road.duration * 100 >= minProgress : false;
-      if (watchedByPercent || watchedByTime) {
+      if ((watchedByPercent || watchedByTime) && !terminalForPlayback) {
+        if (playbackInstanceMatches) markPlaybackInstanceTerminal();
         var media = Object.assign({}, card, {
           hash: hash
         });
         if (meta) {
-          if (!media.season_number && meta.season) media.season_number = meta.season;
-          if (!media.episode_number && meta.episode) media.episode_number = meta.episode;
+          if (media.season_number == null && meta.season != null) media.season_number = meta.season;
+          if (media.episode_number == null && meta.episode != null) media.episode_number = meta.episode;
           if (!media.ids && meta.ids) media.ids = meta.ids;
         }
         var key = getCompletionKey(media);
@@ -10434,49 +10659,101 @@
         return Lampa.Listener.remove('line', _lineHandler);
       });
 
+      // A credential change may represent logout or another Trakt account.
+      // Drop only the in-memory playback session; never replay it under a new token.
+      if (Lampa.Storage && Lampa.Storage.listener) {
+        var activeToken = String(Lampa.Storage.get('trakt_token') || '');
+        var invalidatePlaybackIdentity = function invalidatePlaybackIdentity() {
+          playbackIdentityGeneration++;
+          activeToken = String(Lampa.Storage.get('trakt_token') || '');
+          markPlaybackInstanceTerminal();
+          currentPlaybackInstance = null;
+          pendingExternalPlayback = null;
+          pendingInternalPlayback = null;
+          timelineProgressSamples = {};
+          scrobbleQueue.clear();
+          scrobbler.clearPlaybackSession();
+        };
+        var _authChangeHandler = function _authChangeHandler(e) {
+          if (!e) return;
+          if (e.name === 'trakt_enable_watching' && !Lampa.Storage.field('trakt_enable_watching')) {
+            playbackIdentityGeneration++;
+            markPlaybackInstanceTerminal();
+            currentPlaybackInstance = null;
+            scrobbler.scrobbleStop();
+            pendingExternalPlayback = null;
+            pendingInternalPlayback = null;
+            timelineProgressSamples = {};
+            return;
+          }
+          if (e.name !== 'trakt_token') return;
+          var nextToken = String(Lampa.Storage.get('trakt_token') || '');
+          if (nextToken === activeToken) return;
+          invalidatePlaybackIdentity();
+        };
+        Lampa.Storage.listener.follow('change', _authChangeHandler);
+        this._cleanups.push(function () {
+          return Lampa.Storage.listener.remove('change', _authChangeHandler);
+        });
+        if (Lampa.Account && Lampa.Account.listener) {
+          var _profileChangeHandler = function _profileChangeHandler() {
+            invalidatePlaybackIdentity();
+          };
+          Lampa.Account.listener.follow('profile_select', _profileChangeHandler);
+          this._cleanups.push(function () {
+            return Lampa.Account.listener.remove('profile_select', _profileChangeHandler);
+          });
+        }
+      }
+
       // Переадресація завершальних подій програвача на idempotent intent
       if (window.Lampa && Lampa.Player && Lampa.Player.listener) {
-        // onDestroy / onHidden -> markFinishIntent + scrobbleStop for the current media key
+        // Player exit/ended closes the current scrobble. Backgrounding pauses only.
         var routeFinishIntent = function routeFinishIntent(evt) {
           try {
-            if (!Lampa.Storage.field('trakt_enable_watching')) return;
+            var isExternalHandoff = evt && evt.type === 'destroy' && !!pendingExternalPlayback;
+            if (!isExternalHandoff) pendingExternalPlayback = null;
+            pendingInternalPlayback = null;
+            timelineProgressSamples = {};
+            if (!isExternalHandoff) markPlaybackInstanceTerminal();
+            if (!Lampa.Storage.field('trakt_enable_watching')) {
+              if (scrobbler.getActiveSession()) scrobbler.scrobbleStop();
+              return;
+            }
             var token = Lampa.Storage.get('trakt_token');
-            if (!token) return;
-            var card = Lampa.Activity.active && Lampa.Activity.active() && (Lampa.Activity.active().card_data || Lampa.Activity.active().card || Lampa.Activity.active().movie) || Lampa.Storage.get('trakt_last_card');
+            if (!token) {
+              scrobbler.clearPlaybackSession();
+              return;
+            }
+            var playback = scrobbler.getActiveSession && scrobbler.getActiveSession();
+            var card = playback && playback.media || Lampa.Activity.active && Lampa.Activity.active() && (Lampa.Activity.active().card_data || Lampa.Activity.active().card || Lampa.Activity.active().movie) || Lampa.Storage.get('trakt_last_card');
             if (!card) return;
             // Include last known hash if available from timeline storage
             var lastTimeline = window.last_timeline_event && window.last_timeline_event.data || {};
+            if (playback && playback.media.hash && lastTimeline.hash !== playback.media.hash) lastTimeline = {};
             var media = Object.assign({}, card, {
-              hash: lastTimeline.hash
+              hash: playback && playback.media.hash || lastTimeline.hash
             });
             var meta = watching && typeof watching.getMetaByHash === 'function' ? watching.getMetaByHash(lastTimeline.hash) : null;
             if (meta) {
-              if (!media.season_number && meta.season) media.season_number = meta.season;
-              if (!media.episode_number && meta.episode) media.episode_number = meta.episode;
+              if (media.season_number == null && meta.season != null) media.season_number = meta.season;
+              if (media.episode_number == null && meta.episode != null) media.episode_number = meta.episode;
               if (!media.ids && meta.ids) media.ids = meta.ids;
             }
-            var key = watching && typeof watching.getCompletionKey === 'function' ? watching.getCompletionKey(media) : null;
-            if (key && watching && typeof watching.markFinishIntent === 'function') {
-              watching.markFinishIntent(key);
-            }
-
-            // Only scrobble pause on close if below threshold (stop already sent by timeline handler)
-            if (typeof scrobbler !== 'undefined' && scrobbler) {
-              var currentProgress = lastTimeline.road && lastTimeline.road.percent || 0;
-              var minProgress = parseInt(Lampa.Storage.field('trakt_min_progress') || 90, 10);
-              if (currentProgress < minProgress && typeof scrobbler.scrobblePause === 'function') {
-                scrobbler.scrobblePause(media, currentProgress);
-              }
-            }
+            var currentProgress = playback ? playback.progress : lastTimeline.road && lastTimeline.road.percent || 0;
+            var minProgress = parseInt(Lampa.Storage.field('trakt_min_progress') || 90, 10);
+            if (playback && typeof scrobbler.scrobbleStop === 'function') scrobbler.scrobbleStop(playback.media, currentProgress);
 
             // Primary finish route is timeline update.
-            // Fallback to direct finish only when "ended" happened without known timeline hash.
-            var shouldFallbackFinish = !!(evt && evt.type === 'ended' && !lastTimeline.hash);
+            // Ended without a hash may use a fallback only after the normal completion threshold.
+            var shouldFallbackFinish = !!(evt && evt.type === 'ended' && !lastTimeline.hash && currentProgress >= minProgress);
             if (shouldFallbackFinish && watching && typeof watching.finish === 'function') {
+              var key = watching && typeof watching.getCompletionKey === 'function' ? watching.getCompletionKey(media) : null;
+              if (key && typeof watching.markFinishIntent === 'function') watching.markFinishIntent(key);
               var contentType = watching && typeof watching.getContentType === 'function' ? watching.getContentType(media) : 'movie';
-              var season = media.season_number || media.season || media.seasonNumber;
-              var episode = media.episode_number || media.episode || media.episodeNumber;
-              var canFinishSafely = contentType === 'movie' || season && episode || media.hash;
+              var season = media.season_number != null ? media.season_number : media.season != null ? media.season : media.seasonNumber;
+              var episode = media.episode_number != null ? media.episode_number : media.episode != null ? media.episode : media.episodeNumber;
+              var canFinishSafely = contentType === 'movie' || season != null && season !== '' && episode != null && episode !== '' || media.hash;
               if (canFinishSafely) {
                 watching.finish(media)["catch"](function (e) {
                   logWarn('Fallback finish failed', {
@@ -10495,21 +10772,36 @@
           }
         };
         var _visibilityHandler = function _visibilityHandler(e) {
-          if (e && e.hidden) routeFinishIntent({
-            type: 'hidden'
-          });
+          var playback = scrobbler.getActiveSession && scrobbler.getActiveSession();
+          if (e && e.hidden && playback && !playback.external) scrobbler.scrobblePause(playback.media, playback.progress);
+          if (e && !e.hidden) {
+            if (pendingExternalPlayback || playback && playback.external) {
+              pendingExternalPlayback = null;
+              markPlaybackInstanceTerminal();
+              currentPlaybackInstance = null;
+              if (playback && playback.external) scrobbler.scrobbleStop(playback.media, playback.progress);
+            }
+          }
         };
         Lampa.Player.listener.follow('destroy', routeFinishIntent);
+        Lampa.Player.listener.follow('ended', routeFinishIntent);
+        Lampa.Player.listener.follow('error', routeFinishIntent);
         Lampa.Player.listener.follow('visibility', _visibilityHandler);
         this._cleanups.push(function () {
           return Lampa.Player.listener.remove('destroy', routeFinishIntent);
+        });
+        this._cleanups.push(function () {
+          return Lampa.Player.listener.remove('ended', routeFinishIntent);
+        });
+        this._cleanups.push(function () {
+          return Lampa.Player.listener.remove('error', routeFinishIntent);
         });
         this._cleanups.push(function () {
           return Lampa.Player.listener.remove('visibility', _visibilityHandler);
         });
       }
 
-      // External player support: send scrobble start when external player launches
+      // External hand-off is not proof of playback. Wait for a real Timeline position.
       var _externalHandler = function _externalHandler(e) {
         try {
           if (!Lampa.Storage.field('trakt_enable_watching')) return;
@@ -10517,9 +10809,15 @@
           var card = e && e.data && (e.data.card || Lampa.Storage.get('trakt_last_card'));
           if (!card) return;
           var timeline = e && e.data && e.data.timeline;
-          var startProgress = timeline && timeline.percent || 0;
+          pendingInternalPlayback = null;
           scrobbler.setCurrentMedia(card);
-          scrobbler.scrobbleStart(card, startProgress);
+          pendingExternalPlayback = timeline && timeline.hash ? {
+            media: card,
+            hash: timeline.hash,
+            token: String(Lampa.Storage.get('trakt_token') || ''),
+            identityGeneration: playbackIdentityGeneration
+          } : null;
+          if (pendingExternalPlayback) beginPlaybackInstance(card, timeline.hash, true);
         } catch (e) {
           logWarn('External player handler failed', e, {
             debugOnly: true
@@ -10533,31 +10831,24 @@
         });
       }
 
-      // Pause detection: video pause event for real-time scrobble pause
-      // Skips false pauses from HLS seek (when progress update was sent < 3s ago)
-      var _pauseHandler = function _pauseHandler() {
+      // Pause/resume detection uses the active session identity and actual Timeline position.
+      var _pauseHandler = function _pauseHandler(event) {
         try {
           if (!Lampa.Storage.field('trakt_enable_watching')) return;
           if (!Lampa.Storage.get('trakt_token')) return;
-          // Skip if a scrobbleStart/progress was sent within last 3 seconds (HLS seek)
+          if (!isActiveLampaVideoEvent(event) || !currentPlaybackInstance || currentPlaybackInstance.token !== String(Lampa.Storage.get('trakt_token')) || isPlaybackInstanceTerminal()) return;
+          var playback = scrobbler.getActiveSession && scrobbler.getActiveSession();
+          if (!playback || playback.external || playback.key !== playbackSessionKey(currentPlaybackInstance.media)) return;
+          // Suppress only a confirmed seek event; a recent Timeline update
+          // alone must not suppress an actual pause.
           var lastProgress = typeof scrobbler !== 'undefined' && scrobbler && typeof scrobbler.getCurrentProgress === 'function' ? scrobbler.getCurrentProgress() : null;
-          if (lastProgress && lastProgress.time && Date.now() - lastProgress.time < 3000) return;
-          var lastTimeline = window.last_timeline_event && window.last_timeline_event.data;
-          if (!lastTimeline || !lastTimeline.hash || !lastTimeline.road) return;
-          var card = Lampa.Storage.get('trakt_last_card');
-          if (!card) return;
-          var media = Object.assign({}, card, {
-            hash: lastTimeline.hash
-          });
-          var meta = watching && typeof watching.getMetaByHash === 'function' ? watching.getMetaByHash(lastTimeline.hash) : null;
-          if (meta) {
-            if (!media.season_number && meta.season) media.season_number = meta.season;
-            if (!media.episode_number && meta.episode) media.episode_number = meta.episode;
+          if (event && event.target && event.target.seeking && lastProgress && lastProgress.time && Date.now() - lastProgress.time < 3000) return;
+          var pauseProgress = playback.progress;
+          if (event && event.target && typeof event.target.currentTime === 'number') {
+            var pauseDuration = Number(event.target.duration);
+            if (isFinite(pauseDuration) && pauseDuration > 0) pauseProgress = event.target.currentTime / pauseDuration * 100;
           }
-          var percent = lastTimeline.road.percent || 0;
-          if (typeof scrobbler !== 'undefined' && scrobbler && typeof scrobbler.scrobblePause === 'function') {
-            scrobbler.scrobblePause(media, percent);
-          }
+          scrobbler.scrobblePause(playback.media, pauseProgress);
         } catch (e) {
           logWarn('Pause handler failed', e, {
             debugOnly: true
@@ -10567,6 +10858,42 @@
       document.addEventListener('pause', _pauseHandler, true);
       this._cleanups.push(function () {
         document.removeEventListener('pause', _pauseHandler, true);
+      });
+      var _playHandler = function _playHandler(event) {
+        try {
+          if (!Lampa.Storage.field('trakt_enable_watching') || !Lampa.Storage.get('trakt_token')) return;
+          if (!isActiveLampaVideoEvent(event) || !currentPlaybackInstance || currentPlaybackInstance.token !== String(Lampa.Storage.get('trakt_token')) || isPlaybackInstanceTerminal()) return;
+          var playback = scrobbler.getActiveSession && scrobbler.getActiveSession();
+          var confirmedTarget = typeof event.target.currentTime === 'number' && !event.target.paused;
+          if (confirmedTarget && pendingInternalPlayback) {
+            var target = event.target;
+            var duration = Number(target.duration);
+            var progress = isFinite(duration) && duration > 0 ? target.currentTime / duration * 100 : 0;
+            var media = Object.assign({}, pendingInternalPlayback.media, { hash: pendingInternalPlayback.hash });
+            if (playback && !playback.external && playback.key === playbackSessionKey(media) && playback.state === 'paused') {
+              scrobbler.updatePlaybackSession(media, progress);
+              scrobbler.resumePlaybackSession();
+            } else if (!playback || playback.key !== playbackSessionKey(media)) {
+              scrobbler.scrobbleStart(media, progress, false);
+            }
+            pendingInternalPlayback = null;
+          } else if (playback && !playback.external && playback.key === playbackSessionKey(currentPlaybackInstance.media)) {
+            if (confirmedTarget) {
+              var currentTarget = event.target;
+              var currentDuration = Number(currentTarget.duration);
+              if (isFinite(currentDuration) && currentDuration > 0) {
+                scrobbler.updatePlaybackSession(playback.media, currentTarget.currentTime / currentDuration * 100);
+              }
+            }
+            scrobbler.resumePlaybackSession();
+          }
+        } catch (e) {
+          logWarn('Resume handler failed', e, { debugOnly: true });
+        }
+      };
+      document.addEventListener('playing', _playHandler, true);
+      this._cleanups.push(function () {
+        document.removeEventListener('playing', _playHandler, true);
       });
     },
     /**

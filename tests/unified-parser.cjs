@@ -92,6 +92,25 @@ test('maps live JacRed fields and uses magnet instead of tracker page URL', () =
   assert.equal(row.Voices[0], 'UA studio');
 });
 
+test('preserves separately identified audio, subtitles, voiceover group and studio metadata', () => {
+  const app = load({ results: [{
+    title: 'The Others (2001) 1080p', source: 'Toloka',
+    magnet: 'magnet:?xt=urn:btih:' + 'c'.repeat(40), audio_languages: ['en', 'uk'],
+    audio_tracks: [{ language: 'ja', type: 'audio' }], subtitle_languages: ['ru'], voices: ['UA Group'], release_group: 'Release Group',
+    voiceover_studio: 'Voice Studio', voiceover_type: 'multi-voice'
+  }] });
+  let result;
+  app.Lampa.Parser.get({ search: 'The Others', movie: {} }, row => { result = row; }, error => { throw Error(error); });
+  const row = result.Results[0];
+  assert.deepEqual(row.AudioLanguages, ['en', 'uk']);
+  assert.deepEqual(row.AudioTracks, [{ language: 'ja', type: 'audio' }]);
+  assert.deepEqual(row.SubtitleLanguages, ['ru']);
+  assert.deepEqual(row.Voices, ['UA Group']);
+  assert.equal(row.ReleaseGroup, 'Release Group');
+  assert.equal(row.VoiceoverStudio, 'Voice Studio');
+  assert.equal(row.VoiceoverType, 'multi-voice');
+});
+
 test('rejects tracker topic pages without a magnet or torrent download', () => {
   const app = load({results:[{
     title:'Topic page only',source:'Toloka',

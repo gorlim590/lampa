@@ -6,7 +6,7 @@
 body.stremio-hybrid .sh-has-streams.sh-overlay-mode .sh-movie-column{width:100%!important;max-width:100%!important}
 body.stremio-hybrid .sh-overlay-mode .sh-movie .full-start-new__buttons{order:2!important;margin:.3em -.2em .6em!important}
 body.stremio-hybrid .sh-torrent-overlay[hidden]{display:none!important}
-body.stremio-hybrid .sh-torrent-overlay{position:fixed!important;inset:5vh 7vw!important;width:86vw!important;height:90vh!important;max-height:none!important;z-index:20;box-sizing:border-box;padding:clamp(14px,1.25vw,48px)!important;border:1px solid #ffffff28!important;border-radius:clamp(14px,1.1vw,36px)!important;background:#11131e!important;box-shadow:0 0 0 100vmax #03050a80;display:flex;flex-direction:column;gap:.65em;font:400 clamp(16px,1.1458vw,44px)/1.4 Manrope,system-ui,sans-serif;color:#eef1f8;isolation:isolate}
+body.stremio-hybrid .sh-torrent-overlay{position:fixed!important;inset:5vh 7vw!important;width:86vw!important;height:90vh!important;max-height:none!important;z-index:20;box-sizing:border-box;padding:clamp(14px,1.25vw,48px)!important;border:1px solid #ffffff28!important;border-radius:clamp(14px,1.1vw,36px)!important;background:linear-gradient(145deg,rgba(22,25,39,.98),rgba(9,11,19,.98))!important;box-shadow:0 0 0 100vmax #03050a9c,0 1.5em 5em #0009;display:flex;flex-direction:column;gap:.65em;font:400 clamp(16px,1.1458vw,44px)/1.4 Manrope,system-ui,sans-serif;color:#eef1f8;isolation:isolate}
 body.stremio-hybrid .sh-torrent-overlay .sh-stream-head{display:flex;align-items:center;gap:.7em;flex:none;padding:0!important;font-size:1em!important}
 body.stremio-hybrid .sh-torrent-overlay .sh-stream-head h2{margin:0;flex:1;min-width:0;font-size:1.27em;line-height:1.3;overflow-wrap:anywhere}
 body.stremio-hybrid .sh-torrent-overlay .sh-stream-head .selector,body.stremio-hybrid .sh-torrent-overlay .sh-stream-load{font-size:1em!important;min-height:2.6em;box-sizing:border-box;padding:.55em .8em!important;border-radius:.55em;border:2px solid #ffffff25;background:#ffffff08;color:#eef1f8;flex:none}
@@ -14,17 +14,28 @@ body.stremio-hybrid .sh-torrent-overlay .sh-stream-status{font-size:1em!importan
 body.stremio-hybrid .sh-torrent-overlay .sh-stream-content{min-height:0;flex:1;overflow:hidden}
 body.stremio-hybrid .sh-torrent-overlay .sh-stream-content:empty{flex:0}
 body.stremio-hybrid .sh-torrent-overlay .sh-stream-explorer,body.stremio-hybrid .sh-torrent-overlay .explorer__files{height:100%!important;min-height:0}
-body.stremio-hybrid .sh-torrent-overlay .ctr-tools{font-size:1em!important;padding:0 0 .5em!important}
-body.stremio-hybrid .sh-torrent-overlay .ctr-tabs,body.stremio-hybrid .sh-torrent-overlay .ctr-menus{gap:.5em;margin:0 0 .5em}
+body.stremio-hybrid .sh-torrent-overlay .ctr-tools{display:flex;align-items:center;flex-wrap:wrap;gap:.45em .8em;font-size:1em!important;padding:0 0 .5em!important;border-bottom:1px solid #ffffff17}
+body.stremio-hybrid .sh-torrent-overlay .ctr-tabs,body.stremio-hybrid .sh-torrent-overlay .ctr-menus{display:flex;align-items:center;flex-wrap:wrap;gap:.4em;margin:0}
+body.stremio-hybrid .sh-torrent-overlay .ctr-tracker-tabs{padding:0;border:0}
+body.stremio-hybrid .sh-torrent-overlay .ctr-menus{margin-left:auto}
 body.stremio-hybrid .sh-torrent-overlay .ctr-button,body.stremio-hybrid .sh-torrent-overlay .ctr-tab{min-height:2.6em;padding:.5em .85em;box-sizing:border-box;font-size:1em}
-body.stremio-hybrid .sh-torrent-overlay .torrent-item.sh-cinema-row{font-size:1em!important;padding:.85em!important;margin:0 0 .6em!important;border-radius:.7em;border:2px solid #ffffff14!important;transition:none!important}
+body.stremio-hybrid .sh-torrent-overlay .torrent-item.sh-cinema-row{font-size:1em!important;padding:.85em!important;margin:0 0 .6em!important;border-radius:.7em;border:2px solid #ffffff14!important;transition:border-color .12s ease,background-color .12s ease!important}
+body.stremio-hybrid .sh-torrent-overlay .torrent-item.sh-cinema-row.is-best{border-color:rgba(83,220,157,.58)!important;background:linear-gradient(100deg,rgba(37,113,83,.25),rgba(255,255,255,.035))!important;box-shadow:inset .22em 0 #43d99d,0 .4em 1.4em #0004!important}
+body.stremio-hybrid .sh-torrent-overlay .ctr-best{display:none!important;align-items:center;width:max-content;max-width:100%;margin:0 0 .45em;padding:.25em .6em;border:1px solid #65e6aa70;border-radius:2em;background:#28a46a25;color:#b9f6d7;font-size:.78em!important;font-weight:800;line-height:1.3;overflow-wrap:anywhere}
+body.stremio-hybrid .sh-torrent-overlay .torrent-item.is-best .ctr-best{display:inline-flex!important}
+body.stremio-hybrid .sh-torrent-overlay .is-best[data-best-outside-filter=true] .ctr-best{border-color:#f0c66d88;background:#a77a1d24;color:#ffe1a0}
 body.stremio-hybrid .sh-torrent-overlay .ctr-row{grid-template-columns:4.2em minmax(0,1fr) 8em;gap:1em;min-height:5.5em}
 body.stremio-hybrid .sh-torrent-overlay .ctr-name{font-size:1.18em!important;font-weight:650;line-height:1.4}
 body.stremio-hybrid .sh-torrent-overlay .ctr-quality strong,body.stremio-hybrid .sh-torrent-overlay .ctr-size{font-size:1.1em}
 body.stremio-hybrid .sh-torrent-overlay .ctr-chip,body.stremio-hybrid .sh-torrent-overlay .ctr-peers,body.stremio-hybrid .sh-torrent-overlay .ctr-best,body.stremio-hybrid .sh-torrent-overlay .ctr-quality small{font-size:.95em!important;white-space:normal;overflow-wrap:anywhere}
+body.stremio-hybrid .sh-torrent-overlay .ctr-chip.is-unknown{color:#a6aec0;border:1px dashed #ffffff30}
+body.stremio-hybrid .sh-torrent-overlay .ctr-chip.is-audio{color:#d4fae7;background:#36b97b20;border:1px solid #48d39148}
+body.stremio-hybrid .sh-torrent-overlay .ctr-chip.is-studio{color:#e8dcff;background:#8b6ee522;border:1px solid #a78bfa48;font-weight:700}
+body.stremio-hybrid .sh-torrent-overlay .ctr-chip.is-subtitle{color:#c6ddff;background:#4c86dc20;border:1px solid #70a8f044}
+body.stremio-hybrid .sh-torrent-overlay .ctr-quality.q-720{color:#91d9f5;background:#39a5d11a;border-color:#39a5d155}
 body.stremio-hybrid .sh-torrent-overlay .ctr-bitrate{display:none}
 body.stremio-hybrid .sh-torrent-overlay .ctr-chips{gap:.3em .6em}
-body.stremio-hybrid .sh-torrent-overlay .focus{outline:2px solid #fff!important;outline-offset:-2px;box-shadow:inset .2em 0 var(--sm-accent,#bca8f0)!important;background:#302b47!important}
+body.stremio-hybrid .sh-torrent-overlay .selector.focus,body.stremio-hybrid .sh-torrent-overlay .torrent-item.focus{outline:3px solid #c9b8ff!important;outline-offset:2px;box-shadow:0 0 0 .16em #9775fa88,inset .22em 0 var(--sm-accent,#bca8f0)!important;background:#302b47!important;position:relative;z-index:1}
 body.stremio-hybrid .sh-torrent-overlay .empty{font-size:1em!important}
 body.stremio-hybrid .sh-torrent-overlay .scroll{mask-image:none!important;-webkit-mask-image:none!important}
 body.stremio-hybrid .sh-torrent-overlay .scroll__body{padding:.15em!important;min-width:0}
@@ -61,47 +72,45 @@ body.stremio-hybrid .sh-torrent-overlay .parser-search-status{display:none}
         var ep=coord(source.Episode??source.episode,false);
         return season!=null?'S'+pad(season)+(ep==null?'':'E'+pad(ep)):ep!=null?'E'+pad(ep):'епізоди не визначено';
     }
-    function releaseView(source,movie,kind) {
+    function releaseView(source,movie,kind,context) {
         source=source||{};movie=movie||{};var api=window.TorrentsRedesign,raw=String(source.Title||source.title||''),data=api&&api.normalizeRelease?api.normalizeRelease(source):null;
-        var match=data&&api.releaseMatch?api.releaseMatch(data,movie,{}):null;
+        var match=data&&api.releaseMatch?api.releaseMatch(data,movie,context||{}):null;
         // Full parser release names carry edition, voice and pack details needed on TV.
         // Keep relevance/ranking separate from display; never synthesize a replacement title.
         return {title:raw||'Назва релізу недоступна',raw:raw,release:data?data.parsed.name:'',match:match,data:data};
     }
-    function decorate(row,source,movie,kind) {
-        var view=releaseView(source,movie,kind),name=row.querySelector('.ctr-name'),chips=row.querySelector('.ctr-chips');
+    function decorate(row,source,movie,kind,context) {
+        var view=releaseView(source,movie,kind,context),name=row.querySelector('.ctr-name'),chips=row.querySelector('.ctr-chips');
         if(name)name.textContent=view.title;
         row.title=view.raw;row.setAttribute('aria-label',view.title);
         if(!chips)return view;
         chips.textContent='';
         function chip(label,cls){var n=document.createElement('div');n.className='ctr-chip '+(cls||'');n.textContent=label;chips.appendChild(n);}
-        if(view.release)chip(view.release);
-        // Native .m-audio tags originate from ffprobe; title tokens and subtitle tags cannot prove audio.
-        var audio=Array.from(row.querySelectorAll('.m-audio')).map(function(n){return n.getAttribute('aria-label')||n.textContent;});
-        var languages=source.AudioLanguages||source.audio_languages||[];
-        if(!Array.isArray(languages))languages=[languages];
-        var known=audio.concat(languages).join(' '),ua=/(?:^|[^a-z])(ukr?|ua|ukrainian)(?=$|[^a-z])|українськ/i.test(known),en=/(?:^|[^a-z])(en|eng|english)(?=$|[^a-z])/i.test(known);
-        if(ua)chip('🇺🇦 Українська · аудіо','is-ua');if(en)chip('🇬🇧 English · аудіо');
-        if(!ua&&!en)chip(audio.length?'Аудіо: '+audio.join(' · '):'Мови аудіо не підтверджено');
-        if(row.querySelector('.m-subtitle'))chip('CC · субтитри');
-        if(view.data&&view.data.tracker)chip(view.data.tracker);
+        var data=view.data,parsed=data&&data.parsed||{},audio=parsed.audio||{languages:[],label:'Невідомо',ua:false},subs=parsed.subs||{languages:[],label:'Невідомо'},audioLabel=audio.languages&&audio.languages.length?audio.languages.join(' / '):'Невідомо',subtitleLabel=subs.languages&&subs.languages.length?subs.languages.join(' / '):'Невідомо',studio=parsed.voiceover&&parsed.voiceover!=='Невідомо'?parsed.voiceover:'Студія невідома';
+        if(parsed.name)chip(parsed.name);
+        chip('🔊 Аудіо: '+audioLabel,(audio.ua?'is-ua ':'')+'is-audio'+(audioLabel==='Невідомо'?' is-unknown':''));
+        if(studio!=='Студія невідома'||parsed.voiceoverType)chip('🎙 Озвучення: '+studio+(parsed.voiceoverType?' · '+parsed.voiceoverType:''),studio==='Студія невідома'?'is-unknown':'is-studio');
+        else chip('🎙 Студія невідома','is-unknown');
+        chip('CC · Субтитри: '+subtitleLabel,'is-subtitle'+(subtitleLabel==='Невідомо'?' is-unknown':''));
+        chip('Якість: '+(parsed.quality?(parsed.quality==='2160'?'4K':parsed.quality+'p'):'Невідомо'),parsed.quality?'':'is-unknown');
+        chip('Трекер: '+(data&&data.tracker||'Невідомо'),data&&data.tracker?'':'is-unknown');
+        chip('Сіди: '+(data&&data.seeds!=null?data.seeds:'Невідомо'),data&&data.seeds!=null?'':'is-unknown');
         row.classList.remove('is-best','sh-source-pick');
         // Recommendation is conditional on actual Cinema ranking, relevance and availability, never just 4K.
         return view;
     }
-    function create(pane,page,inline) {
+    function create(pane,page) {
         installStyle();var open=false,scrolls=[],origin=null;pane.dataset.state='closed';
-        if(!inline){pane.classList.add('sh-torrent-overlay');pane.hidden=true;pane.setAttribute('role','dialog');pane.setAttribute('aria-modal','true');document.body.appendChild(pane);page.classList.add('sh-overlay-mode');}
+        pane.classList.add('sh-torrent-overlay');pane.hidden=true;pane.setAttribute('role','dialog');pane.setAttribute('aria-modal','true');document.body.appendChild(pane);page.classList.add('sh-overlay-mode');
         return {
-            inline:inline,
-            isOpen:function(){return inline||open;},
+            isOpen:function(){return open;},
             open:function(){
                 if(open)return;open=true;pane.dataset.state='opening';
                 origin=page.querySelector('.view--torrent.focus')||page.querySelector('.view--torrent:not(.hide)');
                 scrolls=Array.from(page.querySelectorAll('.scroll')).concat(document.scrollingElement||[]).map(function(n){return {node:n,top:n.scrollTop,left:n.scrollLeft};});
-                if(!inline){var styles=getComputedStyle(page);['--sm-accent','--sm-accent-rgb','--sm-accent2','--sm-accent2-rgb','--sm-accent-ink'].forEach(function(k){pane.style.setProperty(k,styles.getPropertyValue(k));});pane.hidden=false;}
+                var styles=getComputedStyle(page);['--sm-accent','--sm-accent-rgb','--sm-accent2','--sm-accent2-rgb','--sm-accent-ink'].forEach(function(k){pane.style.setProperty(k,styles.getPropertyValue(k));});pane.hidden=false;
             },
-            close:function(restore){if(!open)return;open=false;pane.dataset.state='closed';if(!inline)pane.hidden=true;if(restore){if(origin&&origin.isConnected)Lampa.Controller.collectionFocus(origin,page);scrolls.forEach(function(s){s.node.scrollTop=s.top;s.node.scrollLeft=s.left;});}},
+            close:function(restore){if(!open)return;open=false;pane.dataset.state='closed';pane.hidden=true;if(restore){if(origin&&origin.isConnected)Lampa.Controller.collectionFocus(origin,page);scrolls.forEach(function(s){s.node.scrollTop=s.top;s.node.scrollLeft=s.left;});}},
             destroy:function(){open=false;pane.remove();page.classList.remove('sh-overlay-mode');scrolls=[];origin=null;}
         };
     }
