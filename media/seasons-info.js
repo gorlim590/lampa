@@ -392,8 +392,8 @@
     style.textContent =
         "    .card--season-complete {\n" +
         "        position: absolute;\n" +
-        "        left: 0;\n" +
-        "        margin-left: -0.65em;\n" +
+        "        left: 0.7em;\n" +
+        "        margin-left: 0;\n" +
         "        bottom: 2.4em;\n" +
         "        background-color: rgba(61, 161, 141, 0.9);\n" +
         "        z-index: 12;\n" +
@@ -407,8 +407,8 @@
         "\n" +
         "    .card--season-progress {\n" +
         "        position: absolute;\n" +
-        "        left: 0;\n" +
-        "        margin-left: -0.65em;\n" +
+        "        left: 0.7em;\n" +
+        "        margin-left: 0;\n" +
         "        bottom: 2.4em;\n" +
         "        background-color: rgba(255, 66, 66, 1);\n" +
         "        z-index: 12;\n" +
@@ -471,6 +471,24 @@
         "\n" +
         "    .card--season-progress.card--season-alt div {\n" +
         "        padding: 0.29em 0.5em !important;\n" +
+        "    }\n" +
+        "\n" +
+        "    .ydesign-badges > .card--season-complete,\n" +
+        "    .ydesign-badges > .card--season-progress {\n" +
+        "        position: relative;\n" +
+        "        top: auto !important;\n" +
+        "        right: auto !important;\n" +
+        "        bottom: auto !important;\n" +
+        "        left: auto !important;\n" +
+        "        margin: 0 !important;\n" +
+        "        max-width: 100%;\n" +
+        "        flex: 0 1 auto;\n" +
+        "    }\n" +
+        "\n" +
+        "    .ydesign-badges > .card--season-complete.card--season-alt,\n" +
+        "    .ydesign-badges > .card--season-progress.card--season-alt {\n" +
+        "        left: auto !important;\n" +
+        "        margin-left: 0 !important;\n" +
         "    }\n";
     document.head.appendChild(style);
 
@@ -548,8 +566,27 @@
         return badge;
     }
 
+    function positionSeasonBadge(view, badge) {
+        if (!view || !badge) return false;
+        var metadataRow = view.querySelector && view.querySelector('.ydesign-badges');
+        var target = metadataRow || view;
+        if (badge.parentNode !== target) target.appendChild(badge);
+        return !!metadataRow;
+    }
+
+    function moveSeasonBadgesIntoMetadata(cardEl) {
+        if (!cardEl || !cardEl.querySelector) return;
+        var view = cardEl.querySelector('.card__view');
+        var metadataRow = view && view.querySelector('.ydesign-badges');
+        if (!metadataRow) return;
+        var badges = view.querySelectorAll('.card--season-complete, .card--season-progress');
+        var badgesArr = Array.prototype.slice.call(badges, 0);
+        for (var i = 0; i < badgesArr.length; i++) positionSeasonBadge(view, badgesArr[i]);
+    }
+
     function adjustBadgePosition(cardEl, badge) {
         if (!cardEl || !badge) return;
+        if (badge.parentNode && badge.parentNode.classList && badge.parentNode.classList.contains('ydesign-badges')) return;
         var quality = cardEl.querySelector('.card__quality');
 
         if (quality) {
@@ -644,8 +681,8 @@
             }
         }
         var badge = createBadge('...', false, true);
-        view.appendChild(badge);
-        adjustBadgePosition(cardEl, badge);
+        positionSeasonBadge(view, badge);
+        if (!badge.parentNode.classList || !badge.parentNode.classList.contains('ydesign-badges')) adjustBadgePosition(cardEl, badge);
         try {
             qualityObserver.observe(view, {
                 childList: true,
@@ -726,6 +763,9 @@
                     var node = mutation.addedNodes[j];
 
                     if (!node || node.nodeType !== 1) continue;
+
+                    var containingCard = node.classList && node.classList.contains('card') ? node : node.closest && node.closest('.card');
+                    if (containingCard) moveSeasonBadgesIntoMetadata(containingCard);
 
                     if (node.classList && node.classList.contains('card')) {
                         addSeasonBadge(node);
