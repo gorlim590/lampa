@@ -58,6 +58,7 @@ test('Native menu controller expands the existing sidebar and leaving it restore
  context.onStreamController({name:'menu'});assert(classes.has('sh-navigation-expanded'));
  context.onStreamController({name:'main'});assert(!classes.has('sh-navigation-expanded'));
  assert(source.includes('.sh-navigation-expanded .wrap__left .menu__text { display:block !important;'));
+ assert(source.includes('body.stremio-hybrid.sh-navigation-expanded .head__body { padding-left:calc(15em + var(--sh-inset)); }'),'expanded sidebar must reserve its width so the page title stays outside the overlay');
  assert(source.includes('.menu__item.traverse:not(.focus) { box-shadow:inset .18em 0 var(--sh-accent); }'));
  assert(source.includes('@media(prefers-reduced-motion:reduce){body.stremio-hybrid .wrap__left'));
  assert(source.includes("classList.remove('sh-movie-active','sh-navigation-expanded')"),'Hybrid teardown must restore the compact rail');

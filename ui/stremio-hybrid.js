@@ -164,6 +164,7 @@ body.stremio-hybrid .menu__item, body.stremio-hybrid .head__action, body.stremio
  body.stremio-hybrid .wrap__left--hidden .menu__version { font-size:.45em; }
  body.stremio-hybrid .wrap__left { transition:width var(--sh-speed) var(--sh-ease),min-width var(--sh-speed) var(--sh-ease); }
  body.stremio-hybrid.sh-navigation-expanded .wrap__left { position:fixed; inset:0 auto 0 0; z-index:50; width:15em !important; min-width:15em; box-shadow:.8em 0 2em #0007; }
+ body.stremio-hybrid.sh-navigation-expanded .head__body { padding-left:calc(15em + var(--sh-inset)); }
  body.stremio-hybrid.sh-navigation-expanded .wrap__left .menu { width:15em !important; }
  body.stremio-hybrid.sh-navigation-expanded .wrap__left .menu__item { justify-content:flex-start; padding:.8em 1em; }
  body.stremio-hybrid.sh-navigation-expanded .wrap__left .menu__ico { width:1.35em; margin:0 .8em 0 0; flex:0 0 1.35em; }
