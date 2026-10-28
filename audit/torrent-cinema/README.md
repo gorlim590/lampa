@@ -1,8 +1,8 @@
 # Torrent Cinema 2.0 — acceptance evidence
 
-Implementation commit `12530e68af8b8588dc739617230a718c0e21f51a`; branch `feat/issue-117-torrent-cinema`. Development baseline f60132b, rebased onto fa378b3 (two inventory-only main commits).
+Implementation commit `ce50a4461cfd1270547ac8417ce71b4ab01cc9fa`; branch `feat/issue-117-torrent-cinema`. Development baseline f60132b, rebased onto fa378b3 (two inventory-only main commits).
 
-Canonical artifact SHA-256: `6fb25303c484daa5d380b35098bcbfb22ac5ca8429310edd281cb4c61ef8ae20`. Both browser modes routed the same changed bytes into the existing native Lampa runtime. Original tab/URL/display metrics restored; browser/profile kept running.
+Canonical artifact SHA-256: `fa5c1407087ad854a63f6a6c3a2719974289339dca069da1651c1dd4c99b3083`. Both browser modes routed the same changed bytes into the existing native Lampa runtime. Original tab/URL/display metrics restored; browser/profile kept running.
 
 | Check | Result |
 | --- | --- |
@@ -31,9 +31,9 @@ Three scenario families run in each owner-required install mode. Native row OK i
 
 ## Size/performance
 
-Raw shared presentation source changes from 299,568 to 234,421 bytes (65,147 fewer; 21.7%). Legacy installed URLs may add tiny alias requests, never another owner. The first 1080p row changes from about 223 to 129 CSS px; five complete rows fit. The 4K modal uses 44px typography.
+Raw shared presentation source changes from 299,568 to 234,435 bytes (65,133 fewer; 21.7%). Legacy installed URLs may add tiny alias requests, never another owner. The first 1080p row changes from about 223 to 129 CSS px; five complete rows fit. The 4K modal uses 44px typography.
 
-Single first-open observations: 268.3ms before, 319.6ms Hybrid, 274.8ms standalone. Host/protocol polling differs, so latency comparison is **INCONCLUSIVE**. No startup/FPS/memory/device gain claimed. The active runtime has 13 removable subscriptions and one scoped stylesheet; disabling removes these, retaining only its reversible enable-setting listener until destroy.
+Single first-open observations: 268.3ms before, 349.7ms Hybrid, 347.5ms standalone. Host/protocol polling differs, so latency comparison is **INCONCLUSIVE**. No startup/FPS/memory/device gain claimed. The active runtime has 13 removable subscriptions and one scoped stylesheet; disabling removes these, retaining only its reversible enable-setting listener until destroy.
 
 ## Reproduce and rollback
 

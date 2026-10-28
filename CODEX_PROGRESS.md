@@ -1059,3 +1059,5 @@ Next publishupdatedPR50(mainmerge+marginfixonly),CI/merge;thenPR53retargettothat
 - Migration/rollback: `docs/torrent-cinema.md`; verification/screenshots: `audit/torrent-cinema/README.md`. Draft PR next; no merge, issue close or production deploy.
 
 - Draft PR #119 opened: https://github.com/gorlim590/lampa/pull/119. Initial Season CI found an existing static loader assertion pinned to the previous cache-version literal; updated it to the new delivery version without changing Trakt code/dependency behavior. Targeted loader assertion rerun; browser evidence reused because product bytes are unchanged. CI recheck required on the new head.
+
+- Final review tightened streamed selection identity to accept only valid 40/64-character hashes (malformed shared hashes cannot select another release). Source ce50a44, artifact `fa5c1407087ad854a63f6a6c3a2719974289339dca069da1651c1dd4c99b3083`. Fresh 225 unit checks and fresh 24/24 standalone + 24/24 Hybrid runs PASS on these exact bytes; original browser restored. Five CI workflows on the preceding test-alignment head passed; final evidence update now queued for the current head.

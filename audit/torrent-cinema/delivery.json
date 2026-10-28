@@ -1,6 +1,6 @@
 {
   "baseline": "f60132b1502e678e81c85d3a4087d23ccac711ff",
-  "implementationCommit": "12530e68af8b8588dc739617230a718c0e21f51a",
+  "implementationCommit": "ce50a4461cfd1270547ac8417ce71b4ab01cc9fa",
   "before": [
     {
       "file": "torrents-redesign.js",
@@ -21,8 +21,8 @@
   "after": [
     {
       "file": "ui/torrent-cinema.js",
-      "bytes": 132080,
-      "sha256": "6fb25303c484daa5d380b35098bcbfb22ac5ca8429310edd281cb4c61ef8ae20"
+      "bytes": 132094,
+      "sha256": "fa5c1407087ad854a63f6a6c3a2719974289339dca069da1651c1dd4c99b3083"
     },
     {
       "file": "ui/stremio-hybrid.js",
@@ -42,16 +42,16 @@
   ],
   "supportedIntegrationBytes": {
     "before": 299568,
-    "after": 234421,
-    "reduction": 65147,
+    "after": 234435,
+    "reduction": 65133,
     "percentReduction": 21.7
   },
   "note": "Raw source byte comparison for the old three presentation modules versus canonical Cinema + Hybrid. Existing manually installed legacy URLs may still request their small aliases; they initialize no second owner. Not an HTTP compression, startup, FPS or memory measurement.",
   "latency": {
     "status": "INCONCLUSIVE",
     "beforeSingleRecordedOpenMs": 268.3000000002794,
-    "afterIntegrationSingleRecordedOpenMs": 319.6000000005588,
-    "afterStandaloneSingleRecordedOpenMs": 274.79999999981374,
+    "afterIntegrationSingleRecordedOpenMs": 349.70000000018626,
+    "afterStandaloneSingleRecordedOpenMs": 347.5,
     "limits": "Single samples include host/protocol polling differences, not a controlled benchmark. No startup, FPS, smoothness or memory gain claimed."
   }
 }

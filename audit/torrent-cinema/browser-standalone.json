@@ -44,14 +44,14 @@
     "/lampa/torrents-redesign.js",
     "/lampa/loader.js"
   ],
-  "commit": "12530e68af8b8588dc739617230a718c0e21f51a",
+  "commit": "ce50a4461cfd1270547ac8417ce71b4ab01cc9fa",
   "branch": "feat/issue-117-torrent-cinema",
   "fixture": true,
   "assets": {
     "ui/torrent-cinema.js": {
       "url": "https://gorlim590.github.io/lampa/ui/torrent-cinema.js",
-      "sha256": "6fb25303c484daa5d380b35098bcbfb22ac5ca8429310edd281cb4c61ef8ae20",
-      "bytes": 132080
+      "sha256": "fa5c1407087ad854a63f6a6c3a2719974289339dca069da1651c1dd4c99b3083",
+      "bytes": 132094
     }
   },
   "checks": [
@@ -947,7 +947,7 @@
   "hostStartupExceptions": [
     "SyntaxError: Failed to execute 'appendChild' on 'Node': Unexpected token '&'\n    at [URL]"
   ],
-  "openMs": 274.79999999981374,
+  "openMs": 347.5,
   "deviceEquivalent": {
     "viewport": [
       1920,
