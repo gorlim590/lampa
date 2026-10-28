@@ -35,8 +35,17 @@ The visual harness runs each installation mode in isolated Chromium with native 
 
 **Pixel-level visual acceptance: PASS for isolated desktop Chromium at native DPR 1.** This is not physical Google TV evidence. The first isolated run had a 1280×720 browser window; larger viewports were set in-page and independently rasterized at DPR 1 (not forced-device-metrics emulation). Live provider endpoints, live TorrServer and playback were not exercised.
 
-- [Standalone browser report](browser-standalone.json)
-- [Hybrid browser report](browser-hybrid.json)
+Current native-DPR evidence supersedes the earlier DPR-emulated reports in this directory:
+
+- [Standalone 98-check report](../torrent-cinema/browser-standalone.json)
+- [Hybrid 98-check report](../torrent-cinema/browser-results.json)
+
+| Mode | 720p selected / expanded | 1080p selected / expanded | 4K selected / expanded |
+| --- | --- | --- | --- |
+| Standalone | [selected](../torrent-cinema/standalone-1280.png) / [expanded](../torrent-cinema/standalone-expanded-1280.png) | [selected](../torrent-cinema/standalone-1920.png) / [expanded](../torrent-cinema/standalone-expanded-1920.png) | [selected](../torrent-cinema/standalone-3840.png) / [expanded](../torrent-cinema/standalone-expanded-3840.png) |
+| Hybrid | [selected](../torrent-cinema/after-1280.png) / [expanded](../torrent-cinema/expanded-1280.png) | [selected](../torrent-cinema/after-1920.png) / [expanded](../torrent-cinema/expanded-1920.png) | [selected](../torrent-cinema/after-3840.png) / [expanded](../torrent-cinema/expanded-3840.png) |
+
+Files layering captures: [Standalone](../torrent-cinema/standalone-files-1920.png) · [Hybrid](../torrent-cinema/files-1920.png).
 
 The harness restores the existing tab URL and original emulation metrics, removes routes/preload/shadow storage, and leaves the test browser running. Its six endpoint URLs and API keys are synthetic fixture values. It does not touch saved live parser configuration.
 

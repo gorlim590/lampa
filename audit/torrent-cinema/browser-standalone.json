@@ -4,14 +4,23 @@
     "external optional script",
     "external optional script",
     "external optional script",
+    "external optional script",
+    "external optional script",
+    "external optional script",
+    "external optional script",
+    "external optional script",
+    "external optional script",
+    "external optional script",
+    "external optional script",
     "external optional script"
   ],
-  "commit": "2195fbf0dd47ff451bf6c7463449da03cdfc3bd3",
+  "commit": "6a805f62449c4625ad7d5bbb6d2a44c9f92eeea7",
   "branch": "feat/issue-120-multi-parser",
   "fixture": true,
   "assets": {
     "ui/torrent-cinema.js": {
       "url": "https://gorlim590.github.io/lampa/ui/torrent-cinema.js",
+      "source": "local repository bytes served by exact URL interception",
       "sha256": "2b0d3e87bf68284eef9dc584bb2e471db3215e42b7f4670874cbbf088c75693b",
       "bytes": 149557
     }
@@ -5082,11 +5091,11 @@
   "hostStartupExceptions": [],
   "preFixtureStartup": {
     "activity": "main",
-    "scriptCount": 18,
+    "scriptCount": 22,
     "hostErrors": [],
     "runtimeException": null
   },
-  "openMs": 379.19999999552965,
+  "openMs": 530.7000000029802,
   "deviceEquivalent": {
     "viewport": [
       1920,
@@ -5639,7 +5648,7 @@
   ],
   "finalDiagnostics": {
     "running": true,
-    "records": 2,
+    "records": 1,
     "subscriptions": 13,
     "children": 0,
     "cacheEntries": 2

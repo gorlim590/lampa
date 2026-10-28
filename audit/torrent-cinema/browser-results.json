@@ -1,7 +1,7 @@
 {
   "installation": "Hybrid integration",
   "suppressedScripts": [],
-  "commit": "2195fbf0dd47ff451bf6c7463449da03cdfc3bd3",
+  "commit": "6a805f62449c4625ad7d5bbb6d2a44c9f92eeea7",
   "branch": "feat/issue-120-multi-parser",
   "fixture": true,
   "assets": {
@@ -12,6 +12,7 @@
     },
     "ui/settings-hub.js": {
       "url": "https://gorlim590.github.io/lampa/ui/settings-hub.js",
+      "source": "local repository bytes served by exact URL interception",
       "sha256": "d90281c4550ad80b9dbc89a1cbc3b70a2159b1dda5973f890504715915e25fa4",
       "bytes": 24943
     },
@@ -5091,7 +5092,7 @@
     "hostErrors": [],
     "runtimeException": null
   },
-  "openMs": 391.6000000014901,
+  "openMs": 513.5,
   "deviceEquivalent": {
     "viewport": [
       1920,
@@ -5644,7 +5645,7 @@
   ],
   "finalDiagnostics": {
     "running": true,
-    "records": 2,
+    "records": 1,
     "subscriptions": 13,
     "children": 0,
     "cacheEntries": 2
