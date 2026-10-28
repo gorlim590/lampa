@@ -1,5 +1,5 @@
 {
-  "sourceCommit": "4e5f594e0135597aa396441b04c1c5aa00994474",
+  "sourceCommit": "56b1a3b9487676c51bb7ec4cc6624c893ecb96d4",
   "mode": "standalone",
   "fixture": true,
   "assets": {
@@ -9,8 +9,8 @@
       "evaluated": true
     },
     "providers/parser-search.js": {
-      "sha256": "d896eaa8ea2a199e0bc6917dd9b59b19838917171eabd52b03fc15dca18245c3",
-      "bytes": 21213,
+      "sha256": "5faac534b84826a79d801e076d33d27253fd4cbf8d3219896ac01c5659b27558",
+      "bytes": 21401,
       "delivered": true
     },
     "providers/torrent-search.js": {
@@ -58,11 +58,11 @@
   ],
   "first": {
     "stats": {
-      "started": 1793219774501,
+      "started": 1793220008723,
       "requests": 6,
       "peakConcurrency": 4,
       "cacheHits": 0,
-      "firstResultMs": 279,
+      "firstResultMs": 283,
       "results": 2,
       "pending": 1,
       "sources": [
@@ -108,11 +108,11 @@
   },
   "final": {
     "stats": {
-      "started": 1793219774501,
+      "started": 1793220008723,
       "requests": 6,
       "peakConcurrency": 4,
       "cacheHits": 0,
-      "firstResultMs": 279,
+      "firstResultMs": 283,
       "results": 3,
       "pending": 0,
       "sources": [
@@ -153,11 +153,24 @@
           "status": "server-error"
         }
       ],
-      "settledMs": 2031
+      "settledMs": 2032
     },
     "rows": 3,
     "focus": true,
     "controller": "sh_movie_streams"
+  },
+  "geometry": {
+    "viewport": [
+      7680,
+      4320
+    ],
+    "dpr": 0.25,
+    "overlay": {
+      "x": 460.75,
+      "y": 216,
+      "width": 6758.375,
+      "height": 3888
+    }
   },
   "status": "PASS"
 }
