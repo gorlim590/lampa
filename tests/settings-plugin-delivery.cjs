@@ -137,3 +137,12 @@ test('native API without a Listener remains bounded and reports readiness failur
  assert.equal(f.window.LampaLoaderDiagnostics.readinessFailure,'lampa-readiness-timeout');
  assert.equal(f.timers.size,0);
 });
+
+
+test('legacy torrent URLs in a custom loader list normalize to one canonical request',()=>{
+ const f=fixture({appready:true,list:['torrents-redesign.js','ui/torrent-overlay.js','ui/torrent-cinema.js'],responses:Array(4).fill('ok')});
+ assert.equal(f.scripts.length,4);
+ assert.equal(f.scripts[3].src,'https://fixture.invalid/plugins/ui/torrent-cinema.js?v=fixture');
+ assert.equal(f.scripts.filter(s=>/torrent-cinema/.test(s.src)).length,1);
+ assert(!f.scripts.some(s=>/torrents-redesign|torrent-overlay/.test(s.src)));
+});

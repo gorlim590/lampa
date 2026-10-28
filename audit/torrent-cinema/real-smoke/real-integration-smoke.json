@@ -1,0 +1,143 @@
+{
+  "head": "794d1a1d8096e877eb9792fae4acb1a49122cb54",
+  "artifact": {
+    "path": "ui/torrent-cinema.js",
+    "bytes": 149250,
+    "sha256": "16dd3c98d21c83a4044782f2bcf460d746a920ce46dbb919a1abbfd08cf5bd78",
+    "delivery": "The exact local PR artifact was injected into the existing Lampa tab for each run."
+  },
+  "browser": {
+    "authorizedExistingTab": true,
+    "origin": "https://siaivo.isroot.in/",
+    "restored": true,
+    "leftRunning": true,
+    "screenPx": "1920x1080",
+    "cssViewportPx": "7680x4320",
+    "devicePixelRatio": 0.25,
+    "note": "The pre-existing browser page was at 25% zoom (inferred from CSS viewport, devicePixelRatio and screen size). Zoom/profile/settings were left unchanged. Playwright PNGs are CSS-size captures at 7680x4320."
+  },
+  "scenarios": {
+    "theOthers2001": {
+      "status": "PASS",
+      "metadata": {
+        "id": 1933,
+        "localizedTitle": "Інші",
+        "originalTitle": "The Others",
+        "year": 2001
+      },
+      "providerResult": {
+        "elapsedMsToFirstRows": 3824,
+        "releaseCount": 15,
+        "trackers": {
+          "Toloka.to": 9,
+          "Mazepa": 6
+        },
+        "bestChoiceFirstRow": true,
+        "firstRelease": {
+          "rawTitle": "Інші / The Others (2001) BDRemux 1080p Ukr/Eng | Sub Ukr/Eng",
+          "tracker": "Toloka.to",
+          "quality": "1080p",
+          "audio": ["Українська", "English"],
+          "uaAudioSupportedByMetadata": true,
+          "dubbingStudios": [],
+          "seeders": 13,
+          "peers": 0,
+          "sizeBytes": 17265768529
+        }
+      },
+      "nativeFiles": {
+        "status": "PASS",
+        "elapsedMsFromRowsToFiles": 4266,
+        "fileCount": 1,
+        "displayedSize": "16.08 ГБ",
+        "serverError": false,
+        "playbackStarted": false,
+        "backRestoredDetailsAndFocusedRelease": true
+      },
+      "screenshot": "the-others-live.png"
+    },
+    "arcane": {
+      "status": "PASS",
+      "metadata": {
+        "id": 94605,
+        "localizedTitle": "Аркейн",
+        "originalTitle": "Arcane",
+        "firstAirYear": 2021,
+        "seasons": 2
+      },
+      "providerResult": {
+        "elapsedMs": 12231,
+        "releaseCount": 20,
+        "trackers": {
+          "Toloka.to": 14,
+          "The Pirate Bay": 6
+        },
+        "firstReleaseRawTitle": "Аркейн: Ліга Легенд (S2) / Arcane: League of Legends (S2) (2024) BDRemux 4K 2160p H.265 Dolby Vision P7 HDR10 Ukr/Eng | Sub Ukr/Eng",
+        "firstRelease": {
+          "quality": "2160p",
+          "season": 2,
+          "verifiedYearInRawReleaseTitle": 2024,
+          "audio": ["Українська", "English"],
+          "uaAudioSupportedByMetadata": true,
+          "dubbingStudios": [],
+          "seeders": 2,
+          "peers": 0
+        },
+        "displayedTechnicalSections": {
+          "video": "2160p / 4K; Remux; HDR10; Dolby Vision; HEVC",
+          "audio": "Українська / English",
+          "subtitles": "Українська / English",
+          "files": "Count unknown; total 232.04 GB; S02"
+        },
+        "expandedRawTitlePreserved": true,
+        "duplicateHashCountInInspectedRows": 0,
+        "matchWarning": "The expanded row showed ‘Інший рік · Інший сезон’. This smoke did not record/change the native selected-season filter, so the warning is not classified as a defect or pass for the season-2 context."
+      },
+      "screenshots": ["arcane-live-compact.png", "arcane-live-expanded.png"]
+    },
+    "100DaysOfDeception": {
+      "status": "BLOCKED",
+      "metadata": {
+        "id": 293607,
+        "localizedTitle": "100 днів омани",
+        "originalTitle": "100일의 거짓말",
+        "firstAirDate": "2026-10-10",
+        "source": "Lampa TMDB metadata response"
+      },
+      "multilingualSearch": {
+        "localeName": "100 днів омани",
+        "originalName": "100일의 거짓말",
+        "configuredPrimaryLanguage": "df"
+      },
+      "torrentUiAttempt": {
+        "observedForMs": 9009,
+        "visibleRows": 0,
+        "torrentStatusPanel": false,
+        "emptyOrErrorMessage": false
+      },
+      "reason": "The real Lampa Details → Torrent attempt exposed no results panel, status message, rows, or final parser state in 9.009 seconds. This is a blocked UI/parser handoff observation, not a confirmed zero-result search, provider timeout, or provider failure."
+    }
+  },
+  "network": {
+    "theOthersObservedStatusCounts": {
+      "external-redacted:200": 35,
+      "tmdb:200": 2,
+      "external-redacted:400": 1,
+      "external-redacted:404": 1
+    },
+    "attribution": "The 400 and 404 came from external requests whose hosts were deliberately not retained; they cannot be attributed to a configured parser."
+  },
+  "additionalChecks": {
+    "realTrackerPriority": "Observed Toloka.to releases before Mazepa on The Others; Toloka.to Best Choice occupied the first row.",
+    "filtersWithRealProviderRows": "NOT TESTED",
+    "duplicateHandlingAcrossRealTrackers": "NOT TESTED; the inspected Arcane rows had zero repeated InfoHash values.",
+    "parserFailureAttribution": "NOT CONFIRMED; results rendered despite un-attributed external 400/404 responses.",
+    "playback": "NOT TESTED; no file was selected and no playback was started.",
+    "physicalGoogleTv": "NOT TESTED"
+  },
+  "ci": {
+    "githubActionsAtHead": "794d1a1d8096e877eb9792fae4acb1a49122cb54",
+    "passed": 5,
+    "failed": 0
+  }
+}

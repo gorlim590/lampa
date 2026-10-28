@@ -1,0 +1,32 @@
+{
+  "commit": "8e84c0bb4f9896f72e69667de7c9cddfee732ed0",
+  "targetedTests": 64,
+  "targetedPassed": 64,
+  "targetedFailed": 0,
+  "targetedCommand": "node --test --test-timeout=15000 tests/torrent-overlay.cjs tests/torrent-search.cjs",
+  "syntax": [
+    "node --check ui/torrent-cinema.js PASS",
+    "node --check tests/torrent-cinema-browser.cjs PASS"
+  ],
+  "artifact": {
+    "build": "node scripts/build-torrent-cinema.mjs PASS",
+    "freshness": "node scripts/build-torrent-cinema.mjs --check PASS",
+    "bytes": 149250,
+    "sha256": "16dd3c98d21c83a4044782f2bcf460d746a920ce46dbb919a1abbfd08cf5bd78"
+  },
+  "browser": {
+    "hybrid": "96/96 PASS",
+    "standalone": "96/96 PASS",
+    "validSelectedSeason2": "eligible, reasons=[], zero .tc-match-note elements",
+    "negativeSeason1": "renderer-level with explicit {season:1}; one nonempty mismatch warning; no native filter transition",
+    "nativeNameOnlySupport": false,
+    "nativeCompatibility": "Live native component dereferences element.Title.toLowerCase() in parse/filter; Name-only record is not sent to it. Canonical adapter Name-only fallback unit-tested."
+  },
+  "priorBroaderFocusedSuite": {
+    "commit": "91a5685915aba9003a44eb7c76c28f4d14c7654e",
+    "tests": 230,
+    "passed": 230,
+    "failed": 0
+  },
+  "note": "Parser-provided title policy unchanged; no aliases or generated names added. Production change only suppresses empty match-warning notes."
+}

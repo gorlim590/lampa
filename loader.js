@@ -10,7 +10,7 @@
   window.LampaLoaderStarted = true;
 
   var BASE = String(window.LAMPA_PLUGINS_BASE || 'https://gorlim590.github.io/lampa/').replace(/\/?$/, '/');
-  var VERSION = String(window.LAMPA_PLUGINS_VERSION || '20261027-ui-first-1');
+  var VERSION = String(window.LAMPA_PLUGINS_VERSION || '20261028-torrent-cinema-2.0.0');
   var TIMEOUT_MS = 8000;
   var READY_CHECK_MS = 100;
   var READY_MAX_CHECKS = 300;
@@ -19,6 +19,7 @@
     'trakt/trakt.js', 'trakt/trakt-plus.js', 'providers/torrent-search.js',
     'media/average-rating.js', 'ui/cardify-plus.js', 'localization/translate.js'
   ];
+  var TORRENT_ENTRY='ui/torrent-cinema.js';
   var seen = {};
   var state = {
     version: VERSION, startedAt: now(), appreadyAtStart: !!window.appready,
@@ -48,6 +49,7 @@
       var base = new URL(BASE, document.location && document.location.href);
       var url = new URL(value, base.href);
       var pathname = url.pathname.replace(/^\//, '');
+      if((url.origin===base.origin||url.hostname==='gorlim590.github.io')&&/(?:^|\/)(?:torrents-redesign\.js|ui\/torrent-overlay\.js|ui\/torrent-cinema\.js)$/.test(pathname))return TORRENT_ENTRY;
       var known = CRITICAL.concat(DEFAULT_DEFERRED);
       for (var i = 0; i < known.length; i++) if (pathname === known[i] || pathname.slice(-known[i].length) === known[i]) return known[i];
       if (url.origin === base.origin && url.pathname.indexOf(base.pathname) === 0) return url.pathname.slice(base.pathname.length);
@@ -94,6 +96,7 @@
 
   function buildUrl(path) {
     var value = String(path || '').replace(/^\s+|\s+$/g, '');
+    if(pathKey(value)===TORRENT_ENTRY)value=TORRENT_ENTRY;
     if (/^https?:\/\//i.test(value)) return value;
     var separator = value.indexOf('?') === -1 ? '?' : '&';
     return BASE + value.replace(/^\//, '') + separator + 'v=' + encodeURIComponent(VERSION);
@@ -101,7 +104,7 @@
 
   function loadOne(path, stage, index, done) {
     var key = pathKey(path);
-    if (seen[key]) {
+    if (seen[key] || key===TORRENT_ENTRY&&(window.LampaTorrentCinema||document.querySelector&&document.querySelector('script[data-torrent-cinema]'))) {
       state.skipped++;
       done('duplicate');
       return;

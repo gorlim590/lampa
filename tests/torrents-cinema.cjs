@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-const source = fs.readFileSync(__dirname + '/../torrents-redesign.js', 'utf8');
+const source = fs.readFileSync(__dirname + '/../ui/torrent-cinema.js', 'utf8');
 function fixture(initial = {}) {
   const values = { ...initial }, writes = [];
   const Lampa = { Storage: {

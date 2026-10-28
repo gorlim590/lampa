@@ -1,8 +1,10 @@
+> **Поточна архітектура #117:** torrent overlay, рядки, фільтри, Files і lifecycle належать одному `ui/torrent-cinema.js`. Він працює й без Hybrid. Старі описи embedded/right-panel нижче — історичні; актуальні установка, сумісність і докази: [Torrent Cinema 2.0](docs/torrent-cinema.md).
+
 ## Публікація та встановлення — 2026-10-23
 
 Поточна інтеграція переносить збережену тему 2.7.0 і локальну UA Comments у повний репозиторій без заміни його частковим snapshot. Історичні розділи нижче описують попередні контрольні точки.
 
-На Google TV додайте **один** плагін <https://gorlim590.github.io/lampa/ui/stremio-hybrid.js> через штатні розширення Lampa. Торрентний UI: <https://gorlim590.github.io/lampa/torrents-redesign.js>; парсери: <https://gorlim590.github.io/lampa/providers/parsers.js>. Не додавайте другий запис, якщо ці адреси вже встановлені. Hybrid підключається окремо, автоматично всім профілям не вмикається. Параметр Stremio Hybrid у налаштуваннях теми дозволяє вимкнути оформлення; вимкнення розширення та reload повністю повертає попередній інтерфейс.
+На Google TV додайте **один** плагін <https://gorlim590.github.io/lampa/ui/stremio-hybrid.js> через штатні розширення Lampa. Torrent Cinema 2.0 автоматично підключається Hybrid; незалежний URL: <https://gorlim590.github.io/lampa/ui/torrent-cinema.js>; парсери: <https://gorlim590.github.io/lampa/providers/parsers.js>. Не додавайте другий запис, якщо ці адреси вже встановлені. Hybrid підключається окремо, автоматично всім профілям не вмикається. Параметр Stremio Hybrid у налаштуваннях теми дозволяє вимкнути оформлення; вимкнення розширення та reload повністю повертає попередній інтерфейс.
 
 Керований `plugins.json` переводить UA Comments на <https://gorlim590.github.io/lampa/media/ua-comments.js> та вимикає CommunityWatches. Наявний профіль Chromium із локальними preview URL не переписується: для нього застосовується описаний нижче preview restore. Не підключайте upstream UA Comments одночасно з локальною копією.
 

@@ -5,9 +5,9 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 
 const root = __dirname + '/..';
-const hybrid = fs.readFileSync(root + '/ui/stremio-hybrid.js', 'utf8');
-const overlay = fs.readFileSync(root + '/ui/torrent-overlay.js', 'utf8');
-const redesign = fs.readFileSync(root + '/torrents-redesign.js', 'utf8');
+const hybrid = fs.readFileSync(root + '/ui/torrent-cinema/runtime.js', 'utf8');
+const overlay = fs.readFileSync(root + '/ui/torrent-cinema.js', 'utf8');
+const redesign = fs.readFileSync(root + '/ui/torrent-cinema.js', 'utf8');
 function extract(source, name) {
   const start = source.indexOf('    function ' + name + '(');
   assert(start >= 0, 'Missing production function ' + name);
@@ -22,7 +22,7 @@ function extract(source, name) {
 class Node {
   constructor(classes = '') {
     this.children = []; this.parentNode = null; this.attrs = {}; this.dataset = {}; this.listeners = {};
-    this.className = classes; this.classes = new Set(classes.split(/\s+/).filter(Boolean));
+    this.className = classes; this.classes = new Set(classes.split(/\s+/).filter(Boolean));Object.defineProperty(this,'className',{get:()=>[...this.classes].join(' '),set:value=>{this.classes=new Set(String(value).split(/\s+/).filter(Boolean));}});
     this.classList = { add: x => { this.classes.add(x); this.className = [...this.classes].join(' '); }, remove: x => { this.classes.delete(x); this.className = [...this.classes].join(' '); }, contains: x => this.classes.has(x), toggle: (x, on) => { if (on === undefined ? !this.classes.has(x) : on) this.classes.add(x); else this.classes.delete(x); this.className = [...this.classes].join(' '); } };
     this.isConnected = true; this.offsetParent = {}; this.hidden = false; this._text = '';
     Object.defineProperty(this, 'textContent', { get: () => this._text + this.children.map(n => n.textContent).join(''), set: value => { this._text = String(value); this.children.forEach(n => { n.parentNode = null; }); this.children = []; } });
@@ -35,9 +35,13 @@ class Node {
   removeAttribute(key) { delete this.attrs[key]; }
   addEventListener(type, fn) { this.listeners[type] = fn; }
   dispatch(type) { this.listeners[type]({ stopImmediatePropagation() {} }); }
-  querySelector(selector) { if (this.nodes && this.nodes[selector]) return this.nodes[selector]; if (selector === '[data-ctr-role="studio"]') { const queue = Object.values(this.nodes || {}).concat(this.children); while (queue.length) { const node = queue.shift(); if (node.getAttribute && node.getAttribute('data-ctr-role') === 'studio') return node; queue.push(...(node.children || [])); } } return null; }
-  querySelectorAll(selector) { if (selector === '.torrent-item') return this.children.filter(n => n.classList.contains('torrent-item')); return []; }
-  closest(selector) { return selector === '.scroll' ? this.scroll || null : null; }
+  matches(selector){if(selector==='[data-ctr-role="studio"]')return this.getAttribute('data-ctr-role')==='studio';return selector.split(',').some(part=>part.trim().split('.').filter(Boolean).every(cls=>(this.className||'').split(/\s+/).includes(cls)));}
+  querySelector(selector) {if(this.nodes&&this.nodes[selector])return this.nodes[selector];return this.querySelectorAll(selector)[0]||null;}
+  querySelectorAll(selector){const out=[],queue=[...this.children];while(queue.length){const node=queue.shift();if(node.matches?.(selector))out.push(node);queue.push(...(node.children||[]));}return out;}
+  closest(selector) {if(selector==='.scroll')return this.scroll||null;for(let n=this;n;n=n.parentNode)if(n.matches?.(selector))return n;return null;}
+  contains(node){for(let n=node;n;n=n.parentNode)if(n===this)return true;return false;}
+  scrollIntoView(){}
+  get firstChild(){return this.children[0]||null;}
   remove() { if (this.parentNode) this.parentNode.removeChild(this); this.isConnected = false; }
 }
 function fixture() {
@@ -67,14 +71,14 @@ function fixture() {
     if (selector === '.torrent-item') return list.querySelectorAll(selector);
     const tools = files.children.find(node => node.classList.contains('ctr-tools'));
     if (!tools) return [];
-    if (selector === '.ctr-tools .selector,.torrent-filter .selector') return Object.values(nodes).flatMap(group => group.children).filter(node => node.classList.contains('selector'));
+    if (selector === '.ctr-tools .selector,.torrent-filter .selector') return [...nodes['.ctr-tabs'].children,...nodes['.ctr-tracker-tabs'].children].filter(node => node.className.split(/\s+/).includes('selector'));
     if (selector === '.ctr-tabs [data-quality]') return nodes['.ctr-tabs'].children.filter(node => node.dataset.quality);
     if (selector === '.ctr-tracker-tabs .selector') return nodes['.ctr-tracker-tabs'].children;
     if (selector === '.ctr-menus .selector') return nodes['.ctr-menus'].children;
     return [];
   };
   rootNode.classList.add('sh-cinema-explorer');
-  const pane = new Node(); pane.querySelectorAll = () => [];
+  const pane = new Node(),head=new Node(),retry=new Node();head.nodes={'.sh-stream-retry':retry};head.appendChild(retry);pane.nodes={'.sh-stream-head':head};pane.appendChild(head);
   const page = { classList: { contains: () => true } };
   const record = { activity: {}, streamPane: pane, streamView: { isOpen: () => true }, page };
   const movie = { id: 21, source: 'tmdb', media_type: 'movie', title: 'The Others', original_title: 'The Others', release_date: '2001-08-02' };
@@ -85,6 +89,7 @@ function fixture() {
     const row = new Node('torrent-item selector'); row.nodes = { '.ctr-name': new Node('ctr-name'), '.ctr-chips': new Node('ctr-chips'), '.ctr-best': new Node('ctr-best'), '.torrent-item__title': new Node() };
     row.querySelector = selector => row.nodes[selector] || Node.prototype.querySelector.call(row, selector);
     const source = { Title: title, Tracker: tracker, Seeders: 10, Peers: 2, Size: 1000000000, ...extra };
+    const wrap=new Node('ctr-row'),info=new Node('ctr-release-info'),metrics=new Node('ctr-metrics');info.appendChild(row.nodes['.ctr-best']);info.appendChild(row.nodes['.ctr-name']);info.appendChild(row.nodes['.ctr-chips']);wrap.appendChild(info);wrap.appendChild(metrics);row.appendChild(wrap);row.setAttribute('data-parsed','1');
     st.rows.push(row); st.sourceData.set(row, source); return { row, source };
   }
   const nodes = {
@@ -93,7 +98,8 @@ function fixture() {
   // Template-backed toolbar fixture: preserve the production setupStreamTools handlers.
   const filesInsert = files.insertBefore.bind(files);
   files.insertBefore = (node, before) => { node.nodes = nodes; node.querySelector = selector => nodes[selector] || null; node.classList.add('ctr-tools'); return filesInsert(node, before); };
-  const sourceFunctions = ['streamSession', 'streamAlive', 'streamTrackerKey', 'streamSortKey', 'streamWindow', 'streamUpdateRows', 'decorateStreamRows', 'syncStreamTrackerTools', 'streamFocus', 'streamMove', 'setupStreamTools', 'streamEpisodeDetails', 'streamEpisodeWatched', 'restoreStreamEpisodePreview', 'clearStreamEpisodePreviews', 'applyStreamEpisodePreview', 'applyStreamFileStudios', 'onStreamFile'];
+  const sourceFunctions = ['streamRowKey', 'streamSession', 'streamAlive', 'streamTrackerKey', 'streamSortKey', 'streamWindow', 'streamUpdateRows', 'decorateStreamRows', 'syncStreamTrackerTools', 'streamFocus', 'streamMove', 'setupStreamTools', 'streamEpisodeDetails', 'streamEpisodeWatched', 'restoreStreamEpisodePreview', 'clearStreamEpisodePreviews', 'applyStreamEpisodePreview', 'applyStreamFileStudios', 'onStreamFile'];
+  context.$=node=>({on(type,fn){node.jqueryEnter=fn;return this;}});context.running=true;context.metadata=context.TorrentsRedesign;context.bindInline=()=>{};context.collapseInline=()=>false;context.moveInline=()=>false;
   context.streamActivate = () => {};
   context.streamSelectOwner = null;
   context.streamRecord = () => record;
@@ -115,13 +121,13 @@ test('Hybrid embedded list uses shared metadata, exact matching, tracker filters
   f.context.streamUpdateRows(f.st);
   assert.equal(f.st.displayRows.length, 3);
   assert.equal(f.st.displayRows[0], toloka.row, 'the confirmed Ukrainian-audio release is the single Best Choice');
-  assert.equal(toloka.row.nodes['.ctr-chips'].textContent.includes('Аудіо: Українська'), true);
-  assert.equal(toloka.row.nodes['.ctr-chips'].textContent.includes('🎙 UA Studio'), true);
-  assert.equal(toloka.row.nodes['.ctr-chips'].textContent.includes('Субтитри: Російська'), true);
-  assert.equal(mazepa.row.nodes['.ctr-chips'].textContent.includes('Аудіо: Українська'), false, 'Ukrainian subtitles never become Ukrainian audio');
-  assert.equal(mazepa.row.nodes['.ctr-chips'].textContent.includes('Субтитри: Українська'), true);
+  assert.match(toloka.row.querySelector('.tc-audio-label').textContent, /Українська/);
+  assert.match(toloka.row.querySelector('.tc-voice').textContent, /UA Studio/);
+  assert.match(toloka.row.querySelector('.tc-subtitles').textContent, /Російська/);
+  assert.doesNotMatch(mazepa.row.querySelector('.tc-audio-label').textContent, /Українська/, 'Ukrainian subtitles never become Ukrainian audio');
+  assert.match(mazepa.row.querySelector('.tc-subtitles').textContent, /Українська/);
   assert.equal(wrongYear.row.classList.contains('is-best'), false);
-  assert.equal(wrongYear.row.nodes['.ctr-chips'].textContent.includes('Амоногава'), false, 'a release group alone is not a studio identity');
+  assert.equal(wrongYear.row.textContent.includes('Амоногава'), false, 'a release group alone is not a studio identity');
   f.api.storeSort('quality'); f.context.streamUpdateRows(f.st);
   assert.equal(f.st.displayRows[0], toloka.row, 'Best Choice stays first despite quality sorting');
   assert.equal(f.list.children[0], toloka.row, 'the first displayed DOM row is physically pinned');
@@ -129,7 +135,7 @@ test('Hybrid embedded list uses shared metadata, exact matching, tracker filters
   assert.equal(f.st.displayRows.length, 3);
   assert.equal(f.st.displayRows[0], toloka.row, 'global Toloka recommendation stays pinned when Mazepa is selected');
   assert.equal(toloka.row.getAttribute('data-best-outside-filter'), 'true');
-  assert.match(toloka.row.nodes['.ctr-best'].textContent, /Toloka поза фільтром/);
+  assert.match(toloka.row.nodes['.ctr-best'].textContent, /поза фільтром/);
   assert.equal(f.st.displayRows.filter(row => row === toloka.row).length, 1, 'pinned release is not repeated in ordinary results');
   assert.equal(f.st.displayRows[1], mazepa.row);
   assert.equal(f.st.displayRows[2], wrongYear.row);
@@ -138,8 +144,8 @@ test('Hybrid embedded list uses shared metadata, exact matching, tracker filters
 });
 
 test('popup exposes exactly one Best Choice badge and none when no qualified candidate exists', () => {
-  assert.match(overlay, /\.sh-torrent-overlay \.ctr-best\{display:none!important/);
-  assert.match(overlay, /\.sh-torrent-overlay \.torrent-item\.is-best \.ctr-best\{display:inline-flex!important\}/);
+  assert.match(fs.readFileSync(root+'/ui/torrent-cinema/style.css','utf8'), /\.sh-torrent-overlay \.ctr-best\{display:none/);
+  assert.match(fs.readFileSync(root+'/ui/torrent-cinema/style.css','utf8'), /\.sh-torrent-overlay \.is-best \.ctr-best\{display:block/);
   const f = fixture();
   const qualified = f.release('The Others (2001) 1080p', 'Toloka', { AudioLanguages: ['uk'] });
   const ordinary = f.release('The Others (2001) 720p', 'Mazepa', { AudioLanguages: ['en'] });
@@ -170,15 +176,14 @@ test('Hybrid popup rows display confirmed anime audio/studio tracks and reject t
   const ambiguousGroup = f.release('Frieren S01E03 1080p Japanese audio', 'Nyaa', { AudioLanguages: ['ja'], ReleaseGroup: 'Далі Буде' });
   const nestedVoice = f.release('Frieren S01E03 1080p', 'Toloka', { info: { Voices: ['Далі Буде'] } });
   f.context.streamUpdateRows(f.st);
-  const chips = amanogawa.row.nodes['.ctr-chips'].textContent;
-  assert.match(chips, /Аудіо: Українська/);
-  assert.doesNotMatch(chips, /Аудіо: Українська \/ Японська/);
-  assert.match(chips, /🎙 Амоногава/);
-  assert.doesNotMatch(chips, /Багатоголосе/);
-  assert.match(chips, /Субтитри: English/);
+  const chips = amanogawa.row.textContent;
+  assert.match(amanogawa.row.querySelector('.tc-audio-label').textContent, /Українська \/ Японська/);
+  assert.match(chips, /Амоногава/);
+  assert.match(amanogawa.row.querySelector('.tc-voice').textContent, /Багатоголосе/);
+  assert.match(amanogawa.row.querySelector('.tc-subtitles').textContent, /English/);
   assert.equal(wrongSeason.row.classList.contains('is-best'), false);
-  assert.match(ambiguousGroup.row.nodes['.ctr-chips'].textContent, /Студія невідома/);
-  assert.match(nestedVoice.row.nodes['.ctr-chips'].textContent, /🎙 Далі Буде/);
+  assert.doesNotMatch(ambiguousGroup.row.textContent, /Студія невідома/);
+  assert.match(nestedVoice.row.textContent, /Далі Буде/);
 });
 
 test('generic voice tags are not presented as studios, while dedicated studio fields remain supported', () => {
@@ -210,12 +215,12 @@ test('real Hybrid torrent_file handler applies exact episode stills and verified
   f.context.onStreamFile({type:'render',params:{movie:f.st.params.movie,seasons:{3:{episodes:[metadata]}}},element:{season:3,episode:1,title:'Frieren S03E01 [Далі Буде].mkv'},item});
   assert.equal(image.getAttribute('src'),'https://image.tmdb.org/t/p/w300/episode-301.jpg');
   assert.equal(f.record.seasonRequests||0,0,'already available episode metadata does not trigger another request');
-  assert.equal(studio.textContent,'🎙 Далі Буде');
+  assert.equal(studio.textContent,'Далі Буде');
   f.context.onStreamFile({type:'render',params:{movie:f.st.params.movie,seasons:{3:{episodes:[metadata]}}},element:{season:3,episode:2,title:'Frieren S03E02 [Amanogawa].mkv'},item:{0:item}});
   assert.equal(image.getAttribute('src'), '', 'an unwatched episode does not reuse the prior still');
-  assert.equal(studio.textContent,'🎙 Далі Буде, Амоногава');
+  assert.equal(studio.textContent,'Далі Буде, Амоногава');
   f.overlay.decorate(f.st.selectedRow,f.st.selectedRow._ctrSource,f.st.params.movie,'tv',{});
-  assert.equal(f.st.selectedRow.querySelector('[data-ctr-role="studio"]').textContent,'🎙 Далі Буде, Амоногава','verified file names survive overlay redecoration');
+  assert.equal(f.st.selectedRow.querySelector('[data-ctr-role="studio"]').textContent,'Далі Буде, Амоногава','verified file names survive overlay redecoration');
 });
 
 test('missing season metadata is requested once, episode callbacks retain identity, and detached rows stay untouched', () => {
@@ -342,22 +347,22 @@ test('Hybrid embedded controls invoke native tracker/sort handlers; async rows r
   const allButton = f.st.trackerButtons.all, tolokaButton = f.st.trackerButtons.toloka, mazepaButton = f.st.trackerButtons.mazepa, sourceButton = f.st.trackerButtons.source;
   assert.match(tolokaButton.textContent, /Толока · 1/); assert.match(mazepaButton.textContent, /Мазепа · 1/);
   assert.match(sourceButton.textContent, /Інші · 1/);
-  tolokaButton.dispatch('hover:enter');
+  assert.equal(typeof tolokaButton.jqueryEnter,'function','native remote jQuery enter must be bound');tolokaButton.jqueryEnter({stopImmediatePropagation(){}});
   assert.equal(f.api.selectedTrackerFilter(), 'toloka', 'the embedded control persists through the shared preference helper');
   assert.equal(f.st.displayRows.length, 1);
   assert.equal(f.st.displayRows[0], toloka.row);
   assert.equal(f.focus.current, tolokaButton, 'native Lampa focus returns to the active tracker button');
-  allButton.dispatch('click');
+  f.api.storeTrackerFilter('all');f.context.streamUpdateRows(f.st);
   sourceButton.dispatch('hover:enter');
   const sourceSelect = f.selections.at(-1);
-  sourceSelect.onSelect(sourceSelect.items[0]);
+  sourceSelect.onSelect(sourceSelect.items.find(item=>item.key==='source:nyaa'));
   assert.equal(f.api.selectedTrackerFilter(), 'source:nyaa');
   assert.equal(f.st.displayRows.length, 2, 'the global pinned release remains alongside the source-filtered ordinary row');
   assert.equal(f.st.displayRows[0], toloka.row);
   assert.equal(f.st.displayRows[1], other.row);
   assert.equal(f.focus.current, sourceButton, 'focus returns from the native tracker picker to its owner control');
   await new Promise(resolve => setTimeout(resolve, 190));
-  allButton.dispatch('hover:enter');
+  f.api.storeTrackerFilter('all');f.context.streamUpdateRows(f.st);
   assert.equal(f.api.selectedTrackerFilter(), 'all');
   f.st.sortButton.dispatch('hover:enter');
   const sortSelect = f.selections.at(-1);
@@ -371,9 +376,9 @@ test('Hybrid embedded controls invoke native tracker/sort handlers; async rows r
   assert.equal(f.focus.current, allButton, 'D-pad left from a release returns to the tracker toolbar');
   assert.equal(f.st.root.querySelectorAll('.ctr-tracker-tabs .selector').includes(allButton), true, 'active tracker control belongs to the tracker group');
   f.st.last = allButton; f.context.streamMove(f.record, 'left');
-  assert.equal(f.focus.current, f.nodes['.ctr-tabs'].children.at(-1), 'D-pad left from the first tracker filter enters the last quality filter');
+  assert.equal(f.focus.current, f.nodes['.ctr-tabs'].children.at(-1), 'D-pad left enters the preceding control in the unified toolbar');
   f.st.last = allButton; f.context.streamMove(f.record, 'down');
-  assert.equal(f.focus.current, f.st.sortButton, 'D-pad down from tracker filters enters sort controls');
+  assert.equal(f.focus.current, toloka.row, 'D-pad down from the single toolbar enters the first release');
   f.st.last = toloka.row; f.context.streamMove(f.record, 'down');
   assert.equal(f.focus.current, mazepa.row, 'D-pad down selects the next release in the real sorted order');
   const third = f.release('The Others (2001) 1080p', 'Mazepa', { AudioLanguages: ['uk'], Seeders: 120 });
@@ -416,4 +421,50 @@ test('embedded parser status distinguishes total results from currently loaded r
   st.loading = false;
   st.error = true;
   assert.equal(f.context.streamResultStatus(st), 'Парсер недоступний · Оновити — повторна спроба');
+});
+
+test('quality and tracker filter bands remain independent and ordered for remote navigation',()=>{
+ const f=fixture();f.release('The Others (2001) 2160p','Toloka',{AudioLanguages:['uk']});f.release('The Others (2001) 1080p','Mazepa');
+ let quality=[];f.st.child.getFilterData=()=>({quality});f.st.child.setFilterData=value=>{quality=value.quality;};f.st.child.applyFilter=()=>{};
+ f.context.setupStreamTools(f.st);f.context.syncStreamTrackerTools(f.st);
+ const qualityAll=f.nodes['.ctr-tabs'].children.find(node=>node.dataset.quality==='all'),ua=f.nodes['.ctr-tabs'].children.at(-1),all=f.st.trackerButtons.all,mazepa=f.st.trackerButtons.mazepa;
+ assert.deepEqual(f.nodes['.ctr-tabs'].children.map(node=>node.dataset.quality),['all','2160','1080','720',undefined]);
+ assert.deepEqual(f.nodes['.ctr-tracker-tabs'].children.map(node=>node.dataset.tracker),['all','toloka','mazepa','source']);
+ f.nodes['.ctr-tabs'].children.find(node=>node.dataset.quality==='2160').dispatch('hover:enter');
+ assert.deepEqual(Array.from(quality),['4k']);
+ mazepa.dispatch('hover:enter');assert.equal(f.api.selectedTrackerFilter(),'mazepa');assert.deepEqual(Array.from(quality),['4k'],'tracker action cannot reset the quality filter');
+ all.dispatch('hover:enter');assert.equal(f.api.selectedTrackerFilter(),'all');assert.deepEqual(Array.from(quality),['4k'],'All trackers clears only the tracker filter');
+ f.st.last=all;f.context.streamMove(f.record,'left');assert.equal(f.focus.current,ua,'left from tracker row returns to the last quality action');
+ f.st.last=qualityAll;f.context.streamMove(f.record,'down');assert.equal(f.focus.current,f.st.displayRows[0],'down from quality row enters the release list');
+});
+
+test('compact cards lead with the actual release identity, then technical badges and verified audio',()=>{
+ const f=fixture(),source=f.release('The.Last.of.Us.S02E01-E03.2025.2160p.WEB-DL.HDR10.DV.HEVC.Ukr.Eng','Toloka',{AudioLanguages:['uk','en'],VoiceoverType:'multi-voice',VoiceoverStudio:'Контрольна студія'});
+ f.context.streamUpdateRows(f.st);const row=source.row,raw=source.source.Title;
+ assert.equal(row.querySelector('.ctr-name').textContent,'The Last of Us (2025)');
+ assert.match(row.querySelector('.tc-priority-row').textContent,/S02E01–E03/);
+ assert.match(row.querySelector('.tc-priority-row').textContent,/UA/);
+ assert.match(row.querySelector('.tc-priority-row').textContent,/Toloka/);
+ assert.match(row.querySelector('.tc-secondary-row').textContent,/4K/);assert.match(row.querySelector('.tc-secondary-row').textContent,/WEB-DL/);assert.match(row.querySelector('.tc-secondary-row').textContent,/HDR10/);assert.match(row.querySelector('.tc-secondary-row').textContent,/HEVC/);
+ assert.match(row.querySelector('.tc-audio-label').textContent,/Українська \/ English/);assert.match(row.querySelector('.tc-voice').textContent,/Багатоголосе · Контрольна студія/);
+ assert.equal(row.querySelector('.tc-raw-title').textContent,raw,'expanded detail preserves the original torrent title');
+});
+
+
+test('streaming replacement restores the selected source identity without reusing a different row',()=>{
+ const f=fixture(),first=f.release('The Others (2001) 1080p','Toloka',{InfoHash:'a'.repeat(40)}),second=f.release('The Others (2001) 720p','Mazepa',{InfoHash:'b'.repeat(40)});
+ f.context.streamUpdateRows(f.st);f.st.pendingSelectionKey=f.context.streamRowKey(second.source);
+ const replacement=f.release('The Others (2001) 720p','Mazepa',{InfoHash:'b'.repeat(40)});f.st.rows=[first.row,replacement.row];f.context.streamUpdateRows(f.st);
+ assert.equal(f.st.last,replacement.row);assert.equal(f.st.pendingSelectionKey,null);
+ const malformed='f'.repeat(42);assert.notEqual(f.context.streamRowKey({InfoHash:malformed,Title:'First release'}),f.context.streamRowKey({InfoHash:malformed,Title:'Another release'}),'malformed hashes cannot conflate streamed row identities');
+ assert.notEqual(f.context.streamRowKey({Title:'Same title',Tracker:'Toloka',Size:1}),f.context.streamRowKey({Title:'Same title',Tracker:'Mazepa',Size:1}));
+});
+
+
+test('expanded video details retain quality, HDR/Dolby Vision and codec from the existing metadata adapter',()=>{
+ const f=fixture(),release=f.release('The Others (2001) 2160p WEB-DL HDR10 Dolby Vision HEVC','Toloka',{AudioLanguages:['uk']});
+ f.context.streamUpdateRows(f.st);const details=release.row.querySelector('.tc-technical').textContent;
+  assert.match(details,/Відео2160p \/ 4K/);assert.match(details,/HDR10/);assert.match(details,/Dolby Vision/);assert.match(details,/HEVC/);
+  assert.match(details,/АудіоУкраїнська/);assert.match(details,/Субтитри/);assert.match(details,/Файли/);
+ assert.equal(release.row.querySelector('.tc-open-files'),null);
 });

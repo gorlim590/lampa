@@ -1,0 +1,80 @@
+{
+  "stage": "before",
+  "sourceBaseline": "f60132b1502e678e81c85d3a4087d23ccac711ff",
+  "assets": [
+    {
+      "url": "https://gorlim590.github.io/lampa/ui/stremio-hybrid.js",
+      "sha256": "62ccdce0fe6f93b2cdc6a9518bcf1162d28535b4147451e16c1e0e53e5dad662",
+      "bytes": 181364
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/torrents-redesign.js",
+      "sha256": "ac62b00ad001d6bbfd4b463b596d46ef176b1f15f01620efdcc5e7f162f908c2",
+      "bytes": 104874
+    },
+    {
+      "url": "https://gorlim590.github.io/lampa/ui/torrent-overlay.js",
+      "sha256": "b78a8c4c2a0ffd1ce4886b23119ab2892dd1b9b7c995acf0b636754175547fad",
+      "bytes": 13330
+    }
+  ],
+  "layouts": [
+    {
+      "viewport": [
+        1920,
+        1080
+      ],
+      "dpr": 1,
+      "modal": {
+        "x": 134.375,
+        "y": 54,
+        "width": 1651.1875,
+        "height": 972
+      },
+      "row": {
+        "x": 162.375,
+        "y": 350.1875,
+        "width": 1595.1875,
+        "height": 223.4375
+      },
+      "filters": {
+        "x": 162.375,
+        "y": 204.125,
+        "width": 1595.1875,
+        "height": 146.0625
+      },
+      "styles": 3,
+      "controller": "sh_movie_streams",
+      "rows": 12
+    },
+    {
+      "viewport": [
+        3840,
+        2160
+      ],
+      "dpr": 1,
+      "modal": {
+        "x": 268.75,
+        "y": 108,
+        "width": 3302.375,
+        "height": 1944
+      },
+      "row": {
+        "x": 320.75,
+        "y": 671.0625,
+        "width": 3198.375,
+        "height": 423.4375
+      },
+      "filters": {
+        "x": 320.75,
+        "y": 396.625,
+        "width": 3198.375,
+        "height": 274.4375
+      },
+      "styles": 3,
+      "controller": "sh_movie_streams",
+      "rows": 12
+    }
+  ],
+  "openMs": 268.3000000002794
+}

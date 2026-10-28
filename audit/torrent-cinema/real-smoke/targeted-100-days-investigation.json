@@ -1,0 +1,111 @@
+{
+  "prHeadUnderTest": "2776888833ae69b95a441e9b6bacfac970ee2331",
+  "artifact": {
+    "path": "ui/torrent-cinema.js",
+    "bytes": 149250,
+    "sha256": "16dd3c98d21c83a4044782f2bcf460d746a920ce46dbb919a1abbfd08cf5bd78"
+  },
+  "method": {
+    "browser": "existing authorized Lampa Chromium tab via CDP",
+    "fixtureData": false,
+    "parserGet": "temporarily wrapped for timestamps and counts; original function and callback data/errors were delegated unchanged",
+    "waitPerCaseMs": 30000,
+    "userSettingsOrCredentialsChanged": false,
+    "releaseSelectedOrPlaybackStarted": false
+  },
+  "cases": [
+    {
+      "kind": "target",
+      "id": 293607,
+      "title": "100 днів омани",
+      "originalTitle": "100일의 거짓말",
+      "firstAirDate": "2026-10-10",
+      "detailsInitialized": true,
+      "torrentButton": {
+        "exists": true,
+        "visible": true,
+        "actionReceived": true,
+        "eventMs": 54
+      },
+      "nativeTorrentComponent": {
+        "created": true,
+        "eventMs": 58,
+        "search": "100일의 거짓말",
+        "searchOne": "100 днів омани",
+        "searchTwo": "100일의 거짓말"
+      },
+      "parser": {
+        "getInvoked": true,
+        "eventMs": 70,
+        "responseMs": 2598,
+        "responseCount": 0,
+        "parserStatus": [],
+        "errorCallback": false,
+        "timeout": false
+      },
+      "visibleUi": {
+        "loadingAtMs": 108,
+        "loadingText": "Пошук джерел…",
+        "loadingVisible": true,
+        "emptyAtMs": 2621,
+        "emptyText": "Джерел не знайдено",
+        "emptyVisible": true,
+        "rowsAfter30s": 0,
+        "oneVisibleTargetOverlay": true
+      },
+      "verdict": "UI PASS; configured parser response is empty for this query."
+    },
+    {
+      "kind": "control",
+      "id": 93405,
+      "title": "Гра в кальмара",
+      "originalTitle": "오징어 게임",
+      "firstAirDate": "2021-09-17",
+      "detailsInitialized": true,
+      "torrentButton": {
+        "exists": true,
+        "visible": true,
+        "actionReceived": true,
+        "eventMs": 16
+      },
+      "nativeTorrentComponent": {
+        "created": true,
+        "eventMs": 20,
+        "search": "오징어 게임",
+        "searchOne": "Гра в кальмара",
+        "searchTwo": "오징어 게임"
+      },
+      "parser": {
+        "getInvoked": true,
+        "eventMs": 26,
+        "responseMs": 2566,
+        "responseCount": 28,
+        "parserStatus": [],
+        "errorCallback": false,
+        "timeout": false
+      },
+      "visibleUi": {
+        "loadingAtMs": 52,
+        "loadingText": "Пошук джерел…",
+        "loadingVisible": true,
+        "readyAtMs": 2688,
+        "readyText": "Знайдено: 28 · завантажено: 20 із 28",
+        "readyVisible": true,
+        "rowsAfter30s": 20,
+        "oneVisibleTargetOverlay": true
+      },
+      "verdict": "UI PASS; configured parsers returned real releases for the Korean drama control."
+    }
+  ],
+  "summary": {
+    "ui": "PASS: Details initialization, visible Torrent action, action event, native component, Parser.get, immediate loading, and final empty/ready state were observed.",
+    "parser": "The target's real Parser.get response contained zero releases and no per-provider parser_status entries; no parser error or timeout callback occurred. The control returned 28 releases. This points to title/query source coverage for the target, not a PR overlay handoff defect.",
+    "timeouts": "None in either parser call; each screen remained open and observed for 30 seconds.",
+    "externalStatusAttribution": "No provider URL, host, credential, magnet, or InfoHash was retained."
+  },
+  "targetedTests": {
+    "command": "node --test --test-timeout=15000 tests/torrent-overlay.cjs tests/torrent-search.cjs",
+    "passed": 64,
+    "failed": 0
+  }
+}

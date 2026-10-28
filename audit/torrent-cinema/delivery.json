@@ -1,0 +1,60 @@
+{
+  "baseline": "f60132b1502e678e81c85d3a4087d23ccac711ff",
+  "implementationCommit": "98346e41b45e2264eb4881c8bb20fe7213a5b983",
+  "before": [
+    {
+      "file": "torrents-redesign.js",
+      "bytes": 104874,
+      "sha256": "ac62b00ad001d6bbfd4b463b596d46ef176b1f15f01620efdcc5e7f162f908c2"
+    },
+    {
+      "file": "ui/torrent-overlay.js",
+      "bytes": 13330,
+      "sha256": "b78a8c4c2a0ffd1ce4886b23119ab2892dd1b9b7c995acf0b636754175547fad"
+    },
+    {
+      "file": "ui/stremio-hybrid.js",
+      "bytes": 181364,
+      "sha256": "62ccdce0fe6f93b2cdc6a9518bcf1162d28535b4147451e16c1e0e53e5dad662"
+    }
+  ],
+  "after": [
+    {
+      "file": "ui/torrent-cinema.js",
+      "bytes": 149250,
+      "sha256": "16dd3c98d21c83a4044782f2bcf460d746a920ce46dbb919a1abbfd08cf5bd78"
+    },
+    {
+      "file": "ui/stremio-hybrid.js",
+      "bytes": 102341,
+      "sha256": "ebb42a4e35a050d281af6b1673aacdc4f9f70f3a8cbdf864a3518da27dd9d0b6"
+    },
+    {
+      "file": "torrents-redesign.js",
+      "bytes": 793,
+      "sha256": "2b4e046c6cf0602e10fa19d178c6beb25a2dcc0211a70e37c8b0951d66e33f7d"
+    },
+    {
+      "file": "ui/torrent-overlay.js",
+      "bytes": 791,
+      "sha256": "1935cbf34d070a7e12d37702bc37a736459cbccf6270b5e5c7d43f1d8a6b8eac"
+    }
+  ],
+  "supportedIntegrationBytes": {
+    "before": 299568,
+    "after": 253175,
+    "reduction": 46393,
+    "percentReduction": 15.5
+  },
+  "note": "Raw source byte comparison for the old three presentation modules versus canonical Cinema + Hybrid. Existing manually installed legacy URLs may still request their small aliases; they initialize no second owner. Not an HTTP compression, startup, FPS or memory measurement.",
+  "latency": {
+    "status": "INCONCLUSIVE",
+    "beforeSingleRecordedOpenMs": 268.3000000002794,
+    "afterIntegrationSingleRecordedOpenMs": 349.70000000018626,
+    "afterStandaloneSingleRecordedOpenMs": 347.5,
+    "limits": "Single samples include host/protocol polling differences, not a controlled benchmark. No startup, FPS, smoothness or memory gain claimed."
+  },
+  "acceptanceFollowupCommit": "8e84c0bb4f9896f72e69667de7c9cddfee732ed0",
+  "canonicalBuildCheck": "PASS",
+  "verificationCommit": "8e84c0bb4f9896f72e69667de7c9cddfee732ed0"
+}
