@@ -10,7 +10,7 @@
   window.LampaLoaderStarted = true;
 
   var BASE = String(window.LAMPA_PLUGINS_BASE || 'https://gorlim590.github.io/lampa/').replace(/\/?$/, '/');
-  var VERSION = String(window.LAMPA_PLUGINS_VERSION || '20261027-ui-first-1');
+  var VERSION = String(window.LAMPA_PLUGINS_VERSION || '20261028-torrent-cinema-2.0.0');
   var TIMEOUT_MS = 8000;
   var READY_CHECK_MS = 100;
   var READY_MAX_CHECKS = 300;

@@ -228,7 +228,7 @@ function createCinemaView() {
         details.textContent='';var raw=document.createElement('div');raw.className='tc-raw-title';raw.textContent=view.raw;details.appendChild(raw);
         var technical=document.createElement('div');technical.className='tc-technical';
         function detail(label,value){if(!value)return;var n=document.createElement('span');n.textContent=label+': '+value;technical.appendChild(n);}
-        detail('Відео',[parsed.codec].concat(parsed.flags||[]).filter(Boolean).join(' · '));
+        detail('Відео',[(parsed.quality==='2160'?'4K':parsed.quality?parsed.quality+'p':''),parsed.name!=='Відеореліз'?parsed.name:'',parsed.codec].filter(Boolean).join(' · '));
         detail('Аудіо',audio.languages&&audio.languages.length?audio.languages.join(' / '):'Не визначено');
         detail('Субтитри',subs.languages&&subs.languages.join(' / '));
         detail('Озвучення',(row._shVerifiedStudios||[]).join(', ')||(parsed.voiceover!=='Невідомо'?parsed.voiceover:''));

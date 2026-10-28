@@ -432,3 +432,11 @@ test('streaming replacement restores the selected source identity without reusin
  assert.equal(f.st.last,replacement.row);assert.equal(f.st.pendingSelectionKey,null);
  assert.notEqual(f.context.streamRowKey({Title:'Same title',Tracker:'Toloka',Size:1}),f.context.streamRowKey({Title:'Same title',Tracker:'Mazepa',Size:1}));
 });
+
+
+test('expanded video details retain quality, HDR/Dolby Vision and codec from the existing metadata adapter',()=>{
+ const f=fixture(),release=f.release('The Others (2001) 2160p WEB-DL HDR10 Dolby Vision HEVC','Toloka',{AudioLanguages:['uk']});
+ f.context.streamUpdateRows(f.st);const details=release.row.querySelector('.tc-technical').textContent;
+ assert.match(details,/Відео: 4K/);assert.match(details,/HDR10/);assert.match(details,/DV/);assert.match(details,/HEVC/);
+ assert.equal(release.row.querySelector('.tc-open-files'),null);
+});
