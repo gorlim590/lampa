@@ -111,6 +111,25 @@ test('preserves separately identified audio, subtitles, voiceover group and stud
   assert.equal(row.VoiceoverType, 'multi-voice');
 });
 
+test('maps camelCase audio, subtitle and studio fields into the native release schema', () => {
+  const app = load({ results: [{
+    title: 'Frieren S01E03 1080p', source: 'Toloka',
+    magnet: 'magnet:?xt=urn:btih:' + 'd'.repeat(40),
+    audioLanguages: ['uk'], audioTracks: [{ language: 'ja', type: 'audio' }],
+    subtitleLanguages: ['en'], voiceoverStudios: ['Амоногава'],
+    voiceoverType: 'multi-voice', dubbingStudio: 'Амоногава'
+  }] });
+  let result;
+  app.Lampa.Parser.get({ search: 'Frieren', movie: {} }, row => { result = row; }, error => { throw Error(error); });
+  const row = result.Results[0];
+  assert.deepEqual(row.AudioLanguages, ['uk']);
+  assert.deepEqual(row.AudioTracks, [{ language: 'ja', type: 'audio' }]);
+  assert.deepEqual(row.SubtitleLanguages, ['en']);
+  assert.deepEqual(row.VoiceoverStudios, ['Амоногава']);
+  assert.equal(row.VoiceoverType, 'multi-voice');
+  assert.equal(row.DubbingStudio, 'Амоногава');
+});
+
 test('rejects tracker topic pages without a magnet or torrent download', () => {
   const app = load({results:[{
     title:'Topic page only',source:'Toloka',
