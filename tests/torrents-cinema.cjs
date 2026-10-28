@@ -66,7 +66,7 @@ test('anime studio aliases and multiple confirmed audio tracks normalize without
     Title: 'Frieren S01E03 1080p', VoiceoverStudios: ['Amanogawa', 'Далі Буде'],
     VoiceoverType: 'two-voice', ffprobe: [{ codec_type: 'audio', tags: { language: 'jpn' } }]
   });
-  assert.equal(dali.parsed.voiceover, 'Амоногава / Далі Буде');
+  assert.equal(dali.parsed.voiceover, 'Амоногава, Далі Буде');
   assert.equal(dali.parsed.voiceoverType, 'Двоголосе');
   assert.equal(dali.parsed.audio.label, 'Японська');
   const subtitlesOnly = api.normalizeRelease({ Title: 'Frieren S01E03 Ukr Subs', SubtitleLanguages: ['uk'] });
@@ -86,7 +86,7 @@ test('camelCase provider track and dubbing metadata survives release normalizati
   });
   assert.deepEqual(Array.from(release.parsed.audio.languages), ['Українська', 'Японська']);
   assert.equal(release.parsed.subs.label, 'English');
-  assert.equal(release.parsed.voiceover, 'Амоногава / Далі Буде');
+  assert.equal(release.parsed.voiceover, 'Амоногава, Далі Буде');
   assert.equal(release.parsed.voiceoverType, 'Багатоголосе');
 });
 
@@ -124,7 +124,7 @@ test('provider Voices list is treated as explicit dubbing-team metadata, not Rel
     Title: 'Frieren S01E03 1080p',
     Voices: ['Амоногава', 'Dali Bude']
   });
-  assert.equal(release.parsed.voiceover, 'Амоногава / Далі Буде');
+  assert.equal(release.parsed.voiceover, 'Амоногава, Далі Буде');
   const releaseGroupOnly = api.normalizeRelease({
     Title: 'Frieren S01E03 1080p',
     ReleaseGroup: 'Амоногава'
