@@ -15,10 +15,10 @@ const sourceKey=u=>u.pathname.endsWith('/stremio-hybrid.js')?'/ui/stremio-hybrid
  const onError=e=>{if(capture)r.errors.push(e.message.replace(/https?:\/\/\S+/g,'[URL]'))};p.on('response',onResponse);p.on('pageerror',onError);
  const setup=()=>p.evaluate(()=>{
   if(window.__issue10)return;const L=Lampa,s=window.__issue10={shadow:{},local:{},writes:[],selects:[]},get=L.Storage.get,field=L.Storage.field;
-  L.Storage.get=function(k,d){if(k in s.shadow)return s.shadow[k];if(/^trakt_/.test(k))return k==='trakt_token'?null:false;if(k==='sbadger_settings_v1')return{};return get.call(this,k,d)};
+  L.Storage.get=function(k,d){if(k in s.shadow)return s.shadow[k];if(/^trakt_/.test(k))return k==='trakt_token'?null:false;return get.call(this,k,d)};
   L.Storage.field=function(k){if(/^trakt_/.test(k))return false;if(k in s.shadow)return s.shadow[k];return field.call(this,k)};
   L.Storage.set=(k,v)=>{s.writes.push(k);s.shadow[k]=v};L.Favorite.add=L.Favorite.remove=()=>{};if(L.Socket)L.Socket.send=()=>{};
-  const localGet=Storage.prototype.getItem;Storage.prototype.getItem=function(k){if(k in s.local)return s.local[k];if(/^seasonBadgeCache|^trakt_/.test(k))return null;return localGet.call(this,k)};Storage.prototype.setItem=function(k,v){s.local[k]=String(v)};Storage.prototype.removeItem=function(k){s.local[k]=null};
+  const localGet=Storage.prototype.getItem;Storage.prototype.getItem=function(k){if(k in s.local)return s.local[k];if(/^trakt_/.test(k))return null;return localGet.call(this,k)};Storage.prototype.setItem=function(k,v){s.local[k]=String(v)};Storage.prototype.removeItem=function(k){s.local[k]=null};
   const show=L.Select.show;L.Select.show=function(o){s.selects.push(o.items.map(i=>({season:i.season,title:i.title})));return show.apply(this,arguments)};
  });
  const route=async route=>{
@@ -40,9 +40,9 @@ const sourceKey=u=>u.pathname.endsWith('/stremio-hybrid.js')?'/ui/stremio-hybrid
  await p.route('**/*',route);
  try{
   await p.reload({waitUntil:'domcontentloaded'});await p.waitForFunction(()=>window.Lampa?.Activity?.active()?.activity&&window.appready&&window.SeasonBadgePlugin?.integrity,null,{timeout:45000});
-  const before=await p.evaluate(()=>({styles:[...document.head.querySelectorAll('style')].filter(s=>s.textContent.includes('.card--season-complete.card--season-alt div')).length,settings:!!SeasonBadgePlugin.integrity,api:Lampa.Api.sources.tmdb.seasons}));
+  const before=await p.evaluate(()=>({styles:[...document.head.querySelectorAll('style')].filter(s=>/card--season-(complete|progress)/.test(s.textContent)).length,badges:document.querySelectorAll('.card--season-complete,.card--season-progress').length,api:!!SeasonBadgePlugin.integrity&&typeof Lampa.Api.sources.tmdb.seasons==='function'}));
   await p.addScriptTag({url:'https://gorlim590.github.io/lampa/info/seasons-info.js?fixture='+sha});await p.addScriptTag({url:'https://gorlim590.github.io/lampa/media/seasons-info.js?fixture='+sha});
-  check('Canonical+legacy duplicate execution does not add styles',await p.evaluate(n=>[...document.head.querySelectorAll('style')].filter(s=>s.textContent.includes('.card--season-complete.card--season-alt div')).length===n,before.styles));
+  check('Redundant season overlay adds no styles or badges while native season adapter remains active',await p.evaluate(n=>n.styles===0&&n.badges===0&&![...document.head.querySelectorAll('style')].some(s=>/card--season-(complete|progress)/.test(s.textContent))&&document.querySelectorAll('.card--season-complete,.card--season-progress').length===0&&n.api&&typeof Lampa.Api.sources.tmdb.seasons==='function',before),before);
   const one=await open(220542,1);check('Apothecary native episode page: all60 original episodes, one confirmed season and no fabricated IDs',one.count===1&&one.items.length===61&&one.items[1].id===episodes[0].episodes[0].id&&one.items.slice(1).every(i=>i.season===1),{count:one.count,items:one.items.length,first:one.items[1]});
   await p.evaluate(()=>{const c=Lampa.Activity.active().activity.component;c.active=0;Lampa.Controller.toggle('content')});await p.keyboard.press('Enter');await p.waitForTimeout(200);
   const menu=await p.evaluate(()=>__issue10.selects.at(-1));check('Native OK opens only official season1 + separate S0',menu.map(i=>i.season).join() ==='0,1',menu);
