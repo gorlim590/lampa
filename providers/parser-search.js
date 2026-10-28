@@ -129,7 +129,7 @@
                 job.slots.forEach(function(slot){slot.rows=memo[specKey(slot.spec)+queryKey].rows;slot.status=slot.rows.length?'ready':'empty';});
                 job.pending=0;job.stats.cacheHits=job.slots.length;emit(job);return;
             }
-            var runs = Object.create(null);
+            var runs = Object.create(null), finishedRuns = Object.create(null);
             function pump() {
                 if (job.pumping || job.dead || job.epoch !== epoch) return;
                 job.pumping = true;
@@ -152,12 +152,13 @@
                     pump();
                 }
                 if (slot.spec.type !== 'jackett' && slot.spec.type !== 'prowlarr' || !/^https?:\/\//i.test(slot.spec.url || '') || window.location && window.location.protocol === 'https:' && /^http:/i.test(slot.spec.url)) { complete(null, 'unsupported'); return; }
+                if (finishedRuns[key]) { complete(finishedRuns[key].data,finishedRuns[key].error); return; }
                 if (cached && cached.expires > Date.now()) { job.stats.cacheHits++; complete({ Results: cached.rows }); return; }
                 if (cooldown[specKey(slot.spec)] > Date.now()) { complete(null, 'cooldown'); return; }
                 if (runs[key]) { runs[key].push(complete); return; }
                 runs[key] = [complete]; running = true; job.running++; slot.status = 'loading';
                 job.stats.peakConcurrency = Math.max(job.stats.peakConcurrency, job.running);
-                function reply(data, error) { if(slot.expiring)error='timeout'; var callbacks = runs[key]; if (!callbacks) return; delete runs[key]; callbacks.forEach(function (callback) { callback(data, error); }); }
+                function reply(data, error) { if(slot.expiring)error='timeout'; var callbacks = runs[key]; if (!callbacks) return; delete runs[key]; finishedRuns[key]={data:data,error:error}; callbacks.forEach(function (callback) { callback(data, error); }); }
                 slot.timer = setTimeout(function () { slot.expiring=true; if (slot.request) slot.request.clear(); reply(null, 'timeout'); }, slot.timeout);
                 job.stats.requests++;
                 try {

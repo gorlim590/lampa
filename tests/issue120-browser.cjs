@@ -23,7 +23,7 @@ const shadow=`(()=>{const p=Storage.prototype,g=p.getItem,m=new WeakMap(),s=x=>{
  await page.evaluate(()=>{__tcQa.results=[...document.querySelectorAll('.sh-torrent-overlay .torrent-item')].map(n=>n._ctrSource);});
  await page.keyboard.press('ArrowRight');await page.keyboard.press('Enter');assert(await page.locator('.tc-details:not([hidden])').count());await page.keyboard.press('Escape');
  await page.keyboard.press('Enter');await page.waitForFunction(()=>Lampa.Controller.enabled().name==='modal');assert(await page.locator('.sh-files-modal .torrent-file').count());await page.keyboard.press('Escape');await page.waitForFunction(()=>Lampa.Controller.enabled().name==='sh_movie_streams');assert(await page.locator('.sh-torrent-overlay .torrent-item.focus').count());report.checks.push('native info, Files fixture and Back focus');
- await page.screenshot({path:dir+(standalone?'/standalone.png':'/hybrid.png')});
+ report.geometry=await page.evaluate(()=>({viewport:[innerWidth,innerHeight],dpr:devicePixelRatio,overlay:(()=>{const r=document.querySelector('.sh-torrent-overlay:not([hidden])').getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};})()}));await page.locator('.sh-torrent-overlay:not([hidden])').screenshot({path:dir+(standalone?'/standalone.png':'/hybrid.png')});
  await page.keyboard.press('Escape');assert.equal(await page.locator('.sh-torrent-overlay:not([hidden])').count(),0);report.checks.push('D-pad and Back');
  assert(report.assets['providers/parser-search.js'].delivered);assert(report.assets['ui/torrent-cinema.js'].delivered||report.assets['ui/torrent-cinema.js'].evaluated);report.checks.push('exact local coordinator and canonical artifact delivered');
  report.status='PASS';
