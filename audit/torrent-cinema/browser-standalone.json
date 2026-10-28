@@ -44,7 +44,7 @@
     "/lampa/torrents-redesign.js",
     "/lampa/loader.js"
   ],
-  "commit": "6ef14ba36f125df996517b8f5d4183a4d80b3f0c",
+  "commit": "44d5047e4d6adf104d454376d47d2310f67a94bb",
   "branch": "feat/issue-117-torrent-cinema",
   "fixture": true,
   "assets": {
@@ -947,7 +947,7 @@
   "hostStartupExceptions": [
     "SyntaxError: Failed to execute 'appendChild' on 'Node': Unexpected token '&'\n    at [URL]"
   ],
-  "openMs": 288,
+  "openMs": 270.8999999994412,
   "deviceEquivalent": {
     "viewport": [
       1920,

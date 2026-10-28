@@ -1,7 +1,7 @@
 {
   "installation": "Hybrid integration",
   "suppressedScripts": [],
-  "commit": "6ef14ba36f125df996517b8f5d4183a4d80b3f0c",
+  "commit": "44d5047e4d6adf104d454376d47d2310f67a94bb",
   "branch": "feat/issue-117-torrent-cinema",
   "fixture": true,
   "assets": {
@@ -924,7 +924,7 @@
   "hostStartupExceptions": [
     "SyntaxError: Failed to execute 'appendChild' on 'Node': Unexpected token '&'\n    at [URL]"
   ],
-  "openMs": 340.59999999962747,
+  "openMs": 321.69999999925494,
   "deviceEquivalent": {
     "viewport": [
       1920,
