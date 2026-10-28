@@ -166,7 +166,8 @@ test('Hybrid popup rows display confirmed anime audio/studio tracks and reject t
   const chips = amanogawa.row.nodes['.ctr-chips'].textContent;
   assert.match(chips, /Аудіо: Українська/);
   assert.doesNotMatch(chips, /Аудіо: Українська \/ Японська/);
-  assert.match(chips, /Озвучення: Амоногава · Багатоголосе/);
+  assert.match(chips, /Озвучення: Амоногава/);
+  assert.doesNotMatch(chips, /Багатоголосе/);
   assert.match(chips, /Субтитри: English/);
   assert.equal(wrongSeason.row.classList.contains('is-best'), false);
   assert.match(ambiguousGroup.row.nodes['.ctr-chips'].textContent, /Студія невідома/);
