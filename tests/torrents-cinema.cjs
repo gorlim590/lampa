@@ -27,11 +27,15 @@ test('release metadata keeps audio and subtitles separate and exposes only ident
     SubtitleLanguages: ['ru'], VoiceoverStudio: 'Fixture Dubbing Group',
     ffprobe: [{ codec_type: 'audio', tags: { language: 'eng' } }, { codec_type: 'subtitle', tags: { language: 'uk' } }]
   });
-  assert.equal(release.parsed.audio.label, 'English, Українська');
+  assert.equal(release.parsed.audio.label, 'Українська');
+  assert.deepEqual(Array.from(release.parsed.audio.languages), ['English', 'Українська']);
   assert.equal(release.parsed.audio.ua, true);
-  assert.equal(release.parsed.subs.label, 'Російська, Українська');
+  assert.equal(release.parsed.subs.label, 'Українська');
   assert.equal(release.parsed.subs.ua, true);
   assert.equal(release.parsed.voiceover, 'Fixture Dubbing Group');
+  const nonUkrainian = api.normalizeRelease({ Title: 'Movie 1080p', AudioLanguages: ['en', 'ja'], SubtitleLanguages: ['ru', 'en'] });
+  assert.equal(nonUkrainian.parsed.audio.label, 'English, Японська');
+  assert.equal(nonUkrainian.parsed.subs.label, 'Російська, English');
   const subtitlesOnly = api.normalizeRelease({ Title: 'Movie (2001) 1080p Ukr Subs', SubtitleLanguages: ['uk'] });
   assert.equal(subtitlesOnly.parsed.audio.label, 'Невідомо');
   assert.equal(subtitlesOnly.parsed.audio.ua, false);
@@ -84,6 +88,48 @@ test('camelCase provider track and dubbing metadata survives release normalizati
   assert.equal(release.parsed.subs.label, 'English');
   assert.equal(release.parsed.voiceover, 'Амоногава / Далі Буде');
   assert.equal(release.parsed.voiceoverType, 'Багатоголосе');
+});
+
+test('nested provider info and original responses feed studio/audio/subtitle presentation', () => {
+  const api = fixture().api;
+  const fromInfo = api.normalizeRelease({
+    Title: 'Frieren S01E03 1080p',
+    info: {
+      audio_tracks: [{ language: 'uk', type: 'audio' }, { language: 'ja', type: 'audio' }],
+      subtitle_languages: ['en'],
+      voiceover_groups: [{ team: 'Amanogawa' }],
+      voiceover_type: 'multi-voice'
+    }
+  });
+  assert.equal(fromInfo.parsed.audio.label, 'Українська');
+  assert.deepEqual(Array.from(fromInfo.parsed.audio.languages), ['Українська', 'Японська']);
+  assert.equal(fromInfo.parsed.subs.label, 'English');
+  assert.equal(fromInfo.parsed.voiceover, 'Амоногава');
+  assert.equal(fromInfo.parsed.voiceoverType, 'Багатоголосе');
+
+  const fromOriginal = api.normalizeRelease({
+    Title: 'Frieren S01E03 1080p',
+    parser_original: { VoiceoverStudio: 'Далі Буде', AudioLanguages: ['uk'], SubtitleLanguages: ['uk'] }
+  });
+  assert.equal(fromOriginal.parsed.voiceover, 'Далі Буде');
+  assert.equal(fromOriginal.parsed.audio.label, 'Українська');
+  assert.equal(fromOriginal.parsed.subs.label, 'Українська');
+  const releaseGroupOnly = api.normalizeRelease({Title: 'Frieren S01E03', info: { ReleaseGroup: 'Далі Буде' }});
+  assert.equal(releaseGroupOnly.parsed.voiceover, 'Невідомо', 'release groups are not treated as dubbing studios');
+});
+
+test('provider Voices list is treated as explicit dubbing-team metadata, not ReleaseGroup', () => {
+  const api = fixture().api;
+  const release = api.normalizeRelease({
+    Title: 'Frieren S01E03 1080p',
+    Voices: ['Амоногава', 'Dali Bude']
+  });
+  assert.equal(release.parsed.voiceover, 'Амоногава / Далі Буде');
+  const releaseGroupOnly = api.normalizeRelease({
+    Title: 'Frieren S01E03 1080p',
+    ReleaseGroup: 'Амоногава'
+  });
+  assert.equal(releaseGroupOnly.parsed.voiceover, 'Невідомо');
 });
 
 test('recommendation prioritizes confirmed Ukrainian audio, then Toloka before Mazepa', () => {
