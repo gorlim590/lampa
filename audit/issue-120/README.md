@@ -8,7 +8,7 @@ Product patch: `2a5c07fcfff37f17497b34225078a30dd7a7f962`, based on main `901eef
 - `node scripts/build-torrent-cinema.mjs --check`: PASS.
 - `node scripts/check-repository.mjs`: PASS (77 JavaScript files, 43 manifest entries, 556 URLs).
 - `git diff --check`: PASS.
-- Full GitHub Actions: 5 checks PASS, 0 FAIL (recheck against the pushed head before final review).
+- GitHub Actions on pushed head `f9f01f90223de5d8df41498b6da1a1de40285461`: all 5 PR checks PASS, 0 FAIL.
 
 Fake-clock request matrix:
 
