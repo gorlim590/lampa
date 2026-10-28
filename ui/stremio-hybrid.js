@@ -759,6 +759,14 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
     }
     function streamHeaderTitle(params){var movie=params.movie||{},title=movie.title||movie.name||movie.original_title||movie.original_name||'Торренти',year=String(movie.release_date||movie.first_air_date||'').slice(0,4),season=Number(params.season||params.filter_season),episode=Number(params.episode||params.filter_episode),parts=[title];if(year)parts.push(year);if(season>0)parts.push('Сезон '+season);if(episode>0)parts.push('Серія '+episode);return parts.join(' · ');}
     function streamStatus(record,text) {if(record.streamStatus)record.streamStatus.textContent=text;}
+    function streamResultStatus(st) {
+        if(st.error)return 'Парсер недоступний · Оновити — повторна спроба';
+        if(st.total===0)return 'Джерел не знайдено';
+        if(st.total==null)return 'Джерела';
+        var count='Знайдено: '+st.total,loaded=st.rows?st.rows.length:0;
+        if(loaded<st.total)count+=' · завантажено: '+loaded+' із '+st.total;
+        return (st.partial?'Частина парсерів недоступна · ':'')+count;
+    }
     function streamSession(){return window.LampaTorrentOverlay?LampaTorrentOverlay.session():String(streamGeneration);}
     function streamAlive(st){var a=Lampa.Activity.active();return !st.dead&&st.record.streamChild===st&&st.session===streamSession()&&a&&a.activity===st.record.activity;}
     function streamShellActivate(record){
@@ -941,6 +949,7 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
     function streamSyncRows(st) {
         st.root.querySelectorAll('.torrent-item').forEach(function(row){if(st.rows.indexOf(row)<0)st.rows.push(row);});
         decorateStreamRows(st);syncStreamTools(st);
+        if(!st.loading&&st.total!=null)streamStatus(st.record,streamResultStatus(st));
     }
     function streamFocus(st,node) {
         if(!streamAlive(st)||!st.wantFocus||!st.record.streamView?.isOpen())return;
@@ -963,7 +972,7 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         }
         var qualityTabs=Array.prototype.slice.call(st.root.querySelectorAll('.ctr-tabs [data-quality]')),trackerTabs=Array.prototype.slice.call(st.root.querySelectorAll('.ctr-tracker-tabs .selector')),menus=Array.prototype.slice.call(st.root.querySelectorAll('.ctr-menus .selector'));
         var group=headers.indexOf(st.last)>=0?headers:qualityTabs.indexOf(st.last)>=0?qualityTabs:trackerTabs.indexOf(st.last)>=0?trackerTabs:menus.indexOf(st.last)>=0?menus:filters,at=group.indexOf(st.last);
-        if(direction==='left'){if(at>0)streamFocus(st,group[at-1]);else streamFocus(st,group[0]||headers[0]);}
+        if(direction==='left'){if(at>0)streamFocus(st,group[at-1]);else if(group===trackerTabs&&qualityTabs.length)streamFocus(st,qualityTabs[qualityTabs.length-1]);else if(group===menus&&trackerTabs.length)streamFocus(st,trackerTabs[trackerTabs.length-1]);else streamFocus(st,group[0]||headers[0]);}
         else if(direction==='right'){var nextControl=group[at+1];if(!nextControl)nextControl=group===qualityTabs?trackerTabs[0]:group===trackerTabs?menus[0]:filters[0]||rows[0];streamFocus(st,nextControl||record.streamLoad);}
         else if(direction==='down'){var target=group===headers?qualityTabs[0]:group===qualityTabs?trackerTabs[0]:group===trackerTabs?menus[0]:rows[st.windowStart];if(target)streamFocus(st,target);else streamFocus(st,headers[0]);}
         else {var target=group===menus?trackerTabs[trackerTabs.length-1]:group===trackerTabs?qualityTabs[Math.min(at,qualityTabs.length-1)]:group===qualityTabs?headers[headers.length-1]:headers[0];streamFocus(st,target||headers[0]);}
@@ -1038,7 +1047,7 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         try {
             st.child=Lampa.Component.create(params);st.root=st.child.render()[0];st.root.classList.add('sh-stream-explorer');record.streamContent.appendChild(st.root);
             if(window.TorrentsRedesign&&typeof TorrentsRedesign.attachFiles==='function')st.filesBinding=TorrentsRedesign.attachFiles({root:st.root,movie:params.movie,kind:record.kind,component:record.activity.component,isAlive:function(){return streamAlive(st)&&record.streamView.isOpen();}});
-            st.child.activity={loader:function(on){if(!streamAlive(st)||!record.streamView?.isOpen())return;st.loading=on;record.streamPane.dataset.state=on?'loading':st.error?'parser-error':st.total===0?'empty':'ready';record.streamPane.setAttribute('aria-busy',on?'true':'false');streamStatus(record,on?'Пошук джерел…':st.error?'Парсер недоступний · Оновити — повторна спроба':st.partial?'Частина парсерів недоступна · Знайдено: '+st.total:st.total===0?'Джерел не знайдено':st.total!=null?'Знайдено: '+st.total:'Джерела');if(!on){streamSyncRows(st);if(!st.loadedOnce){st.loadedOnce=true;if(!st.navigatedWhileLoading)st.last=st.root.querySelector('.torrent-item')||st.last;}st.child.start=function(){streamActivate(record);};}},toggle:function(){if(!st.dead&&st.wantFocus)streamActivate(record);},render:function(){return $(st.root);}};
+            st.child.activity={loader:function(on){if(!streamAlive(st)||!record.streamView?.isOpen())return;st.loading=on;record.streamPane.dataset.state=on?'loading':st.error?'parser-error':st.total===0?'empty':'ready';record.streamPane.setAttribute('aria-busy',on?'true':'false');streamStatus(record,on?'Пошук джерел…':streamResultStatus(st));if(!on){streamSyncRows(st);if(!st.loadedOnce){st.loadedOnce=true;if(!st.navigatedWhileLoading)st.last=st.root.querySelector('.torrent-item')||st.last;}st.child.start=function(){streamActivate(record);};}},toggle:function(){if(!st.dead&&st.wantFocus)streamActivate(record);},render:function(){return $(st.root);}};
             st.child.start=function(){streamActivate(record);};st.child.back=function(){closeStreamOverlay(record,true);};
             var append=st.child.append,reset=st.child.reset,next=st.child.next,applyFilter=st.child.applyFilter;
             st.child.applyFilter=function(){params.page=1;var result=applyFilter.apply(st.child,arguments);streamSyncRows(st);return result;};

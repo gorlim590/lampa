@@ -209,6 +209,8 @@ test('Hybrid embedded controls invoke native tracker/sort handlers; async rows r
   f.st.last = toloka.row; f.context.streamMove(f.record, 'left');
   assert.equal(f.focus.current, allButton, 'D-pad left from a release returns to the tracker toolbar');
   assert.equal(f.st.root.querySelectorAll('.ctr-tracker-tabs .selector').includes(allButton), true, 'active tracker control belongs to the tracker group');
+  f.st.last = allButton; f.context.streamMove(f.record, 'left');
+  assert.equal(f.focus.current, f.nodes['.ctr-tabs'].children.at(-1), 'D-pad left from the first tracker filter enters the last quality filter');
   f.st.last = allButton; f.context.streamMove(f.record, 'down');
   assert.equal(f.focus.current, f.st.sortButton, 'D-pad down from tracker filters enters sort controls');
   f.st.last = toloka.row; f.context.streamMove(f.record, 'down');
@@ -226,4 +228,31 @@ test('Hybrid embedded controls invoke native tracker/sort handlers; async rows r
   assert.equal(f.st.best, null, 'no trustworthy title match means no Best Choice');
   f.api.storeTrackerFilter('all'); f.st.rows = [toloka.row]; f.st.sourceData = new WeakMap([[toloka.row, toloka.source]]); f.context.streamUpdateRows(f.st);
   assert.equal(f.st.displayRows.length, 1); assert.equal(f.st.displayRows[0], toloka.row); assert.equal(f.st.best, toloka.row, 'a single valid release can be Best Choice');
+});
+
+test('embedded parser status distinguishes total results from currently loaded rows', () => {
+  const f = fixture();
+  const status = { textContent: '' }, record = { streamStatus: status };
+  const rows = [{}, {}];
+  const st = { record, root: { querySelectorAll: () => rows }, rows: [], total: 34, partial: true, loading: false };
+  f.context.decorateStreamRows = () => {};
+  f.context.syncStreamTools = () => {};
+  vm.runInContext([
+    extract(hybrid, 'streamStatus'),
+    extract(hybrid, 'streamResultStatus'),
+    extract(hybrid, 'streamSyncRows')
+  ].join('\n'), f.context);
+
+  f.context.streamSyncRows(st);
+  assert.equal(status.textContent, 'Частина парсерів недоступна · Знайдено: 34 · завантажено: 2 із 34');
+  rows.push({}, {});
+  f.context.streamSyncRows(st);
+  assert.equal(status.textContent, 'Частина парсерів недоступна · Знайдено: 34 · завантажено: 4 із 34');
+  st.loading = true;
+  status.textContent = 'Пошук джерел…';
+  f.context.streamSyncRows(st);
+  assert.equal(status.textContent, 'Пошук джерел…', 'incremental results do not overwrite the active loading status');
+  st.loading = false;
+  st.error = true;
+  assert.equal(f.context.streamResultStatus(st), 'Парсер недоступний · Оновити — повторна спроба');
 });
