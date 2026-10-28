@@ -1,6 +1,7 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const source=fs.readFileSync(__dirname+'/../ui/stremio-hybrid.js','utf8');
+test('movie action buttons are ordered below the expanded description control',()=>{const actions=/\.full-start-new__buttons \{ order:(\d+)/.exec(source),more=/\.sh-description-toggle\{order:(\d+)/.exec(source);assert(actions&&more,'description/action ordering must be explicit');assert(Number(actions[1])>Number(more[1]),'action buttons must follow the description and Show More control');});
 function fixture(){
  const buttons=[],classes=new Set(),handlers=new Map();
  const root={classList:{toggle:(k,on)=>on?classes.add(k):classes.delete(k),remove:k=>classes.delete(k)},querySelector:()=>({appendChild:()=>{throw Error('Description must not enter primary action row')}})};
