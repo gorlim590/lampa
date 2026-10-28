@@ -1,7 +1,7 @@
 {
   "installation": "Hybrid integration",
   "suppressedScripts": [],
-  "commit": "98346e41b45e2264eb4881c8bb20fe7213a5b983",
+  "commit": "91a5685915aba9003a44eb7c76c28f4d14c7654e",
   "branch": "feat/issue-117-torrent-cinema",
   "fixture": true,
   "assets": {
@@ -189,258 +189,2471 @@
       }
     },
     {
-      "name": "720p release, format, audio and subtitle text stays visible inside row",
+      "name": "720p release, format, audio and subtitle text stays visible across all rows including long titles",
       "status": "PASS",
       "details": [
         {
-          "selector": ".ctr-name",
-          "text": "Silent Orbit (2024)",
-          "rect": {
-            "x": 192.6875,
-            "y": 290.8125,
-            "right": 343.875,
-            "bottom": 312.5,
-            "width": 151.1875,
-            "height": 21.6875
-          },
-          "clip": {
-            "x": 100.75,
-            "y": 221.9375,
-            "right": 1179.125,
-            "bottom": 350.8125,
-            "width": 1078.375,
-            "height": 128.875
-          },
-          "visible": true,
-          "textRects": [
+          "index": 0,
+          "raw": "Silent Orbit (2024) 2160p WEB-DL HDR HEVC Ukr Eng ",
+          "long": false,
+          "texts": [
             {
-              "x": 192.6875,
-              "y": 290.8125,
-              "right": 343.875,
-              "bottom": 310.8125,
-              "width": 151.1875,
-              "height": 20
+              "selector": ".ctr-name",
+              "text": "Silent Orbit (2024)",
+              "rect": {
+                "x": 192.6875,
+                "y": 290.8125,
+                "right": 343.875,
+                "bottom": 312.5,
+                "width": 151.1875,
+                "height": 21.6875
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 221.9375,
+                "right": 1179.125,
+                "bottom": 350.8125,
+                "width": 1078.375,
+                "height": 128.875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 290.8125,
+                  "right": 343.875,
+                  "bottom": 310.8125,
+                  "width": 151.1875,
+                  "height": 20
+                }
+              ],
+              "scroll": [
+                151,
+                22
+              ],
+              "client": [
+                151,
+                22
+              ]
+            },
+            {
+              "selector": ".tc-secondary-row",
+              "text": "4KWEB-DLHDRHEVC",
+              "rect": {
+                "x": 192.6875,
+                "y": 314.5,
+                "right": 365.5625,
+                "bottom": 338.5,
+                "width": 172.875,
+                "height": 24
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 221.9375,
+                "right": 1179.125,
+                "bottom": 350.8125,
+                "width": 1078.375,
+                "height": 128.875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 314.5,
+                  "right": 221.4375,
+                  "bottom": 338.5,
+                  "width": 28.75,
+                  "height": 24
+                },
+                {
+                  "x": 200.875,
+                  "y": 319.4375,
+                  "right": 213.25,
+                  "bottom": 327.4375,
+                  "width": 12.375,
+                  "height": 8
+                },
+                {
+                  "x": 224.5625,
+                  "y": 314.5,
+                  "right": 279,
+                  "bottom": 338.5,
+                  "width": 54.4375,
+                  "height": 24
+                },
+                {
+                  "x": 232.75,
+                  "y": 319.4375,
+                  "right": 270.8125,
+                  "bottom": 327.4375,
+                  "width": 38.0625,
+                  "height": 8
+                },
+                {
+                  "x": 282.125,
+                  "y": 314.5,
+                  "right": 319.8125,
+                  "bottom": 338.5,
+                  "width": 37.6875,
+                  "height": 24
+                },
+                {
+                  "x": 290.3125,
+                  "y": 319.4375,
+                  "right": 311.625,
+                  "bottom": 327.4375,
+                  "width": 21.3125,
+                  "height": 8
+                },
+                {
+                  "x": 322.9375,
+                  "y": 314.5,
+                  "right": 365.5625,
+                  "bottom": 338.5,
+                  "width": 42.625,
+                  "height": 24
+                },
+                {
+                  "x": 331.125,
+                  "y": 319.4375,
+                  "right": 357.375,
+                  "bottom": 327.4375,
+                  "width": 26.25,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                173,
+                24
+              ],
+              "client": [
+                173,
+                24
+              ]
+            },
+            {
+              "selector": ".tc-audio-label",
+              "text": "♫ Українська / English",
+              "rect": {
+                "x": 644.4375,
+                "y": 262.125,
+                "right": 949.0625,
+                "bottom": 279.25,
+                "width": 304.625,
+                "height": 17.125
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 221.9375,
+                "right": 1179.125,
+                "bottom": 350.8125,
+                "width": 1078.375,
+                "height": 128.875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 657.75,
+                  "y": 262.125,
+                  "right": 785.3125,
+                  "bottom": 278.125,
+                  "width": 127.5625,
+                  "height": 16
+                }
+              ],
+              "scroll": [
+                305,
+                17
+              ],
+              "client": [
+                305,
+                17
+              ]
+            },
+            {
+              "selector": ".tc-voice",
+              "text": "Контрольна студія",
+              "rect": {
+                "x": 644.4375,
+                "y": 280.875,
+                "right": 949.0625,
+                "bottom": 295.4375,
+                "width": 304.625,
+                "height": 14.5625
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 221.9375,
+                "right": 1179.125,
+                "bottom": 350.8125,
+                "width": 1078.375,
+                "height": 128.875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 276.875,
+                  "right": 737.3125,
+                  "bottom": 292.875,
+                  "width": 92.875,
+                  "height": 16
+                }
+              ],
+              "scroll": [
+                305,
+                15
+              ],
+              "client": [
+                305,
+                15
+              ]
+            },
+            {
+              "selector": ".tc-subtitles",
+              "text": "CC · English",
+              "rect": {
+                "x": 644.4375,
+                "y": 296.9375,
+                "right": 949.0625,
+                "bottom": 310.5625,
+                "width": 304.625,
+                "height": 13.625
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 221.9375,
+                "right": 1179.125,
+                "bottom": 350.8125,
+                "width": 1078.375,
+                "height": 128.875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 296.9375,
+                  "right": 696.125,
+                  "bottom": 304.9375,
+                  "width": 51.6875,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                305,
+                14
+              ],
+              "client": [
+                305,
+                14
+              ]
             }
-          ],
-          "scroll": [
-            151,
-            22
-          ],
-          "client": [
-            151,
-            22
           ]
         },
         {
-          "selector": ".tc-secondary-row",
-          "text": "4KWEB-DLHDRHEVC",
-          "rect": {
-            "x": 192.6875,
-            "y": 314.5,
-            "right": 365.5625,
-            "bottom": 338.5,
-            "width": 172.875,
-            "height": 24
-          },
-          "clip": {
-            "x": 100.75,
-            "y": 221.9375,
-            "right": 1179.125,
-            "bottom": 350.8125,
-            "width": 1078.375,
-            "height": 128.875
-          },
-          "visible": true,
-          "textRects": [
+          "index": 1,
+          "raw": "Silent Orbit (2024) 2160p WEB-DL HDR HEVC Ukr Eng Extended Edition Дуже довга назва релізу 葬送のフリーレン",
+          "long": true,
+          "texts": [
             {
-              "x": 192.6875,
-              "y": 314.5,
-              "right": 221.4375,
-              "bottom": 338.5,
-              "width": 28.75,
-              "height": 24
+              "selector": ".ctr-name",
+              "text": "Silent Orbit (2024)",
+              "rect": {
+                "x": 192.6875,
+                "y": 408.5,
+                "right": 343.875,
+                "bottom": 430.1875,
+                "width": 151.1875,
+                "height": 21.6875
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 357.5,
+                "right": 1179.125,
+                "bottom": 479.6875,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 408.5,
+                  "right": 343.875,
+                  "bottom": 428.5,
+                  "width": 151.1875,
+                  "height": 20
+                }
+              ],
+              "scroll": [
+                151,
+                22
+              ],
+              "client": [
+                151,
+                22
+              ]
             },
             {
-              "x": 200.875,
-              "y": 319.4375,
-              "right": 213.25,
-              "bottom": 327.4375,
-              "width": 12.375,
-              "height": 8
+              "selector": ".tc-secondary-row",
+              "text": "4KWEB-DLHDRHEVC",
+              "rect": {
+                "x": 192.6875,
+                "y": 432.1875,
+                "right": 365.5625,
+                "bottom": 456.1875,
+                "width": 172.875,
+                "height": 24
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 357.5,
+                "right": 1179.125,
+                "bottom": 479.6875,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 432.1875,
+                  "right": 221.4375,
+                  "bottom": 456.1875,
+                  "width": 28.75,
+                  "height": 24
+                },
+                {
+                  "x": 200.875,
+                  "y": 437.125,
+                  "right": 213.25,
+                  "bottom": 445.125,
+                  "width": 12.375,
+                  "height": 8
+                },
+                {
+                  "x": 224.5625,
+                  "y": 432.1875,
+                  "right": 279,
+                  "bottom": 456.1875,
+                  "width": 54.4375,
+                  "height": 24
+                },
+                {
+                  "x": 232.75,
+                  "y": 437.125,
+                  "right": 270.8125,
+                  "bottom": 445.125,
+                  "width": 38.0625,
+                  "height": 8
+                },
+                {
+                  "x": 282.125,
+                  "y": 432.1875,
+                  "right": 319.8125,
+                  "bottom": 456.1875,
+                  "width": 37.6875,
+                  "height": 24
+                },
+                {
+                  "x": 290.3125,
+                  "y": 437.125,
+                  "right": 311.625,
+                  "bottom": 445.125,
+                  "width": 21.3125,
+                  "height": 8
+                },
+                {
+                  "x": 322.9375,
+                  "y": 432.1875,
+                  "right": 365.5625,
+                  "bottom": 456.1875,
+                  "width": 42.625,
+                  "height": 24
+                },
+                {
+                  "x": 331.125,
+                  "y": 437.125,
+                  "right": 357.375,
+                  "bottom": 445.125,
+                  "width": 26.25,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                173,
+                24
+              ],
+              "client": [
+                173,
+                24
+              ]
             },
             {
-              "x": 224.5625,
-              "y": 314.5,
-              "right": 279,
-              "bottom": 338.5,
-              "width": 54.4375,
-              "height": 24
+              "selector": ".tc-audio-label",
+              "text": "♫ Українська / English",
+              "rect": {
+                "x": 644.4375,
+                "y": 394.375,
+                "right": 949.0625,
+                "bottom": 411.5,
+                "width": 304.625,
+                "height": 17.125
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 357.5,
+                "right": 1179.125,
+                "bottom": 479.6875,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 657.75,
+                  "y": 394.375,
+                  "right": 785.3125,
+                  "bottom": 410.375,
+                  "width": 127.5625,
+                  "height": 16
+                }
+              ],
+              "scroll": [
+                305,
+                17
+              ],
+              "client": [
+                305,
+                17
+              ]
             },
             {
-              "x": 232.75,
-              "y": 319.4375,
-              "right": 270.8125,
-              "bottom": 327.4375,
-              "width": 38.0625,
-              "height": 8
+              "selector": ".tc-voice",
+              "text": "Контрольна студія",
+              "rect": {
+                "x": 644.4375,
+                "y": 413.125,
+                "right": 949.0625,
+                "bottom": 427.6875,
+                "width": 304.625,
+                "height": 14.5625
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 357.5,
+                "right": 1179.125,
+                "bottom": 479.6875,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 409.125,
+                  "right": 737.3125,
+                  "bottom": 425.125,
+                  "width": 92.875,
+                  "height": 16
+                }
+              ],
+              "scroll": [
+                305,
+                15
+              ],
+              "client": [
+                305,
+                15
+              ]
             },
             {
-              "x": 282.125,
-              "y": 314.5,
-              "right": 319.8125,
-              "bottom": 338.5,
-              "width": 37.6875,
-              "height": 24
-            },
-            {
-              "x": 290.3125,
-              "y": 319.4375,
-              "right": 311.625,
-              "bottom": 327.4375,
-              "width": 21.3125,
-              "height": 8
-            },
-            {
-              "x": 322.9375,
-              "y": 314.5,
-              "right": 365.5625,
-              "bottom": 338.5,
-              "width": 42.625,
-              "height": 24
-            },
-            {
-              "x": 331.125,
-              "y": 319.4375,
-              "right": 357.375,
-              "bottom": 327.4375,
-              "width": 26.25,
-              "height": 8
+              "selector": ".tc-subtitles",
+              "text": "CC · English",
+              "rect": {
+                "x": 644.4375,
+                "y": 429.1875,
+                "right": 949.0625,
+                "bottom": 442.8125,
+                "width": 304.625,
+                "height": 13.625
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 357.5,
+                "right": 1179.125,
+                "bottom": 479.6875,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 429.1875,
+                  "right": 696.125,
+                  "bottom": 437.1875,
+                  "width": 51.6875,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                305,
+                14
+              ],
+              "client": [
+                305,
+                14
+              ]
             }
-          ],
-          "scroll": [
-            173,
-            24
-          ],
-          "client": [
-            173,
-            24
           ]
         },
         {
-          "selector": ".tc-audio-label",
-          "text": "♫ Українська / English",
-          "rect": {
-            "x": 644.4375,
-            "y": 262.125,
-            "right": 949.0625,
-            "bottom": 279.25,
-            "width": 304.625,
-            "height": 17.125
-          },
-          "clip": {
-            "x": 100.75,
-            "y": 221.9375,
-            "right": 1179.125,
-            "bottom": 350.8125,
-            "width": 1078.375,
-            "height": 128.875
-          },
-          "visible": true,
-          "textRects": [
+          "index": 2,
+          "raw": "Silent Orbit (2024) 720p WEBRip Ukr ",
+          "long": false,
+          "texts": [
             {
-              "x": 657.75,
-              "y": 262.125,
-              "right": 785.3125,
-              "bottom": 278.125,
-              "width": 127.5625,
-              "height": 16
+              "selector": ".ctr-name",
+              "text": "Silent Orbit (2024)",
+              "rect": {
+                "x": 192.6875,
+                "y": 537.375,
+                "right": 343.875,
+                "bottom": 559.0625,
+                "width": 151.1875,
+                "height": 21.6875
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 486.375,
+                "right": 1179.125,
+                "bottom": 608.5625,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 537.375,
+                  "right": 343.875,
+                  "bottom": 557.375,
+                  "width": 151.1875,
+                  "height": 20
+                }
+              ],
+              "scroll": [
+                151,
+                22
+              ],
+              "client": [
+                151,
+                22
+              ]
+            },
+            {
+              "selector": ".tc-secondary-row",
+              "text": "720pWEBRip",
+              "rect": {
+                "x": 192.6875,
+                "y": 561.0625,
+                "right": 290.0625,
+                "bottom": 585.0625,
+                "width": 97.375,
+                "height": 24
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 486.375,
+                "right": 1179.125,
+                "bottom": 608.5625,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 561.0625,
+                  "right": 233,
+                  "bottom": 585.0625,
+                  "width": 40.3125,
+                  "height": 24
+                },
+                {
+                  "x": 200.875,
+                  "y": 566,
+                  "right": 224.8125,
+                  "bottom": 574,
+                  "width": 23.9375,
+                  "height": 8
+                },
+                {
+                  "x": 236.125,
+                  "y": 561.0625,
+                  "right": 290.0625,
+                  "bottom": 585.0625,
+                  "width": 53.9375,
+                  "height": 24
+                },
+                {
+                  "x": 244.3125,
+                  "y": 566,
+                  "right": 281.875,
+                  "bottom": 574,
+                  "width": 37.5625,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                97,
+                24
+              ],
+              "client": [
+                97,
+                24
+              ]
+            },
+            {
+              "selector": ".tc-audio-label",
+              "text": "♫ Українська / English",
+              "rect": {
+                "x": 644.4375,
+                "y": 523.25,
+                "right": 949.0625,
+                "bottom": 540.375,
+                "width": 304.625,
+                "height": 17.125
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 486.375,
+                "right": 1179.125,
+                "bottom": 608.5625,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 657.75,
+                  "y": 523.25,
+                  "right": 785.3125,
+                  "bottom": 539.25,
+                  "width": 127.5625,
+                  "height": 16
+                }
+              ],
+              "scroll": [
+                305,
+                17
+              ],
+              "client": [
+                305,
+                17
+              ]
+            },
+            {
+              "selector": ".tc-voice",
+              "text": "Контрольна студія",
+              "rect": {
+                "x": 644.4375,
+                "y": 542,
+                "right": 949.0625,
+                "bottom": 556.5625,
+                "width": 304.625,
+                "height": 14.5625
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 486.375,
+                "right": 1179.125,
+                "bottom": 608.5625,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 538,
+                  "right": 737.3125,
+                  "bottom": 554,
+                  "width": 92.875,
+                  "height": 16
+                }
+              ],
+              "scroll": [
+                305,
+                15
+              ],
+              "client": [
+                305,
+                15
+              ]
+            },
+            {
+              "selector": ".tc-subtitles",
+              "text": "CC · Українська",
+              "rect": {
+                "x": 644.4375,
+                "y": 558.0625,
+                "right": 949.0625,
+                "bottom": 571.6875,
+                "width": 304.625,
+                "height": 13.625
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 486.375,
+                "right": 1179.125,
+                "bottom": 608.5625,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 558.0625,
+                  "right": 714.125,
+                  "bottom": 566.0625,
+                  "width": 69.6875,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                305,
+                14
+              ],
+              "client": [
+                305,
+                14
+              ]
             }
-          ],
-          "scroll": [
-            305,
-            17
-          ],
-          "client": [
-            305,
-            17
           ]
         },
         {
-          "selector": ".tc-voice",
-          "text": "Контрольна студія",
-          "rect": {
-            "x": 644.4375,
-            "y": 280.875,
-            "right": 949.0625,
-            "bottom": 295.4375,
-            "width": 304.625,
-            "height": 14.5625
-          },
-          "clip": {
-            "x": 100.75,
-            "y": 221.9375,
-            "right": 1179.125,
-            "bottom": 350.8125,
-            "width": 1078.375,
-            "height": 128.875
-          },
-          "visible": true,
-          "textRects": [
+          "index": 3,
+          "raw": "Silent Orbit (2024) 720p WEBRip Ukr Extended Edition Дуже довга назва релізу 葬送のフリーレン",
+          "long": true,
+          "texts": [
             {
-              "x": 644.4375,
-              "y": 276.875,
-              "right": 737.3125,
-              "bottom": 292.875,
-              "width": 92.875,
-              "height": 16
+              "selector": ".ctr-name",
+              "text": "Silent Orbit (2024)",
+              "rect": {
+                "x": 192.6875,
+                "y": 666.25,
+                "right": 343.875,
+                "bottom": 687.9375,
+                "width": 151.1875,
+                "height": 21.6875
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 615.25,
+                "right": 1179.125,
+                "bottom": 737.4375,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 666.25,
+                  "right": 343.875,
+                  "bottom": 686.25,
+                  "width": 151.1875,
+                  "height": 20
+                }
+              ],
+              "scroll": [
+                151,
+                22
+              ],
+              "client": [
+                151,
+                22
+              ]
+            },
+            {
+              "selector": ".tc-secondary-row",
+              "text": "720pWEBRip",
+              "rect": {
+                "x": 192.6875,
+                "y": 689.9375,
+                "right": 290.0625,
+                "bottom": 713.9375,
+                "width": 97.375,
+                "height": 24
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 615.25,
+                "right": 1179.125,
+                "bottom": 737.4375,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 689.9375,
+                  "right": 233,
+                  "bottom": 713.9375,
+                  "width": 40.3125,
+                  "height": 24
+                },
+                {
+                  "x": 200.875,
+                  "y": 694.875,
+                  "right": 224.8125,
+                  "bottom": 702.875,
+                  "width": 23.9375,
+                  "height": 8
+                },
+                {
+                  "x": 236.125,
+                  "y": 689.9375,
+                  "right": 290.0625,
+                  "bottom": 713.9375,
+                  "width": 53.9375,
+                  "height": 24
+                },
+                {
+                  "x": 244.3125,
+                  "y": 694.875,
+                  "right": 281.875,
+                  "bottom": 702.875,
+                  "width": 37.5625,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                97,
+                24
+              ],
+              "client": [
+                97,
+                24
+              ]
+            },
+            {
+              "selector": ".tc-audio-label",
+              "text": "♫ Українська / English",
+              "rect": {
+                "x": 644.4375,
+                "y": 652.125,
+                "right": 949.0625,
+                "bottom": 669.25,
+                "width": 304.625,
+                "height": 17.125
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 615.25,
+                "right": 1179.125,
+                "bottom": 737.4375,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 657.75,
+                  "y": 652.125,
+                  "right": 785.3125,
+                  "bottom": 668.125,
+                  "width": 127.5625,
+                  "height": 16
+                }
+              ],
+              "scroll": [
+                305,
+                17
+              ],
+              "client": [
+                305,
+                17
+              ]
+            },
+            {
+              "selector": ".tc-voice",
+              "text": "Контрольна студія",
+              "rect": {
+                "x": 644.4375,
+                "y": 670.875,
+                "right": 949.0625,
+                "bottom": 685.4375,
+                "width": 304.625,
+                "height": 14.5625
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 615.25,
+                "right": 1179.125,
+                "bottom": 737.4375,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 666.875,
+                  "right": 737.3125,
+                  "bottom": 682.875,
+                  "width": 92.875,
+                  "height": 16
+                }
+              ],
+              "scroll": [
+                305,
+                15
+              ],
+              "client": [
+                305,
+                15
+              ]
+            },
+            {
+              "selector": ".tc-subtitles",
+              "text": "CC · Українська",
+              "rect": {
+                "x": 644.4375,
+                "y": 686.9375,
+                "right": 949.0625,
+                "bottom": 700.5625,
+                "width": 304.625,
+                "height": 13.625
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 615.25,
+                "right": 1179.125,
+                "bottom": 737.4375,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 686.9375,
+                  "right": 714.125,
+                  "bottom": 694.9375,
+                  "width": 69.6875,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                305,
+                14
+              ],
+              "client": [
+                305,
+                14
+              ]
             }
-          ],
-          "scroll": [
-            305,
-            15
-          ],
-          "client": [
-            305,
-            15
           ]
         },
         {
-          "selector": ".tc-subtitles",
-          "text": "CC · English",
-          "rect": {
-            "x": 644.4375,
-            "y": 296.9375,
-            "right": 949.0625,
-            "bottom": 310.5625,
-            "width": 304.625,
-            "height": 13.625
-          },
-          "clip": {
-            "x": 100.75,
-            "y": 221.9375,
-            "right": 1179.125,
-            "bottom": 350.8125,
-            "width": 1078.375,
-            "height": 128.875
-          },
-          "visible": true,
-          "textRects": [
+          "index": 4,
+          "raw": "Silent Orbit (2024) 1080p BluRay Ukr Eng ",
+          "long": false,
+          "texts": [
             {
-              "x": 644.4375,
-              "y": 296.9375,
-              "right": 696.125,
-              "bottom": 304.9375,
-              "width": 51.6875,
-              "height": 8
+              "selector": ".ctr-name",
+              "text": "Silent Orbit (2024)",
+              "rect": {
+                "x": 192.6875,
+                "y": 795.125,
+                "right": 343.875,
+                "bottom": 816.8125,
+                "width": 151.1875,
+                "height": 21.6875
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 744.125,
+                "right": 1179.125,
+                "bottom": 866.3125,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 795.125,
+                  "right": 343.875,
+                  "bottom": 815.125,
+                  "width": 151.1875,
+                  "height": 20
+                }
+              ],
+              "scroll": [
+                151,
+                22
+              ],
+              "client": [
+                151,
+                22
+              ]
+            },
+            {
+              "selector": ".tc-secondary-row",
+              "text": "1080pBluRay",
+              "rect": {
+                "x": 192.6875,
+                "y": 818.8125,
+                "right": 290.875,
+                "bottom": 842.8125,
+                "width": 98.1875,
+                "height": 24
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 744.125,
+                "right": 1179.125,
+                "bottom": 866.3125,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 818.8125,
+                  "right": 238.9375,
+                  "bottom": 842.8125,
+                  "width": 46.25,
+                  "height": 24
+                },
+                {
+                  "x": 200.875,
+                  "y": 823.75,
+                  "right": 230.75,
+                  "bottom": 831.75,
+                  "width": 29.875,
+                  "height": 8
+                },
+                {
+                  "x": 242.0625,
+                  "y": 818.8125,
+                  "right": 290.875,
+                  "bottom": 842.8125,
+                  "width": 48.8125,
+                  "height": 24
+                },
+                {
+                  "x": 250.25,
+                  "y": 823.75,
+                  "right": 282.6875,
+                  "bottom": 831.75,
+                  "width": 32.4375,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                98,
+                24
+              ],
+              "client": [
+                98,
+                24
+              ]
+            },
+            {
+              "selector": ".tc-audio-label",
+              "text": "♫ English",
+              "rect": {
+                "x": 644.4375,
+                "y": 789.0625,
+                "right": 949.0625,
+                "bottom": 806.1875,
+                "width": 304.625,
+                "height": 17.125
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 744.125,
+                "right": 1179.125,
+                "bottom": 866.3125,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 789.0625,
+                  "right": 697.1875,
+                  "bottom": 805.0625,
+                  "width": 52.75,
+                  "height": 16
+                }
+              ],
+              "scroll": [
+                305,
+                17
+              ],
+              "client": [
+                305,
+                17
+              ]
+            },
+            {
+              "selector": ".tc-subtitles",
+              "text": "CC · Українська",
+              "rect": {
+                "x": 644.4375,
+                "y": 807.6875,
+                "right": 949.0625,
+                "bottom": 821.3125,
+                "width": 304.625,
+                "height": 13.625
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 744.125,
+                "right": 1179.125,
+                "bottom": 866.3125,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 807.6875,
+                  "right": 714.125,
+                  "bottom": 815.6875,
+                  "width": 69.6875,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                305,
+                14
+              ],
+              "client": [
+                305,
+                14
+              ]
             }
-          ],
-          "scroll": [
-            305,
-            14
-          ],
-          "client": [
-            305,
-            14
+          ]
+        },
+        {
+          "index": 5,
+          "raw": "Silent Orbit (2024) 1080p BluRay Ukr Eng Extended Edition Дуже довга назва релізу 葬送のフリーレン",
+          "long": true,
+          "texts": [
+            {
+              "selector": ".ctr-name",
+              "text": "Silent Orbit (2024)",
+              "rect": {
+                "x": 192.6875,
+                "y": 924,
+                "right": 343.875,
+                "bottom": 945.6875,
+                "width": 151.1875,
+                "height": 21.6875
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 873,
+                "right": 1179.125,
+                "bottom": 995.1875,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 924,
+                  "right": 343.875,
+                  "bottom": 944,
+                  "width": 151.1875,
+                  "height": 20
+                }
+              ],
+              "scroll": [
+                151,
+                22
+              ],
+              "client": [
+                151,
+                22
+              ]
+            },
+            {
+              "selector": ".tc-secondary-row",
+              "text": "1080pBluRay",
+              "rect": {
+                "x": 192.6875,
+                "y": 947.6875,
+                "right": 290.875,
+                "bottom": 971.6875,
+                "width": 98.1875,
+                "height": 24
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 873,
+                "right": 1179.125,
+                "bottom": 995.1875,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 947.6875,
+                  "right": 238.9375,
+                  "bottom": 971.6875,
+                  "width": 46.25,
+                  "height": 24
+                },
+                {
+                  "x": 200.875,
+                  "y": 952.625,
+                  "right": 230.75,
+                  "bottom": 960.625,
+                  "width": 29.875,
+                  "height": 8
+                },
+                {
+                  "x": 242.0625,
+                  "y": 947.6875,
+                  "right": 290.875,
+                  "bottom": 971.6875,
+                  "width": 48.8125,
+                  "height": 24
+                },
+                {
+                  "x": 250.25,
+                  "y": 952.625,
+                  "right": 282.6875,
+                  "bottom": 960.625,
+                  "width": 32.4375,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                98,
+                24
+              ],
+              "client": [
+                98,
+                24
+              ]
+            },
+            {
+              "selector": ".tc-audio-label",
+              "text": "♫ English",
+              "rect": {
+                "x": 644.4375,
+                "y": 917.9375,
+                "right": 949.0625,
+                "bottom": 935.0625,
+                "width": 304.625,
+                "height": 17.125
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 873,
+                "right": 1179.125,
+                "bottom": 995.1875,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 917.9375,
+                  "right": 697.1875,
+                  "bottom": 933.9375,
+                  "width": 52.75,
+                  "height": 16
+                }
+              ],
+              "scroll": [
+                305,
+                17
+              ],
+              "client": [
+                305,
+                17
+              ]
+            },
+            {
+              "selector": ".tc-subtitles",
+              "text": "CC · Українська",
+              "rect": {
+                "x": 644.4375,
+                "y": 936.5625,
+                "right": 949.0625,
+                "bottom": 950.1875,
+                "width": 304.625,
+                "height": 13.625
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 873,
+                "right": 1179.125,
+                "bottom": 995.1875,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 936.5625,
+                  "right": 714.125,
+                  "bottom": 944.5625,
+                  "width": 69.6875,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                305,
+                14
+              ],
+              "client": [
+                305,
+                14
+              ]
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "raw": "Silent Orbit (2024) 2160p HDR10 DV Eng ",
+          "long": false,
+          "texts": [
+            {
+              "selector": ".ctr-name",
+              "text": "Silent Orbit (2024)",
+              "rect": {
+                "x": 192.6875,
+                "y": 1052.875,
+                "right": 343.875,
+                "bottom": 1074.5625,
+                "width": 151.1875,
+                "height": 21.6875
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1001.875,
+                "right": 1179.125,
+                "bottom": 1124.0625,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 1052.875,
+                  "right": 343.875,
+                  "bottom": 1072.875,
+                  "width": 151.1875,
+                  "height": 20
+                }
+              ],
+              "scroll": [
+                151,
+                22
+              ],
+              "client": [
+                151,
+                22
+              ]
+            },
+            {
+              "selector": ".tc-secondary-row",
+              "text": "4KHDR10 · Dolby Vision",
+              "rect": {
+                "x": 192.6875,
+                "y": 1076.5625,
+                "right": 340.1875,
+                "bottom": 1100.5625,
+                "width": 147.5,
+                "height": 24
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1001.875,
+                "right": 1179.125,
+                "bottom": 1124.0625,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 1076.5625,
+                  "right": 221.4375,
+                  "bottom": 1100.5625,
+                  "width": 28.75,
+                  "height": 24
+                },
+                {
+                  "x": 200.875,
+                  "y": 1081.5,
+                  "right": 213.25,
+                  "bottom": 1089.5,
+                  "width": 12.375,
+                  "height": 8
+                },
+                {
+                  "x": 224.5625,
+                  "y": 1076.5625,
+                  "right": 340.1875,
+                  "bottom": 1100.5625,
+                  "width": 115.625,
+                  "height": 24
+                },
+                {
+                  "x": 232.75,
+                  "y": 1081.5,
+                  "right": 332,
+                  "bottom": 1089.5,
+                  "width": 99.25,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                148,
+                24
+              ],
+              "client": [
+                148,
+                24
+              ]
+            },
+            {
+              "selector": ".tc-audio-label",
+              "text": "♫ English",
+              "rect": {
+                "x": 644.4375,
+                "y": 1046.8125,
+                "right": 949.0625,
+                "bottom": 1063.9375,
+                "width": 304.625,
+                "height": 17.125
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1001.875,
+                "right": 1179.125,
+                "bottom": 1124.0625,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 1046.8125,
+                  "right": 697.1875,
+                  "bottom": 1062.8125,
+                  "width": 52.75,
+                  "height": 16
+                }
+              ],
+              "scroll": [
+                305,
+                17
+              ],
+              "client": [
+                305,
+                17
+              ]
+            },
+            {
+              "selector": ".tc-subtitles",
+              "text": "CC · Українська",
+              "rect": {
+                "x": 644.4375,
+                "y": 1065.4375,
+                "right": 949.0625,
+                "bottom": 1079.0625,
+                "width": 304.625,
+                "height": 13.625
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1001.875,
+                "right": 1179.125,
+                "bottom": 1124.0625,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 1065.4375,
+                  "right": 714.125,
+                  "bottom": 1073.4375,
+                  "width": 69.6875,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                305,
+                14
+              ],
+              "client": [
+                305,
+                14
+              ]
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "raw": "Silent Orbit (2024) 2160p HDR10 DV Eng Extended Edition Дуже довга назва релізу 葬送のフリーレン",
+          "long": true,
+          "texts": [
+            {
+              "selector": ".ctr-name",
+              "text": "Silent Orbit (2024)",
+              "rect": {
+                "x": 192.6875,
+                "y": 1181.75,
+                "right": 343.875,
+                "bottom": 1203.4375,
+                "width": 151.1875,
+                "height": 21.6875
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1130.75,
+                "right": 1179.125,
+                "bottom": 1252.9375,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 1181.75,
+                  "right": 343.875,
+                  "bottom": 1201.75,
+                  "width": 151.1875,
+                  "height": 20
+                }
+              ],
+              "scroll": [
+                151,
+                22
+              ],
+              "client": [
+                151,
+                22
+              ]
+            },
+            {
+              "selector": ".tc-secondary-row",
+              "text": "4KHDR10 · Dolby Vision",
+              "rect": {
+                "x": 192.6875,
+                "y": 1205.4375,
+                "right": 340.1875,
+                "bottom": 1229.4375,
+                "width": 147.5,
+                "height": 24
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1130.75,
+                "right": 1179.125,
+                "bottom": 1252.9375,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 1205.4375,
+                  "right": 221.4375,
+                  "bottom": 1229.4375,
+                  "width": 28.75,
+                  "height": 24
+                },
+                {
+                  "x": 200.875,
+                  "y": 1210.375,
+                  "right": 213.25,
+                  "bottom": 1218.375,
+                  "width": 12.375,
+                  "height": 8
+                },
+                {
+                  "x": 224.5625,
+                  "y": 1205.4375,
+                  "right": 340.1875,
+                  "bottom": 1229.4375,
+                  "width": 115.625,
+                  "height": 24
+                },
+                {
+                  "x": 232.75,
+                  "y": 1210.375,
+                  "right": 332,
+                  "bottom": 1218.375,
+                  "width": 99.25,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                148,
+                24
+              ],
+              "client": [
+                148,
+                24
+              ]
+            },
+            {
+              "selector": ".tc-audio-label",
+              "text": "♫ English",
+              "rect": {
+                "x": 644.4375,
+                "y": 1175.6875,
+                "right": 949.0625,
+                "bottom": 1192.8125,
+                "width": 304.625,
+                "height": 17.125
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1130.75,
+                "right": 1179.125,
+                "bottom": 1252.9375,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 1175.6875,
+                  "right": 697.1875,
+                  "bottom": 1191.6875,
+                  "width": 52.75,
+                  "height": 16
+                }
+              ],
+              "scroll": [
+                305,
+                17
+              ],
+              "client": [
+                305,
+                17
+              ]
+            },
+            {
+              "selector": ".tc-subtitles",
+              "text": "CC · Українська",
+              "rect": {
+                "x": 644.4375,
+                "y": 1194.3125,
+                "right": 949.0625,
+                "bottom": 1207.9375,
+                "width": 304.625,
+                "height": 13.625
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1130.75,
+                "right": 1179.125,
+                "bottom": 1252.9375,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 1194.3125,
+                  "right": 714.125,
+                  "bottom": 1202.3125,
+                  "width": 69.6875,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                305,
+                14
+              ],
+              "client": [
+                305,
+                14
+              ]
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "raw": "Silent Orbit (2024) 1080p WEB-DL Extended Edition Дуже довга назва релізу 葬送のフリーレン",
+          "long": true,
+          "texts": [
+            {
+              "selector": ".ctr-name",
+              "text": "Silent Orbit (2024)",
+              "rect": {
+                "x": 192.6875,
+                "y": 1310.625,
+                "right": 343.875,
+                "bottom": 1332.3125,
+                "width": 151.1875,
+                "height": 21.6875
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1259.625,
+                "right": 1179.125,
+                "bottom": 1381.8125,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 1310.625,
+                  "right": 343.875,
+                  "bottom": 1330.625,
+                  "width": 151.1875,
+                  "height": 20
+                }
+              ],
+              "scroll": [
+                151,
+                22
+              ],
+              "client": [
+                151,
+                22
+              ]
+            },
+            {
+              "selector": ".tc-secondary-row",
+              "text": "1080pWEB-DL",
+              "rect": {
+                "x": 192.6875,
+                "y": 1334.3125,
+                "right": 296.5,
+                "bottom": 1358.3125,
+                "width": 103.8125,
+                "height": 24
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1259.625,
+                "right": 1179.125,
+                "bottom": 1381.8125,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 1334.3125,
+                  "right": 238.9375,
+                  "bottom": 1358.3125,
+                  "width": 46.25,
+                  "height": 24
+                },
+                {
+                  "x": 200.875,
+                  "y": 1339.25,
+                  "right": 230.75,
+                  "bottom": 1347.25,
+                  "width": 29.875,
+                  "height": 8
+                },
+                {
+                  "x": 242.0625,
+                  "y": 1334.3125,
+                  "right": 296.5,
+                  "bottom": 1358.3125,
+                  "width": 54.4375,
+                  "height": 24
+                },
+                {
+                  "x": 250.25,
+                  "y": 1339.25,
+                  "right": 288.3125,
+                  "bottom": 1347.25,
+                  "width": 38.0625,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                104,
+                24
+              ],
+              "client": [
+                104,
+                24
+              ]
+            },
+            {
+              "selector": ".tc-audio-label",
+              "text": "♫ English",
+              "rect": {
+                "x": 644.4375,
+                "y": 1304.5625,
+                "right": 949.0625,
+                "bottom": 1321.6875,
+                "width": 304.625,
+                "height": 17.125
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1259.625,
+                "right": 1179.125,
+                "bottom": 1381.8125,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 1304.5625,
+                  "right": 697.1875,
+                  "bottom": 1320.5625,
+                  "width": 52.75,
+                  "height": 16
+                }
+              ],
+              "scroll": [
+                305,
+                17
+              ],
+              "client": [
+                305,
+                17
+              ]
+            },
+            {
+              "selector": ".tc-subtitles",
+              "text": "CC · English",
+              "rect": {
+                "x": 644.4375,
+                "y": 1323.1875,
+                "right": 949.0625,
+                "bottom": 1336.8125,
+                "width": 304.625,
+                "height": 13.625
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1259.625,
+                "right": 1179.125,
+                "bottom": 1381.8125,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 1323.1875,
+                  "right": 696.125,
+                  "bottom": 1331.1875,
+                  "width": 51.6875,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                305,
+                14
+              ],
+              "client": [
+                305,
+                14
+              ]
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "raw": "Silent Orbit (2024) 1080p WEB-DL ",
+          "long": false,
+          "texts": [
+            {
+              "selector": ".ctr-name",
+              "text": "Silent Orbit (2024)",
+              "rect": {
+                "x": 192.6875,
+                "y": 1439.5,
+                "right": 343.875,
+                "bottom": 1461.1875,
+                "width": 151.1875,
+                "height": 21.6875
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1388.5,
+                "right": 1179.125,
+                "bottom": 1510.6875,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 1439.5,
+                  "right": 343.875,
+                  "bottom": 1459.5,
+                  "width": 151.1875,
+                  "height": 20
+                }
+              ],
+              "scroll": [
+                151,
+                22
+              ],
+              "client": [
+                151,
+                22
+              ]
+            },
+            {
+              "selector": ".tc-secondary-row",
+              "text": "1080pWEB-DL",
+              "rect": {
+                "x": 192.6875,
+                "y": 1463.1875,
+                "right": 296.5,
+                "bottom": 1487.1875,
+                "width": 103.8125,
+                "height": 24
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1388.5,
+                "right": 1179.125,
+                "bottom": 1510.6875,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 1463.1875,
+                  "right": 238.9375,
+                  "bottom": 1487.1875,
+                  "width": 46.25,
+                  "height": 24
+                },
+                {
+                  "x": 200.875,
+                  "y": 1468.125,
+                  "right": 230.75,
+                  "bottom": 1476.125,
+                  "width": 29.875,
+                  "height": 8
+                },
+                {
+                  "x": 242.0625,
+                  "y": 1463.1875,
+                  "right": 296.5,
+                  "bottom": 1487.1875,
+                  "width": 54.4375,
+                  "height": 24
+                },
+                {
+                  "x": 250.25,
+                  "y": 1468.125,
+                  "right": 288.3125,
+                  "bottom": 1476.125,
+                  "width": 38.0625,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                104,
+                24
+              ],
+              "client": [
+                104,
+                24
+              ]
+            },
+            {
+              "selector": ".tc-audio-label",
+              "text": "♫ Аудіо не визначено",
+              "rect": {
+                "x": 644.4375,
+                "y": 1433.4375,
+                "right": 949.0625,
+                "bottom": 1450.5625,
+                "width": 304.625,
+                "height": 17.125
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1388.5,
+                "right": 1179.125,
+                "bottom": 1510.6875,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 1433.4375,
+                  "right": 770.5625,
+                  "bottom": 1449.4375,
+                  "width": 126.125,
+                  "height": 16
+                }
+              ],
+              "scroll": [
+                305,
+                17
+              ],
+              "client": [
+                305,
+                17
+              ]
+            },
+            {
+              "selector": ".tc-subtitles",
+              "text": "CC · English",
+              "rect": {
+                "x": 644.4375,
+                "y": 1452.0625,
+                "right": 949.0625,
+                "bottom": 1465.6875,
+                "width": 304.625,
+                "height": 13.625
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1388.5,
+                "right": 1179.125,
+                "bottom": 1510.6875,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 1452.0625,
+                  "right": 696.125,
+                  "bottom": 1460.0625,
+                  "width": 51.6875,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                305,
+                14
+              ],
+              "client": [
+                305,
+                14
+              ]
+            }
+          ]
+        },
+        {
+          "index": 10,
+          "raw": "Silent Orbit (2024) 1080p WEB-DL Eng ",
+          "long": false,
+          "texts": [
+            {
+              "selector": ".ctr-name",
+              "text": "Silent Orbit (2024)",
+              "rect": {
+                "x": 192.6875,
+                "y": 1568.375,
+                "right": 343.875,
+                "bottom": 1590.0625,
+                "width": 151.1875,
+                "height": 21.6875
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1517.375,
+                "right": 1179.125,
+                "bottom": 1639.5625,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 1568.375,
+                  "right": 343.875,
+                  "bottom": 1588.375,
+                  "width": 151.1875,
+                  "height": 20
+                }
+              ],
+              "scroll": [
+                151,
+                22
+              ],
+              "client": [
+                151,
+                22
+              ]
+            },
+            {
+              "selector": ".tc-secondary-row",
+              "text": "1080pWEB-DL",
+              "rect": {
+                "x": 192.6875,
+                "y": 1592.0625,
+                "right": 296.5,
+                "bottom": 1616.0625,
+                "width": 103.8125,
+                "height": 24
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1517.375,
+                "right": 1179.125,
+                "bottom": 1639.5625,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 1592.0625,
+                  "right": 238.9375,
+                  "bottom": 1616.0625,
+                  "width": 46.25,
+                  "height": 24
+                },
+                {
+                  "x": 200.875,
+                  "y": 1597,
+                  "right": 230.75,
+                  "bottom": 1605,
+                  "width": 29.875,
+                  "height": 8
+                },
+                {
+                  "x": 242.0625,
+                  "y": 1592.0625,
+                  "right": 296.5,
+                  "bottom": 1616.0625,
+                  "width": 54.4375,
+                  "height": 24
+                },
+                {
+                  "x": 250.25,
+                  "y": 1597,
+                  "right": 288.3125,
+                  "bottom": 1605,
+                  "width": 38.0625,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                104,
+                24
+              ],
+              "client": [
+                104,
+                24
+              ]
+            },
+            {
+              "selector": ".tc-audio-label",
+              "text": "♫ English",
+              "rect": {
+                "x": 644.4375,
+                "y": 1562.3125,
+                "right": 949.0625,
+                "bottom": 1579.4375,
+                "width": 304.625,
+                "height": 17.125
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1517.375,
+                "right": 1179.125,
+                "bottom": 1639.5625,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 1562.3125,
+                  "right": 697.1875,
+                  "bottom": 1578.3125,
+                  "width": 52.75,
+                  "height": 16
+                }
+              ],
+              "scroll": [
+                305,
+                17
+              ],
+              "client": [
+                305,
+                17
+              ]
+            },
+            {
+              "selector": ".tc-subtitles",
+              "text": "CC · English",
+              "rect": {
+                "x": 644.4375,
+                "y": 1580.9375,
+                "right": 949.0625,
+                "bottom": 1594.5625,
+                "width": 304.625,
+                "height": 13.625
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1517.375,
+                "right": 1179.125,
+                "bottom": 1639.5625,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 1580.9375,
+                  "right": 696.125,
+                  "bottom": 1588.9375,
+                  "width": 51.6875,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                305,
+                14
+              ],
+              "client": [
+                305,
+                14
+              ]
+            }
+          ]
+        },
+        {
+          "index": 11,
+          "raw": "Silent Orbit (2024) 1080p WEB-DL Eng Extended Edition Дуже довга назва релізу 葬送のフリーレン",
+          "long": true,
+          "texts": [
+            {
+              "selector": ".ctr-name",
+              "text": "Silent Orbit (2024)",
+              "rect": {
+                "x": 192.6875,
+                "y": 1697.25,
+                "right": 343.875,
+                "bottom": 1718.9375,
+                "width": 151.1875,
+                "height": 21.6875
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1646.25,
+                "right": 1179.125,
+                "bottom": 1768.4375,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 1697.25,
+                  "right": 343.875,
+                  "bottom": 1717.25,
+                  "width": 151.1875,
+                  "height": 20
+                }
+              ],
+              "scroll": [
+                151,
+                22
+              ],
+              "client": [
+                151,
+                22
+              ]
+            },
+            {
+              "selector": ".tc-secondary-row",
+              "text": "1080pWEB-DL",
+              "rect": {
+                "x": 192.6875,
+                "y": 1720.9375,
+                "right": 296.5,
+                "bottom": 1744.9375,
+                "width": 103.8125,
+                "height": 24
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1646.25,
+                "right": 1179.125,
+                "bottom": 1768.4375,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 192.6875,
+                  "y": 1720.9375,
+                  "right": 238.9375,
+                  "bottom": 1744.9375,
+                  "width": 46.25,
+                  "height": 24
+                },
+                {
+                  "x": 200.875,
+                  "y": 1725.875,
+                  "right": 230.75,
+                  "bottom": 1733.875,
+                  "width": 29.875,
+                  "height": 8
+                },
+                {
+                  "x": 242.0625,
+                  "y": 1720.9375,
+                  "right": 296.5,
+                  "bottom": 1744.9375,
+                  "width": 54.4375,
+                  "height": 24
+                },
+                {
+                  "x": 250.25,
+                  "y": 1725.875,
+                  "right": 288.3125,
+                  "bottom": 1733.875,
+                  "width": 38.0625,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                104,
+                24
+              ],
+              "client": [
+                104,
+                24
+              ]
+            },
+            {
+              "selector": ".tc-audio-label",
+              "text": "♫ English",
+              "rect": {
+                "x": 644.4375,
+                "y": 1691.1875,
+                "right": 949.0625,
+                "bottom": 1708.3125,
+                "width": 304.625,
+                "height": 17.125
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1646.25,
+                "right": 1179.125,
+                "bottom": 1768.4375,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 1691.1875,
+                  "right": 697.1875,
+                  "bottom": 1707.1875,
+                  "width": 52.75,
+                  "height": 16
+                }
+              ],
+              "scroll": [
+                305,
+                17
+              ],
+              "client": [
+                305,
+                17
+              ]
+            },
+            {
+              "selector": ".tc-subtitles",
+              "text": "CC · English",
+              "rect": {
+                "x": 644.4375,
+                "y": 1709.8125,
+                "right": 949.0625,
+                "bottom": 1723.4375,
+                "width": 304.625,
+                "height": 13.625
+              },
+              "clip": {
+                "x": 100.75,
+                "y": 1646.25,
+                "right": 1179.125,
+                "bottom": 1768.4375,
+                "width": 1078.375,
+                "height": 122.1875
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 644.4375,
+                  "y": 1709.8125,
+                  "right": 696.125,
+                  "bottom": 1717.8125,
+                  "width": 51.6875,
+                  "height": 8
+                }
+              ],
+              "scroll": [
+                305,
+                14
+              ],
+              "client": [
+                305,
+                14
+              ]
+            }
           ]
         }
       ]
@@ -479,42 +2692,49 @@
       "status": "PASS",
       "details": [
         {
-          "selector": ".tc-raw-title",
-          "text": "Silent Orbit (2024) 2160p WEB-DL HDR HEVC Ukr Eng",
-          "rect": {
-            "x": 195.4375,
-            "y": 360.8125,
-            "right": 1149.6875,
-            "bottom": 379.0625,
-            "width": 954.25,
-            "height": 18.25
-          },
-          "clip": {
-            "x": 180.875,
-            "y": 346.625,
-            "right": 1164.25,
-            "bottom": 503.9375,
-            "width": 983.375,
-            "height": 157.3125
-          },
-          "visible": true,
-          "textRects": [
+          "index": 0,
+          "raw": "Silent Orbit (2024) 2160p WEB-DL HDR HEVC Ukr Eng ",
+          "long": false,
+          "texts": [
             {
-              "x": 195.4375,
-              "y": 360.8125,
-              "right": 510.5625,
-              "bottom": 376.8125,
-              "width": 315.125,
-              "height": 16
+              "selector": ".tc-raw-title",
+              "text": "Silent Orbit (2024) 2160p WEB-DL HDR HEVC Ukr Eng",
+              "rect": {
+                "x": 195.4375,
+                "y": 360.8125,
+                "right": 1149.6875,
+                "bottom": 379.0625,
+                "width": 954.25,
+                "height": 18.25
+              },
+              "clip": {
+                "x": 180.875,
+                "y": 346.625,
+                "right": 1164.25,
+                "bottom": 503.9375,
+                "width": 983.375,
+                "height": 157.3125
+              },
+              "visible": true,
+              "textRects": [
+                {
+                  "x": 195.4375,
+                  "y": 360.8125,
+                  "right": 510.5625,
+                  "bottom": 376.8125,
+                  "width": 315.125,
+                  "height": 16
+                }
+              ],
+              "scroll": [
+                954,
+                18
+              ],
+              "client": [
+                954,
+                18
+              ]
             }
-          ],
-          "scroll": [
-            954,
-            18
-          ],
-          "client": [
-            954,
-            18
           ]
         }
       ]
@@ -832,7 +3052,7 @@
       "status": "PASS"
     },
     {
-      "name": "series fixture shows Ukrainian and English release names, year, verified range, quality and voiceover",
+      "name": "series fixture shows parser-provided Ukrainian and English names, verified year/range/quality/audio, and accepts later season",
       "status": "PASS",
       "details": {
         "raw": "Нічний архів / Night Archive — 夜のアーカイブ — 별빛 항로 — S02E01-E03 2024 1080p WEB-DL HEVC Ukr Eng DVO",
@@ -840,7 +3060,8 @@
         "badges": "S02E01–E03🇺🇦 UAtoloka.to",
         "technical": "1080pWEB-DLHEVC",
         "audio": "♫ Українська / EnglishСтудія Переклад / Studio ПерекладCC · Українська",
-        "kind": "tv"
+        "kind": "tv",
+        "eligible": true
       }
     },
     {
@@ -860,243 +3081,1407 @@
       }
     },
     {
-      "name": "release case last-of-us uses torrent identity and readable compact title",
+      "name": "case later-season uses exact parser field and exact release title",
       "status": "PASS",
       "details": {
-        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "title": "The Last of Us (2025)",
-        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
-        "technical": "4KWEB-DLHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
-        "clamp": "2"
+        "expected": {
+          "name": "Attack on Titan",
+          "year": 2018,
+          "coverage": "S03E01–E12",
+          "resolution": "1080p",
+          "audio": "Українська / English",
+          "studio": "ТакТреба",
+          "eligible": true
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "Attack on Titan (2018) S03E01-E12 1080p WEB-DL HEVC Ukr Eng",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "Attack on Titan (2018)",
+          "coverage": "S03E01–E12",
+          "resolution": "1080p",
+          "audio": "Українська / English",
+          "voice": "ТакТреба",
+          "parsedQuality": "1080",
+          "eligible": true,
+          "cacheHit": "false",
+          "parserCalls": 3,
+          "movieId": 99117010,
+          "clamp": "2"
+        }
       }
     },
     {
-      "name": "release case last-of-us keeps exact raw title in details",
+      "name": "case later-season matches verified year, coverage, resolution, and audio",
       "status": "PASS",
       "details": {
-        "expected": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "actual": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+        "expected": {
+          "name": "Attack on Titan",
+          "year": 2018,
+          "coverage": "S03E01–E12",
+          "resolution": "1080p",
+          "audio": "Українська / English",
+          "studio": "ТакТреба",
+          "eligible": true
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "Attack on Titan (2018) S03E01-E12 1080p WEB-DL HEVC Ukr Eng",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "Attack on Titan (2018)",
+          "coverage": "S03E01–E12",
+          "resolution": "1080p",
+          "audio": "Українська / English",
+          "voice": "ТакТреба",
+          "parsedQuality": "1080",
+          "eligible": true,
+          "cacheHit": "false",
+          "parserCalls": 3,
+          "movieId": 99117010,
+          "clamp": "2"
+        }
       }
     },
     {
-      "name": "release case multi-season-anime uses torrent identity and readable compact title",
+      "name": "case later-season is cache-isolated and has no previous result rows",
+      "status": "PASS",
+      "details": [
+        {
+          "raw": "Attack on Titan (2018) S03E01-E12 1080p WEB-DL HEVC Ukr Eng",
+          "cacheHit": "false",
+          "parserCalls": 3,
+          "expectedParserCalls": 3
+        }
+      ]
+    },
+    {
+      "name": "case later-season preserves the complete raw parser title",
       "status": "PASS",
       "details": {
-        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "title": "The Last of Us (2025)",
-        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
-        "technical": "4KWEB-DLHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
-        "clamp": "2"
+        "expected": {
+          "Title": "Attack on Titan (2018) S03E01-E12 1080p WEB-DL HEVC Ukr Eng"
+        },
+        "actual": {
+          "raw": "Attack on Titan (2018) S03E01-E12 1080p WEB-DL HEVC Ukr Eng",
+          "wrap": "anywhere",
+          "scroll": [
+            1451,
+            25
+          ],
+          "client": [
+            1451,
+            25
+          ]
+        }
       }
     },
     {
-      "name": "release case multi-season-anime keeps exact raw title in details",
+      "name": "case multi-season-anime uses exact parser field and exact release title",
       "status": "PASS",
       "details": {
-        "expected": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "actual": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+        "expected": {
+          "name": "葬送のフリーレン Frieren: Beyond Journey’s End",
+          "year": 2023,
+          "coverage": "S01–S03",
+          "resolution": "4K",
+          "audio": "Японська / English"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "葬送のフリーレン Frieren: Beyond Journey’s End S01-S03 2023 2160p BluRay HEVC Jap Eng",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "葬送のフリーレン Frieren: Beyond Journey’s End (2023)",
+          "coverage": "S01–S03",
+          "resolution": "4K",
+          "audio": "Японська / English",
+          "voice": "",
+          "parsedQuality": "2160",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 4,
+          "movieId": 99117011,
+          "clamp": "2"
+        }
       }
     },
     {
-      "name": "release case complete-season uses torrent identity and readable compact title",
+      "name": "case multi-season-anime matches verified year, coverage, resolution, and audio",
       "status": "PASS",
       "details": {
-        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "title": "The Last of Us (2025)",
-        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
-        "technical": "4KWEB-DLHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
-        "clamp": "2"
+        "expected": {
+          "name": "葬送のフリーレン Frieren: Beyond Journey’s End",
+          "year": 2023,
+          "coverage": "S01–S03",
+          "resolution": "4K",
+          "audio": "Японська / English"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "葬送のフリーレン Frieren: Beyond Journey’s End S01-S03 2023 2160p BluRay HEVC Jap Eng",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "葬送のフリーレン Frieren: Beyond Journey’s End (2023)",
+          "coverage": "S01–S03",
+          "resolution": "4K",
+          "audio": "Японська / English",
+          "voice": "",
+          "parsedQuality": "2160",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 4,
+          "movieId": 99117011,
+          "clamp": "2"
+        }
       }
     },
     {
-      "name": "release case complete-season keeps exact raw title in details",
+      "name": "case multi-season-anime is cache-isolated and has no previous result rows",
+      "status": "PASS",
+      "details": [
+        {
+          "raw": "葬送のフリーレン Frieren: Beyond Journey’s End S01-S03 2023 2160p BluRay HEVC Jap Eng",
+          "cacheHit": "false",
+          "parserCalls": 4,
+          "expectedParserCalls": 4
+        }
+      ]
+    },
+    {
+      "name": "case multi-season-anime preserves the complete raw parser title",
       "status": "PASS",
       "details": {
-        "expected": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "actual": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+        "expected": {
+          "Title": "葬送のフリーレン Frieren: Beyond Journey’s End S01-S03 2023 2160p BluRay HEVC Jap Eng"
+        },
+        "actual": {
+          "raw": "葬送のフリーレン Frieren: Beyond Journey’s End S01-S03 2023 2160p BluRay HEVC Jap Eng",
+          "wrap": "anywhere",
+          "scroll": [
+            1451,
+            25
+          ],
+          "client": [
+            1451,
+            25
+          ]
+        }
       }
     },
     {
-      "name": "release case episode-pack uses torrent identity and readable compact title",
+      "name": "case complete-season uses exact parser field and exact release title",
       "status": "PASS",
       "details": {
-        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "title": "The Last of Us (2025)",
-        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
-        "technical": "4KWEB-DLHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
-        "clamp": "2"
+        "expected": {
+          "name": "Blue Eye Samurai",
+          "year": 2024,
+          "coverage": "Complete Season 2",
+          "resolution": "1080p",
+          "audio": "Українська"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "Blue Eye Samurai Complete Season 2 2024 1080p WEBRip Ukr",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "Blue Eye Samurai (2024)",
+          "coverage": "Complete Season 2",
+          "resolution": "1080p",
+          "audio": "Українська",
+          "voice": "",
+          "parsedQuality": "1080",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 5,
+          "movieId": 99117012,
+          "clamp": "2"
+        }
       }
     },
     {
-      "name": "release case episode-pack keeps exact raw title in details",
+      "name": "case complete-season matches verified year, coverage, resolution, and audio",
       "status": "PASS",
       "details": {
-        "expected": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "actual": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+        "expected": {
+          "name": "Blue Eye Samurai",
+          "year": 2024,
+          "coverage": "Complete Season 2",
+          "resolution": "1080p",
+          "audio": "Українська"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "Blue Eye Samurai Complete Season 2 2024 1080p WEBRip Ukr",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "Blue Eye Samurai (2024)",
+          "coverage": "Complete Season 2",
+          "resolution": "1080p",
+          "audio": "Українська",
+          "voice": "",
+          "parsedQuality": "1080",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 5,
+          "movieId": 99117012,
+          "clamp": "2"
+        }
       }
     },
     {
-      "name": "release case anime uses torrent identity and readable compact title",
+      "name": "case complete-season is cache-isolated and has no previous result rows",
+      "status": "PASS",
+      "details": [
+        {
+          "raw": "Blue Eye Samurai Complete Season 2 2024 1080p WEBRip Ukr",
+          "cacheHit": "false",
+          "parserCalls": 5,
+          "expectedParserCalls": 5
+        }
+      ]
+    },
+    {
+      "name": "case complete-season preserves the complete raw parser title",
       "status": "PASS",
       "details": {
-        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "title": "The Last of Us (2025)",
-        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
-        "technical": "4KWEB-DLHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
-        "clamp": "2"
+        "expected": {
+          "Title": "Blue Eye Samurai Complete Season 2 2024 1080p WEBRip Ukr"
+        },
+        "actual": {
+          "raw": "Blue Eye Samurai Complete Season 2 2024 1080p WEBRip Ukr",
+          "wrap": "anywhere",
+          "scroll": [
+            1451,
+            25
+          ],
+          "client": [
+            1451,
+            25
+          ]
+        }
       }
     },
     {
-      "name": "release case anime keeps exact raw title in details",
+      "name": "case episode-pack uses exact parser field and exact release title",
       "status": "PASS",
       "details": {
-        "expected": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "actual": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+        "expected": {
+          "name": "Arcane",
+          "year": 2021,
+          "coverage": "S01E01–E09",
+          "resolution": "1080p",
+          "audio": "Українська",
+          "studio": "Коло"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "Arcane S01E01-E09 2021 1080p WEB-DL AVC Ukr DVO Коло",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "Arcane (2021)",
+          "coverage": "S01E01–E09",
+          "resolution": "1080p",
+          "audio": "Українська",
+          "voice": "Коло",
+          "parsedQuality": "1080",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 6,
+          "movieId": 99117013,
+          "clamp": "2"
+        }
       }
     },
     {
-      "name": "release case dorama uses torrent identity and readable compact title",
+      "name": "case episode-pack matches verified year, coverage, resolution, and audio",
       "status": "PASS",
       "details": {
-        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "title": "The Last of Us (2025)",
-        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
-        "technical": "4KWEB-DLHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
-        "clamp": "2"
+        "expected": {
+          "name": "Arcane",
+          "year": 2021,
+          "coverage": "S01E01–E09",
+          "resolution": "1080p",
+          "audio": "Українська",
+          "studio": "Коло"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "Arcane S01E01-E09 2021 1080p WEB-DL AVC Ukr DVO Коло",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "Arcane (2021)",
+          "coverage": "S01E01–E09",
+          "resolution": "1080p",
+          "audio": "Українська",
+          "voice": "Коло",
+          "parsedQuality": "1080",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 6,
+          "movieId": 99117013,
+          "clamp": "2"
+        }
       }
     },
     {
-      "name": "release case dorama keeps exact raw title in details",
+      "name": "case episode-pack is cache-isolated and has no previous result rows",
+      "status": "PASS",
+      "details": [
+        {
+          "raw": "Arcane S01E01-E09 2021 1080p WEB-DL AVC Ukr DVO Коло",
+          "cacheHit": "false",
+          "parserCalls": 6,
+          "expectedParserCalls": 6
+        }
+      ]
+    },
+    {
+      "name": "case episode-pack preserves the complete raw parser title",
       "status": "PASS",
       "details": {
-        "expected": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "actual": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+        "expected": {
+          "Title": "Arcane S01E01-E09 2021 1080p WEB-DL AVC Ukr DVO Коло"
+        },
+        "actual": {
+          "raw": "Arcane S01E01-E09 2021 1080p WEB-DL AVC Ukr DVO Коло",
+          "wrap": "anywhere",
+          "scroll": [
+            1451,
+            25
+          ],
+          "client": [
+            1451,
+            25
+          ]
+        }
       }
     },
     {
-      "name": "release case movie uses torrent identity and readable compact title",
+      "name": "case anime uses exact parser field and exact release title",
       "status": "PASS",
       "details": {
-        "raw": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng",
-        "title": "Dune Part Two (2024)",
-        "coverage": "🇺🇦 UAtoloka.to",
-        "technical": "4KBluRayHDR10+ · Dolby VisionHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
-        "clamp": "2"
+        "expected": {
+          "name": "葬送のフリーレン",
+          "year": 2023,
+          "coverage": "S01E01–E28",
+          "resolution": "1080p",
+          "audio": "Японська / English"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "葬送のフリーレン S01E01-E28 2023 1080p WEB-DL H.265 Jap Eng",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "葬送のフリーレン (2023)",
+          "coverage": "S01E01–E28",
+          "resolution": "1080p",
+          "audio": "Японська / English",
+          "voice": "",
+          "parsedQuality": "1080",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 7,
+          "movieId": 99117014,
+          "clamp": "2"
+        }
       }
     },
     {
-      "name": "release case movie keeps exact raw title in details",
+      "name": "case anime matches verified year, coverage, resolution, and audio",
       "status": "PASS",
       "details": {
-        "expected": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng",
-        "actual": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng"
+        "expected": {
+          "name": "葬送のフリーレン",
+          "year": 2023,
+          "coverage": "S01E01–E28",
+          "resolution": "1080p",
+          "audio": "Японська / English"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "葬送のフリーレン S01E01-E28 2023 1080p WEB-DL H.265 Jap Eng",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "葬送のフリーレン (2023)",
+          "coverage": "S01E01–E28",
+          "resolution": "1080p",
+          "audio": "Японська / English",
+          "voice": "",
+          "parsedQuality": "1080",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 7,
+          "movieId": 99117014,
+          "clamp": "2"
+        }
       }
     },
     {
-      "name": "release case unicode-long-movie uses torrent identity and readable compact title",
+      "name": "case anime is cache-isolated and has no previous result rows",
+      "status": "PASS",
+      "details": [
+        {
+          "raw": "葬送のフリーレン S01E01-E28 2023 1080p WEB-DL H.265 Jap Eng",
+          "cacheHit": "false",
+          "parserCalls": 7,
+          "expectedParserCalls": 7
+        }
+      ]
+    },
+    {
+      "name": "case anime preserves the complete raw parser title",
       "status": "PASS",
       "details": {
-        "raw": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng",
-        "title": "Dune Part Two (2024)",
-        "coverage": "🇺🇦 UAtoloka.to",
-        "technical": "4KBluRayHDR10+ · Dolby VisionHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
-        "clamp": "2"
+        "expected": {
+          "Title": "葬送のフリーレン S01E01-E28 2023 1080p WEB-DL H.265 Jap Eng"
+        },
+        "actual": {
+          "raw": "葬送のフリーレン S01E01-E28 2023 1080p WEB-DL H.265 Jap Eng",
+          "wrap": "anywhere",
+          "scroll": [
+            1451,
+            25
+          ],
+          "client": [
+            1451,
+            25
+          ]
+        }
       }
     },
     {
-      "name": "release case unicode-long-movie keeps exact raw title in details",
+      "name": "case dorama uses exact parser field and exact release title",
       "status": "PASS",
       "details": {
-        "expected": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng",
-        "actual": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng"
+        "expected": {
+          "name": "이상한 변호사 우영우",
+          "year": 2022,
+          "coverage": "S01E01–E16",
+          "resolution": "1080p",
+          "audio": "Корейська / English"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "이상한 변호사 우영우 S01E01-E16 2022 1080p WEB-DL HEVC Kor Eng",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "이상한 변호사 우영우 (2022)",
+          "coverage": "S01E01–E16",
+          "resolution": "1080p",
+          "audio": "Корейська / English",
+          "voice": "",
+          "parsedQuality": "1080",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 8,
+          "movieId": 99117015,
+          "clamp": "2"
+        }
       }
     },
     {
-      "name": "release case name-field uses torrent identity and readable compact title",
+      "name": "case dorama matches verified year, coverage, resolution, and audio",
       "status": "PASS",
       "details": {
-        "raw": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng",
-        "title": "Dune Part Two (2024)",
-        "coverage": "🇺🇦 UAtoloka.to",
-        "technical": "4KBluRayHDR10+ · Dolby VisionHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
-        "clamp": "2"
+        "expected": {
+          "name": "이상한 변호사 우영우",
+          "year": 2022,
+          "coverage": "S01E01–E16",
+          "resolution": "1080p",
+          "audio": "Корейська / English"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "이상한 변호사 우영우 S01E01-E16 2022 1080p WEB-DL HEVC Kor Eng",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "이상한 변호사 우영우 (2022)",
+          "coverage": "S01E01–E16",
+          "resolution": "1080p",
+          "audio": "Корейська / English",
+          "voice": "",
+          "parsedQuality": "1080",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 8,
+          "movieId": 99117015,
+          "clamp": "2"
+        }
       }
     },
     {
-      "name": "release case name-field keeps exact raw title in details",
+      "name": "case dorama is cache-isolated and has no previous result rows",
+      "status": "PASS",
+      "details": [
+        {
+          "raw": "이상한 변호사 우영우 S01E01-E16 2022 1080p WEB-DL HEVC Kor Eng",
+          "cacheHit": "false",
+          "parserCalls": 8,
+          "expectedParserCalls": 8
+        }
+      ]
+    },
+    {
+      "name": "case dorama preserves the complete raw parser title",
       "status": "PASS",
       "details": {
-        "expected": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng",
-        "actual": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng"
+        "expected": {
+          "Title": "이상한 변호사 우영우 S01E01-E16 2022 1080p WEB-DL HEVC Kor Eng"
+        },
+        "actual": {
+          "raw": "이상한 변호사 우영우 S01E01-E16 2022 1080p WEB-DL HEVC Kor Eng",
+          "wrap": "anywhere",
+          "scroll": [
+            1451,
+            25
+          ],
+          "client": [
+            1451,
+            25
+          ]
+        }
       }
     },
     {
-      "name": "release case sparse-raw uses torrent identity and readable compact title",
+      "name": "case movie uses exact parser field and exact release title",
       "status": "PASS",
       "details": {
-        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "title": "The Last of Us (2025)",
-        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
-        "technical": "4KWEB-DLHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
-        "clamp": "2"
+        "expected": {
+          "name": "Dune Part Two",
+          "year": 2024,
+          "coverage": "",
+          "resolution": "4K",
+          "audio": "Українська / English"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "Dune Part Two (2024)",
+          "coverage": "",
+          "resolution": "4K",
+          "audio": "Українська / English",
+          "voice": "",
+          "parsedQuality": "2160",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 9,
+          "movieId": 99117016,
+          "clamp": "2"
+        }
       }
     },
     {
-      "name": "release case sparse-raw keeps exact raw title in details",
+      "name": "case movie matches verified year, coverage, resolution, and audio",
       "status": "PASS",
       "details": {
-        "expected": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "actual": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+        "expected": {
+          "name": "Dune Part Two",
+          "year": 2024,
+          "coverage": "",
+          "resolution": "4K",
+          "audio": "Українська / English"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "Dune Part Two (2024)",
+          "coverage": "",
+          "resolution": "4K",
+          "audio": "Українська / English",
+          "voice": "",
+          "parsedQuality": "2160",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 9,
+          "movieId": 99117016,
+          "clamp": "2"
+        }
       }
     },
     {
-      "name": "release case korean-series uses torrent identity and readable compact title",
+      "name": "case movie is cache-isolated and has no previous result rows",
+      "status": "PASS",
+      "details": [
+        {
+          "raw": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng",
+          "cacheHit": "false",
+          "parserCalls": 9,
+          "expectedParserCalls": 9
+        }
+      ]
+    },
+    {
+      "name": "case movie preserves the complete raw parser title",
       "status": "PASS",
       "details": {
-        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "title": "The Last of Us (2025)",
-        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
-        "technical": "4KWEB-DLHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
-        "clamp": "2"
+        "expected": {
+          "Title": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng"
+        },
+        "actual": {
+          "raw": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng",
+          "wrap": "anywhere",
+          "scroll": [
+            1451,
+            25
+          ],
+          "client": [
+            1451,
+            25
+          ]
+        }
       }
     },
     {
-      "name": "release case korean-series keeps exact raw title in details",
+      "name": "case unicode-long-movie uses exact parser field and exact release title",
       "status": "PASS",
       "details": {
-        "expected": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "actual": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+        "expected": {
+          "name": "海辺の長い物語 / The Long Shore Story — قصة طويلة على الشاطئ",
+          "year": 2023,
+          "coverage": "",
+          "resolution": "1080p",
+          "audio": "Українська"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "海辺の長い物語 / The Long Shore Story — قصة طويلة على الشاطئ 2023 1080p WEB-DL AVC Ukr",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "海辺の長い物語 / The Long Shore Story — قصة طويلة على الشاطئ (2023)",
+          "coverage": "",
+          "resolution": "1080p",
+          "audio": "Українська",
+          "voice": "",
+          "parsedQuality": "1080",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 10,
+          "movieId": 99117017,
+          "clamp": "2"
+        }
       }
     },
     {
-      "name": "release case latin-long-series uses torrent identity and readable compact title",
+      "name": "case unicode-long-movie matches verified year, coverage, resolution, and audio",
       "status": "PASS",
       "details": {
-        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "title": "The Last of Us (2025)",
-        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
-        "technical": "4KWEB-DLHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
-        "clamp": "2"
+        "expected": {
+          "name": "海辺の長い物語 / The Long Shore Story — قصة طويلة على الشاطئ",
+          "year": 2023,
+          "coverage": "",
+          "resolution": "1080p",
+          "audio": "Українська"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "海辺の長い物語 / The Long Shore Story — قصة طويلة على الشاطئ 2023 1080p WEB-DL AVC Ukr",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "海辺の長い物語 / The Long Shore Story — قصة طويلة على الشاطئ (2023)",
+          "coverage": "",
+          "resolution": "1080p",
+          "audio": "Українська",
+          "voice": "",
+          "parsedQuality": "1080",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 10,
+          "movieId": 99117017,
+          "clamp": "2"
+        }
       }
     },
     {
-      "name": "release case latin-long-series keeps exact raw title in details",
+      "name": "case unicode-long-movie is cache-isolated and has no previous result rows",
+      "status": "PASS",
+      "details": [
+        {
+          "raw": "海辺の長い物語 / The Long Shore Story — قصة طويلة على الشاطئ 2023 1080p WEB-DL AVC Ukr",
+          "cacheHit": "false",
+          "parserCalls": 10,
+          "expectedParserCalls": 10
+        }
+      ]
+    },
+    {
+      "name": "case unicode-long-movie preserves the complete raw parser title",
       "status": "PASS",
       "details": {
-        "expected": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "actual": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+        "expected": {
+          "Title": "海辺の長い物語 / The Long Shore Story — قصة طويلة على الشاطئ 2023 1080p WEB-DL AVC Ukr"
+        },
+        "actual": {
+          "raw": "海辺の長い物語 / The Long Shore Story — قصة طويلة على الشاطئ 2023 1080p WEB-DL AVC Ukr",
+          "wrap": "anywhere",
+          "scroll": [
+            1451,
+            25
+          ],
+          "client": [
+            1451,
+            25
+          ]
+        }
+      }
+    },
+    {
+      "name": "case name-field uses exact parser field and exact release title",
+      "status": "PASS",
+      "details": {
+        "expected": {
+          "name": "Amélie",
+          "year": 2001,
+          "coverage": "",
+          "resolution": "1080p",
+          "audio": "Французька / English"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "Amélie 2001 1080p BluRay AVC French Eng",
+          "sourceKey": "Title",
+          "nameValue": "Amélie 2001 1080p BluRay AVC French Eng",
+          "title": "Amélie (2001)",
+          "coverage": "",
+          "resolution": "1080p",
+          "audio": "Французька / English",
+          "voice": "",
+          "parsedQuality": "1080",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 11,
+          "movieId": 99117018,
+          "clamp": "2"
+        }
+      }
+    },
+    {
+      "name": "case name-field matches verified year, coverage, resolution, and audio",
+      "status": "PASS",
+      "details": {
+        "expected": {
+          "name": "Amélie",
+          "year": 2001,
+          "coverage": "",
+          "resolution": "1080p",
+          "audio": "Французька / English"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "Amélie 2001 1080p BluRay AVC French Eng",
+          "sourceKey": "Title",
+          "nameValue": "Amélie 2001 1080p BluRay AVC French Eng",
+          "title": "Amélie (2001)",
+          "coverage": "",
+          "resolution": "1080p",
+          "audio": "Французька / English",
+          "voice": "",
+          "parsedQuality": "1080",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 11,
+          "movieId": 99117018,
+          "clamp": "2"
+        }
+      }
+    },
+    {
+      "name": "case name-field is cache-isolated and has no previous result rows",
+      "status": "PASS",
+      "details": [
+        {
+          "raw": "Amélie 2001 1080p BluRay AVC French Eng",
+          "cacheHit": "false",
+          "parserCalls": 11,
+          "expectedParserCalls": 11
+        }
+      ]
+    },
+    {
+      "name": "case name-field preserves the complete raw parser title",
+      "status": "PASS",
+      "details": {
+        "expected": {
+          "Title": "Amélie 2001 1080p BluRay AVC French Eng",
+          "Name": "Amélie 2001 1080p BluRay AVC French Eng"
+        },
+        "actual": {
+          "raw": "Amélie 2001 1080p BluRay AVC French Eng",
+          "wrap": "anywhere",
+          "scroll": [
+            1451,
+            25
+          ],
+          "client": [
+            1451,
+            25
+          ]
+        }
+      }
+    },
+    {
+      "name": "case sparse-raw uses exact parser field and exact release title",
+      "status": "PASS",
+      "details": {
+        "expected": {
+          "name": "未知の物語 — Невідома історія українською",
+          "year": null,
+          "coverage": "",
+          "resolution": "",
+          "audio": "Аудіо не визначено"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "未知の物語 — Невідома історія українською",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "未知の物語 — Невідома історія українською",
+          "coverage": "",
+          "resolution": "",
+          "audio": "Аудіо не визначено",
+          "voice": "",
+          "parsedQuality": "",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 12,
+          "movieId": 99117019,
+          "clamp": "2"
+        }
+      }
+    },
+    {
+      "name": "case sparse-raw matches verified year, coverage, resolution, and audio",
+      "status": "PASS",
+      "details": {
+        "expected": {
+          "name": "未知の物語 — Невідома історія українською",
+          "year": null,
+          "coverage": "",
+          "resolution": "",
+          "audio": "Аудіо не визначено"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "未知の物語 — Невідома історія українською",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "未知の物語 — Невідома історія українською",
+          "coverage": "",
+          "resolution": "",
+          "audio": "Аудіо не визначено",
+          "voice": "",
+          "parsedQuality": "",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 12,
+          "movieId": 99117019,
+          "clamp": "2"
+        }
+      }
+    },
+    {
+      "name": "case sparse-raw is cache-isolated and has no previous result rows",
+      "status": "PASS",
+      "details": [
+        {
+          "raw": "未知の物語 — Невідома історія українською",
+          "cacheHit": "false",
+          "parserCalls": 12,
+          "expectedParserCalls": 12
+        }
+      ]
+    },
+    {
+      "name": "case sparse-raw preserves the complete raw parser title",
+      "status": "PASS",
+      "details": {
+        "expected": {
+          "Title": "未知の物語 — Невідома історія українською"
+        },
+        "actual": {
+          "raw": "未知の物語 — Невідома історія українською",
+          "wrap": "anywhere",
+          "scroll": [
+            1451,
+            25
+          ],
+          "client": [
+            1451,
+            25
+          ]
+        }
+      }
+    },
+    {
+      "name": "case korean-series uses exact parser field and exact release title",
+      "status": "PASS",
+      "details": {
+        "expected": {
+          "name": "무빙 Moving",
+          "year": 2023,
+          "coverage": "S01E01–E20",
+          "resolution": "1080p",
+          "audio": "Корейська / English"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "무빙 Moving 2023 S01E01-E20 1080p WEB-DL DUAL-AUDIO Kor Eng",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "무빙 Moving (2023)",
+          "coverage": "S01E01–E20",
+          "resolution": "1080p",
+          "audio": "Корейська / English",
+          "voice": "",
+          "parsedQuality": "1080",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 13,
+          "movieId": 99117020,
+          "clamp": "2"
+        }
+      }
+    },
+    {
+      "name": "case korean-series matches verified year, coverage, resolution, and audio",
+      "status": "PASS",
+      "details": {
+        "expected": {
+          "name": "무빙 Moving",
+          "year": 2023,
+          "coverage": "S01E01–E20",
+          "resolution": "1080p",
+          "audio": "Корейська / English"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "무빙 Moving 2023 S01E01-E20 1080p WEB-DL DUAL-AUDIO Kor Eng",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "무빙 Moving (2023)",
+          "coverage": "S01E01–E20",
+          "resolution": "1080p",
+          "audio": "Корейська / English",
+          "voice": "",
+          "parsedQuality": "1080",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 13,
+          "movieId": 99117020,
+          "clamp": "2"
+        }
+      }
+    },
+    {
+      "name": "case korean-series is cache-isolated and has no previous result rows",
+      "status": "PASS",
+      "details": [
+        {
+          "raw": "무빙 Moving 2023 S01E01-E20 1080p WEB-DL DUAL-AUDIO Kor Eng",
+          "cacheHit": "false",
+          "parserCalls": 13,
+          "expectedParserCalls": 13
+        }
+      ]
+    },
+    {
+      "name": "case korean-series preserves the complete raw parser title",
+      "status": "PASS",
+      "details": {
+        "expected": {
+          "Title": "무빙 Moving 2023 S01E01-E20 1080p WEB-DL DUAL-AUDIO Kor Eng"
+        },
+        "actual": {
+          "raw": "무빙 Moving 2023 S01E01-E20 1080p WEB-DL DUAL-AUDIO Kor Eng",
+          "wrap": "anywhere",
+          "scroll": [
+            1451,
+            25
+          ],
+          "client": [
+            1451,
+            25
+          ]
+        }
+      }
+    },
+    {
+      "name": "case latin-long-series uses exact parser field and exact release title",
+      "status": "PASS",
+      "details": {
+        "expected": {
+          "name": "Зоряний архів / Star Archive — 星の書庫 — 별빛 기록",
+          "year": 2026,
+          "coverage": "S03E01–E08",
+          "resolution": "720p",
+          "audio": "Українська",
+          "studio": "Коло"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "Зоряний архів / Star Archive — 星の書庫 — 별빛 기록 S03E01-E08 2026 720p WEBRip Ukr DVO Коло",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "Зоряний архів / Star Archive — 星の書庫 — 별빛 기록 (2026)",
+          "coverage": "S03E01–E08",
+          "resolution": "720p",
+          "audio": "Українська",
+          "voice": "Коло",
+          "parsedQuality": "720",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 14,
+          "movieId": 99117021,
+          "clamp": "2"
+        }
+      }
+    },
+    {
+      "name": "case latin-long-series matches verified year, coverage, resolution, and audio",
+      "status": "PASS",
+      "details": {
+        "expected": {
+          "name": "Зоряний архів / Star Archive — 星の書庫 — 별빛 기록",
+          "year": 2026,
+          "coverage": "S03E01–E08",
+          "resolution": "720p",
+          "audio": "Українська",
+          "studio": "Коло"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "Зоряний архів / Star Archive — 星の書庫 — 별빛 기록 S03E01-E08 2026 720p WEBRip Ukr DVO Коло",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "Зоряний архів / Star Archive — 星の書庫 — 별빛 기록 (2026)",
+          "coverage": "S03E01–E08",
+          "resolution": "720p",
+          "audio": "Українська",
+          "voice": "Коло",
+          "parsedQuality": "720",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 14,
+          "movieId": 99117021,
+          "clamp": "2"
+        }
+      }
+    },
+    {
+      "name": "case latin-long-series is cache-isolated and has no previous result rows",
+      "status": "PASS",
+      "details": [
+        {
+          "raw": "Зоряний архів / Star Archive — 星の書庫 — 별빛 기록 S03E01-E08 2026 720p WEBRip Ukr DVO Коло",
+          "cacheHit": "false",
+          "parserCalls": 14,
+          "expectedParserCalls": 14
+        }
+      ]
+    },
+    {
+      "name": "case latin-long-series preserves the complete raw parser title",
+      "status": "PASS",
+      "details": {
+        "expected": {
+          "Title": "Зоряний архів / Star Archive — 星の書庫 — 별빛 기록 S03E01-E08 2026 720p WEBRip Ukr DVO Коло"
+        },
+        "actual": {
+          "raw": "Зоряний архів / Star Archive — 星の書庫 — 별빛 기록 S03E01-E08 2026 720p WEBRip Ukr DVO Коло",
+          "wrap": "anywhere",
+          "scroll": [
+            1451,
+            25
+          ],
+          "client": [
+            1451,
+            25
+          ]
+        }
+      }
+    },
+    {
+      "name": "case ukrainian-only uses exact parser field and exact release title",
+      "status": "PASS",
+      "details": {
+        "expected": {
+          "name": "Самотня українська назва",
+          "year": 2022,
+          "coverage": "",
+          "resolution": "720p",
+          "audio": "Українська"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "Самотня українська назва 2022 720p WEBRip Ukr",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "Самотня українська назва (2022)",
+          "coverage": "",
+          "resolution": "720p",
+          "audio": "Українська",
+          "voice": "",
+          "parsedQuality": "720",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 15,
+          "movieId": 99117022,
+          "clamp": "2"
+        }
+      }
+    },
+    {
+      "name": "case ukrainian-only matches verified year, coverage, resolution, and audio",
+      "status": "PASS",
+      "details": {
+        "expected": {
+          "name": "Самотня українська назва",
+          "year": 2022,
+          "coverage": "",
+          "resolution": "720p",
+          "audio": "Українська"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "Самотня українська назва 2022 720p WEBRip Ukr",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "Самотня українська назва (2022)",
+          "coverage": "",
+          "resolution": "720p",
+          "audio": "Українська",
+          "voice": "",
+          "parsedQuality": "720",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 15,
+          "movieId": 99117022,
+          "clamp": "2"
+        }
+      }
+    },
+    {
+      "name": "case ukrainian-only is cache-isolated and has no previous result rows",
+      "status": "PASS",
+      "details": [
+        {
+          "raw": "Самотня українська назва 2022 720p WEBRip Ukr",
+          "cacheHit": "false",
+          "parserCalls": 15,
+          "expectedParserCalls": 15
+        }
+      ]
+    },
+    {
+      "name": "case ukrainian-only preserves the complete raw parser title",
+      "status": "PASS",
+      "details": {
+        "expected": {
+          "Title": "Самотня українська назва 2022 720p WEBRip Ukr"
+        },
+        "actual": {
+          "raw": "Самотня українська назва 2022 720p WEBRip Ukr",
+          "wrap": "anywhere",
+          "scroll": [
+            1451,
+            25
+          ],
+          "client": [
+            1451,
+            25
+          ]
+        }
+      }
+    },
+    {
+      "name": "case english-only uses exact parser field and exact release title",
+      "status": "PASS",
+      "details": {
+        "expected": {
+          "name": "Only the English Name",
+          "year": 2020,
+          "coverage": "",
+          "resolution": "1080p",
+          "audio": "English"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "Only the English Name 2020 1080p WEB-DL Eng",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "Only the English Name (2020)",
+          "coverage": "",
+          "resolution": "1080p",
+          "audio": "English",
+          "voice": "",
+          "parsedQuality": "1080",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 16,
+          "movieId": 99117023,
+          "clamp": "2"
+        }
+      }
+    },
+    {
+      "name": "case english-only matches verified year, coverage, resolution, and audio",
+      "status": "PASS",
+      "details": {
+        "expected": {
+          "name": "Only the English Name",
+          "year": 2020,
+          "coverage": "",
+          "resolution": "1080p",
+          "audio": "English"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "Only the English Name 2020 1080p WEB-DL Eng",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "Only the English Name (2020)",
+          "coverage": "",
+          "resolution": "1080p",
+          "audio": "English",
+          "voice": "",
+          "parsedQuality": "1080",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 16,
+          "movieId": 99117023,
+          "clamp": "2"
+        }
+      }
+    },
+    {
+      "name": "case english-only is cache-isolated and has no previous result rows",
+      "status": "PASS",
+      "details": [
+        {
+          "raw": "Only the English Name 2020 1080p WEB-DL Eng",
+          "cacheHit": "false",
+          "parserCalls": 16,
+          "expectedParserCalls": 16
+        }
+      ]
+    },
+    {
+      "name": "case english-only preserves the complete raw parser title",
+      "status": "PASS",
+      "details": {
+        "expected": {
+          "Title": "Only the English Name 2020 1080p WEB-DL Eng"
+        },
+        "actual": {
+          "raw": "Only the English Name 2020 1080p WEB-DL Eng",
+          "wrap": "anywhere",
+          "scroll": [
+            1451,
+            25
+          ],
+          "client": [
+            1451,
+            25
+          ]
+        }
+      }
+    },
+    {
+      "name": "case bilingual-title uses exact parser field and exact release title",
+      "status": "PASS",
+      "details": {
+        "expected": {
+          "name": "Українська назва / English Name",
+          "year": 2025,
+          "coverage": "",
+          "resolution": "4K",
+          "audio": "Українська / English"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "Українська назва / English Name 2025 4K WEB-DL Ukr Eng",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "Українська назва / English Name (2025)",
+          "coverage": "",
+          "resolution": "4K",
+          "audio": "Українська / English",
+          "voice": "",
+          "parsedQuality": "2160",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 17,
+          "movieId": 99117024,
+          "clamp": "2"
+        }
+      }
+    },
+    {
+      "name": "case bilingual-title matches verified year, coverage, resolution, and audio",
+      "status": "PASS",
+      "details": {
+        "expected": {
+          "name": "Українська назва / English Name",
+          "year": 2025,
+          "coverage": "",
+          "resolution": "4K",
+          "audio": "Українська / English"
+        },
+        "actual": {
+          "visibleRowCount": 1,
+          "raw": "Українська назва / English Name 2025 4K WEB-DL Ukr Eng",
+          "sourceKey": "Title",
+          "nameValue": "",
+          "title": "Українська назва / English Name (2025)",
+          "coverage": "",
+          "resolution": "4K",
+          "audio": "Українська / English",
+          "voice": "",
+          "parsedQuality": "2160",
+          "eligible": false,
+          "cacheHit": "false",
+          "parserCalls": 17,
+          "movieId": 99117024,
+          "clamp": "2"
+        }
+      }
+    },
+    {
+      "name": "case bilingual-title is cache-isolated and has no previous result rows",
+      "status": "PASS",
+      "details": [
+        {
+          "raw": "Українська назва / English Name 2025 4K WEB-DL Ukr Eng",
+          "cacheHit": "false",
+          "parserCalls": 17,
+          "expectedParserCalls": 17
+        }
+      ]
+    },
+    {
+      "name": "case bilingual-title preserves the complete raw parser title",
+      "status": "PASS",
+      "details": {
+        "expected": {
+          "Title": "Українська назва / English Name 2025 4K WEB-DL Ukr Eng"
+        },
+        "actual": {
+          "raw": "Українська назва / English Name 2025 4K WEB-DL Ukr Eng",
+          "wrap": "anywhere",
+          "scroll": [
+            1451,
+            25
+          ],
+          "client": [
+            1451,
+            25
+          ]
+        }
       }
     },
     {
@@ -1636,10 +5021,41 @@
     "Host delivery errors/toast recorded separately; no whole-page zero-error claim"
   ],
   "browser": "Chrome/156.0.8078.4",
+  "startupExceptionDetails": {
+    "text": "Uncaught",
+    "exception": "SyntaxError: Failed to execute 'appendChild' on 'Node': Unexpected token '&'\n    at https://siaivo.isroot.in/app.min.js?v=1992455:44592:24",
+    "frames": [
+      {
+        "functionName": "",
+        "url": "https://siaivo.isroot.in/app.min.js?v=1992455",
+        "line": 44592,
+        "column": 24
+      }
+    ]
+  },
   "hostStartupExceptions": [
-    "SyntaxError: Failed to execute 'appendChild' on 'Node': Unexpected token '&'\n    at [URL]"
+    "SyntaxError: Failed to execute 'appendChild' on 'Node': Unexpected token '&'\n    at https://siaivo.isroot.in/app.min.js"
   ],
-  "openMs": 332.0999999977648,
+  "preFixtureStartup": {
+    "activity": "full",
+    "scriptCount": 52,
+    "hostErrors": [
+      "SyntaxError: Failed to execute 'appendChild' on 'Node': Unexpected token '&'\n    at https://siaivo.isroot.in/app.min.js"
+    ],
+    "runtimeException": {
+      "text": "Uncaught",
+      "exception": "SyntaxError: Failed to execute 'appendChild' on 'Node': Unexpected token '&'\n    at https://siaivo.isroot.in/app.min.js?v=1992455:44592:24",
+      "frames": [
+        {
+          "functionName": "",
+          "url": "https://siaivo.isroot.in/app.min.js?v=1992455",
+          "line": 44592,
+          "column": 24
+        }
+      ]
+    }
+  },
+  "openMs": 402.80000000074506,
   "deviceEquivalent": {
     "viewport": [
       1920,
@@ -1719,7 +5135,8 @@
       "badges": "S02E01–E03🇺🇦 UAtoloka.to",
       "technical": "1080pWEB-DLHEVC",
       "audio": "♫ Українська / EnglishСтудія Переклад / Studio ПерекладCC · Українська",
-      "kind": "tv"
+      "kind": "tv",
+      "eligible": true
     },
     "expanded": {
       "raw": "Нічний архів / Night Archive — 夜のアーカイブ — 별빛 항로 — S02E01-E03 2024 1080p WEB-DL HEVC Ukr Eng DVO",
@@ -1750,92 +5167,207 @@
   },
   "mediaCases": [
     {
-      "id": "last-of-us",
+      "id": "later-season",
       "kind": "tv",
+      "expected": {
+        "name": "Attack on Titan",
+        "year": 2018,
+        "coverage": "S03E01–E12",
+        "resolution": "1080p",
+        "audio": "Українська / English",
+        "studio": "ТакТреба",
+        "eligible": true
+      },
       "compact": {
-        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "title": "The Last of Us (2025)",
-        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
-        "technical": "4KWEB-DLHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "visibleRowCount": 1,
+        "raw": "Attack on Titan (2018) S03E01-E12 1080p WEB-DL HEVC Ukr Eng",
+        "sourceKey": "Title",
+        "nameValue": "",
+        "title": "Attack on Titan (2018)",
+        "coverage": "S03E01–E12",
+        "resolution": "1080p",
+        "audio": "Українська / English",
+        "voice": "ТакТреба",
+        "parsedQuality": "1080",
+        "eligible": true,
+        "cacheHit": "false",
+        "parserCalls": 3,
+        "movieId": 99117010,
         "clamp": "2"
       },
-      "rawDetails": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+      "rawDetails": "Attack on Titan (2018) S03E01-E12 1080p WEB-DL HEVC Ukr Eng"
     },
     {
       "id": "multi-season-anime",
       "kind": "tv",
+      "expected": {
+        "name": "葬送のフリーレン Frieren: Beyond Journey’s End",
+        "year": 2023,
+        "coverage": "S01–S03",
+        "resolution": "4K",
+        "audio": "Японська / English"
+      },
       "compact": {
-        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "title": "The Last of Us (2025)",
-        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
-        "technical": "4KWEB-DLHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "visibleRowCount": 1,
+        "raw": "葬送のフリーレン Frieren: Beyond Journey’s End S01-S03 2023 2160p BluRay HEVC Jap Eng",
+        "sourceKey": "Title",
+        "nameValue": "",
+        "title": "葬送のフリーレン Frieren: Beyond Journey’s End (2023)",
+        "coverage": "S01–S03",
+        "resolution": "4K",
+        "audio": "Японська / English",
+        "voice": "",
+        "parsedQuality": "2160",
+        "eligible": false,
+        "cacheHit": "false",
+        "parserCalls": 4,
+        "movieId": 99117011,
         "clamp": "2"
       },
-      "rawDetails": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+      "rawDetails": "葬送のフリーレン Frieren: Beyond Journey’s End S01-S03 2023 2160p BluRay HEVC Jap Eng"
     },
     {
       "id": "complete-season",
       "kind": "tv",
+      "expected": {
+        "name": "Blue Eye Samurai",
+        "year": 2024,
+        "coverage": "Complete Season 2",
+        "resolution": "1080p",
+        "audio": "Українська"
+      },
       "compact": {
-        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "title": "The Last of Us (2025)",
-        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
-        "technical": "4KWEB-DLHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "visibleRowCount": 1,
+        "raw": "Blue Eye Samurai Complete Season 2 2024 1080p WEBRip Ukr",
+        "sourceKey": "Title",
+        "nameValue": "",
+        "title": "Blue Eye Samurai (2024)",
+        "coverage": "Complete Season 2",
+        "resolution": "1080p",
+        "audio": "Українська",
+        "voice": "",
+        "parsedQuality": "1080",
+        "eligible": false,
+        "cacheHit": "false",
+        "parserCalls": 5,
+        "movieId": 99117012,
         "clamp": "2"
       },
-      "rawDetails": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+      "rawDetails": "Blue Eye Samurai Complete Season 2 2024 1080p WEBRip Ukr"
     },
     {
       "id": "episode-pack",
       "kind": "tv",
+      "expected": {
+        "name": "Arcane",
+        "year": 2021,
+        "coverage": "S01E01–E09",
+        "resolution": "1080p",
+        "audio": "Українська",
+        "studio": "Коло"
+      },
       "compact": {
-        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "title": "The Last of Us (2025)",
-        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
-        "technical": "4KWEB-DLHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "visibleRowCount": 1,
+        "raw": "Arcane S01E01-E09 2021 1080p WEB-DL AVC Ukr DVO Коло",
+        "sourceKey": "Title",
+        "nameValue": "",
+        "title": "Arcane (2021)",
+        "coverage": "S01E01–E09",
+        "resolution": "1080p",
+        "audio": "Українська",
+        "voice": "Коло",
+        "parsedQuality": "1080",
+        "eligible": false,
+        "cacheHit": "false",
+        "parserCalls": 6,
+        "movieId": 99117013,
         "clamp": "2"
       },
-      "rawDetails": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+      "rawDetails": "Arcane S01E01-E09 2021 1080p WEB-DL AVC Ukr DVO Коло"
     },
     {
       "id": "anime",
       "kind": "tv",
+      "expected": {
+        "name": "葬送のフリーレン",
+        "year": 2023,
+        "coverage": "S01E01–E28",
+        "resolution": "1080p",
+        "audio": "Японська / English"
+      },
       "compact": {
-        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "title": "The Last of Us (2025)",
-        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
-        "technical": "4KWEB-DLHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "visibleRowCount": 1,
+        "raw": "葬送のフリーレン S01E01-E28 2023 1080p WEB-DL H.265 Jap Eng",
+        "sourceKey": "Title",
+        "nameValue": "",
+        "title": "葬送のフリーレン (2023)",
+        "coverage": "S01E01–E28",
+        "resolution": "1080p",
+        "audio": "Японська / English",
+        "voice": "",
+        "parsedQuality": "1080",
+        "eligible": false,
+        "cacheHit": "false",
+        "parserCalls": 7,
+        "movieId": 99117014,
         "clamp": "2"
       },
-      "rawDetails": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+      "rawDetails": "葬送のフリーレン S01E01-E28 2023 1080p WEB-DL H.265 Jap Eng"
     },
     {
       "id": "dorama",
       "kind": "tv",
+      "expected": {
+        "name": "이상한 변호사 우영우",
+        "year": 2022,
+        "coverage": "S01E01–E16",
+        "resolution": "1080p",
+        "audio": "Корейська / English"
+      },
       "compact": {
-        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "title": "The Last of Us (2025)",
-        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
-        "technical": "4KWEB-DLHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "visibleRowCount": 1,
+        "raw": "이상한 변호사 우영우 S01E01-E16 2022 1080p WEB-DL HEVC Kor Eng",
+        "sourceKey": "Title",
+        "nameValue": "",
+        "title": "이상한 변호사 우영우 (2022)",
+        "coverage": "S01E01–E16",
+        "resolution": "1080p",
+        "audio": "Корейська / English",
+        "voice": "",
+        "parsedQuality": "1080",
+        "eligible": false,
+        "cacheHit": "false",
+        "parserCalls": 8,
+        "movieId": 99117015,
         "clamp": "2"
       },
-      "rawDetails": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+      "rawDetails": "이상한 변호사 우영우 S01E01-E16 2022 1080p WEB-DL HEVC Kor Eng"
     },
     {
       "id": "movie",
       "kind": "movie",
+      "expected": {
+        "name": "Dune Part Two",
+        "year": 2024,
+        "coverage": "",
+        "resolution": "4K",
+        "audio": "Українська / English"
+      },
       "compact": {
+        "visibleRowCount": 1,
         "raw": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng",
+        "sourceKey": "Title",
+        "nameValue": "",
         "title": "Dune Part Two (2024)",
-        "coverage": "🇺🇦 UAtoloka.to",
-        "technical": "4KBluRayHDR10+ · Dolby VisionHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "coverage": "",
+        "resolution": "4K",
+        "audio": "Українська / English",
+        "voice": "",
+        "parsedQuality": "2160",
+        "eligible": false,
+        "cacheHit": "false",
+        "parserCalls": 9,
+        "movieId": 99117016,
         "clamp": "2"
       },
       "rawDetails": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng"
@@ -1843,67 +5375,235 @@
     {
       "id": "unicode-long-movie",
       "kind": "movie",
+      "expected": {
+        "name": "海辺の長い物語 / The Long Shore Story — قصة طويلة على الشاطئ",
+        "year": 2023,
+        "coverage": "",
+        "resolution": "1080p",
+        "audio": "Українська"
+      },
       "compact": {
-        "raw": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng",
-        "title": "Dune Part Two (2024)",
-        "coverage": "🇺🇦 UAtoloka.to",
-        "technical": "4KBluRayHDR10+ · Dolby VisionHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "visibleRowCount": 1,
+        "raw": "海辺の長い物語 / The Long Shore Story — قصة طويلة على الشاطئ 2023 1080p WEB-DL AVC Ukr",
+        "sourceKey": "Title",
+        "nameValue": "",
+        "title": "海辺の長い物語 / The Long Shore Story — قصة طويلة على الشاطئ (2023)",
+        "coverage": "",
+        "resolution": "1080p",
+        "audio": "Українська",
+        "voice": "",
+        "parsedQuality": "1080",
+        "eligible": false,
+        "cacheHit": "false",
+        "parserCalls": 10,
+        "movieId": 99117017,
         "clamp": "2"
       },
-      "rawDetails": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng"
+      "rawDetails": "海辺の長い物語 / The Long Shore Story — قصة طويلة على الشاطئ 2023 1080p WEB-DL AVC Ukr"
     },
     {
       "id": "name-field",
       "kind": "movie",
+      "expected": {
+        "name": "Amélie",
+        "year": 2001,
+        "coverage": "",
+        "resolution": "1080p",
+        "audio": "Французька / English"
+      },
       "compact": {
-        "raw": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng",
-        "title": "Dune Part Two (2024)",
-        "coverage": "🇺🇦 UAtoloka.to",
-        "technical": "4KBluRayHDR10+ · Dolby VisionHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "visibleRowCount": 1,
+        "raw": "Amélie 2001 1080p BluRay AVC French Eng",
+        "sourceKey": "Title",
+        "nameValue": "Amélie 2001 1080p BluRay AVC French Eng",
+        "title": "Amélie (2001)",
+        "coverage": "",
+        "resolution": "1080p",
+        "audio": "Французька / English",
+        "voice": "",
+        "parsedQuality": "1080",
+        "eligible": false,
+        "cacheHit": "false",
+        "parserCalls": 11,
+        "movieId": 99117018,
         "clamp": "2"
       },
-      "rawDetails": "Dune Part Two 2024 2160p UHD BluRay HDR10+ DV HEVC Ukr Eng"
+      "rawDetails": "Amélie 2001 1080p BluRay AVC French Eng"
     },
     {
       "id": "sparse-raw",
-      "kind": "tv",
+      "kind": "movie",
+      "expected": {
+        "name": "未知の物語 — Невідома історія українською",
+        "year": null,
+        "coverage": "",
+        "resolution": "",
+        "audio": "Аудіо не визначено"
+      },
       "compact": {
-        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "title": "The Last of Us (2025)",
-        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
-        "technical": "4KWEB-DLHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "visibleRowCount": 1,
+        "raw": "未知の物語 — Невідома історія українською",
+        "sourceKey": "Title",
+        "nameValue": "",
+        "title": "未知の物語 — Невідома історія українською",
+        "coverage": "",
+        "resolution": "",
+        "audio": "Аудіо не визначено",
+        "voice": "",
+        "parsedQuality": "",
+        "eligible": false,
+        "cacheHit": "false",
+        "parserCalls": 12,
+        "movieId": 99117019,
         "clamp": "2"
       },
-      "rawDetails": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+      "rawDetails": "未知の物語 — Невідома історія українською"
     },
     {
       "id": "korean-series",
       "kind": "tv",
+      "expected": {
+        "name": "무빙 Moving",
+        "year": 2023,
+        "coverage": "S01E01–E20",
+        "resolution": "1080p",
+        "audio": "Корейська / English"
+      },
       "compact": {
-        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "title": "The Last of Us (2025)",
-        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
-        "technical": "4KWEB-DLHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "visibleRowCount": 1,
+        "raw": "무빙 Moving 2023 S01E01-E20 1080p WEB-DL DUAL-AUDIO Kor Eng",
+        "sourceKey": "Title",
+        "nameValue": "",
+        "title": "무빙 Moving (2023)",
+        "coverage": "S01E01–E20",
+        "resolution": "1080p",
+        "audio": "Корейська / English",
+        "voice": "",
+        "parsedQuality": "1080",
+        "eligible": false,
+        "cacheHit": "false",
+        "parserCalls": 13,
+        "movieId": 99117020,
         "clamp": "2"
       },
-      "rawDetails": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+      "rawDetails": "무빙 Moving 2023 S01E01-E20 1080p WEB-DL DUAL-AUDIO Kor Eng"
     },
     {
       "id": "latin-long-series",
       "kind": "tv",
+      "expected": {
+        "name": "Зоряний архів / Star Archive — 星の書庫 — 별빛 기록",
+        "year": 2026,
+        "coverage": "S03E01–E08",
+        "resolution": "720p",
+        "audio": "Українська",
+        "studio": "Коло"
+      },
       "compact": {
-        "raw": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба",
-        "title": "The Last of Us (2025)",
-        "coverage": "S02E01–E03🇺🇦 UAtoloka.to",
-        "technical": "4KWEB-DLHEVC",
-        "audio": "♫ Українська / EnglishПереклад UACC · Українська",
+        "visibleRowCount": 1,
+        "raw": "Зоряний архів / Star Archive — 星の書庫 — 별빛 기록 S03E01-E08 2026 720p WEBRip Ukr DVO Коло",
+        "sourceKey": "Title",
+        "nameValue": "",
+        "title": "Зоряний архів / Star Archive — 星の書庫 — 별빛 기록 (2026)",
+        "coverage": "S03E01–E08",
+        "resolution": "720p",
+        "audio": "Українська",
+        "voice": "Коло",
+        "parsedQuality": "720",
+        "eligible": false,
+        "cacheHit": "false",
+        "parserCalls": 14,
+        "movieId": 99117021,
         "clamp": "2"
       },
-      "rawDetails": "The Last of Us S02E01-E03 2025 4K WEB-DL DOVI HEVC Ukr Eng DVO ТакТреба"
+      "rawDetails": "Зоряний архів / Star Archive — 星の書庫 — 별빛 기록 S03E01-E08 2026 720p WEBRip Ukr DVO Коло"
+    },
+    {
+      "id": "ukrainian-only",
+      "kind": "movie",
+      "expected": {
+        "name": "Самотня українська назва",
+        "year": 2022,
+        "coverage": "",
+        "resolution": "720p",
+        "audio": "Українська"
+      },
+      "compact": {
+        "visibleRowCount": 1,
+        "raw": "Самотня українська назва 2022 720p WEBRip Ukr",
+        "sourceKey": "Title",
+        "nameValue": "",
+        "title": "Самотня українська назва (2022)",
+        "coverage": "",
+        "resolution": "720p",
+        "audio": "Українська",
+        "voice": "",
+        "parsedQuality": "720",
+        "eligible": false,
+        "cacheHit": "false",
+        "parserCalls": 15,
+        "movieId": 99117022,
+        "clamp": "2"
+      },
+      "rawDetails": "Самотня українська назва 2022 720p WEBRip Ukr"
+    },
+    {
+      "id": "english-only",
+      "kind": "movie",
+      "expected": {
+        "name": "Only the English Name",
+        "year": 2020,
+        "coverage": "",
+        "resolution": "1080p",
+        "audio": "English"
+      },
+      "compact": {
+        "visibleRowCount": 1,
+        "raw": "Only the English Name 2020 1080p WEB-DL Eng",
+        "sourceKey": "Title",
+        "nameValue": "",
+        "title": "Only the English Name (2020)",
+        "coverage": "",
+        "resolution": "1080p",
+        "audio": "English",
+        "voice": "",
+        "parsedQuality": "1080",
+        "eligible": false,
+        "cacheHit": "false",
+        "parserCalls": 16,
+        "movieId": 99117023,
+        "clamp": "2"
+      },
+      "rawDetails": "Only the English Name 2020 1080p WEB-DL Eng"
+    },
+    {
+      "id": "bilingual-title",
+      "kind": "movie",
+      "expected": {
+        "name": "Українська назва / English Name",
+        "year": 2025,
+        "coverage": "",
+        "resolution": "4K",
+        "audio": "Українська / English"
+      },
+      "compact": {
+        "visibleRowCount": 1,
+        "raw": "Українська назва / English Name 2025 4K WEB-DL Ukr Eng",
+        "sourceKey": "Title",
+        "nameValue": "",
+        "title": "Українська назва / English Name (2025)",
+        "coverage": "",
+        "resolution": "4K",
+        "audio": "Українська / English",
+        "voice": "",
+        "parsedQuality": "2160",
+        "eligible": false,
+        "cacheHit": "false",
+        "parserCalls": 17,
+        "movieId": 99117024,
+        "clamp": "2"
+      },
+      "rawDetails": "Українська назва / English Name 2025 4K WEB-DL Ukr Eng"
     }
   ],
   "finalDiagnostics": {

@@ -1,14 +1,27 @@
 {
-  "commit": "98346e41b45e2264eb4881c8bb20fe7213a5b983",
-  "tests": 229,
-  "passed": 229,
+  "commit": "91a5685915aba9003a44eb7c76c28f4d14c7654e",
+  "tests": 230,
+  "passed": 230,
   "failed": 0,
   "command": "node --test --test-timeout=15000 tests/torrent-overlay.cjs tests/hybrid-ui.cjs tests/torrents-cinema.cjs tests/torrent-details.cjs tests/hybrid-torrent-discovery.cjs tests/torrent-search.cjs tests/parser-providers.cjs tests/ui-bootstrap.cjs tests/settings-census.cjs tests/settings-inventory.cjs tests/settings-registry.cjs tests/settings-hub-lifecycle.cjs",
   "static": [
-    "77 JavaScript files, 43 manifest entries, repository URL paths PASS",
-    "offline artifact freshness PASS",
+    "node scripts/build-torrent-cinema.mjs --check PASS",
+    "node --test tests/repository-checker.cjs PASS",
     "git diff --check PASS"
   ],
-  "note": "Existing Hybrid CI entry imports new lifecycle/inline and build-freshness tests. Workflows unchanged. Latest main inventory Markdown link formatting repaired after inherited validator failure; no inventory contents/configuration changed.",
-  "followUp": "Final HD text geometry regression, circular info action, 12 browser release-name cases in standalone and Hybrid, and retired TV appearance setting inertness checks pass."
+  "browser": {
+    "hybrid": "93/93 PASS",
+    "standalone": "93/93 PASS",
+    "independentMediaCasesPerMode": 15,
+    "exactFixtureSourceAndRawExpandedTitle": "PASS",
+    "cacheIsolation": "unique media IDs; parser called once per case; cacheHit=false",
+    "deliveredCanonicalBytes": {
+      "file": "ui/torrent-cinema.js",
+      "bytes": 149099,
+      "sha256": "241e1c1e623f3fc93092e731b2e0d521a2e2205b1536f00d6dbe42122b8be62a"
+    }
+  },
+  "preFixtureException": "Both browser modes observe the same uncaught SyntaxError from host https://siaivo.isroot.in/app.min.js?v=1992455:44592:24 before fixture setup. CDP Runtime stack points to host bundle; no PR asset frame observed. No uncaught exception after fixture installation.",
+  "note": "No product runtime source changed in this focused acceptance correction. Tests reject stale results through exact Title/Name, compact title/metadata, one visible row and exact raw expanded-title assertions.",
+  "followUp": "15 independently isolated media identity cases in Hybrid and standalone; 720p text rectangles checked across all 12 baseline rows including long title; 2018 season 3 verified for 2013 premiere; parser-provided bilingual, Ukrainian-only, English-only, Name-only and multilingual titles tested without aliases."
 }

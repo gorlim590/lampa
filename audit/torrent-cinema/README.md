@@ -1,26 +1,26 @@
 # Torrent Cinema 2.0 — acceptance evidence
 
-Branch `feat/issue-117-torrent-cinema`; visual acceptance follow-up to `ce50a4461cfd1270547ac8417ce71b4ab01cc9fa`. Development baseline f60132b, rebased onto fa378b3 (two inventory-only main commits).
+Branch `feat/issue-117-torrent-cinema`; final focused acceptance follow-up tested at `91a5685915aba9003a44eb7c76c28f4d14c7654e` (parent implementation remains `98346e41b45e2264eb4881c8bb20fe7213a5b983`). Development baseline f60132b, rebased onto fa378b3 (two inventory-only main commits).
 
-Canonical artifact SHA-256: `ef020d3b953646d1a2527385ae346aa9fb366cf85b64680b1809faa89912da47`. Both browser modes routed the same changed bytes into the existing native Lampa runtime. Original tab/URL/display metrics restored; browser/profile kept running.
+Canonical artifact `ui/torrent-cinema.js`: 149099 bytes; SHA-256 `241e1c1e623f3fc93092e731b2e0d521a2e2205b1536f00d6dbe42122b8be62a`. Rebuilt freshness check passed; both browser modes routed these exact local bytes into the existing native Lampa runtime. Original tab/URL/display metrics restored; browser/profile kept running.
 
 | Check | Result |
 | --- | --- |
-| Focused automated regressions | 229 PASS / 0 FAIL; command in unit-results.json |
-| Canonical-only install, Hybrid/Buttons+/other visual scripts not executed | 57 PASS / 0 FAIL |
-| Hybrid integration | 57 PASS / 0 FAIL |
+| Focused automated regressions | 230 PASS / 0 FAIL; command and tested commit in unit-results.json |
+| Canonical-only install, Hybrid/Buttons+/other visual scripts not executed | 93 PASS / 0 FAIL |
+| Hybrid integration | 93 PASS / 0 FAIL |
 | 1280×720, 1920×1080, 3840×2160 CSS at DPR 1 | PASS in both modes; independent PNG sizes match |
 | 1920×1080 CSS at DPR 2 | PASS; separate 3840×2160 PNG in both modes |
 | Single toolbar/style, native D-pad/OK, info/Back, Files/return, focus restore | PASS with controlled parser/transport data |
 | 720p text geometry | Actual title, technical badges, audio, voiceover and subtitles fit the row; info control is circular; expanded raw title fits its panel |
-| Release-name fixtures | 12 film/series/anime/dorama, season/episode pack, long multilingual and sparse name cases; compact title and exact expanded raw title checked in both modes |
+| Release-name fixtures | 15 independent film/series/anime/dorama, season/episode pack, long multilingual and sparse-name cases per mode; each has a unique media ID, exact parser Title/Name, one row, cacheHit=false, exact compact identity/verified metadata and exact expanded raw title |
 | Retired Google TV appearance settings | Eight settings remain inert and stored; toggling former TV/animation values leaves styles/subscriptions stable, without animation, transform or backdrop filter |
 | Owner approved reference comparison | Reviewed directly; real release title, resolution/type/HDR/codec, audio, aligned availability/actions, two filter bands, restrained purple and four premium detail sections |
 | Empty/error/retry, delayed results, reopen, profile isolation, teardown | PASS |
 | Syntax/manifest/URL validator, artifact freshness, whitespace | PASS |
 | Physical Google TV, real providers/TorrServer/player/tracks/4K playback | UNVERIFIED |
 
-Three scenario families run in each owner-required install mode. Native row OK is preserved; only the synthetic release transport is shadowed. Core Files template/Modal/controllers run in the actual app. This is not real TorrServer/playback proof. Existing host startup errors are recorded separately; no exception occurred after fixture setup. The pre-existing delivery toast was temporarily hidden for screenshots, then restored by reload.
+Three scenario families run in each owner-required install mode. Native row OK is preserved; only the synthetic release transport is shadowed. Core Files template/Modal/controllers run in the actual app. This is not real TorrServer/playback proof. Before fixture installation, both modes report the same uncaught `SyntaxError: Failed to execute 'appendChild' on 'Node': Unexpected token '&'` from `https://siaivo.isroot.in/app.min.js?v=1992455:44592:24`. CDP Runtime evidence attributes it to the host application bundle, before the fixture, with no observed PR asset frame; the host bundle source was not changed by this PR. No uncaught exception occurred after fixture setup. The pre-existing delivery toast was temporarily hidden for screenshots, then restored by reload.
 
 ## Screenshots
 
@@ -36,7 +36,7 @@ Three scenario families run in each owner-required install mode. Native row OK i
 
 The reference comparison keeps its TV composition while applying the owner's requested deviations: quality and tracker controls are separate navigable rows; the real title is parsed from the release's Title/Name field and shown above format badges; purple focus is muted; Files are factual metadata in the fourth details column and have no separate launch button. Release year and episode coverage appear only when supported by the release string or its metadata. Complete raw names remain in expanded details. The rendered fixture has no poster/backdrop artwork, so the screenshot's surface cannot show the Last of Us image from the reference.
 
-The final HD pass gives wrapped text enough row height, brightens technical badges and keeps the info action circular. A browser regression measures actual text rectangles against the card/details bounds, beyond checking document overflow. A long series fixture renders `Нічний архів / Night Archive` with verified 2024, S02E01–E03, 1080p, Ukrainian/English audio and studio; its expanded details retain the full multilingual raw torrent title. Twelve additional release cases are tested in both installation modes.
+The final HD pass gives wrapped text enough row height, brightens technical badges and keeps the info action circular. A browser regression measures actual text rectangles for all 12 baseline rows, including a long-title row, against card bounds, beyond checking document overflow. A long series fixture renders `Нічний архів / Night Archive` with verified 2024, S02E01–E03, 1080p, Ukrainian/English audio and studio; its expanded details retain the full multilingual raw torrent title. Fifteen independent cases are tested in each installation mode, covering parser-provided bilingual, Ukrainian-only, English-only, Name-field-only and long multilingual titles. No catalog alias is appended. A 2018 season 3 release is accepted for a series whose premiere metadata is 2013.
 
 Series captures: [compact 1080p](series-long-1920.png) · [expanded 1080p](series-expanded-1920.png) · [standalone compact](standalone-series-long-1920.png) · [standalone expanded](standalone-series-expanded-1920.png).
 

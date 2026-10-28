@@ -21,8 +21,8 @@
   "after": [
     {
       "file": "ui/torrent-cinema.js",
-      "bytes": 149045,
-      "sha256": "ef020d3b953646d1a2527385ae346aa9fb366cf85b64680b1809faa89912da47"
+      "bytes": 149099,
+      "sha256": "241e1c1e623f3fc93092e731b2e0d521a2e2205b1536f00d6dbe42122b8be62a"
     },
     {
       "file": "ui/stremio-hybrid.js",
@@ -53,5 +53,7 @@
     "afterIntegrationSingleRecordedOpenMs": 349.70000000018626,
     "afterStandaloneSingleRecordedOpenMs": 347.5,
     "limits": "Single samples include host/protocol polling differences, not a controlled benchmark. No startup, FPS, smoothness or memory gain claimed."
-  }
+  },
+  "acceptanceFollowupCommit": "91a5685915aba9003a44eb7c76c28f4d14c7654e",
+  "canonicalBuildCheck": "PASS"
 }
