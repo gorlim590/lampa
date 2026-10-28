@@ -289,15 +289,20 @@ function createCinemaRuntime(metadata) {
     }
     function scanTransitionSurfaces(record){
         if(!record)return;
-        if(record.selectionArmed&&record.streamStage==='loading')document.querySelectorAll('.loading-layer,.media-loading--standalone').forEach(function(node){markNativeSurface(record,node,'tc-native-loading');});
+        var loadingFound=false;
+        if(record.selectionArmed&&record.streamStage==='loading')document.querySelectorAll('.loading-layer,.media-loading--standalone').forEach(function(node){markNativeSurface(record,node,'tc-native-loading');loadingFound=true;});
         if(record.streamFocused&&record.streamView&&record.streamView.isOpen()&&record.streamStage==='search')document.querySelectorAll('.search-box,.search').forEach(function(node){markNativeSurface(record,node,'tc-native-search');});
         if(record.selectionArmed&&record.streamStage==='player')document.querySelectorAll('.player,.youtube-player').forEach(function(node){markNativeSurface(record,node,'tc-native-player');});
+        return loadingFound;
     }
     function watchTransitionSurfaces(record){
-        scanTransitionSurfaces(record);if(record.nativeObserver||!document.body||typeof MutationObserver==='undefined')return;
-        record.nativeObserver=new MutationObserver(function(){scanTransitionSurfaces(record);});
+        var loadingFound=scanTransitionSurfaces(record);if(record.nativeObserver||!document.body||typeof MutationObserver==='undefined'||record.streamStage==='loading'&&loadingFound)return;
+        record.nativeObserver=new MutationObserver(function(){var found=scanTransitionSurfaces(record);if(record.streamStage==='loading'&&found)stopWatchingSurfaces(record);});
         record.nativeObserver.observe(document.body,{childList:true,subtree:true});
-        record.nativeObserverTimer=setTimeout(function(){if(record.nativeObserver){record.nativeObserver.disconnect();record.nativeObserver=null;}record.nativeObserverTimer=0;},10000);
+        // Native Loading.start switches controller immediately, then inserts its
+        // generic surface after 500 ms (MediaLoading inserts synchronously). The
+        // observer only waits for that surface, not for the duration of playback.
+        record.nativeObserverTimer=setTimeout(function(){if(record.nativeObserver){record.nativeObserver.disconnect();record.nativeObserver=null;}record.nativeObserverTimer=0;},record.streamStage==='loading'?1500:10000);
     }
     function stopWatchingSurfaces(record){
         if(!record)return;if(record.nativeObserver){record.nativeObserver.disconnect();record.nativeObserver=null;}
@@ -538,20 +543,23 @@ function createCinemaRuntime(metadata) {
     function decorateStreamRows(st){st.rows.forEach(function(row){var data=st.sourceData.get(row);cinemaRows.decorate(row,data);row.classList.add('sh-cinema-row');});streamUpdateRows(st);}
 
 
-    var streamSelectOwner=null;
+    var streamSelectOwner=null,streamSelectRestore=null;
     function clearStreamSelect(keepOwner){
         var st=streamSelectOwner;if(!st)return;if(!keepOwner)streamSelectOwner=null;
         if(st.selectNode){st.selectNode.classList.remove('sh-cinema-select');Object.keys(st.selectTokens||{}).forEach(function(key){var entry=st.selectTokens[key];if(st.selectNode.style.getPropertyValue(key)===entry.ours){if(entry.before)st.selectNode.style.setProperty(key,entry.before);else st.selectNode.style.removeProperty(key);}});st.selectNode=null;st.selectTokens=null;}
     }
     function onStreamSelectHide(){
-        var st=streamSelectOwner;if(!st)return;st.selectTransition=true;clearStreamSelect(true);
-        setTimeout(function(){if(streamSelectOwner!==st||Lampa.Select.opened&&Lampa.Select.opened())return;streamSelectOwner=null;
-            st.selectTransition=false;
-            if(streamAlive(st)&&st.wantFocus&&Lampa.Controller.enabled().name==='sh_movie_streams')streamFocus(st,st.last);
-        },0);
+        var st=streamSelectOwner;if(!st)return;
+        streamSelectRestore={state:st,node:st.selectNode};st.selectTransition=false;clearStreamSelect();
+    }
+    function onStreamSelectClose(){
+        var pending=streamSelectRestore;if(!pending)return;streamSelectRestore=null;
+        if(Lampa.Select.opened&&Lampa.Select.opened()||Lampa.Select.render&&Lampa.Select.render()[0]!==pending.node)return;
+        var st=pending.state;
+        if(streamAlive(st)&&st.wantFocus&&Lampa.Controller.enabled().name==='sh_movie_streams')streamFocus(st,st.last);
     }
     function onStreamSelect(event){
-        clearStreamSelect();
+        streamSelectRestore=null;clearStreamSelect();
         if(Lampa.Controller.enabled().name==='sh_profile')return; // Profile owns its compact native Select surface.
         var record=movieRecords.filter(function(r){return r.streamFocused&&r.streamChild&&!r.streamChild.dead&&r.page.classList.contains('activity--active');})[0];
         if(!record)return;var st=record.streamChild,node=event&&event.html&&(event.html[0]||event.html)||Lampa.Select.render()[0];if(!node)return;
@@ -812,10 +820,14 @@ function createCinemaRuntime(metadata) {
     function onStreamController(event) {
         if(!event)return;
         var record=movieRecords.filter(function(r){return r.page.classList.contains('activity--active')&&r.streamPane;})[0];if(!record)return;
+        if(streamSelectRestore&&event.name!=='select'){
+            var pending=streamSelectRestore;streamSelectRestore=null;
+            if(event.name==='sh_movie_streams'&&!Lampa.Select.opened()&&streamAlive(pending.state)&&pending.state.wantFocus)streamFocus(pending.state,pending.state.last);
+        }
         if(record.selectionArmed&&event.name==='loading'){record.streamStage='loading';watchTransitionSurfaces(record);}
         if(record.selectionArmed&&['player','player_video','youtube'].indexOf(event.name)>=0){record.streamStage='player';watchTransitionSurfaces(record);}
         if(record.streamFocused&&record.streamView&&record.streamView.isOpen()&&['search','keyboard'].indexOf(event.name)>=0){record.streamStage='search';watchTransitionSurfaces(record);}
-        if(record.streamStage==='loading'&&event.name!=='loading'){clearNativeSurfaces(record,'tc-native-loading');record.streamStage='files';}
+        if(record.streamStage==='loading'&&event.name!=='loading'){stopWatchingSurfaces(record);clearNativeSurfaces(record,'tc-native-loading');record.streamStage='files';}
         if(!['full_start','content'].includes(event.name))return;
         // Native player/Files return may activate the underlying detail controller.
         // A visible overlay must retain remote ownership; leave inner menus/player alone.
@@ -831,7 +843,7 @@ function createCinemaRuntime(metadata) {
         // Preserve native Down to cast/recommendations; sources open through the real torrent action.
         record.streamDown=controller.down;
     }
-    function onStreamProfile(){streamGeneration++;streamCache=[];movieRecords.forEach(function(record){record.selectionArmed=false;record.streamStage='idle';stopWatchingSurfaces(record);clearNativeSurfaces(record);clearStreamEpisodePreviews(record);closeStreamOverlay(record,false);closeStreamChild(record);});}
+    function onStreamProfile(){streamGeneration++;streamCache=[];clearStreamSelect();streamSelectRestore=null;movieRecords.forEach(function(record){record.selectionArmed=false;record.streamStage='idle';stopWatchingSurfaces(record);clearNativeSurfaces(record);clearStreamEpisodePreviews(record);closeStreamOverlay(record,false);closeStreamChild(record);});}
     function onStreamSettings(event) {
         if(event&&/^(account|account_user|account_email)$/.test(event.name)){onStreamProfile();return;}
         if(event&&/^(jackett_|prowlarr_|parser_|parse_)/.test(event.name)){if(movieRecords.some(function(r){return r.streamChild&&r.streamChild.providerChanging;}))return;streamGeneration++;streamCache=[];movieRecords.forEach(function(r){closeStreamOverlay(r,false);closeStreamChild(r);});}
@@ -887,7 +899,9 @@ function createCinemaRuntime(metadata) {
     }
     function onFilesClose(){var st=metadata.overlayState();if(st)metadata.clearFileRatings(st);var record=streamRecord();clearStreamFiles();if(!record||!record.selectionArmed)return;
         clearNativeSurfaces(record,'tc-native-torrent-modal');
-        setTimeout(function(){if(!record.selectionArmed)return;var owner=Lampa.Controller.enabled().name;if(owner!=='loading'&&owner!=='player'&&owner!=='player_video'&&owner!=='youtube'){record.selectionArmed=false;record.streamStage='idle';stopWatchingSurfaces(record);clearNativeSurfaces(record);}},0);
+        // Files can close before the transport starts native Loading. Keep the
+        // release armed until Controller's native transition identifies Loading,
+        // player, Files return, or the registered Torrent.back callback runs.
     }
     function start(){
         if(running)return;running=true;
@@ -896,7 +910,7 @@ function createCinemaRuntime(metadata) {
         subscribe(Lampa.Modal.listener,'fullshow',onStreamFiles);subscribe(Lampa.Modal.listener,'update',onStreamFiles);subscribe(Lampa.Modal.listener,'close',onFilesClose);
         subscribe(Lampa.Listener,'torrent_file',fileEvent);
         if(Lampa.PlayerVideo)subscribe(Lampa.PlayerVideo.listener,'error',onStreamPlaybackError);
-        subscribe(Lampa.Select.listener,'fullshow',onStreamSelect);subscribe(Lampa.Select.listener,'hide',onStreamSelectHide);
+        subscribe(Lampa.Select.listener,'fullshow',onStreamSelect);subscribe(Lampa.Select.listener,'hide',onStreamSelectHide);subscribe(Lampa.Select.listener,'close',onStreamSelectClose);
         subscribe(Lampa.Storage.listener,'change',onStreamSettings);
         if(Lampa.Account)subscribe(Lampa.Account.listener,'profile_select',onStreamProfile);
         if(Lampa.Search)subscribe(Lampa.Search.listener,'sources',onStreamProfile);
@@ -904,7 +918,7 @@ function createCinemaRuntime(metadata) {
     }
     function stop(){
         if(frame){cancelAnimationFrame(frame);frame=0;}
-        movieRecords.slice().forEach(removeStreams);movieRecords=[];
+        movieRecords.slice().forEach(removeStreams);movieRecords=[];streamSelectRestore=null;streamSelectOwner=null;
         removeStreamRoutes();clearStreamFiles();clearStreamSelect();streamCache=[];streamGeneration++;
         subscriptions.splice(0).reverse().forEach(function(remove){remove();});running=false;
         var style=document.getElementById('torrent-cinema-style');if(style)style.remove();
