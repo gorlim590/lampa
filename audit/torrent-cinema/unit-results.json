@@ -1,0 +1,13 @@
+{
+  "commit": "12530e68af8b8588dc739617230a718c0e21f51a",
+  "tests": 225,
+  "passed": 225,
+  "failed": 0,
+  "command": "node --test --test-timeout=15000 tests/torrent-overlay.cjs tests/hybrid-ui.cjs tests/torrents-cinema.cjs tests/torrent-details.cjs tests/hybrid-torrent-discovery.cjs tests/torrent-search.cjs tests/parser-providers.cjs tests/ui-bootstrap.cjs tests/settings-census.cjs tests/settings-inventory.cjs tests/settings-registry.cjs tests/settings-hub-lifecycle.cjs",
+  "static": [
+    "77 JavaScript files, 43 manifest entries, repository URL paths PASS",
+    "offline artifact freshness PASS",
+    "git diff --check PASS"
+  ],
+  "note": "Existing Hybrid CI entry imports new lifecycle/inline and build-freshness tests. Workflows unchanged. Latest main inventory Markdown link formatting repaired after inherited validator failure; no inventory contents/configuration changed."
+}

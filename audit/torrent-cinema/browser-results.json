@@ -1,0 +1,1000 @@
+{
+  "installation": "Hybrid integration",
+  "suppressedScripts": [],
+  "commit": "12530e68af8b8588dc739617230a718c0e21f51a",
+  "branch": "feat/issue-117-torrent-cinema",
+  "fixture": true,
+  "assets": {
+    "torrents-redesign.js": {
+      "url": "https://gorlim590.github.io/lampa/torrents-redesign.js",
+      "sha256": "2b4e046c6cf0602e10fa19d178c6beb25a2dcc0211a70e37c8b0951d66e33f7d",
+      "bytes": 793
+    },
+    "loader.js": {
+      "url": "https://gorlim590.github.io/lampa/loader.js",
+      "sha256": "823738aedc6ee5f867eb630e2446c562634ee45ca27d0032667ea7969c2732f5",
+      "bytes": 10076
+    },
+    "ui/torrent-cinema.js": {
+      "url": "https://gorlim590.github.io/lampa/ui/torrent-cinema.js",
+      "sha256": "6fb25303c484daa5d380b35098bcbfb22ac5ca8429310edd281cb4c61ef8ae20",
+      "bytes": 132080
+    },
+    "ui/stremio-hybrid.js": {
+      "url": "https://gorlim590.github.io/lampa/ui/stremio-hybrid.js",
+      "sha256": "ebb42a4e35a050d281af6b1673aacdc4f9f70f3a8cbdf864a3518da27dd9d0b6",
+      "bytes": 102341
+    },
+    "ui/settings-hub.js": {
+      "url": "https://gorlim590.github.io/lampa/ui/settings-hub.js",
+      "sha256": "d90281c4550ad80b9dbc89a1cbc3b70a2159b1dda5973f890504715915e25fa4",
+      "bytes": 24943
+    }
+  },
+  "checks": [
+    {
+      "name": "installation boundary",
+      "status": "PASS"
+    },
+    {
+      "name": "layout 1280",
+      "status": "PASS",
+      "details": {
+        "viewport": [
+          1280,
+          720
+        ],
+        "dpr": 1,
+        "modal": {
+          "x": 76.75,
+          "y": 36,
+          "width": 1126.375,
+          "height": 648,
+          "right": 1203.125,
+          "bottom": 684
+        },
+        "firstRow": {
+          "x": 100.75,
+          "y": 199.625,
+          "width": 1078.375,
+          "height": 98.6875,
+          "right": 1179.125,
+          "bottom": 298.3125
+        },
+        "lastVisibleRow": {
+          "x": 100.75,
+          "y": 499.5625,
+          "width": 1078.375,
+          "height": 88.625,
+          "right": 1179.125,
+          "bottom": 588.1875
+        },
+        "focus": {
+          "x": 100.75,
+          "y": 199.625,
+          "width": 1078.375,
+          "height": 98.6875,
+          "right": 1179.125,
+          "bottom": 298.3125
+        },
+        "filters": {
+          "x": 96.75,
+          "y": 131.4375,
+          "width": 1086.375,
+          "height": 55.375,
+          "right": 1183.125,
+          "bottom": 186.8125
+        },
+        "visibleRows": 4,
+        "filterOverflow": 0,
+        "horizontalOverflow": 0,
+        "font": 16,
+        "toolbars": 1,
+        "inlineFilesButtons": 0,
+        "controller": "sh_movie_streams",
+        "styleCount": 1,
+        "legacyStyles": 0,
+        "collapsed": {
+          "file": "after-1280.png",
+          "pixels": [
+            1280,
+            720
+          ]
+        },
+        "expanded": {
+          "file": "expanded-1280.png",
+          "pixels": [
+            1280,
+            720
+          ]
+        },
+        "expandedGeometry": {
+          "viewport": [
+            1280,
+            720
+          ],
+          "dpr": 1,
+          "modal": {
+            "x": 76.75,
+            "y": 36,
+            "width": 1126.375,
+            "height": 648,
+            "right": 1203.125,
+            "bottom": 684
+          },
+          "firstRow": {
+            "x": 100.75,
+            "y": 199.625,
+            "width": 1078.375,
+            "height": 208.8125,
+            "right": 1179.125,
+            "bottom": 408.4375
+          },
+          "lastVisibleRow": {
+            "x": 100.75,
+            "y": 513.0625,
+            "width": 1078.375,
+            "height": 88.625,
+            "right": 1179.125,
+            "bottom": 601.6875
+          },
+          "focus": {
+            "x": 1139.125,
+            "y": 236.1875,
+            "width": 24,
+            "height": 25.5625,
+            "right": 1163.125,
+            "bottom": 261.75
+          },
+          "filters": {
+            "x": 96.75,
+            "y": 131.4375,
+            "width": 1086.375,
+            "height": 55.375,
+            "right": 1183.125,
+            "bottom": 186.8125
+          },
+          "visibleRows": 3,
+          "filterOverflow": 0,
+          "horizontalOverflow": 0,
+          "font": 16,
+          "toolbars": 1,
+          "inlineFilesButtons": 0,
+          "controller": "sh_movie_streams",
+          "styleCount": 1,
+          "legacyStyles": 0
+        }
+      }
+    },
+    {
+      "name": "inline opens 1280",
+      "status": "PASS"
+    },
+    {
+      "name": "layout 1920",
+      "status": "PASS",
+      "details": {
+        "viewport": [
+          1920,
+          1080
+        ],
+        "dpr": 1,
+        "modal": {
+          "x": 115.1875,
+          "y": 54,
+          "width": 1689.5625,
+          "height": 972,
+          "right": 1804.75,
+          "bottom": 1026
+        },
+        "firstRow": {
+          "x": 152.0625,
+          "y": 280.5,
+          "width": 1615.8125,
+          "height": 129.125,
+          "right": 1767.875,
+          "bottom": 409.625
+        },
+        "lastVisibleRow": {
+          "x": 152.0625,
+          "y": 820.125,
+          "width": 1615.8125,
+          "height": 122.25,
+          "right": 1767.875,
+          "bottom": 942.375
+        },
+        "focus": {
+          "x": 152.0625,
+          "y": 280.5,
+          "width": 1615.8125,
+          "height": 129.125,
+          "right": 1767.875,
+          "bottom": 409.625
+        },
+        "filters": {
+          "x": 146.625,
+          "y": 191.3125,
+          "width": 1626.6875,
+          "height": 71.625,
+          "right": 1773.3125,
+          "bottom": 262.9375
+        },
+        "visibleRows": 5,
+        "filterOverflow": 0,
+        "horizontalOverflow": 0,
+        "font": 22,
+        "toolbars": 1,
+        "inlineFilesButtons": 0,
+        "controller": "sh_movie_streams",
+        "styleCount": 1,
+        "legacyStyles": 0,
+        "collapsed": {
+          "file": "after-1920.png",
+          "pixels": [
+            1920,
+            1080
+          ]
+        },
+        "expanded": {
+          "file": "expanded-1920.png",
+          "pixels": [
+            1920,
+            1080
+          ]
+        },
+        "expandedGeometry": {
+          "viewport": [
+            1920,
+            1080
+          ],
+          "dpr": 1,
+          "modal": {
+            "x": 115.1875,
+            "y": 54,
+            "width": 1689.5625,
+            "height": 972,
+            "right": 1804.75,
+            "bottom": 1026
+          },
+          "firstRow": {
+            "x": 152.0625,
+            "y": 280.5,
+            "width": 1615.8125,
+            "height": 278.6875,
+            "right": 1767.875,
+            "bottom": 559.1875
+          },
+          "lastVisibleRow": {
+            "x": 152.0625,
+            "y": 836.5,
+            "width": 1615.8125,
+            "height": 122.25,
+            "right": 1767.875,
+            "bottom": 958.75
+          },
+          "focus": {
+            "x": 1710,
+            "y": 327.4375,
+            "width": 37.375,
+            "height": 35.1875,
+            "right": 1747.375,
+            "bottom": 362.625
+          },
+          "filters": {
+            "x": 146.625,
+            "y": 191.3125,
+            "width": 1626.6875,
+            "height": 71.625,
+            "right": 1773.3125,
+            "bottom": 262.9375
+          },
+          "visibleRows": 4,
+          "filterOverflow": 0,
+          "horizontalOverflow": 0,
+          "font": 22,
+          "toolbars": 1,
+          "inlineFilesButtons": 0,
+          "controller": "sh_movie_streams",
+          "styleCount": 1,
+          "legacyStyles": 0
+        }
+      }
+    },
+    {
+      "name": "inline opens 1920",
+      "status": "PASS"
+    },
+    {
+      "name": "layout 3840",
+      "status": "PASS",
+      "details": {
+        "viewport": [
+          3840,
+          2160
+        ],
+        "dpr": 1,
+        "modal": {
+          "x": 230.375,
+          "y": 108,
+          "width": 3379.1875,
+          "height": 1944,
+          "right": 3609.5625,
+          "bottom": 2052
+        },
+        "firstRow": {
+          "x": 300.25,
+          "y": 540.4375,
+          "width": 3239.4375,
+          "height": 242.6875,
+          "right": 3539.6875,
+          "bottom": 783.125
+        },
+        "lastVisibleRow": {
+          "x": 300.25,
+          "y": 1580.9375,
+          "width": 3239.4375,
+          "height": 236.6875,
+          "right": 3539.6875,
+          "bottom": 1817.625
+        },
+        "focus": {
+          "x": 300.25,
+          "y": 540.4375,
+          "width": 3239.4375,
+          "height": 242.6875,
+          "right": 3539.6875,
+          "bottom": 783.125
+        },
+        "filters": {
+          "x": 289.3125,
+          "y": 372.375,
+          "width": 3261.3125,
+          "height": 132.875,
+          "right": 3550.625,
+          "bottom": 505.25
+        },
+        "visibleRows": 5,
+        "filterOverflow": 0,
+        "horizontalOverflow": 0,
+        "font": 44,
+        "toolbars": 1,
+        "inlineFilesButtons": 0,
+        "controller": "sh_movie_streams",
+        "styleCount": 1,
+        "legacyStyles": 0,
+        "collapsed": {
+          "file": "after-3840.png",
+          "pixels": [
+            3840,
+            2160
+          ]
+        },
+        "expanded": {
+          "file": "expanded-3840.png",
+          "pixels": [
+            3840,
+            2160
+          ]
+        },
+        "expandedGeometry": {
+          "viewport": [
+            3840,
+            2160
+          ],
+          "dpr": 1,
+          "modal": {
+            "x": 230.375,
+            "y": 108,
+            "width": 3379.1875,
+            "height": 1944,
+            "right": 3609.5625,
+            "bottom": 2052
+          },
+          "firstRow": {
+            "x": 300.25,
+            "y": 540.4375,
+            "width": 3239.4375,
+            "height": 468.9375,
+            "right": 3539.6875,
+            "bottom": 1009.375
+          },
+          "lastVisibleRow": {
+            "x": 300.25,
+            "y": 1548.5625,
+            "width": 3239.4375,
+            "height": 236.6875,
+            "right": 3539.6875,
+            "bottom": 1785.25
+          },
+          "focus": {
+            "x": 3427.9375,
+            "y": 626.5625,
+            "width": 74.75,
+            "height": 70.375,
+            "right": 3502.6875,
+            "bottom": 696.9375
+          },
+          "filters": {
+            "x": 289.3125,
+            "y": 372.375,
+            "width": 3261.3125,
+            "height": 132.875,
+            "right": 3550.625,
+            "bottom": 505.25
+          },
+          "visibleRows": 4,
+          "filterOverflow": 0,
+          "horizontalOverflow": 0,
+          "font": 44,
+          "toolbars": 1,
+          "inlineFilesButtons": 0,
+          "controller": "sh_movie_streams",
+          "styleCount": 1,
+          "legacyStyles": 0
+        }
+      }
+    },
+    {
+      "name": "inline opens 3840",
+      "status": "PASS"
+    },
+    {
+      "name": "native row navigation retains one focused release",
+      "status": "PASS"
+    },
+    {
+      "name": "remote info expands without selection",
+      "status": "PASS"
+    },
+    {
+      "name": "Back collapses before closing",
+      "status": "PASS"
+    },
+    {
+      "name": "native selection preserves synthetic transport and opens Files modal",
+      "status": "PASS"
+    },
+    {
+      "name": "Files Back restores popup row",
+      "status": "PASS"
+    },
+    {
+      "name": "popup Back restores actual Torrent action",
+      "status": "PASS"
+    },
+    {
+      "name": "reopen reuses one child/search and stable subscriptions",
+      "status": "PASS"
+    },
+    {
+      "name": "tracker keeps eligible global recommendation plus actual matches",
+      "status": "PASS",
+      "details": {
+        "filter": "mazepa",
+        "rows": [
+          {
+            "tracker": "toloka.to",
+            "best": true
+          },
+          {
+            "tracker": "mazepa.to",
+            "best": false
+          },
+          {
+            "tracker": "mazepa.to",
+            "best": false
+          },
+          {
+            "tracker": "mazepa.to",
+            "best": false
+          },
+          {
+            "tracker": "mazepa.to",
+            "best": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "empty state remains navigable",
+      "status": "PASS"
+    },
+    {
+      "name": "provider error has retry and popup controller",
+      "status": "PASS"
+    },
+    {
+      "name": "closed delayed result cannot steal focus",
+      "status": "PASS"
+    },
+    {
+      "name": "profile fixture owns only a temporary public-identity boundary",
+      "status": "PASS"
+    },
+    {
+      "name": "new profile gets a fresh native child/search",
+      "status": "PASS"
+    },
+    {
+      "name": "disable removes owned UI/style and runtime subscriptions",
+      "status": "PASS"
+    },
+    {
+      "name": "independent plugin works with Hybrid disabled",
+      "status": "PASS"
+    },
+    {
+      "name": "canonical source bytes were actually delivered",
+      "status": "PASS"
+    },
+    {
+      "name": "changed-runtime scenario has no uncaught exception",
+      "status": "PASS",
+      "details": []
+    }
+  ],
+  "layouts": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "dpr": 1,
+      "modal": {
+        "x": 76.75,
+        "y": 36,
+        "width": 1126.375,
+        "height": 648,
+        "right": 1203.125,
+        "bottom": 684
+      },
+      "firstRow": {
+        "x": 100.75,
+        "y": 199.625,
+        "width": 1078.375,
+        "height": 98.6875,
+        "right": 1179.125,
+        "bottom": 298.3125
+      },
+      "lastVisibleRow": {
+        "x": 100.75,
+        "y": 499.5625,
+        "width": 1078.375,
+        "height": 88.625,
+        "right": 1179.125,
+        "bottom": 588.1875
+      },
+      "focus": {
+        "x": 100.75,
+        "y": 199.625,
+        "width": 1078.375,
+        "height": 98.6875,
+        "right": 1179.125,
+        "bottom": 298.3125
+      },
+      "filters": {
+        "x": 96.75,
+        "y": 131.4375,
+        "width": 1086.375,
+        "height": 55.375,
+        "right": 1183.125,
+        "bottom": 186.8125
+      },
+      "visibleRows": 4,
+      "filterOverflow": 0,
+      "horizontalOverflow": 0,
+      "font": 16,
+      "toolbars": 1,
+      "inlineFilesButtons": 0,
+      "controller": "sh_movie_streams",
+      "styleCount": 1,
+      "legacyStyles": 0,
+      "collapsed": {
+        "file": "after-1280.png",
+        "pixels": [
+          1280,
+          720
+        ]
+      },
+      "expanded": {
+        "file": "expanded-1280.png",
+        "pixels": [
+          1280,
+          720
+        ]
+      },
+      "expandedGeometry": {
+        "viewport": [
+          1280,
+          720
+        ],
+        "dpr": 1,
+        "modal": {
+          "x": 76.75,
+          "y": 36,
+          "width": 1126.375,
+          "height": 648,
+          "right": 1203.125,
+          "bottom": 684
+        },
+        "firstRow": {
+          "x": 100.75,
+          "y": 199.625,
+          "width": 1078.375,
+          "height": 208.8125,
+          "right": 1179.125,
+          "bottom": 408.4375
+        },
+        "lastVisibleRow": {
+          "x": 100.75,
+          "y": 513.0625,
+          "width": 1078.375,
+          "height": 88.625,
+          "right": 1179.125,
+          "bottom": 601.6875
+        },
+        "focus": {
+          "x": 1139.125,
+          "y": 236.1875,
+          "width": 24,
+          "height": 25.5625,
+          "right": 1163.125,
+          "bottom": 261.75
+        },
+        "filters": {
+          "x": 96.75,
+          "y": 131.4375,
+          "width": 1086.375,
+          "height": 55.375,
+          "right": 1183.125,
+          "bottom": 186.8125
+        },
+        "visibleRows": 3,
+        "filterOverflow": 0,
+        "horizontalOverflow": 0,
+        "font": 16,
+        "toolbars": 1,
+        "inlineFilesButtons": 0,
+        "controller": "sh_movie_streams",
+        "styleCount": 1,
+        "legacyStyles": 0
+      }
+    },
+    {
+      "viewport": [
+        1920,
+        1080
+      ],
+      "dpr": 1,
+      "modal": {
+        "x": 115.1875,
+        "y": 54,
+        "width": 1689.5625,
+        "height": 972,
+        "right": 1804.75,
+        "bottom": 1026
+      },
+      "firstRow": {
+        "x": 152.0625,
+        "y": 280.5,
+        "width": 1615.8125,
+        "height": 129.125,
+        "right": 1767.875,
+        "bottom": 409.625
+      },
+      "lastVisibleRow": {
+        "x": 152.0625,
+        "y": 820.125,
+        "width": 1615.8125,
+        "height": 122.25,
+        "right": 1767.875,
+        "bottom": 942.375
+      },
+      "focus": {
+        "x": 152.0625,
+        "y": 280.5,
+        "width": 1615.8125,
+        "height": 129.125,
+        "right": 1767.875,
+        "bottom": 409.625
+      },
+      "filters": {
+        "x": 146.625,
+        "y": 191.3125,
+        "width": 1626.6875,
+        "height": 71.625,
+        "right": 1773.3125,
+        "bottom": 262.9375
+      },
+      "visibleRows": 5,
+      "filterOverflow": 0,
+      "horizontalOverflow": 0,
+      "font": 22,
+      "toolbars": 1,
+      "inlineFilesButtons": 0,
+      "controller": "sh_movie_streams",
+      "styleCount": 1,
+      "legacyStyles": 0,
+      "collapsed": {
+        "file": "after-1920.png",
+        "pixels": [
+          1920,
+          1080
+        ]
+      },
+      "expanded": {
+        "file": "expanded-1920.png",
+        "pixels": [
+          1920,
+          1080
+        ]
+      },
+      "expandedGeometry": {
+        "viewport": [
+          1920,
+          1080
+        ],
+        "dpr": 1,
+        "modal": {
+          "x": 115.1875,
+          "y": 54,
+          "width": 1689.5625,
+          "height": 972,
+          "right": 1804.75,
+          "bottom": 1026
+        },
+        "firstRow": {
+          "x": 152.0625,
+          "y": 280.5,
+          "width": 1615.8125,
+          "height": 278.6875,
+          "right": 1767.875,
+          "bottom": 559.1875
+        },
+        "lastVisibleRow": {
+          "x": 152.0625,
+          "y": 836.5,
+          "width": 1615.8125,
+          "height": 122.25,
+          "right": 1767.875,
+          "bottom": 958.75
+        },
+        "focus": {
+          "x": 1710,
+          "y": 327.4375,
+          "width": 37.375,
+          "height": 35.1875,
+          "right": 1747.375,
+          "bottom": 362.625
+        },
+        "filters": {
+          "x": 146.625,
+          "y": 191.3125,
+          "width": 1626.6875,
+          "height": 71.625,
+          "right": 1773.3125,
+          "bottom": 262.9375
+        },
+        "visibleRows": 4,
+        "filterOverflow": 0,
+        "horizontalOverflow": 0,
+        "font": 22,
+        "toolbars": 1,
+        "inlineFilesButtons": 0,
+        "controller": "sh_movie_streams",
+        "styleCount": 1,
+        "legacyStyles": 0
+      }
+    },
+    {
+      "viewport": [
+        3840,
+        2160
+      ],
+      "dpr": 1,
+      "modal": {
+        "x": 230.375,
+        "y": 108,
+        "width": 3379.1875,
+        "height": 1944,
+        "right": 3609.5625,
+        "bottom": 2052
+      },
+      "firstRow": {
+        "x": 300.25,
+        "y": 540.4375,
+        "width": 3239.4375,
+        "height": 242.6875,
+        "right": 3539.6875,
+        "bottom": 783.125
+      },
+      "lastVisibleRow": {
+        "x": 300.25,
+        "y": 1580.9375,
+        "width": 3239.4375,
+        "height": 236.6875,
+        "right": 3539.6875,
+        "bottom": 1817.625
+      },
+      "focus": {
+        "x": 300.25,
+        "y": 540.4375,
+        "width": 3239.4375,
+        "height": 242.6875,
+        "right": 3539.6875,
+        "bottom": 783.125
+      },
+      "filters": {
+        "x": 289.3125,
+        "y": 372.375,
+        "width": 3261.3125,
+        "height": 132.875,
+        "right": 3550.625,
+        "bottom": 505.25
+      },
+      "visibleRows": 5,
+      "filterOverflow": 0,
+      "horizontalOverflow": 0,
+      "font": 44,
+      "toolbars": 1,
+      "inlineFilesButtons": 0,
+      "controller": "sh_movie_streams",
+      "styleCount": 1,
+      "legacyStyles": 0,
+      "collapsed": {
+        "file": "after-3840.png",
+        "pixels": [
+          3840,
+          2160
+        ]
+      },
+      "expanded": {
+        "file": "expanded-3840.png",
+        "pixels": [
+          3840,
+          2160
+        ]
+      },
+      "expandedGeometry": {
+        "viewport": [
+          3840,
+          2160
+        ],
+        "dpr": 1,
+        "modal": {
+          "x": 230.375,
+          "y": 108,
+          "width": 3379.1875,
+          "height": 1944,
+          "right": 3609.5625,
+          "bottom": 2052
+        },
+        "firstRow": {
+          "x": 300.25,
+          "y": 540.4375,
+          "width": 3239.4375,
+          "height": 468.9375,
+          "right": 3539.6875,
+          "bottom": 1009.375
+        },
+        "lastVisibleRow": {
+          "x": 300.25,
+          "y": 1548.5625,
+          "width": 3239.4375,
+          "height": 236.6875,
+          "right": 3539.6875,
+          "bottom": 1785.25
+        },
+        "focus": {
+          "x": 3427.9375,
+          "y": 626.5625,
+          "width": 74.75,
+          "height": 70.375,
+          "right": 3502.6875,
+          "bottom": 696.9375
+        },
+        "filters": {
+          "x": 289.3125,
+          "y": 372.375,
+          "width": 3261.3125,
+          "height": 132.875,
+          "right": 3550.625,
+          "bottom": 505.25
+        },
+        "visibleRows": 4,
+        "filterOverflow": 0,
+        "horizontalOverflow": 0,
+        "font": 44,
+        "toolbars": 1,
+        "inlineFilesButtons": 0,
+        "controller": "sh_movie_streams",
+        "styleCount": 1,
+        "legacyStyles": 0
+      }
+    }
+  ],
+  "exceptions": [],
+  "blockedWrites": 0,
+  "limits": [
+    "Synthetic parser results and transport; real native Lampa Full/torrent/Files template/Modal/controllers",
+    "Physical Google TV, real providers, TorrServer/player/track switching and 4K playback unverified",
+    "Host delivery errors/toast recorded separately; no whole-page zero-error claim"
+  ],
+  "browser": "Chrome/156.0.8078.4",
+  "hostStartupExceptions": [
+    "SyntaxError: Failed to execute 'appendChild' on 'Node': Unexpected token '&'\n    at [URL]"
+  ],
+  "openMs": 319.6000000005588,
+  "deviceEquivalent": {
+    "viewport": [
+      1920,
+      1080
+    ],
+    "dpr": 2,
+    "modal": {
+      "x": 115.1875,
+      "y": 54,
+      "width": 1689.5625,
+      "height": 972,
+      "right": 1804.75,
+      "bottom": 1026
+    },
+    "firstRow": {
+      "x": 152.0625,
+      "y": 280.5,
+      "width": 1615.8125,
+      "height": 129.125,
+      "right": 1767.875,
+      "bottom": 409.625
+    },
+    "lastVisibleRow": {
+      "x": 152.0625,
+      "y": 820.125,
+      "width": 1615.8125,
+      "height": 122.25,
+      "right": 1767.875,
+      "bottom": 942.375
+    },
+    "focus": {
+      "x": 152.0625,
+      "y": 280.5,
+      "width": 1615.8125,
+      "height": 129.125,
+      "right": 1767.875,
+      "bottom": 409.625
+    },
+    "filters": {
+      "x": 146.625,
+      "y": 191.3125,
+      "width": 1626.6875,
+      "height": 71.625,
+      "right": 1773.3125,
+      "bottom": 262.9375
+    },
+    "visibleRows": 5,
+    "filterOverflow": 0,
+    "horizontalOverflow": 0,
+    "font": 22,
+    "toolbars": 1,
+    "inlineFilesButtons": 0,
+    "controller": "sh_movie_streams",
+    "styleCount": 1,
+    "legacyStyles": 0,
+    "capture": {
+      "file": "device-equivalent-1080-dpr2.png",
+      "pixels": [
+        3840,
+        2160
+      ]
+    }
+  },
+  "finalDiagnostics": {
+    "running": true,
+    "records": 1,
+    "subscriptions": 13,
+    "children": 1,
+    "cacheEntries": 1
+  },
+  "status": "PASS",
+  "restoredOriginalTab": true
+}
