@@ -85,12 +85,13 @@ body.stremio-hybrid .sh-torrent-overlay .parser-search-status{display:none}
         row.title=view.raw;row.setAttribute('aria-label',view.title);
         if(!chips)return view;
         chips.textContent='';
-        function chip(label,cls){var n=document.createElement('div');n.className='ctr-chip '+(cls||'');n.textContent=label;chips.appendChild(n);}
+        function chip(label,cls,role){var n=document.createElement('div');n.className='ctr-chip '+(cls||'');if(role)n.setAttribute('data-ctr-role',role);n.textContent=label;chips.appendChild(n);}
         var data=view.data,parsed=data&&data.parsed||{},audio=parsed.audio||{languages:[],label:'Невідомо',ua:false},subs=parsed.subs||{languages:[],label:'Невідомо'},audioLabel=audio.label||'Невідомо',subtitleLabel=subs.label||'Невідомо',studio=parsed.voiceover&&parsed.voiceover!=='Невідомо'?parsed.voiceover:'Студія невідома';
         if(parsed.name)chip(parsed.name);
         chip('🔊 Аудіо: '+audioLabel,(audio.ua?'is-ua ':'')+'is-audio'+(audioLabel==='Невідомо'?' is-unknown':''));
-        if(studio!=='Студія невідома')chip('🎙 Озвучення: '+studio,'is-studio');
-        else chip('🎙 Студія невідома','is-unknown');
+        var verifiedStudios=row._shVerifiedStudios&&row._shVerifiedStudios.length?row._shVerifiedStudios.join(', '):studio;
+        if(verifiedStudios!=='Студія невідома')chip('🎙 '+verifiedStudios,'is-studio','studio');
+        else chip('🎙 Студія невідома','is-unknown','studio');
         chip('CC · Субтитри: '+subtitleLabel,'is-subtitle'+(subtitleLabel==='Невідомо'?' is-unknown':''));
         chip('Якість: '+(parsed.quality?(parsed.quality==='2160'?'4K':parsed.quality+'p'):'Невідомо'),parsed.quality?'':'is-unknown');
         chip('Трекер: '+(data&&data.tracker||'Невідомо'),data&&data.tracker?'':'is-unknown');

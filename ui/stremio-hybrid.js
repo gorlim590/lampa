@@ -730,21 +730,52 @@ body.stremio-hybrid .sh-file-rating{grid-column:1/-1;color:#f5d48d;font-size:.9e
         var styles=getComputedStyle(record.page),tokens={'--acc':styles.getPropertyValue('--sm-accent').trim()||'#9775fa','--acc-rgb':styles.getPropertyValue('--sm-accent-rgb').trim()||'151,117,250','--muted':'#aeb6c9','--text':'#eef1f8','--ctr-head-height':(document.querySelector('.head').getBoundingClientRect().height/innerHeight*100)+'vh'};
         Object.keys(tokens).forEach(function(key){if(!filesOverlay.tokens[key])filesOverlay.tokens[key]={before:node.style.getPropertyValue(key),ours:tokens[key]};node.style.setProperty(key,tokens[key]);});
         var head=node.querySelector('.modal__head'),summary=node.querySelector('.sh-files-summary');if(!summary&&head){summary=document.createElement('div');summary.className='sh-files-summary';head.appendChild(summary);}
+        if(record.streamChild&&record.streamChild.selectedRow)filesOverlay.row=record.streamChild.selectedRow;
+        if(!filesOverlay.studios)filesOverlay.studios=[];
         var movie=streamMovie(record);if(summary)summary.textContent=(movie.title||movie.name||'')+' · Файлів: '+node.querySelectorAll('.torrent-serial,.torrent-file').length;
     }
     function onStreamPlaybackError(){var record=streamRecord();if(record&&record.streamChild.started){record.streamPane.dataset.state='playback-error';streamStatus(record,'Помилка відтворення · Виберіть реліз повторно або спробуйте інший');}}
+    function streamEpisodeDetails(record,params,season,episode,done){
+        var seasons=params.seasons||{},current=seasons[season],found=current&&Array.isArray(current.episodes)?current.episodes.filter(function(item){return Number(item.episode_number)===episode&&(item.season_number==null||Number(item.season_number)===season);}):[];
+        if(found.length===1)return done(found[0]);
+        var source=Lampa.Api&&Lampa.Api.sources&&Lampa.Api.sources.tmdb;if(!source||typeof source.seasons!=='function'||!params.movie)return;
+        var key=[params.movie.source||'tmdb',params.movie.id,season].join(':');record.streamSeasonRequests=record.streamSeasonRequests||{};var request=record.streamSeasonRequests[key];
+        if(request){if(request.data){var cached=request.data[season];var cachedEpisodes=cached&&cached.episodes||[];var cachedMatch=cachedEpisodes.filter(function(item){return Number(item.episode_number)===episode&&(item.season_number==null||Number(item.season_number)===season);});if(cachedMatch.length===1)done(cachedMatch[0]);}else request.callbacks.push(done);return;}
+        request=record.streamSeasonRequests[key]={callbacks:[done],data:null};
+        try{source.seasons(params.movie,[season],function(data){request.data=data||{};var seasonData=request.data[season],episodes=seasonData&&seasonData.episodes||[];request.callbacks.splice(0).forEach(function(callback){var match=episodes.filter(function(item){return Number(item.episode_number)===episode&&(item.season_number==null||Number(item.season_number)===season);});if(match.length===1)callback(match[0]);});});}catch(e){delete record.streamSeasonRequests[key];}
+    }
+    function applyStreamEpisodePreview(record,node,params,season,episode){
+        var selected=record.streamChild&&record.streamChild.selectedRow;
+        streamEpisodeDetails(record,params,season,episode,function(metadata){
+            if(!node.isConnected||!record.page.classList.contains('activity--active')||!metadata||!metadata.still_path)return;
+            var image=node.querySelector('.torrent-serial__img');if(!image)return;
+            var src=Lampa.Api.img(metadata.still_path,'w300');if(!src||image.getAttribute('src')===src)return;
+            if(selected&&record.streamChild&&record.streamChild.selectedRow!==selected)return;
+            image.setAttribute('src',src);image.setAttribute('data-sh-episode-preview','tmdb');
+        });
+    }
+    function applyStreamFileStudios(record,file){
+        var modal=filesOverlay,row=modal&&modal.row||record.streamChild&&record.streamChild.selectedRow;
+        if(!row||!row.isConnected||!window.TorrentsRedesign||typeof window.TorrentsRedesign.normalizeRelease!=='function')return;
+        var raw=[file&&file.title,file&&file.name,file&&file.path].filter(Boolean).join(' ');if(!raw)return;
+        var parsed=window.TorrentsRedesign.normalizeRelease({Title:raw}).parsed,names=parsed&&parsed.voiceoverStudios||[];if(!names.length)return;
+        row._shVerifiedStudios=row._shVerifiedStudios||[];names.forEach(function(name){if(row._shVerifiedStudios.indexOf(name)<0)row._shVerifiedStudios.push(name);});
+        var chip=row.querySelector('[data-ctr-role="studio"]');if(chip)chip.textContent='🎙 '+row._shVerifiedStudios.join(', ');
+    }
     function onStreamFile(event){
         var record=streamRecord();if(!record||record.kind!=='tv'||!event||event.type!=='render')return;
         var params=event.params||{},file=event.element||{},node=event.item&&(event.item[0]||event.item);
-        if(!node||!params.movie||String(params.movie.id)!==String(streamMovie(record).id)||node.querySelector('.sh-file-rating,.ctr-episode-rating'))return;
+        if(!node||!params.movie||String(params.movie.id)!==String(streamMovie(record).id))return;
+        applyStreamFileStudios(record,file);
         var season=Number(file.season),episode=Number(file.episode);
         if(file.season==null||file.episode==null||!Number.isInteger(season)||season<0||!Number.isInteger(episode)||episode<1||(file.episodes&&file.episodes.length>1))return;
         var data=params.seasons&&params.seasons[season],episodes=data&&data.episodes;
+        applyStreamEpisodePreview(record,node,params,season,episode);
         if(!Array.isArray(episodes))return;
         var matches=episodes.filter(function(e){return e.id&&Number(e.episode_number)===episode&&(e.season_number==null||Number(e.season_number)===season);});
         if(matches.length!==1)return;var rating=Number(matches[0].vote_average);
         // Use already loaded episode metadata only; never borrow the series score or read API credentials.
-        if(!(rating>0&&rating<=10))return;
+        if(!(rating>0&&rating<=10)||node.querySelector('.sh-file-rating,.ctr-episode-rating'))return;
         var badge=document.createElement('div');badge.className='sh-file-rating';badge.textContent='TMDB '+rating.toFixed(1);badge.title='S'+season+'E'+episode;node.querySelector('.torrent-serial__content')?.appendChild(badge);
     }
     var streamCache=[], streamGeneration=0;
