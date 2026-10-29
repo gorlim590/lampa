@@ -10108,7 +10108,8 @@
       hash: hash || null,
       token: String(Lampa.Storage.get('trakt_token') || ''),
       identityGeneration: playbackIdentityGeneration,
-      external: !!external
+      external: !!external,
+      ambiguousTimelineHash: false
     };
     terminalPlaybackInstanceId = null;
     timelineProgressSamples = Object.create(null);
@@ -10271,16 +10272,22 @@
       var token = Lampa.Storage.get('trakt_token');
       if (card && Lampa.Storage.field('trakt_enable_watching') && token) {
         // Build media with season/episode from hash meta
-        var metaHash = hash ? getHashMeta(hash) : null;
+        var previousInstance = currentPlaybackInstance;
+        var reusedTimelineHash = !!(previousInstance && hash && previousInstance.hash === hash);
+        var metaHash = hash && !reusedTimelineHash ? getHashMeta(hash) : null;
         var mediaForStart = Object.assign({}, card);
         if (metaHash) {
           if (card.season_number == null && metaHash.season != null) mediaForStart.season_number = metaHash.season;
           if (card.episode_number == null && metaHash.episode != null) mediaForStart.episode_number = metaHash.episode;
         }
+        var oldEpisode = previousInstance && verifiedShowEpisode(previousInstance.media);
+        var newEpisode = verifiedShowEpisode(mediaForStart);
+        var sameHashDifferentEpisode = !!(reusedTimelineHash && oldEpisode && newEpisode && oldEpisode.id === newEpisode.id && (oldEpisode.season !== newEpisode.season || oldEpisode.episode !== newEpisode.episode));
         stopPreviousEpisodeOnPlayerStart(mediaForStart, hash || null);
         scrobbler.setCurrentMedia(mediaForStart);
         var externalHandoff = pendingExternalPlayback && pendingExternalPlayback.hash === hash;
-        beginPlaybackInstance(mediaForStart, hash, !!externalHandoff);
+        var activeInstance = beginPlaybackInstance(mediaForStart, hash, !!externalHandoff);
+        activeInstance.ambiguousTimelineHash = sameHashDifferentEpisode;
         pendingInternalPlayback = externalHandoff ? null : { media: mediaForStart, hash: hash || null };
       } else {
         currentPlaybackInstance = null;
@@ -10340,6 +10347,10 @@
         if (this.isLoggingEnabled()) slog('Ignoring Timeline update without current playback identity', { hash: hash });
         return;
       }
+      // A reused hash cannot distinguish delayed events from the prior file.
+      // In this case only actual internal-video position events may advance the
+      // new session; Timeline never supplies progress or completion evidence.
+      if (timelineInstance.ambiguousTimelineHash) return;
       var card = timelineInstance.media;
       var externalPlayback = pendingExternalPlayback;
       if (externalPlayback) {
@@ -10986,6 +10997,19 @@
       this._cleanups.push(function () {
         document.removeEventListener('pause', _pauseHandler, true);
       });
+      var _timeUpdateHandler = function _timeUpdateHandler(event) {
+        try {
+          var instance = currentPlaybackInstance;
+          if (!instance || !instance.ambiguousTimelineHash || instance.external || isPlaybackInstanceTerminal() ||
+              instance.token !== String(Lampa.Storage.get('trakt_token') || '') || !isActiveLampaVideoEvent(event)) return;
+          var active = scrobbler.getActiveSession && scrobbler.getActiveSession();
+          var duration = Number(event.target && event.target.duration), currentTime = Number(event.target && event.target.currentTime);
+          if (!active || active.external || active.key !== playbackSessionKey(instance.media) || !isFinite(duration) || duration <= 0 || !isFinite(currentTime) || currentTime < 0) return;
+          scrobbler.updatePlaybackSession(active.media, Math.max(0, Math.min(100, currentTime / duration * 100)));
+        } catch (e) { logWarn('Ambiguous Timeline video-position handler failed', e && e.name || 'unknown'); }
+      };
+      document.addEventListener('timeupdate', _timeUpdateHandler, true);
+      this._cleanups.push(function () { document.removeEventListener('timeupdate', _timeUpdateHandler, true); });
       var _playHandler = function _playHandler(event) {
         try {
           if (!Lampa.Storage.field('trakt_enable_watching') || !Lampa.Storage.get('trakt_token')) return;

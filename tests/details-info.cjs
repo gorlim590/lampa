@@ -61,10 +61,25 @@ test('force refresh supersedes an older details request without reusing or publi
  const cached=await f.api.detailsProgress(movie);assert.equal(cached.completed,53,'late stale response cannot replace the newer detail cache');
 });
 
-test('identical confirmed progress reads do not emit watched updates or persist redundant UI state',async()=>{
+test('identical confirmed progress reads do not emit watched updates or redecorate UI',async()=>{
  const f=fixture({transport});const first=await f.api.detailsProgress(movie,true);assert.equal(first.confirmed,true);
  const eventCount=f.events.filter(e=>e==='traktplus:watched').length,writes=f.writes.length;
  const second=await f.api.detailsProgress(movie,true);assert.equal(second.confirmed,true);
  assert.equal(f.events.filter(e=>e==='traktplus:watched').length,eventCount);
- assert.equal(f.writes.length,writes,'same progress evidence does not cause another watched-cache write');
+ assert.equal(f.writes.length,writes+1,'identical authenticated data persists the refreshed freshness timestamp once');
+});
+
+test('identical successful progress refreshes freshness and clears retry state without a watched event or UI redecorate',async()=>{
+ const episodeProgress={aired:2,completed:1,last_episode:{season:1,number:1,title:'Episode 1',first_aired:'2026-01-01T00:00:00Z'},next_episode:{season:1,number:2,title:'Episode 2',first_aired:'2026-01-02T00:00:00Z'},seasons:[{number:1,episodes:[{number:1,completed:true,first_aired:'2026-01-01T00:00:00Z',last_watched_at:'2026-01-03T00:00:00Z'},{number:2,completed:false,first_aired:'2026-01-02T00:00:00Z'}]}]};
+ const showRecord={show:{ids:{tmdb:220542,trakt:202569},title:'Fixture show',aired_episodes:2},seasons:[{number:1,episodes:[{number:1,plays:1,first_aired:'2026-01-01T00:00:00Z'}]}]};
+ const fixtureTransport=path=>{if(path==='/users/me')return {ids:{uuid:'fixture-details-freshness'}};if(path==='/sync/last_activities')return stamp;if(path.startsWith('/sync/watched/movies'))return [];if(path.startsWith('/sync/history/movies'))return [];if(path.startsWith('/sync/watched/shows'))return [showRecord];if(path.startsWith('/search/tmdb/'))return [{show:{ids:{tmdb:220542,trakt:202569}}}];if(path.startsWith('/shows/'))return episodeProgress;throw Error('Unexpected fixture path '+path)};
+ const f=fixture({transport:fixtureTransport});await f.api.syncWatched(false);const first=await f.api.detailsProgress(movie,true);assert.equal(first.confirmed,true);
+ const state=f.api.__test.getShowStates()['220542'], oldTime=Date.now()-7*60*60*1000;state.t=oldTime;state.error=true;state.retryAfter=Date.now()+60000;
+ assert.equal(f.api.upNextStatus(movie).phase,'unknown','expired confirmed progress is unknown until authenticated refresh');
+ const events=f.events.filter(e=>e==='traktplus:watched').length,decorations=f.context.window.__testDecorations||0;
+ const refreshed=await f.api.detailsProgress(movie,true);assert.equal(refreshed.confirmed,true);
+ const updated=f.api.__test.getShowStates()['220542'];assert(updated.t>oldTime,'identical authenticated response refreshes freshness');assert.equal(updated.error,false);assert.equal(updated.retryAfter,0);
+ assert.equal(f.events.filter(e=>e==='traktplus:watched').length,events,'unchanged watched state emits no duplicate event');
+ assert.equal(f.context.window.__testDecorations||0,decorations,'unchanged state does not redecorate UI');
+ assert.notEqual(f.api.upNextStatus(movie).phase,'unknown','confirmed progress is fresh again');
 });

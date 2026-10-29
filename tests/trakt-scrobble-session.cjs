@@ -426,6 +426,29 @@ test('unchanged Timeline hash without distinct episode metadata cannot infer a s
   assert.deepEqual(f.calls.map(call=>call.action),['start','stop'],'the old session closes, but no episode history is inferred');
 });
 
+test('same-hash delayed E02 Timeline events cannot transfer 20% progress or watched completion to E03', async () => {
+  const f=integrationFixture(), second=episode(2), third=episode(3);
+  f.launch(second,'shared-season-pack-hash');
+  f.timeline('shared-season-pack-hash',100,10); f.timeline('shared-season-pack-hash',200,20); await flush();
+  assert.equal(f.api.getActiveSession().key,'show:1396:1:2');assert.equal(f.api.getActiveSession().progress,20);
+  f.launch(third,'shared-season-pack-hash'); await flush();
+  assert.equal(f.context.finishCallCount||0,0,'20% E02 does not finish');
+  assert.equal(f.context.currentPlaybackInstance.ambiguousTimelineHash,true);
+  // Old events are indistinguishable by hash alone, so the production handler
+  // must ignore them rather than assigning their positions to the new episode.
+  f.timeline('shared-season-pack-hash',990,99);f.timeline('shared-season-pack-hash',1000,100);await flush();
+  assert.notEqual(f.api.getActiveSession()?.key,'show:1396:1:3','stale timeline cannot confirm/start E03');
+  Object.assign(f.video(),{currentTime:100,duration:1000,paused:false});f.documentListeners.playing[0]({target:f.video()});await flush();
+  assert.equal(f.api.getActiveSession().key,'show:1396:1:3');assert.equal(f.api.getActiveSession().progress,10,'E03 starts from actual active-video position');
+  const previousWindowEvent=f.context.window.last_timeline_event;
+  f.timeline('shared-season-pack-hash',990,99);f.timeline('shared-season-pack-hash',1000,100);await flush();
+  assert.equal(f.api.getActiveSession().progress,10,'delayed E02 events cannot overwrite video-confirmed E03 progress');
+  assert.equal(f.context.finishCallCount||0,0,'stale 99–100% never marks E03 watched');
+  assert.equal(f.context.window.last_timeline_event,previousWindowEvent,'ambiguous callbacks do not publish as current Timeline evidence');
+  Object.assign(f.video(),{currentTime:200,duration:1000,paused:false});f.documentListeners.timeupdate[0]({target:f.video()});
+  assert.equal(f.api.getActiveSession().progress,20,'internal player timeupdate may advance only from the active video element');
+});
+
 test('production destroy and error handlers STOP the confirmed session', async () => {
   for (const endEvent of ['destroy', 'error']) {
     const f = integrationFixture(), media = movie(endEvent === 'destroy' ? 1 : 2);

@@ -2270,7 +2270,18 @@
           watchedShows = completedShows(); watchedVer++;
           try { persistWatched(); } catch (e) {}
           clearRowCaches(); emitWatched(); decorateAll();
-        } else { showStates[id] = Object.assign({}, previousState, { progressSignature: nextProgressSignature }); }
+        } else {
+          // A fresh, authenticated response refreshes cache age and clears a
+          // stale retry/error marker even when the watched state is identical.
+          // Do not emit or redecorate: the semantic progress signature is stable.
+          showStates[id] = Object.assign({}, previousState, {
+            t: nextState.t, aired: nextState.aired, watched: nextState.watched, known: nextState.known,
+            complete: nextState.complete, trakt: nextState.trakt, episodes: nextState.episodes, next: nextState.next,
+            error: false, retryAfter: 0, progressSignature: nextProgressSignature
+          });
+          showSources[id] = { show: { ids: verifiedIds } };
+          try { persistWatched(); } catch (e) {}
+        }
         detailCache[key] = { time: Date.now(), data: result }; var index = detailKeys.indexOf(key); if (index >= 0) detailKeys.splice(index, 1); detailKeys.push(key);
         while (detailKeys.length > 32) delete detailCache[detailKeys.shift()];
         return result;
