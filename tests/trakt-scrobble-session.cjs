@@ -578,44 +578,41 @@ test('official Just+ playlist callback finalizes each exact episode through Lamp
   assert.equal(f.context.finishedMedia.length, 2, 'repeated callback snapshot is idempotent');
 });
 
-test('Just+ return snapshot survives Player.start before or after visibility and same active hash', async () => {
-  for (const order of ['start-then-visibility', 'visibility-then-start']) {
-    const f = integrationFixture();
-    const show = { id: 1396, method: 'tv', type: 'tv', name: 'Show', season_number: 1, episode_number: 3 };
-    f.setPlaylist([{ season: 1, episode: 3, timeline: { hash: 'return-e3', time: 0, duration: 2700 } }]);
-    f.playerEvent('external', { data: { card: show, timeline: { hash: 'return-e3' } } });
-    assert.ok(f.context.externalPlaylistReport);
-    if (order === 'start-then-visibility') {
-      f.playerEvent('start', { card: show, timeline: { hash: 'return-e3' } });
-      f.playerEvent('visibility', { hidden: false });
-    } else {
-      f.playerEvent('visibility', { hidden: false });
-      f.playerEvent('start', { card: show, timeline: { hash: 'return-e3' } });
-    }
-    assert.ok(f.context.externalPlaylistReport, 'valid return callbacks retain their captured playlist identity');
-    f.timeline('return-e3', 0, 100, 0);
-    await flush();
-    assert.equal(f.context.finishCallCount || 0, 0, 'Android 0/0/100 normalization is not completion evidence');
-    f.timeline('return-e3', 2430, 90, 2700);
-    await flush();
-    assert.deepEqual((f.context.finishedMedia || []).map(media => [media.season_number, media.episode_number, media.hash]), [[1, 3, 'return-e3']]);
-  }
+test('external launch Player.start before visibility retains report; native Timeline callback after return still completes', async () => {
+  const f = integrationFixture();
+  const show = { id: 1396, method: 'tv', type: 'tv', name: 'Show', season_number: 1, episode_number: 3 };
+  f.setPlaylist([{ season: 1, episode: 3, timeline: { hash: 'return-e3', time: 0, duration: 2700 } }]);
+  f.playerEvent('external', { data: { card: show, timeline: { hash: 'return-e3' } } });
+  f.playerEvent('start', { card: show, timeline: { hash: 'return-e3' } });
+  assert.ok(f.context.externalPlaylistReport, 'start correlated with the still-pending external handoff preserves the snapshot');
+  f.playerEvent('visibility', { hidden: false });
+  f.timeline('return-e3', 0, 100, 0);
+  await flush();
+  assert.equal(f.context.finishCallCount || 0, 0, 'Android 0/0/100 normalization is not completion evidence');
+  f.timeline('return-e3', 2430, 90, 2700);
+  await flush();
+  assert.deepEqual((f.context.finishedMedia || []).map(media => [media.season_number, media.episode_number, media.hash]), [[1, 3, 'return-e3']]);
 });
 
-test('late Player.start for another mapped playlist hash preserves identity when the native card omits S/E', async () => {
+test('fresh internal Player.start with the same episode/hash clears external snapshot and uses real video progress', async () => {
   const f = integrationFixture();
-  const show = { id: 1396, method: 'tv', type: 'tv', name: 'Show' };
-  f.setPlaylist([
-    { season: 1, episode: 2, timeline: { hash: 'late-e2', time: 0, duration: 2700 } },
-    { season: 1, episode: 3, timeline: { hash: 'late-e3', time: 0, duration: 2700 } }
-  ]);
-  f.playerEvent('external', { data: { card: show, timeline: { hash: 'late-e2' } } });
+  const show = { id: 1396, method: 'tv', type: 'tv', name: 'Show', season_number: 1, episode_number: 3 };
+  f.setPlaylist([{ season: 1, episode: 3, timeline: { hash: 'same-e3', time: 0, duration: 2700 } }]);
+  f.playerEvent('external', { data: { card: show, timeline: { hash: 'same-e3' } } });
   f.playerEvent('visibility', { hidden: false });
-  f.playerEvent('start', { card: show, timeline: { hash: 'late-e3' } });
-  assert.ok(f.context.externalPlaylistReport, 'the exact playlist hash and show ID retain the snapshot despite absent card S/E');
-  f.timeline('late-e3', 2430, 90, 2700);
+  f.launch(show, 'same-e3');
+  assert.equal(f.context.externalPlaylistReport, null, 'a post-return Player.start is a new internal session, not an Android result callback');
+  assert.equal(f.context.currentPlaybackInstance.ambiguousTimelineHash, true, 'reused external hash is quarantined from Timeline attribution');
+  f.timeline('same-e3', 0, 100, 0);
   await flush();
-  assert.deepEqual((f.context.finishedMedia || []).map(media => [media.season_number, media.episode_number, media.hash]), [[1, 3, 'late-e3']]);
+  assert.equal(f.context.finishCallCount || 0, 0, 'late normalized Android completion cannot finish the fresh internal session');
+  Object.assign(f.video(), { currentTime: 100, duration: 1000, paused: false });
+  f.documentListeners.playing[0]({ target: f.video() });
+  await flush();
+  Object.assign(f.video(), { currentTime: 950 });
+  f.documentListeners.timeupdate[0]({ target: f.video() });
+  await flush();
+  assert.deepEqual((f.context.finishedMedia || []).map(media => [media.season_number, media.episode_number, media.hash]), [[1, 3, 'same-e3']], 'actual internal video progress completes normally');
 });
 
 test('account change invalidates a not-yet-sent production START and its pending association', async () => {

@@ -10168,8 +10168,6 @@
       // This is a single active handoff snapshot, not a time-limited cache.
       // Long episodes and multi-episode sessions may legitimately return much
       // later; account, profile, and subsequent-player transitions invalidate it.
-      launchHash: hash ? String(hash) : null,
-      launchIdentity: hash && entries[String(hash)] && !entries[String(hash)].ambiguous ? entries[String(hash)].identity : null,
       entries: entries
     };
   }
@@ -10221,9 +10219,11 @@
   }
 
   function externalReportMatchesPlayerStart(report, media, hash) {
-    if (!report || report !== externalPlaylistReport || report.token !== String(Lampa.Storage.get('trakt_token') || '') || report.identityGeneration !== playbackIdentityGeneration) return false;
+    // Only a Player.start still associated with the live external handoff can
+    // be part of its launch ordering. Once visibility returns, the Android
+    // result bridge emits Timeline updates and file callbacks, not Player.start.
+    if (!report || !pendingExternalPlayback || !hash || pendingExternalPlayback.hash !== hash || report !== externalPlaylistReport || report.token !== String(Lampa.Storage.get('trakt_token') || '') || report.identityGeneration !== playbackIdentityGeneration) return false;
     var identity = verifiedShowEpisode(media);
-    if (!hash) return !!(identity && report.launchIdentity && identity.id === report.launchIdentity.id && identity.season === report.launchIdentity.season && identity.episode === report.launchIdentity.episode);
     var entry = report.entries[String(hash)];
     if (!entry || entry.ambiguous) return false;
     // The launch event can omit S/E on the card while the handoff snapshot has
@@ -10440,13 +10440,18 @@
         }
         var oldEpisode = previousInstance && verifiedShowEpisode(previousInstance.media);
         var newEpisode = verifiedShowEpisode(mediaForStart);
+        var returnedExternalHash = !!(externalPlaylistReport && hash && externalPlaylistReport.entries[String(hash)] && !pendingExternalPlayback);
         if (!externalReportMatchesPlayerStart(externalPlaylistReport, mediaForStart, hash)) externalPlaylistReport = null;
         var sameHashDifferentEpisode = !!(reusedTimelineHash && oldEpisode && newEpisode && oldEpisode.id === newEpisode.id && (oldEpisode.season !== newEpisode.season || oldEpisode.episode !== newEpisode.episode));
         stopPreviousEpisodeOnPlayerStart(mediaForStart, hash || null);
         scrobbler.setCurrentMedia(mediaForStart);
         var externalHandoff = pendingExternalPlayback && pendingExternalPlayback.hash === hash;
         var activeInstance = beginPlaybackInstance(mediaForStart, hash, !!externalHandoff);
-        activeInstance.ambiguousTimelineHash = sameHashDifferentEpisode;
+        // A fresh internal Player.start may reuse the external episode's hash.
+        // Quarantine Timeline for that instance: delayed Android callbacks and
+        // internal Timeline events are indistinguishable. Actual internal video
+        // positions remain usable through the active HTML video handlers.
+        activeInstance.ambiguousTimelineHash = sameHashDifferentEpisode || returnedExternalHash;
         pendingInternalPlayback = externalHandoff ? null : { media: mediaForStart, hash: hash || null };
       } else {
         currentPlaybackInstance = null;
