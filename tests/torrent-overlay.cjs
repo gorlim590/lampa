@@ -25,6 +25,30 @@ test('audio language categories use verified audio metadata only and keep multi-
  assert.equal(match(audio(['ru']),'ru'),true);assert.equal(match(audio(['en']),'en'),true);assert.equal(match(audio(['fr']),'other'),true);assert.equal(match(audio([]),'other'),true);
  const subtitlesOnly=api.normalizeRelease({Title:'Release 1080p WEB-DL',SubtitleLanguages:['uk']}).parsed;
  assert.equal(match(subtitlesOnly.audio,'ua'),false);assert.equal(match(subtitlesOnly.audio,'other'),true,'unknown audio belongs to Other without borrowing subtitle language');
+ const localized=[
+  [{Title:'Назва S08 1080p WEB-DL',AudioLanguages:['Українська озвучка']},'ua'],
+  [{Title:'Назва S08 1080p WEB-DL',AudioLanguages:['Українська доріжка']},'ua'],
+  [{Title:'Назва 1080p WEB-DL',AudioLanguages:['УКР']},'ua'],
+  [{Title:'Назва 1080p WEB-DL',AudioLanguages:['Ukr']},'ua'],
+  [{Title:'Назва 1080p WEB-DL',AudioLanguages:['UA']},'ua'],
+  [{Title:'Название 1080p WEB-DL',AudioLanguages:['Русский']},'ru'],
+  [{Title:'Название 1080p WEB-DL',AudioLanguages:['російська озвучка']},'ru'],
+  [{Title:'Movie 1080p WEB-DL',AudioLanguages:['RUS']},'ru'],
+  [{Title:'Movie 1080p WEB-DL',AudioLanguages:['RU']},'ru'],
+  [{Title:'Movie 1080p WEB-DL',AudioLanguages:['Англійська']},'en'],
+  [{Title:'Movie 1080p WEB-DL',AudioLanguages:['ENG']},'en'],
+  [{Title:'Movie 1080p WEB-DL',AudioLanguages:['EN']},'en']
+ ];
+ for(const [source,category] of localized){const parsed=api.normalizeRelease(source).parsed;assert.equal(match(parsed.audio,category),true,JSON.stringify(source));}
+ const unknownExplicit=api.normalizeRelease({Title:'The Others (2001) Ukr 1080p WEB-DL',AudioLanguages:['und']}).parsed;
+ assert.equal(match(unknownExplicit.audio,'ua'),false,'explicit unknown structured audio overrides a title-only token');assert.equal(match(unknownExplicit.audio,'other'),true);
+ const titleOnly=api.normalizeRelease({Title:'The Others (2001) Ukr audio 1080p WEB-DL',Tracker:'Toloka.to'}).parsed;
+ assert.equal(match(titleOnly.audio,'ua'),true,'verified release-title aliases work without structured audio metadata');
+ const subtitleLanguage=api.normalizeRelease({Title:'Movie English audio Ukrainian subtitles 1080p WEB-DL',AudioLanguages:['en'],SubtitleLanguages:['uk'],Tracker:'Toloka.to'}).parsed;
+ assert.equal(match(subtitleLanguage.audio,'en'),true);assert.equal(match(subtitleLanguage.audio,'ua'),false,'Ukrainian subtitle and tracker do not imply Ukrainian audio');
+ const nativeMixedFields=api.normalizeRelease({Title:'Movie English audio Ukrainian subtitles 1080p WEB-DL',AudioLanguages:['en'],SubtitleLanguages:['uk'],ffprobe:[{codec_type:'audio',tags:{language:'eng'}},{codec_type:'audio',tags:{language:'ukr'}}]}).parsed;
+ assert.deepEqual(Array.from(nativeMixedFields.audio.languages),['English'],'explicit audio language list takes precedence over ambiguous secondary parser/ffprobe language tokens');assert.equal(match(nativeMixedFields.audio,'ua'),false);
+ assert.equal(match(api.normalizeRelease({Title:'Movie Ukr 1080p WEB-DL',Tracker:'Toloka.to',AudioLanguages:['fr']}).parsed.audio,'ua'),false,'tracker origin cannot override structured audio');
 });
 test('Torrent Cinema offers dedicated UA/RU/EN/Other audio controls, defaults to UA, and removes the quality-row UA toggle',()=>{
  const runtime=fs.readFileSync(__dirname+'/../ui/torrent-cinema/runtime.js','utf8');

@@ -60,3 +60,21 @@ Focused local checks after this pass: **146/146** tests passed across season mod
 - `git diff --check` passed.
 
 Standalone mode, physical Google TV, and actual playback were not exercised in this main-browser session. The standalone and Hybrid integration contracts remain covered by focused automated tests; this evidence does not claim device-level acceptance.
+
+## Audio selector hardening — 2026-10-29
+
+The final local build was injected into the owner's existing main Chrome Lampa tab through the read-only loopback preview. The exact artifact was `ui/torrent-cinema.js` (185,677 UTF-8 bytes / 181,440 JavaScript characters; SHA-256 `9e8175e9fdf24da713302002e30dc7928ecf8a5767d89e8e6695818517371d53`). The parser boundary was replaced only in page memory with seven controlled releases; no configured parser endpoint, credential, proxy, or saved parser source flag was changed.
+
+The controlled set contained Ukrainian-only, Russian-only, English-only, unknown-audio, Ukrainian+English, English-audio/Ukrainian-subtitle, and French-audio releases. Real ArrowLeft/ArrowRight/Enter input selected all four categories. Observed category counts were UA 2, RU 1, EN 3, Other 2; the bilingual release counted in both UA and EN. The English-audio/Ukrainian-subtitle item appeared under EN only. Unknown and French items appeared under Other. With Toloka selected, the scoped counters became UA 1, RU 0, EN 0, Other 1; returning to All Trackers restored the original counts. A separate five-release fixture with no Ukrainian audio showed UA 0 while RU 1, EN 2, and Other 2 remained populated. The default for a new title was UA.
+
+Counter scope is the active season and quality/tracker filters, before the selected audio category. Duplicate valid InfoHashes count once per category; a multilingual release can count in more than one category. A stale native season value is ignored in movie status text, and audio/tracker selection refreshes the result status immediately.
+
+| Main Chrome controlled-fixture render | CSS viewport / DPR | Raster | Geometry and result |
+|---|---:|---:|---|
+| [1280×720](audio-filter/1280x720.jpg) | 1280×720 / 1 | 1280×720 | Modal 1126×648; two 1084×116 rows; no toolbar, modal, or tested text clipping |
+| [1920×1080](audio-filter/1920x1080.jpg) | 1920×1080 / 1 | 1920×1080 | Modal 1690×972; two 1622 px wide rows; no horizontal overflow or tested text clipping |
+| [3840×2160](audio-filter/3840x2160.jpg) | 3840×2160 / 1 | 3840×2160 | Modal 3379×1944; two 3245 px wide rows; no horizontal overflow or tested text clipping |
+
+One visible Torrent Cinema overlay was present at each viewport. This is a real browser raster check at DPR 1, not physical Google TV testing. The controlled fixture did not start playback or call TorrServer.
+
+Focused tests after the final patch: **225/225 passed** across metadata/overlay, seasons, native lifecycle, parser search, Hybrid discovery/UI, and parser provider suites. `node scripts/build-torrent-cinema.mjs --check` and `git diff --check` passed. These browser category cases are controlled-fixture evidence; no live provider response is claimed.

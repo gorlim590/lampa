@@ -101,7 +101,7 @@ function fixture() {
   // Template-backed toolbar fixture: preserve the production setupStreamTools handlers.
   const filesInsert = files.insertBefore.bind(files);
   files.insertBefore = (node, before) => { node.nodes = nodes; node.querySelector = selector => nodes[selector] || null; node.classList.add('ctr-tools'); return filesInsert(node, before); };
-  const sourceFunctions = ['streamSeasonCoverageBadge', 'streamRowKey', 'streamSession', 'streamAlive', 'streamTrackerKey', 'streamSortKey', 'streamWindow', 'streamUpdateRows', 'decorateStreamRows', 'syncStreamTrackerTools', 'streamFocus', 'streamNavGroups', 'streamMove', 'moveInline', 'setupStreamTools', 'streamEpisodeDetails', 'streamEpisodeWatched', 'restoreStreamEpisodePreview', 'clearStreamEpisodePreviews', 'applyStreamEpisodePreview', 'applyStreamFileStudios', 'onStreamFile'];
+  const sourceFunctions = ['streamSeasonCoverageBadge', 'streamRowKey', 'streamSession', 'streamAlive', 'streamTrackerKey', 'streamSortKey', 'streamWindow', 'streamUpdateRows', 'decorateStreamRows', 'streamAudioCounterRows', 'syncStreamTrackerTools', 'streamFocus', 'streamNavGroups', 'streamMove', 'moveInline', 'streamStatus', 'streamResultStatus', 'setupStreamTools', 'streamEpisodeDetails', 'streamEpisodeWatched', 'restoreStreamEpisodePreview', 'clearStreamEpisodePreviews', 'applyStreamEpisodePreview', 'applyStreamFileStudios', 'onStreamFile'];
   context.$=node=>({on(type,fn){node.jqueryEnter=fn;return this;}});context.running=true;context.metadata=context.TorrentsRedesign;context.metadata.audioCategoryMatches=context.window.LampaTorrentCinema.audioCategoryMatches;context.getComputedStyle=()=>({visibility:'visible',display:'block'});context.bindInline=()=>{};context.collapseInline=()=>false;
   context.streamActivate = () => {};
   context.streamSelectOwner = null;
@@ -409,6 +409,25 @@ test('audio menu categories filter rows by audio tracks, allow bilingual matches
  for(const [category,expected] of [['ua',[ua.row]],['ru',[ru.row]],['en',[ua.row,en.row]],['other',[other.row,unknown.row]]]){f.st.audioCategory=category;f.context.streamUpdateRows(f.st);assert.deepEqual(JSON.parse(JSON.stringify(f.st.displayRows.map(row=>row._ctrSource.Tracker).sort())),expected.map(row=>row._ctrSource.Tracker).sort(),category);}
 });
 
+test('audio category counters scope to selected season, include every collection, deduplicate hashes, and apply quality/tracker filters',()=>{
+ const f=fixture(),classes=new Set(),rows=[],sources=[];
+ function add(title,tracker,audio,hash,quality='1080p',hidden=false){const source={Title:title,Tracker:tracker,AudioLanguages:audio,InfoHash:hash,Quality:quality},row=new Node('torrent-item');row._ctrData=f.api.normalizeRelease(source);row.classList.toggle('tc-season-hidden',hidden);rows.push(row);sources.push([row,source]);}
+ add('Supernatural S08E01-E23 2012 1080p WEB-DL','Toloka.to',['uk','en'],'a'.repeat(40));
+ add('Supernatural S08E01-E23 2012 1080p WEB-DL','Toloka.to',['ru'],'a'.repeat(40));
+ add('Supernatural S01E01-E22 2005 1080p WEB-DL','Toloka.to',['uk'],'b'.repeat(40),'1080p',true);
+ add('Supernatural S15E01-E20 2019 1080p WEB-DL','Mazepa.to',['en'],'c'.repeat(40),'1080p',true);
+ add('Supernatural S01-S15 Complete Collection 1080p BluRay','Mazepa.to',['en'],'d'.repeat(40));
+ add('Supernatural S01-S03 Collection 720p WEB-DL','Other tracker',['fr'],'e'.repeat(40),'720p');
+ f.st.rows=rows;f.st.sourceData=new WeakMap(sources);f.st.child.getFilterData=()=>({quality:[]});
+ vm.runInContext([extract(hybrid,'streamRowKey'),extract(hybrid,'streamTrackerKey'),extract(hybrid,'streamAudioCounterRows')].join('\n'),f.context);
+ const counts=category=>f.context.streamAudioCounterRows(f.st).filter(entry=>f.api.audioCategoryMatches(entry.audio,category)).length;
+ assert.equal(f.context.streamAudioCounterRows(f.st).length,3,'S01/S15 releases are excluded; both collections remain and duplicate S08 hashes collapse');
+ assert.deepEqual(['ua','ru','en','other'].map(counts),[1,1,2,1],'bilingual and merged same-hash metadata count in each applicable category');
+ f.st.child.getFilterData=()=>({quality:['720p']});assert.deepEqual(['ua','ru','en','other'].map(counts),[0,0,0,1],'current quality applies to counters');
+ f.st.child.getFilterData=()=>({quality:[]});f.api.storeTrackerFilter('toloka');assert.deepEqual(['ua','ru','en','other'].map(counts),[1,1,1,0],'current tracker applies to counters while the audio choice remains independent');
+ f.api.storeTrackerFilter('all');
+});
+
 test('embedded parser status distinguishes total results from currently loaded rows', () => {
   const f = fixture();
   const status = { textContent: '' }, record = { streamStatus: status };
@@ -437,7 +456,8 @@ test('embedded parser status distinguishes total results from currently loaded r
 });
 
 test('quality and tracker filter bands remain independent and ordered for remote navigation',()=>{
- const f=fixture();f.st.audioCategory='ua';f.release('The Others (2001) 2160p','Toloka',{AudioLanguages:['uk']});f.release('The Others (2001) 1080p','Mazepa');
+ const f=fixture(),status={textContent:''};f.st.audioCategory='ua';f.st.total=2;f.record.streamStatus=status;f.release('The Others (2001) 2160p','Toloka',{AudioLanguages:['uk']});f.release('The Others (2001) 1080p','Mazepa');
+ vm.runInContext([extract(hybrid,'streamStatus'),extract(hybrid,'streamResultStatus')].join('\n'),f.context);
  let quality=[];f.st.child.getFilterData=()=>({quality});f.st.child.setFilterData=value=>{quality=value.quality;};f.st.child.applyFilter=()=>{};
  f.context.setupStreamTools(f.st);f.context.syncStreamTrackerTools(f.st);
  const qualityAll=f.nodes['.ctr-tabs'].children.find(node=>node.dataset.quality==='all'),all=f.st.trackerButtons.all,mazepa=f.st.trackerButtons.mazepa;
@@ -447,7 +467,10 @@ test('quality and tracker filter bands remain independent and ordered for remote
  f.nodes['.ctr-quality-tabs'].children.find(node=>node.dataset.quality==='2160').dispatch('hover:enter');
  assert.deepEqual(Array.from(quality),['4k']);
  mazepa.dispatch('hover:enter');assert.equal(f.api.selectedTrackerFilter(),'mazepa');assert.deepEqual(Array.from(quality),['4k'],'tracker action cannot reset the quality filter');
+ assert.match(status.textContent,/озвучка UA/,'changing a tracker refreshes the visible result status');
  all.dispatch('hover:enter');assert.equal(f.api.selectedTrackerFilter(),'all');assert.deepEqual(Array.from(quality),['4k'],'All trackers clears only the tracker filter');
+ f.st.audioButtons.en.dispatch('hover:enter');assert.match(status.textContent,/EN/i,'changing the audio category refreshes its visible result count');
+ f.st.audioButtons.ua.dispatch('hover:enter');
  f.st.last=all;f.context.streamMove(f.record,'left');assert.equal(f.focus.current,all,'left at the first tracker keeps focus within the tracker band');
  f.st.last=all;f.context.streamMove(f.record,'up');assert.equal(f.focus.current,f.st.audioButtons.other,'up from tracker band enters the last audio action');
  f.st.last=qualityAll;f.context.streamMove(f.record,'down');assert.equal(f.focus.current,f.st.audioButtons.ua,'down from quality band enters the first audio control');
