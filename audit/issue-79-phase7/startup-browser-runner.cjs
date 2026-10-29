@@ -14,7 +14,8 @@ const root = path.resolve(__dirname, '../..');
 const base = 'https://gorlim590.github.io/lampa/';
 const mode = process.argv[2] || 'main';
 const count = Number(process.argv[3] || 1);
-if (!['main', 'branch'].includes(mode) || !Number.isInteger(count) || count < 1 || count > 10) throw new Error('usage: node startup-browser-runner.cjs main|branch [1..10]');
+const profile = process.argv[4] || 'trakt-heavy';
+if (!['main', 'branch'].includes(mode) || !Number.isInteger(count) || count < 1 || count > 10 || !['minimal','trakt-heavy','many-rows','slow-optional','failed-optional','warm-return'].includes(profile)) throw new Error('usage: node startup-browser-runner.cjs main|branch [1..10] [minimal|trakt-heavy|many-rows|slow-optional|failed-optional|warm-return]');
 
 const deferred = [
   'trakt/trakt.js', 'trakt/trakt-plus.js', 'providers/torrent-search.js',
@@ -22,7 +23,7 @@ const deferred = [
   'plugins-to-enable/home-policy.js', 'plugins-to-enable/home-history.js',
   'ui/torrent-cinema.js'
 ];
-const fixtureTvIds = Array.from({ length: 24 }, (_, i) => 980000 + i);
+const fixtureTvIds = Array.from({ length: profile === 'minimal' ? 0 : 24 }, (_, i) => 980000 + i);
 const pluginFiles = new Set([
   'loader.js', 'ui/stremio-hybrid.js', 'ui/interface-plus.js', 'ui/design-optimized.js',
   'ui/cardify-plus.js', 'ui/settings-hub.js', 'ui/torrent-cinema.js',
@@ -49,7 +50,7 @@ for (const file of pluginFiles) {
 }
 
 const probe = `(()=>{
-  const p=window.__p7={marks:{documentStart:performance.now()},runs:[],resources:[],longTasks:[],loaderRequests:[],readinessEvents:[],keyEvents:[],fixtureFavoriteCalls:0,
+  const p=window.__p7={profile:${JSON.stringify(profile)},marks:{documentStart:performance.now()},runs:[],resources:[],longTasks:[],loaderRequests:[],readinessEvents:[],contentRowsCalls:[],keyEvents:[],fixtureFavoriteCalls:0,fixtureRows:0,
     mark(name,extra){if(!this.marks[name])this.marks[name]=performance.now();if(extra)this.runs.push({name,at:this.marks[name],extra})}};
   document.addEventListener('keydown',e=>{if(p.keyEvents.length<30){const cards=[...document.querySelectorAll('.activity--active .card.selector')],focus=document.querySelector('.activity--active .card.selector.focus');p.keyEvents.push({key:e.key,at:+performance.now().toFixed(1),target:e.target&&e.target.tagName,defaultPrevented:e.defaultPrevented,controller:window.Lampa&&Lampa.Controller&&Lampa.Controller.enabled&&Lampa.Controller.enabled()?.name,focusIndex:cards.indexOf(focus),lineCards:focus&&focus.parentElement?focus.parentElement.querySelectorAll('.card.selector').length:0})}},true);
   document.addEventListener('DOMContentLoaded',()=>p.mark('domContentLoaded'),{once:true});
@@ -58,7 +59,9 @@ const probe = `(()=>{
   try{new PerformanceObserver(list=>{for(const e of list.getEntries())if(p.resources.length<1000){let u;try{u=new URL(e.name)}catch(e){continue}p.resources.push({origin:u.origin,path:u.pathname.replace(/\\/\\d{4,}/g,'/:id').replace(/\\/[a-f0-9]{32,}/ig,'/:hash'),type:e.initiatorType,start:+e.startTime.toFixed(1),end:+e.responseEnd.toFixed(1),bytes:e.transferSize||0})}}).observe({type:'resource',buffered:true})}catch(e){}
   let ticks=0,seen={};const timer=setInterval(()=>{ticks++;const L=window.Lampa;if(L&&L.ContentRows&&!seen.rows){seen.rows=1;p.mark('contentRowsAvailable')}
     if(L&&!seen.lampa){seen.lampa=1;p.mark('lampaGlobalAvailable');try{L.Listener?.follow('activity',e=>p.readinessEvents.push({kind:'activity',type:e?.type,component:e?.component,at:+performance.now().toFixed(1)}));L.Controller?.listener?.follow('toggle',e=>p.readinessEvents.push({kind:'controller',name:e?.name,at:+performance.now().toFixed(1)}));L.Favorite?.listener?.follow('read',()=>p.readinessEvents.push({kind:'favorite-read',at:+performance.now().toFixed(1)}))}catch(e){}}
+    if(L?.ContentRows?.call&&!seen.contentRowsCall){seen.contentRowsCall=1;const original=L.ContentRows.call;L.ContentRows.call=function(){const started=performance.now(),args=arguments,screen=args[0],calls=args[2],entry={screen:typeof screen==='string'?screen:'',inputCount:Array.isArray(calls)?calls.length:null,outputCount:null,durationMs:0,at:+started.toFixed(1),callbackInvocations:[]};if(Array.isArray(calls))for(let i=0;i<calls.length;i++)if(typeof calls[i]==='function'){const fn=calls[i];calls[i]=function(){const callStart=performance.now();try{return fn.apply(this,arguments)}finally{if(entry.callbackInvocations.length<100)entry.callbackInvocations.push({index:i,durationMs:+(performance.now()-callStart).toFixed(2),at:+callStart.toFixed(1)})}}}let result;try{result=original.apply(this,args);entry.outputCount=Array.isArray(calls)?calls.filter(x=>typeof x==='function').length:null;return result}finally{entry.durationMs=+(performance.now()-started).toFixed(2);if(p.contentRowsCalls.length<100)p.contentRowsCalls.push(entry)}}}
     if(window.Lampa?.Favorite?.get&&window.Lampa.Favorite.get!==p.fixtureFavoriteGet){const original=window.Lampa.Favorite.get;const fixture=${JSON.stringify(fixtureTvIds)}.map((id,i)=>({id,media_type:'tv',name:'Fixture Series '+i,original_name:'Fixture Series '+i,source:'tmdb',poster_path:'/fixture-'+i+'.jpg'}));p.fixtureFavoriteGet=function(params){if(params&&params.type==='look'){p.fixtureFavoriteCalls++;return fixture.slice()}return original.apply(this,arguments)};window.Lampa.Favorite.get=p.fixtureFavoriteGet;seen.favorite=1}
+    if(p.profile==='many-rows'&&!seen.fixtureRows){const a=L?.Activity?.active?.(),c=a?.component==='main'&&a.activity&&a.activity.component;if(c&&Array.isArray(c.items)&&c.items.length&&c.emit&&c.scroll?.append){seen.fixtureRows=1;const previous=c.fragment,fragment=document.createDocumentFragment();try{c.fragment=fragment;for(let row=0;row<18;row++){const items=Array.from({length:6},(_,i)=>({id:970000+row*10+i,media_type:'movie',title:'Synthetic row '+row+' card '+i,source:'fixture',poster_path:null,backdrop_path:null,vote_average:6}));c.emit('createAndAppend',{title:'Fixture row '+row,results:items,home_row_id:'p7_fixture_'+row});p.fixtureRows++}c.fragment=previous;c.scroll.append(fragment)}catch(e){c.fragment=previous;p.fixtureRowError=String(e&&e.message||e)}}}
     if(window.appready===true&&!seen.appready){seen.appready=1;p.mark('nativeAppReady')}
     const card=document.querySelector('.activity--active .card.selector'),focus=document.querySelector('.activity--active .card.selector.focus');
     if(card&&card.getClientRects().length&&!seen.firstCard){seen.firstCard=1;p.mark('firstVisibleHomeCard',snapshot())}
@@ -69,7 +72,7 @@ const probe = `(()=>{
     if(seen.appready&&seen.firstCard&&seen.focus&&ticks>80){clearInterval(timer);p.mark('stageProbeStopped')}
     if(ticks>=1600){clearInterval(timer);p.mark('stageProbeTimeout')}
   },25);
-  function snapshot(){const L=window.Lampa,act=L&&L.Activity&&L.Activity.active();return{at:+performance.now().toFixed(1),activity:act&&act.component,controller:L&&L.Controller&&L.Controller.enabled&&L.Controller.enabled()?.name,cards:document.querySelectorAll('.activity--active .card.selector').length,nodes:document.querySelectorAll('*').length,styles:document.querySelectorAll('style,link[rel=stylesheet]').length,focus:!!document.querySelector('.activity--active .card.selector.focus')}}
+  function snapshot(){const L=window.Lampa,act=L&&L.Activity&&L.Activity.active();return{at:+performance.now().toFixed(1),activity:act&&act.component,controller:L&&L.Controller&&L.Controller.enabled&&L.Controller.enabled()?.name,rows:document.querySelectorAll('.activity--active .items-line').length,cards:document.querySelectorAll('.activity--active .card.selector').length,nodes:document.querySelectorAll('*').length,styles:document.querySelectorAll('style,link[rel=stylesheet]').length,focus:!!document.querySelector('.activity--active .card.selector.focus')}}
   p.snapshot=snapshot;
 })();`;
 
@@ -100,6 +103,8 @@ async function executeRun(browser, iteration) {
     }
     if (u.hostname === 'api.themoviedb.org' && /^\/3\/tv\/(\d+)$/.test(u.pathname) && fixtureTvIds.includes(Number(u.pathname.split('/')[3]))) {
       const id=Number(u.pathname.split('/')[3]);
+      if(profile==='slow-optional')await new Promise(resolve=>setTimeout(resolve,700));
+      if(profile==='failed-optional')return route.fulfill({status:503,contentType:'application/json',body:'{"status_message":"controlled optional metadata failure"}'});
       return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({id,name:'Fixture Series '+(id-980000),tagline:'Controlled startup fixture',first_air_date:'2020-01-01',number_of_seasons:1,number_of_episodes:2,seasons:[{season_number:1}],last_episode_to_air:{season_number:1,episode_number:1,air_date:'2026-10-20'},next_episode_to_air:{season_number:1,episode_number:2,air_date:new Date(Date.now()+86400000).toISOString().slice(0,10),name:'Fixture episode'},countries:[],origin_country:[],production_countries:[],genres:[],images:{posters:[]},release_dates:{results:[]},content_ratings:{results:[]}})});
     }
     if (u.hostname === 'gorlim590.github.io' && u.pathname.startsWith('/lampa/')) {
@@ -137,14 +142,14 @@ async function executeRun(browser, iteration) {
   const metrics = await page.evaluate(() => {
     const p=window.__p7,nav=performance.getEntriesByType('navigation')[0],snap=p.snapshot();
     const resources=performance.getEntriesByType('resource').map(e=>{let u;try{u=new URL(e.name)}catch{return null}return{origin:u.origin,path:u.pathname.replace(/\/\d{4,}/g,'/:id').replace(/\/[a-f0-9]{32,}/ig,'/:hash'),type:e.initiatorType,start:+e.startTime.toFixed(1),end:+e.responseEnd.toFixed(1),bytes:e.transferSize||0}}).filter(Boolean);
-    return{marks:Object.fromEntries(Object.entries(p.marks).map(([k,v])=>[k,+v.toFixed(1)])),stages:p.runs,readinessEvents:p.readinessEvents.slice(),fixtureFavoriteCalls:p.fixtureFavoriteCalls,warmRowsSettings:window.Lampa&&Lampa.Storage?{continue:Lampa.Storage.get('ydesign_row_continue'),week:Lampa.Storage.get('ydesign_row_week'),source:Lampa.Storage.get('source')}:null,homeTvPrefetch:{total:resources.filter(r=>r.origin==='https://api.themoviedb.org'&&r.path==='/3/tv/:id').length,beforeFirstUsable:resources.filter(r=>r.origin==='https://api.themoviedb.org'&&r.path==='/3/tv/:id'&&r.start<(p.marks.firstUsableHome||Infinity)).length,starts:resources.filter(r=>r.origin==='https://api.themoviedb.org'&&r.path==='/3/tv/:id').map(r=>r.start)},nav:nav&&{domContentLoaded:+nav.domContentLoadedEventEnd.toFixed(1),load:+nav.loadEventEnd.toFixed(1),responseStart:+nav.responseStart.toFixed(1),transfer:nav.transferSize},final:snap,hybrid:window.StremioHybrid?.version||null,loader:window.LampaLoaderDiagnostics&&{requested:LampaLoaderDiagnostics.requested,loaded:LampaLoaderDiagnostics.loaded,failed:LampaLoaderDiagnostics.failed,criticalMs:LampaLoaderDiagnostics.criticalFinishedAt,appreadyStart:LampaLoaderDiagnostics.deferredStartedAt,deferredFinished:LampaLoaderDiagnostics.deferredFinishedAt},longTasks:p.longTasks,resources};
+    return{marks:Object.fromEntries(Object.entries(p.marks).map(([k,v])=>[k,+v.toFixed(1)])),stages:p.runs,readinessEvents:p.readinessEvents.slice(),contentRowsCalls:p.contentRowsCalls.slice(),fixtureFavoriteCalls:p.fixtureFavoriteCalls,fixtureRows:p.fixtureRows,fixtureRowError:p.fixtureRowError||null,warmRowsSettings:window.Lampa&&Lampa.Storage?{continue:Lampa.Storage.get('ydesign_row_continue'),week:Lampa.Storage.get('ydesign_row_week'),source:Lampa.Storage.get('source')}:null,homeTvPrefetch:{total:resources.filter(r=>r.origin==='https://api.themoviedb.org'&&r.path==='/3/tv/:id').length,beforeFirstUsable:resources.filter(r=>r.origin==='https://api.themoviedb.org'&&r.path==='/3/tv/:id'&&r.start<(p.marks.firstUsableHome||Infinity)).length,starts:resources.filter(r=>r.origin==='https://api.themoviedb.org'&&r.path==='/3/tv/:id').map(r=>r.start)},nav:nav&&{domContentLoaded:+nav.domContentLoadedEventEnd.toFixed(1),load:+nav.loadEventEnd.toFixed(1),responseStart:+nav.responseStart.toFixed(1),transfer:nav.transferSize},final:snap,hybrid:window.StremioHybrid?.version||null,loader:window.LampaLoaderDiagnostics&&{requested:LampaLoaderDiagnostics.requested,loaded:LampaLoaderDiagnostics.loaded,failed:LampaLoaderDiagnostics.failed,criticalMs:LampaLoaderDiagnostics.criticalFinishedAt,appreadyStart:LampaLoaderDiagnostics.deferredStartedAt,deferredFinished:LampaLoaderDiagnostics.deferredFinishedAt},longTasks:p.longTasks,resources};
   });
 
   const navigation = { dpad: null, details: null, back: null };
   if (metrics.marks.firstHomeFocus !== undefined) {
     navigation.dpad = await page.evaluate(() => {const p=performance.now(),before=document.querySelector('.activity--active .card.selector.focus'),idx=[...document.querySelectorAll('.activity--active .card.selector')].indexOf(before);return{start:p,index:idx,controller:Lampa.Controller.enabled()?.name}});
     let attempts=0,moved=false;
-    while(attempts<3&&!moved){attempts++;await page.keyboard.press('ArrowRight');await page.waitForTimeout(120);moved=await page.evaluate(i=>{const a=[...document.querySelectorAll('.activity--active .card.selector')],f=document.querySelector('.activity--active .card.selector.focus');return a.indexOf(f)!==i},navigation.dpad.index);}
+    while(attempts<3&&!moved){attempts++;await page.keyboard.press('ArrowRight');try{await page.waitForFunction(i=>{const a=[...document.querySelectorAll('.activity--active .card.selector')],f=document.querySelector('.activity--active .card.selector.focus');return a.indexOf(f)!==i},navigation.dpad.index,{timeout:500});moved=true}catch(e){moved=false}}
     navigation.dpad = await page.evaluate(({before,attempts,moved}) => {const now=performance.now(),f=document.querySelector('.activity--active .card.selector.focus'),i=[...document.querySelectorAll('.activity--active .card.selector')].indexOf(f);if(moved)window.__p7.mark('firstUsableHome');return{...before,end:+now.toFixed(1),responseMs:+(now-before.start).toFixed(1),from:before.index,to:i,moved,attempts,controller:Lampa.Controller.enabled()?.name,focusClass:f&&f.className,keys:window.__p7.keyEvents.slice()}},{before:navigation.dpad,attempts,moved});
     metrics.marks.firstUsableHome=navigation.dpad.moved?navigation.dpad.end:null;
     metrics.homeTvPrefetch.beforeFirstUsable=navigation.dpad.moved?metrics.homeTvPrefetch.starts.filter(t=>t<navigation.dpad.end).length:null;
@@ -166,7 +171,18 @@ async function executeRun(browser, iteration) {
   await page.waitForTimeout(8000);
   const tail=await page.evaluate(()=>{const resources=performance.getEntriesByType('resource').map(e=>{let u;try{u=new URL(e.name)}catch{return null}return{origin:u.origin,path:u.pathname.replace(/\/\d{4,}/g,'/:id').replace(/\/[a-f0-9]{32,}/ig,'/:hash'),type:e.initiatorType,start:+e.startTime.toFixed(1),end:+e.responseEnd.toFixed(1),bytes:e.transferSize||0}}).filter(Boolean),tv=resources.filter(r=>r.origin==='https://api.themoviedb.org'&&r.path==='/3/tv/:id'),events=[];tv.forEach(r=>{events.push([r.start,1],[r.end,-1])});events.sort((a,b)=>a[0]-b[0]||a[1]-b[1]);let active=0,max=0;events.forEach(e=>{active+=e[1];if(active>max)max=active});return{resources,homeTvPrefetch:{total:tv.length,beforeFirstUsable:tv.filter(r=>r.start<(window.__p7.marks.firstUsableHome||Infinity)).length,starts:tv.map(r=>r.start),maxConcurrent:max},fixtureFavoriteCalls:window.__p7.fixtureFavoriteCalls,readinessEvents:window.__p7.readinessEvents.slice(),activity:Lampa.Activity.active()?.component,controller:Lampa.Controller.enabled()?.name,ydesignLoaded:!!window.YDesignLoaded,homeHistoryActive:!!window.LampaHomeHistory?.active,marks:window.__p7.marks}});
   metrics.resources=tail.resources;metrics.homeTvPrefetch=tail.homeTvPrefetch;metrics.fixtureFavoriteCalls=tail.fixtureFavoriteCalls;metrics.finalDiagnostics=tail;
-  const result = { mode, iteration, browser: await browser.version(), viewport: [1920,1080], dpr: await page.evaluate(()=>devicePixelRatio), elapsedWallMs: Date.now()-started, localAssets: requests, pageErrors, consoleErrors, responses, metrics, topCpu, navigation };
+  let warmReturn=null;
+  if(profile==='warm-return'){
+    const warmStarted=Date.now();
+    await page.reload({waitUntil:'domcontentloaded',timeout:60000});
+    try{await page.waitForFunction(()=>window.__p7?.marks?.firstHomeFocus!==undefined&&window.Lampa?.Controller?.enabled?.()?.name,null,{timeout:60000})}catch(e){}
+    warmReturn=await page.evaluate(start=>{
+      const p=window.__p7,nav=performance.getEntriesByType('navigation')[0];
+      const tv=performance.getEntriesByType('resource').filter(e=>{try{const u=new URL(e.name);return u.hostname==='api.themoviedb.org'&&/^\/3\/tv\/\d+$/.test(u.pathname)}catch{return false}});
+      return{elapsedWallMs:Date.now()-start,marks:Object.fromEntries(Object.entries(p.marks).map(([k,v])=>[k,+v.toFixed(1)])),rows:document.querySelectorAll('.activity--active .items-line').length,cards:document.querySelectorAll('.activity--active .card.selector').length,controller:Lampa.Controller.enabled()?.name,cachePresent:!!localStorage.getItem('ydesign_cache_v6'),tvMetadataRequests:tv.length,nav:nav&&{domContentLoaded:+nav.domContentLoadedEventEnd.toFixed(1),load:+nav.loadEventEnd.toFixed(1)}};
+    },warmStarted);
+  }
+  const result = { mode, profile, iteration, browser: await browser.version(), viewport: [1920,1080], dpr: await page.evaluate(()=>devicePixelRatio), elapsedWallMs: Date.now()-started, localAssets: requests, pageErrors, consoleErrors, responses, metrics, topCpu, navigation, warmReturn };
   await context.close();
   return result;
 }

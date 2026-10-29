@@ -1493,6 +1493,7 @@
             if (t && t.classList) card = t.classList.contains('ydesign-card') ? t : (t.closest ? t.closest('.ydesign-card') : null);
             if (card) {
                 if (card._ydesign_updateMarks) card._ydesign_updateMarks();
+                if (card._ydesign_updateNotch) card._ydesign_updateNotch();
                 if (card._ydesign_lazyMarks) card._ydesign_lazyMarks();
                 if (card._ydesign_onFocus) card._ydesign_onFocus();
             }
@@ -1923,13 +1924,24 @@
         RefreshT = setTimeout(function () {
             RefreshT = null;
             bumpMarks();
-            var list = document.querySelectorAll('.activity--active .ydesign-card');
+            var cards = document.querySelectorAll('.activity--active .ydesign-card');
+            var width = window.innerWidth || document.documentElement.clientWidth || 0;
+            var height = window.innerHeight || document.documentElement.clientHeight || 0;
+            // Refresh the cards which can currently be seen. Horizontal/vertical
+            // offscreen cards are updated on their next native focus event.
+            var list = [];
+            for (var j = 0; j < cards.length; j++) {
+                var card = cards[j];
+                if (!card || !card.getBoundingClientRect) continue;
+                var rect = card.getBoundingClientRect();
+                if (rect.bottom > 0 && rect.top < height && rect.right > 0 && rect.left < width) list.push(card);
+            }
             var i = 0;
             (function step() {
                 var end = Math.min(i + 10, list.length);
                 for (; i < end; i++) {
                     var c = list[i];
-                    if (c.offsetParent !== null && c._ydesign_updateNotch) c._ydesign_updateNotch();
+                    if (c._ydesign_updateNotch) c._ydesign_updateNotch();
                 }
                 if (i < list.length) requestAnimationFrame(step);
             })();
