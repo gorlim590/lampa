@@ -44,7 +44,7 @@ The authorized Chrome DevTools session was used read-only. Its existing Lampa ta
 
 - `tests/design-home-startup.cjs` and `tests/ydesign.cjs`: PASS, including asynchronous empty-cache row fill, event rescheduling, bounded readiness, retry/backoff, fresh cache, stale-session protection, and existing YDesign behavior.
 - Broader Home, Hybrid, startup, Settings, Trakt, and Torrent Cinema regression matrix: **488/488 PASS** locally.
-- `tests/design-home-startup.cjs` is included in the required Repository checks workflow; verify its execution in final-SHA GitHub logs before closing this acceptance item.
+- `tests/design-home-startup.cjs` is included in the required Repository checks workflow. On pushed SHA `6f1f02f2f8bed3c1d96195d5922e3ffe8b3c8fcb`, all five GitHub Actions passed; the Repository checks log shows the `Trakt and YDesign regressions` step ran the new cases and finished **204/204 PASS** ([workflow run](https://github.com/gorlim590/lampa/actions/runs/40827304141)). The final evidence-only head is rechecked separately after push.
 - `node scripts/check-repository.mjs`, JavaScript syntax checks, and `git diff --check`: PASS.
 - GitHub Actions: verify all five workflows on the final pushed PR SHA; repository logs must show `tests/design-home-startup.cjs` executed.
 - Physical Google TV: NOT TESTED.
