@@ -18,33 +18,33 @@ Values below are milliseconds from navigation start. The outlier values are reta
 
 | Metric | main runs (1 / 2 / 3) | PR runs (1 / 2 / 3) | Median main → PR |
 |---|---:|---:|---:|
-| DOMContentLoaded | 2763 / 591 / 588 | 1003 / 527 / 563 | 591 → 563 |
-| Native Lampa API available | 3246 / 1415 / 1408 | 2285 / 1010 / 1350 | 1415 → 1350 |
-| Loader executed | 3271 / 1443 / 1435 | 2495 / 1036 / 1377 | 1443 → 1377 |
-| Hybrid first active frame | 3340 / 1512 / 1493 | 2608 / 1099 / 1437 | 1512 → 1437 |
-| Native `appready` | 5007 / 3090 / 3097 | 4487 / 2801 / 3100 | 3097 → 3100 |
-| First visible Home card / usable focus | 10522 / 3785 / 3800 | 3734 / 3895 / 4530 | 3800 → 3895 |
-| `appready` → usable Home | 5515 / 694 / 702 | 773 / 681 / 664 | 702 → 681 |
-| First successful D-pad move | 81 / 2046 / 2036 | 69 / 51 / 241 | 2036 → 69 |
-| Details ready after Enter | 897 / 345 / 330 | 662 / 706 / 693 | 345 → 693 |
-| Home/focus restored after Back | 84 / 88 / 76 | 466 / 104 / 121 | 84 → 121 |
+| DOMContentLoaded | 2763 / 591 / 588 | 955 / 647 / 554 | 591 → 647 |
+| Native Lampa API available | 3246 / 1415 / 1408 | 2123 / 1630 / 1226 | 1415 → 1630 |
+| Loader executed | 3271 / 1443 / 1435 | 2230 / 1668 / 1263 | 1443 → 1668 |
+| Hybrid first active frame | 3340 / 1512 / 1493 | 2433 / 1751 / 1328 | 1512 → 1751 |
+| Native `appready` | 5007 / 3090 / 3097 | 4517 / 3464 / 3072 | 3097 → 3464 |
+| First visible Home card / usable focus | 10522 / 3785 / 3800 | 5588 / 4748 / 3955 | 3800 → 4748 |
+| `appready` → usable Home | 5515 / 694 / 702 | 1071 / 1283 / 883 | 702 → 1071 |
+| First successful D-pad move | 81 / 2046 / 2036 | 212 / 191 / 410 | 2036 → 212 |
+| Details ready after Enter | 897 / 345 / 330 | blocked / 1556 / 1803 | only 2/3 branch runs opened Details |
+| Home/focus restored after Back | 84 / 88 / 76 | n/a / 1210 / 170 | only 2/3 branch runs returned |
 
-Final branch reruns were made after production commit `457b1eceb8cfd5d6fe988322ddb4b0d10da02002`; branch median navigation-to-usable-Home was 3,895 ms versus 3,800 ms on main. The branch `appready`-to-Home median was 681 ms versus 702 ms on main. This 21 ms change does not establish a noticeable improvement, and overall startup was about 96 ms slower on branch in these samples. Host delivery variance dominates. First Home DOMs had 28 cards in all six runs and similar node/style counts. Browser long-task observations and sanitized resource paths are retained in `browser-results.json`.
+Final branch reruns used production commit `7ccf7b6763f718596ab5e1522d2e016ad3fded22`; branch median navigation-to-usable-Home was 4,748 ms versus 3,800 ms on main. Branch `appready`-to-Home median was 1,071 ms versus 702 ms on main. These samples establish no startup improvement; host and endpoint variation prevent attributing the slower branch timings to this code. First Home DOMs had 28 cards in all six runs and similar node/style counts. Browser long-task observations and sanitized resource paths are retained in `browser-results.json`.
 
 YDesign TV prefetch timing on the final branch rerun was:
 
 - Main: 24/24 requests began before first usable Home in every run; observed peak concurrency 4 under the native request queue.
-- Branch: no TV metadata requests were observed before Home or during the 8-second post-Home observation in any of the three final runs. The unit regression directly calls the bounded queue after focus is ready and verifies it starts four requests and drains all 24 after failures. This cold browser fixture did not demonstrate live post-Home queue execution, so that runtime behavior remains unverified in this fixture.
+- Branch: no TV metadata requests began before usable Home. 24 were observed after Home in run 1 (peak 3); runs 2 and 3 had none in the 8-second observation window. The unit regression directly calls the bounded queue after focus is ready and verifies it starts four requests and drains all 24 after failures. Live post-Home queue execution was inconsistent in this fixture, so remains a limitation.
 
 The initial Home source itself is host-driven. The controlled performance comparison cannot establish physical Google TV CPU, storage, or network performance, and the fixture does not represent the user's saved Home rows.
 
 ## Test results
 
-Focused Home, Hybrid, startup, Settings, Trakt and Torrent Cinema regressions: **389/389 PASS** with:
+Focused Home, Hybrid, startup, YDesign, Settings, Trakt and Torrent Cinema regressions: **454/454 PASS** with:
 
 ```sh
 node --test --test-timeout=15000 \
-  tests/design-home-startup.cjs tests/home-history.cjs tests/home-order.cjs \
+  tests/design-home-startup.cjs tests/ydesign.cjs tests/home-history.cjs tests/home-order.cjs \
   tests/home-progress-display.cjs tests/home-trakt-progress.cjs \
   tests/hybrid-ui.cjs tests/hybrid-torrent-discovery.cjs \
   tests/ui-bootstrap.cjs tests/ui-startup-probe.cjs \
@@ -56,7 +56,7 @@ node --test --test-timeout=15000 \
   tests/torrent-cinema-lifecycle.cjs tests/torrent-cinema-seasons.cjs
 ```
 
-- `node --check` for all changed JavaScript: PASS.
+- `node --check` for all changed JavaScript: PASS. `Lampa.Controller.enabled()` returning `null` is handled safely in YDesign series refresh; this existing controller state is covered in the full `tests/ydesign.cjs` suite.
 - Repository checker (78 JavaScript files, 43 manifest entries, 565 URLs): PASS.
 - `git diff --check`: PASS.
 - Actual main Chrome Home → Details → Back: PASS. Enter opened native Details; Escape returned to Home and restored the focused card. Original URL, viewport, and original card focus were restored afterward.
