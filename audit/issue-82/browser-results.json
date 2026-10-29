@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-29",
+  "baseCommit": "fedfd4f5be4516b2cd34b48cb8c64fc5de772cef",
+  "branch": "feat/issue-82-more-catalog",
+  "testedSourceSha256": "afc03706065b7d5905c4998acf33d2f7527ba1e69aa1b1d213cff3eba32cc76f",
+  "browser": {
+    "connection": "authorized Chrome DevTools MCP autoConnect",
+    "page": 3,
+    "origin": "https://siaivo.isroot.in/",
+    "originalUrlRestored": "https://siaivo.isroot.in/?card=125988&media=tv&source=tmdb",
+    "originalViewportRestored": "1920x937",
+    "dpr": 1,
+    "traktApiCallsByFixture": 0,
+    "storageWritesByFixture": 0,
+    "temporaryComponentsRemovedByReload": true
+  },
+  "fixture": {
+    "type": "synthetic cards through installed native Lampa Category",
+    "liveTraktResults": false,
+    "changedTraktPlusScriptLoaded": false,
+    "dpad": {
+      "arrowRight": "Controlled Catalog 001 -> Controlled Catalog 002",
+      "arrowDown": "Controlled Catalog 002 -> Controlled Catalog 007",
+      "escape": "returned to Silo Details URL and native full_start controller"
+    },
+    "nativeCategory": {
+      "firstPageItems": 24,
+      "firstPageDOMCards": 24,
+      "cardsAfterFivePages": 120,
+      "visibleAt1280x720": 10,
+      "visibleAt1920x1080": 10,
+      "visibleAt3840x2160": 10,
+      "pageSize": 24
+    },
+    "exactChangedSourceBrowserAcceptance": "BLOCKED: rerunning authenticated Trakt+ source would duplicate listeners/rows and could invoke account reads; DevTools MCP exposes no route interception"
+  },
+  "screenshots": {
+    "baseline120": "screenshots/issue82-before-120-1920x1080.png",
+    "firstPage24": "screenshots/issue82-after-1920x1080.png",
+    "1280x720": "screenshots/issue82-final-1280x720.png",
+    "3840x2160": "screenshots/issue82-final-3840x2160.png"
+  },
+  "notMeasured": [
+    "live Trakt first-card latency",
+    "first actionable D-pad wall-clock latency",
+    "live pagination latency",
+    "More item -> real Details -> exact-card Back restoration",
+    "physical Google TV behavior"
+  ]
+}

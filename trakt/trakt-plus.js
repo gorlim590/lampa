@@ -28,8 +28,8 @@
   var CACHE_VER = 7;      // v7: verified account owner; credentials are never persisted as identity
   var TOP_INDEX = 0;      // з якої позиції починаються рядки Trakt на головній (0 = самий верх)
   var QUEUE_MAX = 3;      // скільки запитів до Trakt одночасно (щоб не ловити 429)
-  var FULL_FIRST = 600;   // перший екран «Ще»: великий список без збільшення рядів головної
-  var FULL_PAGE = 200;    // унікальних карток у наступній порції
+  var FULL_FIRST = 24;    // перша порція нативного Category
+  var FULL_PAGE = 24;     // одна помірна порція за кожен запит нативного Category
   var FULL_SCAN = 12;     // межа пошуку після фільтрації в одному запиті UI
 
   var TREND_ROWS = [
@@ -1677,7 +1677,7 @@
   }
 
   function createFullPager(def, initial) {
-    var seen = {}, pending = [], chunk = initial.nextChunk || 2;
+    var seen = {}, pending = [], chunk = initial.nextChunk || 2, failed = false;
     var done = !!initial.exhausted;
     function append(cards) {
       (cards || []).forEach(function (card) {
@@ -1690,8 +1690,11 @@
     append(initial.cards);
     return {
       hasMore: function () { return pending.length > 0 || !done; },
+      takeReady: function (limit) { return pending.splice(0, limit); },
+      failed: function () { return failed; },
       take: function (limit) {
         var tries = 0;
+        failed = false;
         function step() {
           if (done || pending.length >= limit || tries++ >= FULL_SCAN) {
             return Promise.resolve(pending.splice(0, limit));
@@ -1699,11 +1702,12 @@
           return loadChunk(def, chunk, true).then(function (r) {
             append(r.cards);
             // Partial/error responses must be retried at the same source page.
-            if (r.errs) return pending.splice(0, limit);
+            if (r.errs) { failed = true; return pending.splice(0, limit); }
             chunk++;
+            failed = false;
             if (!r.raw && !r.moreSources) done = true;
             return step();
-          }, function () { return pending.splice(0, limit); });
+          }, function () { failed = true; return pending.splice(0, limit); });
         }
         return step();
       }
@@ -1716,7 +1720,7 @@
     Lampa.Component.add('trakt_plus_view', function (object) {
       var comp = Lampa.Maker.make('Category', object);
       var def = ROWS[object.row];
-      var pager = null, next = 2;
+      var pager = null, next = 2, endNotified = false;
 
       comp.use({
         onCreate: function () {
@@ -1724,23 +1728,44 @@
           if (!def) { self.empty(); return; }
           getRow(def).then(function (r) {
             pager = createFullPager(def, r);
-            return pager.take(FULL_FIRST).then(function (cards) {
+            var ready = pager.takeReady(FULL_FIRST);
+            function build(cards) {
               if (self.destroyed) return;
               if (!cards.length) { self.empty(); return; }
               try {
                 self.build({ results: cards, total_pages: pager.hasMore() ? 2 : 1, page: 1 });
               } catch (err) { self.empty(); }
-            });
-          }, function () { self.empty(); });
+            }
+            // Build from the row's already-loaded/cacheable data first. Only a truly
+            // empty cached row needs an initial foreground request; do not wait for
+            // hundreds of later pages before native Category becomes usable.
+            if (ready.length) { build(ready); return; }
+            if (!pager.hasMore()) { build(ready); return; }
+            pager.take(FULL_FIRST).then(function (cards) {
+              if (pager.failed()) notify(tr('Не вдалося завантажити каталог. Поверніться назад і відкрийте «Ще» повторно.', 'Could not load the catalog. Go back and reopen “More” to retry.'));
+              build(cards);
+            }, function () { build([]); });
+          }, function () {
+            if (self.destroyed) return;
+            self.empty();
+            notify(tr('Не вдалося завантажити каталог. Поверніться назад і відкрийте «Ще» повторно.', 'Could not load the catalog. Go back and reopen “More” to retry.'));
+          });
         },
         onNext: function (resolve, reject) {
           var self = this;
-          if (!def || !pager || !pager.hasMore()) return reject.call(self);
+          if (!def || !pager) return reject.call(self);
+          if (!pager.hasMore()) {
+            if (!endNotified) { endNotified = true; notify(tr('Це всі доступні результати цієї категорії.', 'You have reached the end of this catalog.')); }
+            return reject.call(self);
+          }
           pager.take(FULL_PAGE).then(function (res) {
             if (self.destroyed) return;
+            if (pager.failed() && res.length) notify(tr('Частину каталогу не вдалося завантажити. Доступні результати показані; наступна спроба повторить ту саму сторінку.', 'Some catalog results could not be loaded. Available results are shown; the next attempt will retry the same page.'));
             if (!res.length) {
               self.object.page = next - 1;
               if (!pager.hasMore()) self.total_pages = next - 1;
+              if (pager.failed()) notify(tr('Не вдалося завантажити наступну сторінку. Перейдіть донизу ще раз, щоб повторити.', 'Could not load the next page. Reach the bottom again to retry.'));
+              else if (!pager.hasMore() && !endNotified) { endNotified = true; notify(tr('Це всі доступні результати цієї категорії.', 'You have reached the end of this catalog.')); }
               return reject.call(self);
             }
             var pg = next++;
