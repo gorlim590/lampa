@@ -39,7 +39,7 @@ test('visible title uses parser-provided Ukrainian/English names only and never 
  for(const [source,name] of cases){const raw=source.Title||source.Name,view=api.releaseView(source,catalog,'movie');assert.equal(view.identity.name,name);assert.equal(view.title,raw);assert.equal(view.raw,raw);assert(!view.identity.name.includes('Catalog'));}
 });
 test('removed Google TV appearance keys are not read by the canonical runtime',()=>{
- const fs=require('node:fs'),path=require('node:path'),base=path.join(__dirname,'../ui/torrent-cinema'),sources=['entry.js','runtime.js','view.js','metadata.js','style.css'].map(file=>fs.readFileSync(path.join(base,file),'utf8')).join('\n');
+ const fs=require('node:fs'),path=require('node:path'),base=path.join(__dirname,'../ui/torrent-cinema'),sources=['entry.js','runtime.js','view.js','metadata.js','seasons.js','style.css'].map(file=>fs.readFileSync(path.join(base,file),'utf8')).join('\n');
  for(const key of ['torrents_cinema_theme','torrents_cinema_tv','torrents_cinema_animations','torrents_cinema_title_lines','torrents_cinema_cards','torrents_cinema_intensity','torrents_cinema_opacity','torrents_cinema_darkness'])assert(!sources.includes(key),key+' should stay inert after retirement');
 });
 for(const [raw,want] of [['Frieren.S01E03.1080p','S01E03'],['Frieren.S02E01-E12.2160p','S02E01–E12'],['Frieren.S01E01-S01E12','S01E01–E12'],['Frieren.1x03','S01E03'],['Frieren.Season 2','S02'],['Frieren.Сезон 2','S02'],['Frieren.1 сезон, 1-12 серії','S01E01–E12'],['Frieren.[01-12].1080p','E01–E12'],['Frieren.S01-S03','S01–S03'],['Frieren.E05','E05'],['Frieren.2023.1080p.x265.10bit','епізоди не визначено']])test('verified release coverage: '+raw,()=>assert.equal(apiFixture().api.coverage(raw,{}),want));

@@ -44,10 +44,13 @@
         return list.slice(0, 32);
     }
     function coordinate(value) { var n = Number(value); return value !== undefined && value !== null && value !== '' && isFinite(n) && n >= 0 && Math.floor(n) === n ? n : null; }
+    function seasonSearch(params){return !!params&&coordinate(params.season)!==null&&/(?:\bS\d{1,3}(?:E\d{1,4})?|\bSeason\s*\d{1,3}|Сезон\s*\d{1,3}|\d{1,3}\s+сезон)/iu.test(String(params.search||''));}
     function match(row, movie, context, names) {
         context = context || {}; var raw = text(row.Title || row.title || row.parsed && row.parsed.raw), reasons = [], tv = series(movie);
         names = names || titles(movie); var year = text(movie.first_air_date || movie.release_date).slice(0, 4);
-        var seasonRange = /\bS(\d{1,2})\s*[-–]\s*S?(\d{1,2})(?![a-z0-9])/i.exec(raw);
+        var seasonRange = /\bS(\d{1,3})\s*[-–]\s*S?(\d{1,3})(?![a-z0-9])/i.exec(raw);
+        var localizedSeasonRange = /\bSeasons?\s*(\d{1,3})\s*[-–]\s*(?:Seasons?\s*)?(\d{1,3})\b|Сезони?\s*(\d{1,3})\s*[-–]\s*(?:Сезони?\s*)?(\d{1,3})/iu.exec(raw);
+        var seasonCollection = !!(seasonRange || localizedSeasonRange || /\b(?:complete\s+(?:series|show|collection)|all\s+seasons|full\s+series|collection|box[ .-]?set)\b|повн(?:ий|а)\s+(?:серіал|колекці)|усі\s+сезони/iu.test(raw));
         var season = /\bS(\d{1,2})(?:E\d|\b)|(?:season|сезон)[ ._:-]*(\d{1,2})/i.exec(raw), episode = /\bS\d{1,2}E(\d{1,3})(?!\d)(?:\s*[-–]\s*(?:S\d{1,2}E|E)?(\d{1,3})(?!\d))?/i.exec(raw);
         var alternateEpisode = /(?:\b(\d{1,2})x|(?:сері[яїій]|сери[яий]|епізод(?:и|ів)?|эпизод(?:ы|ов)?)[ ._:-]*)(\d{1,3})(?:\s*[-–]\s*(\d{1,3}))?/i.exec(raw);
         var rs = coordinate(row.Season != null ? row.Season : row.season), re = coordinate(row.Episode != null ? row.Episode : row.episode);
@@ -65,7 +68,7 @@
         var type = text(row.media_type || row.MediaType || row.Type).toLowerCase();
         if (tv && type === 'movie' || !tv && /^(tv|series|show)$/.test(type)) reasons.push('Інший тип');
         if (row.tmdb_id && text(row.tmdb_id) !== text(movie.id)) reasons.push('Інший TMDB ID');
-        if (expectedSeason !== null && rs !== null && (seasonRange ? expectedSeason < Number(seasonRange[1]) || expectedSeason > Number(seasonRange[2]) : rs !== expectedSeason)) reasons.push('Інший сезон');
+        if (expectedSeason !== null && rs !== null && !seasonCollection && (seasonRange ? expectedSeason < Number(seasonRange[1]) || expectedSeason > Number(seasonRange[2]) : rs !== expectedSeason)) reasons.push('Інший сезон');
         if (expectedEpisode !== null && re !== null && (expectedEpisode < re || expectedEpisode > Number(episode && episode[2] || alternateEpisode && alternateEpisode[3] || re))) reasons.push('Інша серія');
         var clean = raw.replace(/^(?:\[[^\]]{1,60}\]\s*)+/, ''), pieces = clean.split(/\s*[\/|]\s*/);
         var found = pieces.some(function (piece) {
@@ -116,32 +119,39 @@
             if (stopped) return originalGet.apply(this, arguments);
             cancel();
             var mine = generation;
-            if (!params || (params.from_search || params.clarification) || !target(params.movie)) {
+            if (!params || (params.from_search || params.clarification) || (!target(params.movie)&&!seasonSearch(params))) {
                 return dispatch(this, params, function () { if (mine === generation && typeof done === 'function') return done.apply(this, arguments); }, function () { if (mine === generation && typeof fail === 'function') return fail.apply(this, arguments); });
             }
-            var movie = params.movie, names = titles(movie, params), used = Object.create(null), calls = 0, ended = false, metadataRequest = null, timer = null;
+            var movie = params.movie, names = titles(movie, params), used = Object.create(null), calls = 0, ended = false, metadataRequest = null, timer = null, seasonCollectionQuery=false,seasonRows=[],seasonRawRows=[],seasonScoped=seasonSearch(params);
             var metadataTried = false, fallbackStart = 0, lastData = { Results: [] }, self = this;
-            var stats = { calls: 0, metadataRequests: 0, cancelled: false, started: Date.now() }; window.LampaTorrentSearch.lastStats = stats;
+            var stats = { calls: 0, metadataRequests: 0, cancelled: false, started: Date.now(), search: text(params.search), season: coordinate(params.season), seasonScoped: seasonScoped, phases: [] }; window.LampaTorrentSearch.lastStats = stats;
             function alive() { return !ended && mine === generation; }
             function clean() { clearTimeout(timer); if (metadataRequest) metadataRequest.clear(); metadataRequest = null; }
             current = { cancel: function () { ended = true; stats.cancelled = true; clean(); } };
             function finish(data, error) {
                 if (!alive()) return; ended = true; clean(); current = null;
+                if(data&&seasonScoped)data=Object.assign({},data,{torrent_search_raw_total:dedup(seasonRawRows).length});
                 if (data && data.parser_pending) data = Object.assign({}, data, { parser_pending: false, parser_status: (data.parser_status || []).map(function (s) { return s.status === 'loading' ? Object.assign({}, s, { status: 'cancelled' }) : s; }) });
                 stats.elapsed = Date.now() - stats.started;
                 if (error) { if (typeof fail === 'function') fail(error); } else done(data);
             }
             function remaining() { return FALLBACK_MS - (Date.now() - fallbackStart); }
-            function candidates() { return names.filter(function (name) { return !used[normalize(name)]; }); }
+            function candidates() {
+                var season=coordinate(params.season),list=[];
+                if(season!==null&&seasonScoped){[params.search_one,params.search_two].forEach(function(value){if(value)list.push(String(value));});var padded=String(season).padStart(2,'0');names.forEach(function(name){list.push(name+' S'+padded);});}
+                else list=names.slice();
+                var seen=Object.create(null);return list.filter(function(name){var key=normalize(name);if(!key||seen[key]||used[key])return false;seen[key]=true;return true;});
+            }
+            function hasSeasonRelease(rows){var wanted=coordinate(params.season);if(wanted===null)return true;return rows.some(function(row){var raw=text(row.Title||row.Name||row.title||row.name),pack=/\bS\d{1,3}\s*[-–]\s*S?\d{1,3}\b|\bSeasons?\s*\d{1,3}\s*[-–]\s*(?:Seasons?\s*)?\d{1,3}\b|Сезони?\s*\d{1,3}\s*[-–]\s*(?:Сезони?\s*)?\d{1,3}\b|\b(?:complete\s+(?:series|show|collection)|all\s+seasons|full\s+series|collection|box[ .-]?set)\b|повн(?:ий|а)\s+(?:серіал|колекці)|усі\s+сезони/iu.test(raw);if(pack)return false;var m=/\bS(\d{1,3})(?:E\d{1,4}|\b)|\bSeason\s*(\d{1,3})|Сезон\s*(\d{1,3})|\b(\d{1,3})x\d{1,4}\b/iu.exec(raw),found=m?Number(m[1]||m[2]||m[3]||m[4]):coordinate(row.Season!=null?row.Season:row.season);return found===wanted;});}
             function next() {
                 if (!alive()) return;
-                if (calls >= MAX_CALLS || remaining() <= 0) return finish(Object.assign({}, lastData, { Results: [] }));
+                if (calls >= MAX_CALLS || (fallbackStart && remaining() <= 0)) return finish(Object.assign({}, lastData, { Results: dedup(seasonRows) }));
                 var available = candidates();
                 // Fetch one metadata record only when local title variants contain no Latin-script
                 // alias. Cyrillic-only local titles may still need a verified English translation.
                 if (!metadataTried && names.every(function (name) { return !/[a-z]/i.test(name); })) return metadataThenNext();
                 metadataTried = true;
-                if (!available.length) return finish(Object.assign({}, lastData, { Results: [] }));
+                if (!available.length) return finish(Object.assign({}, lastData, { Results: dedup(seasonRows) }));
                 run(available[0], true);
             }
             function metadataThenNext() {
@@ -158,17 +168,23 @@
                 }
                 metadataRequest.silent(L.TMDB.api((series(movie) ? 'tv/' : 'movie/') + movie.id + '?append_to_response=translations,alternative_titles&api_key=' + encodeURIComponent(L.TMDB.key())), ready, function () { ready(); });
             }
-            function run(query, fallback) {
+            function run(query, fallback, broadSeasonQuery) {
                 if (!alive()) return;
                 used[normalize(query)] = true; calls++; stats.calls = calls;
                 var request = fallback || !params.search ? Object.assign({}, params, { search: query, torrent_search_owner: params }) : params; if (fallback) request.clarification = true;
-                if (fallback) timer = setTimeout(function () { if (!alive()) return; clearTransport(L.Parser); finish(Object.assign({}, lastData, { Results: [] })); }, Math.min(4000, remaining()));
+                if (fallback) timer = setTimeout(function () { if (!alive()) return; clearTransport(L.Parser); finish(Object.assign({}, lastData, { Results:seasonRows.length?dedup(seasonRows):[] })); }, Math.min(4000, remaining()));
                 dispatch(self, request, function (data) {
                     if (!alive()) return; lastData = data || { Results: [] };
-                    var rows = dedup((Array.isArray(lastData.Results) ? lastData.Results : []).filter(function (row) { return match(row, movie, Object.assign({}, params, params.params || {}), names).eligible; }));
-                    if (lastData.parser_pending) { if (rows.length) { clearTimeout(timer); done(Object.assign({}, lastData, { Results: rows })); } return; }
+                    var rawRows=Array.isArray(lastData.Results)?lastData.Results:[],rejected={};if(seasonScoped&&rawRows.length)seasonRawRows=dedup(seasonRawRows.concat(rawRows));var rows = dedup(rawRows.filter(function (row) { var result=match(row, movie, Object.assign({}, params, params.params || {}), names);if(!result.eligible)(result.reasons||[]).forEach(function(reason){var key=String(reason).split(':')[0];rejected[key]=(rejected[key]||0)+1;});return result.eligible; }));var phase=stats.phases.filter(function(item){return item.search===String(query);})[0];if(!phase){phase={search:String(query),raw:0,accepted:0,rejected:{}};stats.phases.push(phase);}phase.raw=Math.max(phase.raw,rawRows.length);phase.accepted=Math.max(phase.accepted,rows.length);Object.keys(rejected).forEach(function(key){phase.rejected[key]=Math.max(phase.rejected[key]||0,rejected[key]);});
+                    if (lastData.parser_pending) { if (rows.length) { clearTimeout(timer); done(Object.assign({}, lastData, { Results:dedup(seasonRows.concat(rows)),torrent_search_raw_total:dedup(seasonRawRows).length })); } return; }
                     clearTimeout(timer);
-                    if (rows.length) { remember(movie, Object.assign({}, cached(movie) || {}, { aliases: names.map(function (title) { return { title: title }; }) })); return finish(Object.assign({}, lastData, { Results: rows })); }
+                    if(rows.length)seasonRows=dedup(seasonRows.concat(rows));
+                    if(seasonScoped&&!seasonCollectionQuery){seasonCollectionQuery=true;fallbackStart=fallbackStart||Date.now();var broad=String(params.search||'').replace(/\s+(?:S\d{1,3}(?:E\d{1,4})?|Season\s*\d{1,3}|Сезон\s*\d{1,3}|\d{1,3}\s+сезон)$/iu,'').trim()||names[0];return run(broad,true,true);}
+                    if (rows.length) {
+                        if(seasonScoped&&!hasSeasonRelease(seasonRows)&&calls<MAX_CALLS)return next();
+                        remember(movie, Object.assign({}, cached(movie) || {}, { aliases: names.map(function (title) { return { title: title }; }) })); return finish(Object.assign({}, lastData, { Results:dedup(seasonRows) }));
+                    }
+                    if(broadSeasonQuery){if(calls<MAX_CALLS)return next();return finish(Object.assign({},lastData,{Results:dedup(seasonRows)}));}
                     if (!fallback) { fallbackStart = Date.now(); next(); } else next();
                 }, function (error) { if (!alive()) return; clearTimeout(timer); if (!fallback) finish(null, error); else finish(Object.assign({}, lastData, { Results: [] })); });
             }

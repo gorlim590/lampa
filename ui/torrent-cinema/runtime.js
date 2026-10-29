@@ -1,5 +1,5 @@
 /* Native Lampa Full/torrent/Files adapter; moved from Hybrid, no second search/player. */
-function createCinemaRuntime(metadata) {
+function createCinemaRuntime(metadata,seasonModel) {
     var movieRecords=[],running=false,frame=0,subscriptions=[];
     var filesOverlay=null;
     function markNativeSurface(record,node,className){
@@ -144,17 +144,40 @@ function createCinemaRuntime(metadata) {
         var movie=record.activity.component.props && record.activity.component.props.get('movie');
         return movie || Lampa.Activity.active().card;
     }
+    function streamSeasonOwner(record){var permit=Lampa.Account&&Lampa.Account.Permit,account=permit&&permit.account||{};return {account:account.id||'',profile:account.profile&&account.profile.id||''};}
+    function streamSelectedSeason(record,movie,list){var owner=streamSeasonOwner(record),component=record.activity&&record.activity.component,props=component&&component.props,active=Lampa.Activity.active(),native=null;try{native=props&&props.get&&(props.get('season')||props.get('season_number'))||active&&(active.season||active.season_number||active.card&&(active.card.season_number||active.card.season));}catch(e){};native=native||movie.season_number||movie.season;var storage;try{storage=window.localStorage;}catch(e){}var last=seasonModel.persisted(movie,owner.account,owner.profile,storage);return seasonModel.choose(movie,list,native,last,new Date());}
+    function streamSeasonTitle(movie){return movie.title||movie.name||movie.original_title||movie.original_name||'';}
+    function streamSeasonQuery(movie,season){var title=streamSeasonTitle(movie),language=(Lampa.Storage.field('parse_lang')||'').toLowerCase(),base=language==='original'?(movie.original_title||movie.original_name||title):language==='en'?(movie.title||movie.name||movie.original_title||movie.original_name||title):(movie.title||movie.name||title);return seasonModel.seasonQuery(base,season,'padded');}
+    function streamPersistSeason(record,movie,season){var owner=streamSeasonOwner(record),storage;try{storage=window.localStorage;}catch(e){}seasonModel.save(movie,season,owner.account,owner.profile,storage);}
+    function streamSeasonButtons(record){return record.streamSeasonRow&&Array.prototype.slice.call(record.streamSeasonRow.querySelectorAll('.tc-season-button'))||[];}
+    function streamFocusSeason(record,season){var st=record.streamChild,buttons=streamSeasonButtons(record),target=buttons.filter(function(n){return Number(n.dataset.season)===Number(season);})[0];if(!target)return;target.scrollIntoView({block:'nearest',inline:'center',behavior:'auto'});if(st){st.last=target;streamFocus(st,target);}else if(record.streamView&&record.streamView.isOpen()){Lampa.Controller.collectionSet(record.streamPane,false,true);Lampa.Controller.collectionFocus(target,record.streamPane);}}
+    function renderStreamSeasons(record,movie){
+        if(!record.streamSeasonRow)return;var row=record.streamSeasonRow,list=seasonModel.list(movie,record.kind);
+        if(!list){row.hidden=false;row.dataset.state='loading';row.innerHTML='<span class="tc-season-loading" role="status">Завантаження сезонів…</span>';return;}
+        row.hidden=false;row.dataset.state=list.length?'ready':'empty';row.textContent='';
+        if(!list.length){var empty=document.createElement('span');empty.className='tc-season-loading';empty.textContent='Немає підтверджених сезонів';row.appendChild(empty);return;}
+        var owner=streamSeasonOwner(record),selected=streamSelectedSeason(record,movie,list);if(!list.some(function(s){return s.number===Number(record.selectedSeason);}))record.selectedSeason=selected;
+        list.forEach(function(season){var button=document.createElement('button');button.type='button';button.className='tc-season-button selector';button.dataset.season=season.number;button.setAttribute('aria-pressed',String(Number(record.selectedSeason)===season.number));button.textContent='S'+String(season.number).padStart(2,'0');$(button).on('hover:enter.tcCinema',function(e){e.stopImmediatePropagation();activateStreamSeason(record,season.number);});button.addEventListener('click',function(e){e.stopPropagation();activateStreamSeason(record,season.number);});row.appendChild(button);});
+        row.classList.toggle('has-overflow',row.scrollWidth>row.clientWidth);var focus=Number(record.selectedSeason);var focused=record.streamChild&&record.streamChild.last;var wanted=focused&&focused.classList&&focused.classList.contains('tc-season-button')?Number(focused.dataset.season):focus;var button=streamSeasonButtons(record).filter(function(n){return Number(n.dataset.season)===wanted;})[0];if(button)button.scrollIntoView({block:'nearest',inline:'nearest'});
+    }
+    function fetchStreamSeasonMetadata(record,movie){var sources=Lampa.Api&&Lampa.Api.sources,source=sources&&(sources[movie.source]||sources.tmdb);if(!source||typeof source.get!=='function'||!movie.id||record.seasonRequest)return;var key=String(movie.source||'tmdb')+':'+String(movie.id);record.seasonRequest=key;source.get('tv/'+movie.id,{},function(data){if(record.seasonRequest!==key||!record.streamSeasonRow||!data||String(data.id)!==String(movie.id))return;record.seasonRequest=null;movie.seasons=Array.isArray(data.seasons)?data.seasons:[];renderStreamSeasons(record,movie);if(record.streamPendingOpen){record.streamPendingOpen=false;record.streamQuery=streamParams(record);loadStreams(record);}},function(){if(record.seasonRequest===key){record.seasonRequest=null;record.streamSeasonRow.dataset.state='unavailable';var label=record.streamSeasonRow.querySelector('.tc-season-loading');if(label)label.textContent='Сезони тимчасово недоступні';if(record.streamPendingOpen){record.streamPendingOpen=false;record.streamStatus.textContent='Метадані сезонів недоступні · показано загальний пошук';record.streamQuery=streamParams(record);loadStreams(record);}}});}
+    function activateStreamSeason(record,number){var movie=streamMovie(record),list=seasonModel.list(movie,record.kind);if(!list||!list.some(function(s){return s.number===Number(number);}))return;var selected=Number(number);record.selectedSeason=selected;streamPersistSeason(record,movie,selected);renderStreamSeasons(record,movie);if(record.streamChild)record.streamChild.seasonGeneration=(record.streamChild.seasonGeneration||0)+1;record.streamQuery=Object.assign({},streamParams(record),{season:selected,search:streamSeasonQuery(movie,selected),search_one:seasonModel.seasonQuery(movie.title||movie.name||streamSeasonTitle(movie),selected,'english'),search_two:seasonModel.seasonQuery(movie.original_title||movie.original_name||streamSeasonTitle(movie),selected,'uk-postfix'),filter_season:undefined,filter_episode:undefined});closeStreamChild(record);loadStreams(record);}
     function streamParams(record) {
         var movie=JSON.parse(JSON.stringify(streamMovie(record))),year=String(movie.release_date||movie.first_air_date||'0000').slice(0,4), df=movie.original_title||movie.original_name||movie.title||movie.name,lg=movie.title||movie.name||df;
         var names={df:df,df_year:df+' '+year,df_lg:df+' '+lg,df_lg_year:df+' '+lg+' '+year,lg:lg,lg_year:lg+' '+year,lg_df:lg+' '+df,lg_df_year:lg+' '+df+' '+year};
-        return {component:'torrents',url:'',title:Lampa.Lang.translate('title_torrents'),search:names[Lampa.Storage.field('parse_lang')]||df,search_one:lg,search_two:df,movie:movie,page:1};
+        var params={component:'torrents',url:'',title:Lampa.Lang.translate('title_torrents'),search:names[Lampa.Storage.field('parse_lang')]||df,search_one:lg,search_two:df,movie:movie,page:1};
+        if(record.kind==='tv'){
+            var list=seasonModel.list(movie,'tv');if(list&&list.length){var selected=record.selectedSeason&&list.some(function(s){return s.number===Number(record.selectedSeason);})?Number(record.selectedSeason):streamSelectedSeason(record,movie,list);record.selectedSeason=selected;params.season=selected;params.search=streamSeasonQuery(movie,selected);params.search_one=seasonModel.seasonQuery(lg,selected,'english');params.search_two=seasonModel.seasonQuery(df,selected,'uk-postfix');}
+        }
+        return params;
     }
     function streamHeaderTitle(params){var movie=params.movie||{},title=movie.title||movie.name||movie.original_title||movie.original_name||'Торренти',year=String(movie.release_date||movie.first_air_date||'').slice(0,4),season=Number(params.season||params.filter_season),episode=Number(params.episode||params.filter_episode),parts=[title];if(year)parts.push(year);if(season>0)parts.push('Сезон '+season);if(episode>0)parts.push('Серія '+episode);return parts.join(' · ');}
     function streamStatus(record,text) {if(record.streamStatus)record.streamStatus.textContent=text;}
     function streamResultStatus(st) {
         if(st.error)return 'Парсер недоступний · Оновити — повторна спроба';
-        if(st.total===0)return 'Джерел не знайдено';
+        if(st.total===0&&!(st.record&&st.record.kind==='tv'&&st.rawTotal>0))return 'Джерел не знайдено';
         if(st.total==null)return 'Джерела';
+        if(st.record&&st.record.kind==='tv'&&Number(st.params.season)>0){var active=Number(st.params.season),shown=st.displayRows||[],seasonCount=shown.filter(function(row){return row._tcSeasonGroup==='season';}).length,collectionCount=shown.filter(function(row){return row._tcSeasonGroup==='collection';}).length,rawCount=Number(st.rawTotal);return (st.partial?'Частина парсерів недоступна · ':'')+'Парсер знайшов: '+(Number.isFinite(rawCount)&&rawCount>0?rawCount:st.total)+' · S'+String(active).padStart(2,'0')+': '+seasonCount+' · колекції: '+collectionCount;}
         var loaded=(st.displayRows||st.rows||[]).length,filter=st.child&&st.child.getFilterData?st.child.getFilterData()||{}:{},season=Array.isArray(filter.season)?filter.season:filter.season==null?[]:[filter.season],quality=Array.isArray(filter.quality)?filter.quality:filter.quality==null?[]:[filter.quality],tracker=window.TorrentsRedesign&&window.TorrentsRedesign.selectedTrackerFilter?window.TorrentsRedesign.selectedTrackerFilter():'all',filtered=season.length>0||quality.length>0||!!st.uaOnly||tracker!=='all';
         var count='Знайдено загалом: '+st.total;
         if(filtered){var scope=[];if(season.length)scope.push('сезон '+season.map(function(value){var n=Number(value);return isFinite(n)?'S'+('0'+n).slice(-2):String(value);}).join(', '));if(quality.length||st.uaOnly||tracker!=='all')scope.push('поточні фільтри');count+=' · '+scope.join(' + ')+': завантажено '+loaded;}
@@ -164,6 +187,7 @@ function createCinemaRuntime(metadata) {
     }
     function streamSession(){return window.LampaTorrentOverlay?LampaTorrentOverlay.session():String(streamGeneration);}
     function streamAlive(st){var a=Lampa.Activity.active();return running&&!st.dead&&st.record.streamChild===st&&st.session===streamSession()&&a&&a.activity===st.record.activity;}
+    function streamOwnSeasonFilter(child){var get=child.getFilterData,local=Object.assign({},typeof get==='function'?get.call(child)||{}:{});local.season=[];child.getFilterData=function(){var value=Object.assign({},local);value.season=[];return value;};child.setFilterData=function(next){local=Object.assign({},local,next||{});local.season=[];};}
     function streamShellActivate(record){
         function focus(step){var items=Array.prototype.filter.call(record.streamPane.querySelectorAll('.sh-stream-head .selector,.sh-stream-load'),function(n){return !n.hidden&&n.offsetParent!==null;}),index=items.findIndex(function(n){return n.classList.contains('focus');});Lampa.Controller.collectionSet(record.streamPane);if(items.length)Lampa.Controller.collectionFocus(items[Math.max(0,Math.min(items.length-1,index+step))],record.streamPane);}
         Lampa.Controller.add('sh_movie_streams',{toggle:function(){focus(0);},up:function(){focus(-1);},left:function(){focus(-1);},down:function(){focus(1);},right:function(){focus(1);},back:function(){closeStreamOverlay(record,true);}});Lampa.Controller.toggle('sh_movie_streams');
@@ -209,8 +233,8 @@ function createCinemaRuntime(metadata) {
         st.windowStart=Math.max(0,Math.min(Number(start)||0,Math.max(0,rows.length-1)));st.windowing=true;
         var desired=rows.slice(st.windowStart,st.windowStart+40),current=Array.prototype.slice.call(list.querySelectorAll('.torrent-item'));
         if(current.length!==desired.length||current.some(function(node,i){return node!==desired[i];})){
-            st.rows.forEach(function(node){if(node.parentNode)node.parentNode.removeChild(node);});
-            desired.forEach(function(node){list.appendChild(node);});
+            st.rows.forEach(function(node){if(node.parentNode)node.parentNode.removeChild(node);});list.querySelectorAll('.tc-season-section').forEach(function(node){node.remove();});
+            var lastGroup='';desired.forEach(function(node){var group=node._tcSeasonGroup||'';if(group&&group!==lastGroup){var heading=document.createElement('div');heading.className='tc-season-section';heading.textContent=group==='collection'?'Колекції сезонів':'Сезон '+Number(st.params.season);list.appendChild(heading);lastGroup=group;}list.appendChild(node);});
         }
         if(scroll)scroll.scrollTop=top;st.windowing=false;
     }
@@ -239,7 +263,7 @@ function createCinemaRuntime(metadata) {
     function streamTrackerKey(st){var api=window.TorrentsRedesign;return api&&api.selectedTrackerFilter?api.selectedTrackerFilter():'all';}
     function streamSortKey(){var value;try{value=Lampa.Storage.get('torrents_cinema_sort','recommended');}catch(e){}return value||'recommended';}
     function streamUpdateRows(st){
-        var api=window.TorrentsRedesign,filter=streamTrackerKey(st),movie=st.params.movie||{},nativeFilter=st.child&&st.child.getFilterData?st.child.getFilterData()||{}:{},context=Object.assign({},st.params,nativeFilter),qualityFilter=Array.isArray(nativeFilter.quality)?nativeFilter.quality:[],best=null,bestScore=-Infinity,preferredQuality='1080',seen=Object.create(null);
+        var api=window.TorrentsRedesign,filter=streamTrackerKey(st),movie=st.params.movie||{},nativeFilter=st.child&&st.child.getFilterData?st.child.getFilterData()||{}:{},context=Object.assign({},st.params,nativeFilter),qualityFilter=Array.isArray(nativeFilter.quality)?nativeFilter.quality:[],best=null,bestScore=-Infinity,bestCollection=null,bestCollectionScore=-Infinity,preferredQuality='1080';var seen=Object.create(null),seasonActive=st.record.kind==='tv'&&Number(st.params.season)>0,selectedSeason=Number(st.params.season);
         try{preferredQuality=Lampa.Storage.get('torrents_cinema_quality','1080')||'1080';}catch(e){}
         st.rows.forEach(function(row){
             var source=st.sourceData.get(row)||row._ctrSource||{Title:row.querySelector('.torrent-item__title')?.textContent||''};
@@ -249,13 +273,15 @@ function createCinemaRuntime(metadata) {
             if(!data)data=row._ctrData;
             if(!data)return;var hash=String(source.InfoHash||source.infohash||source.hash||'').toLowerCase(),duplicate=/^[a-f0-9]{40}$/.test(hash)&&!!seen[hash];if(/^[a-f0-9]{40}$/.test(hash))seen[hash]=true;row.classList.toggle('sh-duplicate-hidden',metadata.flag('dedupe',false)&&duplicate);row._ctrSource=source;row._ctrData=data;row._shMatch=view&&view.match;bindInline(st,row);
             if(!row._shMatch&&api&&api.releaseMatch)row._shMatch=api.releaseMatch(data,movie,context);
+            var seasonClass=seasonActive?seasonModel.classify(source.Title||source.Name||source.title||source.name||'',source,selectedSeason):null;row._tcSeasonGroup=seasonActive?(seasonClass.kind==='season'&&seasonClass.contains?'season':seasonClass.kind==='collection'?'collection':''):'';row.classList.toggle('tc-season-hidden',!!(seasonActive&&!row._tcSeasonGroup));row.dataset.seasonCoverage=seasonClass?seasonClass.label:'';
             var matches=(!st.uaOnly||!!data.parsed.audio&&data.parsed.audio.ua)&&(!api||!api.trackerMatches||api.trackerMatches(data.tracker,filter)),qualityMatches=!qualityFilter.length||qualityFilter.some(function(q){q=String(q).toLowerCase();return q==='4k'||q==='2160'?data.parsed.quality==='2160':String(data.parsed.quality)===q.replace(/p$/,'');});row.classList.toggle('sh-tracker-hidden',!matches);row.classList.remove('is-best','sh-source-pick');
             data.sortScore=api&&api.score?api.score(data,row._shMatch,{ua:metadata.flag('ua',true),audio:metadata.flag('ua_audio',true),subs:metadata.flag('ua_subs',true),quality:preferredQuality}):0;
-            if(metadata.flag('auto',true)&&(!st.uaOnly||data.parsed.audio&&data.parsed.audio.ua)&&qualityMatches&&!row.hidden&&!row.classList.contains('sh-duplicate-hidden')&&row._shMatch&&api&&api.bestMatchAllowed&&api.bestMatchAllowed(data,movie,row._shMatch)&&data.sortScore>bestScore){best=row;bestScore=data.sortScore;}
+            var validSeason=!seasonActive||row._tcSeasonGroup==='season'&&seasonClass.contains||row._tcSeasonGroup==='collection'&&seasonClass.contains;
+            if(metadata.flag('auto',true)&&validSeason&&(!st.uaOnly||data.parsed.audio&&data.parsed.audio.ua)&&qualityMatches&&!row.hidden&&!row.classList.contains('sh-duplicate-hidden')&&row._shMatch&&api&&api.bestMatchAllowed&&api.bestMatchAllowed(data,movie,row._shMatch)){if(row._tcSeasonGroup==='collection'){if(data.sortScore>bestCollectionScore){bestCollection=row;bestCollectionScore=data.sortScore;}}else if(data.sortScore>bestScore){best=row;bestScore=data.sortScore;}}
         });
-        var visible=st.rows.filter(function(row){var data=row._ctrData||{},qualityFilter=st.child&&st.child.getFilterData?st.child.getFilterData().quality:[];qualityFilter=Array.isArray(qualityFilter)?qualityFilter:[];var qualityMatches=!qualityFilter.length||qualityFilter.some(function(q){q=String(q).toLowerCase();return q==='4k'||q==='2160'?data.parsed.quality==='2160':String(data.parsed.quality)===q.replace(/p$/,'');});return !row.hidden&&qualityMatches&&!row.classList.contains('sh-tracker-hidden')&&!row.classList.contains('sh-duplicate-hidden');});
+        if(!best)best=bestCollection;var visible=st.rows.filter(function(row){var data=row._ctrData||{},qualityFilter=st.child&&st.child.getFilterData?st.child.getFilterData().quality:[];qualityFilter=Array.isArray(qualityFilter)?qualityFilter:[];var qualityMatches=!qualityFilter.length||qualityFilter.some(function(q){q=String(q).toLowerCase();return q==='4k'||q==='2160'?data.parsed.quality==='2160':String(data.parsed.quality)===q.replace(/p$/,'');});return !row.hidden&&!row.classList.contains('tc-season-hidden')&&qualityMatches&&!row.classList.contains('sh-tracker-hidden')&&!row.classList.contains('sh-duplicate-hidden');});
         st.best=best;var ordinary=visible.filter(function(row){return row!==best;});ordinary=api&&api.sortReleaseRows?api.sortReleaseRows(ordinary,streamSortKey()):ordinary.slice();
-        var ordered=best?[best].concat(ordinary):ordinary;st.displayRows=best&&api&&api.pinBestRow?api.pinBestRow(ordered,best,true):ordered;
+        var singles=ordinary.filter(function(row){return row._tcSeasonGroup!=='collection';}),collections=ordinary.filter(function(row){return row._tcSeasonGroup==='collection';});var ordered=(best?[best]:[]).concat(singles,collections);st.displayRows=best&&api&&api.pinBestRow?api.pinBestRow(ordered,best,true):ordered;
         if(best){
             st.displayRows=st.displayRows.filter(function(row,index){return index===0||row!==best;});
             best.classList.remove('sh-tracker-hidden');
@@ -380,6 +406,7 @@ function createCinemaRuntime(metadata) {
         function controls(selector){return Array.prototype.filter.call(st.record.streamPane.querySelectorAll(selector),function(n){return !n.hidden&&!n.disabled&&n.getAttribute('aria-disabled')!=='true'&&n.offsetParent!==null;});}
         return [
             controls('.sh-stream-head .selector:not([data-nav-group="filters"])'),
+            controls('.tc-season-button'),
             controls('.ctr-tabs:not(.ctr-tracker-tabs) .selector'),
             controls('.ctr-tracker-tabs .selector'),
             controls('.sh-stream-head [data-nav-group="filters"],.torrent-filter .selector,.parser-providers-toolbar .selector')
@@ -478,6 +505,7 @@ function createCinemaRuntime(metadata) {
     }
     function loadStreams(record) {
         openStreamOverlay(record);
+        if(record.kind==='tv'&&!seasonModel.list(streamMovie(record),'tv')){record.streamPendingOpen=true;if(record.streamSeasonRow){record.streamSeasonRow.dataset.state='loading';var seasonLabel=record.streamSeasonRow.querySelector('.tc-season-loading');if(seasonLabel)seasonLabel.textContent='Завантаження сезонів…';}streamStatus(record,'Завантаження метаданих сезонів…');fetchStreamSeasonMetadata(record,streamMovie(record));return;}
         if(record.streamChild&&(record.streamChild.session!==streamSession()||record.streamChild.expires&&record.streamChild.expires<Date.now()))closeStreamChild(record);
         if(record.streamChild){var existing=record.streamChild;existing.wantFocus=true;if(existing.deferred){var deferred=existing.deferred;existing.deferred=null;deferred();}streamActivate(record);return;}
         if(typeof Lampa.Component.get('torrents')!=='function'){streamStatus(record,'Модуль торрентів недоступний · Повторіть спробу');streamShellActivate(record);return;}
@@ -512,8 +540,11 @@ function createCinemaRuntime(metadata) {
                 streamCache=streamCache.filter(function(item){return item.expires>Date.now();});var cached=streamCache.filter(function(item){return item.key===key;})[0];
                 if(cached){record.streamPane.dataset.cacheHit='true';st.total=cached.data.Results.length;st.expires=cached.expires;var data=JSON.parse(JSON.stringify(cached.data)),viewed=Lampa.Storage.cache('torrents_view',5000,[]);data.Results.forEach(function(item){item.viewed=viewed.indexOf(item.hash)>-1;});done(data);return;}
                 record.streamPane.dataset.cacheHit='false';
-                return originalGet.call(this,query,function(data){if(!streamAlive(st))return;st.total=data.Results.length;st.partial=(data.parser_status||[]).some(function(s){return s.status!=='ready'&&s.status!=='empty'&&s.status!=='loading';});var serialized=JSON.stringify(data);if(!data.parser_pending&&!(data.parser_status||[]).some(function(s){return s.status!=='ready'&&s.status!=='empty';})&&serialized.length<2000000){streamCache=streamCache.filter(function(item){return item.key!==key;});streamCache.push({key:key,data:JSON.parse(serialized),expires:st.expires=Date.now()+(data.Results.length?300000:60000)});while(streamCache.length>4)streamCache.shift();}if(!record.streamView.isOpen()){st.deferred=function(){done(data);};return;}done(data);},function(error){if(!streamAlive(st))return;st.error=true;if(!record.streamView.isOpen()){st.deferred=function(){fail(error);};return;}fail(error);});
+                return originalGet.call(this,query,function(data){if(!streamAlive(st))return;st.total=data.Results.length;st.rawTotal=Number.isFinite(Number(data.torrent_search_raw_total))?Number(data.torrent_search_raw_total):(data.parser_status||[]).reduce(function(total,state){return total+(Number(state.count)||0);},0);st.partial=(data.parser_status||[]).some(function(s){return s.status!=='ready'&&s.status!=='empty'&&s.status!=='loading';});var serialized=JSON.stringify(data);if(!data.parser_pending&&!(data.parser_status||[]).some(function(s){return s.status!=='ready'&&s.status!=='empty';})&&serialized.length<2000000){streamCache=streamCache.filter(function(item){return item.key!==key;});streamCache.push({key:key,data:JSON.parse(serialized),expires:st.expires=Date.now()+(data.Results.length?300000:60000)});while(streamCache.length>4)streamCache.shift();}if(!record.streamView.isOpen()){st.deferred=function(){done(data);};return;}done(data);},function(error){if(!streamAlive(st))return;st.error=true;if(!record.streamView.isOpen()){st.deferred=function(){fail(error);};return;}fail(error);});
             };
+            // The overlay's explicit season is authoritative. Clear only this child
+            // component's transient native filter; never write the saved preference.
+            if(record.kind==='tv'&&Number(params.season)>0)streamOwnSeasonFilter(st.child);
             var parse=st.child.parse;st.child.parse=function(){if(!streamAlive(st))return;originalGet=Lampa.Parser.get;Lampa.Parser.get=getForChild;try{return parse.apply(st.child,arguments);}finally{Lampa.Parser.get=originalGet;}};st.child.initialize();streamSyncRows(st);
             if(st.loading)streamActivate(record);
         }catch(error){if(st.child&&typeof st.child.destroy==='function')closeStreamChild(record);else record.streamChild=null;streamStatus(record,'Вбудовані джерела недоступні. Спробуйте оновити джерела.');record.streamLoad.hidden=false;streamShellActivate(record);}
@@ -542,8 +573,9 @@ function createCinemaRuntime(metadata) {
         }
         installStreamRoutes();
         var pane=document.createElement('section');pane.className='sh-streams';pane.setAttribute('aria-label','Торрентні джерела');pane.setAttribute('aria-busy','false');
-        pane.innerHTML='<div class="sh-stream-head"><h2>Торренти</h2><div class="sh-stream-retry selector" role="button" title="Повторити пошук">Оновити</div><div class="sh-stream-close selector" role="button" aria-label="Закрити торренти">Закрити · Back</div></div><div class="sh-stream-status" role="status">Джерела завантажуються лише після відкриття</div><div class="sh-stream-load selector" role="button">Показати джерела</div><div class="sh-stream-content"></div>';
+        pane.innerHTML='<div class="sh-stream-head"><h2>Торренти</h2><div class="sh-stream-retry selector" role="button" title="Повторити пошук">Оновити</div><div class="sh-stream-close selector" role="button" aria-label="Закрити торренти">Закрити · Back</div></div>'+(record.kind==='tv'?'<div class="tc-season-selector" aria-label="Сезони"></div>':'')+'<div class="sh-stream-status" role="status">Джерела завантажуються лише після відкриття</div><div class="sh-stream-load selector" role="button">Показати джерела</div><div class="sh-stream-content"></div>';
         record.streamPane=pane;record.streamContent=pane.querySelector('.sh-stream-content');record.streamStatus=pane.querySelector('.sh-stream-status');record.streamLoad=pane.querySelector('.sh-stream-load');record.page.classList.add('sh-has-streams');
+        record.streamSeasonRow=pane.querySelector('.tc-season-selector');if(record.streamSeasonRow){renderStreamSeasons(record,streamMovie(record));if(!seasonModel.list(streamMovie(record),'tv'))fetchStreamSeasonMetadata(record,streamMovie(record));}
         record.streamView=LampaTorrentOverlay.create(pane,record.page);
         pane.querySelector('h2').textContent='Торренти · '+streamHeaderTitle(streamParams(record));
         record.streamEnter=function(event){

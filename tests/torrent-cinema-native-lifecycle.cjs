@@ -57,6 +57,10 @@ test('result status distinguishes raw all-season totals from a loaded native sea
     assert.match(filtered,/Знайдено загалом: 142/);assert.match(filtered,/сезон S01: завантажено 14/);assert.doesNotMatch(filtered,/14 із 142/);
     assert.match(progressive,/завантажено 14 із 142/);
 });
+test('season status reports raw parser total separately from selected-season and collection counts',()=>{
+ const context={window:{TorrentsRedesign:{selectedTrackerFilter:()=> 'all'}}};vm.createContext(context);vm.runInContext(slice('    function streamResultStatus(','    function streamSession('),context);
+ const state={record:{kind:'tv'},params:{season:8},total:5,rawTotal:23,displayRows:[{_tcSeasonGroup:'season'},{_tcSeasonGroup:'season'},{_tcSeasonGroup:'collection'}]};assert.equal(context.streamResultStatus(state),'Парсер знайшов: 23 · S08: 2 · колекції: 1');state.total=0;assert.equal(context.streamResultStatus(state),'Парсер знайшов: 23 · S08: 2 · колекції: 1');
+});
 function loadingFixture(initial=[]){
     let observer=null,timer=null,disconnected=0,cleared=0;const nodes=initial.slice();
     class Observer{constructor(fn){this.fn=fn;observer=this;}observe(){}disconnect(){disconnected++;observer=null;}}
