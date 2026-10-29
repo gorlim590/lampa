@@ -67,11 +67,11 @@ The paired screenshots show the same synthetic catalog at 1920×1080: the 120-ca
 
 ## CI gate
 
-All five GitHub Actions passed on implementation checkpoint `baed6e7bdce6d198cbe2bb171f23c582c3d6d078` (Repository checks, Home order, Home history, Parser provider regressions, Season integrity). Its Repository checks log confirms `tests/trakt-more-view.cjs` ran in the Trakt/YDesign regression step, which passed 224/224. A final evidence-only documentation sync is receiving its own CI run before delivery.
+All five GitHub Actions passed on final SHA `e97a9b57404bdaea953019e19372625873718497` (Repository checks, Home order, Home history, Parser provider regressions, Season integrity). The Repository checks log confirms `tests/trakt-more-view.cjs` ran in the Trakt/YDesign regression step, which passed 224/224.
 
 ## Limitations and acceptance status
 
-- **Verified by tests:** first build uses cache; page size is 24; duplicates are suppressed; credential/profile ownership guards block stale pages; 429 honors `Retry-After` without timer retries; failures retain the retry cursor; final-page notification is emitted when the final real batch arrives; row identity stays bound to the existing native viewer.
+- **Verified by tests:** first build uses cache; page size is 24; duplicates are suppressed; credential/profile ownership guards block stale pages; 429 honors `Retry-After` without timer retries; failures retain the retry cursor; final-page notification is emitted when the final real batch arrives; row identity stays bound to the existing native viewer. The focused local Trakt/More/ratings/personalization suite passes 147/147.
 - **Browser verified:** installed native Lampa `Category` accepts the fixture, Arrow navigation works, viewport layouts render, and Escape returns to Details.
 - **Changed-source runtime:** `trakt/trakt-plus.js` was not injected into the signed-in main tab. Re-executing it could duplicate account-scoped listeners/row registrations and invoke authenticated reads; the authorized DevTools MCP exposes no safe route-level script interception. Production handlers are tested from exact source in Node VM tests; browser tests validate the installed native Category/Activity contract.
 - **Native limitation:** installed `Category` accumulates DOM items as pages are appended (120 cards remained after five 24-card pages). This PR reduces initial DOM to one 24-item batch, but does not claim virtualization or a bounded lifetime DOM window. A safe native Category recycling contract has not been established.
