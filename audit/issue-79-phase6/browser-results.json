@@ -1,0 +1,898 @@
+{
+  "schema": 2,
+  "issue": 79,
+  "phase": 6,
+  "acceptance": "controlled cold-start; five interleaved runs per revision, three Home→Details→Back cycles per run",
+  "baseCommit": "c49961a0d8d7d88b609ead2def34f5c5bc2c7e6d",
+  "branchSourceSha256": {
+    "loader.js": "cb9833f6d6821464e1cc0fd4213fb599e7edc2a2205d0dd110e6b46b2115e2c1",
+    "ui/stremio-hybrid.js": "2a77c7f3c5e759acde5040589e078f52a105fd1485a8f89bc8f55fc041a9f139",
+    "ui/interface-plus.js": "e5e5c2d43f1ddf10beaa9eceae64fbdd83b846d595f555bda032223ea6377fd3",
+    "ui/design-optimized.js": "30921cac2b50e9f29447a97106c3c58bc3c5424c2a8eed9e6eb76cb53b9a2ecb",
+    "ui/cardify-plus.js": "ab3e622d18e58f4c12f0192828bb0ace6551eec65cfbdae34637182df546aa74",
+    "ui/settings-hub.js": "d90281c4550ad80b9dbc89a1cbc3b70a2159b1dda5973f890504715915e25fa4",
+    "ui/torrent-cinema.js": "312accb1711376c1edaca433d243a9e8774ca14e5d1c513af90387294a069b64",
+    "trakt/trakt.js": "418a30fb4269134666f7e0c8ca5934cd04719d6d42a2a111646215f86b8be50b",
+    "trakt/trakt-plus.js": "c67f8565fd20b86d4cf2f14771537a0f5a81ae12df9a4d9232d80a690fdd2bbb",
+    "providers/torrent-search.js": "5775add9fd0c1bbd672a0d16daf9278e7154e19433743222efe388ee6a329c4b",
+    "media/average-rating.js": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+    "localization/translate.js": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
+    "plugins-to-enable/home-policy.js": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+    "plugins-to-enable/home-history.js": "6ad4f518561ea024b1b842349c88861d05565c30c9787e21f5d08199b5ddd3d0"
+  },
+  "environment": {
+    "viewport": [
+      1920,
+      1080
+    ],
+    "dpr": 1,
+    "condition": "new disposable Chromium context each run; empty cache/storage/cookies; actual Siaivo host/core; exact local repository source intercepted before host bootstrap; controlled 24-TV Favorite fixture; same endpoint policies"
+  },
+  "summary": {
+    "firstUsableHomeMs": {
+      "main": {
+        "values": [
+          3975,
+          4198.1,
+          4450.2,
+          4475,
+          6507
+        ],
+        "median": 4450.2,
+        "range": [
+          3975,
+          6507
+        ]
+      },
+      "branch": {
+        "values": [
+          3740.1,
+          4029.9,
+          4168,
+          4324.3,
+          5036.6
+        ],
+        "median": 4168,
+        "range": [
+          3740.1,
+          5036.6
+        ]
+      }
+    },
+    "appreadyToHomeMs": {
+      "main": {
+        "values": [
+          724.1,
+          726,
+          903.5,
+          1027.1,
+          1113.6
+        ],
+        "median": 903.5,
+        "range": [
+          724.1,
+          1113.6
+        ]
+      },
+      "branch": {
+        "values": [
+          670.3,
+          700.1,
+          721.4,
+          947.8,
+          1154.1
+        ],
+        "median": 721.4,
+        "range": [
+          670.3,
+          1154.1
+        ]
+      }
+    },
+    "firstDpadResponseMs": {
+      "main": {
+        "values": [
+          62.6,
+          71.3,
+          78.6,
+          85.9,
+          567.8
+        ],
+        "median": 78.6,
+        "range": [
+          62.6,
+          567.8
+        ]
+      },
+      "branch": {
+        "values": [
+          57.6,
+          67.3,
+          73.5,
+          83.8,
+          167.8
+        ],
+        "median": 73.5,
+        "range": [
+          57.6,
+          167.8
+        ]
+      }
+    },
+    "detailsResponseMs": {
+      "main": {
+        "values": [
+          715.6,
+          821.4,
+          932.2,
+          1059.5,
+          1170
+        ],
+        "median": 932.2,
+        "range": [
+          715.6,
+          1170
+        ]
+      },
+      "branch": {
+        "values": [
+          711.3,
+          742.6,
+          772.5,
+          903,
+          1000.6
+        ],
+        "median": 772.5,
+        "range": [
+          711.3,
+          1000.6
+        ]
+      }
+    },
+    "backResponseMs": {
+      "main": {
+        "values": [
+          87.4,
+          94.4,
+          297.2,
+          403,
+          792.3
+        ],
+        "median": 297.2,
+        "range": [
+          87.4,
+          792.3
+        ]
+      },
+      "branch": {
+        "values": [
+          92.5,
+          97.2,
+          126.2,
+          213.7,
+          602.1
+        ],
+        "median": 126.2,
+        "range": [
+          92.5,
+          602.1
+        ]
+      }
+    },
+    "detailsCycles": {
+      "main": "15/15",
+      "branch": "15/15"
+    },
+    "backFocusRestoration": {
+      "main": "15/15",
+      "branch": "15/15"
+    },
+    "fixtureMetadataRequests": {
+      "main": {
+        "beforeFirstUsable": "115/120",
+        "afterFirstUsable": "5/120"
+      },
+      "branch": {
+        "beforeFirstUsable": "0/120",
+        "afterFirstUsable": "120/120"
+      }
+    }
+  },
+  "navigationFixtureFailureInvestigation": {
+    "initialFailure": "A prior controlled run failed while opening a synthetic TV Details item; at failure the native Activity was full, controller content, and app.min.js threw TypeError: countries.join is not a function.",
+    "classification": "Fixture contract error: the synthetic TMDb TV response omitted countries: [] expected by native Details. The controlled TV response now includes the correctly typed countries, origin_country, production_countries and genres arrays. After correction, 15/15 Details opens and 15/15 Back focus restorations pass per revision; no page exceptions in the final ten runs."
+  },
+  "runs": [
+    {
+      "run": 1,
+      "mode": "main",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "dpr": 1,
+      "domContentLoaded": 2908,
+      "loaderRequested": 3589.7,
+      "loaderExecuted": 3622.4,
+      "hybridFirstActiveFrame": 3689.8,
+      "nativeAppReady": 5781,
+      "firstUsableHome": 6507,
+      "appreadyToHome": 726,
+      "firstDpadResponseMs": 71.3,
+      "detailsResponseMs": 1059.5,
+      "backResponseMs": 297.2,
+      "threeCycles": [
+        {
+          "detailsMs": 1059.5,
+          "detailsController": "full_start",
+          "backMs": 297.2,
+          "backRestored": true,
+          "blocked": false
+        },
+        {
+          "detailsMs": 418.8,
+          "detailsController": "full_start",
+          "backMs": 186.9,
+          "backRestored": true,
+          "blocked": false
+        },
+        {
+          "detailsMs": 479.3,
+          "detailsController": "full_start",
+          "backMs": 540.8,
+          "backRestored": true,
+          "blocked": false
+        }
+      ],
+      "tvMetadata": {
+        "candidateFixtureCount": 24,
+        "favoriteGetCalls": 11,
+        "totalRequests": 24,
+        "beforeFirstUsable": 24,
+        "afterFirstUsable": 0,
+        "maxObservedConcurrent": 4,
+        "rowsEnabledByDefault": true,
+        "source": "tmdb"
+      },
+      "pageErrors": [],
+      "localAssetHashes": {
+        "loader.js": "cb9833f6d6821464e1cc0fd4213fb599e7edc2a2205d0dd110e6b46b2115e2c1",
+        "ui/stremio-hybrid.js": "2a77c7f3c5e759acde5040589e078f52a105fd1485a8f89bc8f55fc041a9f139",
+        "ui/interface-plus.js": "e5e5c2d43f1ddf10beaa9eceae64fbdd83b846d595f555bda032223ea6377fd3",
+        "ui/design-optimized.js": "6aa3d3824a858668f84784d5860120c61ab0e0285d6c4bbc5f3875478db72de5",
+        "ui/cardify-plus.js": "ab3e622d18e58f4c12f0192828bb0ace6551eec65cfbdae34637182df546aa74",
+        "ui/settings-hub.js": "d90281c4550ad80b9dbc89a1cbc3b70a2159b1dda5973f890504715915e25fa4",
+        "ui/torrent-cinema.js": "312accb1711376c1edaca433d243a9e8774ca14e5d1c513af90387294a069b64",
+        "trakt/trakt.js": "418a30fb4269134666f7e0c8ca5934cd04719d6d42a2a111646215f86b8be50b",
+        "trakt/trakt-plus.js": "c67f8565fd20b86d4cf2f14771537a0f5a81ae12df9a4d9232d80a690fdd2bbb",
+        "providers/torrent-search.js": "5775add9fd0c1bbd672a0d16daf9278e7154e19433743222efe388ee6a329c4b",
+        "media/average-rating.js": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+        "localization/translate.js": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
+        "plugins-to-enable/home-policy.js": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+        "plugins-to-enable/home-history.js": "6ad4f518561ea024b1b842349c88861d05565c30c9787e21f5d08199b5ddd3d0"
+      }
+    },
+    {
+      "run": 2,
+      "mode": "branch",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "dpr": 1,
+      "domContentLoaded": 755.6,
+      "loaderRequested": 1307.4,
+      "loaderExecuted": 1341.7,
+      "hybridFirstActiveFrame": 1404.4,
+      "nativeAppReady": 3018.7,
+      "firstUsableHome": 3740.1,
+      "appreadyToHome": 721.4,
+      "firstDpadResponseMs": 57.6,
+      "detailsResponseMs": 772.5,
+      "backResponseMs": 92.5,
+      "threeCycles": [
+        {
+          "detailsMs": 772.5,
+          "detailsController": "full_start",
+          "backMs": 92.5,
+          "backRestored": true,
+          "blocked": false
+        },
+        {
+          "detailsMs": 411.6,
+          "detailsController": "full_start",
+          "backMs": 83.8,
+          "backRestored": true,
+          "blocked": false
+        },
+        {
+          "detailsMs": 299.5,
+          "detailsController": "full_start",
+          "backMs": 57.2,
+          "backRestored": true,
+          "blocked": false
+        }
+      ],
+      "tvMetadata": {
+        "candidateFixtureCount": 24,
+        "favoriteGetCalls": 10,
+        "totalRequests": 24,
+        "beforeFirstUsable": 0,
+        "afterFirstUsable": 24,
+        "maxObservedConcurrent": 2,
+        "rowsEnabledByDefault": true,
+        "source": "tmdb"
+      },
+      "pageErrors": [],
+      "localAssetHashes": {
+        "loader.js": "cb9833f6d6821464e1cc0fd4213fb599e7edc2a2205d0dd110e6b46b2115e2c1",
+        "ui/stremio-hybrid.js": "2a77c7f3c5e759acde5040589e078f52a105fd1485a8f89bc8f55fc041a9f139",
+        "ui/interface-plus.js": "e5e5c2d43f1ddf10beaa9eceae64fbdd83b846d595f555bda032223ea6377fd3",
+        "ui/design-optimized.js": "30921cac2b50e9f29447a97106c3c58bc3c5424c2a8eed9e6eb76cb53b9a2ecb",
+        "ui/cardify-plus.js": "ab3e622d18e58f4c12f0192828bb0ace6551eec65cfbdae34637182df546aa74",
+        "ui/settings-hub.js": "d90281c4550ad80b9dbc89a1cbc3b70a2159b1dda5973f890504715915e25fa4",
+        "ui/torrent-cinema.js": "312accb1711376c1edaca433d243a9e8774ca14e5d1c513af90387294a069b64",
+        "trakt/trakt.js": "418a30fb4269134666f7e0c8ca5934cd04719d6d42a2a111646215f86b8be50b",
+        "trakt/trakt-plus.js": "c67f8565fd20b86d4cf2f14771537a0f5a81ae12df9a4d9232d80a690fdd2bbb",
+        "providers/torrent-search.js": "5775add9fd0c1bbd672a0d16daf9278e7154e19433743222efe388ee6a329c4b",
+        "media/average-rating.js": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+        "localization/translate.js": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
+        "plugins-to-enable/home-policy.js": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+        "plugins-to-enable/home-history.js": "6ad4f518561ea024b1b842349c88861d05565c30c9787e21f5d08199b5ddd3d0"
+      }
+    },
+    {
+      "run": 3,
+      "mode": "branch",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "dpr": 1,
+      "domContentLoaded": 934.3,
+      "loaderRequested": 1767.5,
+      "loaderExecuted": 1794.4,
+      "hybridFirstActiveFrame": 1858,
+      "nativeAppReady": 3497.7,
+      "firstUsableHome": 4168,
+      "appreadyToHome": 670.3,
+      "firstDpadResponseMs": 83.8,
+      "detailsResponseMs": 742.6,
+      "backResponseMs": 126.2,
+      "threeCycles": [
+        {
+          "detailsMs": 742.6,
+          "detailsController": "full_start",
+          "backMs": 126.2,
+          "backRestored": true,
+          "blocked": false
+        },
+        {
+          "detailsMs": 438.2,
+          "detailsController": "full_start",
+          "backMs": 376.8,
+          "backRestored": true,
+          "blocked": false
+        },
+        {
+          "detailsMs": 308.4,
+          "detailsController": "full_start",
+          "backMs": 53.5,
+          "backRestored": true,
+          "blocked": false
+        }
+      ],
+      "tvMetadata": {
+        "candidateFixtureCount": 24,
+        "favoriteGetCalls": 13,
+        "totalRequests": 24,
+        "beforeFirstUsable": 0,
+        "afterFirstUsable": 24,
+        "maxObservedConcurrent": 3,
+        "rowsEnabledByDefault": true,
+        "source": "tmdb"
+      },
+      "pageErrors": [],
+      "localAssetHashes": {
+        "loader.js": "cb9833f6d6821464e1cc0fd4213fb599e7edc2a2205d0dd110e6b46b2115e2c1",
+        "ui/stremio-hybrid.js": "2a77c7f3c5e759acde5040589e078f52a105fd1485a8f89bc8f55fc041a9f139",
+        "ui/interface-plus.js": "e5e5c2d43f1ddf10beaa9eceae64fbdd83b846d595f555bda032223ea6377fd3",
+        "ui/design-optimized.js": "30921cac2b50e9f29447a97106c3c58bc3c5424c2a8eed9e6eb76cb53b9a2ecb",
+        "ui/cardify-plus.js": "ab3e622d18e58f4c12f0192828bb0ace6551eec65cfbdae34637182df546aa74",
+        "ui/settings-hub.js": "d90281c4550ad80b9dbc89a1cbc3b70a2159b1dda5973f890504715915e25fa4",
+        "ui/torrent-cinema.js": "312accb1711376c1edaca433d243a9e8774ca14e5d1c513af90387294a069b64",
+        "trakt/trakt.js": "418a30fb4269134666f7e0c8ca5934cd04719d6d42a2a111646215f86b8be50b",
+        "trakt/trakt-plus.js": "c67f8565fd20b86d4cf2f14771537a0f5a81ae12df9a4d9232d80a690fdd2bbb",
+        "providers/torrent-search.js": "5775add9fd0c1bbd672a0d16daf9278e7154e19433743222efe388ee6a329c4b",
+        "media/average-rating.js": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+        "localization/translate.js": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
+        "plugins-to-enable/home-policy.js": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+        "plugins-to-enable/home-history.js": "6ad4f518561ea024b1b842349c88861d05565c30c9787e21f5d08199b5ddd3d0"
+      }
+    },
+    {
+      "run": 4,
+      "mode": "main",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "dpr": 1,
+      "domContentLoaded": 681.8,
+      "loaderRequested": 1469.3,
+      "loaderExecuted": 1515.7,
+      "hybridFirstActiveFrame": 1596.6,
+      "nativeAppReady": 3294.6,
+      "firstUsableHome": 4198.1,
+      "appreadyToHome": 903.5,
+      "firstDpadResponseMs": 567.8,
+      "detailsResponseMs": 932.2,
+      "backResponseMs": 792.3,
+      "threeCycles": [
+        {
+          "detailsMs": 932.2,
+          "detailsController": "full_start",
+          "backMs": 792.3,
+          "backRestored": true,
+          "blocked": false
+        },
+        {
+          "detailsMs": 358.1,
+          "detailsController": "full_start",
+          "backMs": 149.4,
+          "backRestored": true,
+          "blocked": false
+        },
+        {
+          "detailsMs": 276.2,
+          "detailsController": "full_start",
+          "backMs": 284.5,
+          "backRestored": true,
+          "blocked": false
+        }
+      ],
+      "tvMetadata": {
+        "candidateFixtureCount": 24,
+        "favoriteGetCalls": 15,
+        "totalRequests": 24,
+        "beforeFirstUsable": 19,
+        "afterFirstUsable": 5,
+        "maxObservedConcurrent": 4,
+        "rowsEnabledByDefault": true,
+        "source": "tmdb"
+      },
+      "pageErrors": [],
+      "localAssetHashes": {
+        "loader.js": "cb9833f6d6821464e1cc0fd4213fb599e7edc2a2205d0dd110e6b46b2115e2c1",
+        "ui/stremio-hybrid.js": "2a77c7f3c5e759acde5040589e078f52a105fd1485a8f89bc8f55fc041a9f139",
+        "ui/interface-plus.js": "e5e5c2d43f1ddf10beaa9eceae64fbdd83b846d595f555bda032223ea6377fd3",
+        "ui/design-optimized.js": "6aa3d3824a858668f84784d5860120c61ab0e0285d6c4bbc5f3875478db72de5",
+        "ui/cardify-plus.js": "ab3e622d18e58f4c12f0192828bb0ace6551eec65cfbdae34637182df546aa74",
+        "ui/settings-hub.js": "d90281c4550ad80b9dbc89a1cbc3b70a2159b1dda5973f890504715915e25fa4",
+        "ui/torrent-cinema.js": "312accb1711376c1edaca433d243a9e8774ca14e5d1c513af90387294a069b64",
+        "trakt/trakt.js": "418a30fb4269134666f7e0c8ca5934cd04719d6d42a2a111646215f86b8be50b",
+        "trakt/trakt-plus.js": "c67f8565fd20b86d4cf2f14771537a0f5a81ae12df9a4d9232d80a690fdd2bbb",
+        "providers/torrent-search.js": "5775add9fd0c1bbd672a0d16daf9278e7154e19433743222efe388ee6a329c4b",
+        "media/average-rating.js": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+        "localization/translate.js": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
+        "plugins-to-enable/home-policy.js": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+        "plugins-to-enable/home-history.js": "6ad4f518561ea024b1b842349c88861d05565c30c9787e21f5d08199b5ddd3d0"
+      }
+    },
+    {
+      "run": 5,
+      "mode": "main",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "dpr": 1,
+      "domContentLoaded": 920,
+      "loaderRequested": 1567.7,
+      "loaderExecuted": 1614.8,
+      "hybridFirstActiveFrame": 1664.9,
+      "nativeAppReady": 3336.6,
+      "firstUsableHome": 4450.2,
+      "appreadyToHome": 1113.6,
+      "firstDpadResponseMs": 85.9,
+      "detailsResponseMs": 1170,
+      "backResponseMs": 403,
+      "threeCycles": [
+        {
+          "detailsMs": 1170,
+          "detailsController": "full_start",
+          "backMs": 403,
+          "backRestored": true,
+          "blocked": false
+        },
+        {
+          "detailsMs": 534,
+          "detailsController": "full_start",
+          "backMs": 94.8,
+          "backRestored": true,
+          "blocked": false
+        },
+        {
+          "detailsMs": 382.5,
+          "detailsController": "full_start",
+          "backMs": 144.3,
+          "backRestored": true,
+          "blocked": false
+        }
+      ],
+      "tvMetadata": {
+        "candidateFixtureCount": 24,
+        "favoriteGetCalls": 11,
+        "totalRequests": 24,
+        "beforeFirstUsable": 24,
+        "afterFirstUsable": 0,
+        "maxObservedConcurrent": 4,
+        "rowsEnabledByDefault": true,
+        "source": "tmdb"
+      },
+      "pageErrors": [],
+      "localAssetHashes": {
+        "loader.js": "cb9833f6d6821464e1cc0fd4213fb599e7edc2a2205d0dd110e6b46b2115e2c1",
+        "ui/stremio-hybrid.js": "2a77c7f3c5e759acde5040589e078f52a105fd1485a8f89bc8f55fc041a9f139",
+        "ui/interface-plus.js": "e5e5c2d43f1ddf10beaa9eceae64fbdd83b846d595f555bda032223ea6377fd3",
+        "ui/design-optimized.js": "6aa3d3824a858668f84784d5860120c61ab0e0285d6c4bbc5f3875478db72de5",
+        "ui/cardify-plus.js": "ab3e622d18e58f4c12f0192828bb0ace6551eec65cfbdae34637182df546aa74",
+        "ui/settings-hub.js": "d90281c4550ad80b9dbc89a1cbc3b70a2159b1dda5973f890504715915e25fa4",
+        "ui/torrent-cinema.js": "312accb1711376c1edaca433d243a9e8774ca14e5d1c513af90387294a069b64",
+        "trakt/trakt.js": "418a30fb4269134666f7e0c8ca5934cd04719d6d42a2a111646215f86b8be50b",
+        "trakt/trakt-plus.js": "c67f8565fd20b86d4cf2f14771537a0f5a81ae12df9a4d9232d80a690fdd2bbb",
+        "providers/torrent-search.js": "5775add9fd0c1bbd672a0d16daf9278e7154e19433743222efe388ee6a329c4b",
+        "media/average-rating.js": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+        "localization/translate.js": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
+        "plugins-to-enable/home-policy.js": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+        "plugins-to-enable/home-history.js": "6ad4f518561ea024b1b842349c88861d05565c30c9787e21f5d08199b5ddd3d0"
+      }
+    },
+    {
+      "run": 6,
+      "mode": "branch",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "dpr": 1,
+      "domContentLoaded": 585.6,
+      "loaderRequested": 1307.6,
+      "loaderExecuted": 1332.6,
+      "hybridFirstActiveFrame": 1417.3,
+      "nativeAppReady": 3170.2,
+      "firstUsableHome": 4324.3,
+      "appreadyToHome": 1154.1,
+      "firstDpadResponseMs": 167.8,
+      "detailsResponseMs": 1000.6,
+      "backResponseMs": 602.1,
+      "threeCycles": [
+        {
+          "detailsMs": 1000.6,
+          "detailsController": "full_start",
+          "backMs": 602.1,
+          "backRestored": true,
+          "blocked": false
+        },
+        {
+          "detailsMs": 825.2,
+          "detailsController": "full_start",
+          "backMs": 543.3,
+          "backRestored": true,
+          "blocked": false
+        },
+        {
+          "detailsMs": 354.2,
+          "detailsController": "full_start",
+          "backMs": 167.9,
+          "backRestored": true,
+          "blocked": false
+        }
+      ],
+      "tvMetadata": {
+        "candidateFixtureCount": 24,
+        "favoriteGetCalls": 14,
+        "totalRequests": 24,
+        "beforeFirstUsable": 0,
+        "afterFirstUsable": 24,
+        "maxObservedConcurrent": 3,
+        "rowsEnabledByDefault": true,
+        "source": "tmdb"
+      },
+      "pageErrors": [],
+      "localAssetHashes": {
+        "loader.js": "cb9833f6d6821464e1cc0fd4213fb599e7edc2a2205d0dd110e6b46b2115e2c1",
+        "ui/stremio-hybrid.js": "2a77c7f3c5e759acde5040589e078f52a105fd1485a8f89bc8f55fc041a9f139",
+        "ui/interface-plus.js": "e5e5c2d43f1ddf10beaa9eceae64fbdd83b846d595f555bda032223ea6377fd3",
+        "ui/design-optimized.js": "30921cac2b50e9f29447a97106c3c58bc3c5424c2a8eed9e6eb76cb53b9a2ecb",
+        "ui/cardify-plus.js": "ab3e622d18e58f4c12f0192828bb0ace6551eec65cfbdae34637182df546aa74",
+        "ui/settings-hub.js": "d90281c4550ad80b9dbc89a1cbc3b70a2159b1dda5973f890504715915e25fa4",
+        "ui/torrent-cinema.js": "312accb1711376c1edaca433d243a9e8774ca14e5d1c513af90387294a069b64",
+        "trakt/trakt.js": "418a30fb4269134666f7e0c8ca5934cd04719d6d42a2a111646215f86b8be50b",
+        "trakt/trakt-plus.js": "c67f8565fd20b86d4cf2f14771537a0f5a81ae12df9a4d9232d80a690fdd2bbb",
+        "providers/torrent-search.js": "5775add9fd0c1bbd672a0d16daf9278e7154e19433743222efe388ee6a329c4b",
+        "media/average-rating.js": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+        "localization/translate.js": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
+        "plugins-to-enable/home-policy.js": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+        "plugins-to-enable/home-history.js": "6ad4f518561ea024b1b842349c88861d05565c30c9787e21f5d08199b5ddd3d0"
+      }
+    },
+    {
+      "run": 7,
+      "mode": "branch",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "dpr": 1,
+      "domContentLoaded": 731.6,
+      "loaderRequested": 1265.5,
+      "loaderExecuted": 1288.3,
+      "hybridFirstActiveFrame": 1355.1,
+      "nativeAppReady": 3082.1,
+      "firstUsableHome": 4029.9,
+      "appreadyToHome": 947.8,
+      "firstDpadResponseMs": 73.5,
+      "detailsResponseMs": 903,
+      "backResponseMs": 97.2,
+      "threeCycles": [
+        {
+          "detailsMs": 903,
+          "detailsController": "full_start",
+          "backMs": 97.2,
+          "backRestored": true,
+          "blocked": false
+        },
+        {
+          "detailsMs": 324.7,
+          "detailsController": "full_start",
+          "backMs": 202.9,
+          "backRestored": true,
+          "blocked": false
+        },
+        {
+          "detailsMs": 393.8,
+          "detailsController": "full_start",
+          "backMs": 99.2,
+          "backRestored": true,
+          "blocked": false
+        }
+      ],
+      "tvMetadata": {
+        "candidateFixtureCount": 24,
+        "favoriteGetCalls": 12,
+        "totalRequests": 24,
+        "beforeFirstUsable": 0,
+        "afterFirstUsable": 24,
+        "maxObservedConcurrent": 2,
+        "rowsEnabledByDefault": true,
+        "source": "tmdb"
+      },
+      "pageErrors": [],
+      "localAssetHashes": {
+        "loader.js": "cb9833f6d6821464e1cc0fd4213fb599e7edc2a2205d0dd110e6b46b2115e2c1",
+        "ui/stremio-hybrid.js": "2a77c7f3c5e759acde5040589e078f52a105fd1485a8f89bc8f55fc041a9f139",
+        "ui/interface-plus.js": "e5e5c2d43f1ddf10beaa9eceae64fbdd83b846d595f555bda032223ea6377fd3",
+        "ui/design-optimized.js": "30921cac2b50e9f29447a97106c3c58bc3c5424c2a8eed9e6eb76cb53b9a2ecb",
+        "ui/cardify-plus.js": "ab3e622d18e58f4c12f0192828bb0ace6551eec65cfbdae34637182df546aa74",
+        "ui/settings-hub.js": "d90281c4550ad80b9dbc89a1cbc3b70a2159b1dda5973f890504715915e25fa4",
+        "ui/torrent-cinema.js": "312accb1711376c1edaca433d243a9e8774ca14e5d1c513af90387294a069b64",
+        "trakt/trakt.js": "418a30fb4269134666f7e0c8ca5934cd04719d6d42a2a111646215f86b8be50b",
+        "trakt/trakt-plus.js": "c67f8565fd20b86d4cf2f14771537a0f5a81ae12df9a4d9232d80a690fdd2bbb",
+        "providers/torrent-search.js": "5775add9fd0c1bbd672a0d16daf9278e7154e19433743222efe388ee6a329c4b",
+        "media/average-rating.js": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+        "localization/translate.js": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
+        "plugins-to-enable/home-policy.js": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+        "plugins-to-enable/home-history.js": "6ad4f518561ea024b1b842349c88861d05565c30c9787e21f5d08199b5ddd3d0"
+      }
+    },
+    {
+      "run": 8,
+      "mode": "main",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "dpr": 1,
+      "domContentLoaded": 749.6,
+      "loaderRequested": 1480.9,
+      "loaderExecuted": 1503,
+      "hybridFirstActiveFrame": 1578.7,
+      "nativeAppReady": 3750.9,
+      "firstUsableHome": 4475,
+      "appreadyToHome": 724.1,
+      "firstDpadResponseMs": 62.6,
+      "detailsResponseMs": 821.4,
+      "backResponseMs": 94.4,
+      "threeCycles": [
+        {
+          "detailsMs": 821.4,
+          "detailsController": "full_start",
+          "backMs": 94.4,
+          "backRestored": true,
+          "blocked": false
+        },
+        {
+          "detailsMs": 1023,
+          "detailsController": "full_start",
+          "backMs": 378,
+          "backRestored": true,
+          "blocked": false
+        },
+        {
+          "detailsMs": 412.2,
+          "detailsController": "full_start",
+          "backMs": 182.4,
+          "backRestored": true,
+          "blocked": false
+        }
+      ],
+      "tvMetadata": {
+        "candidateFixtureCount": 24,
+        "favoriteGetCalls": 11,
+        "totalRequests": 24,
+        "beforeFirstUsable": 24,
+        "afterFirstUsable": 0,
+        "maxObservedConcurrent": 4,
+        "rowsEnabledByDefault": true,
+        "source": "tmdb"
+      },
+      "pageErrors": [],
+      "localAssetHashes": {
+        "loader.js": "cb9833f6d6821464e1cc0fd4213fb599e7edc2a2205d0dd110e6b46b2115e2c1",
+        "ui/stremio-hybrid.js": "2a77c7f3c5e759acde5040589e078f52a105fd1485a8f89bc8f55fc041a9f139",
+        "ui/interface-plus.js": "e5e5c2d43f1ddf10beaa9eceae64fbdd83b846d595f555bda032223ea6377fd3",
+        "ui/design-optimized.js": "6aa3d3824a858668f84784d5860120c61ab0e0285d6c4bbc5f3875478db72de5",
+        "ui/cardify-plus.js": "ab3e622d18e58f4c12f0192828bb0ace6551eec65cfbdae34637182df546aa74",
+        "ui/settings-hub.js": "d90281c4550ad80b9dbc89a1cbc3b70a2159b1dda5973f890504715915e25fa4",
+        "ui/torrent-cinema.js": "312accb1711376c1edaca433d243a9e8774ca14e5d1c513af90387294a069b64",
+        "trakt/trakt.js": "418a30fb4269134666f7e0c8ca5934cd04719d6d42a2a111646215f86b8be50b",
+        "trakt/trakt-plus.js": "c67f8565fd20b86d4cf2f14771537a0f5a81ae12df9a4d9232d80a690fdd2bbb",
+        "providers/torrent-search.js": "5775add9fd0c1bbd672a0d16daf9278e7154e19433743222efe388ee6a329c4b",
+        "media/average-rating.js": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+        "localization/translate.js": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
+        "plugins-to-enable/home-policy.js": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+        "plugins-to-enable/home-history.js": "6ad4f518561ea024b1b842349c88861d05565c30c9787e21f5d08199b5ddd3d0"
+      }
+    },
+    {
+      "run": 9,
+      "mode": "main",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "dpr": 1,
+      "domContentLoaded": 682.9,
+      "loaderRequested": 1207.5,
+      "loaderExecuted": 1232.6,
+      "hybridFirstActiveFrame": 1282.1,
+      "nativeAppReady": 2947.9,
+      "firstUsableHome": 3975,
+      "appreadyToHome": 1027.1,
+      "firstDpadResponseMs": 78.6,
+      "detailsResponseMs": 715.6,
+      "backResponseMs": 87.4,
+      "threeCycles": [
+        {
+          "detailsMs": 715.6,
+          "detailsController": "full_start",
+          "backMs": 87.4,
+          "backRestored": true,
+          "blocked": false
+        },
+        {
+          "detailsMs": 352.3,
+          "detailsController": "full_start",
+          "backMs": 212.6,
+          "backRestored": true,
+          "blocked": false
+        },
+        {
+          "detailsMs": 412.1,
+          "detailsController": "full_start",
+          "backMs": 79.4,
+          "backRestored": true,
+          "blocked": false
+        }
+      ],
+      "tvMetadata": {
+        "candidateFixtureCount": 24,
+        "favoriteGetCalls": 10,
+        "totalRequests": 24,
+        "beforeFirstUsable": 24,
+        "afterFirstUsable": 0,
+        "maxObservedConcurrent": 4,
+        "rowsEnabledByDefault": true,
+        "source": "tmdb"
+      },
+      "pageErrors": [],
+      "localAssetHashes": {
+        "loader.js": "cb9833f6d6821464e1cc0fd4213fb599e7edc2a2205d0dd110e6b46b2115e2c1",
+        "ui/stremio-hybrid.js": "2a77c7f3c5e759acde5040589e078f52a105fd1485a8f89bc8f55fc041a9f139",
+        "ui/interface-plus.js": "e5e5c2d43f1ddf10beaa9eceae64fbdd83b846d595f555bda032223ea6377fd3",
+        "ui/design-optimized.js": "6aa3d3824a858668f84784d5860120c61ab0e0285d6c4bbc5f3875478db72de5",
+        "ui/cardify-plus.js": "ab3e622d18e58f4c12f0192828bb0ace6551eec65cfbdae34637182df546aa74",
+        "ui/settings-hub.js": "d90281c4550ad80b9dbc89a1cbc3b70a2159b1dda5973f890504715915e25fa4",
+        "ui/torrent-cinema.js": "312accb1711376c1edaca433d243a9e8774ca14e5d1c513af90387294a069b64",
+        "trakt/trakt.js": "418a30fb4269134666f7e0c8ca5934cd04719d6d42a2a111646215f86b8be50b",
+        "trakt/trakt-plus.js": "c67f8565fd20b86d4cf2f14771537a0f5a81ae12df9a4d9232d80a690fdd2bbb",
+        "providers/torrent-search.js": "5775add9fd0c1bbd672a0d16daf9278e7154e19433743222efe388ee6a329c4b",
+        "media/average-rating.js": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+        "localization/translate.js": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
+        "plugins-to-enable/home-policy.js": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+        "plugins-to-enable/home-history.js": "6ad4f518561ea024b1b842349c88861d05565c30c9787e21f5d08199b5ddd3d0"
+      }
+    },
+    {
+      "run": 10,
+      "mode": "branch",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "dpr": 1,
+      "domContentLoaded": 1715.7,
+      "loaderRequested": 2537.7,
+      "loaderExecuted": 2560.7,
+      "hybridFirstActiveFrame": 2618.3,
+      "nativeAppReady": 4336.5,
+      "firstUsableHome": 5036.6,
+      "appreadyToHome": 700.1,
+      "firstDpadResponseMs": 67.3,
+      "detailsResponseMs": 711.3,
+      "backResponseMs": 213.7,
+      "threeCycles": [
+        {
+          "detailsMs": 711.3,
+          "detailsController": "full_start",
+          "backMs": 213.7,
+          "backRestored": true,
+          "blocked": false
+        },
+        {
+          "detailsMs": 603.1,
+          "detailsController": "full_start",
+          "backMs": 396.1,
+          "backRestored": true,
+          "blocked": false
+        },
+        {
+          "detailsMs": 256.5,
+          "detailsController": "full_start",
+          "backMs": 90.2,
+          "backRestored": true,
+          "blocked": false
+        }
+      ],
+      "tvMetadata": {
+        "candidateFixtureCount": 24,
+        "favoriteGetCalls": 15,
+        "totalRequests": 24,
+        "beforeFirstUsable": 0,
+        "afterFirstUsable": 24,
+        "maxObservedConcurrent": 2,
+        "rowsEnabledByDefault": true,
+        "source": "tmdb"
+      },
+      "pageErrors": [],
+      "localAssetHashes": {
+        "loader.js": "cb9833f6d6821464e1cc0fd4213fb599e7edc2a2205d0dd110e6b46b2115e2c1",
+        "ui/stremio-hybrid.js": "2a77c7f3c5e759acde5040589e078f52a105fd1485a8f89bc8f55fc041a9f139",
+        "ui/interface-plus.js": "e5e5c2d43f1ddf10beaa9eceae64fbdd83b846d595f555bda032223ea6377fd3",
+        "ui/design-optimized.js": "30921cac2b50e9f29447a97106c3c58bc3c5424c2a8eed9e6eb76cb53b9a2ecb",
+        "ui/cardify-plus.js": "ab3e622d18e58f4c12f0192828bb0ace6551eec65cfbdae34637182df546aa74",
+        "ui/settings-hub.js": "d90281c4550ad80b9dbc89a1cbc3b70a2159b1dda5973f890504715915e25fa4",
+        "ui/torrent-cinema.js": "312accb1711376c1edaca433d243a9e8774ca14e5d1c513af90387294a069b64",
+        "trakt/trakt.js": "418a30fb4269134666f7e0c8ca5934cd04719d6d42a2a111646215f86b8be50b",
+        "trakt/trakt-plus.js": "c67f8565fd20b86d4cf2f14771537a0f5a81ae12df9a4d9232d80a690fdd2bbb",
+        "providers/torrent-search.js": "5775add9fd0c1bbd672a0d16daf9278e7154e19433743222efe388ee6a329c4b",
+        "media/average-rating.js": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+        "localization/translate.js": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
+        "plugins-to-enable/home-policy.js": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+        "plugins-to-enable/home-history.js": "6ad4f518561ea024b1b842349c88861d05565c30c9787e21f5d08199b5ddd3d0"
+      }
+    }
+  ],
+  "branchTestedCommit": "a93e941596a98e8ce48d2d0c8d250010d51ff1ee"
+}
