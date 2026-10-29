@@ -70,11 +70,12 @@ function releaseMatch(d,movie,context){movie=movie||{};context=context||{};if(wi
     if(!series&&year&&expectedYear&&year[1]!==expectedYear){blocked=true;reasons.push('Інший рік: '+year[1]);}
     var collection=/(?:collection|anthology|box[ .-]?set|duology|trilogy|tetralogy|pentalogy|колекці[яї]|збірк[аи]|трилогі[яї]|антологі[яї])/i.test(raw);
     if(collection&&!series){blocked=true;reasons.push('Колекція замість одного фільму');}
-    var seasons=[],sm,rx=/(?:\bs|season[ ._]*|сезон[иів]*[ ._:]*)(\d{1,2})(?:[ ._-]*(?:-|–|to)[ ._]*(?:s)?(\d{1,2}))?/gi;
+    var seasons=[],sm,rx=/(?:\bs|season[ ._]*|сезон[иів]*[ ._:]*)(\d{1,2})(?:[ ._-]*(?:-|–|to)[ ._]*(?:s)?(\d{1,2}))?/gi,seasonPack=/\bS(\d{1,3})\s*[-–]\s*S?(\d{1,3})(?![a-z0-9])|\bSeasons?\s*(\d{1,3})\s*[-–]\s*(?:Seasons?\s*)?(\d{1,3})\b|Сезони?\s*(\d{1,3})\s*[-–]\s*(?:Сезони?\s*)?(\d{1,3})/iu.exec(raw);
     while((sm=rx.exec(raw))){seasons.push(Number(sm[1]));if(sm[2])seasons.push(Number(sm[2]));}
     if(d.season!=null&&seasons.indexOf(d.season)<0)seasons.push(d.season);
     var expectedSeason=number(context.season),expectedEpisode=number(context.episode),em=/\bs\d{1,2}e(\d{1,3})(?:[ ._-]*e?(\d{1,3}))?/i.exec(raw);
-    if(expectedSeason!=null&&seasons.length&&(seasons.some(function(n){return n!==expectedSeason;}))){blocked=true;reasons.push('Інший сезон або набір сезонів');}
+    var packContains=!!(seasonPack&&expectedSeason>=Number(seasonPack[1]||seasonPack[3]||seasonPack[5])&&expectedSeason<=Number(seasonPack[2]||seasonPack[4]||seasonPack[6]));
+    if(expectedSeason!=null&&seasons.length&&!packContains&&(seasons.some(function(n){return n!==expectedSeason;}))){blocked=true;reasons.push('Інший сезон або набір сезонів');}
     if(expectedEpisode!=null&&d.episode!=null&&expectedEpisode!==d.episode){blocked=true;reasons.push('Інша серія за даними парсера');}
     if(expectedEpisode!=null&&em&&(expectedEpisode<Number(em[1])||expectedEpisode>Number(em[2]||em[1]))){blocked=true;reasons.push('Інша серія');}
     if(!series&&seasons.length){blocked=true;reasons.push('Серіальний реліз');}

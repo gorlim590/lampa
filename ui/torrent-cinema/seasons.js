@@ -38,10 +38,10 @@ function createCinemaSeasons() {
         m=packRx.exec(raw);
         if(m){var a=Number(m[1]||m[3]||m[5]),b=Number(m[2]||m[4]||m[6]);if(a>0&&b>=a){range=[a,b];explicit=true;}}
         if(!range&&!episode){m=/\b(\d{1,3})x\d{1,4}\b/i.exec(raw);if(m&&Number(m[1])>0){nums.push(Number(m[1]));episode=true;explicit=true;}}
-        if(!range&&!episode){m=/\b(?:S|Season\s*|Сезон\s*|Сезон\s*)(\d{1,3})(?!\d)|(?:^|[^\d])(\d{1,3})\s*сезон\b/iu.exec(raw);if(m){var single=Number(m[1]||m[2]);if(single>0){nums.push(single);explicit=true;}}}
         var collection=/\b(?:complete\s+series|complete\s+collection|complete\s+show|all\s+seasons|full\s+series|box[ .-]?set|collection|anthology)\b|повн(?:ий|а)\s+(?:серіал|колекці)|усі\s+сезони/iu.test(raw);
         var sourceSeason=source.Season!=null?source.Season:source.season;
-        if(!explicit&&integer(sourceSeason)&&Number(sourceSeason)>0){nums.push(Number(sourceSeason));explicit=true;}
+        if(!range&&!episode){m=/(?:^|[^\p{L}\p{N}_])(?:S|Season\s*|Сезон\s*)(\d{1,3})(?![\p{L}\p{N}_])|(?:^|[^\p{N}])(\d{1,3})\s*сезон(?![\p{L}\p{N}_])/iu.exec(raw);if(m){var single=Number(m[1]||m[2]);if(single>0){nums.push(single);explicit=true;}}}
+        if(!explicit&&!collection&&integer(sourceSeason)&&Number(sourceSeason)>0){nums.push(Number(sourceSeason));explicit=true;}
         nums=nums.filter(function(n,i,a){return Number.isInteger(n)&&n>0&&a.indexOf(n)===i;}).sort(function(x,y){return x-y;});
         if(range){for(var s=range[0];s<=range[1];s++)nums.push(s);nums=nums.filter(function(n,i,a){return a.indexOf(n)===i;}).sort(function(x,y){return x-y;});}
         if(range||collection)return {kind:'collection',seasons:nums,range:range,verified:!!(range||nums.length),episode:episode};

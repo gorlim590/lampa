@@ -151,6 +151,7 @@ function createCinemaRuntime(metadata,seasonModel) {
     function streamPersistSeason(record,movie,season){var owner=streamSeasonOwner(record),storage;try{storage=window.localStorage;}catch(e){}seasonModel.save(movie,season,owner.account,owner.profile,storage);}
     function streamSeasonButtons(record){return record.streamSeasonRow&&Array.prototype.slice.call(record.streamSeasonRow.querySelectorAll('.tc-season-button'))||[];}
     function streamFocusSeason(record,season){var st=record.streamChild,buttons=streamSeasonButtons(record),target=buttons.filter(function(n){return Number(n.dataset.season)===Number(season);})[0];if(!target)return;target.scrollIntoView({block:'nearest',inline:'center',behavior:'auto'});if(st){st.last=target;streamFocus(st,target);}else if(record.streamView&&record.streamView.isOpen()){Lampa.Controller.collectionSet(record.streamPane,false,true);Lampa.Controller.collectionFocus(target,record.streamPane);}}
+    function streamRevealSelectedSeason(record){var row=record.streamSeasonRow;if(!row)return;var selected=Number(record.selectedSeason),target=streamSeasonButtons(record).filter(function(n){return Number(n.dataset.season)===selected;})[0];if(!target)return;function reveal(){if(record.streamView&&record.streamView.isOpen()&&target.isConnected)target.scrollIntoView({block:'nearest',inline:'center',behavior:'auto'});}window.requestAnimationFrame(function(){window.requestAnimationFrame(reveal);});}
     function renderStreamSeasons(record,movie){
         if(!record.streamSeasonRow)return;var row=record.streamSeasonRow,list=seasonModel.list(movie,record.kind);
         if(!list){row.hidden=false;row.dataset.state='loading';row.innerHTML='<span class="tc-season-loading" role="status">Завантаження сезонів…</span>';return;}
@@ -187,13 +188,13 @@ function createCinemaRuntime(metadata,seasonModel) {
     }
     function streamSession(){return window.LampaTorrentOverlay?LampaTorrentOverlay.session():String(streamGeneration);}
     function streamAlive(st){var a=Lampa.Activity.active();return running&&!st.dead&&st.record.streamChild===st&&st.session===streamSession()&&a&&a.activity===st.record.activity;}
-    function streamOwnSeasonFilter(child){var get=child.getFilterData,local=Object.assign({},typeof get==='function'?get.call(child)||{}:{});local.season=[];child.getFilterData=function(){var value=Object.assign({},local);value.season=[];return value;};child.setFilterData=function(next){local=Object.assign({},local,next||{});local.season=[];};}
+    function streamOwnSeasonFilter(child){var get=child.getFilterData,set=child.setFilterData;function clone(data){var value=Object.assign({},data||{});Object.keys(value).forEach(function(key){if(Array.isArray(value[key]))value[key]=value[key].slice();});return value;}var initial=clone(typeof get==='function'?get.call(child)||{}:{}),savedSeason=Object.prototype.hasOwnProperty.call(initial,'season')?clone({season:initial.season}).season:undefined,local=clone(initial);local.season=[];child.getFilterData=function(){var value=clone(local);value.season=[];return value;};child.setFilterData=function(next){local=Object.assign(clone(local),clone(next));local.season=[];if(typeof set==='function'){var persisted=clone(local);if(savedSeason===undefined)delete persisted.season;else persisted.season=clone({season:savedSeason}).season;set.call(child,persisted);}};}
     function streamShellActivate(record){
         function focus(step){var items=Array.prototype.filter.call(record.streamPane.querySelectorAll('.sh-stream-head .selector,.sh-stream-load'),function(n){return !n.hidden&&n.offsetParent!==null;}),index=items.findIndex(function(n){return n.classList.contains('focus');});Lampa.Controller.collectionSet(record.streamPane);if(items.length)Lampa.Controller.collectionFocus(items[Math.max(0,Math.min(items.length-1,index+step))],record.streamPane);}
         Lampa.Controller.add('sh_movie_streams',{toggle:function(){focus(0);},up:function(){focus(-1);},left:function(){focus(-1);},down:function(){focus(1);},right:function(){focus(1);},back:function(){closeStreamOverlay(record,true);}});Lampa.Controller.toggle('sh_movie_streams');
     }
     function openStreamOverlay(record){
-        if(record.streamView)record.streamView.open();
+        if(record.streamView){record.streamView.open();streamRevealSelectedSeason(record);}
     }
     function closeStreamOverlay(record,restore){
         var st=record.streamChild;if(st){st.wantFocus=false;}
@@ -262,8 +263,9 @@ function createCinemaRuntime(metadata,seasonModel) {
     })();
     function streamTrackerKey(st){var api=window.TorrentsRedesign;return api&&api.selectedTrackerFilter?api.selectedTrackerFilter():'all';}
     function streamSortKey(){var value;try{value=Lampa.Storage.get('torrents_cinema_sort','recommended');}catch(e){}return value||'recommended';}
+    function streamSeasonCoverageBadge(row,coverage){var label=coverage&&coverage.kind==='collection'?coverage.label||'Склад сезонів не підтверджено':'',badge=row.querySelector('.tc-season-coverage');if(!label){if(badge)badge.remove();return;}var chips=row.querySelector('.ctr-chips')||row.querySelector('.ctr-release-info');if(!chips)return;if(!badge){badge=document.createElement('span');badge.className='ctr-chip tc-season-coverage';}badge.textContent=label;badge.setAttribute('aria-label',label);if(badge.parentNode!==chips)chips.appendChild(badge);}
     function streamUpdateRows(st){
-        var api=window.TorrentsRedesign,filter=streamTrackerKey(st),movie=st.params.movie||{},nativeFilter=st.child&&st.child.getFilterData?st.child.getFilterData()||{}:{},context=Object.assign({},st.params,nativeFilter),qualityFilter=Array.isArray(nativeFilter.quality)?nativeFilter.quality:[],best=null,bestScore=-Infinity,bestCollection=null,bestCollectionScore=-Infinity,preferredQuality='1080';var seen=Object.create(null),seasonActive=st.record.kind==='tv'&&Number(st.params.season)>0,selectedSeason=Number(st.params.season);
+        var api=window.TorrentsRedesign,filter=streamTrackerKey(st),movie=st.params.movie||{},nativeFilter=st.child&&st.child.getFilterData?st.child.getFilterData()||{}:{},context=Object.assign({},st.params,nativeFilter),qualityFilter=Array.isArray(nativeFilter.quality)?nativeFilter.quality:[],best=null,bestScore=-Infinity,bestCollection=null,bestCollectionScore=-Infinity,preferredQuality='1080';var seen=Object.create(null),seasonActive=st.record.kind==='tv'&&Number(st.params.season)>0,selectedSeason=Number(st.params.season);if(seasonActive)context.season=selectedSeason;
         try{preferredQuality=Lampa.Storage.get('torrents_cinema_quality','1080')||'1080';}catch(e){}
         st.rows.forEach(function(row){
             var source=st.sourceData.get(row)||row._ctrSource||{Title:row.querySelector('.torrent-item__title')?.textContent||''};
@@ -272,8 +274,8 @@ function createCinemaRuntime(metadata,seasonModel) {
             if(!data&&api&&api.normalizeRelease)data=api.normalizeRelease(source);
             if(!data)data=row._ctrData;
             if(!data)return;var hash=String(source.InfoHash||source.infohash||source.hash||'').toLowerCase(),duplicate=/^[a-f0-9]{40}$/.test(hash)&&!!seen[hash];if(/^[a-f0-9]{40}$/.test(hash))seen[hash]=true;row.classList.toggle('sh-duplicate-hidden',metadata.flag('dedupe',false)&&duplicate);row._ctrSource=source;row._ctrData=data;row._shMatch=view&&view.match;bindInline(st,row);
-            if(!row._shMatch&&api&&api.releaseMatch)row._shMatch=api.releaseMatch(data,movie,context);
-            var seasonClass=seasonActive?seasonModel.classify(source.Title||source.Name||source.title||source.name||'',source,selectedSeason):null;row._tcSeasonGroup=seasonActive?(seasonClass.kind==='season'&&seasonClass.contains?'season':seasonClass.kind==='collection'?'collection':''):'';row.classList.toggle('tc-season-hidden',!!(seasonActive&&!row._tcSeasonGroup));row.dataset.seasonCoverage=seasonClass?seasonClass.label:'';
+            row._shMatch=api&&api.releaseMatch?api.releaseMatch(data,movie,context):view&&view.match;
+            var seasonClass=seasonActive?seasonModel.classify(source.Title||source.Name||source.title||source.name||'',source,selectedSeason):null;row._tcSeasonGroup=seasonActive?(seasonClass.kind==='season'&&seasonClass.contains?'season':seasonClass.kind==='collection'?'collection':''):'';row.classList.toggle('tc-season-hidden',!!(seasonActive&&!row._tcSeasonGroup));row.dataset.seasonCoverage=seasonClass?seasonClass.label:'';streamSeasonCoverageBadge(row,seasonClass);
             var matches=(!st.uaOnly||!!data.parsed.audio&&data.parsed.audio.ua)&&(!api||!api.trackerMatches||api.trackerMatches(data.tracker,filter)),qualityMatches=!qualityFilter.length||qualityFilter.some(function(q){q=String(q).toLowerCase();return q==='4k'||q==='2160'?data.parsed.quality==='2160':String(data.parsed.quality)===q.replace(/p$/,'');});row.classList.toggle('sh-tracker-hidden',!matches);row.classList.remove('is-best','sh-source-pick');
             data.sortScore=api&&api.score?api.score(data,row._shMatch,{ua:metadata.flag('ua',true),audio:metadata.flag('ua_audio',true),subs:metadata.flag('ua_subs',true),quality:preferredQuality}):0;
             var validSeason=!seasonActive||row._tcSeasonGroup==='season'&&seasonClass.contains||row._tcSeasonGroup==='collection'&&seasonClass.contains;
@@ -436,7 +438,7 @@ function createCinemaRuntime(metadata,seasonModel) {
         if(rowIndex<0){streamFocus(st,rows[st.windowStart]||groups[0]&&groups[0][0]);return;}
         var group=groups[rowIndex],at=group.indexOf(st.last);
         if(direction==='left'||direction==='right')streamFocus(st,group[Math.max(0,Math.min(group.length-1,at+(direction==='right'?1:-1)))]);
-        else if(direction==='up'){var previous=groups[rowIndex-1];if(previous)streamFocus(st,previous[previous.length-1]);}
+        else if(direction==='up'){var previous=groups[rowIndex-1];if(previous){var selected=previous.filter(function(node){return node.classList.contains('tc-season-button')&&node.getAttribute('aria-pressed')==='true';})[0];streamFocus(st,selected||previous[previous.length-1]);}}
         else if(direction==='down'){var following=groups[rowIndex+1];streamFocus(st,following?following[0]:rows[st.windowStart]);}
     }
 

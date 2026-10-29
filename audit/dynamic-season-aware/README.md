@@ -35,8 +35,21 @@ Silo overlay geometry was x=77, y=36, 1126×648 at 1280×720 and x=230, y=108, 3
 
 The final local source bytes loaded into the browser were:
 
-- `ui/torrent-cinema.js` — 177,975 bytes, SHA-256 `10db03bfbdaa98ba081a71caaad0d531a2f1e3d163d8e73be42d395113250ae1`
+- `ui/torrent-cinema.js` — 180,506 bytes, SHA-256 `7ee7a602346b77965067064faf9757a3e9e6da97b35156a645b4fb612c513b81`
 - `providers/torrent-search.js` — 21,773 bytes, SHA-256 `5775add9fd0c1bbd672a0d16daf9278e7154e19433743222efe388ee6a329c4b`
+
+## PR #128 pre-merge hardening — 2026-10-29
+
+The exact rebuilt `ui/torrent-cinema.js` (2.1.0; 180,506 bytes; SHA-256 above) was loaded temporarily into the existing main Chrome tab at `?card=125988&media=tv&source=tmdb` through a loopback read-only preview. The page was restored afterward; the main browser profile, saved settings, parser credentials and URL were preserved.
+
+- Live Silo metadata still exposed only aired seasons S01–S03; future S04 (2027) remained absent.
+- A browser-only synthetic metadata/parser fixture supplied 47 already-aired numbered seasons. At CSS viewport 1280×720, DPR 1, the UI rendered 47 buttons in one scrollable row (scrollWidth 2,731 px; clientWidth 1,092 px). The selected S47 scrolled into view on open. Real ArrowRight reached S47, ArrowLeft returned to S01, and both focused buttons stayed inside the visible row. Up from a release traversed the settings, tracker and quality groups back to the selected season.
+- Fixture searches issued S47, S08, S15 and S02 queries. After rapid S08→S15→S02 changes, S02 was selected, stale S47-only results were not shown, and a verified S01–S47 collection was eligible and pinned as Best Choice. The S01–S03 collection was not pinned outside its coverage. This is fixture evidence, not live provider output.
+- On S08, collection rows visibly showed **Містить S08**, **Не містить S08**, and **Склад сезонів не підтверджено**. The direct 1280×720 browser capture is [premerge-1280-season8-visible-badges.png](premerge-1280-season8-visible-badges.png).
+- The native quality/audio/tracker fields remain delegated to the native filter setter; its saved legacy season is preserved and the active season is never written there. Browser fixture writes to the separate new season namespace were intercepted, so no preference changed.
+- With an in-memory TorrServer transport stub, native Files appeared above Torrent Cinema (z-index 130 over 100); Back returned to the overlay with the same release focused. Reopening Files on the same synthetic release did not produce a second Files dialog in this direct main-browser run; a different synthetic release did open Files. Same-release repeated Files behavior therefore remains unconfirmed with a live configured TorrServer. No playback or download was started.
+
+Focused local checks after this pass: **146/146** tests passed across season model, overlay, parser search, Hybrid, Torrent Cinema and native lifecycle suites. Artifact freshness, syntax, repository checks and `git diff --check` passed. The main-browser screenshot and geometry above are an actual 1280×720 Chrome render. Physical Google TV behavior is not tested.
 
 ## Targeted checks
 
