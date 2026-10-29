@@ -10,8 +10,8 @@ function fixture(value=true,full=false,primaryValue=false){
   addEventListener:(name,fn)=>events[name]=fn,removeEventListener:name=>delete events[name]};
  const L={Storage:{get:key=>key==='stremio_hybrid_enabled'?value:key==='stremio_hybrid_primary_settings'?primaryValue:false,set:(key,v)=>{writes.push([key,v]);if(key==='stremio_hybrid_enabled')value=v;else if(key==='stremio_hybrid_primary_settings')primaryValue=v;}},
   SettingsApi:{getParam:()=>params,addParam:p=>params.push(p)},Listener:{follow:(name,fn)=>native.push(fn),remove:(name,fn)=>{const i=native.indexOf(fn);if(i>=0)native.splice(i,1);}}};
- const c={URL,document:doc,Lampa:L,window:{appready:false,Lampa:L,performance:{now:()=>++clock}},$:()=>{},setTimeout:(fn,ms)=>{const id=++timerId;timers.set(id,{fn,ms});return id;},clearTimeout:id=>timers.delete(id),nativeWaitTimer:0,nativeWaitAttempts:0,NATIVE_WAIT_MS:100,NATIVE_WAIT_MAX:300,UI_VERSION:'fixture-v1',css:'fixture-css',style:null,styleStore:{order:[],modules:{}},styleIdsByOwner:{'ydesign-cards':'ydesign-style-block','ydesign-font':'ydesign-font-css','cardify-plus':'cardify-plus-styles'},ready:false,destroyed:false,waiting:false,watching:false,shellFrame:0,requestAnimationFrame:fn=>{const id=frames.size+1;frames.set(id,fn);return id;},cancelAnimationFrame:id=>frames.delete(id),
-  bootStats:{scriptStartMs:0,shellAppliedMs:null,firstShellFrameMs:null,readyMs:null,initCount:0,styleInsertions:0,styleUpdates:0,shellTransitions:0,settingsLoads:0,settingsMounts:0,settingsUnmounts:0,settingsFailures:0},settingsHub:null,settingsScript:null,settingsLoading:false,settingsAttempted:false,settingsFailedApi:null,
+ const c={URL,document:doc,Lampa:L,window:{appready:false,Lampa:L,performance:{now:()=>++clock}},$:()=>{},setTimeout:(fn,ms)=>{const id=++timerId;timers.set(id,{fn,ms});return id;},clearTimeout:id=>timers.delete(id),nativeWaitTimer:0,nativeWaitAttempts:0,NATIVE_WAIT_MS:100,NATIVE_WAIT_MAX:300,UI_VERSION:'fixture-v1',css:'fixture-css',style:null,styleStore:{order:[],modules:{}},styleIdsByOwner:{'ydesign-cards':'ydesign-style-block','ydesign-font':'ydesign-font-css','cardify-plus':'cardify-plus-styles'},styleModuleRevision:0,styleContentCache:{valid:false,active:null,destroyed:null,revision:-1,value:''},ready:false,destroyed:false,waiting:false,watching:false,shellFrame:0,requestAnimationFrame:fn=>{const id=frames.size+1;frames.set(id,fn);return id;},cancelAnimationFrame:id=>frames.delete(id),
+  bootStats:{scriptStartMs:0,shellAppliedMs:null,firstShellFrameMs:null,readyMs:null,initCount:0,styleInsertions:0,styleUpdates:0,styleCompositions:0,styleCacheHits:0,shellTransitions:0,settingsLoads:0,settingsMounts:0,settingsUnmounts:0,settingsFailures:0},settingsHub:null,settingsScript:null,settingsLoading:false,settingsAttempted:false,settingsFailedApi:null,
   overlayScriptURL:doc.currentScript.src,setupUI:()=>{counts.setup++;c.watching=true;},removeUI:()=>{counts.remove++;c.watching=false;},updateAvatar:()=>counts.avatar++,onHeaderUtilitiesSetting:()=>{},removeHeaderUtilitiesSetting:()=>{},openHeaderUtilities:()=>{},backdropResume:null,movieBrands:[],movieEnglish:[],paletteCache:[]};
  vm.createContext(c);
  if(full)vm.runInContext(source,c);
@@ -60,6 +60,17 @@ test('A throwing optional Settings adapter cannot prevent the shell/native fallb
 test('Startup timing is retained for a late probe, uses one frame and cancels it on early teardown',()=>{
  const f=fixture();assert.equal(f.frames.size,1);const [id,frame]=f.frames.entries().next().value;f.frames.delete(id);frame();f.ready();const metrics=f.c.window.StremioHybrid.diagnostics();assert(metrics.shellAppliedMs<metrics.firstShellFrameMs);assert(metrics.firstShellFrameMs<metrics.readyMs);f.c.window.StremioHybrid.refresh();assert.equal(f.frames.size,0);
  const early=fixture(true,true);assert.equal(early.frames.size,1);early.c.window.StremioHybrid.destroy();assert.equal(early.frames.size,0);
+});
+
+test('Repeated Hybrid readiness passes reuse the composed stylesheet and invalidate only on style or theme changes',()=>{
+ const f=fixture(true,true),api=f.c.window.StremioHybrid;
+ const before=api.diagnostics();
+ for(let i=0;i<12;i++){const next=[...f.timers.entries()].find(([,timer])=>timer.ms===100);if(!next)break;f.timers.delete(next[0]);next[1].fn();}
+ const stable=api.diagnostics();assert.equal(stable.styleCompositions,before.styleCompositions,'readiness/apply calls do not rebuild unchanged adapter CSS');assert.equal(stable.styleCacheHits,before.styleCacheHits+12);
+ api.registerStyles('fixture-adapter','.fixture{display:block}');const registered=api.diagnostics();assert.equal(registered.styleCompositions,2);assert.equal(registered.styleUpdates,2);
+ api.registerStyles('fixture-adapter','.fixture{display:block}');assert.equal(api.diagnostics().styleCompositions,2,'duplicate registration does not invalidate the cache');
+ api.setEnabled(false);assert.equal(api.diagnostics().styleCompositions,3);assert.doesNotMatch(f.nodes.find(n=>n.id==='stremio-hybrid-style').textContent,/canonical shell/);assert.match(f.nodes.find(n=>n.id==='stremio-hybrid-style').textContent,/\.fixture/);
+ api.setEnabled(true);assert.equal(api.diagnostics().styleCompositions,4);assert.match(f.nodes.find(n=>n.id==='stremio-hybrid-style').textContent,/\.fixture/);
 });
 
 test('Transient Settings load failure retries only on explicit disable/reenable, not refresh',()=>{

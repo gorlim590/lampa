@@ -34,7 +34,7 @@ function hybridStyleFixture(enabled = true) {
   };
   const context = {
     window: {}, document, css: '/* canonical shell */', UI_VERSION: 'fixture', style: null, destroyed: false,
-    styleStore: { order: [], modules: {} }, styleIdsByOwner: { 'ydesign-cards':'ydesign-style-block', 'ydesign-font':'ydesign-font-css', 'cardify-plus':'cardify-plus-styles' }, bootStats: { styleInsertions: 0, styleUpdates: 0 }
+    styleStore: { order: [], modules: {} }, styleIdsByOwner: { 'ydesign-cards':'ydesign-style-block', 'ydesign-font':'ydesign-font-css', 'cardify-plus':'cardify-plus-styles' }, styleModuleRevision:0,styleContentCache:{valid:false,active:null,destroyed:null,revision:-1,value:''},bootStats: { styleInsertions: 0, styleUpdates: 0, styleCompositions:0, styleCacheHits:0 }
   };
   const start = hybridSource.indexOf('    function renderOwnedStyles()');
   const end = hybridSource.indexOf('    // One static shell and stylesheet owner;', start);
@@ -72,6 +72,22 @@ test('registered adapter CSS shares one stable Hybrid stylesheet and ignores dup
   c.unregisterStyles('ydesign-font');
   assert.equal(f.nodes.length, 1);
   assert.doesNotMatch(f.nodes[0].textContent, /font-family:fixture/);
+});
+
+test('unchanged Hybrid readiness calls reuse combined CSS and recompute after owner changes',()=>{
+  const f=hybridStyleFixture(),c=f.context;
+  c.registerStyles('ydesign-cards','.ydesign-card{display:block}');
+  const composed=c.bootStats.styleCompositions,writes=f.writes();
+  for(let i=0;i<20;i++)c.renderOwnedStyles();
+  assert.equal(c.bootStats.styleCompositions,composed,'unchanged apply/readiness does not concatenate adapter modules again');
+  assert.equal(c.bootStats.styleCacheHits,20);
+  assert.equal(f.writes(),writes,'cache hits do not rewrite the owner stylesheet');
+  c.registerStyles('ydesign-font','body{font-family:fixture}');
+  assert.equal(c.bootStats.styleCompositions,composed+1);
+  f.classes.delete('stremio-hybrid');c.renderOwnedStyles();
+  assert.equal(c.bootStats.styleCompositions,composed+2,'native fallback composes feature-only CSS once');
+  f.classes.add('stremio-hybrid');c.renderOwnedStyles();
+  assert.equal(c.bootStats.styleCompositions,composed+3,'re-enabled theme recomposes the canonical shell');
 });
 
 test('Hybrid disabled retains only registered feature CSS and removes the shell-only sheet', () => {

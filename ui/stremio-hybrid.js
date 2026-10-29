@@ -26,7 +26,7 @@
         var previousCanonicalStyle=document.getElementById('stremio-hybrid-style');
         if(previousCanonicalStyle){if(previousCanonicalStyle.remove)previousCanonicalStyle.remove();else if(previousCanonicalStyle.parentNode&&previousCanonicalStyle.parentNode.removeChild)previousCanonicalStyle.parentNode.removeChild(previousCanonicalStyle);}
     }
-    var bootStats={scriptStartMs:uiNow(),shellAppliedMs:null,firstShellFrameMs:null,readyMs:null,initCount:0,styleInsertions:0,styleUpdates:0,shellTransitions:0,settingsLoads:0,settingsMounts:0,settingsUnmounts:0,settingsFailures:0,presentationFailures:0},shellFrame=0;
+    var bootStats={scriptStartMs:uiNow(),shellAppliedMs:null,firstShellFrameMs:null,readyMs:null,initCount:0,styleInsertions:0,styleUpdates:0,styleCompositions:0,styleCacheHits:0,shellTransitions:0,settingsLoads:0,settingsMounts:0,settingsUnmounts:0,settingsFailures:0,presentationFailures:0},shellFrame=0;
     var settingsHub=null,settingsScript=null,settingsLoading=false,settingsAttempted=false,settingsFailedApi=null;
     var overlayScriptURL=document.currentScript&&document.currentScript.src;if(!/^https?:\/\//i.test(overlayScriptURL||''))overlayScriptURL='';
     function ensureTorrentOverlay(){
@@ -36,6 +36,9 @@
         script.onerror=function(){script.remove();};document.head.appendChild(script);
     }
     var style, ready = false, destroyed = false, waiting = false, watching = false, nativeWaitTimer = 0, nativeWaitAttempts = 0, moreButton = null, menuOpen = false, searchNode = null, searchReturn = false, settingsRail = null, settingsFrame = 0, settingsParameter = null, settingsCategory = 'interface', settingsLeftConsumed = false, settingsPrimaryRouting = false, searchSources = null, searchRoots = [];
+    // Readiness polling calls applyShell repeatedly. Cache the combined 54 KB
+    // owner stylesheet so those calls do not rejoin every adapter module.
+    var styleModuleRevision=0,styleContentCache={valid:false,active:null,destroyed:null,revision:-1,value:''};
     var styleStore = previousStyleStore&&previousStyleStore.version===UI_VERSION&&Array.isArray(previousStyleStore.order)&&previousStyleStore.modules
         ? previousStyleStore : { version:UI_VERSION, order:[], modules:{} };
     styleStore.version=UI_VERSION;
@@ -991,10 +994,18 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
     function renderOwnedStyles() {
         if (!document.head || !document.body) return;
         var active = document.body.classList.contains('stremio-hybrid');
-        var content = active && !destroyed ? css : '';
-        for (var i = 0; i < styleStore.order.length; i++) {
-            var name = styleStore.order[i];
-            if (styleStore.modules[name]) content += '\n' + styleStore.modules[name];
+        var content;
+        if(!styleContentCache.valid||styleContentCache.active!==active||styleContentCache.destroyed!==destroyed||styleContentCache.revision!==styleModuleRevision){
+            content = active && !destroyed ? css : '';
+            for (var i = 0; i < styleStore.order.length; i++) {
+                var name = styleStore.order[i];
+                if (styleStore.modules[name]) content += '\n' + styleStore.modules[name];
+            }
+            styleContentCache={valid:true,active:active,destroyed:destroyed,revision:styleModuleRevision,value:content};
+            bootStats.styleCompositions++;
+        }else{
+            content=styleContentCache.value;
+            bootStats.styleCacheHits++;
         }
         if (content) {
             if (!style) {
@@ -1023,6 +1034,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         var text = String(value || '');
         if (styleStore.modules[name] === text) return true;
         styleStore.modules[name] = text;
+        styleModuleRevision++;
         renderOwnedStyles();
         return true;
     }
@@ -1031,6 +1043,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         if (!name || !Object.prototype.hasOwnProperty.call(styleStore.modules, name)) return false;
         delete styleStore.modules[name];
         styleStore.order = styleStore.order.filter(function (item) { return item !== name; });
+        styleModuleRevision++;
         renderOwnedStyles();
         return true;
     }
@@ -1050,6 +1063,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
     function releaseStyleModules(){
         styleStore.order.forEach(function(owner){writeStandaloneStyle(owner,String(styleStore.modules[owner]||''));});
         styleStore.order=[];styleStore.modules={};
+        styleModuleRevision++;
         if(style){if(style.remove)style.remove();else if(style.parentNode&&style.parentNode.removeChild)style.parentNode.removeChild(style);}
         style=null;
         if(window.__StremioHybridStyleStore===styleStore)delete window.__StremioHybridStyleStore;
@@ -1168,7 +1182,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         openUtilities: openHeaderUtilities,
         setEnabled: setEnabled,
         refresh: function () { if (ready) apply(enabled()); },
-        diagnostics: function () {return {version:UI_VERSION,styleOwner:'hybrid',styleStoreVersion:styleStore.version,registeredStyleModules:styleStore.order.length,registeredStyleOwners:styleStore.order.slice(),registeredStyleBytes:styleStore.order.reduce(function(total,name){return total+(styleStore.modules[name]||'').length;},0),scriptStartMs:bootStats.scriptStartMs,shellAppliedMs:bootStats.shellAppliedMs,firstShellFrameMs:bootStats.firstShellFrameMs,readyMs:bootStats.readyMs,initCount:bootStats.initCount,styleInsertions:bootStats.styleInsertions,styleUpdates:bootStats.styleUpdates,shellTransitions:bootStats.shellTransitions,settingsLoads:bootStats.settingsLoads,settingsMounts:bootStats.settingsMounts,settingsUnmounts:bootStats.settingsUnmounts,settingsFailures:bootStats.settingsFailures,presentationFailures:bootStats.presentationFailures||0,nativeReadinessTimedOut:!!bootStats.nativeReadinessTimedOut,readinessSubscribeFailures:bootStats.readinessSubscribeFailures||0};},
+        diagnostics: function () {return {version:UI_VERSION,styleOwner:'hybrid',styleStoreVersion:styleStore.version,registeredStyleModules:styleStore.order.length,registeredStyleOwners:styleStore.order.slice(),registeredStyleBytes:styleStore.order.reduce(function(total,name){return total+(styleStore.modules[name]||'').length;},0),scriptStartMs:bootStats.scriptStartMs,shellAppliedMs:bootStats.shellAppliedMs,firstShellFrameMs:bootStats.firstShellFrameMs,readyMs:bootStats.readyMs,initCount:bootStats.initCount,styleInsertions:bootStats.styleInsertions,styleUpdates:bootStats.styleUpdates,styleCompositions:bootStats.styleCompositions,styleCacheHits:bootStats.styleCacheHits,shellTransitions:bootStats.shellTransitions,settingsLoads:bootStats.settingsLoads,settingsMounts:bootStats.settingsMounts,settingsUnmounts:bootStats.settingsUnmounts,settingsFailures:bootStats.settingsFailures,presentationFailures:bootStats.presentationFailures||0,nativeReadinessTimedOut:!!bootStats.nativeReadinessTimedOut,readinessSubscribeFailures:bootStats.readinessSubscribeFailures||0};},
         destroy: function () {
             apply(false);
             removeHeaderUtilitiesSetting();
