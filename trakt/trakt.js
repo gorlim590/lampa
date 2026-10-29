@@ -9454,13 +9454,19 @@
    * Check if finish is allowed once within TTL for a key
    * Returns { allow:boolean, reason:string }
    */
-  function canFinishOnce(key) {
+  function canFinishOnce(key, token) {
     var ttl = getTTL();
     var rec = completionCache.get(key);
     var now = nowSec();
     if (!rec) return {
       allow: true,
       reason: 'no_record'
+    };
+    // Completion records are account scoped. A previous Trakt account must
+    // never suppress the same episode's history write for the current account.
+    if (rec.token !== token) return {
+      allow: true,
+      reason: 'account_changed'
     };
     if (now - rec.ts > ttl) {
       completionCache["delete"](key);
@@ -9562,7 +9568,7 @@
               return _regenerator().w(function (_context2) {
                 while (1) switch (_context2.p = _context2.n) {
                   case 0:
-                    check = canFinishOnce(key);
+                    check = canFinishOnce(key, token);
                     slog(logPrefix, 'canFinishOnce', key, check);
                     if (check.allow) {
                       _context2.n = 1;
@@ -9712,7 +9718,26 @@
    * This function is the only entry point that sends final Trakt request.
    */
   function finish(_x4) {
-    return _finish.apply(this, arguments);
+    var media = arguments[0];
+    return _finish.apply(this, arguments).then(function (result) {
+      if (result && result.ok) refreshConfirmedShowProgress(media);
+      return result;
+    });
+  }
+  var lastShowProgressRefresh = Object.create(null);
+  function refreshConfirmedShowProgress(media) {
+    if (!media || getContentType$1(media) !== 'show' || !window.TraktPlus || typeof window.TraktPlus.detailsProgress !== 'function') return;
+    var id = media.id || media.ids && media.ids.tmdb;
+    if (!id) return;
+    var now = Date.now();
+    if (lastShowProgressRefresh[id] && now - lastShowProgressRefresh[id] < 30000) return;
+    lastShowProgressRefresh[id] = now;
+    // Refresh only the affected show's progress after Trakt has acknowledged
+    // the history write. This updates Details/Up Next consumers without
+    // rebuilding the Home page or publishing an optimistic watched state.
+    Promise.resolve().then(function () {
+      return window.TraktPlus.detailsProgress(media, true);
+    }).catch(function () {});
   }
   /**
    * Визначає тип вмісту (фільм чи серіал) на основі даних картки
@@ -10036,6 +10061,41 @@
     terminalPlaybackInstanceId = currentPlaybackInstance.id;
   }
 
+  function stopPreviousEpisodeOnPlayerStart(nextMedia, nextHash) {
+    var previous = currentPlaybackInstance;
+    if (!previous || !previous.media || !previous.hash || previous.hash === nextHash ||
+        previous.token !== String(Lampa.Storage.get('trakt_token') || '') ||
+        previous.identityGeneration !== playbackIdentityGeneration || isPlaybackInstanceTerminal()) return;
+    var previousKey = playbackSessionKey(previous.media);
+    var nextKey = playbackSessionKey(nextMedia);
+    // A new transport for the same episode is not an episode transition.
+    if (!previousKey || previousKey === nextKey) return;
+    var active = scrobbler.getActiveSession && scrobbler.getActiveSession();
+    if (!active || active.key !== previousKey) return;
+
+    var progress = Number(active.progress);
+    if (!isFinite(progress) || progress < 0) progress = 0;
+    var season = previous.media.season_number != null ? previous.media.season_number : previous.media.season;
+    var episode = previous.media.episode_number != null ? previous.media.episode_number : previous.media.episode;
+    var minimum = Lampa.Storage.field('trakt_min_progress');
+    minimum = parseInt(minimum == null ? config.minProgress : minimum, 10);
+    if (!isFinite(minimum)) minimum = 90;
+
+    // Timeline/player progress is the only completion evidence. At the
+    // configured threshold, retry the idempotent history path before closing
+    // the prior session; below it, stop without a watched-history write.
+    if (getContentType$1(previous.media) === 'show' && season != null && season !== '' &&
+        episode != null && episode !== '' && progress >= minimum) {
+      var completed = Object.assign({}, active.media, { hash: previous.hash });
+      if (completed.season_number == null) completed.season_number = season;
+      if (completed.episode_number == null) completed.episode_number = episode;
+      markPlaybackInstanceTerminal();
+      markFinishIntent(getCompletionKey(completed));
+      finish(completed).catch(function (e) { slog('episode transition finish error', e); });
+    }
+    scrobbler.scrobbleStop(active.media, progress);
+  }
+
   function isActiveLampaVideoEvent(event) {
     try {
       if (!event || !event.target || !Lampa.PlayerVideo || typeof Lampa.PlayerVideo.video !== 'function') return false;
@@ -10151,6 +10211,7 @@
           if (card.season_number == null && metaHash.season != null) mediaForStart.season_number = metaHash.season;
           if (card.episode_number == null && metaHash.episode != null) mediaForStart.episode_number = metaHash.episode;
         }
+        stopPreviousEpisodeOnPlayerStart(mediaForStart, hash || null);
         scrobbler.setCurrentMedia(mediaForStart);
         var externalHandoff = pendingExternalPlayback && pendingExternalPlayback.hash === hash;
         beginPlaybackInstance(mediaForStart, hash, !!externalHandoff);

@@ -133,6 +133,7 @@ function integrationFixture() {
       addEventListener: on(documentListeners), removeEventListener: remove(documentListeners)
     },
     config: { minProgress: 90 }, cloudInjectInProgress: false,
+    getContentType$1: media => media && (media.method === 'tv' || media.method === 'show' || media.original_name || media.first_air_date) ? 'show' : 'movie',
     isInitialized: false,
     isInitialized$1: false,
     pendingExternalPlayback: null, pendingInternalPlayback: null, timelineProgressSamples: {},
@@ -291,6 +292,59 @@ test('production Timeline switching sends S01E02 STOP before S01E03 START', asyn
   f.launch(second, 's1e2'); f.timeline('s1e2', 10, 1); f.timeline('s1e2', 11, 1.1); await flush();
   f.launch(third, 's1e3'); f.timeline('s1e3', 0, 0); f.timeline('s1e3', 1, 0.1); await flush();
   assert.deepEqual(f.calls.map(call => [call.action, call.media.episode_number]), [['start', 2], ['stop', 2], ['start', 3]]);
+});
+
+test('direct player switch at confirmed 95% records only the previous episode and stops it before E03 starts', async () => {
+  const f = integrationFixture(), second = episode(2), third = episode(3);
+  f.launch(second, 'switch-e2');
+  Object.assign(f.video(), { currentTime: 950, duration: 1000, paused: false });
+  f.documentListeners.playing[0]({ target: f.video() }); await flush();
+  assert.deepEqual(f.calls.map(call => call.action), ['start']);
+  assert.equal(f.api.getActiveSession().progress, 95);
+  assert.equal(f.context.currentPlaybackInstance.hash, 'switch-e2');
+  assert.equal(f.context.playbackSessionKey(second), 'show:1396:1:2');
+  assert.equal(f.context.playbackSessionKey(third), 'show:1396:1:3');
+  assert.match(f.context.onPlayerStart.toString(), /stopPreviousEpisodeOnPlayerStart/);
+  f.launch(third, 'switch-e3');
+  await flush();
+  assert.equal(f.context.finishCallCount, 1);
+  assert.equal(f.context.finishedMedia[0].episode_number, 2);
+  assert.deepEqual(f.calls.map(call => [call.action, call.media.episode_number]), [['start', 2], ['stop', 2]]);
+  f.timeline('switch-e3', 0, 0); f.timeline('switch-e3', 1, 0.1); await flush();
+  assert.deepEqual(f.calls.map(call => [call.action, call.media.episode_number]), [['start', 2], ['stop', 2], ['start', 3]]);
+  assert.ok(!f.context.finishedMedia.some(media => media.episode_number === 3), 'starting E03 never marks E03 watched');
+});
+
+test('direct player switch at 20% stops E02 without a watched-history write', async () => {
+  const f = integrationFixture(), second = episode(2), third = episode(3);
+  f.launch(second, 'low-e2');
+  f.timeline('low-e2', 100, 10); f.timeline('low-e2', 200, 20); await flush();
+  f.launch(third, 'low-e3'); await flush();
+  assert.equal(f.context.finishCallCount || 0, 0);
+  assert.deepEqual(f.calls.map(call => [call.action, call.media.episode_number]), [['start', 2], ['stop', 2]]);
+  f.timeline('low-e3', 0, 0); f.timeline('low-e3', 1, 0.1); await flush();
+  assert.deepEqual(f.calls.map(call => [call.action, call.media.episode_number]), [['start', 2], ['stop', 2], ['start', 3]]);
+  assert.equal(f.context.finishCallCount || 0, 0);
+});
+
+test('same torrent hash with different selected episode files keeps independent episode sessions', async () => {
+  const f = integrationFixture(), second = Object.assign(episode(2), { infohash: 'same-pack-hash' }), third = Object.assign(episode(3), { infohash: 'same-pack-hash' });
+  f.launch(second, 'pack-file-e2'); f.timeline('pack-file-e2', 1, 1); f.timeline('pack-file-e2', 2, 2); await flush();
+  f.launch(third, 'pack-file-e3'); f.timeline('pack-file-e3', 0, 0); f.timeline('pack-file-e3', 1, 0.1); await flush();
+  assert.deepEqual(f.calls.map(call => [call.action, call.media.episode_number]), [['start', 2], ['stop', 2], ['start', 3]]);
+  assert.equal(f.api.getActiveSession().key, 'show:1396:1:3');
+});
+
+test('rapid next/previous episode starts and duplicate/out-of-order Timeline callbacks stay isolated', async () => {
+  const f = integrationFixture(), second = episode(2), third = episode(3);
+  f.launch(second, 'rapid-e2'); f.timeline('rapid-e2', 10, 1); f.timeline('rapid-e2', 11, 1.1); await flush();
+  f.launch(third, 'rapid-e3'); f.timeline('rapid-e3', 0, 0); f.timeline('rapid-e3', 1, 0.1); await flush();
+  f.launch(second, 'rapid-e2-replay'); f.timeline('rapid-e2-replay', 0, 0); f.timeline('rapid-e2-replay', 1, 0.1); await flush();
+  const before = f.calls.length;
+  f.timeline('rapid-e3', 990, 99); f.timeline('rapid-e2-replay', 1, 0.1); await flush();
+  assert.equal(f.calls.length, before, 'stale or repeated samples cannot add starts/history');
+  assert.equal(f.api.getActiveSession().key, 'show:1396:1:2');
+  assert.equal(f.context.finishCallCount || 0, 0);
 });
 
 test('stale S01E02 completion after switching to S01E03 cannot mutate or complete the current episode', async () => {

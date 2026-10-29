@@ -2230,7 +2230,7 @@
       var key = owner + ':' + epoch + ':tv:' + id, previous = detailCache[key];
       if (detailJobs[key]) return detailJobs[key];
       if (!force && previous && Date.now() - previous.time < 60000) return previous.data;
-      var cancel = sessionCancel(epoch, null), source = showSources[id];
+      var cancel = sessionCancel(epoch, null), source = showSources[id], verifiedIds;
       var identity = source && source.show && source.show.ids;
       var mapping = identity && String(identity.tmdb) === String(id) && identity.trakt ? Promise.resolve(identity) : getRetry('/search/tmdb/' + encodeURIComponent(id) + '?type=show', 2, cancel).then(function (rows) {
         var match = Array.isArray(rows) && rows.filter(function (r) { return r && r.show && r.show.ids && String(r.show.ids.tmdb) === String(id) && Number(r.show.ids.trakt) > 0; });
@@ -2239,6 +2239,7 @@
       });
       var pending = mapping.then(function (ids) {
         checkCancelled(cancel);
+        verifiedIds = ids;
         return getRetry(progressPath({ show: { ids: ids } }), 2, cancel);
       }).then(function (data) {
         checkCancelled(cancel);
@@ -2246,6 +2247,22 @@
         var valid = progressEvidence(data), result = { confirmed: true, phase: 'ready', session: epoch,
           completed: valid.watched, aired: valid.aired, complete: valid.complete, last: detailEpisode(data.last_episode), next: detailEpisode(data.next_episode),
           seasons: Array.isArray(data.seasons) ? data.seasons.filter(function (s) { return Number(s.number) > 0; }).map(function (s) { return { number: Number(s.number), aired: s.aired, completed: s.completed }; }) : [] };
+        // A confirmed per-show progress read can refresh the existing Trakt+
+        // watched/Up Next cache without running the full library import.
+        var previousState = showStates[id] || {};
+        var episodeEvidence = Array.isArray(data.seasons) ? progressEpisodes(data) : previousState.episodes || [];
+        var nextState = {
+          t: valid.t, aired: valid.aired, watched: valid.watched, known: valid.known, complete: valid.complete,
+          sig: previousState.sig || 'details:' + id, trakt: verifiedIds.trakt, episodes: episodeEvidence,
+          next: airedNext(data), lastWatchedAt: previousState.lastWatchedAt || 0,
+          homeCheckedAt: previousState.homeCheckedAt || 0, error: false, retryAfter: 0
+        };
+        completionTransition(previousState, nextState, episodeEvidence);
+        showStates[id] = nextState;
+        showSources[id] = { show: { ids: verifiedIds } };
+        watchedShows = completedShows(); watchedVer++;
+        try { persistWatched(); } catch (e) {}
+        clearRowCaches(); emitWatched(); decorateAll();
         detailCache[key] = { time: Date.now(), data: result }; var index = detailKeys.indexOf(key); if (index >= 0) detailKeys.splice(index, 1); detailKeys.push(key);
         while (detailKeys.length > 32) delete detailCache[detailKeys.shift()];
         return result;
