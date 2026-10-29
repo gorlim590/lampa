@@ -57,6 +57,10 @@ The paired screenshots show the same synthetic catalog at 1920×1080: the 120-ca
 - [1280×720](screenshots/issue82-final-1280x720.png)
 - [3840×2160](screenshots/issue82-final-3840x2160.png)
 
+## CI gate
+
+GitHub Actions on tested code SHA `e4d8e37f0173253cbcc69196482c51d9b20740af`: all five workflows passed (Repository checks, Home order, Home history, Parser provider regressions, Season integrity). The Repository checks log confirms the new `tests/trakt-more-view.cjs` ran as part of the Trakt/YDesign regression command; that step passed 218/218. The repository whitespace gate initially caught one extra blank EOF line in the new test; it was removed before this successful run.
+
 ## Limitations and acceptance status
 
 - **Verified by tests:** first build uses cache; page size is 24; duplicates are suppressed; failures retain the retry cursor; row identity stays bound to the existing native viewer.
