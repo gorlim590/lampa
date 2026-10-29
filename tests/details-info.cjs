@@ -48,3 +48,23 @@ test('details disabled, signed out, unknown mapping and invalid counters do not 
 test('details error preserves same-session last verified evidence, but new account cannot reuse it',async()=>{let offline=false;const f=fixture({transport:p=>{if(offline&&p.startsWith('/shows/'))throw Object.assign(Error('offline'),{status:401});return transport(p)}});await f.api.detailsProgress(movie);offline=true;const r=await f.api.detailsProgress(movie,true);assert.equal(r.confirmed,true);assert.equal(r.phase,'error');assert.equal(r.completed,52);f.options.credential='new-synthetic-token';const changed=await f.api.detailsProgress(movie);assert.equal(changed.confirmed,false);assert.notEqual(changed.session,r.session);});
 test('late account-A result is cancelled rather than displayed after token/session changes',async()=>{let finish;const f=fixture({transport:p=>p.startsWith('/shows/')?new Promise(r=>finish=r):transport(p)});const pending=f.api.detailsProgress(movie);for(let i=0;i<20&&!finish;i++)await Promise.resolve();assert(finish);f.options.credential='other-fixture';f.api.detailsSession();finish(progress);const r=await pending;assert.equal(r.confirmed,false);assert.equal(r.phase,'cancelled');});
 test('repeated full/renderer initialization has no multi-target .after insertion; canonical owner and Hybrid handoff explicit',()=>{const native=fs.readFileSync(__dirname+'/../trakt/trakt.js','utf8'),a=native.indexOf('showWatchProgress: function'),b=native.indexOf('addHistoryButton:',a),legacy=native.slice(a,b);assert(!legacy.includes('taglineElement.after'));assert(legacy.includes('window.LampaSeriesDetails.owns'));assert(legacy.includes("host.append(progressElement)"));assert(interfaceSource.includes('if (window.__ifx_plugin_initialized) return;'));assert(fs.readFileSync(__dirname+'/../ui/stremio-hybrid.js','utf8').includes("record.root.querySelector('[data-series-info]')"));});
+
+test('force refresh supersedes an older details request without reusing or publishing its late response',async()=>{
+ const waits=[];const f=fixture({transport:p=>p.startsWith('/shows/')?new Promise(resolve=>waits.push(resolve)):transport(p)});
+ const old=f.api.detailsProgress(movie);for(let i=0;i<30&&!waits.length;i++)await Promise.resolve();assert.equal(waits.length,1);
+ const forced=f.api.detailsProgress(movie,true);for(let i=0;i<30&&waits.length<2;i++)await Promise.resolve();assert.equal(waits.length,2,'force starts a fresh request while the old one is pending');
+ const latest={...progress,aired:53,completed:53,seasons:[{number:1,episodes:[{number:1,plays:1},{number:2,plays:1}]}]};
+ waits[1](latest);const current=await forced;assert.equal(current.confirmed,true);assert.equal(current.completed,53);
+ const eventsAfterCurrent=f.events.filter(e=>e==='traktplus:watched').length;
+ waits[0](progress);const stale=await old;assert.equal(stale.phase,'superseded');
+ assert.equal(f.events.filter(e=>e==='traktplus:watched').length,eventsAfterCurrent,'late pre-force response cannot redecorate or emit');
+ const cached=await f.api.detailsProgress(movie);assert.equal(cached.completed,53,'late stale response cannot replace the newer detail cache');
+});
+
+test('identical confirmed progress reads do not emit watched updates or persist redundant UI state',async()=>{
+ const f=fixture({transport});const first=await f.api.detailsProgress(movie,true);assert.equal(first.confirmed,true);
+ const eventCount=f.events.filter(e=>e==='traktplus:watched').length,writes=f.writes.length;
+ const second=await f.api.detailsProgress(movie,true);assert.equal(second.confirmed,true);
+ assert.equal(f.events.filter(e=>e==='traktplus:watched').length,eventCount);
+ assert.equal(f.writes.length,writes,'same progress evidence does not cause another watched-cache write');
+});

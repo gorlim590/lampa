@@ -10,14 +10,14 @@ Trakt Core can observe these Lampa-side signals:
 
 `Player.start` identifies a player/media handoff, but does not by itself confirm playback. A new Trakt START still waits for a matching advancing Timeline sample or the active internal video `playing` event. A new `Player.start` for a different, identified episode now ends the previous active session using its last confirmed progress. If that progress meets `trakt_min_progress`, it goes through the existing idempotent history writer; otherwise no history write is attempted.
 
-The Timeline hash remains the association boundary. Stale samples for an earlier hash are ignored after a transition. Episode identity uses the show ID and exact season/episode fields resolved from the player event/hash metadata; unknown identity cannot create a show-history write. Two selected files from the same torrent are separate only when Lampa supplies distinct episode identities.
+The Timeline hash remains the association boundary. Stale samples for an earlier hash are ignored after a transition. Episode identity uses the show ID and exact season/episode fields resolved from the player event/hash metadata; unknown identity cannot create a show-history write. Two selected files from the same torrent are separate when Lampa supplies distinct exact S/E metadata, even if the Timeline hash is unchanged. If the hash stays the same and Lampa supplies no distinct episode metadata or player-start transition, the plugin cannot infer a file change and safely sends no watched history.
 
 ## Trakt writes and account safety
 
 - Watched history is written through the existing authenticated `finish` / `api.addToHistory` path, only after the configured threshold is confirmed.
-- Existing retry, per-key locking, completion cache, and 409-as-already-recorded behavior remain in place. Completion cache decisions now also compare the active Trakt token so a previous account's terminal record cannot suppress the current account.
+- Existing retry and 409-as-already-recorded behavior remain in place. Completion cache, request deduplication, and locks are scoped by Trakt account; stale callbacks are guarded by both token and playback/profile generation. Tokens are not emitted in logs.
 - After Trakt acknowledges a show-history write, the affected show's Trakt+ progress is refreshed. Verified aired/watched counts, per-episode evidence (when returned by the endpoint), and Up Next are written into the existing account-bound cache; `traktplus:watched` notifies card/Details consumers. The full watched-library import is not rerun and Home is not reconstructed.
-- The Trakt+ refresh is coalesced per show for 30 seconds. History writes remain per episode.
+- A Trakt+ refresh is coalesced per account/profile/show. The cooldown starts only after a confirmed successful refresh; failures remain retryable, and overlapping history confirmations trigger a follow-up read for the newest episode. Forced reads supersede earlier in-flight reads so stale responses cannot update watched state or UI. Identical progress snapshots do not emit another watched event or redecorate rows.
 
 ## External-player limitation
 
@@ -30,7 +30,11 @@ The main Chrome tab was inspected read-only and showed an initialized Lampa page
 Run:
 
 ```sh
-node --test --test-timeout=15000 tests/trakt-scrobble-session.cjs tests/trakt-episode-transition.cjs tests/trakt-watched-sync.cjs tests/trakt-account-isolation.cjs
+node --test --test-timeout=15000 tests/trakt-scrobble-session.cjs tests/trakt-episode-transition.cjs tests/details-info.cjs tests/trakt-watched-sync.cjs tests/trakt-account-isolation.cjs
 ```
 
 The controlled transition cases cover 95% and 20% progress, same torrent infohash with distinct files, rapid next/previous switches, duplicate and stale Timeline events, specials, profile changes, retry after a transient history error, and account-scoped history deduplication.
+
+## Final safety hardening checkpoint
+
+The PR adds controlled cases for malformed/fractional/negative episode identity (while retaining S00), same-hash season-pack files, late account-A completion while account B records the same episode, failed and overlapping Trakt+ refreshes, forced refresh supersession, and repeated identical progress reads. The GitHub Actions workflow `home-history-checks.yml` now runs the five mandatory Trakt lifecycle and watched-state test files alongside its Home regressions. The final local focused matrix passed 268/268; the exact GitHub Actions workflow command passed 208/208. CI must still be confirmed on the pushed commit; external-player and physical-device acceptance are not claimed.

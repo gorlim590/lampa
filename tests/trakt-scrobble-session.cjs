@@ -402,6 +402,30 @@ test('verified current episode completes once at threshold with its exact identi
   assert.deepEqual(f.calls.map(call => call.action), ['start', 'stop']);
 });
 
+test('production session key refuses malformed TV episode identity before scrobble or history association', () => {
+  const f=integrationFixture(), base={id:1396,method:'tv',name:'Synthetic Series',original_name:'Synthetic Series'};
+  for(const [season,episodeNumber] of [[-1,2],[1.5,2],[1,0],[1,'2.25'],[undefined,2]]) {
+    assert.equal(f.context.playbackSessionKey({...base,season_number:season,episode_number:episodeNumber}),'');
+  }
+});
+
+test('same Timeline hash may represent a different verified file episode in a season pack', async () => {
+  const f=integrationFixture(), second=episode(2), third=episode(3);
+  f.launch(second,'same-timeline-hash'); Object.assign(f.video(),{currentTime:950,duration:1000,paused:false}); f.documentListeners.playing[0]({target:f.video()}); await flush();
+  f.launch(third,'same-timeline-hash'); await flush();
+  assert.equal(f.context.finishCallCount,1,'exact S/E metadata distinguishes selected files despite unchanged torrent hash');
+  assert.equal(f.context.finishedMedia[0].episode_number,2);
+  assert.deepEqual(f.calls.map(call=>[call.action,call.media.episode_number]),[['start',2],['stop',2]]);
+});
+
+test('unchanged Timeline hash without distinct episode metadata cannot infer a season-pack transition', async () => {
+  const f=integrationFixture(), second=episode(2), ambiguous={id:1396,method:'tv',name:'Synthetic Series',original_name:'Synthetic Series'};
+  f.launch(second,'same-hash'); Object.assign(f.video(),{currentTime:200,duration:1000,paused:false}); f.documentListeners.playing[0]({target:f.video()}); await flush();
+  f.launch(ambiguous,'same-hash'); await flush();
+  assert.equal(f.context.finishCallCount||0,0);
+  assert.deepEqual(f.calls.map(call=>call.action),['start','stop'],'the old session closes, but no episode history is inferred');
+});
+
 test('production destroy and error handlers STOP the confirmed session', async () => {
   for (const endEvent of ['destroy', 'error']) {
     const f = integrationFixture(), media = movie(endEvent === 'destroy' ? 1 : 2);
