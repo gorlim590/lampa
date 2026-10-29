@@ -1,0 +1,5892 @@
+{
+  "schema": 1,
+  "cacheCondition": "new isolated browser context per run; empty HTTP cache/storage/cookies; real Siaivo host/core and API endpoints; repository plugin source bytes intercepted locally",
+  "mode": "main",
+  "baseCommit": "c49961a0d8d7d88b609ead2def34f5c5bc2c7e6d",
+  "testedCommit": "f04d3c6c9716a3d7488887a92d14a1195bb8520b",
+  "sourceHashes": {
+    "loader.js": "cb9833f6d6821464e1cc0fd4213fb599e7edc2a2205d0dd110e6b46b2115e2c1",
+    "ui/stremio-hybrid.js": "2a77c7f3c5e759acde5040589e078f52a105fd1485a8f89bc8f55fc041a9f139",
+    "ui/interface-plus.js": "e5e5c2d43f1ddf10beaa9eceae64fbdd83b846d595f555bda032223ea6377fd3",
+    "ui/design-optimized.js": "6aa3d3824a858668f84784d5860120c61ab0e0285d6c4bbc5f3875478db72de5",
+    "ui/cardify-plus.js": "ab3e622d18e58f4c12f0192828bb0ace6551eec65cfbdae34637182df546aa74",
+    "ui/settings-hub.js": "d90281c4550ad80b9dbc89a1cbc3b70a2159b1dda5973f890504715915e25fa4",
+    "ui/torrent-cinema.js": "312accb1711376c1edaca433d243a9e8774ca14e5d1c513af90387294a069b64",
+    "trakt/trakt.js": "418a30fb4269134666f7e0c8ca5934cd04719d6d42a2a111646215f86b8be50b",
+    "trakt/trakt-plus.js": "c67f8565fd20b86d4cf2f14771537a0f5a81ae12df9a4d9232d80a690fdd2bbb",
+    "providers/torrent-search.js": "5775add9fd0c1bbd672a0d16daf9278e7154e19433743222efe388ee6a329c4b",
+    "media/average-rating.js": "d79b772aaf3d8db0fcceaa3292f29680ba2b36e7efc8f4193dd73efc5ae68b94",
+    "localization/translate.js": "1501a1ae26e576695dc58ab17c1df2e9f3c6b84359ef896a47956a7b763f4d68",
+    "plugins-to-enable/home-policy.js": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27",
+    "plugins-to-enable/home-history.js": "6ad4f518561ea024b1b842349c88861d05565c30c9787e21f5d08199b5ddd3d0"
+  },
+  "results": [
+    {
+      "mode": "main",
+      "iteration": 1,
+      "browser": "156.0.8078.73",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "dpr": 1,
+      "elapsedWallMs": 16065,
+      "localAssets": [
+        {
+          "path": "loader.js",
+          "bytes": 10583
+        },
+        {
+          "path": "ui/stremio-hybrid.js",
+          "bytes": 108230
+        },
+        {
+          "path": "ui/interface-plus.js",
+          "bytes": 169318
+        },
+        {
+          "path": "ui/design-optimized.js",
+          "bytes": 272676
+        },
+        {
+          "path": "ui/torrent-cinema.js",
+          "bytes": 185828
+        },
+        {
+          "path": "ui/settings-hub.js",
+          "bytes": 24943
+        },
+        {
+          "path": "trakt/trakt.js",
+          "bytes": 553084
+        },
+        {
+          "path": "providers/torrent-search.js",
+          "bytes": 21773
+        },
+        {
+          "path": "trakt/trakt-plus.js",
+          "bytes": 150503
+        },
+        {
+          "path": "media/average-rating.js",
+          "bytes": 45277
+        },
+        {
+          "path": "ui/cardify-plus.js",
+          "bytes": 61257
+        },
+        {
+          "path": "localization/translate.js",
+          "bytes": 25659
+        },
+        {
+          "path": "plugins-to-enable/home-policy.js",
+          "bytes": 23364
+        },
+        {
+          "path": "plugins-to-enable/home-history.js",
+          "bytes": 24689
+        }
+      ],
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource",
+        "Failed to load resource",
+        "Failed to load resource",
+        "Failed to load resource",
+        "Failed to load resource",
+        "Failed to load resource",
+        "Refused to set unsafe header \"User-Agent\"",
+        "Failed to load resource",
+        "Failed to load resource",
+        "Failed to load resource"
+      ],
+      "responses": [
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/",
+          "status": 200,
+          "type": "document"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/vender/scrollbar/jquery.scrollbar.css",
+          "status": 200,
+          "type": "stylesheet"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/vender/keypad/style.css",
+          "status": 200,
+          "type": "stylesheet"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/css/app.css",
+          "status": 200,
+          "type": "stylesheet"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/vender/jquery/jquery.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/webos/webOSTV.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/vender/navigator/navigator.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/vender/scrollbar/jquery.scrollbar.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/vender/notify/notify.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/vender/keypad/keypad.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/img/welcome.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/app.min.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://gorlim590.github.io",
+          "path": "/lampa/loader.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://gorlim590.github.io",
+          "path": "/lampa/ui/stremio-hybrid.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://gorlim590.github.io",
+          "path": "/lampa/ui/interface-plus.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://gorlim590.github.io",
+          "path": "/lampa/ui/design-optimized.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/fonts/SegoeUI/SegoeUI.woff",
+          "status": 200,
+          "type": "font"
+        },
+        {
+          "origin": "https://date.nager.at",
+          "path": "/api/v3/NextPublicHolidays/ua",
+          "status": 200,
+          "type": "fetch"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/icons/favicon-32x32.png",
+          "status": 200,
+          "type": "other"
+        },
+        {
+          "origin": "https://raw.githubusercontent.com",
+          "path": "/sweatycab/nuvio-minimalist-badges/main/badges-white.json",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/lang/uk.js",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/plugins_grey_list.json",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.bigdatacloud.net",
+          "path": "/data/reverse-geocode-client",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/plugins/modification.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/fonts/SegoeUI/SegoeUI-SemiBold.woff",
+          "status": 200,
+          "type": "font"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/plugins/modification.js",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/vender/hls/hls.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://gorlim590.github.io",
+          "path": "/lampa/ui/settings-hub.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://gorlim590.github.io",
+          "path": "/lampa/ui/torrent-cinema.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/lampa-ua-pack/feed.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/autoload.json",
+          "status": 200,
+          "type": "fetch"
+        },
+        {
+          "origin": "https://gorlim590.github.io",
+          "path": "/lampa/providers/torrent-search.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://gorlim590.github.io",
+          "path": "/lampa/trakt/trakt.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/img/bokeh-h/5.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/img/bokeh/3.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/img/bokeh/2.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/img/bokeh/5.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/img/icons/settings/server.svg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/img/bokeh/4.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/img/bokeh-h/2.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/lampa-ua-pack/anime/map.json",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://gorlim590.github.io",
+          "path": "/lampa/media/average-rating.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://gorlim590.github.io",
+          "path": "/lampa/trakt/trakt-plus.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/img/bokeh-h/4.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/img/icons/settings/parser.svg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/img/icons/settings/player.svg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/img/bokeh/1.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/img/bokeh-h/1.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/img/bokeh-h/6.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/img/icons/settings/more.svg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/img/icons/menu/anime.svg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/img/bokeh-h/3.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/img/bokeh/6.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/vender/dash/dash.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://gorlim590.github.io",
+          "path": "/lampa/ui/cardify-plus.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://gorlim590.github.io",
+          "path": "/lampa/localization/translate.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/vender/qrcode/qrcode.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://gorlim590.github.io",
+          "path": "/lampa/plugins-to-enable/home-policy.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://gorlim590.github.io",
+          "path": "/lampa/plugins-to-enable/home-history.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://fonts.googleapis.com",
+          "path": "/css2",
+          "status": 200,
+          "type": "stylesheet"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/img/loader.svg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://lampame.github.io",
+          "path": "/main/music.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://nrsua.github.io",
+          "path": "/lampa-nrs/lparty.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/fonts/SegoeUI/SegoeUI-Light.woff",
+          "status": 200,
+          "type": "font"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/icons/favicon-32x32.png",
+          "status": 200,
+          "type": "other"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/trending/movie/day",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/trending/movie/week",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://lampame.github.io",
+          "path": "/main/vinyl/vinyl.js",
+          "status": 200,
+          "type": "script"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/now_playing",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://fonts.gstatic.com",
+          "path": "/s/golostext/v7/q5uCsoe9Lv5t7Meb31EcExd8hLxR.woff2",
+          "status": 200,
+          "type": "font"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/upcoming",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://fonts.gstatic.com",
+          "path": "/l/font",
+          "status": 200,
+          "type": "font"
+        },
+        {
+          "origin": "https://fonts.gstatic.com",
+          "path": "/s/golostext/v7/q5uCsoe9Lv5t7Meb31EcExN8hA.woff2",
+          "status": 200,
+          "type": "font"
+        },
+        {
+          "origin": "https://fonts.gstatic.com",
+          "path": "/l/font",
+          "status": 200,
+          "type": "font"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/tv/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/img/img_load.svg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/collection/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://lampame.github.io",
+          "path": "/main/music.js",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://nrsua.github.io",
+          "path": "/lampa-nrs/lparty.js",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/81FLOOicWMgiT67RiqP42pRcTaw.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/r2ib7b2QRLRlb8g7K2QI2rfFgeA.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/81FLOOicWMgiT67RiqP42pRcTaw.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/2h3a7i3mSd1ZhK7sYEzDRgdtvvl.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/1xuVUvb2B1Sq3KMHyPKIvoazrMZ.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/baoPOk6ElW1zLHiSWyWM8qKrNvR.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/vLl5tcuabARqGBefccSsYAYXdgA.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/Ai7VesRDerUCvER1tnsPnfR3iHg.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/2h3a7i3mSd1ZhK7sYEzDRgdtvvl.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/dBZBEdsX3C06FlMAJVWq3NAFYaE.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/lkcSRoS5FXzzNi13ug6kenL2vi2.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/zJkpdPkIQWsDojHl0hTvhH9H5ya.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/gNBiOPEbEPGPTfTIyGDvNQ50m0V.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/hdjCd21IfRdLwBYI3WqZuFZu5x8.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/r2ib7b2QRLRlb8g7K2QI2rfFgeA.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/uhNMNaaovoZiYeaDYZ9BYX7jTAJ.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/1xuVUvb2B1Sq3KMHyPKIvoazrMZ.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/dBZBEdsX3C06FlMAJVWq3NAFYaE.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/1LPzBhF0J0ObYxvMRxyo223UMXO.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/67SHha1PONyP33eCkjnjQXxWIKP.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/yxOxOBxspl3NgC676W62G02g1cR.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/ewNyFpLB2oLZSDkgSN8ea2zqeIY.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/o3TY0dc236CM7eMwAsyghcXIzBL.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/bAd0HA40yHoC3BfQyByR5dvvba2.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/iT72Y5FgZxU8hEiwGP9Wb2xLtm9.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/q1LLTu5kHA4DDwepavnpBmdTtWk.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/dcTp4pV494fvJrFGKsgNQ8vZyzw.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/vLl5tcuabARqGBefccSsYAYXdgA.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://siaivo.isroot.in",
+          "path": "/icons/favicon-32x32.png",
+          "status": 200,
+          "type": "other"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/uhNMNaaovoZiYeaDYZ9BYX7jTAJ.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/Ai7VesRDerUCvER1tnsPnfR3iHg.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id/recommendations",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id/credits",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://upload.wikimedia.org",
+          "path": "/wikipedia/commons/8/89/Tmdb.new.logo.svg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/lkcSRoS5FXzzNi13ug6kenL2vi2.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/hdjCd21IfRdLwBYI3WqZuFZu5x8.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id/similar",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id/videos",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/zJkpdPkIQWsDojHl0hTvhH9H5ya.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id/videos",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/baoPOk6ElW1zLHiSWyWM8qKrNvR.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/67SHha1PONyP33eCkjnjQXxWIKP.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/gNBiOPEbEPGPTfTIyGDvNQ50m0V.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/1LPzBhF0J0ObYxvMRxyo223UMXO.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/yxOxOBxspl3NgC676W62G02g1cR.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/oFYDW8cgvedzLZuE5sceplckRTV.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/bZ3C0B0O7lMrR1AgQFcybyGtl2u.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/5Pbk95yHAETsDRS5eUTsTWLJ1WO.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/4by8InwbaSqB3I9f7GFVxWgt9ls.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/q1LLTu5kHA4DDwepavnpBmdTtWk.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/g9MoyXHtNgaR1UC2MoztL80iZl3.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/collection/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/ewNyFpLB2oLZSDkgSN8ea2zqeIY.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/barJMlk3d6jiiMy3AbqjhBPH0Yw.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/qEYcZA5NrmqL9eCU7lkLzEbQskT.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/o3TY0dc236CM7eMwAsyghcXIzBL.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/9YzsMLLSpCbAiDiEXlwkZr3m5Ri.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/gTEOtXzS0rgqj8a8zT80iFfCyaA.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/bAd0HA40yHoC3BfQyByR5dvvba2.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/e8GdKxhgIBVR06z1Xar4g2RHrN7.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/iT72Y5FgZxU8hEiwGP9Wb2xLtm9.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/yfU7Rp0C3DluvsDoZfqGojRgNLh.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/dcTp4pV494fvJrFGKsgNQ8vZyzw.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/i5A8UZtgyduV5yhRl4RaIrKkmi8.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/oFYDW8cgvedzLZuE5sceplckRTV.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/vIY7hkuhytQv8EgbeUvxjdUgVFL.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/5Pbk95yHAETsDRS5eUTsTWLJ1WO.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/2NcVNNhso3w90GwbDjAuWmp0mSG.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/bZ3C0B0O7lMrR1AgQFcybyGtl2u.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/9YzsMLLSpCbAiDiEXlwkZr3m5Ri.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/9ulobOWQViT7UQt2iYzb5tEVgm9.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w92/1qpgMYBPbm2bief81IIF6qqjjhm.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/wJ3Nfqd0QRHxcXuHQ9i8FEPrjuU.png",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://image.tmdb.org",
+          "path": "/t/p/w300/1qpgMYBPbm2bief81IIF6qqjjhm.jpg",
+          "status": 200,
+          "type": "image"
+        },
+        {
+          "origin": "https://clients5.google.com",
+          "path": "/translate_a/t",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://api.themoviedb.org",
+          "path": "/3/movie/:id",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://clients5.google.com",
+          "path": "/translate_a/t",
+          "status": 200,
+          "type": "xhr"
+        },
+        {
+          "origin": "https://clients5.google.com",
+          "path": "/translate_a/t",
+          "status": 200,
+          "type": "xhr"
+        }
+      ],
+      "metrics": {
+        "marks": {
+          "documentStart": 744.8,
+          "domContentLoaded": 749.6,
+          "lampaRuntimeAvailable": 1480.8,
+          "loaderRequested": 1480.9,
+          "contentRowsAvailable": 1481.9,
+          "lampaGlobalAvailable": 1481.9,
+          "loaderExecuted": 1503,
+          "windowLoad": 1548.1,
+          "firstHybridActiveFrame": 1578.7,
+          "nativeAppReady": 3750.9,
+          "firstVisibleHomeCard": 4474.4,
+          "firstHomeFocus": 4474.8,
+          "firstUsableHome": 4475,
+          "stageProbeStopped": 4475
+        },
+        "stages": [
+          {
+            "name": "firstHybridActiveFrame",
+            "at": 1578.7000000029802,
+            "extra": {
+              "at": 1578.7,
+              "controller": "",
+              "cards": 0,
+              "nodes": 84,
+              "styles": 15,
+              "focus": false
+            }
+          },
+          {
+            "name": "firstVisibleHomeCard",
+            "at": 4474.4000000059605,
+            "extra": {
+              "at": 4474.1,
+              "activity": "main",
+              "controller": "items_line",
+              "cards": 28,
+              "nodes": 885,
+              "styles": 32,
+              "focus": true
+            }
+          },
+          {
+            "name": "firstHomeFocus",
+            "at": 4474.80000000447,
+            "extra": {
+              "at": 4474.5,
+              "activity": "main",
+              "controller": "items_line",
+              "cards": 28,
+              "nodes": 885,
+              "styles": 32,
+              "focus": true
+            }
+          },
+          {
+            "name": "firstUsableHome",
+            "at": 4475,
+            "extra": {
+              "at": 4474.9,
+              "activity": "main",
+              "controller": "items_line",
+              "cards": 28,
+              "nodes": 885,
+              "styles": 32,
+              "focus": true
+            }
+          }
+        ],
+        "readinessEvents": [
+          {
+            "kind": "activity",
+            "type": "init",
+            "component": "main",
+            "at": 4099.3
+          },
+          {
+            "kind": "activity",
+            "type": "create",
+            "component": "main",
+            "at": 4110.5
+          },
+          {
+            "kind": "controller",
+            "name": "content",
+            "at": 4132.6
+          },
+          {
+            "kind": "controller",
+            "name": "content",
+            "at": 4134.9
+          },
+          {
+            "kind": "activity",
+            "type": "start",
+            "component": "main",
+            "at": 4135.7
+          },
+          {
+            "kind": "controller",
+            "name": "content",
+            "at": 4429.3
+          },
+          {
+            "kind": "controller",
+            "name": "items_line",
+            "at": 4433.4
+          },
+          {
+            "kind": "controller",
+            "name": "content",
+            "at": 4433.5
+          }
+        ],
+        "fixtureFavoriteCalls": 11,
+        "warmRowsSettings": {
+          "continue": "",
+          "week": "",
+          "source": "tmdb"
+        },
+        "homeTvPrefetch": {
+          "total": 24,
+          "beforeFirstUsable": 24,
+          "starts": [
+            4139.2,
+            4140.1,
+            4140.6,
+            4141.2,
+            4184.1,
+            4187.5,
+            4191.1,
+            4198.2,
+            4207.6,
+            4209.9,
+            4218.1,
+            4220.2,
+            4248.2,
+            4250.3,
+            4253.6,
+            4258.8,
+            4261.2,
+            4263.3,
+            4267.1,
+            4271.4,
+            4278.9,
+            4282.7,
+            4297.9,
+            4303.9
+          ],
+          "maxConcurrent": 4
+        },
+        "nav": {
+          "domContentLoaded": 749.7,
+          "load": 1548.1,
+          "responseStart": 160,
+          "transfer": 11508
+        },
+        "final": {
+          "at": 4591.7,
+          "activity": "main",
+          "controller": "items_line",
+          "cards": 28,
+          "nodes": 979,
+          "styles": 32,
+          "focus": true
+        },
+        "hybrid": "3.1.0-single-presentation-owner",
+        "loader": {
+          "requested": 11,
+          "loaded": 11,
+          "failed": 0,
+          "criticalMs": 1539.5,
+          "appreadyStart": 3684.7,
+          "deferredFinished": 4001.8
+        },
+        "longTasks": [
+          {
+            "start": 1161.4,
+            "duration": 285
+          },
+          {
+            "start": 3563.1,
+            "duration": 136
+          },
+          {
+            "start": 4314.6,
+            "duration": 125
+          }
+        ],
+        "resources": [
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/vender/scrollbar/jquery.scrollbar.css",
+            "type": "link",
+            "start": 169.4,
+            "end": 581.1,
+            "bytes": 3492
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/vender/keypad/style.css",
+            "type": "link",
+            "start": 169.8,
+            "end": 583.6,
+            "bytes": 1122
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/css/app.css",
+            "type": "link",
+            "start": 170,
+            "end": 659.6,
+            "bytes": 52780
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/webos/webOSTV.js",
+            "type": "script",
+            "start": 170.1,
+            "end": 657.5,
+            "bytes": 3958
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/vender/jquery/jquery.js",
+            "type": "script",
+            "start": 170.3,
+            "end": 646.8,
+            "bytes": 81147
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/vender/notify/notify.js",
+            "type": "script",
+            "start": 170.3,
+            "end": 659.5,
+            "bytes": 9290
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/vender/scrollbar/jquery.scrollbar.js",
+            "type": "script",
+            "start": 170.4,
+            "end": 658.8,
+            "bytes": 6979
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/vender/navigator/navigator.js",
+            "type": "script",
+            "start": 170.5,
+            "end": 658.2,
+            "bytes": 6576
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/vender/keypad/keypad.js",
+            "type": "script",
+            "start": 170.7,
+            "end": 682.1,
+            "bytes": 9674
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/img/welcome.jpg",
+            "type": "css",
+            "start": 726.1,
+            "end": 786.3,
+            "bytes": 28033
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/app.min.js",
+            "type": "script",
+            "start": 747.2,
+            "end": 1120,
+            "bytes": 793156
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/fonts/SegoeUI/SegoeUI.woff",
+            "type": "css",
+            "start": 1449.4,
+            "end": 1538.4,
+            "bytes": 246144
+          },
+          {
+            "origin": "https://date.nager.at",
+            "path": "/api/v3/NextPublicHolidays/ua",
+            "type": "fetch",
+            "start": 1479.9,
+            "end": 1559.9,
+            "bytes": 0
+          },
+          {
+            "origin": "https://gorlim590.github.io",
+            "path": "/lampa/loader.js",
+            "type": "script",
+            "start": 1481.5,
+            "end": 1496.1,
+            "bytes": 0
+          },
+          {
+            "origin": "https://raw.githubusercontent.com",
+            "path": "/sweatycab/nuvio-minimalist-badges/main/badges-white.json",
+            "type": "xmlhttprequest",
+            "start": 1492.7,
+            "end": 1887.8,
+            "bytes": 0
+          },
+          {
+            "origin": "https://gorlim590.github.io",
+            "path": "/lampa/ui/stremio-hybrid.js",
+            "type": "script",
+            "start": 1501.9,
+            "end": 1516.9,
+            "bytes": 0
+          },
+          {
+            "origin": "https://gorlim590.github.io",
+            "path": "/lampa/ui/interface-plus.js",
+            "type": "script",
+            "start": 1502.4,
+            "end": 1520.9,
+            "bytes": 0
+          },
+          {
+            "origin": "https://gorlim590.github.io",
+            "path": "/lampa/ui/design-optimized.js",
+            "type": "script",
+            "start": 1502.8,
+            "end": 1528.4,
+            "bytes": 0
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/icons/favicon.ico",
+            "type": "other",
+            "start": 1551.4,
+            "end": 1553.4,
+            "bytes": 0
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/icons/favicon-32x32.png",
+            "type": "other",
+            "start": 1555.5,
+            "end": 1587.4,
+            "bytes": 2730
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/lang/uk.js",
+            "type": "xmlhttprequest",
+            "start": 2447.5,
+            "end": 2480.4,
+            "bytes": 25128
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/plugins_grey_list.json",
+            "type": "xmlhttprequest",
+            "start": 2509.8,
+            "end": 2540.9,
+            "bytes": 575
+          },
+          {
+            "origin": "https://api.bigdatacloud.net",
+            "path": "/data/reverse-geocode-client",
+            "type": "xmlhttprequest",
+            "start": 2544.8,
+            "end": 3521,
+            "bytes": 0
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/plugins/modification.js",
+            "type": "script",
+            "start": 3531.4,
+            "end": 3561.7,
+            "bytes": 544
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/plugins/modification.js",
+            "type": "xmlhttprequest",
+            "start": 3564.5,
+            "end": 3595.9,
+            "bytes": 544
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/vender/hls/hls.js",
+            "type": "script",
+            "start": 3629,
+            "end": 3681.8,
+            "bytes": 112379
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/fonts/SegoeUI/SegoeUI-SemiBold.woff",
+            "type": "css",
+            "start": 3635.3,
+            "end": 3705.3,
+            "bytes": 193496
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/lampa-ua-pack/feed.js",
+            "type": "script",
+            "start": 3653.4,
+            "end": 3724.2,
+            "bytes": 716
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/autoload.json",
+            "type": "fetch",
+            "start": 3655.8,
+            "end": 3725.1,
+            "bytes": 534
+          },
+          {
+            "origin": "https://gorlim590.github.io",
+            "path": "/lampa/ui/torrent-cinema.js",
+            "type": "script",
+            "start": 3657.8,
+            "end": 3710.1,
+            "bytes": 0
+          },
+          {
+            "origin": "https://gorlim590.github.io",
+            "path": "/lampa/ui/settings-hub.js",
+            "type": "script",
+            "start": 3659.8,
+            "end": 3711.8,
+            "bytes": 0
+          },
+          {
+            "origin": "https://fonts.googleapis.com",
+            "path": "/css2",
+            "type": "link",
+            "start": 3678.5,
+            "end": 4134.9,
+            "bytes": 998
+          },
+          {
+            "origin": "https://gorlim590.github.io",
+            "path": "/lampa/trakt/trakt.js",
+            "type": "script",
+            "start": 3686.3,
+            "end": 3768.3,
+            "bytes": 0
+          },
+          {
+            "origin": "https://gorlim590.github.io",
+            "path": "/lampa/providers/torrent-search.js",
+            "type": "script",
+            "start": 3687,
+            "end": 3769.9,
+            "bytes": 0
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/img/icons/settings/player.svg",
+            "type": "img",
+            "start": 3698.3,
+            "end": 3875.8,
+            "bytes": 842
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/img/icons/settings/parser.svg",
+            "type": "img",
+            "start": 3698.4,
+            "end": 3875.5,
+            "bytes": 993
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/img/icons/settings/server.svg",
+            "type": "img",
+            "start": 3698.6,
+            "end": 3829.5,
+            "bytes": 814
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/img/bokeh-h/1.png",
+            "type": "img",
+            "start": 3698.7,
+            "end": 3878.3,
+            "bytes": 18517
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/img/icons/settings/more.svg",
+            "type": "img",
+            "start": 3698.7,
+            "end": 3876,
+            "bytes": 677
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/img/bokeh-h/2.png",
+            "type": "img",
+            "start": 3698.8,
+            "end": 3848.5,
+            "bytes": 26932
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/img/bokeh-h/3.png",
+            "type": "img",
+            "start": 3698.9,
+            "end": 3880,
+            "bytes": 44073
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/img/bokeh-h/4.png",
+            "type": "img",
+            "start": 3699,
+            "end": 3886.7,
+            "bytes": 39283
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/img/bokeh-h/5.png",
+            "type": "img",
+            "start": 3699.1,
+            "end": 3819.5,
+            "bytes": 59881
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/img/bokeh-h/6.png",
+            "type": "img",
+            "start": 3699.2,
+            "end": 3907.7,
+            "bytes": 77828
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/img/bokeh/1.png",
+            "type": "img",
+            "start": 3699.2,
+            "end": 3908.6,
+            "bytes": 60543
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/img/bokeh/3.png",
+            "type": "img",
+            "start": 3699.3,
+            "end": 3822.2,
+            "bytes": 21972
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/img/bokeh/2.png",
+            "type": "img",
+            "start": 3699.3,
+            "end": 3825.5,
+            "bytes": 35904
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/img/bokeh/4.png",
+            "type": "img",
+            "start": 3699.4,
+            "end": 3846.2,
+            "bytes": 58790
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/img/bokeh/5.png",
+            "type": "img",
+            "start": 3699.5,
+            "end": 3840.5,
+            "bytes": 83425
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/img/icons/menu/anime.svg",
+            "type": "img",
+            "start": 3699.6,
+            "end": 3876.4,
+            "bytes": 1080
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/img/bokeh/6.png",
+            "type": "img",
+            "start": 3699.6,
+            "end": 3911.1,
+            "bytes": 119654
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/lampa-ua-pack/anime/map.json",
+            "type": "xmlhttprequest",
+            "start": 3748.6,
+            "end": 3839.5,
+            "bytes": 47622
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/vender/dash/dash.js",
+            "type": "script",
+            "start": 3766.3,
+            "end": 3909.3,
+            "bytes": 188717
+          },
+          {
+            "origin": "https://nrsua.github.io",
+            "path": "/lampa-nrs/lparty.js",
+            "type": "script",
+            "start": 3789.8,
+            "end": 4203.6,
+            "bytes": 0
+          },
+          {
+            "origin": "https://lampame.github.io",
+            "path": "/main/music.js",
+            "type": "script",
+            "start": 3791.7,
+            "end": 4199.9,
+            "bytes": 0
+          },
+          {
+            "origin": "https://gorlim590.github.io",
+            "path": "/lampa/trakt/trakt-plus.js",
+            "type": "script",
+            "start": 3841,
+            "end": 3859.3,
+            "bytes": 0
+          },
+          {
+            "origin": "https://gorlim590.github.io",
+            "path": "/lampa/media/average-rating.js",
+            "type": "script",
+            "start": 3846.7,
+            "end": 3862.5,
+            "bytes": 0
+          },
+          {
+            "origin": "https://gorlim590.github.io",
+            "path": "/lampa/ui/cardify-plus.js",
+            "type": "script",
+            "start": 3913.6,
+            "end": 3924,
+            "bytes": 0
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/vender/qrcode/qrcode.js",
+            "type": "script",
+            "start": 3949.2,
+            "end": 3984.4,
+            "bytes": 12368
+          },
+          {
+            "origin": "https://gorlim590.github.io",
+            "path": "/lampa/localization/translate.js",
+            "type": "script",
+            "start": 3963.7,
+            "end": 3969,
+            "bytes": 0
+          },
+          {
+            "origin": "https://gorlim590.github.io",
+            "path": "/lampa/plugins-to-enable/home-policy.js",
+            "type": "script",
+            "start": 3980.2,
+            "end": 3985.8,
+            "bytes": 0
+          },
+          {
+            "origin": "https://gorlim590.github.io",
+            "path": "/lampa/plugins-to-enable/home-history.js",
+            "type": "script",
+            "start": 3992.5,
+            "end": 3997.5,
+            "bytes": 0
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/img/loader.svg",
+            "type": "css",
+            "start": 4114.1,
+            "end": 4186.6,
+            "bytes": 734
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/fonts/SegoeUI/SegoeUI-Light.woff",
+            "type": "css",
+            "start": 4120.6,
+            "end": 4207,
+            "bytes": 174840
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4139.2,
+            "end": 4172.7,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4140.1,
+            "end": 4174.1,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4140.6,
+            "end": 4174.6,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4141.2,
+            "end": 4175,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/now_playing",
+            "type": "xmlhttprequest",
+            "start": 4176.8,
+            "end": 4291.3,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/trending/movie/day",
+            "type": "xmlhttprequest",
+            "start": 4177.7,
+            "end": 4290.3,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/trending/movie/week",
+            "type": "xmlhttprequest",
+            "start": 4178.7,
+            "end": 4294.5,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/upcoming",
+            "type": "xmlhttprequest",
+            "start": 4179.3,
+            "end": 4293.6,
+            "bytes": 0
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/icons/favicon.ico",
+            "type": "other",
+            "start": 4182.1,
+            "end": 4185.6,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4184.1,
+            "end": 4202.9,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4187.5,
+            "end": 4203.5,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4191.1,
+            "end": 4206.9,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4198.2,
+            "end": 4211.2,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4207.6,
+            "end": 4216.8,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4209.9,
+            "end": 4224.7,
+            "bytes": 0
+          },
+          {
+            "origin": "https://lampame.github.io",
+            "path": "/main/vinyl/vinyl.js",
+            "type": "script",
+            "start": 4211.6,
+            "end": 4284,
+            "bytes": 0
+          },
+          {
+            "origin": "https://lampame.github.io",
+            "path": "/main/music.js",
+            "type": "xmlhttprequest",
+            "start": 4213.4,
+            "end": 4607.8,
+            "bytes": 0
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/icons/favicon-32x32.png",
+            "type": "other",
+            "start": 4214.8,
+            "end": 4262.9,
+            "bytes": 2730
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4218.1,
+            "end": 4234,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4220.2,
+            "end": 4234.7,
+            "bytes": 0
+          },
+          {
+            "origin": "https://nrsua.github.io",
+            "path": "/lampa-nrs/lparty.js",
+            "type": "xmlhttprequest",
+            "start": 4245.9,
+            "end": 4639.9,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4248.2,
+            "end": 4252.6,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4250.3,
+            "end": 4257.3,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4253.6,
+            "end": 4262.8,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4258.8,
+            "end": 4268.8,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4261.2,
+            "end": 4276.5,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4263.3,
+            "end": 4277,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4267.1,
+            "end": 4285.7,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4271.4,
+            "end": 4286.6,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4278.9,
+            "end": 4291.3,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4282.7,
+            "end": 4292.1,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4297.9,
+            "end": 4301.1,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/tv/:id",
+            "type": "xmlhttprequest",
+            "start": 4303.9,
+            "end": 4309,
+            "bytes": 0
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/img/img_load.svg",
+            "type": "css",
+            "start": 4389.7,
+            "end": 4479.5,
+            "bytes": 1090
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/2h3a7i3mSd1ZhK7sYEzDRgdtvvl.jpg",
+            "type": "img",
+            "start": 4435.4,
+            "end": 5040.5,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/2h3a7i3mSd1ZhK7sYEzDRgdtvvl.jpg",
+            "type": "img",
+            "start": 4435.5,
+            "end": 4951.9,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/81FLOOicWMgiT67RiqP42pRcTaw.jpg",
+            "type": "img",
+            "start": 4435.6,
+            "end": 4959.4,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/81FLOOicWMgiT67RiqP42pRcTaw.jpg",
+            "type": "img",
+            "start": 4435.7,
+            "end": 4950.2,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/r2ib7b2QRLRlb8g7K2QI2rfFgeA.jpg",
+            "type": "img",
+            "start": 4435.7,
+            "end": 4979,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/r2ib7b2QRLRlb8g7K2QI2rfFgeA.jpg",
+            "type": "img",
+            "start": 4435.8,
+            "end": 4934.4,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/1xuVUvb2B1Sq3KMHyPKIvoazrMZ.jpg",
+            "type": "img",
+            "start": 4436,
+            "end": 4971.8,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/1xuVUvb2B1Sq3KMHyPKIvoazrMZ.jpg",
+            "type": "img",
+            "start": 4436,
+            "end": 5028.2,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/dBZBEdsX3C06FlMAJVWq3NAFYaE.jpg",
+            "type": "img",
+            "start": 4436.1,
+            "end": 5028.5,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/dBZBEdsX3C06FlMAJVWq3NAFYaE.jpg",
+            "type": "img",
+            "start": 4436.2,
+            "end": 5012.8,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/vLl5tcuabARqGBefccSsYAYXdgA.jpg",
+            "type": "img",
+            "start": 4436.3,
+            "end": 5061.2,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/vLl5tcuabARqGBefccSsYAYXdgA.jpg",
+            "type": "img",
+            "start": 4436.4,
+            "end": 5008.7,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/Ai7VesRDerUCvER1tnsPnfR3iHg.jpg",
+            "type": "img",
+            "start": 4436.5,
+            "end": 5073.5,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/Ai7VesRDerUCvER1tnsPnfR3iHg.jpg",
+            "type": "img",
+            "start": 4436.6,
+            "end": 5009.8,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/lkcSRoS5FXzzNi13ug6kenL2vi2.jpg",
+            "type": "img",
+            "start": 4436.8,
+            "end": 5073.2,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/lkcSRoS5FXzzNi13ug6kenL2vi2.jpg",
+            "type": "img",
+            "start": 4437,
+            "end": 5013.6,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/zJkpdPkIQWsDojHl0hTvhH9H5ya.jpg",
+            "type": "img",
+            "start": 4437.1,
+            "end": 5079.3,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/zJkpdPkIQWsDojHl0hTvhH9H5ya.jpg",
+            "type": "img",
+            "start": 4437.3,
+            "end": 5015.3,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/baoPOk6ElW1zLHiSWyWM8qKrNvR.jpg",
+            "type": "img",
+            "start": 4437.4,
+            "end": 5078.1,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/baoPOk6ElW1zLHiSWyWM8qKrNvR.jpg",
+            "type": "img",
+            "start": 4437.5,
+            "end": 4997.1,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/hdjCd21IfRdLwBYI3WqZuFZu5x8.jpg",
+            "type": "img",
+            "start": 4437.6,
+            "end": 5084.2,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/hdjCd21IfRdLwBYI3WqZuFZu5x8.jpg",
+            "type": "img",
+            "start": 4437.8,
+            "end": 5023.1,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/uhNMNaaovoZiYeaDYZ9BYX7jTAJ.jpg",
+            "type": "img",
+            "start": 4438,
+            "end": 5057.4,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/uhNMNaaovoZiYeaDYZ9BYX7jTAJ.jpg",
+            "type": "img",
+            "start": 4438.1,
+            "end": 5024,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/67SHha1PONyP33eCkjnjQXxWIKP.jpg",
+            "type": "img",
+            "start": 4438.4,
+            "end": 5098.1,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/67SHha1PONyP33eCkjnjQXxWIKP.jpg",
+            "type": "img",
+            "start": 4438.6,
+            "end": 5031.3,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/gNBiOPEbEPGPTfTIyGDvNQ50m0V.jpg",
+            "type": "img",
+            "start": 4439,
+            "end": 5098.3,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/gNBiOPEbEPGPTfTIyGDvNQ50m0V.jpg",
+            "type": "img",
+            "start": 4439.1,
+            "end": 5020.8,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/1LPzBhF0J0ObYxvMRxyo223UMXO.jpg",
+            "type": "img",
+            "start": 4439.3,
+            "end": 5098.5,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/1LPzBhF0J0ObYxvMRxyo223UMXO.jpg",
+            "type": "img",
+            "start": 4439.4,
+            "end": 5028.7,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 4470.5,
+            "end": 4517.8,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 4472.7,
+            "end": 4521.8,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 4477.1,
+            "end": 4523.3,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 4481.1,
+            "end": 4527.1,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 4519.6,
+            "end": 4566.2,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 4525.4,
+            "end": 4575.3,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/yxOxOBxspl3NgC676W62G02g1cR.jpg",
+            "type": "img",
+            "start": 4529,
+            "end": 5113.6,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/yxOxOBxspl3NgC676W62G02g1cR.jpg",
+            "type": "img",
+            "start": 4529.2,
+            "end": 5036,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/4by8InwbaSqB3I9f7GFVxWgt9ls.png",
+            "type": "img",
+            "start": 4529.3,
+            "end": 5113.7,
+            "bytes": 0
+          },
+          {
+            "origin": "https://upload.wikimedia.org",
+            "path": "/wikipedia/commons/8/89/Tmdb.new.logo.svg",
+            "type": "img",
+            "start": 4529.4,
+            "end": 5072.9,
+            "bytes": 1456
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/collection/:id",
+            "type": "xmlhttprequest",
+            "start": 4532.5,
+            "end": 4588.4,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/q1LLTu5kHA4DDwepavnpBmdTtWk.jpg",
+            "type": "img",
+            "start": 4536.2,
+            "end": 5113.9,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/q1LLTu5kHA4DDwepavnpBmdTtWk.jpg",
+            "type": "img",
+            "start": 4536.4,
+            "end": 5038.9,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/g9MoyXHtNgaR1UC2MoztL80iZl3.png",
+            "type": "img",
+            "start": 4536.6,
+            "end": 5114.1,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 4568.6,
+            "end": 4613.2,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/ewNyFpLB2oLZSDkgSN8ea2zqeIY.jpg",
+            "type": "img",
+            "start": 4572.2,
+            "end": 5037,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/ewNyFpLB2oLZSDkgSN8ea2zqeIY.jpg",
+            "type": "img",
+            "start": 4572.2,
+            "end": 5114.3,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/barJMlk3d6jiiMy3AbqjhBPH0Yw.png",
+            "type": "img",
+            "start": 4572.3,
+            "end": 5114.4,
+            "bytes": 0
+          },
+          {
+            "origin": "https://clients5.google.com",
+            "path": "/translate_a/t",
+            "type": "xmlhttprequest",
+            "start": 4579.8,
+            "end": 5221.9,
+            "bytes": 0
+          },
+          {
+            "origin": "https://clients5.google.com",
+            "path": "/translate_a/t",
+            "type": "xmlhttprequest",
+            "start": 4582,
+            "end": 5131.6,
+            "bytes": 0
+          },
+          {
+            "origin": "https://clients5.google.com",
+            "path": "/translate_a/t",
+            "type": "xmlhttprequest",
+            "start": 4583.4,
+            "end": 5219.3,
+            "bytes": 0
+          },
+          {
+            "origin": "https://clients5.google.com",
+            "path": "/translate_a/t",
+            "type": "xmlhttprequest",
+            "start": 4585,
+            "end": 5223,
+            "bytes": 0
+          },
+          {
+            "origin": "https://clients5.google.com",
+            "path": "/translate_a/t",
+            "type": "xmlhttprequest",
+            "start": 4586.6,
+            "end": 5223.5,
+            "bytes": 0
+          },
+          {
+            "origin": "https://clients5.google.com",
+            "path": "/translate_a/t",
+            "type": "xmlhttprequest",
+            "start": 4589,
+            "end": 5220.4,
+            "bytes": 0
+          },
+          {
+            "origin": "https://clients5.google.com",
+            "path": "/translate_a/t",
+            "type": "xmlhttprequest",
+            "start": 4590.3,
+            "end": 5243,
+            "bytes": 0
+          },
+          {
+            "origin": "https://clients5.google.com",
+            "path": "/translate_a/t",
+            "type": "xmlhttprequest",
+            "start": 4614.9,
+            "end": 5228.3,
+            "bytes": 0
+          },
+          {
+            "origin": "https://clients5.google.com",
+            "path": "/translate_a/t",
+            "type": "xmlhttprequest",
+            "start": 4617.1,
+            "end": 5230.1,
+            "bytes": 0
+          },
+          {
+            "origin": "https://clients5.google.com",
+            "path": "/translate_a/t",
+            "type": "xmlhttprequest",
+            "start": 4618.9,
+            "end": 5241.9,
+            "bytes": 0
+          },
+          {
+            "origin": "https://clients5.google.com",
+            "path": "/translate_a/t",
+            "type": "xmlhttprequest",
+            "start": 4620.7,
+            "end": 5242.4,
+            "bytes": 0
+          },
+          {
+            "origin": "https://clients5.google.com",
+            "path": "/translate_a/t",
+            "type": "xmlhttprequest",
+            "start": 4623.1,
+            "end": 5246.4,
+            "bytes": 0
+          },
+          {
+            "origin": "https://clients5.google.com",
+            "path": "/translate_a/t",
+            "type": "xmlhttprequest",
+            "start": 4625,
+            "end": 5245,
+            "bytes": 0
+          },
+          {
+            "origin": "https://clients5.google.com",
+            "path": "/translate_a/t",
+            "type": "xmlhttprequest",
+            "start": 4632.4,
+            "end": 5250.5,
+            "bytes": 0
+          },
+          {
+            "origin": "https://clients5.google.com",
+            "path": "/translate_a/t",
+            "type": "xmlhttprequest",
+            "start": 4633.6,
+            "end": 5222.5,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 4655.5,
+            "end": 4702.9,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/o3TY0dc236CM7eMwAsyghcXIzBL.jpg",
+            "type": "img",
+            "start": 4659.2,
+            "end": 5141.8,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/o3TY0dc236CM7eMwAsyghcXIzBL.jpg",
+            "type": "img",
+            "start": 4659.4,
+            "end": 5037.5,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/gTEOtXzS0rgqj8a8zT80iFfCyaA.png",
+            "type": "img",
+            "start": 4659.6,
+            "end": 5142,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 4666.9,
+            "end": 4711.2,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/bAd0HA40yHoC3BfQyByR5dvvba2.jpg",
+            "type": "img",
+            "start": 4669.2,
+            "end": 5142.4,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/bAd0HA40yHoC3BfQyByR5dvvba2.jpg",
+            "type": "img",
+            "start": 4669.3,
+            "end": 5038.2,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/e8GdKxhgIBVR06z1Xar4g2RHrN7.png",
+            "type": "img",
+            "start": 4669.5,
+            "end": 5142.7,
+            "bytes": 0
+          },
+          {
+            "origin": "https://clients5.google.com",
+            "path": "/translate_a/t",
+            "type": "xmlhttprequest",
+            "start": 4671.8,
+            "end": 5249.2,
+            "bytes": 0
+          },
+          {
+            "origin": "https://clients5.google.com",
+            "path": "/translate_a/t",
+            "type": "xmlhttprequest",
+            "start": 4673.7,
+            "end": 5247.3,
+            "bytes": 0
+          },
+          {
+            "origin": "https://clients5.google.com",
+            "path": "/translate_a/t",
+            "type": "xmlhttprequest",
+            "start": 4677.8,
+            "end": 5249.5,
+            "bytes": 0
+          },
+          {
+            "origin": "https://clients5.google.com",
+            "path": "/translate_a/t",
+            "type": "xmlhttprequest",
+            "start": 4679.8,
+            "end": 5245.6,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 4682.6,
+            "end": 4727,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 4706.3,
+            "end": 4753.1,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 4851,
+            "end": 4897.4,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 4853.6,
+            "end": 4969.5,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/iT72Y5FgZxU8hEiwGP9Wb2xLtm9.jpg",
+            "type": "img",
+            "start": 4858.5,
+            "end": 5142.8,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/iT72Y5FgZxU8hEiwGP9Wb2xLtm9.jpg",
+            "type": "img",
+            "start": 4858.7,
+            "end": 5038.6,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/yfU7Rp0C3DluvsDoZfqGojRgNLh.png",
+            "type": "img",
+            "start": 4858.8,
+            "end": 5143.5,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 4861.6,
+            "end": 4970.6,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 4864.5,
+            "end": 4970.1,
+            "bytes": 0
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/icons/favicon.ico",
+            "type": "other",
+            "start": 4866.8,
+            "end": 4881.9,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 4882.7,
+            "end": 5051.9,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id/credits",
+            "type": "xmlhttprequest",
+            "start": 4883.9,
+            "end": 5054.4,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id/recommendations",
+            "type": "xmlhttprequest",
+            "start": 4885,
+            "end": 5052.2,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id/similar",
+            "type": "xmlhttprequest",
+            "start": 4885.7,
+            "end": 5054.9,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id/videos",
+            "type": "xmlhttprequest",
+            "start": 4886.6,
+            "end": 5056.7,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id/videos",
+            "type": "xmlhttprequest",
+            "start": 4887.3,
+            "end": 5057,
+            "bytes": 0
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/icons/favicon-32x32.png",
+            "type": "other",
+            "start": 4902.4,
+            "end": 5039,
+            "bytes": 2730
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 4906.1,
+            "end": 5057.2,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/dcTp4pV494fvJrFGKsgNQ8vZyzw.jpg",
+            "type": "img",
+            "start": 4908.9,
+            "end": 5144.7,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/dcTp4pV494fvJrFGKsgNQ8vZyzw.jpg",
+            "type": "img",
+            "start": 4909.2,
+            "end": 5039.2,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/i5A8UZtgyduV5yhRl4RaIrKkmi8.png",
+            "type": "img",
+            "start": 4909.3,
+            "end": 5145.7,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/collection/:id",
+            "type": "xmlhttprequest",
+            "start": 4975.3,
+            "end": 5082,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/oFYDW8cgvedzLZuE5sceplckRTV.jpg",
+            "type": "img",
+            "start": 4978,
+            "end": 5146.4,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/oFYDW8cgvedzLZuE5sceplckRTV.jpg",
+            "type": "img",
+            "start": 4978.7,
+            "end": 5092.3,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/vIY7hkuhytQv8EgbeUvxjdUgVFL.png",
+            "type": "img",
+            "start": 4979.3,
+            "end": 5160.6,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 4982.5,
+            "end": 5082.6,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/5Pbk95yHAETsDRS5eUTsTWLJ1WO.jpg",
+            "type": "img",
+            "start": 4986.5,
+            "end": 5161.2,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/5Pbk95yHAETsDRS5eUTsTWLJ1WO.jpg",
+            "type": "img",
+            "start": 4986.8,
+            "end": 5093.5,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/2NcVNNhso3w90GwbDjAuWmp0mSG.png",
+            "type": "img",
+            "start": 4986.9,
+            "end": 5161.6,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 4990.5,
+            "end": 5083.7,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/bZ3C0B0O7lMrR1AgQFcybyGtl2u.jpg",
+            "type": "img",
+            "start": 4992.6,
+            "end": 5162.3,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/bZ3C0B0O7lMrR1AgQFcybyGtl2u.jpg",
+            "type": "img",
+            "start": 4992.9,
+            "end": 5093,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/qEYcZA5NrmqL9eCU7lkLzEbQskT.png",
+            "type": "img",
+            "start": 4993.2,
+            "end": 5141.5,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 5081.4,
+            "end": 5158.7,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/9YzsMLLSpCbAiDiEXlwkZr3m5Ri.jpg",
+            "type": "img",
+            "start": 5083.7,
+            "end": 5166.4,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/9YzsMLLSpCbAiDiEXlwkZr3m5Ri.jpg",
+            "type": "img",
+            "start": 5083.8,
+            "end": 5152.1,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/9ulobOWQViT7UQt2iYzb5tEVgm9.png",
+            "type": "img",
+            "start": 5084,
+            "end": 5168.7,
+            "bytes": 0
+          },
+          {
+            "origin": "https://wh.lme.isroot.in",
+            "path": "/",
+            "type": "xmlhttprequest",
+            "start": 5112.2,
+            "end": 5337.2,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 5116.5,
+            "end": 5199.3,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/1qpgMYBPbm2bief81IIF6qqjjhm.jpg",
+            "type": "img",
+            "start": 5120.2,
+            "end": 5196.7,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/1qpgMYBPbm2bief81IIF6qqjjhm.jpg",
+            "type": "img",
+            "start": 5120.4,
+            "end": 5191.4,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/wJ3Nfqd0QRHxcXuHQ9i8FEPrjuU.png",
+            "type": "img",
+            "start": 5120.6,
+            "end": 5189.9,
+            "bytes": 0
+          },
+          {
+            "origin": "https://wh.lme.isroot.in",
+            "path": "/",
+            "type": "xmlhttprequest",
+            "start": 5186.1,
+            "end": 5299.2,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/N02mrzHOb7ZUiLQiZ1rZgZhOFx.jpg",
+            "type": "img",
+            "start": 5190.6,
+            "end": 5271.9,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/N02mrzHOb7ZUiLQiZ1rZgZhOFx.jpg",
+            "type": "img",
+            "start": 5190.9,
+            "end": 5264.3,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/v7cyt97JH2mumOC0Phl5lU8HfS5.png",
+            "type": "img",
+            "start": 5191,
+            "end": 5269,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/collection/:id",
+            "type": "xmlhttprequest",
+            "start": 5211.9,
+            "end": 5283.4,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/au44HwfaYPJAdRZP4zlM32xbJVO.jpg",
+            "type": "img",
+            "start": 5215.6,
+            "end": 5293.2,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/au44HwfaYPJAdRZP4zlM32xbJVO.jpg",
+            "type": "img",
+            "start": 5215.9,
+            "end": 5284.5,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/zh2WOCt6cXbBuSFrmdUT1vvM9K1.png",
+            "type": "img",
+            "start": 5216,
+            "end": 5289.7,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/dg1UotKplZUIp1fAJSGhZjrTiCM.jpg",
+            "type": "img",
+            "start": 5252.1,
+            "end": 5322.2,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/dg1UotKplZUIp1fAJSGhZjrTiCM.jpg",
+            "type": "img",
+            "start": 5252.4,
+            "end": 5312.1,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/hJG3cSi9z40smOi4Fac07xIlAqZ.png",
+            "type": "img",
+            "start": 5252.4,
+            "end": 5324.8,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/collection/:id",
+            "type": "xmlhttprequest",
+            "start": 5323.7,
+            "end": 5367.6,
+            "bytes": 0
+          },
+          {
+            "origin": "https://wh.lme.isroot.in",
+            "path": "/",
+            "type": "xmlhttprequest",
+            "start": 5326.5,
+            "end": 5419.6,
+            "bytes": 0
+          },
+          {
+            "origin": "https://wh.lme.isroot.in",
+            "path": "/",
+            "type": "xmlhttprequest",
+            "start": 5340.8,
+            "end": 5394.6,
+            "bytes": 0
+          },
+          {
+            "origin": "https://wh.lme.isroot.in",
+            "path": "/",
+            "type": "xmlhttprequest",
+            "start": 5404.7,
+            "end": 5491,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 5406.7,
+            "end": 5447.2,
+            "bytes": 0
+          },
+          {
+            "origin": "https://wh.lme.isroot.in",
+            "path": "/",
+            "type": "xmlhttprequest",
+            "start": 5425.5,
+            "end": 5474.7,
+            "bytes": 0
+          },
+          {
+            "origin": "https://api.themoviedb.org",
+            "path": "/3/movie/:id",
+            "type": "xmlhttprequest",
+            "start": 5549.7,
+            "end": 5609.2,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w1280//nGau0KBOaRILSK5MqFcuTfv7GMl.jpg",
+            "type": "img",
+            "start": 5563.5,
+            "end": 5627.5,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w500//81FLOOicWMgiT67RiqP42pRcTaw.jpg",
+            "type": "img",
+            "start": 5563.6,
+            "end": 5641.6,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w276_and_h350_face//hDj7wXT937jZZjU7lJ8aTuKoBg5.jpg",
+            "type": "img",
+            "start": 5563.7,
+            "end": 5642.4,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w276_and_h350_face//1M1FX7YR9Dq0DhawzQ0vT0tx678.jpg",
+            "type": "img",
+            "start": 5563.8,
+            "end": 5643.2,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w500//81FLOOicWMgiT67RiqP42pRcTaw.jpg",
+            "type": "img",
+            "start": 5563.9,
+            "end": 5634,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w1280/nGau0KBOaRILSK5MqFcuTfv7GMl.jpg",
+            "type": "img",
+            "start": 5563.9,
+            "end": 5655.6,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w500//zh2WOCt6cXbBuSFrmdUT1vvM9K1.png",
+            "type": "img",
+            "start": 5563.9,
+            "end": 5648.9,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w276_and_h350_face//9BJxdhi4tuiQdgT8bfDuiPipnsx.jpg",
+            "type": "img",
+            "start": 5564.1,
+            "end": 5649.1,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w276_and_h350_face//tFdTyIrWsPIItcOP3OcyHtCboqC.jpg",
+            "type": "img",
+            "start": 5564.2,
+            "end": 5649.3,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w276_and_h350_face//qSe3SuZHVPR5AMOuOAGxLdD6kYv.jpg",
+            "type": "img",
+            "start": 5564.3,
+            "end": 5649.6,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w276_and_h350_face//a36MI02S0f11bJZjBoxkZTsUDAK.jpg",
+            "type": "img",
+            "start": 5564.3,
+            "end": 5655.8,
+            "bytes": 0
+          },
+          {
+            "origin": "https://siaivo.isroot.in",
+            "path": "/img/actor.svg",
+            "type": "img",
+            "start": 5564.4,
+            "end": 5633.4,
+            "bytes": 2627
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w276_and_h350_face//57FrMe016RyMHm8WDL2mK7P0bmS.jpg",
+            "type": "img",
+            "start": 5564.5,
+            "end": 5655.9,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w276_and_h350_face//alqr0Hx7kgLZ38QvwdQKFIA8Y8l.jpg",
+            "type": "img",
+            "start": 5564.7,
+            "end": 5656.4,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w300/8xukbVG9JJfnpcdIEYPijVVOfhH.jpg",
+            "type": "img",
+            "start": 5564.8,
+            "end": 5656.7,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w92/8xukbVG9JJfnpcdIEYPijVVOfhH.jpg",
+            "type": "img",
+            "start": 5564.9,
+            "end": 5643.7,
+            "bytes": 0
+          },
+          {
+            "origin": "https://image.tmdb.org",
+            "path": "/t/p/w200//nGau0KBOaRILSK5MqFcuTfv7GMl.jpg",
+            "type": "img",
+            "start": 5565.9,
+            "end": 5642.1,
+            "bytes": 0
+          }
+        ],
+        "finalDiagnostics": {
+          "resources": [
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/vender/scrollbar/jquery.scrollbar.css",
+              "type": "link",
+              "start": 169.4,
+              "end": 581.1,
+              "bytes": 3492
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/vender/keypad/style.css",
+              "type": "link",
+              "start": 169.8,
+              "end": 583.6,
+              "bytes": 1122
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/css/app.css",
+              "type": "link",
+              "start": 170,
+              "end": 659.6,
+              "bytes": 52780
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/webos/webOSTV.js",
+              "type": "script",
+              "start": 170.1,
+              "end": 657.5,
+              "bytes": 3958
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/vender/jquery/jquery.js",
+              "type": "script",
+              "start": 170.3,
+              "end": 646.8,
+              "bytes": 81147
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/vender/notify/notify.js",
+              "type": "script",
+              "start": 170.3,
+              "end": 659.5,
+              "bytes": 9290
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/vender/scrollbar/jquery.scrollbar.js",
+              "type": "script",
+              "start": 170.4,
+              "end": 658.8,
+              "bytes": 6979
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/vender/navigator/navigator.js",
+              "type": "script",
+              "start": 170.5,
+              "end": 658.2,
+              "bytes": 6576
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/vender/keypad/keypad.js",
+              "type": "script",
+              "start": 170.7,
+              "end": 682.1,
+              "bytes": 9674
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/img/welcome.jpg",
+              "type": "css",
+              "start": 726.1,
+              "end": 786.3,
+              "bytes": 28033
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/app.min.js",
+              "type": "script",
+              "start": 747.2,
+              "end": 1120,
+              "bytes": 793156
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/fonts/SegoeUI/SegoeUI.woff",
+              "type": "css",
+              "start": 1449.4,
+              "end": 1538.4,
+              "bytes": 246144
+            },
+            {
+              "origin": "https://date.nager.at",
+              "path": "/api/v3/NextPublicHolidays/ua",
+              "type": "fetch",
+              "start": 1479.9,
+              "end": 1559.9,
+              "bytes": 0
+            },
+            {
+              "origin": "https://gorlim590.github.io",
+              "path": "/lampa/loader.js",
+              "type": "script",
+              "start": 1481.5,
+              "end": 1496.1,
+              "bytes": 0
+            },
+            {
+              "origin": "https://raw.githubusercontent.com",
+              "path": "/sweatycab/nuvio-minimalist-badges/main/badges-white.json",
+              "type": "xmlhttprequest",
+              "start": 1492.7,
+              "end": 1887.8,
+              "bytes": 0
+            },
+            {
+              "origin": "https://gorlim590.github.io",
+              "path": "/lampa/ui/stremio-hybrid.js",
+              "type": "script",
+              "start": 1501.9,
+              "end": 1516.9,
+              "bytes": 0
+            },
+            {
+              "origin": "https://gorlim590.github.io",
+              "path": "/lampa/ui/interface-plus.js",
+              "type": "script",
+              "start": 1502.4,
+              "end": 1520.9,
+              "bytes": 0
+            },
+            {
+              "origin": "https://gorlim590.github.io",
+              "path": "/lampa/ui/design-optimized.js",
+              "type": "script",
+              "start": 1502.8,
+              "end": 1528.4,
+              "bytes": 0
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/icons/favicon.ico",
+              "type": "other",
+              "start": 1551.4,
+              "end": 1553.4,
+              "bytes": 0
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/icons/favicon-32x32.png",
+              "type": "other",
+              "start": 1555.5,
+              "end": 1587.4,
+              "bytes": 2730
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/lang/uk.js",
+              "type": "xmlhttprequest",
+              "start": 2447.5,
+              "end": 2480.4,
+              "bytes": 25128
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/plugins_grey_list.json",
+              "type": "xmlhttprequest",
+              "start": 2509.8,
+              "end": 2540.9,
+              "bytes": 575
+            },
+            {
+              "origin": "https://api.bigdatacloud.net",
+              "path": "/data/reverse-geocode-client",
+              "type": "xmlhttprequest",
+              "start": 2544.8,
+              "end": 3521,
+              "bytes": 0
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/plugins/modification.js",
+              "type": "script",
+              "start": 3531.4,
+              "end": 3561.7,
+              "bytes": 544
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/plugins/modification.js",
+              "type": "xmlhttprequest",
+              "start": 3564.5,
+              "end": 3595.9,
+              "bytes": 544
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/vender/hls/hls.js",
+              "type": "script",
+              "start": 3629,
+              "end": 3681.8,
+              "bytes": 112379
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/fonts/SegoeUI/SegoeUI-SemiBold.woff",
+              "type": "css",
+              "start": 3635.3,
+              "end": 3705.3,
+              "bytes": 193496
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/lampa-ua-pack/feed.js",
+              "type": "script",
+              "start": 3653.4,
+              "end": 3724.2,
+              "bytes": 716
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/autoload.json",
+              "type": "fetch",
+              "start": 3655.8,
+              "end": 3725.1,
+              "bytes": 534
+            },
+            {
+              "origin": "https://gorlim590.github.io",
+              "path": "/lampa/ui/torrent-cinema.js",
+              "type": "script",
+              "start": 3657.8,
+              "end": 3710.1,
+              "bytes": 0
+            },
+            {
+              "origin": "https://gorlim590.github.io",
+              "path": "/lampa/ui/settings-hub.js",
+              "type": "script",
+              "start": 3659.8,
+              "end": 3711.8,
+              "bytes": 0
+            },
+            {
+              "origin": "https://fonts.googleapis.com",
+              "path": "/css2",
+              "type": "link",
+              "start": 3678.5,
+              "end": 4134.9,
+              "bytes": 998
+            },
+            {
+              "origin": "https://gorlim590.github.io",
+              "path": "/lampa/trakt/trakt.js",
+              "type": "script",
+              "start": 3686.3,
+              "end": 3768.3,
+              "bytes": 0
+            },
+            {
+              "origin": "https://gorlim590.github.io",
+              "path": "/lampa/providers/torrent-search.js",
+              "type": "script",
+              "start": 3687,
+              "end": 3769.9,
+              "bytes": 0
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/img/icons/settings/player.svg",
+              "type": "img",
+              "start": 3698.3,
+              "end": 3875.8,
+              "bytes": 842
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/img/icons/settings/parser.svg",
+              "type": "img",
+              "start": 3698.4,
+              "end": 3875.5,
+              "bytes": 993
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/img/icons/settings/server.svg",
+              "type": "img",
+              "start": 3698.6,
+              "end": 3829.5,
+              "bytes": 814
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/img/bokeh-h/1.png",
+              "type": "img",
+              "start": 3698.7,
+              "end": 3878.3,
+              "bytes": 18517
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/img/icons/settings/more.svg",
+              "type": "img",
+              "start": 3698.7,
+              "end": 3876,
+              "bytes": 677
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/img/bokeh-h/2.png",
+              "type": "img",
+              "start": 3698.8,
+              "end": 3848.5,
+              "bytes": 26932
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/img/bokeh-h/3.png",
+              "type": "img",
+              "start": 3698.9,
+              "end": 3880,
+              "bytes": 44073
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/img/bokeh-h/4.png",
+              "type": "img",
+              "start": 3699,
+              "end": 3886.7,
+              "bytes": 39283
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/img/bokeh-h/5.png",
+              "type": "img",
+              "start": 3699.1,
+              "end": 3819.5,
+              "bytes": 59881
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/img/bokeh-h/6.png",
+              "type": "img",
+              "start": 3699.2,
+              "end": 3907.7,
+              "bytes": 77828
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/img/bokeh/1.png",
+              "type": "img",
+              "start": 3699.2,
+              "end": 3908.6,
+              "bytes": 60543
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/img/bokeh/3.png",
+              "type": "img",
+              "start": 3699.3,
+              "end": 3822.2,
+              "bytes": 21972
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/img/bokeh/2.png",
+              "type": "img",
+              "start": 3699.3,
+              "end": 3825.5,
+              "bytes": 35904
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/img/bokeh/4.png",
+              "type": "img",
+              "start": 3699.4,
+              "end": 3846.2,
+              "bytes": 58790
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/img/bokeh/5.png",
+              "type": "img",
+              "start": 3699.5,
+              "end": 3840.5,
+              "bytes": 83425
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/img/icons/menu/anime.svg",
+              "type": "img",
+              "start": 3699.6,
+              "end": 3876.4,
+              "bytes": 1080
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/img/bokeh/6.png",
+              "type": "img",
+              "start": 3699.6,
+              "end": 3911.1,
+              "bytes": 119654
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/lampa-ua-pack/anime/map.json",
+              "type": "xmlhttprequest",
+              "start": 3748.6,
+              "end": 3839.5,
+              "bytes": 47622
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/vender/dash/dash.js",
+              "type": "script",
+              "start": 3766.3,
+              "end": 3909.3,
+              "bytes": 188717
+            },
+            {
+              "origin": "https://nrsua.github.io",
+              "path": "/lampa-nrs/lparty.js",
+              "type": "script",
+              "start": 3789.8,
+              "end": 4203.6,
+              "bytes": 0
+            },
+            {
+              "origin": "https://lampame.github.io",
+              "path": "/main/music.js",
+              "type": "script",
+              "start": 3791.7,
+              "end": 4199.9,
+              "bytes": 0
+            },
+            {
+              "origin": "https://gorlim590.github.io",
+              "path": "/lampa/trakt/trakt-plus.js",
+              "type": "script",
+              "start": 3841,
+              "end": 3859.3,
+              "bytes": 0
+            },
+            {
+              "origin": "https://gorlim590.github.io",
+              "path": "/lampa/media/average-rating.js",
+              "type": "script",
+              "start": 3846.7,
+              "end": 3862.5,
+              "bytes": 0
+            },
+            {
+              "origin": "https://gorlim590.github.io",
+              "path": "/lampa/ui/cardify-plus.js",
+              "type": "script",
+              "start": 3913.6,
+              "end": 3924,
+              "bytes": 0
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/vender/qrcode/qrcode.js",
+              "type": "script",
+              "start": 3949.2,
+              "end": 3984.4,
+              "bytes": 12368
+            },
+            {
+              "origin": "https://gorlim590.github.io",
+              "path": "/lampa/localization/translate.js",
+              "type": "script",
+              "start": 3963.7,
+              "end": 3969,
+              "bytes": 0
+            },
+            {
+              "origin": "https://gorlim590.github.io",
+              "path": "/lampa/plugins-to-enable/home-policy.js",
+              "type": "script",
+              "start": 3980.2,
+              "end": 3985.8,
+              "bytes": 0
+            },
+            {
+              "origin": "https://gorlim590.github.io",
+              "path": "/lampa/plugins-to-enable/home-history.js",
+              "type": "script",
+              "start": 3992.5,
+              "end": 3997.5,
+              "bytes": 0
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/img/loader.svg",
+              "type": "css",
+              "start": 4114.1,
+              "end": 4186.6,
+              "bytes": 734
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/fonts/SegoeUI/SegoeUI-Light.woff",
+              "type": "css",
+              "start": 4120.6,
+              "end": 4207,
+              "bytes": 174840
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4139.2,
+              "end": 4172.7,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4140.1,
+              "end": 4174.1,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4140.6,
+              "end": 4174.6,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4141.2,
+              "end": 4175,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/now_playing",
+              "type": "xmlhttprequest",
+              "start": 4176.8,
+              "end": 4291.3,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/trending/movie/day",
+              "type": "xmlhttprequest",
+              "start": 4177.7,
+              "end": 4290.3,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/trending/movie/week",
+              "type": "xmlhttprequest",
+              "start": 4178.7,
+              "end": 4294.5,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/upcoming",
+              "type": "xmlhttprequest",
+              "start": 4179.3,
+              "end": 4293.6,
+              "bytes": 0
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/icons/favicon.ico",
+              "type": "other",
+              "start": 4182.1,
+              "end": 4185.6,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4184.1,
+              "end": 4202.9,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4187.5,
+              "end": 4203.5,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4191.1,
+              "end": 4206.9,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4198.2,
+              "end": 4211.2,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4207.6,
+              "end": 4216.8,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4209.9,
+              "end": 4224.7,
+              "bytes": 0
+            },
+            {
+              "origin": "https://lampame.github.io",
+              "path": "/main/vinyl/vinyl.js",
+              "type": "script",
+              "start": 4211.6,
+              "end": 4284,
+              "bytes": 0
+            },
+            {
+              "origin": "https://lampame.github.io",
+              "path": "/main/music.js",
+              "type": "xmlhttprequest",
+              "start": 4213.4,
+              "end": 4607.8,
+              "bytes": 0
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/icons/favicon-32x32.png",
+              "type": "other",
+              "start": 4214.8,
+              "end": 4262.9,
+              "bytes": 2730
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4218.1,
+              "end": 4234,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4220.2,
+              "end": 4234.7,
+              "bytes": 0
+            },
+            {
+              "origin": "https://nrsua.github.io",
+              "path": "/lampa-nrs/lparty.js",
+              "type": "xmlhttprequest",
+              "start": 4245.9,
+              "end": 4639.9,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4248.2,
+              "end": 4252.6,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4250.3,
+              "end": 4257.3,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4253.6,
+              "end": 4262.8,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4258.8,
+              "end": 4268.8,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4261.2,
+              "end": 4276.5,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4263.3,
+              "end": 4277,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4267.1,
+              "end": 4285.7,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4271.4,
+              "end": 4286.6,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4278.9,
+              "end": 4291.3,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4282.7,
+              "end": 4292.1,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4297.9,
+              "end": 4301.1,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/tv/:id",
+              "type": "xmlhttprequest",
+              "start": 4303.9,
+              "end": 4309,
+              "bytes": 0
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/img/img_load.svg",
+              "type": "css",
+              "start": 4389.7,
+              "end": 4479.5,
+              "bytes": 1090
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/2h3a7i3mSd1ZhK7sYEzDRgdtvvl.jpg",
+              "type": "img",
+              "start": 4435.4,
+              "end": 5040.5,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/2h3a7i3mSd1ZhK7sYEzDRgdtvvl.jpg",
+              "type": "img",
+              "start": 4435.5,
+              "end": 4951.9,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/81FLOOicWMgiT67RiqP42pRcTaw.jpg",
+              "type": "img",
+              "start": 4435.6,
+              "end": 4959.4,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/81FLOOicWMgiT67RiqP42pRcTaw.jpg",
+              "type": "img",
+              "start": 4435.7,
+              "end": 4950.2,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/r2ib7b2QRLRlb8g7K2QI2rfFgeA.jpg",
+              "type": "img",
+              "start": 4435.7,
+              "end": 4979,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/r2ib7b2QRLRlb8g7K2QI2rfFgeA.jpg",
+              "type": "img",
+              "start": 4435.8,
+              "end": 4934.4,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/1xuVUvb2B1Sq3KMHyPKIvoazrMZ.jpg",
+              "type": "img",
+              "start": 4436,
+              "end": 4971.8,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/1xuVUvb2B1Sq3KMHyPKIvoazrMZ.jpg",
+              "type": "img",
+              "start": 4436,
+              "end": 5028.2,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/dBZBEdsX3C06FlMAJVWq3NAFYaE.jpg",
+              "type": "img",
+              "start": 4436.1,
+              "end": 5028.5,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/dBZBEdsX3C06FlMAJVWq3NAFYaE.jpg",
+              "type": "img",
+              "start": 4436.2,
+              "end": 5012.8,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/vLl5tcuabARqGBefccSsYAYXdgA.jpg",
+              "type": "img",
+              "start": 4436.3,
+              "end": 5061.2,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/vLl5tcuabARqGBefccSsYAYXdgA.jpg",
+              "type": "img",
+              "start": 4436.4,
+              "end": 5008.7,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/Ai7VesRDerUCvER1tnsPnfR3iHg.jpg",
+              "type": "img",
+              "start": 4436.5,
+              "end": 5073.5,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/Ai7VesRDerUCvER1tnsPnfR3iHg.jpg",
+              "type": "img",
+              "start": 4436.6,
+              "end": 5009.8,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/lkcSRoS5FXzzNi13ug6kenL2vi2.jpg",
+              "type": "img",
+              "start": 4436.8,
+              "end": 5073.2,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/lkcSRoS5FXzzNi13ug6kenL2vi2.jpg",
+              "type": "img",
+              "start": 4437,
+              "end": 5013.6,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/zJkpdPkIQWsDojHl0hTvhH9H5ya.jpg",
+              "type": "img",
+              "start": 4437.1,
+              "end": 5079.3,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/zJkpdPkIQWsDojHl0hTvhH9H5ya.jpg",
+              "type": "img",
+              "start": 4437.3,
+              "end": 5015.3,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/baoPOk6ElW1zLHiSWyWM8qKrNvR.jpg",
+              "type": "img",
+              "start": 4437.4,
+              "end": 5078.1,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/baoPOk6ElW1zLHiSWyWM8qKrNvR.jpg",
+              "type": "img",
+              "start": 4437.5,
+              "end": 4997.1,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/hdjCd21IfRdLwBYI3WqZuFZu5x8.jpg",
+              "type": "img",
+              "start": 4437.6,
+              "end": 5084.2,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/hdjCd21IfRdLwBYI3WqZuFZu5x8.jpg",
+              "type": "img",
+              "start": 4437.8,
+              "end": 5023.1,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/uhNMNaaovoZiYeaDYZ9BYX7jTAJ.jpg",
+              "type": "img",
+              "start": 4438,
+              "end": 5057.4,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/uhNMNaaovoZiYeaDYZ9BYX7jTAJ.jpg",
+              "type": "img",
+              "start": 4438.1,
+              "end": 5024,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/67SHha1PONyP33eCkjnjQXxWIKP.jpg",
+              "type": "img",
+              "start": 4438.4,
+              "end": 5098.1,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/67SHha1PONyP33eCkjnjQXxWIKP.jpg",
+              "type": "img",
+              "start": 4438.6,
+              "end": 5031.3,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/gNBiOPEbEPGPTfTIyGDvNQ50m0V.jpg",
+              "type": "img",
+              "start": 4439,
+              "end": 5098.3,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/gNBiOPEbEPGPTfTIyGDvNQ50m0V.jpg",
+              "type": "img",
+              "start": 4439.1,
+              "end": 5020.8,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/1LPzBhF0J0ObYxvMRxyo223UMXO.jpg",
+              "type": "img",
+              "start": 4439.3,
+              "end": 5098.5,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/1LPzBhF0J0ObYxvMRxyo223UMXO.jpg",
+              "type": "img",
+              "start": 4439.4,
+              "end": 5028.7,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 4470.5,
+              "end": 4517.8,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 4472.7,
+              "end": 4521.8,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 4477.1,
+              "end": 4523.3,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 4481.1,
+              "end": 4527.1,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 4519.6,
+              "end": 4566.2,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 4525.4,
+              "end": 4575.3,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/yxOxOBxspl3NgC676W62G02g1cR.jpg",
+              "type": "img",
+              "start": 4529,
+              "end": 5113.6,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/yxOxOBxspl3NgC676W62G02g1cR.jpg",
+              "type": "img",
+              "start": 4529.2,
+              "end": 5036,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/4by8InwbaSqB3I9f7GFVxWgt9ls.png",
+              "type": "img",
+              "start": 4529.3,
+              "end": 5113.7,
+              "bytes": 0
+            },
+            {
+              "origin": "https://upload.wikimedia.org",
+              "path": "/wikipedia/commons/8/89/Tmdb.new.logo.svg",
+              "type": "img",
+              "start": 4529.4,
+              "end": 5072.9,
+              "bytes": 1456
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/collection/:id",
+              "type": "xmlhttprequest",
+              "start": 4532.5,
+              "end": 4588.4,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/q1LLTu5kHA4DDwepavnpBmdTtWk.jpg",
+              "type": "img",
+              "start": 4536.2,
+              "end": 5113.9,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/q1LLTu5kHA4DDwepavnpBmdTtWk.jpg",
+              "type": "img",
+              "start": 4536.4,
+              "end": 5038.9,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/g9MoyXHtNgaR1UC2MoztL80iZl3.png",
+              "type": "img",
+              "start": 4536.6,
+              "end": 5114.1,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 4568.6,
+              "end": 4613.2,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/ewNyFpLB2oLZSDkgSN8ea2zqeIY.jpg",
+              "type": "img",
+              "start": 4572.2,
+              "end": 5037,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/ewNyFpLB2oLZSDkgSN8ea2zqeIY.jpg",
+              "type": "img",
+              "start": 4572.2,
+              "end": 5114.3,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/barJMlk3d6jiiMy3AbqjhBPH0Yw.png",
+              "type": "img",
+              "start": 4572.3,
+              "end": 5114.4,
+              "bytes": 0
+            },
+            {
+              "origin": "https://clients5.google.com",
+              "path": "/translate_a/t",
+              "type": "xmlhttprequest",
+              "start": 4579.8,
+              "end": 5221.9,
+              "bytes": 0
+            },
+            {
+              "origin": "https://clients5.google.com",
+              "path": "/translate_a/t",
+              "type": "xmlhttprequest",
+              "start": 4582,
+              "end": 5131.6,
+              "bytes": 0
+            },
+            {
+              "origin": "https://clients5.google.com",
+              "path": "/translate_a/t",
+              "type": "xmlhttprequest",
+              "start": 4583.4,
+              "end": 5219.3,
+              "bytes": 0
+            },
+            {
+              "origin": "https://clients5.google.com",
+              "path": "/translate_a/t",
+              "type": "xmlhttprequest",
+              "start": 4585,
+              "end": 5223,
+              "bytes": 0
+            },
+            {
+              "origin": "https://clients5.google.com",
+              "path": "/translate_a/t",
+              "type": "xmlhttprequest",
+              "start": 4586.6,
+              "end": 5223.5,
+              "bytes": 0
+            },
+            {
+              "origin": "https://clients5.google.com",
+              "path": "/translate_a/t",
+              "type": "xmlhttprequest",
+              "start": 4589,
+              "end": 5220.4,
+              "bytes": 0
+            },
+            {
+              "origin": "https://clients5.google.com",
+              "path": "/translate_a/t",
+              "type": "xmlhttprequest",
+              "start": 4590.3,
+              "end": 5243,
+              "bytes": 0
+            },
+            {
+              "origin": "https://clients5.google.com",
+              "path": "/translate_a/t",
+              "type": "xmlhttprequest",
+              "start": 4614.9,
+              "end": 5228.3,
+              "bytes": 0
+            },
+            {
+              "origin": "https://clients5.google.com",
+              "path": "/translate_a/t",
+              "type": "xmlhttprequest",
+              "start": 4617.1,
+              "end": 5230.1,
+              "bytes": 0
+            },
+            {
+              "origin": "https://clients5.google.com",
+              "path": "/translate_a/t",
+              "type": "xmlhttprequest",
+              "start": 4618.9,
+              "end": 5241.9,
+              "bytes": 0
+            },
+            {
+              "origin": "https://clients5.google.com",
+              "path": "/translate_a/t",
+              "type": "xmlhttprequest",
+              "start": 4620.7,
+              "end": 5242.4,
+              "bytes": 0
+            },
+            {
+              "origin": "https://clients5.google.com",
+              "path": "/translate_a/t",
+              "type": "xmlhttprequest",
+              "start": 4623.1,
+              "end": 5246.4,
+              "bytes": 0
+            },
+            {
+              "origin": "https://clients5.google.com",
+              "path": "/translate_a/t",
+              "type": "xmlhttprequest",
+              "start": 4625,
+              "end": 5245,
+              "bytes": 0
+            },
+            {
+              "origin": "https://clients5.google.com",
+              "path": "/translate_a/t",
+              "type": "xmlhttprequest",
+              "start": 4632.4,
+              "end": 5250.5,
+              "bytes": 0
+            },
+            {
+              "origin": "https://clients5.google.com",
+              "path": "/translate_a/t",
+              "type": "xmlhttprequest",
+              "start": 4633.6,
+              "end": 5222.5,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 4655.5,
+              "end": 4702.9,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/o3TY0dc236CM7eMwAsyghcXIzBL.jpg",
+              "type": "img",
+              "start": 4659.2,
+              "end": 5141.8,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/o3TY0dc236CM7eMwAsyghcXIzBL.jpg",
+              "type": "img",
+              "start": 4659.4,
+              "end": 5037.5,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/gTEOtXzS0rgqj8a8zT80iFfCyaA.png",
+              "type": "img",
+              "start": 4659.6,
+              "end": 5142,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 4666.9,
+              "end": 4711.2,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/bAd0HA40yHoC3BfQyByR5dvvba2.jpg",
+              "type": "img",
+              "start": 4669.2,
+              "end": 5142.4,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/bAd0HA40yHoC3BfQyByR5dvvba2.jpg",
+              "type": "img",
+              "start": 4669.3,
+              "end": 5038.2,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/e8GdKxhgIBVR06z1Xar4g2RHrN7.png",
+              "type": "img",
+              "start": 4669.5,
+              "end": 5142.7,
+              "bytes": 0
+            },
+            {
+              "origin": "https://clients5.google.com",
+              "path": "/translate_a/t",
+              "type": "xmlhttprequest",
+              "start": 4671.8,
+              "end": 5249.2,
+              "bytes": 0
+            },
+            {
+              "origin": "https://clients5.google.com",
+              "path": "/translate_a/t",
+              "type": "xmlhttprequest",
+              "start": 4673.7,
+              "end": 5247.3,
+              "bytes": 0
+            },
+            {
+              "origin": "https://clients5.google.com",
+              "path": "/translate_a/t",
+              "type": "xmlhttprequest",
+              "start": 4677.8,
+              "end": 5249.5,
+              "bytes": 0
+            },
+            {
+              "origin": "https://clients5.google.com",
+              "path": "/translate_a/t",
+              "type": "xmlhttprequest",
+              "start": 4679.8,
+              "end": 5245.6,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 4682.6,
+              "end": 4727,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 4706.3,
+              "end": 4753.1,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 4851,
+              "end": 4897.4,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 4853.6,
+              "end": 4969.5,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/iT72Y5FgZxU8hEiwGP9Wb2xLtm9.jpg",
+              "type": "img",
+              "start": 4858.5,
+              "end": 5142.8,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/iT72Y5FgZxU8hEiwGP9Wb2xLtm9.jpg",
+              "type": "img",
+              "start": 4858.7,
+              "end": 5038.6,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/yfU7Rp0C3DluvsDoZfqGojRgNLh.png",
+              "type": "img",
+              "start": 4858.8,
+              "end": 5143.5,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 4861.6,
+              "end": 4970.6,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 4864.5,
+              "end": 4970.1,
+              "bytes": 0
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/icons/favicon.ico",
+              "type": "other",
+              "start": 4866.8,
+              "end": 4881.9,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 4882.7,
+              "end": 5051.9,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id/credits",
+              "type": "xmlhttprequest",
+              "start": 4883.9,
+              "end": 5054.4,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id/recommendations",
+              "type": "xmlhttprequest",
+              "start": 4885,
+              "end": 5052.2,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id/similar",
+              "type": "xmlhttprequest",
+              "start": 4885.7,
+              "end": 5054.9,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id/videos",
+              "type": "xmlhttprequest",
+              "start": 4886.6,
+              "end": 5056.7,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id/videos",
+              "type": "xmlhttprequest",
+              "start": 4887.3,
+              "end": 5057,
+              "bytes": 0
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/icons/favicon-32x32.png",
+              "type": "other",
+              "start": 4902.4,
+              "end": 5039,
+              "bytes": 2730
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 4906.1,
+              "end": 5057.2,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/dcTp4pV494fvJrFGKsgNQ8vZyzw.jpg",
+              "type": "img",
+              "start": 4908.9,
+              "end": 5144.7,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/dcTp4pV494fvJrFGKsgNQ8vZyzw.jpg",
+              "type": "img",
+              "start": 4909.2,
+              "end": 5039.2,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/i5A8UZtgyduV5yhRl4RaIrKkmi8.png",
+              "type": "img",
+              "start": 4909.3,
+              "end": 5145.7,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/collection/:id",
+              "type": "xmlhttprequest",
+              "start": 4975.3,
+              "end": 5082,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/oFYDW8cgvedzLZuE5sceplckRTV.jpg",
+              "type": "img",
+              "start": 4978,
+              "end": 5146.4,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/oFYDW8cgvedzLZuE5sceplckRTV.jpg",
+              "type": "img",
+              "start": 4978.7,
+              "end": 5092.3,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/vIY7hkuhytQv8EgbeUvxjdUgVFL.png",
+              "type": "img",
+              "start": 4979.3,
+              "end": 5160.6,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 4982.5,
+              "end": 5082.6,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/5Pbk95yHAETsDRS5eUTsTWLJ1WO.jpg",
+              "type": "img",
+              "start": 4986.5,
+              "end": 5161.2,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/5Pbk95yHAETsDRS5eUTsTWLJ1WO.jpg",
+              "type": "img",
+              "start": 4986.8,
+              "end": 5093.5,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/2NcVNNhso3w90GwbDjAuWmp0mSG.png",
+              "type": "img",
+              "start": 4986.9,
+              "end": 5161.6,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 4990.5,
+              "end": 5083.7,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/bZ3C0B0O7lMrR1AgQFcybyGtl2u.jpg",
+              "type": "img",
+              "start": 4992.6,
+              "end": 5162.3,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/bZ3C0B0O7lMrR1AgQFcybyGtl2u.jpg",
+              "type": "img",
+              "start": 4992.9,
+              "end": 5093,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/qEYcZA5NrmqL9eCU7lkLzEbQskT.png",
+              "type": "img",
+              "start": 4993.2,
+              "end": 5141.5,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 5081.4,
+              "end": 5158.7,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/9YzsMLLSpCbAiDiEXlwkZr3m5Ri.jpg",
+              "type": "img",
+              "start": 5083.7,
+              "end": 5166.4,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/9YzsMLLSpCbAiDiEXlwkZr3m5Ri.jpg",
+              "type": "img",
+              "start": 5083.8,
+              "end": 5152.1,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/9ulobOWQViT7UQt2iYzb5tEVgm9.png",
+              "type": "img",
+              "start": 5084,
+              "end": 5168.7,
+              "bytes": 0
+            },
+            {
+              "origin": "https://wh.lme.isroot.in",
+              "path": "/",
+              "type": "xmlhttprequest",
+              "start": 5112.2,
+              "end": 5337.2,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 5116.5,
+              "end": 5199.3,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/1qpgMYBPbm2bief81IIF6qqjjhm.jpg",
+              "type": "img",
+              "start": 5120.2,
+              "end": 5196.7,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/1qpgMYBPbm2bief81IIF6qqjjhm.jpg",
+              "type": "img",
+              "start": 5120.4,
+              "end": 5191.4,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/wJ3Nfqd0QRHxcXuHQ9i8FEPrjuU.png",
+              "type": "img",
+              "start": 5120.6,
+              "end": 5189.9,
+              "bytes": 0
+            },
+            {
+              "origin": "https://wh.lme.isroot.in",
+              "path": "/",
+              "type": "xmlhttprequest",
+              "start": 5186.1,
+              "end": 5299.2,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/N02mrzHOb7ZUiLQiZ1rZgZhOFx.jpg",
+              "type": "img",
+              "start": 5190.6,
+              "end": 5271.9,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/N02mrzHOb7ZUiLQiZ1rZgZhOFx.jpg",
+              "type": "img",
+              "start": 5190.9,
+              "end": 5264.3,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/v7cyt97JH2mumOC0Phl5lU8HfS5.png",
+              "type": "img",
+              "start": 5191,
+              "end": 5269,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/collection/:id",
+              "type": "xmlhttprequest",
+              "start": 5211.9,
+              "end": 5283.4,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/au44HwfaYPJAdRZP4zlM32xbJVO.jpg",
+              "type": "img",
+              "start": 5215.6,
+              "end": 5293.2,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/au44HwfaYPJAdRZP4zlM32xbJVO.jpg",
+              "type": "img",
+              "start": 5215.9,
+              "end": 5284.5,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/zh2WOCt6cXbBuSFrmdUT1vvM9K1.png",
+              "type": "img",
+              "start": 5216,
+              "end": 5289.7,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/dg1UotKplZUIp1fAJSGhZjrTiCM.jpg",
+              "type": "img",
+              "start": 5252.1,
+              "end": 5322.2,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/dg1UotKplZUIp1fAJSGhZjrTiCM.jpg",
+              "type": "img",
+              "start": 5252.4,
+              "end": 5312.1,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/hJG3cSi9z40smOi4Fac07xIlAqZ.png",
+              "type": "img",
+              "start": 5252.4,
+              "end": 5324.8,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/collection/:id",
+              "type": "xmlhttprequest",
+              "start": 5323.7,
+              "end": 5367.6,
+              "bytes": 0
+            },
+            {
+              "origin": "https://wh.lme.isroot.in",
+              "path": "/",
+              "type": "xmlhttprequest",
+              "start": 5326.5,
+              "end": 5419.6,
+              "bytes": 0
+            },
+            {
+              "origin": "https://wh.lme.isroot.in",
+              "path": "/",
+              "type": "xmlhttprequest",
+              "start": 5340.8,
+              "end": 5394.6,
+              "bytes": 0
+            },
+            {
+              "origin": "https://wh.lme.isroot.in",
+              "path": "/",
+              "type": "xmlhttprequest",
+              "start": 5404.7,
+              "end": 5491,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 5406.7,
+              "end": 5447.2,
+              "bytes": 0
+            },
+            {
+              "origin": "https://wh.lme.isroot.in",
+              "path": "/",
+              "type": "xmlhttprequest",
+              "start": 5425.5,
+              "end": 5474.7,
+              "bytes": 0
+            },
+            {
+              "origin": "https://api.themoviedb.org",
+              "path": "/3/movie/:id",
+              "type": "xmlhttprequest",
+              "start": 5549.7,
+              "end": 5609.2,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w1280//nGau0KBOaRILSK5MqFcuTfv7GMl.jpg",
+              "type": "img",
+              "start": 5563.5,
+              "end": 5627.5,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w500//81FLOOicWMgiT67RiqP42pRcTaw.jpg",
+              "type": "img",
+              "start": 5563.6,
+              "end": 5641.6,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w276_and_h350_face//hDj7wXT937jZZjU7lJ8aTuKoBg5.jpg",
+              "type": "img",
+              "start": 5563.7,
+              "end": 5642.4,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w276_and_h350_face//1M1FX7YR9Dq0DhawzQ0vT0tx678.jpg",
+              "type": "img",
+              "start": 5563.8,
+              "end": 5643.2,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w500//81FLOOicWMgiT67RiqP42pRcTaw.jpg",
+              "type": "img",
+              "start": 5563.9,
+              "end": 5634,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w1280/nGau0KBOaRILSK5MqFcuTfv7GMl.jpg",
+              "type": "img",
+              "start": 5563.9,
+              "end": 5655.6,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w500//zh2WOCt6cXbBuSFrmdUT1vvM9K1.png",
+              "type": "img",
+              "start": 5563.9,
+              "end": 5648.9,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w276_and_h350_face//9BJxdhi4tuiQdgT8bfDuiPipnsx.jpg",
+              "type": "img",
+              "start": 5564.1,
+              "end": 5649.1,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w276_and_h350_face//tFdTyIrWsPIItcOP3OcyHtCboqC.jpg",
+              "type": "img",
+              "start": 5564.2,
+              "end": 5649.3,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w276_and_h350_face//qSe3SuZHVPR5AMOuOAGxLdD6kYv.jpg",
+              "type": "img",
+              "start": 5564.3,
+              "end": 5649.6,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w276_and_h350_face//a36MI02S0f11bJZjBoxkZTsUDAK.jpg",
+              "type": "img",
+              "start": 5564.3,
+              "end": 5655.8,
+              "bytes": 0
+            },
+            {
+              "origin": "https://siaivo.isroot.in",
+              "path": "/img/actor.svg",
+              "type": "img",
+              "start": 5564.4,
+              "end": 5633.4,
+              "bytes": 2627
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w276_and_h350_face//57FrMe016RyMHm8WDL2mK7P0bmS.jpg",
+              "type": "img",
+              "start": 5564.5,
+              "end": 5655.9,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w276_and_h350_face//alqr0Hx7kgLZ38QvwdQKFIA8Y8l.jpg",
+              "type": "img",
+              "start": 5564.7,
+              "end": 5656.4,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w300/8xukbVG9JJfnpcdIEYPijVVOfhH.jpg",
+              "type": "img",
+              "start": 5564.8,
+              "end": 5656.7,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w92/8xukbVG9JJfnpcdIEYPijVVOfhH.jpg",
+              "type": "img",
+              "start": 5564.9,
+              "end": 5643.7,
+              "bytes": 0
+            },
+            {
+              "origin": "https://image.tmdb.org",
+              "path": "/t/p/w200//nGau0KBOaRILSK5MqFcuTfv7GMl.jpg",
+              "type": "img",
+              "start": 5565.9,
+              "end": 5642.1,
+              "bytes": 0
+            }
+          ],
+          "homeTvPrefetch": {
+            "total": 24,
+            "beforeFirstUsable": 24,
+            "starts": [
+              4139.2,
+              4140.1,
+              4140.6,
+              4141.2,
+              4184.1,
+              4187.5,
+              4191.1,
+              4198.2,
+              4207.6,
+              4209.9,
+              4218.1,
+              4220.2,
+              4248.2,
+              4250.3,
+              4253.6,
+              4258.8,
+              4261.2,
+              4263.3,
+              4267.1,
+              4271.4,
+              4278.9,
+              4282.7,
+              4297.9,
+              4303.9
+            ],
+            "maxConcurrent": 4
+          },
+          "fixtureFavoriteCalls": 11,
+          "readinessEvents": [
+            {
+              "kind": "activity",
+              "type": "init",
+              "component": "main",
+              "at": 4099.3
+            },
+            {
+              "kind": "activity",
+              "type": "create",
+              "component": "main",
+              "at": 4110.5
+            },
+            {
+              "kind": "controller",
+              "name": "content",
+              "at": 4132.6
+            },
+            {
+              "kind": "controller",
+              "name": "content",
+              "at": 4134.9
+            },
+            {
+              "kind": "activity",
+              "type": "start",
+              "component": "main",
+              "at": 4135.7
+            },
+            {
+              "kind": "controller",
+              "name": "content",
+              "at": 4429.3
+            },
+            {
+              "kind": "controller",
+              "name": "items_line",
+              "at": 4433.4
+            },
+            {
+              "kind": "controller",
+              "name": "content",
+              "at": 4433.5
+            },
+            {
+              "kind": "activity",
+              "type": "init",
+              "component": "full",
+              "at": 4784.3
+            },
+            {
+              "kind": "activity",
+              "type": "create",
+              "component": "full",
+              "at": 4799.4
+            },
+            {
+              "kind": "controller",
+              "name": "content",
+              "at": 4804.9
+            },
+            {
+              "kind": "controller",
+              "name": "content",
+              "at": 4807.5
+            },
+            {
+              "kind": "activity",
+              "type": "start",
+              "component": "full",
+              "at": 4807.9
+            },
+            {
+              "kind": "controller",
+              "name": "content",
+              "at": 5558.6
+            },
+            {
+              "kind": "controller",
+              "name": "full_start",
+              "at": 5561.7
+            },
+            {
+              "kind": "controller",
+              "name": "content",
+              "at": 5562.1
+            },
+            {
+              "kind": "controller",
+              "name": "content",
+              "at": 5617.5
+            },
+            {
+              "kind": "controller",
+              "name": "items_line",
+              "at": 5623.5
+            },
+            {
+              "kind": "controller",
+              "name": "content",
+              "at": 5623.8
+            },
+            {
+              "kind": "activity",
+              "type": "start",
+              "component": "main",
+              "at": 5624.2
+            },
+            {
+              "kind": "activity",
+              "type": "archive",
+              "component": "main",
+              "at": 5624.9
+            },
+            {
+              "kind": "activity",
+              "type": "init",
+              "component": "full",
+              "at": 5715.4
+            },
+            {
+              "kind": "activity",
+              "type": "create",
+              "component": "full",
+              "at": 5717.8
+            },
+            {
+              "kind": "controller",
+              "name": "content",
+              "at": 5723
+            },
+            {
+              "kind": "controller",
+              "name": "content",
+              "at": 5725.6
+            },
+            {
+              "kind": "activity",
+              "type": "start",
+              "component": "full",
+              "at": 5726
+            },
+            {
+              "kind": "activity",
+              "type": "destroy",
+              "component": "full",
+              "at": 6090.1
+            },
+            {
+              "kind": "controller",
+              "name": "content",
+              "at": 6432.8
+            },
+            {
+              "kind": "controller",
+              "name": "full_start",
+              "at": 6448.4
+            },
+            {
+              "kind": "controller",
+              "name": "content",
+              "at": 6449
+            },
+            {
+              "kind": "controller",
+              "name": "content",
+              "at": 7059.4
+            },
+            {
+              "kind": "controller",
+              "name": "items_line",
+              "at": 7065.3
+            },
+            {
+              "kind": "controller",
+              "name": "content",
+              "at": 7065.5
+            },
+            {
+              "kind": "activity",
+              "type": "start",
+              "component": "main",
+              "at": 7065.8
+            },
+            {
+              "kind": "activity",
+              "type": "archive",
+              "component": "main",
+              "at": 7066.2
+            },
+            {
+              "kind": "activity",
+              "type": "destroy",
+              "component": "full",
+              "at": 7299
+            },
+            {
+              "kind": "activity",
+              "type": "init",
+              "component": "full",
+              "at": 7350.7
+            },
+            {
+              "kind": "activity",
+              "type": "create",
+              "component": "full",
+              "at": 7352.1
+            },
+            {
+              "kind": "controller",
+              "name": "content",
+              "at": 7356.6
+            },
+            {
+              "kind": "controller",
+              "name": "content",
+              "at": 7359
+            },
+            {
+              "kind": "activity",
+              "type": "start",
+              "component": "full",
+              "at": 7359.4
+            },
+            {
+              "kind": "controller",
+              "name": "content",
+              "at": 7642.2
+            },
+            {
+              "kind": "controller",
+              "name": "full_start",
+              "at": 7646.4
+            },
+            {
+              "kind": "controller",
+              "name": "content",
+              "at": 7646.8
+            },
+            {
+              "kind": "controller",
+              "name": "content",
+              "at": 7841.5
+            },
+            {
+              "kind": "controller",
+              "name": "items_line",
+              "at": 7853.5
+            },
+            {
+              "kind": "controller",
+              "name": "content",
+              "at": 7856.9
+            },
+            {
+              "kind": "activity",
+              "type": "start",
+              "component": "main",
+              "at": 7857.2
+            },
+            {
+              "kind": "activity",
+              "type": "archive",
+              "component": "main",
+              "at": 7857.6
+            },
+            {
+              "kind": "activity",
+              "type": "destroy",
+              "component": "full",
+              "at": 8253
+            }
+          ],
+          "activity": "main",
+          "controller": "items_line",
+          "ydesignLoaded": true,
+          "homeHistoryActive": true,
+          "marks": {
+            "documentStart": 744.8000000044703,
+            "domContentLoaded": 749.6000000014901,
+            "lampaRuntimeAvailable": 1480.8000000044703,
+            "loaderRequested": 1480.9000000059605,
+            "contentRowsAvailable": 1481.9000000059605,
+            "lampaGlobalAvailable": 1481.9000000059605,
+            "loaderExecuted": 1503,
+            "windowLoad": 1548.1000000014901,
+            "firstHybridActiveFrame": 1578.7000000029802,
+            "nativeAppReady": 3750.9000000059605,
+            "firstVisibleHomeCard": 4474.4000000059605,
+            "firstHomeFocus": 4474.80000000447,
+            "firstUsableHome": 4475,
+            "stageProbeStopped": 4475
+          }
+        }
+      },
+      "navigation": {
+        "dpad": {
+          "start": 4708,
+          "end": 4770.6,
+          "responseMs": 62.6,
+          "from": 0,
+          "to": 1,
+          "moved": true,
+          "controller": "items_line"
+        },
+        "details": {
+          "at": 5597.3,
+          "responseMs": 821.4,
+          "controller": "full_start",
+          "details": true
+        },
+        "back": {
+          "at": 5702.2,
+          "responseMs": 94.4,
+          "restored": true,
+          "controller": "items_line"
+        },
+        "cycles": [
+          {
+            "details": {
+              "at": 5597.3,
+              "responseMs": 821.4,
+              "controller": "full_start",
+              "details": true
+            },
+            "back": {
+              "at": 5702.2,
+              "responseMs": 94.4,
+              "restored": true,
+              "controller": "items_line"
+            }
+          },
+          {
+            "details": {
+              "responseMs": 1023,
+              "controller": "full_start"
+            },
+            "back": {
+              "responseMs": 378,
+              "restored": true,
+              "controller": "items_line"
+            }
+          },
+          {
+            "details": {
+              "responseMs": 412.2,
+              "controller": "full_start"
+            },
+            "back": {
+              "responseMs": 182.4,
+              "restored": true,
+              "controller": "items_line"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

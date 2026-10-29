@@ -1939,7 +1939,7 @@
     // =========================================================================
     // 6.4. РЯДКИ ГОЛОВНОЇ: «Продовжити перегляд (N)» та «Виходять цього тижня (N)»
     // =========================================================================
-    var RowsStore = { registered: false, busy: false, last: 0 };
+    var RowsStore = { registered: false, busy: false, lastSuccess: 0, retryAt: 0, failures: 0, outcome: 'idle', generation: 0 };
     var ROW_LISTS = ['look', 'continued', 'scheduled', 'book', 'like', 'wath', 'history'];
 
     function extCacheKey(id, type) {
@@ -2027,67 +2027,195 @@
         } catch (e) {}
     }
 
-    // Фонове підтягування даних серіалів зі списків користувача (з кешем 12 год., через чергу запитів)
-    var WarmRowsStore = { timer: null, attempts: 0, force: false };
-    function runWarmRowsWhenHomeUsable() {
-        WarmRowsStore.timer = null;
+    // Optional TV metadata waits for a real usable Home, then uses native row append/update APIs.
+    var WarmRowsStore = { timer: null, attempts: 0, force: false, pending: false, generation: 0, installed: false };
+    var HomeRowsRefresh = { timer: null };
+    function activeHomeActivity() {
         var active = Lampa.Activity && Lampa.Activity.active();
+        return active && active.component === 'main' ? active : null;
+    }
+    function usableHome() {
         var focus = document.querySelector && document.querySelector('.activity--active .card.selector.focus');
         var controller = Lampa.Controller && Lampa.Controller.enabled && Lampa.Controller.enabled();
-        if (!active || active.component !== 'main') {
-            if (WarmRowsStore.attempts < 20) {
-                WarmRowsStore.attempts++;
-                WarmRowsStore.timer = setTimeout(runWarmRowsWhenHomeUsable, 250);
-            } else WarmRowsStore.attempts = 0;
-            return;
+        return !!(activeHomeActivity() && focus && focus.getClientRects && focus.getClientRects().length && controller && controller.name);
+    }
+    function cancelWarmRows(leaving) {
+        if (WarmRowsStore.timer) clearTimeout(WarmRowsStore.timer);
+        WarmRowsStore.timer = null; WarmRowsStore.pending = false; WarmRowsStore.attempts = 0;
+        if (leaving) WarmRowsStore.generation++;
+    }
+    function scheduleYDesignRowsRefresh() {
+        if (HomeRowsRefresh.timer) return;
+        HomeRowsRefresh.timer = setTimeout(function () { HomeRowsRefresh.timer = null; refreshYDesignRows(); }, 120);
+    }
+    function ydesignRowPayload(kind) {
+        if (kind === 'cont' && window.LampaHomeHistory && window.LampaHomeHistory.active) return null;
+        var call = makeRowCall(kind, kind === 'cont' ? 'Продовжити перегляд' : 'Виходять цього тижня');
+        if (typeof call !== 'function') return null;
+        var data = null;
+        try { call(function (result) { data = result; }); } catch (e) { return null; }
+        if (!data || !Array.isArray(data.results) || !data.results.length) return null;
+        data.home_row_id = 'ydesign_' + kind; data.home_row_origin = 'ydesign';
+        return data;
+    }
+    function ydesignRowKey(card) { return card ? String(card.source || 'tmdb') + ':' + String(card.id || '') : ''; }
+    function ydesignRowSignature(cards) { return JSON.stringify(cards.map(function (card) { return [ydesignRowKey(card), card.ydesign_row || '']; })); }
+    function paintYDesignRow(component, kind, data) {
+        var id = 'ydesign_' + kind;
+        var line = (component.items || []).find(function (item) {
+            return item.data && (item.data.home_row_id === id || item.data.ydesign_row === kind ||
+                Array.isArray(item.data.results) && item.data.results.some(function (card) { return card && card.ydesign_row === kind; }));
+        });
+        if (!line) {
+            if (!data || !data.results.length) return false;
+            var previousFragment = component.fragment;
+            try {
+                component.fragment = document.createDocumentFragment();
+                component.emit('createAndAppend', data);
+                if (component.scroll && component.scroll.append) component.scroll.append(component.fragment);
+                return true;
+            } catch (e) { return false; }
+            finally { component.fragment = previousFragment; }
         }
-        if (!focus || !focus.getClientRects || !focus.getClientRects().length || !controller) {
-            if (WarmRowsStore.attempts < 20) {
-                WarmRowsStore.attempts++;
-                WarmRowsStore.timer = setTimeout(runWarmRowsWhenHomeUsable, 250);
-            } else WarmRowsStore.attempts = 0;
-            return;
+        var cards = data && data.results || [], old = line.data && line.data.results || [];
+        if (ydesignRowSignature(old) === ydesignRowSignature(cards)) return false;
+        if (!cards.length) {
+            if (Lampa.Controller && Lampa.Controller.own && Lampa.Controller.own(line)) return false;
+            var removeIndex = component.items.indexOf(line);
+            if (removeIndex < 0) return false;
+            component.items.splice(removeIndex, 1); if (line.destroy) line.destroy();
+            component.active = Math.max(0, Math.min(component.active - (removeIndex < component.active ? 1 : 0), component.items.length - 1));
+            return true;
         }
-        WarmRowsStore.attempts = 0;
-        warmRows(WarmRowsStore.force);
+        var ownsFocus = Lampa.Controller && Lampa.Controller.own && Lampa.Controller.own(line);
+        var selected = old[line.active || 0], selectedKey = ydesignRowKey(selected);
+        (line.items || []).forEach(function (item) { if (item.destroy) item.destroy(); });
+        line.items = []; line.more = null; line.last = null; line.active = 0;
+        line.data.results = cards; line.data.title = data.title; line.data.home_row_id = id; line.data.home_row_origin = 'ydesign';
+        var rendered = line.render && line.render(true), titleNode = rendered && (rendered[0] || rendered);
+        titleNode = titleNode && titleNode.querySelector && titleNode.querySelector('.items-line__title');
+        if (titleNode) titleNode.textContent = data.title;
+        var selectedIndex = selectedKey ? cards.findIndex(function (card) { return ydesignRowKey(card) === selectedKey; }) : 0;
+        cards.slice(0, Math.max(line.view || 7, selectedIndex + 1)).forEach(function (card) { line.emit('createAndAppend', card); });
+        line.active = Math.max(0, selectedIndex);
+        if (line.items[line.active] && line.items[line.active].render) line.last = line.items[line.active].render(true);
+        if (ownsFocus && line.toggle) line.toggle();
+        if (Lampa.Layer && Lampa.Layer.visible && line.render) Lampa.Layer.visible(line.render(true));
+        return true;
+    }
+    function refreshYDesignRows() {
+        var active = activeHomeActivity(), component = active && active.activity && active.activity.component;
+        if (!active || !component || !Array.isArray(component.items) || !component.emit || !component.scroll) return false;
+        var changed = false;
+        ['cont', 'week'].forEach(function (kind) { if (paintYDesignRow(component, kind, ydesignRowPayload(kind))) changed = true; });
+        if (changed) component.emit('homeHistoryChanged');
+        return changed;
+    }
+    function finishWarmRowsReadiness() {
+        WarmRowsStore.timer = null;
+        if (!WarmRowsStore.pending) return;
+        if (!activeHomeActivity()) { cancelWarmRows(true); return; }
+        if (usableHome()) {
+            WarmRowsStore.pending = false; WarmRowsStore.attempts = 0;
+            warmRows(WarmRowsStore.force); return;
+        }
+        if (WarmRowsStore.attempts < 8) {
+            WarmRowsStore.attempts++;
+            WarmRowsStore.timer = setTimeout(finishWarmRowsReadiness, 250);
+        } else { WarmRowsStore.pending = false; WarmRowsStore.attempts = 0; RowsStore.outcome = 'not-ready'; }
     }
     function scheduleWarmRows(delay, force) {
-        if (WarmRowsStore.timer) clearTimeout(WarmRowsStore.timer);
+        if (!activeHomeActivity()) return;
+        WarmRowsStore.pending = true; WarmRowsStore.force = !!force;
+        if (WarmRowsStore.timer) return;
         WarmRowsStore.attempts = 0;
-        WarmRowsStore.force = !!force;
-        WarmRowsStore.timer = setTimeout(runWarmRowsWhenHomeUsable, Math.max(0, Number(delay) || 0));
+        WarmRowsStore.timer = setTimeout(finishWarmRowsReadiness, Math.max(0, Number(delay) || 0));
     }
-
+    function onWarmRowsActivity(event) {
+        if (!event || event.type !== 'start') return;
+        if (event.component === 'main') {
+            WarmRowsStore.generation++; RowsStore.generation = WarmRowsStore.generation;
+            WarmRowsStore.attempts = 0; WarmRowsStore.pending = true; WarmRowsStore.force = false;
+            if (WarmRowsStore.timer) clearTimeout(WarmRowsStore.timer);
+            WarmRowsStore.timer = setTimeout(finishWarmRowsReadiness, 0);
+        } else cancelWarmRows(true);
+    }
+    function onWarmRowsReadinessSignal() {
+        if (!activeHomeActivity()) return;
+        if (!WarmRowsStore.pending) {
+            if (RowsStore.outcome !== 'empty-candidates' && RowsStore.outcome !== 'not-ready') return;
+            WarmRowsStore.pending = true; WarmRowsStore.attempts = 0;
+        }
+        if (!WarmRowsStore.timer) WarmRowsStore.timer = setTimeout(finishWarmRowsReadiness, 0);
+    }
+    function installWarmRowsEvents() {
+        if (WarmRowsStore.installed) return;
+        WarmRowsStore.installed = true;
+        if (Lampa.Listener && Lampa.Listener.follow) Lampa.Listener.follow('activity', onWarmRowsActivity);
+        if (Lampa.Controller && Lampa.Controller.listener && Lampa.Controller.listener.follow) Lampa.Controller.listener.follow('toggle', onWarmRowsReadinessSignal);
+        if (Lampa.Favorite && Lampa.Favorite.listener && Lampa.Favorite.listener.follow) ['read', 'add', 'added', 'remove'].forEach(function (name) { Lampa.Favorite.listener.follow(name, onWarmRowsReadinessSignal); });
+        document.addEventListener('hover:focus', function (event) {
+            var target = event && event.target;
+            if (target && target.closest && target.closest('.activity--active .card.selector')) onWarmRowsReadinessSignal();
+        }, true);
+        if (activeHomeActivity()) scheduleWarmRows(0, false);
+    }
     function warmRows(force) {
         try {
-            var active = Lampa.Activity && Lampa.Activity.active();
-            if (!active || active.component !== 'main') return;
+            var active = activeHomeActivity();
+            if (!active || !usableHome()) { RowsStore.outcome = 'not-ready'; return; }
             if (!getSet('ydesign_row_continue') && !getSet('ydesign_row_week')) return;
             var now = Date.now();
-            if (RowsStore.busy || (!force && now - RowsStore.last < 20 * 60 * 1000)) return;
-            RowsStore.busy = true;
-            RowsStore.last = now;
-            var cands = rowCandidates(), queue = [];
-            for (var i = 0; i < cands.length && queue.length < 24; i++) {
-                if (isTvMedia(cands[i])) queue.push(cands[i]);
+            if (RowsStore.busy) return;
+            if (RowsStore.retryAt > now) { scheduleWarmRows(RowsStore.retryAt - now, false); return; }
+            if (!force && RowsStore.lastSuccess && now - RowsStore.lastSuccess < 20 * 60 * 1000) { RowsStore.outcome = 'fresh-cache'; scheduleYDesignRowsRefresh(); return; }
+            var candidates = rowCandidates(), queue = [];
+            for (var i = 0; i < candidates.length && queue.length < 24; i++) if (isTvMedia(candidates[i])) queue.push(candidates[i]);
+            if (!queue.length) { RowsStore.outcome = 'empty-candidates'; return; }
+            queue = queue.filter(function (card) {
+                var cached = ApiCache.get(extCacheKey(card.id, 'tv'));
+                return !cached || !cached.fetched || Date.now() - cached.fetched > 43200000;
+            });
+            if (!queue.length) {
+                RowsStore.lastSuccess = now; RowsStore.retryAt = 0; RowsStore.failures = 0; RowsStore.outcome = 'fresh-cache';
+                scheduleYDesignRowsRefresh(); return;
             }
-            var next = 0, running = 0, settled = 0;
+            RowsStore.busy = true; RowsStore.outcome = 'fetching';
+            var next = 0, running = 0, settled = 0, successes = 0, failures = 0;
+            var generation = WarmRowsStore.generation;
             function pump() {
                 while (running < 4 && next < queue.length) {
                     (function (card) {
                         running++;
-                        Promise.resolve().then(function () { return fetchExtendedData(card.id, 'tv'); }).then(finish, finish);
+                        Promise.resolve().then(function () { return fetchExtendedData(card.id, 'tv'); }).then(finish, function () { finish(null); });
                     })(queue[next++]);
                 }
-                if (!queue.length) RowsStore.busy = false;
             }
-            function finish() {
+            function finish(result) {
                 running--; settled++;
-                if (settled >= queue.length) RowsStore.busy = false;
-                else pump();
+                if (result) successes++; else failures++;
+                if (result && activeHomeActivity() === active && WarmRowsStore.generation === generation) scheduleYDesignRowsRefresh();
+                if (settled >= queue.length) done(); else pump();
+            }
+            function done() {
+                if (!RowsStore.busy) return;
+                RowsStore.busy = false;
+                var completedAt = Date.now(), sameHome = activeHomeActivity() === active && WarmRowsStore.generation === generation;
+                if (successes && !failures) {
+                    RowsStore.lastSuccess = completedAt; RowsStore.failures = 0; RowsStore.retryAt = 0; RowsStore.outcome = sameHome ? 'success' : 'stale-session';
+                } else if (successes || failures) {
+                    RowsStore.failures++;
+                    var delay = Math.min(15 * 60 * 1000, 30000 * Math.pow(2, Math.min(RowsStore.failures - 1, 5)));
+                    RowsStore.retryAt = completedAt + delay; RowsStore.outcome = successes ? 'partial-failure' : 'failed';
+                    if (sameHome) scheduleWarmRows(delay, false);
+                }
+                if (successes && sameHome) scheduleYDesignRowsRefresh();
             }
             pump();
-        } catch (e) { RowsStore.busy = false; }
+        } catch (e) {
+            RowsStore.busy = false; RowsStore.outcome = 'failed'; RowsStore.failures++;
+            RowsStore.retryAt = Date.now() + Math.min(15 * 60 * 1000, 30000 * Math.pow(2, Math.min(RowsStore.failures - 1, 5)));
+        }
     }
 
 
@@ -4115,11 +4243,10 @@
                 Lampa.Listener.follow('activity', function (e) {
                     if (!e || e.type !== 'start') return;
                     scheduleRefreshMarks();
-                    if (e.component === 'main') scheduleWarmRows(1500, false);
                 });
             }
-            scheduleWarmRows(1500, false);
-            setTimeout(function () { scheduleWarmRows(0, true); }, 6000);
+            // Optional metadata is event-driven and starts only after native Home focus/controller readiness.
+            installWarmRowsEvents();
 
             if (window.appready && Lampa.Activity && Lampa.Activity.active()) {
                 setTimeout(function () {

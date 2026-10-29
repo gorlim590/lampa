@@ -1,0 +1,1157 @@
+{
+  "schema": 1,
+  "order": [
+    "main",
+    "branch",
+    "branch",
+    "main",
+    "main",
+    "branch",
+    "branch",
+    "main",
+    "main",
+    "branch"
+  ],
+  "results": [
+    {
+      "file": "/home/gostrimchik/lampa-issue79-phase6/audit/issue-79-phase6/interleaved-runs/01-main.json",
+      "mode": "main",
+      "marks": {
+        "documentStart": 2902.9,
+        "domContentLoaded": 2908,
+        "lampaRuntimeAvailable": 3589.7,
+        "loaderRequested": 3589.7,
+        "contentRowsAvailable": 3590.9,
+        "lampaGlobalAvailable": 3591,
+        "loaderExecuted": 3622.4,
+        "firstHybridActiveFrame": 3689.8,
+        "windowLoad": 3778.8,
+        "nativeAppReady": 5781,
+        "firstVisibleHomeCard": 6506.4,
+        "firstHomeFocus": 6506.7,
+        "firstUsableHome": 6507,
+        "stageProbeStopped": 6507
+      },
+      "homeTvPrefetch": {
+        "total": 24,
+        "beforeFirstUsable": 24,
+        "starts": [
+          6146.9,
+          6147.8,
+          6148.8,
+          6149.7,
+          6219.5,
+          6223.6,
+          6225.8,
+          6228.1,
+          6236,
+          6239.6,
+          6241.4,
+          6245.1,
+          6250.7,
+          6252.4,
+          6257.8,
+          6260.3,
+          6262.3,
+          6264.8,
+          6267.8,
+          6269.8,
+          6274.6,
+          6280.1,
+          6281.7,
+          6283.4
+        ],
+        "maxConcurrent": 4
+      },
+      "navigation": {
+        "dpad": {
+          "start": 6675.39999999851,
+          "end": 6746.7,
+          "responseMs": 71.3,
+          "from": 0,
+          "to": 1,
+          "moved": true,
+          "controller": "items_line"
+        },
+        "details": {
+          "at": 7810.8,
+          "responseMs": 1059.5,
+          "controller": "full_start",
+          "details": true
+        },
+        "back": {
+          "at": 8147.8,
+          "responseMs": 297.2,
+          "restored": true,
+          "controller": "items_line"
+        },
+        "cycles": [
+          {
+            "details": {
+              "at": 7810.8,
+              "responseMs": 1059.5,
+              "controller": "full_start",
+              "details": true
+            },
+            "back": {
+              "at": 8147.8,
+              "responseMs": 297.2,
+              "restored": true,
+              "controller": "items_line"
+            }
+          },
+          {
+            "details": {
+              "responseMs": 418.8,
+              "controller": "full_start"
+            },
+            "back": {
+              "responseMs": 186.9,
+              "restored": true,
+              "controller": "items_line"
+            }
+          },
+          {
+            "details": {
+              "responseMs": 479.3,
+              "controller": "full_start"
+            },
+            "back": {
+              "responseMs": 540.8,
+              "restored": true,
+              "controller": "items_line"
+            }
+          }
+        ]
+      },
+      "fixtureFavoriteCalls": 11,
+      "errors": []
+    },
+    {
+      "file": "/home/gostrimchik/lampa-issue79-phase6/audit/issue-79-phase6/interleaved-runs/02-branch.json",
+      "mode": "branch",
+      "marks": {
+        "documentStart": 751.8,
+        "domContentLoaded": 755.6,
+        "lampaRuntimeAvailable": 1307.4,
+        "loaderRequested": 1307.4,
+        "contentRowsAvailable": 1318.4,
+        "lampaGlobalAvailable": 1318.4,
+        "loaderExecuted": 1341.7,
+        "windowLoad": 1399.3,
+        "firstHybridActiveFrame": 1404.4,
+        "nativeAppReady": 3018.7,
+        "firstVisibleHomeCard": 3739.6,
+        "firstHomeFocus": 3739.8,
+        "firstUsableHome": 3740.1,
+        "stageProbeStopped": 3740.1
+      },
+      "homeTvPrefetch": {
+        "total": 24,
+        "beforeFirstUsable": 0,
+        "starts": [
+          3776.6,
+          3787.8,
+          3845.5,
+          3903.2,
+          3909.9,
+          3920,
+          4033.6,
+          4039.4,
+          4045.9,
+          4051.6,
+          4065.9,
+          4073.4,
+          4075.4,
+          4087.1,
+          4098,
+          4104.8,
+          4111.1,
+          4123,
+          4130.1,
+          4141.7,
+          4158.4,
+          4162.1,
+          4178.2,
+          4185.8
+        ],
+        "maxConcurrent": 2
+      },
+      "navigation": {
+        "dpad": {
+          "start": 3912.2000000029802,
+          "end": 3969.8,
+          "responseMs": 57.6,
+          "from": 0,
+          "to": 1,
+          "moved": true,
+          "controller": "items_line"
+        },
+        "details": {
+          "at": 4745.2,
+          "responseMs": 772.5,
+          "controller": "full_start",
+          "details": true
+        },
+        "back": {
+          "at": 4923.7,
+          "responseMs": 92.5,
+          "restored": true,
+          "controller": "items_line"
+        },
+        "cycles": [
+          {
+            "details": {
+              "at": 4745.2,
+              "responseMs": 772.5,
+              "controller": "full_start",
+              "details": true
+            },
+            "back": {
+              "at": 4923.7,
+              "responseMs": 92.5,
+              "restored": true,
+              "controller": "items_line"
+            }
+          },
+          {
+            "details": {
+              "responseMs": 411.6,
+              "controller": "full_start"
+            },
+            "back": {
+              "responseMs": 83.8,
+              "restored": true,
+              "controller": "items_line"
+            }
+          },
+          {
+            "details": {
+              "responseMs": 299.5,
+              "controller": "full_start"
+            },
+            "back": {
+              "responseMs": 57.2,
+              "restored": true,
+              "controller": "items_line"
+            }
+          }
+        ]
+      },
+      "fixtureFavoriteCalls": 10,
+      "errors": []
+    },
+    {
+      "file": "/home/gostrimchik/lampa-issue79-phase6/audit/issue-79-phase6/interleaved-runs/03-branch.json",
+      "mode": "branch",
+      "marks": {
+        "documentStart": 928,
+        "domContentLoaded": 934.3,
+        "contentRowsAvailable": 1767.2,
+        "lampaGlobalAvailable": 1767.2,
+        "lampaRuntimeAvailable": 1767.5,
+        "loaderRequested": 1767.5,
+        "loaderExecuted": 1794.4,
+        "firstHybridActiveFrame": 1858,
+        "windowLoad": 1914.4,
+        "nativeAppReady": 3497.7,
+        "firstVisibleHomeCard": 4167.4,
+        "firstHomeFocus": 4167.7,
+        "firstUsableHome": 4168,
+        "stageProbeStopped": 4168
+      },
+      "homeTvPrefetch": {
+        "total": 24,
+        "beforeFirstUsable": 0,
+        "starts": [
+          4227.7,
+          4241.8,
+          4332.8,
+          4362.1,
+          4432.1,
+          4434.2,
+          4437.9,
+          4448.3,
+          4455,
+          4460.6,
+          4465.7,
+          4469.1,
+          4475.2,
+          4478.9,
+          4482.4,
+          4531.5,
+          4533.2,
+          4538.5,
+          4549.6,
+          4565.4,
+          4570.6,
+          4575.6,
+          4592.9,
+          4604
+        ],
+        "maxConcurrent": 3
+      },
+      "navigation": {
+        "dpad": {
+          "start": 4373,
+          "end": 4456.8,
+          "responseMs": 83.8,
+          "from": 0,
+          "to": 1,
+          "moved": true,
+          "controller": "items_line"
+        },
+        "details": {
+          "at": 5209.2,
+          "responseMs": 742.6,
+          "controller": "full_start",
+          "details": true
+        },
+        "back": {
+          "at": 5417.7,
+          "responseMs": 126.2,
+          "restored": true,
+          "controller": "items_line"
+        },
+        "cycles": [
+          {
+            "details": {
+              "at": 5209.2,
+              "responseMs": 742.6,
+              "controller": "full_start",
+              "details": true
+            },
+            "back": {
+              "at": 5417.7,
+              "responseMs": 126.2,
+              "restored": true,
+              "controller": "items_line"
+            }
+          },
+          {
+            "details": {
+              "responseMs": 438.2,
+              "controller": "full_start"
+            },
+            "back": {
+              "responseMs": 376.8,
+              "restored": true,
+              "controller": "items_line"
+            }
+          },
+          {
+            "details": {
+              "responseMs": 308.4,
+              "controller": "full_start"
+            },
+            "back": {
+              "responseMs": 53.5,
+              "restored": true,
+              "controller": "items_line"
+            }
+          }
+        ]
+      },
+      "fixtureFavoriteCalls": 13,
+      "errors": []
+    },
+    {
+      "file": "/home/gostrimchik/lampa-issue79-phase6/audit/issue-79-phase6/interleaved-runs/04-main.json",
+      "mode": "main",
+      "marks": {
+        "documentStart": 676.7,
+        "domContentLoaded": 681.8,
+        "lampaRuntimeAvailable": 1469.3,
+        "loaderRequested": 1469.3,
+        "contentRowsAvailable": 1478,
+        "lampaGlobalAvailable": 1478.1,
+        "loaderExecuted": 1515.7,
+        "windowLoad": 1593.5,
+        "firstHybridActiveFrame": 1596.6,
+        "nativeAppReady": 3294.6,
+        "firstVisibleHomeCard": 4197.6,
+        "firstHomeFocus": 4197.8,
+        "firstUsableHome": 4198.1,
+        "stageProbeStopped": 4198.1
+      },
+      "homeTvPrefetch": {
+        "total": 24,
+        "beforeFirstUsable": 19,
+        "starts": [
+          3637,
+          3638.2,
+          3642,
+          3643.4,
+          3734.5,
+          3739,
+          3744.3,
+          3746.3,
+          3775,
+          3776.7,
+          3785.2,
+          3787,
+          3824.9,
+          3847.7,
+          3858.4,
+          3865.6,
+          3906.8,
+          3948.6,
+          3951,
+          5658.6,
+          5754.2,
+          5793.6,
+          5812.3,
+          5864.6
+        ],
+        "maxConcurrent": 4
+      },
+      "navigation": {
+        "dpad": {
+          "start": 4787.20000000298,
+          "end": 5355,
+          "responseMs": 567.8,
+          "from": 0,
+          "to": 1,
+          "moved": true,
+          "controller": "items_line"
+        },
+        "details": {
+          "at": 6322.6,
+          "responseMs": 932.2,
+          "controller": "full_start",
+          "details": true
+        },
+        "back": {
+          "at": 7187.2,
+          "responseMs": 792.3,
+          "restored": true,
+          "controller": "items_line"
+        },
+        "cycles": [
+          {
+            "details": {
+              "at": 6322.6,
+              "responseMs": 932.2,
+              "controller": "full_start",
+              "details": true
+            },
+            "back": {
+              "at": 7187.2,
+              "responseMs": 792.3,
+              "restored": true,
+              "controller": "items_line"
+            }
+          },
+          {
+            "details": {
+              "responseMs": 358.1,
+              "controller": "full_start"
+            },
+            "back": {
+              "responseMs": 149.4,
+              "restored": true,
+              "controller": "items_line"
+            }
+          },
+          {
+            "details": {
+              "responseMs": 276.2,
+              "controller": "full_start"
+            },
+            "back": {
+              "responseMs": 284.5,
+              "restored": true,
+              "controller": "items_line"
+            }
+          }
+        ]
+      },
+      "fixtureFavoriteCalls": 15,
+      "errors": []
+    },
+    {
+      "file": "/home/gostrimchik/lampa-issue79-phase6/audit/issue-79-phase6/interleaved-runs/05-main.json",
+      "mode": "main",
+      "marks": {
+        "documentStart": 914.9,
+        "domContentLoaded": 920,
+        "contentRowsAvailable": 1558.9,
+        "lampaGlobalAvailable": 1559,
+        "lampaRuntimeAvailable": 1567.7,
+        "loaderRequested": 1567.7,
+        "loaderExecuted": 1614.8,
+        "firstHybridActiveFrame": 1664.9,
+        "windowLoad": 1689.4,
+        "nativeAppReady": 3336.6,
+        "firstVisibleHomeCard": 4449.8,
+        "firstHomeFocus": 4450,
+        "firstUsableHome": 4450.2,
+        "stageProbeStopped": 4450.2
+      },
+      "homeTvPrefetch": {
+        "total": 24,
+        "beforeFirstUsable": 24,
+        "starts": [
+          3719.7,
+          3720.7,
+          3721.4,
+          3722.2,
+          3782.3,
+          3785.9,
+          3788.3,
+          3797.3,
+          3825.9,
+          3834.8,
+          3839.2,
+          3841.9,
+          3847.3,
+          3854.2,
+          3871.5,
+          3873.7,
+          3891.3,
+          3896.8,
+          3904.1,
+          3912.9,
+          3924.6,
+          3929.1,
+          3934.7,
+          3970.8
+        ],
+        "maxConcurrent": 4
+      },
+      "navigation": {
+        "dpad": {
+          "start": 4715.69999999553,
+          "end": 4801.6,
+          "responseMs": 85.9,
+          "from": 0,
+          "to": 1,
+          "moved": true,
+          "controller": "items_line"
+        },
+        "details": {
+          "at": 6031.2,
+          "responseMs": 1170,
+          "controller": "full_start",
+          "details": true
+        },
+        "back": {
+          "at": 6541.2,
+          "responseMs": 403,
+          "restored": true,
+          "controller": "items_line"
+        },
+        "cycles": [
+          {
+            "details": {
+              "at": 6031.2,
+              "responseMs": 1170,
+              "controller": "full_start",
+              "details": true
+            },
+            "back": {
+              "at": 6541.2,
+              "responseMs": 403,
+              "restored": true,
+              "controller": "items_line"
+            }
+          },
+          {
+            "details": {
+              "responseMs": 534,
+              "controller": "full_start"
+            },
+            "back": {
+              "responseMs": 94.8,
+              "restored": true,
+              "controller": "items_line"
+            }
+          },
+          {
+            "details": {
+              "responseMs": 382.5,
+              "controller": "full_start"
+            },
+            "back": {
+              "responseMs": 144.3,
+              "restored": true,
+              "controller": "items_line"
+            }
+          }
+        ]
+      },
+      "fixtureFavoriteCalls": 11,
+      "errors": []
+    },
+    {
+      "file": "/home/gostrimchik/lampa-issue79-phase6/audit/issue-79-phase6/interleaved-runs/06-branch.json",
+      "mode": "branch",
+      "marks": {
+        "documentStart": 562.8,
+        "domContentLoaded": 585.6,
+        "lampaRuntimeAvailable": 1307.6,
+        "loaderRequested": 1307.6,
+        "contentRowsAvailable": 1308.7,
+        "lampaGlobalAvailable": 1308.7,
+        "loaderExecuted": 1332.6,
+        "windowLoad": 1396.1,
+        "firstHybridActiveFrame": 1417.3,
+        "nativeAppReady": 3170.2,
+        "firstVisibleHomeCard": 4323,
+        "firstHomeFocus": 4324.1,
+        "firstUsableHome": 4324.3,
+        "stageProbeStopped": 4324.3
+      },
+      "homeTvPrefetch": {
+        "total": 24,
+        "beforeFirstUsable": 0,
+        "starts": [
+          4479.1,
+          4502.7,
+          4666.4,
+          4672.3,
+          4700.7,
+          4722.2,
+          4727.7,
+          4749.9,
+          4875.1,
+          4877.3,
+          4879.7,
+          4914.1,
+          4917,
+          5001.5,
+          5003.6,
+          5069.2,
+          5072.4,
+          5184,
+          5191.8,
+          5238.6,
+          5249.5,
+          5256.2,
+          5273.8,
+          5286.6
+        ],
+        "maxConcurrent": 3
+      },
+      "navigation": {
+        "dpad": {
+          "start": 4528.4000000059605,
+          "end": 4696.2,
+          "responseMs": 167.8,
+          "from": 0,
+          "to": 1,
+          "moved": true,
+          "controller": "items_line"
+        },
+        "details": {
+          "at": 5710.2,
+          "responseMs": 1000.6,
+          "controller": "full_start",
+          "details": true
+        },
+        "back": {
+          "at": 6473,
+          "responseMs": 602.1,
+          "restored": true,
+          "controller": "items_line"
+        },
+        "cycles": [
+          {
+            "details": {
+              "at": 5710.2,
+              "responseMs": 1000.6,
+              "controller": "full_start",
+              "details": true
+            },
+            "back": {
+              "at": 6473,
+              "responseMs": 602.1,
+              "restored": true,
+              "controller": "items_line"
+            }
+          },
+          {
+            "details": {
+              "responseMs": 825.2,
+              "controller": "full_start"
+            },
+            "back": {
+              "responseMs": 543.3,
+              "restored": true,
+              "controller": "items_line"
+            }
+          },
+          {
+            "details": {
+              "responseMs": 354.2,
+              "controller": "full_start"
+            },
+            "back": {
+              "responseMs": 167.9,
+              "restored": true,
+              "controller": "items_line"
+            }
+          }
+        ]
+      },
+      "fixtureFavoriteCalls": 14,
+      "errors": []
+    },
+    {
+      "file": "/home/gostrimchik/lampa-issue79-phase6/audit/issue-79-phase6/interleaved-runs/07-branch.json",
+      "mode": "branch",
+      "marks": {
+        "documentStart": 726.6,
+        "domContentLoaded": 731.6,
+        "lampaRuntimeAvailable": 1265.5,
+        "loaderRequested": 1265.5,
+        "contentRowsAvailable": 1266.6,
+        "lampaGlobalAvailable": 1266.6,
+        "loaderExecuted": 1288.3,
+        "windowLoad": 1338.4,
+        "firstHybridActiveFrame": 1355.1,
+        "nativeAppReady": 3082.1,
+        "firstVisibleHomeCard": 4029.3,
+        "firstHomeFocus": 4029.6,
+        "firstUsableHome": 4029.9,
+        "stageProbeStopped": 4029.9
+      },
+      "homeTvPrefetch": {
+        "total": 24,
+        "beforeFirstUsable": 0,
+        "starts": [
+          4180.4,
+          4206.2,
+          4316.6,
+          4455.7,
+          4464.8,
+          4486.2,
+          4495.2,
+          4524,
+          4530.4,
+          4585.9,
+          4589.7,
+          4608.5,
+          4611.6,
+          4643.1,
+          4648.7,
+          4654.8,
+          4657.2,
+          4665.7,
+          4669.7,
+          4674.9,
+          4680.6,
+          4683.8,
+          4692.9,
+          4696.7
+        ],
+        "maxConcurrent": 2
+      },
+      "navigation": {
+        "dpad": {
+          "start": 4313.70000000298,
+          "end": 4387.2,
+          "responseMs": 73.5,
+          "from": 0,
+          "to": 1,
+          "moved": true,
+          "controller": "items_line"
+        },
+        "details": {
+          "at": 5293.7,
+          "responseMs": 903,
+          "controller": "full_start",
+          "details": true
+        },
+        "back": {
+          "at": 5436.4,
+          "responseMs": 97.2,
+          "restored": true,
+          "controller": "items_line"
+        },
+        "cycles": [
+          {
+            "details": {
+              "at": 5293.7,
+              "responseMs": 903,
+              "controller": "full_start",
+              "details": true
+            },
+            "back": {
+              "at": 5436.4,
+              "responseMs": 97.2,
+              "restored": true,
+              "controller": "items_line"
+            }
+          },
+          {
+            "details": {
+              "responseMs": 324.7,
+              "controller": "full_start"
+            },
+            "back": {
+              "responseMs": 202.9,
+              "restored": true,
+              "controller": "items_line"
+            }
+          },
+          {
+            "details": {
+              "responseMs": 393.8,
+              "controller": "full_start"
+            },
+            "back": {
+              "responseMs": 99.2,
+              "restored": true,
+              "controller": "items_line"
+            }
+          }
+        ]
+      },
+      "fixtureFavoriteCalls": 12,
+      "errors": []
+    },
+    {
+      "file": "/home/gostrimchik/lampa-issue79-phase6/audit/issue-79-phase6/interleaved-runs/08-main.json",
+      "mode": "main",
+      "marks": {
+        "documentStart": 744.8,
+        "domContentLoaded": 749.6,
+        "lampaRuntimeAvailable": 1480.8,
+        "loaderRequested": 1480.9,
+        "contentRowsAvailable": 1481.9,
+        "lampaGlobalAvailable": 1481.9,
+        "loaderExecuted": 1503,
+        "windowLoad": 1548.1,
+        "firstHybridActiveFrame": 1578.7,
+        "nativeAppReady": 3750.9,
+        "firstVisibleHomeCard": 4474.4,
+        "firstHomeFocus": 4474.8,
+        "firstUsableHome": 4475,
+        "stageProbeStopped": 4475
+      },
+      "homeTvPrefetch": {
+        "total": 24,
+        "beforeFirstUsable": 24,
+        "starts": [
+          4139.2,
+          4140.1,
+          4140.6,
+          4141.2,
+          4184.1,
+          4187.5,
+          4191.1,
+          4198.2,
+          4207.6,
+          4209.9,
+          4218.1,
+          4220.2,
+          4248.2,
+          4250.3,
+          4253.6,
+          4258.8,
+          4261.2,
+          4263.3,
+          4267.1,
+          4271.4,
+          4278.9,
+          4282.7,
+          4297.9,
+          4303.9
+        ],
+        "maxConcurrent": 4
+      },
+      "navigation": {
+        "dpad": {
+          "start": 4708,
+          "end": 4770.6,
+          "responseMs": 62.6,
+          "from": 0,
+          "to": 1,
+          "moved": true,
+          "controller": "items_line"
+        },
+        "details": {
+          "at": 5597.3,
+          "responseMs": 821.4,
+          "controller": "full_start",
+          "details": true
+        },
+        "back": {
+          "at": 5702.2,
+          "responseMs": 94.4,
+          "restored": true,
+          "controller": "items_line"
+        },
+        "cycles": [
+          {
+            "details": {
+              "at": 5597.3,
+              "responseMs": 821.4,
+              "controller": "full_start",
+              "details": true
+            },
+            "back": {
+              "at": 5702.2,
+              "responseMs": 94.4,
+              "restored": true,
+              "controller": "items_line"
+            }
+          },
+          {
+            "details": {
+              "responseMs": 1023,
+              "controller": "full_start"
+            },
+            "back": {
+              "responseMs": 378,
+              "restored": true,
+              "controller": "items_line"
+            }
+          },
+          {
+            "details": {
+              "responseMs": 412.2,
+              "controller": "full_start"
+            },
+            "back": {
+              "responseMs": 182.4,
+              "restored": true,
+              "controller": "items_line"
+            }
+          }
+        ]
+      },
+      "fixtureFavoriteCalls": 11,
+      "errors": []
+    },
+    {
+      "file": "/home/gostrimchik/lampa-issue79-phase6/audit/issue-79-phase6/interleaved-runs/09-main.json",
+      "mode": "main",
+      "marks": {
+        "documentStart": 678.9,
+        "domContentLoaded": 682.9,
+        "lampaRuntimeAvailable": 1207.4,
+        "loaderRequested": 1207.5,
+        "contentRowsAvailable": 1209,
+        "lampaGlobalAvailable": 1209,
+        "loaderExecuted": 1232.6,
+        "windowLoad": 1274.7,
+        "firstHybridActiveFrame": 1282.1,
+        "nativeAppReady": 2947.9,
+        "firstVisibleHomeCard": 3973.1,
+        "firstHomeFocus": 3974.7,
+        "firstUsableHome": 3975,
+        "stageProbeStopped": 3975
+      },
+      "homeTvPrefetch": {
+        "total": 24,
+        "beforeFirstUsable": 24,
+        "starts": [
+          3337.1,
+          3338,
+          3338.9,
+          3339.8,
+          3399.8,
+          3404,
+          3408.7,
+          3415.9,
+          3431.6,
+          3434.7,
+          3464.7,
+          3466.8,
+          3469.3,
+          3471.6,
+          3482.9,
+          3485,
+          3490.1,
+          3502,
+          3503.7,
+          3505.3,
+          3507.8,
+          3514.9,
+          3517.2,
+          3519.9
+        ],
+        "maxConcurrent": 4
+      },
+      "navigation": {
+        "dpad": {
+          "start": 4172,
+          "end": 4250.6,
+          "responseMs": 78.6,
+          "from": 0,
+          "to": 1,
+          "moved": true,
+          "controller": "items_line"
+        },
+        "details": {
+          "at": 4969.9,
+          "responseMs": 715.6,
+          "controller": "full_start",
+          "details": true
+        },
+        "back": {
+          "at": 5075.5,
+          "responseMs": 87.4,
+          "restored": true,
+          "controller": "items_line"
+        },
+        "cycles": [
+          {
+            "details": {
+              "at": 4969.9,
+              "responseMs": 715.6,
+              "controller": "full_start",
+              "details": true
+            },
+            "back": {
+              "at": 5075.5,
+              "responseMs": 87.4,
+              "restored": true,
+              "controller": "items_line"
+            }
+          },
+          {
+            "details": {
+              "responseMs": 352.3,
+              "controller": "full_start"
+            },
+            "back": {
+              "responseMs": 212.6,
+              "restored": true,
+              "controller": "items_line"
+            }
+          },
+          {
+            "details": {
+              "responseMs": 412.1,
+              "controller": "full_start"
+            },
+            "back": {
+              "responseMs": 79.4,
+              "restored": true,
+              "controller": "items_line"
+            }
+          }
+        ]
+      },
+      "fixtureFavoriteCalls": 10,
+      "errors": []
+    },
+    {
+      "file": "/home/gostrimchik/lampa-issue79-phase6/audit/issue-79-phase6/interleaved-runs/10-branch.json",
+      "mode": "branch",
+      "marks": {
+        "documentStart": 1693.2,
+        "domContentLoaded": 1715.7,
+        "contentRowsAvailable": 2537.3,
+        "lampaGlobalAvailable": 2537.3,
+        "lampaRuntimeAvailable": 2537.7,
+        "loaderRequested": 2537.7,
+        "loaderExecuted": 2560.7,
+        "firstHybridActiveFrame": 2618.3,
+        "windowLoad": 2688.2,
+        "nativeAppReady": 4336.5,
+        "firstVisibleHomeCard": 5036.3,
+        "firstHomeFocus": 5036.5,
+        "firstUsableHome": 5036.6,
+        "stageProbeStopped": 5036.7
+      },
+      "homeTvPrefetch": {
+        "total": 24,
+        "beforeFirstUsable": 0,
+        "starts": [
+          5082.8,
+          5117.4,
+          5170.6,
+          5216.4,
+          5229.7,
+          5239.7,
+          5366.9,
+          5369.1,
+          5380.9,
+          5382.8,
+          5395.8,
+          5397.8,
+          5401.2,
+          5403.7,
+          5408,
+          5412.2,
+          5416,
+          5420.4,
+          5422.8,
+          5436.4,
+          5445.6,
+          5455.4,
+          5460.7,
+          5462.3
+        ],
+        "maxConcurrent": 2
+      },
+      "navigation": {
+        "dpad": {
+          "start": 5231.10000000149,
+          "end": 5298.4,
+          "responseMs": 67.3,
+          "from": 0,
+          "to": 1,
+          "moved": true,
+          "controller": "items_line"
+        },
+        "details": {
+          "at": 6012.5,
+          "responseMs": 711.3,
+          "controller": "full_start",
+          "details": true
+        },
+        "back": {
+          "at": 6333.5,
+          "responseMs": 213.7,
+          "restored": true,
+          "controller": "items_line"
+        },
+        "cycles": [
+          {
+            "details": {
+              "at": 6012.5,
+              "responseMs": 711.3,
+              "controller": "full_start",
+              "details": true
+            },
+            "back": {
+              "at": 6333.5,
+              "responseMs": 213.7,
+              "restored": true,
+              "controller": "items_line"
+            }
+          },
+          {
+            "details": {
+              "responseMs": 603.1,
+              "controller": "full_start"
+            },
+            "back": {
+              "responseMs": 396.1,
+              "restored": true,
+              "controller": "items_line"
+            }
+          },
+          {
+            "details": {
+              "responseMs": 256.5,
+              "controller": "full_start"
+            },
+            "back": {
+              "responseMs": 90.2,
+              "restored": true,
+              "controller": "items_line"
+            }
+          }
+        ]
+      },
+      "fixtureFavoriteCalls": 15,
+      "errors": []
+    }
+  ]
+}

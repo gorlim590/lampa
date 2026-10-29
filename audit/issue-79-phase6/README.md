@@ -1,77 +1,55 @@
-# Issue #79 — Phase 6 startup evidence
+# Issue #79 — Phase 6 stabilization evidence
 
-## Scope and result
+## Result
 
-The confirmed plugin-side startup work was YDesign's optional TV metadata prefetch. On merged main, its 24 TMDb requests all began before the first usable Home focus in each of three controlled runs. The change now waits for the Home activity, visible focused card, and enabled native controller, then drains the same maximum of 24 candidates through a four-request queue. It does not change Home rows, their settings, Trakt data, row order, or saved visibility preferences.
+This patch stabilizes YDesign's optional TV metadata prefetch and updates the existing Home rows when metadata arrives. It does **not** establish a reliable startup-speed improvement; Issue #79 remains open and PR #131 remains Draft.
 
-The same source review found a defect in `computeRows()`: its loop referenced an undeclared `jobs` variable. With any candidate present, the existing `makeRowCall()` catch silently hid the resulting `ReferenceError`, so cached YDesign rows could fail to render. The loop now uses the already bounded candidate list directly.
+## Confirmed prefetch failure
 
-This is a concrete reduction in pre-interaction background work and a row correctness fix. The three-run comparison did **not** establish a noticeable overall startup speedup: host and native app timing varied more than the measured change. Phase 6 is therefore not complete and Issue #79 stays open.
+The previous code used a short timer window to wait for Home focus/controller readiness, then read Favorites once. It also stamped `RowsStore.last` before checking candidates or request outcomes. If Home was not ready during that window, or Favorite data was still empty, later native readiness/data events did not reliably restart the work. Because the early stamp also activated a 20-minute cooldown, an empty or failed attempt could suppress useful work.
 
-## Runtime ownership and measurements
+The final cold-start fixture makes the distinctions explicit: 24 eligible TV candidates, empty browser cache/storage, both YDesign rows using their default-enabled settings, a live `items_line` controller, and one new disposable browser context per trial. The branch began **0/24** TMDb TV metadata requests before usable Home and completed **24/24** after it in all five trials. Merged main began 115/120 before usable Home (19–24 per run) and the remaining five after. Branch source calls are bounded to four by the queue; the browser's native request layer observed at most two simultaneous requests in this fixture.
 
-The actual authorized Chrome tab was inspected through the existing Chrome DevTools session and restored after one Home → Details → Back smoke. The live page remained `https://siaivo.isroot.in/?component=main&source=tmdb&page=1`, 1920×937 CSS pixels, DPR 1, Hybrid `3.0.0-early-shell-phase1`, with the original `The Dog Stars` card focused. In its resource timing, `/app.min.js` ended at 440 ms, while the plugin loader request started at 2572 ms. This confirms that host delivery, rather than Hybrid CSS application alone, controls when the user's installed loader can run. The browser's active loader and preferences were not changed.
+Root causes addressed: the exhausted timer-only readiness window, no rescheduling on later Home/controller/focus/Favorite events, and cooldown state recorded before a successful outcome. The branch now waits for a visible focused Home card and an enabled controller, retries readiness at most eight times per event, then stops until a later native event. Empty candidates do not set a success cooldown. Only fully successful work starts the 20-minute cooldown; failures use exponential backoff starting at 30 seconds and capped at 15 minutes. Successful metadata is cached even if its Home session has gone stale, but that stale completion cannot paint into another activity.
 
-Cold comparisons used six disposable Chromium contexts, three per source version, with the same Chromium 156.0.8078.73 binary, 1920×1080 viewport, DPR 1, empty context storage/cache, real Siaivo host/core and live endpoint timing. Exact repository JS bytes were intercepted locally before host navigation. A controlled Home fixture supplied 24 TV candidates; no credentials or user Storage were copied. The loader started when the native Lampa API was available, matching the real host's API-before-plugin ordering. The main browser was not reloaded for these measurements.
+## Updating Home rows
 
-Values below are milliseconds from navigation start. The outlier values are retained.
+When a successful response changes the computed YDesign rows, a coalesced targeted refresh uses Lampa Home's native `createAndAppend` path. It appends a missing YDesign row or refreshes only that row, preserves the selected card when replacing its contents, and does not call `Activity.replace()` or rebuild unrelated Home/Trakt rows. Controlled regression coverage confirms the existing Home receives the new row without reload, focus remains on the same card, empty candidates can resume on a later Favorite `read`, failures retry after 30 seconds, fresh cache avoids another request, and late results after leaving Home do not mutate the new activity.
 
-| Metric | main runs (1 / 2 / 3) | PR runs (1 / 2 / 3) | Median main → PR |
-|---|---:|---:|---:|
-| DOMContentLoaded | 2763 / 591 / 588 | 955 / 647 / 554 | 591 → 647 |
-| Native Lampa API available | 3246 / 1415 / 1408 | 2123 / 1630 / 1226 | 1415 → 1630 |
-| Loader executed | 3271 / 1443 / 1435 | 2230 / 1668 / 1263 | 1443 → 1668 |
-| Hybrid first active frame | 3340 / 1512 / 1493 | 2433 / 1751 / 1328 | 1512 → 1751 |
-| Native `appready` | 5007 / 3090 / 3097 | 4517 / 3464 / 3072 | 3097 → 3464 |
-| First visible Home card / usable focus | 10522 / 3785 / 3800 | 5588 / 4748 / 3955 | 3800 → 4748 |
-| `appready` → usable Home | 5515 / 694 / 702 | 1071 / 1283 / 883 | 702 → 1071 |
-| First successful D-pad move | 81 / 2046 / 2036 | 212 / 191 / 410 | 2036 → 212 |
-| Details ready after Enter | 897 / 345 / 330 | blocked / 1556 / 1803 | only 2/3 branch runs opened Details |
-| Home/focus restored after Back | 84 / 88 / 76 | n/a / 1210 / 170 | only 2/3 branch runs returned |
+## Interleaved cold-start comparison
 
-Final branch reruns used production commit `7ccf7b6763f718596ab5e1522d2e016ad3fded22`; branch median navigation-to-usable-Home was 4,748 ms versus 3,800 ms on main. Branch `appready`-to-Home median was 1,071 ms versus 702 ms on main. These samples establish no startup improvement; host and endpoint variation prevent attributing the slower branch timings to this code. First Home DOMs had 28 cards in all six runs and similar node/style counts. Browser long-task observations and sanitized resource paths are retained in `browser-results.json`.
+Ten disposable runs were interleaved `main, branch, branch, main` and repeated; each used a new context with empty cache/storage/cookies, Chromium 156, 1920×1080 CSS viewport, DPR 1, the actual Siaivo host/core, and local repository scripts intercepted before host bootstrap. A controlled 24-TV Favorite fixture was used; no saved user Home rows, credentials, preferences, or Trakt data were copied. Full per-run timings, sanitized resource waterfall, navigation events, local source hashes, and failures are in `browser-results.json` and `interleaved-runs/`.
 
-YDesign TV prefetch timing on the final branch rerun was:
+| Metric (navigation start, ms) | Main median (range) | Branch median (range) |
+|---|---:|---:|
+| First usable Home | 4450 (3975–6507) | 4168 (3740–5037) |
+| `appready` → usable Home | 904 (724–1114) | 721 (670–1154) |
+| First successful D-pad movement | 79 (63–568) | 74 (58–168) |
+| Details ready after Enter | 932 (716–1170) | 773 (711–1001) |
+| Back and Home focus restored | 297 (87–792) | 126 (93–602) |
 
-- Main: 24/24 requests began before first usable Home in every run; observed peak concurrency 4 under the native request queue.
-- Branch: no TV metadata requests began before usable Home. 24 were observed after Home in run 1 (peak 3); runs 2 and 3 had none in the 8-second observation window. The unit regression directly calls the bounded queue after focus is ready and verifies it starts four requests and drains all 24 after failures. Live post-Home queue execution was inconsistent in this fixture, so remains a limitation.
+Although the observed branch median for first usable Home is 282 ms lower, the run-to-run ranges overlap substantially and the sample uses synthetic Home favorites. This is not sufficient evidence to claim that the branch makes startup faster or to attribute the difference to the patch. The earlier three-run sample was slower on branch; the new runs show how variable the host/network path is. The concrete verified change is the timing of the optional metadata requests, not a demonstrated launch-time gain.
 
-The initial Home source itself is host-driven. The controlled performance comparison cannot establish physical Google TV CPU, storage, or network performance, and the fixture does not represent the user's saved Home rows.
+All five main trials and all five branch trials completed three Home → Details → Back cycles (15/15 Details opens and 15/15 focus restorations per revision). All ten final runs had no page exceptions. First usable D-pad readiness is measured as the first ArrowRight that changes the focused card.
 
-## Test results
+## Details navigation failure investigation
 
-Focused Home, Hybrid, startup, YDesign, Settings, Trakt and Torrent Cinema regressions: **454/454 PASS** with:
+One intermediate controlled run did not open a synthetic TV Details card. The captured state was native Activity `full`, controller `content`, with a native `app.min.js` exception: `TypeError: countries.join is not a function`. The synthetic TMDb response had omitted the `countries` array required by Lampa's native Details renderer. The harness now supplies `countries`, `origin_country`, and `production_countries` as arrays. After correcting the fixture, the failure did not recur in 30 Details/Back cycles across main and branch. This was a harness data-contract failure, not a confirmed production regression.
 
-```sh
-node --test --test-timeout=15000 \
-  tests/design-home-startup.cjs tests/ydesign.cjs tests/home-history.cjs tests/home-order.cjs \
-  tests/home-progress-display.cjs tests/home-trakt-progress.cjs \
-  tests/hybrid-ui.cjs tests/hybrid-torrent-discovery.cjs \
-  tests/ui-bootstrap.cjs tests/ui-startup-probe.cjs \
-  tests/issue79-visual-owner.cjs tests/loader-critical-parallel.cjs \
-  tests/settings-functional.cjs tests/settings-hub-lifecycle.cjs \
-  tests/trakt-scrobble-session.cjs tests/trakt-episode-transition.cjs \
-  tests/trakt-watched-sync.cjs tests/trakt-account-isolation.cjs \
-  tests/torrent-overlay.cjs tests/torrents-cinema.cjs \
-  tests/torrent-cinema-lifecycle.cjs tests/torrent-cinema-seasons.cjs
-```
+## Main Chrome observation
 
-- `node --check` for all changed JavaScript: PASS. `Lampa.Controller.enabled()` returning `null` is handled safely in YDesign series refresh; this existing controller state is covered in the full `tests/ydesign.cjs` suite.
-- Repository checker (78 JavaScript files, 43 manifest entries, 565 URLs): PASS.
-- `git diff --check`: PASS.
-- Actual main Chrome Home → Details → Back: PASS. Enter opened native Details; Escape returned to Home and restored the focused card. Original URL, viewport, and original card focus were restored afterward.
-- Readiness retry is bounded: if Home has no visible focused card or enabled native controller after at most 20 checks, optional metadata prefetch stops without starting requests; it can resume on a later Home activation.
-- Search/Discover and physical Google TV: NOT TESTED. The changed code is isolated to YDesign Home rows/prefetch; those routes were not changed.
-- User Trakt state, plugin settings, parser preferences, credentials, and browser Storage: not read or changed.
+The authorized Chrome DevTools session was used read-only. Its existing Lampa tab remained at `https://siaivo.isroot.in/?component=main&source=tmdb&page=1`, appready, on the main activity, with `items_line` controller, `The Dog Stars` focused, viewport 1920×937 and DPR 1. No page scripts, storage, settings, tabs, or profile state were changed.
 
-## Changed files and rollback
+## Validation
 
-- `ui/design-optimized.js`: fix cached row computation; defer optional series metadata until Home focus is ready; bound this background queue to four in flight.
-- `tests/helpers/ydesign-fixture.cjs`, `tests/design-home-startup.cjs`: deterministic regression coverage for cached rows, focus gating, queue bounds and failures.
-- `audit/issue-79-phase6/startup-browser-runner.cjs`, `browser-results.json`: reproducible cold-start harness and sanitized evidence.
+- `tests/design-home-startup.cjs` and `tests/ydesign.cjs`: PASS, including asynchronous empty-cache row fill, event rescheduling, bounded readiness, retry/backoff, fresh cache, stale-session protection, and existing YDesign behavior.
+- Broader Home, Hybrid, startup, Settings, Trakt, and Torrent Cinema regression matrix: **488/488 PASS** locally.
+- `tests/design-home-startup.cjs` is included in the required Repository checks workflow; verify its execution in final-SHA GitHub logs before closing this acceptance item.
+- `node scripts/check-repository.mjs`, JavaScript syntax checks, and `git diff --check`: PASS.
+- GitHub Actions: verify all five workflows on the final pushed PR SHA; repository logs must show `tests/design-home-startup.cjs` executed.
+- Physical Google TV: NOT TESTED.
+- User's saved Home rows and personalized production feed: NOT copied into disposable contexts; behavior with that exact stored feed remains unverified.
 
-Rollback is a revert of the Phase 6 commit. No data migration or user-setting rollback is required. The design, loader, generated artifacts, Trakt logic, Torrent Cinema, and Settings Hub were not changed.
+## Rollback
 
-## Remaining Phase 6 work
-
-The measured result does not yet satisfy the requested “noticeably faster first genuinely usable Home” criterion. Next work should isolate host/native Home card readiness from deferred plugin delivery on the same stable network path and identify a bottleneck that changes first usable Home materially without delaying Trakt/personalized rows. No physical Google TV result is claimed.
+Revert the Phase 6 commit. It changes no stored settings and performs no data migration. No parser, Trakt, torrent, or credential configuration changes are included.
