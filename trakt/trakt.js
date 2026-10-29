@@ -10163,6 +10163,47 @@
     scrobbler.scrobbleStop(active.media, progress);
   }
 
+  function finishAmbiguousEpisodeAtProgress(instance, progress) {
+    if (!instance || instance !== currentPlaybackInstance || !instance.ambiguousTimelineHash ||
+        instance.external || isPlaybackInstanceTerminal() ||
+        instance.token !== String(Lampa.Storage.get('trakt_token') || '') ||
+        instance.identityGeneration !== playbackIdentityGeneration) return false;
+    var identity = verifiedShowEpisode(instance.media);
+    var active = scrobbler.getActiveSession && scrobbler.getActiveSession();
+    if (!identity || !active || active.external || active.key !== playbackSessionKey(instance.media) ||
+        playbackSessionKey(active.media) !== active.key) return false;
+    var minimum = parseInt(Lampa.Storage.field('trakt_min_progress') == null ? config.minProgress : Lampa.Storage.field('trakt_min_progress'), 10);
+    if (!isFinite(minimum)) minimum = 90;
+    var confirmedProgress = Number(progress);
+    if (!isFinite(confirmedProgress) || confirmedProgress < minimum) return false;
+    var media = Object.assign({}, active.media, {
+      id: identity.id,
+      method: 'tv',
+      season_number: identity.season,
+      episode_number: identity.episode,
+      hash: instance.hash || null
+    });
+    var key = getCompletionKey(media);
+    if (!key) return false;
+    // The instance becomes terminal before any async work; repeated timeupdate,
+    // ended, destroy, and Back callbacks therefore share one idempotent write.
+    markPlaybackInstanceTerminal();
+    markFinishIntent(key);
+    finish(media).catch(function (e) { slog('ambiguous Timeline episode finish error', e && e.status || 'request_failed'); });
+    scrobbler.scrobbleStop(active.media, confirmedProgress);
+    return true;
+  }
+  function finishAmbiguousEpisodeFromExit() {
+    var instance = currentPlaybackInstance;
+    if (!instance || !instance.ambiguousTimelineHash || instance.external || isPlaybackInstanceTerminal() ||
+        !Lampa.PlayerVideo || typeof Lampa.PlayerVideo.video !== 'function') return false;
+    var video = Lampa.PlayerVideo.video();
+    var duration = Number(video && video.duration), currentTime = Number(video && video.currentTime);
+    if (!video || video.seeking || !isFinite(duration) || duration <= 0 || !isFinite(currentTime) || currentTime < 0 ||
+        instance.lastVideoPosition != null && currentTime <= instance.lastVideoPosition) return false;
+    instance.lastVideoPosition = currentTime;
+    return finishAmbiguousEpisodeAtProgress(instance, Math.max(0, Math.min(100, currentTime / duration * 100)));
+  }
   function isActiveLampaVideoEvent(event) {
     try {
       if (!event || !event.target || !Lampa.PlayerVideo || typeof Lampa.PlayerVideo.video !== 'function') return false;
@@ -10850,6 +10891,7 @@
         var routeFinishIntent = function routeFinishIntent(evt) {
           try {
             var isExternalHandoff = evt && evt.type === 'destroy' && !!pendingExternalPlayback;
+            if (!isExternalHandoff) finishAmbiguousEpisodeFromExit();
             if (!isExternalHandoff) pendingExternalPlayback = null;
             pendingInternalPlayback = null;
             timelineProgressSamples = {};
@@ -11003,9 +11045,16 @@
           if (!instance || !instance.ambiguousTimelineHash || instance.external || isPlaybackInstanceTerminal() ||
               instance.token !== String(Lampa.Storage.get('trakt_token') || '') || !isActiveLampaVideoEvent(event)) return;
           var active = scrobbler.getActiveSession && scrobbler.getActiveSession();
-          var duration = Number(event.target && event.target.duration), currentTime = Number(event.target && event.target.currentTime);
-          if (!active || active.external || active.key !== playbackSessionKey(instance.media) || !isFinite(duration) || duration <= 0 || !isFinite(currentTime) || currentTime < 0) return;
-          scrobbler.updatePlaybackSession(active.media, Math.max(0, Math.min(100, currentTime / duration * 100)));
+          var target = event.target;
+          var duration = Number(target && target.duration), currentTime = Number(target && target.currentTime);
+          if (!active || active.external || active.key !== playbackSessionKey(instance.media) ||
+              playbackSessionKey(active.media) !== active.key || target.paused || target.seeking ||
+              !isFinite(duration) || duration <= 0 || !isFinite(currentTime) || currentTime < 0 ||
+              instance.lastVideoPosition != null && currentTime <= instance.lastVideoPosition) return;
+          instance.lastVideoPosition = currentTime;
+          var videoProgress = Math.max(0, Math.min(100, currentTime / duration * 100));
+          scrobbler.updatePlaybackSession(active.media, videoProgress);
+          finishAmbiguousEpisodeAtProgress(instance, videoProgress);
         } catch (e) { logWarn('Ambiguous Timeline video-position handler failed', e && e.name || 'unknown'); }
       };
       document.addEventListener('timeupdate', _timeUpdateHandler, true);
@@ -11018,6 +11067,7 @@
           var confirmedTarget = typeof event.target.currentTime === 'number' && !event.target.paused;
           if (confirmedTarget && pendingInternalPlayback) {
             var target = event.target;
+            if (currentPlaybackInstance && currentPlaybackInstance.ambiguousTimelineHash) currentPlaybackInstance.lastVideoPosition = Number(target.currentTime);
             var duration = Number(target.duration);
             var progress = isFinite(duration) && duration > 0 ? target.currentTime / duration * 100 : 0;
             var media = Object.assign({}, pendingInternalPlayback.media, { hash: pendingInternalPlayback.hash });
@@ -11030,6 +11080,7 @@
             pendingInternalPlayback = null;
           } else if (playback && !playback.external && playback.key === playbackSessionKey(currentPlaybackInstance.media)) {
             if (confirmedTarget) {
+              if (currentPlaybackInstance.ambiguousTimelineHash) currentPlaybackInstance.lastVideoPosition = Number(event.target.currentTime);
               var currentTarget = event.target;
               var currentDuration = Number(currentTarget.duration);
               if (isFinite(currentDuration) && currentDuration > 0) {

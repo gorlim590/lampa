@@ -449,6 +449,58 @@ test('same-hash delayed E02 Timeline events cannot transfer 20% progress or watc
   assert.equal(f.api.getActiveSession().progress,20,'internal player timeupdate may advance only from the active video element');
 });
 
+test('ambiguous same-hash E03 completes once from advancing active-video progress at threshold', async () => {
+  const f=integrationFixture(), second=episode(2), third=episode(3);
+  f.launch(second,'threshold-pack-hash');
+  f.timeline('threshold-pack-hash',100,10);f.timeline('threshold-pack-hash',200,20);await flush();
+  f.launch(third,'threshold-pack-hash');await flush();
+  f.timeline('threshold-pack-hash',990,99);f.timeline('threshold-pack-hash',1000,100);await flush();
+  assert.equal(f.context.finishCallCount||0,0,'delayed E02 Timeline does not finish E03');
+  Object.assign(f.video(),{currentTime:200,duration:1000,paused:false});f.documentListeners.playing[0]({target:f.video()});await flush();
+  Object.assign(f.video(),{currentTime:950,duration:1000,paused:false});f.documentListeners.timeupdate[0]({target:f.video()});await flush();
+  assert.equal(f.context.finishCallCount,1);
+  assert.equal(String(f.context.finishedMedia[0].id),'1396');assert.equal(f.context.finishedMedia[0].season_number,1);assert.equal(f.context.finishedMedia[0].episode_number,3);
+  assert.equal(f.context.terminalPlaybackInstanceId,f.context.currentPlaybackInstance.id);
+  f.documentListeners.timeupdate[0]({target:f.video()});f.documentListeners.timeupdate[0]({target:f.video()});
+  f.playerEvent('ended',{type:'ended'});f.playerEvent('destroy',{type:'destroy'});await flush();
+  assert.equal(f.context.finishCallCount,1,'repeat updates and exit callbacks do not duplicate completion');
+});
+
+test('ambiguous same-hash completion is captured on Player ended before a final timeupdate', async () => {
+  const f=integrationFixture();f.launch(episode(2),'exit-pack-hash');
+  f.timeline('exit-pack-hash',100,10);f.timeline('exit-pack-hash',200,20);await flush();
+  f.launch(episode(3),'exit-pack-hash');await flush();
+  Object.assign(f.video(),{currentTime:200,duration:1000,paused:false});f.documentListeners.playing[0]({target:f.video()});await flush();
+  // Simulate a final internal-video position sampled by Lampa.Player.ended,
+  // with no preceding timeupdate at this exact threshold.
+  Object.assign(f.video(),{currentTime:950,duration:1000,paused:false});f.playerEvent('ended',{type:'ended'});await flush();
+  assert.equal(f.context.finishCallCount,1);assert.equal(f.context.finishedMedia[0].episode_number,3);
+  f.playerEvent('destroy',{type:'destroy'});await flush();assert.equal(f.context.finishCallCount,1,'destroy after ended cannot duplicate the history write');
+});
+
+test('ambiguous same-hash episode at 89% exits without a history write', async () => {
+  const f=integrationFixture();f.launch(episode(2),'under-threshold-pack');
+  f.timeline('under-threshold-pack',100,10);f.timeline('under-threshold-pack',200,20);await flush();
+  f.launch(episode(3),'under-threshold-pack');await flush();
+  Object.assign(f.video(),{currentTime:200,duration:1000,paused:false});f.documentListeners.playing[0]({target:f.video()});await flush();
+  Object.assign(f.video(),{currentTime:890,duration:1000,paused:false});f.documentListeners.timeupdate[0]({target:f.video()});await flush();
+  assert.equal(f.api.getActiveSession().progress,89);assert.equal(f.context.finishCallCount||0,0);
+  f.playerEvent('ended',{type:'ended'});await flush();assert.equal(f.context.finishCallCount||0,0);
+});
+
+test('ambiguous same-hash timeupdate cannot finish after account or profile identity changes', async () => {
+  for(const changed of ['account','profile']) {
+    const f=integrationFixture();f.launch(episode(2),'identity-pack-'+changed);
+    f.timeline('identity-pack-'+changed,100,10);f.timeline('identity-pack-'+changed,200,20);await flush();
+    f.launch(episode(3),'identity-pack-'+changed);await flush();
+    Object.assign(f.video(),{currentTime:200,duration:1000,paused:false});f.documentListeners.playing[0]({target:f.video()});await flush();
+    if(changed==='account'){f.values.trakt_token='synthetic-new-account';f.storageChange('trakt_token');}
+    else (f.accountListeners.profile_select||[]).slice().forEach(fn=>fn({}));
+    Object.assign(f.video(),{currentTime:950,duration:1000,paused:false});f.documentListeners.timeupdate[0]({target:f.video()});await flush();
+    assert.equal(f.context.finishCallCount||0,0,changed+' switch invalidates pending episode completion');
+  }
+});
+
 test('production destroy and error handlers STOP the confirmed session', async () => {
   for (const endEvent of ['destroy', 'error']) {
     const f = integrationFixture(), media = movie(endEvent === 'destroy' ? 1 : 2);
