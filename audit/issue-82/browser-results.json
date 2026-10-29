@@ -3,7 +3,7 @@
   "baseCommit": "fedfd4f5be4516b2cd34b48cb8c64fc5de772cef",
   "branch": "feat/issue-82-more-catalog",
   "testedSourceSha256": "afc03706065b7d5905c4998acf33d2f7527ba1e69aa1b1d213cff3eba32cc76f",
-  "testedCodeCommit": "e4d8e37f0173253cbcc69196482c51d9b20740af",
+  "testedCodeCommit": "baed6e7bdce6d198cbe2bb171f23c582c3d6d078",
   "githubActionsOnTestedCodeCommit": "PASS: all five workflows; Repository checks log includes trakt-more-view in 218/218 Trakt/YDesign regressions",
   "browser": {
     "connection": "authorized Chrome DevTools MCP autoConnect",
@@ -72,5 +72,6 @@
       "dpr": 1,
       "focus": "Коментарі"
     }
-  }
+  },
+  "githubActionsOnFollowUpCodeCommit": "PASS: all five workflows; Repository checks ran trakt-more-view.cjs in 224/224 Trakt/YDesign regressions"
 }
