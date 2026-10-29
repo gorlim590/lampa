@@ -80,4 +80,3 @@ test('an initial catalog error shows a retry message without fabricating an empt
   assert.equal(self.emptied,true);assert.equal(self.built,undefined);
   assert.match(f.notifications[0].text,/Could not load the catalog/);
 });
-
