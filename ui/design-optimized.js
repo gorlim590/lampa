@@ -1967,7 +1967,7 @@
     // Рахуємо тільки з кешу (без мережі): якщо даних серіалу ще немає — їх підтягне warmRows
     function computeRows() {
         var up = [], cont = [], cands = rowCandidates();
-        for (var i = 0; i < cands.length && jobs.length < 24; i++) {
+        for (var i = 0; i < cands.length; i++) {
             var c = cands[i];
             if (isTvMedia(c)) {
                 var ext = ApiCache.get(extCacheKey(c.id, 'tv'));
@@ -2028,6 +2028,36 @@
     }
 
     // Фонове підтягування даних серіалів зі списків користувача (з кешем 12 год., через чергу запитів)
+    var WarmRowsStore = { timer: null, attempts: 0, force: false };
+    function runWarmRowsWhenHomeUsable() {
+        WarmRowsStore.timer = null;
+        var active = Lampa.Activity && Lampa.Activity.active();
+        var focus = document.querySelector && document.querySelector('.activity--active .card.selector.focus');
+        var controller = Lampa.Controller && Lampa.Controller.enabled && Lampa.Controller.enabled();
+        if (!active || active.component !== 'main') {
+            if (WarmRowsStore.attempts < 20) {
+                WarmRowsStore.attempts++;
+                WarmRowsStore.timer = setTimeout(runWarmRowsWhenHomeUsable, 250);
+            } else WarmRowsStore.attempts = 0;
+            return;
+        }
+        if (!focus || !focus.getClientRects || !focus.getClientRects().length || !controller) {
+            if (WarmRowsStore.attempts < 20) {
+                WarmRowsStore.attempts++;
+                WarmRowsStore.timer = setTimeout(runWarmRowsWhenHomeUsable, 250);
+            } else WarmRowsStore.attempts = 0;
+            return;
+        }
+        WarmRowsStore.attempts = 0;
+        warmRows(WarmRowsStore.force);
+    }
+    function scheduleWarmRows(delay, force) {
+        if (WarmRowsStore.timer) clearTimeout(WarmRowsStore.timer);
+        WarmRowsStore.attempts = 0;
+        WarmRowsStore.force = !!force;
+        WarmRowsStore.timer = setTimeout(runWarmRowsWhenHomeUsable, Math.max(0, Number(delay) || 0));
+    }
+
     function warmRows(force) {
         try {
             var active = Lampa.Activity && Lampa.Activity.active();
@@ -2037,12 +2067,26 @@
             if (RowsStore.busy || (!force && now - RowsStore.last < 20 * 60 * 1000)) return;
             RowsStore.busy = true;
             RowsStore.last = now;
-            var cands = rowCandidates(), jobs = [];
-            for (var i = 0; i < cands.length && jobs.length < 24; i++) {
-                if (isTvMedia(cands[i])) jobs.push(fetchExtendedData(cands[i].id, 'tv'));
+            var cands = rowCandidates(), queue = [];
+            for (var i = 0; i < cands.length && queue.length < 24; i++) {
+                if (isTvMedia(cands[i])) queue.push(cands[i]);
             }
-            var done = function () { RowsStore.busy = false; };
-            Promise.all(jobs).then(done, done);
+            var next = 0, running = 0, settled = 0;
+            function pump() {
+                while (running < 4 && next < queue.length) {
+                    (function (card) {
+                        running++;
+                        Promise.resolve().then(function () { return fetchExtendedData(card.id, 'tv'); }).then(finish, finish);
+                    })(queue[next++]);
+                }
+                if (!queue.length) RowsStore.busy = false;
+            }
+            function finish() {
+                running--; settled++;
+                if (settled >= queue.length) RowsStore.busy = false;
+                else pump();
+            }
+            pump();
         } catch (e) { RowsStore.busy = false; }
     }
 
@@ -4070,10 +4114,11 @@
                 Lampa.Listener.follow('activity', function (e) {
                     if (!e || e.type !== 'start') return;
                     scheduleRefreshMarks();
-                    if (e.component === 'main') warmRows(false);
+                    if (e.component === 'main') scheduleWarmRows(1500, false);
                 });
             }
-            setTimeout(function () { warmRows(true); }, 6000);
+            scheduleWarmRows(1500, false);
+            setTimeout(function () { scheduleWarmRows(0, true); }, 6000);
 
             if (window.appready && Lampa.Activity && Lampa.Activity.active()) {
                 setTimeout(function () {
