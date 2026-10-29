@@ -1506,6 +1506,7 @@
                 if (card._ydesign_updateNotch) card._ydesign_updateNotch();
                 if (card._ydesign_lazyMarks) card._ydesign_lazyMarks();
                 if (card._ydesign_onFocus) card._ydesign_onFocus();
+                if (typeof IntersectionObserver === 'undefined' && RefreshFallbackInstalled) scheduleFallbackMarkRefresh();
             }
         }, true);
     }
