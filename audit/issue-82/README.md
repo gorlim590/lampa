@@ -35,11 +35,11 @@ Trakt's current API guidance says discovery information may be displayed in-app 
 - Empty/error first render shows an explicit Bell retry instruction.
 - `openMore()` preserves the registered row ID and existing `trakt_plus_view` component.
 
-The tests use in-memory fake responses only. No authenticated Trakt request or write is issued.
+The tests use in-memory fake responses only. They do not issue authenticated Trakt requests or writes.
 
 ## Existing Chrome observation (fixture only)
 
-Used the existing main Chrome DevTools tab (`page 3`) at `https://siaivo.isroot.in/?card=125988&media=tv&source=tmdb`; original viewport was 1920×937 at DPR 1. Read-only inspection showed the installed Trakt+ script URL and active native Details controller. For UI isolation, temporary `Lampa.Component.add` entries rendered deterministic synthetic cards directly through the installed native `Category`; no Trakt requests or Storage writes were used. The temporary registrations were cleared by reloading the original URL.
+Used the existing main Chrome DevTools tab (`page 3`) at `https://siaivo.isroot.in/?card=125988&media=tv&source=tmdb`; original viewport was 1920×937 at DPR 1. Read-only inspection showed the installed Trakt+ script URL and active native Details controller. For UI isolation, temporary `Lampa.Component.add` entries rendered deterministic synthetic cards directly through the installed native `Category`; the fixture code itself makes no Trakt or Storage calls. The signed-in app stayed active, so its normal background reads were not counted as fixture requests. No history/rating writes or Storage writes were initiated. Temporary registrations were cleared by reloading the original URL.
 
 | Native Category fixture | Viewport / DPR | Cards in active DOM | Visible cards | Focus / controller |
 |---|---:|---:|---:|---|
@@ -57,18 +57,26 @@ The paired screenshots show the same synthetic catalog at 1920×1080: the 120-ca
 - [1280×720](screenshots/issue82-final-1280x720.png)
 - [3840×2160](screenshots/issue82-final-3840x2160.png)
 
+## Review follow-up — session ownership, retry and end state
+
+- The More activity captures `sessionEpoch`, `ratingProfile()` and the verified account owner (when already known). It checks this owner after `getRow()`, before every later request, after each source chunk, and immediately before building/appending results. A credential or profile change invalidates the view and prevents its pending page from reaching native Category. Deterministic tests cover both an initial pending row and a later page resolving after credential/profile change.
+- Inspected Lampa native [`Category.onLoadNext`](https://github.com/yumata/lampa-source/blob/master/src/interaction/items/category/module/next.js): native code increments `object.page` before `next` and `reject` only clears `next_wait`. On a failed page the viewer restores `object.page` to the last successful page, so a subsequent native scroll-end/Down-at-end can invoke the same page again. No automatic pagination loop starts on failure. A 429 is not retried by a timer; `Retry-After` is honored globally for catalog requests (30 seconds if absent), queued requests are suppressed during the window, and the visible notice tells the user to wait and retry at the end.
+- End notification now occurs as soon as the final actual chunk is delivered (or an exhausted cached page is built). It does not wait for a later `onNext()` callback that native Category will never emit. An empty catalog continues to use native `empty()` state.
+- **Important boundary:** the 24-card UI batches do not reduce the initial `getRow(def)` payload or its existing requests. `getRow()` still loads its configured preview chunks; upstream `feed()` still requests `limit=100` per endpoint. This change has no cold-start or live-provider speedup measurement.
+- Main Chrome used the existing native Category for two controlled navigation checks. A one-card fixture opened real Silo `full` Details; Escape returned to the same fixture card/page. A separate 42-card fixture used ArrowRight + seven ArrowDown presses to reach `Controlled Film 37` at index 36 and native `scroll.position() = -3907.59375`; Enter opened a controlled Details activity and Escape restored the same focus, index, page and scroll position exactly. These validate native activity restoration; they do not load the changed Trakt+ script into the authenticated runtime. The original Silo URL, 1920×937 viewport, DPR 1, and “Коментарі” focus were restored, and temporary component registrations disappeared after reload.
+
 ## CI gate
 
-GitHub Actions on tested code SHA `e4d8e37f0173253cbcc69196482c51d9b20740af`: all five workflows passed (Repository checks, Home order, Home history, Parser provider regressions, Season integrity). The Repository checks log confirms the new `tests/trakt-more-view.cjs` ran as part of the Trakt/YDesign regression command; that step passed 218/218. The repository whitespace gate initially caught one extra blank EOF line in the new test; it was removed before this successful run.
+All five GitHub Actions passed on code SHA `e4d8e37f0173253cbcc69196482c51d9b20740af` (Repository checks, Home order, Home history, Parser provider regressions, Season integrity). On this follow-up the CI suite is rerunning on the final pushed SHA. The Repository checks log confirms `tests/trakt-more-view.cjs` ran in the Trakt/YDesign regression step.
 
 ## Limitations and acceptance status
 
 - **Verified by tests:** first build uses cache; page size is 24; duplicates are suppressed; failures retain the retry cursor; row identity stays bound to the existing native viewer.
 - **Browser verified:** installed native Lampa `Category` accepts the fixture, Arrow navigation works, viewport layouts render, and Escape returns to Details.
-- **Not browser verified:** the changed `trakt/trakt-plus.js` was not injected into the signed-in main tab. Re-executing this plugin would duplicate account-scoped listeners/row registrations and could invoke authenticated reads; no safe route-level script interception is exposed by the authorized DevTools MCP. Production handler coverage is through the exact source in Node VM tests.
+- **Changed-source runtime:** `trakt/trakt-plus.js` was not injected into the signed-in main tab. Re-executing it could duplicate account-scoped listeners/row registrations and invoke authenticated reads; the authorized DevTools MCP exposes no safe route-level script interception. Production handlers are tested from exact source in Node VM tests; browser tests validate the installed native Category/Activity contract.
 - **Native limitation:** installed `Category` accumulates DOM items as pages are appended (120 cards remained after five 24-card pages). This PR reduces initial DOM to one 24-item batch, but does not claim virtualization or a bounded lifetime DOM window. A safe native Category recycling contract has not been established.
-- **Performance timing:** no comparable live-provider before/after latency is claimed. The measurable result is the first build's 24-card/zero-additional-request contract in the production-handler fixture and the browser native Category's 120→24 first-screen DOM comparison. Provider latency, 429 headers/access tiers, and source population remain unmeasured.
-- **Missing measurements:** first-card wall-clock, first actionable D-pad wall-clock, and page request latency were not captured; the browser fixture's push timing is not a production Trakt/provider measurement. Category → selected movie Details → Back exact-card restoration was not exercised; the existing `onInstance` → `openFull(element)` contract is unchanged but still needs a safe branch-runtime test.
+- **Performance timing:** no comparable live-provider before/after latency or cold-start speedup is claimed. The 24-card UI batch does not change `getRow()` request count or per-endpoint payload size. Provider latency and catalog population remain unmeasured.
+- **Missing measurements:** first-card wall-clock, first actionable D-pad wall-clock, and page request latency were not captured; fixture timing is not production Trakt/provider timing. Exact changed-source More → Details → Back is not browser-tested, though the existing native Category/Activity restoration contract was exercised with controlled fixtures as described above.
 - **Sparse catalog, empty state, and 429 behavior:** covered with deterministic fixture responses; not tested against live Trakt.
 - **Physical Google TV:** NOT VERIFIED.
 

@@ -14,7 +14,9 @@
     "dpr": 1,
     "traktApiCallsByFixture": 0,
     "storageWritesByFixture": 0,
-    "temporaryComponentsRemovedByReload": true
+    "temporaryComponentsRemovedByReload": true,
+    "noTraktHistoryOrRatingWrites": true,
+    "originalFocusRestored": "Коментарі"
   },
   "fixture": {
     "type": "synthetic cards through installed native Lampa Category",
@@ -46,7 +48,29 @@
     "live Trakt first-card latency",
     "first actionable D-pad wall-clock latency",
     "live pagination latency",
-    "More item -> real Details -> exact-card Back restoration",
-    "physical Google TV behavior"
-  ]
+    "physical Google TV behavior",
+    "Exact changed Trakt+ source execution in the authenticated browser"
+  ],
+  "followUpSourceSha256": "f732ef05c30df35ee4f9234a9ce319eaf3e97ebcf3c9cd9f101f2858dd686831",
+  "nativeNavigationFollowUp": {
+    "oneCardFixture": {
+      "target": "real Lampa full Details for Silo",
+      "back": "returned to the same More fixture card and page 1",
+      "changedTraktPlusScriptLoaded": false
+    },
+    "42CardControlledFixture": {
+      "input": "ArrowRight, then seven ArrowDown presses",
+      "selected": "Controlled Film 37",
+      "selectedCardIndex": 36,
+      "nativeScrollPositionBefore": -3907.59375,
+      "details": "controlled local Details activity (no Trakt route)",
+      "back": "same selected title, index 36, page 1, and scroll.position() -3907.59375"
+    },
+    "restored": {
+      "url": "https://siaivo.isroot.in/?card=125988&media=tv&source=tmdb",
+      "viewport": "1920x937",
+      "dpr": 1,
+      "focus": "Коментарі"
+    }
+  }
 }
