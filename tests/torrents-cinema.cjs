@@ -27,14 +27,14 @@ test('release metadata keeps audio and subtitles separate and exposes only ident
     SubtitleLanguages: ['ru'], VoiceoverStudio: 'Fixture Dubbing Group',
     ffprobe: [{ codec_type: 'audio', tags: { language: 'eng' } }, { codec_type: 'subtitle', tags: { language: 'uk' } }]
   });
-  assert.equal(release.parsed.audio.label, 'Українська');
+  assert.equal(release.parsed.audio.label, 'English · Українська');
   assert.deepEqual(Array.from(release.parsed.audio.languages), ['English', 'Українська']);
   assert.equal(release.parsed.audio.ua, true);
   assert.equal(release.parsed.subs.label, 'Українська');
   assert.equal(release.parsed.subs.ua, true);
   assert.equal(release.parsed.voiceover, 'Fixture Dubbing Group');
   const nonUkrainian = api.normalizeRelease({ Title: 'Movie 1080p', AudioLanguages: ['en', 'ja'], SubtitleLanguages: ['ru', 'en'] });
-  assert.equal(nonUkrainian.parsed.audio.label, 'English, Японська');
+  assert.equal(nonUkrainian.parsed.audio.label, 'English · Японська');
   assert.equal(nonUkrainian.parsed.subs.label, 'Російська, English');
   const subtitlesOnly = api.normalizeRelease({ Title: 'Movie (2001) 1080p Ukr Subs', SubtitleLanguages: ['uk'] });
   assert.equal(subtitlesOnly.parsed.audio.label, 'Невідомо');
@@ -101,7 +101,7 @@ test('nested provider info and original responses feed studio/audio/subtitle pre
       voiceover_type: 'multi-voice'
     }
   });
-  assert.equal(fromInfo.parsed.audio.label, 'Українська');
+  assert.equal(fromInfo.parsed.audio.label, 'Українська · Японська');
   assert.deepEqual(Array.from(fromInfo.parsed.audio.languages), ['Українська', 'Японська']);
   assert.equal(fromInfo.parsed.subs.label, 'English');
   assert.equal(fromInfo.parsed.voiceover, 'Амоногава');

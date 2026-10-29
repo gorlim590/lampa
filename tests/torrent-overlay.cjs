@@ -54,6 +54,18 @@ test('audio language categories use verified audio metadata only and keep multi-
  assert.deepEqual(Array.from(nativeMixedFields.audio.languages),['English'],'explicit audio language list takes precedence over ambiguous secondary parser/ffprobe language tokens');assert.equal(match(nativeMixedFields.audio,'ua'),false);
  assert.equal(match(api.normalizeRelease({Title:'Movie Ukr 1080p WEB-DL',Tracker:'Toloka.to',AudioLanguages:['fr']}).parsed.audio,'ua'),false,'tracker origin cannot override structured audio');
 });
+test('visible audio labels include every verified track while preserving the Ukrainian flag cue',()=>{
+ const {api}=apiFixture(),cases=[
+  [['uk'],'Українська',true],
+  [['uk','en'],'Українська · English',true],
+  [['uk','fr'],'Українська · Французька',true],
+  [['en','ja'],'English · Японська',false],
+  [['und'],'Невідомо',false]
+ ];
+ for(const [languages,label,ua] of cases){const audio=api.normalizeRelease({Title:'Release 1080p WEB-DL',AudioLanguages:languages}).parsed.audio;assert.equal(audio.label,label,JSON.stringify(languages));assert.equal(audio.ua,ua,JSON.stringify(languages));const visible=(audio.ua?'🇺🇦 ':'🔊 ')+audio.label;assert.equal(visible,(ua?'🇺🇦 ':'🔊 ')+label);}
+ const runtime=fs.readFileSync(__dirname+'/../ui/torrent-cinema/runtime.js','utf8');assert.match(runtime,/d\.parsed\.audio\.ua\?'🇺🇦 ':'🔊 '\)\+d\.parsed\.audio\.label/);
+ const view=fs.readFileSync(__dirname+'/../ui/torrent-cinema/view.js','utf8');assert.ok(view.includes("audioLine.textContent=(audio.ua?'🇺🇦 ':'')+(audio.label||'Невідомо')"));assert.match(view,/section\('tc-audio-section',[\s\S]*?\[audio\.label\|\|'Невідомо'/);
+});
 test('Torrent Cinema offers dedicated UA/RU/EN/Other audio controls, defaults to UA, and removes the quality-row UA toggle',()=>{
  const runtime=fs.readFileSync(__dirname+'/../ui/torrent-cinema/runtime.js','utf8');
  assert.match(runtime,/\['ua','🇺🇦 UA'\],\['ru','RU'\],\['en','EN'\],\['other','Інші'\]/);

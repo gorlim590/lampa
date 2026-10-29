@@ -113,3 +113,11 @@ Used the same main Chrome tab, same movie card (TMDb 1384216), same in-memory `L
 Thus the previously reported second-cycle return-to-Details behavior did not reproduce on either side under the identical fixture. No separate inherited blocker is confirmed by this A/B. This is a browser fixture test, not a real TorrServer or playback test.
 
 Focused local tests now include direct localized-UA flag, mixed-language Other membership, subtitle separation, and TV status updates including zero visible rows. Physical Google TV and actual media playback remain untested.
+
+## Final multilingual audio label refinement — 2026-10-29
+
+The final compact and expanded audio UI now reads from the normalized `audio.label`, which lists every verified track separated by a middle dot. The UA flag and dedicated `🇺🇦 UA` badge remain. Unknown audio displays `Невідомо`; subtitle languages remain separate.
+
+Verified label cases: UK → `Українська`; UK+EN → `Українська · English`; UK+FR → `Українська · Французька`; EN+JA → `English · Японська`; unknown → `Невідомо`.
+
+In the owner's main Chrome tab, the exact rebuilt PR artifact was loaded locally and a controlled Silo S03 fixture was rendered. The compact row displayed `🇺🇦 Українська · English`, retained the `🇺🇦 UA` badge and `.is-ua` styling; expanded Audio details displayed `Українська · English`. The fixture replaced the parser callback only in memory; no configured endpoint, credential, saved setting, playback or TorrServer call was involved. The tab was returned to its original URL afterward.

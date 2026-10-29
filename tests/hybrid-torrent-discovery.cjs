@@ -180,7 +180,7 @@ test('Hybrid popup rows display confirmed anime audio/studio tracks and reject t
   const nestedVoice = f.release('Frieren S01E03 1080p', 'Toloka', { info: { Voices: ['Далі Буде'] } });
   f.context.streamUpdateRows(f.st);
   const chips = amanogawa.row.textContent;
-  assert.match(amanogawa.row.querySelector('.tc-audio-label').textContent, /Українська \/ Японська/);
+  assert.equal(amanogawa.row.querySelector('.tc-audio-label').textContent, '🇺🇦 Українська · Японська');
   assert.match(chips, /Амоногава/);
   assert.match(amanogawa.row.querySelector('.tc-voice').textContent, /Багатоголосе/);
   assert.match(amanogawa.row.querySelector('.tc-subtitles').textContent, /English/);
@@ -496,7 +496,7 @@ test('compact cards lead with the actual release identity, then technical badges
  assert.match(row.querySelector('.tc-priority-row').textContent,/UA/);
  assert.match(row.querySelector('.tc-priority-row').textContent,/Toloka/);
  assert.match(row.querySelector('.tc-secondary-row').textContent,/4K/);assert.match(row.querySelector('.tc-secondary-row').textContent,/WEB-DL/);assert.match(row.querySelector('.tc-secondary-row').textContent,/HDR10/);assert.match(row.querySelector('.tc-secondary-row').textContent,/HEVC/);
- assert.match(row.querySelector('.tc-audio-label').textContent,/Українська \/ English/);assert.match(row.querySelector('.tc-voice').textContent,/Багатоголосе · Контрольна студія/);
+ assert.equal(row.querySelector('.tc-audio-label').textContent,'🇺🇦 Українська · English');assert.match(row.querySelector('.tc-voice').textContent,/Багатоголосе · Контрольна студія/);
  assert.equal(row.querySelector('.tc-raw-title').textContent,raw,'expanded detail preserves the original torrent title');
 });
 
