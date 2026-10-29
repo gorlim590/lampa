@@ -133,6 +133,7 @@ function integrationFixture() {
       addEventListener: on(documentListeners), removeEventListener: remove(documentListeners)
     },
     config: { minProgress: 90 }, cloudInjectInProgress: false,
+    getContentType$1: media => media && (media.method === 'tv' || media.method === 'show' || media.original_name || media.first_air_date) ? 'show' : 'movie',
     isInitialized: false,
     isInitialized$1: false,
     pendingExternalPlayback: null, pendingInternalPlayback: null, timelineProgressSamples: {},
@@ -293,6 +294,59 @@ test('production Timeline switching sends S01E02 STOP before S01E03 START', asyn
   assert.deepEqual(f.calls.map(call => [call.action, call.media.episode_number]), [['start', 2], ['stop', 2], ['start', 3]]);
 });
 
+test('direct player switch at confirmed 95% records only the previous episode and stops it before E03 starts', async () => {
+  const f = integrationFixture(), second = episode(2), third = episode(3);
+  f.launch(second, 'switch-e2');
+  Object.assign(f.video(), { currentTime: 950, duration: 1000, paused: false });
+  f.documentListeners.playing[0]({ target: f.video() }); await flush();
+  assert.deepEqual(f.calls.map(call => call.action), ['start']);
+  assert.equal(f.api.getActiveSession().progress, 95);
+  assert.equal(f.context.currentPlaybackInstance.hash, 'switch-e2');
+  assert.equal(f.context.playbackSessionKey(second), 'show:1396:1:2');
+  assert.equal(f.context.playbackSessionKey(third), 'show:1396:1:3');
+  assert.match(f.context.onPlayerStart.toString(), /stopPreviousEpisodeOnPlayerStart/);
+  f.launch(third, 'switch-e3');
+  await flush();
+  assert.equal(f.context.finishCallCount, 1);
+  assert.equal(f.context.finishedMedia[0].episode_number, 2);
+  assert.deepEqual(f.calls.map(call => [call.action, call.media.episode_number]), [['start', 2], ['stop', 2]]);
+  f.timeline('switch-e3', 0, 0); f.timeline('switch-e3', 1, 0.1); await flush();
+  assert.deepEqual(f.calls.map(call => [call.action, call.media.episode_number]), [['start', 2], ['stop', 2], ['start', 3]]);
+  assert.ok(!f.context.finishedMedia.some(media => media.episode_number === 3), 'starting E03 never marks E03 watched');
+});
+
+test('direct player switch at 20% stops E02 without a watched-history write', async () => {
+  const f = integrationFixture(), second = episode(2), third = episode(3);
+  f.launch(second, 'low-e2');
+  f.timeline('low-e2', 100, 10); f.timeline('low-e2', 200, 20); await flush();
+  f.launch(third, 'low-e3'); await flush();
+  assert.equal(f.context.finishCallCount || 0, 0);
+  assert.deepEqual(f.calls.map(call => [call.action, call.media.episode_number]), [['start', 2], ['stop', 2]]);
+  f.timeline('low-e3', 0, 0); f.timeline('low-e3', 1, 0.1); await flush();
+  assert.deepEqual(f.calls.map(call => [call.action, call.media.episode_number]), [['start', 2], ['stop', 2], ['start', 3]]);
+  assert.equal(f.context.finishCallCount || 0, 0);
+});
+
+test('same torrent hash with different selected episode files keeps independent episode sessions', async () => {
+  const f = integrationFixture(), second = Object.assign(episode(2), { infohash: 'same-pack-hash' }), third = Object.assign(episode(3), { infohash: 'same-pack-hash' });
+  f.launch(second, 'pack-file-e2'); f.timeline('pack-file-e2', 1, 1); f.timeline('pack-file-e2', 2, 2); await flush();
+  f.launch(third, 'pack-file-e3'); f.timeline('pack-file-e3', 0, 0); f.timeline('pack-file-e3', 1, 0.1); await flush();
+  assert.deepEqual(f.calls.map(call => [call.action, call.media.episode_number]), [['start', 2], ['stop', 2], ['start', 3]]);
+  assert.equal(f.api.getActiveSession().key, 'show:1396:1:3');
+});
+
+test('rapid next/previous episode starts and duplicate/out-of-order Timeline callbacks stay isolated', async () => {
+  const f = integrationFixture(), second = episode(2), third = episode(3);
+  f.launch(second, 'rapid-e2'); f.timeline('rapid-e2', 10, 1); f.timeline('rapid-e2', 11, 1.1); await flush();
+  f.launch(third, 'rapid-e3'); f.timeline('rapid-e3', 0, 0); f.timeline('rapid-e3', 1, 0.1); await flush();
+  f.launch(second, 'rapid-e2-replay'); f.timeline('rapid-e2-replay', 0, 0); f.timeline('rapid-e2-replay', 1, 0.1); await flush();
+  const before = f.calls.length;
+  f.timeline('rapid-e3', 990, 99); f.timeline('rapid-e2-replay', 1, 0.1); await flush();
+  assert.equal(f.calls.length, before, 'stale or repeated samples cannot add starts/history');
+  assert.equal(f.api.getActiveSession().key, 'show:1396:1:2');
+  assert.equal(f.context.finishCallCount || 0, 0);
+});
+
 test('stale S01E02 completion after switching to S01E03 cannot mutate or complete the current episode', async () => {
   const f = integrationFixture(), second = episode(2), third = episode(3);
   f.launch(second, 'delayed-e2'); f.timeline('delayed-e2', 10, 1); f.timeline('delayed-e2', 11, 1.1); await flush();
@@ -346,6 +400,105 @@ test('verified current episode completes once at threshold with its exact identi
   assert.equal(f.context.finishedMedia[0].season_number, 0);
   assert.equal(f.context.finishedMedia[0].episode_number, 7);
   assert.deepEqual(f.calls.map(call => call.action), ['start', 'stop']);
+});
+
+test('production session key refuses malformed TV episode identity before scrobble or history association', () => {
+  const f=integrationFixture(), base={id:1396,method:'tv',name:'Synthetic Series',original_name:'Synthetic Series'};
+  for(const [season,episodeNumber] of [[-1,2],[1.5,2],[1,0],[1,'2.25'],[undefined,2]]) {
+    assert.equal(f.context.playbackSessionKey({...base,season_number:season,episode_number:episodeNumber}),'');
+  }
+});
+
+test('same Timeline hash may represent a different verified file episode in a season pack', async () => {
+  const f=integrationFixture(), second=episode(2), third=episode(3);
+  f.launch(second,'same-timeline-hash'); Object.assign(f.video(),{currentTime:950,duration:1000,paused:false}); f.documentListeners.playing[0]({target:f.video()}); await flush();
+  f.launch(third,'same-timeline-hash'); await flush();
+  assert.equal(f.context.finishCallCount,1,'exact S/E metadata distinguishes selected files despite unchanged torrent hash');
+  assert.equal(f.context.finishedMedia[0].episode_number,2);
+  assert.deepEqual(f.calls.map(call=>[call.action,call.media.episode_number]),[['start',2],['stop',2]]);
+});
+
+test('unchanged Timeline hash without distinct episode metadata cannot infer a season-pack transition', async () => {
+  const f=integrationFixture(), second=episode(2), ambiguous={id:1396,method:'tv',name:'Synthetic Series',original_name:'Synthetic Series'};
+  f.launch(second,'same-hash'); Object.assign(f.video(),{currentTime:200,duration:1000,paused:false}); f.documentListeners.playing[0]({target:f.video()}); await flush();
+  f.launch(ambiguous,'same-hash'); await flush();
+  assert.equal(f.context.finishCallCount||0,0);
+  assert.deepEqual(f.calls.map(call=>call.action),['start','stop'],'the old session closes, but no episode history is inferred');
+});
+
+test('same-hash delayed E02 Timeline events cannot transfer 20% progress or watched completion to E03', async () => {
+  const f=integrationFixture(), second=episode(2), third=episode(3);
+  f.launch(second,'shared-season-pack-hash');
+  f.timeline('shared-season-pack-hash',100,10); f.timeline('shared-season-pack-hash',200,20); await flush();
+  assert.equal(f.api.getActiveSession().key,'show:1396:1:2');assert.equal(f.api.getActiveSession().progress,20);
+  f.launch(third,'shared-season-pack-hash'); await flush();
+  assert.equal(f.context.finishCallCount||0,0,'20% E02 does not finish');
+  assert.equal(f.context.currentPlaybackInstance.ambiguousTimelineHash,true);
+  // Old events are indistinguishable by hash alone, so the production handler
+  // must ignore them rather than assigning their positions to the new episode.
+  f.timeline('shared-season-pack-hash',990,99);f.timeline('shared-season-pack-hash',1000,100);await flush();
+  assert.notEqual(f.api.getActiveSession()?.key,'show:1396:1:3','stale timeline cannot confirm/start E03');
+  Object.assign(f.video(),{currentTime:100,duration:1000,paused:false});f.documentListeners.playing[0]({target:f.video()});await flush();
+  assert.equal(f.api.getActiveSession().key,'show:1396:1:3');assert.equal(f.api.getActiveSession().progress,10,'E03 starts from actual active-video position');
+  const previousWindowEvent=f.context.window.last_timeline_event;
+  f.timeline('shared-season-pack-hash',990,99);f.timeline('shared-season-pack-hash',1000,100);await flush();
+  assert.equal(f.api.getActiveSession().progress,10,'delayed E02 events cannot overwrite video-confirmed E03 progress');
+  assert.equal(f.context.finishCallCount||0,0,'stale 99–100% never marks E03 watched');
+  assert.equal(f.context.window.last_timeline_event,previousWindowEvent,'ambiguous callbacks do not publish as current Timeline evidence');
+  Object.assign(f.video(),{currentTime:200,duration:1000,paused:false});f.documentListeners.timeupdate[0]({target:f.video()});
+  assert.equal(f.api.getActiveSession().progress,20,'internal player timeupdate may advance only from the active video element');
+});
+
+test('ambiguous same-hash E03 completes once from advancing active-video progress at threshold', async () => {
+  const f=integrationFixture(), second=episode(2), third=episode(3);
+  f.launch(second,'threshold-pack-hash');
+  f.timeline('threshold-pack-hash',100,10);f.timeline('threshold-pack-hash',200,20);await flush();
+  f.launch(third,'threshold-pack-hash');await flush();
+  f.timeline('threshold-pack-hash',990,99);f.timeline('threshold-pack-hash',1000,100);await flush();
+  assert.equal(f.context.finishCallCount||0,0,'delayed E02 Timeline does not finish E03');
+  Object.assign(f.video(),{currentTime:200,duration:1000,paused:false});f.documentListeners.playing[0]({target:f.video()});await flush();
+  Object.assign(f.video(),{currentTime:950,duration:1000,paused:false});f.documentListeners.timeupdate[0]({target:f.video()});await flush();
+  assert.equal(f.context.finishCallCount,1);
+  assert.equal(String(f.context.finishedMedia[0].id),'1396');assert.equal(f.context.finishedMedia[0].season_number,1);assert.equal(f.context.finishedMedia[0].episode_number,3);
+  assert.equal(f.context.terminalPlaybackInstanceId,f.context.currentPlaybackInstance.id);
+  f.documentListeners.timeupdate[0]({target:f.video()});f.documentListeners.timeupdate[0]({target:f.video()});
+  f.playerEvent('ended',{type:'ended'});f.playerEvent('destroy',{type:'destroy'});await flush();
+  assert.equal(f.context.finishCallCount,1,'repeat updates and exit callbacks do not duplicate completion');
+});
+
+test('ambiguous same-hash completion is captured on Player ended before a final timeupdate', async () => {
+  const f=integrationFixture();f.launch(episode(2),'exit-pack-hash');
+  f.timeline('exit-pack-hash',100,10);f.timeline('exit-pack-hash',200,20);await flush();
+  f.launch(episode(3),'exit-pack-hash');await flush();
+  Object.assign(f.video(),{currentTime:200,duration:1000,paused:false});f.documentListeners.playing[0]({target:f.video()});await flush();
+  // Simulate a final internal-video position sampled by Lampa.Player.ended,
+  // with no preceding timeupdate at this exact threshold.
+  Object.assign(f.video(),{currentTime:950,duration:1000,paused:false});f.playerEvent('ended',{type:'ended'});await flush();
+  assert.equal(f.context.finishCallCount,1);assert.equal(f.context.finishedMedia[0].episode_number,3);
+  f.playerEvent('destroy',{type:'destroy'});await flush();assert.equal(f.context.finishCallCount,1,'destroy after ended cannot duplicate the history write');
+});
+
+test('ambiguous same-hash episode at 89% exits without a history write', async () => {
+  const f=integrationFixture();f.launch(episode(2),'under-threshold-pack');
+  f.timeline('under-threshold-pack',100,10);f.timeline('under-threshold-pack',200,20);await flush();
+  f.launch(episode(3),'under-threshold-pack');await flush();
+  Object.assign(f.video(),{currentTime:200,duration:1000,paused:false});f.documentListeners.playing[0]({target:f.video()});await flush();
+  Object.assign(f.video(),{currentTime:890,duration:1000,paused:false});f.documentListeners.timeupdate[0]({target:f.video()});await flush();
+  assert.equal(f.api.getActiveSession().progress,89);assert.equal(f.context.finishCallCount||0,0);
+  f.playerEvent('ended',{type:'ended'});await flush();assert.equal(f.context.finishCallCount||0,0);
+});
+
+test('ambiguous same-hash timeupdate cannot finish after account or profile identity changes', async () => {
+  for(const changed of ['account','profile']) {
+    const f=integrationFixture();f.launch(episode(2),'identity-pack-'+changed);
+    f.timeline('identity-pack-'+changed,100,10);f.timeline('identity-pack-'+changed,200,20);await flush();
+    f.launch(episode(3),'identity-pack-'+changed);await flush();
+    Object.assign(f.video(),{currentTime:200,duration:1000,paused:false});f.documentListeners.playing[0]({target:f.video()});await flush();
+    if(changed==='account'){f.values.trakt_token='synthetic-new-account';f.storageChange('trakt_token');}
+    else (f.accountListeners.profile_select||[]).slice().forEach(fn=>fn({}));
+    Object.assign(f.video(),{currentTime:950,duration:1000,paused:false});f.documentListeners.timeupdate[0]({target:f.video()});await flush();
+    assert.equal(f.context.finishCallCount||0,0,changed+' switch invalidates pending episode completion');
+  }
 });
 
 test('production destroy and error handlers STOP the confirmed session', async () => {

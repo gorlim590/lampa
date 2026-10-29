@@ -8980,14 +8980,34 @@
   var activePlaybackSession = null;
   var playbackActionChain = Promise.resolve();
   var playbackActionEpoch = 0;
+  function exactInteger(value, min) {
+    if (typeof value === 'number') return isFinite(value) && Math.floor(value) === value && value >= min;
+    if (typeof value !== 'string' || !/^\d+$/.test(value.trim())) return false;
+    var parsed = Number(value);
+    return isFinite(parsed) && Math.floor(parsed) === parsed && parsed >= min;
+  }
+  function verifiedShowEpisode(media) {
+    if (!media || getContentType$2(media) !== 'show') return null;
+    var id = media.ids && media.ids.tmdb != null ? media.ids.tmdb : media.id;
+    if (!exactInteger(id, 1)) return null;
+    var explicitShow = media.method === 'tv' || media.method === 'show' || media.card_type === 'tv' || media.card_type === 'show' || media.media_type === 'tv' || media.media_type === 'show';
+    var metadataShow = !!((media.name || media.original_name) && media.first_air_date) || exactInteger(media.number_of_seasons, 1);
+    if (!explicitShow && !metadataShow) return null;
+    var season = media.season_number != null ? media.season_number : media.season != null ? media.season : media.seasonNumber;
+    var episode = media.episode_number != null ? media.episode_number : media.episode != null ? media.episode : media.episodeNumber;
+    if (!exactInteger(season, 0) || !exactInteger(episode, 1)) return null;
+    return { id: String(id), season: Number(season), episode: Number(episode) };
+  }
+  function completionScopeKey(key, token) {
+    return String(token || '') + '\u0000' + String(key || '');
+  }
   function playbackSessionKey(media) {
     if (!media || !media.id) return '';
     var type = getContentType$2(media);
     if (type === 'show') {
-      var season = media.season_number != null ? media.season_number : media.season;
-      var episode = media.episode_number != null ? media.episode_number : media.episode;
-      if (season == null || season === '' || episode == null || episode === '') return '';
-      return ['show', media.id, season, episode].join(':');
+      var identity = verifiedShowEpisode(media);
+      if (!identity) return '';
+      return ['show', identity.id, identity.season, identity.episode].join(':');
     }
     return ['movie', media.id].join(':');
   }
@@ -9179,7 +9199,7 @@
    * Record shape: { ts:number, token:string, status:'intent'|'finishing'|'finished' }
    */
 
-  var completionCache = new Map(); // key -> { ts, token, status }
+  var completionCache = new Map(); // account-scoped key -> { ts, token, status, sourceKey }
   var lockQueues = new Map(); // key -> array of resolvers for queued locks
   var requestInProgress = {}; // Об'єкт для відстеження запитів, що виконуються
   var hashMetaCache = new Map(); // hash -> { ts, card, season, episode, ids }
@@ -9389,15 +9409,12 @@
         if (media.id) return "movie:tmdb:".concat(media.id);
         if (media.hash) return "movie:hash:".concat(media.hash);
       } else {
-        // Prefer show trakt id + season/episode if present on card
+        // Torrent hashes identify transports, not episodes. Require exact metadata.
+        var exactEpisode = verifiedShowEpisode(media);
+        if (!exactEpisode) return '';
         var showTrakt = ids && ids.trakt || media.show && media.show.ids && media.show.ids.trakt;
-        var s = media.season_number != null ? media.season_number : media.season != null ? media.season : media.seasonNumber;
-        var e = media.episode_number != null ? media.episode_number : media.episode != null ? media.episode : media.episodeNumber;
-        var hasEpisodeIdentity = s != null && s !== '' && e != null && e !== '';
-        if (showTrakt && hasEpisodeIdentity) return "episode:trakt:".concat(showTrakt, ":S").concat(s, ":E").concat(e);
-        // fallback tmdb
-        if (media.id && hasEpisodeIdentity) return "episode:tmdb:".concat(media.id, ":S").concat(s, ":E").concat(e);
-        if (media.hash) return "episode:hash:".concat(media.hash);
+        if (showTrakt) return "episode:trakt:".concat(showTrakt, ":S").concat(exactEpisode.season, ":E").concat(exactEpisode.episode);
+        return "episode:tmdb:".concat(exactEpisode.id, ":S").concat(exactEpisode.season, ":E").concat(exactEpisode.episode);
       }
     } catch (e) {}
     // ultimate fallback: hashed title
@@ -9419,11 +9436,11 @@
           k = _ref6[0],
           v = _ref6[1];
         if (v && now - v.ts <= ttl) {
-          completionCache.set(k, v);
+          completionCache.set(completionScopeKey(k, v.token), Object.assign({ sourceKey: k }, v));
         }
       });
     }
-    slog('completionCache restored', Object.fromEntries(completionCache));
+    slog('completionCache restored', completionCache.size);
   }
   function persistSessionCache() {
     var ttl = getTTL();
@@ -9443,9 +9460,13 @@
     } finally {
       _iterator2.f();
     }
+    var safeEntries = Array.from(completionCache.entries()).map(function (entry) {
+      var rec = entry[1] || {};
+      return [rec.sourceKey || entry[0], { ts: rec.ts, token: rec.token, status: rec.status }];
+    });
     var payload = {
       ts: now,
-      entries: Array.from(completionCache.entries())
+      entries: safeEntries
     };
     Lampa.Storage.set('trakt_completion_cache', payload);
   }
@@ -9454,16 +9475,23 @@
    * Check if finish is allowed once within TTL for a key
    * Returns { allow:boolean, reason:string }
    */
-  function canFinishOnce(key) {
+  function canFinishOnce(key, token) {
     var ttl = getTTL();
-    var rec = completionCache.get(key);
+    var scopedKey = completionScopeKey(key, token);
+    var rec = completionCache.get(scopedKey);
     var now = nowSec();
     if (!rec) return {
       allow: true,
       reason: 'no_record'
     };
+    // Completion records are account scoped. A previous Trakt account must
+    // never suppress the same episode's history write for the current account.
+    if (rec.token !== token) return {
+      allow: true,
+      reason: 'account_changed'
+    };
     if (now - rec.ts > ttl) {
-      completionCache["delete"](key);
+      completionCache["delete"](scopedKey);
       return {
         allow: true,
         reason: 'expired'
@@ -9490,11 +9518,12 @@
     var rec = {
       ts: nowSec(),
       token: token,
+      sourceKey: key,
       status: status
     };
-    completionCache.set(key, rec);
+    completionCache.set(completionScopeKey(key, token), rec);
     persistSessionCache();
-    slog('markFinished', key, rec);
+    slog('markFinished', key, status);
   }
 
   /**
@@ -9557,12 +9586,12 @@
         while (1) switch (_context3.n) {
           case 0:
             key = _ref7.key, token = _ref7.token, doFinish = _ref7.doFinish, _ref7$logPrefix = _ref7.logPrefix, logPrefix = _ref7$logPrefix === void 0 ? 'finish' : _ref7$logPrefix;
-            return _context3.a(2, withPerKeyLock(key, /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
+            return _context3.a(2, withPerKeyLock(completionScopeKey(key, token), /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
               var check, delays, lastErr, attempt, res, status, _t;
               return _regenerator().w(function (_context2) {
                 while (1) switch (_context2.p = _context2.n) {
                   case 0:
-                    check = canFinishOnce(key);
+                    check = canFinishOnce(key, token);
                     slog(logPrefix, 'canFinishOnce', key, check);
                     if (check.allow) {
                       _context2.n = 1;
@@ -9665,12 +9694,13 @@
     var token = Lampa.Storage.get('trakt_token');
     var ttl = getTTL();
     var now = nowSec();
-    var rec = completionCache.get(key);
+    var scopedKey = completionScopeKey(key, token);
+    var rec = completionCache.get(scopedKey);
     var isFresh = rec && now - rec.ts <= ttl;
 
     // Do not downgrade terminal states to intent inside TTL window.
     if (isFresh && (rec.status === 'finished' || rec.status === 'finishing')) {
-      slog('markFinishIntent skipped (terminal state preserved)', key, rec);
+      slog('markFinishIntent skipped (terminal state preserved)', key, rec.status);
       return {
         skipped: true,
         reason: rec.status
@@ -9679,27 +9709,28 @@
     var next = {
       ts: now,
       token: token,
+      sourceKey: key,
       status: 'intent'
     };
-    completionCache.set(key, next);
+    completionCache.set(scopedKey, next);
     persistSessionCache();
 
     // debounce persist bursts
     var wait = getDebounceMs();
-    if (intentTimers.has(key)) clearTimeout(intentTimers.get(key));
+    if (intentTimers.has(scopedKey)) clearTimeout(intentTimers.get(scopedKey));
     var t = setTimeout(function () {
-      var cur = completionCache.get(key);
+      var cur = completionCache.get(scopedKey);
       // keep latest ts fresh only for intent state
       if (cur && cur.status === 'intent') {
-        completionCache.set(key, _objectSpread2(_objectSpread2({}, cur), {}, {
+        completionCache.set(scopedKey, _objectSpread2(_objectSpread2({}, cur), {}, {
           ts: nowSec()
         }));
         persistSessionCache();
         slog('markFinishIntent debounced persisted', key);
       }
     }, wait);
-    intentTimers.set(key, t);
-    slog('markFinishIntent', key, next);
+    intentTimers.set(scopedKey, t);
+    slog('markFinishIntent', key, 'intent');
     return {
       ok: true
     };
@@ -9712,7 +9743,59 @@
    * This function is the only entry point that sends final Trakt request.
    */
   function finish(_x4) {
-    return _finish.apply(this, arguments);
+    var media = arguments[0];
+    var expectedToken = String(Lampa.Storage.get('trakt_token') || '');
+    var expectedGeneration = playbackIdentityGeneration;
+    return _finish.call(this, media, expectedToken, expectedGeneration).then(function (result) {
+      if (result && result.ok && expectedToken === String(Lampa.Storage.get('trakt_token') || '') && expectedGeneration === playbackIdentityGeneration) refreshConfirmedShowProgress(media, expectedToken, expectedGeneration);
+      return result;
+    });
+  }
+  var confirmedShowRefreshes = new Map();
+  function refreshConfirmedShowProgress(media, ownerToken, ownerGeneration) {
+    if (!media || getContentType$1(media) !== 'show' || !window.TraktPlus || typeof window.TraktPlus.detailsProgress !== 'function') return;
+    var identity = verifiedShowEpisode(media);
+    var id = identity && identity.id || media.ids && media.ids.tmdb || media.id;
+    if (!id) return;
+    var token = ownerToken == null ? String(Lampa.Storage.get('trakt_token') || '') : String(ownerToken);
+    var generation = ownerGeneration == null ? playbackIdentityGeneration : ownerGeneration;
+    var key = token + '\u0000' + generation + '\u0000' + String(id);
+    var state = confirmedShowRefreshes.get(key);
+    if (!state) {
+      state = { version: 0, media: media, running: false, lastSuccess: 0, retryTimer: null, retryDelay: 1000 };
+      confirmedShowRefreshes.set(key, state);
+    }
+    state.version++;
+    state.media = media;
+    if (state.retryTimer) { clearTimeout(state.retryTimer); state.retryTimer = null; }
+    function run(forceLatest) {
+      if (state.running || String(Lampa.Storage.get('trakt_token') || '') !== token || generation !== playbackIdentityGeneration) return;
+      var wait = Date.now() - state.lastSuccess;
+      if (!forceLatest && state.lastSuccess && wait < 30000) {
+        if (!state.retryTimer) state.retryTimer = setTimeout(function () { state.retryTimer = null; run(false); }, 30000 - wait);
+        return;
+      }
+      var requestedVersion = state.version;
+      var requestedMedia = state.media;
+      state.running = true;
+      Promise.resolve().then(function () { return window.TraktPlus.detailsProgress(requestedMedia, true); }).then(function (result) {
+        if (String(Lampa.Storage.get('trakt_token') || '') !== token || generation !== playbackIdentityGeneration) return;
+        if (result && result.confirmed) {
+          state.lastSuccess = Date.now();
+          state.retryDelay = 1000;
+        } else {
+          throw new Error('Trakt+ progress refresh was not confirmed');
+        }
+      }).catch(function () {
+        if (String(Lampa.Storage.get('trakt_token') || '') !== token || generation !== playbackIdentityGeneration) return;
+        if (!state.retryTimer) state.retryTimer = setTimeout(function () { state.retryTimer = null; run(false); }, state.retryDelay);
+        state.retryDelay = Math.min(state.retryDelay * 2, 30000);
+      }).then(function () {
+        state.running = false;
+        if (state.version !== requestedVersion) run(true);
+      });
+    }
+    run(false);
   }
   /**
    * Визначає тип вмісту (фільм чи серіал) на основі даних картки
@@ -9720,13 +9803,13 @@
    * @returns {string} 'movie' або 'show'
    */
   function _finish() {
-    _finish = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(media) {
-      var token, key, doFinish, result;
+    _finish = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(media, expectedToken, expectedGeneration) {
+      var token, key, scopedKey, doFinish, result;
       return _regenerator().w(function (_context5) {
         while (1) switch (_context5.p = _context5.n) {
           case 0:
-            token = Lampa.Storage.get('trakt_token');
-            if (token) {
+            token = String(Lampa.Storage.get('trakt_token') || '');
+            if (token && token === expectedToken && expectedGeneration === playbackIdentityGeneration) {
               _context5.n = 1;
               break;
             }
@@ -9735,8 +9818,10 @@
               reason: 'no_token'
             });
           case 1:
-            key = getCompletionKey(media); // START -- RACE CONDITION FIX
-            if (!requestInProgress[key]) {
+            key = getCompletionKey(media);
+            if (!key) return _context5.a(2, { skipped: true, reason: 'ambiguous_episode' });
+            scopedKey = completionScopeKey(key, token);
+            if (!requestInProgress[scopedKey]) {
               _context5.n = 2;
               break;
             }
@@ -9746,8 +9831,7 @@
               reason: 'in_progress'
             });
           case 2:
-            requestInProgress[key] = true;
-            // END -- RACE CONDITION FIX
+            requestInProgress[scopedKey] = true;
             _context5.p = 3;
             doFinish = /*#__PURE__*/function () {
               var _ref9 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4() {
@@ -9777,7 +9861,7 @@
                     case 2:
                       traktId = search[0].movie.ids.trakt;
                       _context4.n = 3;
-                      return api$1.addToHistory({
+                      return addHistoryForOwner(token, expectedGeneration, {
                         method: 'movie',
                         id: tmdbId,
                         ids: _objectSpread2(_objectSpread2({}, media.ids || {}), {}, {
@@ -9941,7 +10025,7 @@
                       throw _e3;
                     case 31:
                       _context4.n = 32;
-                      return api$1.addToHistory({
+                      return addHistoryForOwner(token, expectedGeneration, {
                         method: 'show',
                         id: _tmdbId,
                         ids: _objectSpread2(_objectSpread2({}, media.ids || {}), {}, {
@@ -9981,7 +10065,7 @@
             return _context5.a(2, result);
           case 5:
             _context5.p = 5;
-            delete requestInProgress[key]; // Завжди знімаємо блокування
+            delete requestInProgress[scopedKey]; // always release this account's lock
             return _context5.f(5);
           case 6:
             return _context5.a(2);
@@ -9989,6 +10073,10 @@
       }, _callee5, null, [[3,, 5, 6]]);
     }));
     return _finish.apply(this, arguments);
+  }
+  function addHistoryForOwner(expectedToken, expectedGeneration, body) {
+    if (String(Lampa.Storage.get('trakt_token') || '') !== expectedToken || expectedGeneration !== playbackIdentityGeneration) return Promise.reject(Object.assign(new Error('Account or playback identity changed'), { status: 499 }));
+    return api$1.addToHistory(body);
   }
   function getContentType$1(card) {
     if (!card) return 'movie';
@@ -10020,7 +10108,8 @@
       hash: hash || null,
       token: String(Lampa.Storage.get('trakt_token') || ''),
       identityGeneration: playbackIdentityGeneration,
-      external: !!external
+      external: !!external,
+      ambiguousTimelineHash: false
     };
     terminalPlaybackInstanceId = null;
     timelineProgressSamples = Object.create(null);
@@ -10036,6 +10125,85 @@
     terminalPlaybackInstanceId = currentPlaybackInstance.id;
   }
 
+  function stopPreviousEpisodeOnPlayerStart(nextMedia, nextHash) {
+    var previous = currentPlaybackInstance;
+    if (!previous || !previous.media ||
+        previous.token !== String(Lampa.Storage.get('trakt_token') || '') ||
+        previous.identityGeneration !== playbackIdentityGeneration || isPlaybackInstanceTerminal()) return;
+    var previousKey = playbackSessionKey(previous.media);
+    var nextKey = playbackSessionKey(nextMedia);
+    if (!previousKey || nextKey && previousKey === nextKey) return;
+    var active = scrobbler.getActiveSession && scrobbler.getActiveSession();
+    if (!active || active.key !== previousKey || playbackSessionKey(active.media) !== previousKey) return;
+
+    var previousIdentity = verifiedShowEpisode(previous.media);
+    var nextIdentity = verifiedShowEpisode(nextMedia);
+    var progress = Number(active.progress);
+    if (!isFinite(progress) || progress < 0) progress = 0;
+    var minimum = Lampa.Storage.field('trakt_min_progress');
+    minimum = parseInt(minimum == null ? config.minProgress : minimum, 10);
+    if (!isFinite(minimum)) minimum = 90;
+
+    // A history finalization requires a concrete transition between two exact
+    // episodes of the same verified show. The stop itself also applies when
+    // the next player item is a movie or has incomplete metadata.
+    if (previousIdentity && nextIdentity && previousIdentity.id === nextIdentity.id &&
+        previousKey !== nextKey && progress >= minimum) {
+      var completed = Object.assign({}, active.media, {
+        id: previousIdentity.id,
+        method: 'tv',
+        season_number: previousIdentity.season,
+        episode_number: previousIdentity.episode,
+        hash: previous.hash || active.media.hash || null
+      });
+      markPlaybackInstanceTerminal();
+      markFinishIntent(getCompletionKey(completed));
+      finish(completed).catch(function (e) { slog('episode transition finish error', e && e.status || 'request_failed'); });
+    }
+    scrobbler.scrobbleStop(active.media, progress);
+  }
+
+  function finishAmbiguousEpisodeAtProgress(instance, progress) {
+    if (!instance || instance !== currentPlaybackInstance || !instance.ambiguousTimelineHash ||
+        instance.external || isPlaybackInstanceTerminal() ||
+        instance.token !== String(Lampa.Storage.get('trakt_token') || '') ||
+        instance.identityGeneration !== playbackIdentityGeneration) return false;
+    var identity = verifiedShowEpisode(instance.media);
+    var active = scrobbler.getActiveSession && scrobbler.getActiveSession();
+    if (!identity || !active || active.external || active.key !== playbackSessionKey(instance.media) ||
+        playbackSessionKey(active.media) !== active.key) return false;
+    var minimum = parseInt(Lampa.Storage.field('trakt_min_progress') == null ? config.minProgress : Lampa.Storage.field('trakt_min_progress'), 10);
+    if (!isFinite(minimum)) minimum = 90;
+    var confirmedProgress = Number(progress);
+    if (!isFinite(confirmedProgress) || confirmedProgress < minimum) return false;
+    var media = Object.assign({}, active.media, {
+      id: identity.id,
+      method: 'tv',
+      season_number: identity.season,
+      episode_number: identity.episode,
+      hash: instance.hash || null
+    });
+    var key = getCompletionKey(media);
+    if (!key) return false;
+    // The instance becomes terminal before any async work; repeated timeupdate,
+    // ended, destroy, and Back callbacks therefore share one idempotent write.
+    markPlaybackInstanceTerminal();
+    markFinishIntent(key);
+    finish(media).catch(function (e) { slog('ambiguous Timeline episode finish error', e && e.status || 'request_failed'); });
+    scrobbler.scrobbleStop(active.media, confirmedProgress);
+    return true;
+  }
+  function finishAmbiguousEpisodeFromExit() {
+    var instance = currentPlaybackInstance;
+    if (!instance || !instance.ambiguousTimelineHash || instance.external || isPlaybackInstanceTerminal() ||
+        !Lampa.PlayerVideo || typeof Lampa.PlayerVideo.video !== 'function') return false;
+    var video = Lampa.PlayerVideo.video();
+    var duration = Number(video && video.duration), currentTime = Number(video && video.currentTime);
+    if (!video || video.seeking || !isFinite(duration) || duration <= 0 || !isFinite(currentTime) || currentTime < 0 ||
+        instance.lastVideoPosition != null && currentTime <= instance.lastVideoPosition) return false;
+    instance.lastVideoPosition = currentTime;
+    return finishAmbiguousEpisodeAtProgress(instance, Math.max(0, Math.min(100, currentTime / duration * 100)));
+  }
   function isActiveLampaVideoEvent(event) {
     try {
       if (!event || !event.target || !Lampa.PlayerVideo || typeof Lampa.PlayerVideo.video !== 'function') return false;
@@ -10145,15 +10313,22 @@
       var token = Lampa.Storage.get('trakt_token');
       if (card && Lampa.Storage.field('trakt_enable_watching') && token) {
         // Build media with season/episode from hash meta
-        var metaHash = hash ? getHashMeta(hash) : null;
+        var previousInstance = currentPlaybackInstance;
+        var reusedTimelineHash = !!(previousInstance && hash && previousInstance.hash === hash);
+        var metaHash = hash && !reusedTimelineHash ? getHashMeta(hash) : null;
         var mediaForStart = Object.assign({}, card);
         if (metaHash) {
           if (card.season_number == null && metaHash.season != null) mediaForStart.season_number = metaHash.season;
           if (card.episode_number == null && metaHash.episode != null) mediaForStart.episode_number = metaHash.episode;
         }
+        var oldEpisode = previousInstance && verifiedShowEpisode(previousInstance.media);
+        var newEpisode = verifiedShowEpisode(mediaForStart);
+        var sameHashDifferentEpisode = !!(reusedTimelineHash && oldEpisode && newEpisode && oldEpisode.id === newEpisode.id && (oldEpisode.season !== newEpisode.season || oldEpisode.episode !== newEpisode.episode));
+        stopPreviousEpisodeOnPlayerStart(mediaForStart, hash || null);
         scrobbler.setCurrentMedia(mediaForStart);
         var externalHandoff = pendingExternalPlayback && pendingExternalPlayback.hash === hash;
-        beginPlaybackInstance(mediaForStart, hash, !!externalHandoff);
+        var activeInstance = beginPlaybackInstance(mediaForStart, hash, !!externalHandoff);
+        activeInstance.ambiguousTimelineHash = sameHashDifferentEpisode;
         pendingInternalPlayback = externalHandoff ? null : { media: mediaForStart, hash: hash || null };
       } else {
         currentPlaybackInstance = null;
@@ -10213,6 +10388,10 @@
         if (this.isLoggingEnabled()) slog('Ignoring Timeline update without current playback identity', { hash: hash });
         return;
       }
+      // A reused hash cannot distinguish delayed events from the prior file.
+      // In this case only actual internal-video position events may advance the
+      // new session; Timeline never supplies progress or completion evidence.
+      if (timelineInstance.ambiguousTimelineHash) return;
       var card = timelineInstance.media;
       var externalPlayback = pendingExternalPlayback;
       if (externalPlayback) {
@@ -10712,6 +10891,7 @@
         var routeFinishIntent = function routeFinishIntent(evt) {
           try {
             var isExternalHandoff = evt && evt.type === 'destroy' && !!pendingExternalPlayback;
+            if (!isExternalHandoff) finishAmbiguousEpisodeFromExit();
             if (!isExternalHandoff) pendingExternalPlayback = null;
             pendingInternalPlayback = null;
             timelineProgressSamples = {};
@@ -10859,6 +11039,26 @@
       this._cleanups.push(function () {
         document.removeEventListener('pause', _pauseHandler, true);
       });
+      var _timeUpdateHandler = function _timeUpdateHandler(event) {
+        try {
+          var instance = currentPlaybackInstance;
+          if (!instance || !instance.ambiguousTimelineHash || instance.external || isPlaybackInstanceTerminal() ||
+              instance.token !== String(Lampa.Storage.get('trakt_token') || '') || !isActiveLampaVideoEvent(event)) return;
+          var active = scrobbler.getActiveSession && scrobbler.getActiveSession();
+          var target = event.target;
+          var duration = Number(target && target.duration), currentTime = Number(target && target.currentTime);
+          if (!active || active.external || active.key !== playbackSessionKey(instance.media) ||
+              playbackSessionKey(active.media) !== active.key || target.paused || target.seeking ||
+              !isFinite(duration) || duration <= 0 || !isFinite(currentTime) || currentTime < 0 ||
+              instance.lastVideoPosition != null && currentTime <= instance.lastVideoPosition) return;
+          instance.lastVideoPosition = currentTime;
+          var videoProgress = Math.max(0, Math.min(100, currentTime / duration * 100));
+          scrobbler.updatePlaybackSession(active.media, videoProgress);
+          finishAmbiguousEpisodeAtProgress(instance, videoProgress);
+        } catch (e) { logWarn('Ambiguous Timeline video-position handler failed', e && e.name || 'unknown'); }
+      };
+      document.addEventListener('timeupdate', _timeUpdateHandler, true);
+      this._cleanups.push(function () { document.removeEventListener('timeupdate', _timeUpdateHandler, true); });
       var _playHandler = function _playHandler(event) {
         try {
           if (!Lampa.Storage.field('trakt_enable_watching') || !Lampa.Storage.get('trakt_token')) return;
@@ -10867,6 +11067,7 @@
           var confirmedTarget = typeof event.target.currentTime === 'number' && !event.target.paused;
           if (confirmedTarget && pendingInternalPlayback) {
             var target = event.target;
+            if (currentPlaybackInstance && currentPlaybackInstance.ambiguousTimelineHash) currentPlaybackInstance.lastVideoPosition = Number(target.currentTime);
             var duration = Number(target.duration);
             var progress = isFinite(duration) && duration > 0 ? target.currentTime / duration * 100 : 0;
             var media = Object.assign({}, pendingInternalPlayback.media, { hash: pendingInternalPlayback.hash });
@@ -10879,6 +11080,7 @@
             pendingInternalPlayback = null;
           } else if (playback && !playback.external && playback.key === playbackSessionKey(currentPlaybackInstance.media)) {
             if (confirmedTarget) {
+              if (currentPlaybackInstance.ambiguousTimelineHash) currentPlaybackInstance.lastVideoPosition = Number(event.target.currentTime);
               var currentTarget = event.target;
               var currentDuration = Number(currentTarget.duration);
               if (isFinite(currentDuration) && currentDuration > 0) {

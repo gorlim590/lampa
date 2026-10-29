@@ -2212,7 +2212,7 @@
   }
 
   // Read-only, account-scoped details progress. Never imports or changes watched/history.
-  var detailCache = {}, detailJobs = {}, detailKeys = [];
+  var detailCache = {}, detailJobs = {}, detailKeys = [], detailRequestVersions = Object.create(null);
   function detailEpisode(ep) {
     if (!ep || !(Number(ep.season) > 0) || !(Number(ep.number) > 0)) return null;
     return { season: Number(ep.season), number: Number(ep.number), tmdb: ep.ids && Number(ep.ids.tmdb) || null,
@@ -2228,9 +2228,10 @@
     return whenApi().then(function () { return ensureAccount(); }).then(function (owner) {
       if (epoch !== sessionEpoch) return unknown('cancelled');
       var key = owner + ':' + epoch + ':tv:' + id, previous = detailCache[key];
-      if (detailJobs[key]) return detailJobs[key];
+      if (detailJobs[key] && !force) return detailJobs[key];
       if (!force && previous && Date.now() - previous.time < 60000) return previous.data;
-      var cancel = sessionCancel(epoch, null), source = showSources[id];
+      var requestVersion = detailRequestVersions[key] = (detailRequestVersions[key] || 0) + 1;
+      var cancel = sessionCancel(epoch, null), source = showSources[id], verifiedIds;
       var identity = source && source.show && source.show.ids;
       var mapping = identity && String(identity.tmdb) === String(id) && identity.trakt ? Promise.resolve(identity) : getRetry('/search/tmdb/' + encodeURIComponent(id) + '?type=show', 2, cancel).then(function (rows) {
         var match = Array.isArray(rows) && rows.filter(function (r) { return r && r.show && r.show.ids && String(r.show.ids.tmdb) === String(id) && Number(r.show.ids.trakt) > 0; });
@@ -2239,13 +2240,48 @@
       });
       var pending = mapping.then(function (ids) {
         checkCancelled(cancel);
+        if (detailRequestVersions[key] !== requestVersion) return { __detailSuperseded: true };
+        verifiedIds = ids;
         return getRetry(progressPath({ show: { ids: ids } }), 2, cancel);
       }).then(function (data) {
         checkCancelled(cancel);
+        if (detailRequestVersions[key] !== requestVersion) return unknown('superseded');
         if (typeof data.aired !== 'number' || typeof data.completed !== 'number') throw new Error('Incomplete progress');
         var valid = progressEvidence(data), result = { confirmed: true, phase: 'ready', session: epoch,
           completed: valid.watched, aired: valid.aired, complete: valid.complete, last: detailEpisode(data.last_episode), next: detailEpisode(data.next_episode),
           seasons: Array.isArray(data.seasons) ? data.seasons.filter(function (s) { return Number(s.number) > 0; }).map(function (s) { return { number: Number(s.number), aired: s.aired, completed: s.completed }; }) : [] };
+        // A confirmed per-show progress read can refresh the existing Trakt+
+        // watched/Up Next cache without running the full library import.
+        var previousState = showStates[id] || {};
+        var episodeEvidence = Array.isArray(data.seasons) ? progressEpisodes(data) : previousState.episodes || [];
+        var nextState = {
+          t: valid.t, aired: valid.aired, watched: valid.watched, known: valid.known, complete: valid.complete,
+          sig: previousState.sig || 'details:' + id, trakt: verifiedIds.trakt, episodes: episodeEvidence,
+          next: airedNext(data), lastWatchedAt: previousState.lastWatchedAt || 0,
+          homeCheckedAt: previousState.homeCheckedAt || 0, error: false, retryAfter: 0
+        };
+        var nextProgressSignature = JSON.stringify({ aired: nextState.aired, watched: nextState.watched, known: nextState.known, complete: nextState.complete, trakt: nextState.trakt, episodes: nextState.episodes, next: nextState.next });
+        var previousProgressSignature = previousState.progressSignature || JSON.stringify({ aired: previousState.aired, watched: previousState.watched, known: previousState.known, complete: previousState.complete, trakt: previousState.trakt, episodes: previousState.episodes, next: previousState.next });
+        if (nextProgressSignature !== previousProgressSignature) {
+          nextState.progressSignature = nextProgressSignature;
+          completionTransition(previousState, nextState, episodeEvidence);
+          showStates[id] = nextState;
+          showSources[id] = { show: { ids: verifiedIds } };
+          watchedShows = completedShows(); watchedVer++;
+          try { persistWatched(); } catch (e) {}
+          clearRowCaches(); emitWatched(); decorateAll();
+        } else {
+          // A fresh, authenticated response refreshes cache age and clears a
+          // stale retry/error marker even when the watched state is identical.
+          // Do not emit or redecorate: the semantic progress signature is stable.
+          showStates[id] = Object.assign({}, previousState, {
+            t: nextState.t, aired: nextState.aired, watched: nextState.watched, known: nextState.known,
+            complete: nextState.complete, trakt: nextState.trakt, episodes: nextState.episodes, next: nextState.next,
+            error: false, retryAfter: 0, progressSignature: nextProgressSignature
+          });
+          showSources[id] = { show: { ids: verifiedIds } };
+          try { persistWatched(); } catch (e) {}
+        }
         detailCache[key] = { time: Date.now(), data: result }; var index = detailKeys.indexOf(key); if (index >= 0) detailKeys.splice(index, 1); detailKeys.push(key);
         while (detailKeys.length > 32) delete detailCache[detailKeys.shift()];
         return result;
@@ -2253,7 +2289,7 @@
         if (epoch !== sessionEpoch) return unknown('cancelled');
         if (previous && Date.now() - previous.time < SHOW_STATE_TTL) return Object.assign({}, previous.data, { phase: 'error' });
         return unknown('error');
-      }).then(function (result) { releaseSession(cancel); delete detailJobs[key]; return result; });
+      }).then(function (result) { releaseSession(cancel); if (detailJobs[key] === pending) delete detailJobs[key]; return result; });
       detailJobs[key] = pending; return pending;
     }).catch(function () { return unknown(epoch === sessionEpoch ? 'unavailable' : 'cancelled'); });
   }
