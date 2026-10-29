@@ -1964,6 +1964,16 @@
         return out;
     }
 
+    function hasUncachedRowCandidates() {
+        var candidates = rowCandidates();
+        for (var i = 0; i < candidates.length; i++) {
+            if (!isTvMedia(candidates[i])) continue;
+            var cached = ApiCache.get(extCacheKey(candidates[i].id, 'tv'));
+            if (!cached || !cached.fetched || Date.now() - cached.fetched > 43200000) return true;
+        }
+        return false;
+    }
+
     // Рахуємо тільки з кешу (без мережі): якщо даних серіалу ще немає — їх підтягне warmRows
     function computeRows() {
         var up = [], cont = [], cands = rowCandidates();
@@ -2028,7 +2038,7 @@
     }
 
     // Optional TV metadata waits for a real usable Home, then uses native row append/update APIs.
-    var WarmRowsStore = { timer: null, attempts: 0, force: false, pending: false, rerun: false, generation: 0, installed: false };
+    var WarmRowsStore = { timer: null, attempts: 0, force: false, pending: false, rerun: false, followupUsed: false, generation: 0, installed: false };
     var HomeRowsRefresh = { timer: null };
     function activeHomeActivity() {
         var active = Lampa.Activity && Lampa.Activity.active();
@@ -2157,7 +2167,7 @@
         if (!event || event.type !== 'start') return;
         if (event.component === 'main') {
             WarmRowsStore.generation++; RowsStore.generation = WarmRowsStore.generation;
-            WarmRowsStore.attempts = 0; WarmRowsStore.pending = true; WarmRowsStore.force = false;
+            WarmRowsStore.attempts = 0; WarmRowsStore.pending = true; WarmRowsStore.force = false; WarmRowsStore.followupUsed = false;
             if (WarmRowsStore.timer) clearTimeout(WarmRowsStore.timer);
             WarmRowsStore.timer = setTimeout(finishWarmRowsReadiness, 0);
         } else cancelWarmRows(true);
@@ -2178,6 +2188,7 @@
             WarmRowsStore.force = true;
             return;
         }
+        WarmRowsStore.followupUsed = false;
         // Force only bypasses the global cooldown. Per-title fresh cache is still honored below.
         scheduleWarmRows(0, true);
     }
@@ -2251,6 +2262,12 @@
                     if (sameHome) scheduleWarmRows(delay, false);
                 }
                 if (successes && sameHome) scheduleYDesignRowsRefresh();
+                if (successes && !failures && queue.length === 24 && !WarmRowsStore.followupUsed && hasUncachedRowCandidates()) {
+                    // One bounded continuation drains candidates beyond this batch cap.
+                    // Its normal cache check requests only titles still missing fresh metadata.
+                    WarmRowsStore.followupUsed = true;
+                    scheduleWarmRows(0, true);
+                }
                 if (rerun && activeHomeActivity()) scheduleWarmRows(0, true);
             }
             pump();

@@ -185,6 +185,34 @@ test('a new Favorite after successful warmup fetches only the uncached candidate
   assert.equal(f.api.RowsStore.outcome, 'success'); assert.ok(f.api.RowsStore.lastSuccess >= oldSuccess);
 });
 
+test('the 25th Favorite is fetched in one bounded follow-up after 24 stale candidates fill the batch', async () => {
+  const stale = Array.from({ length: 24 }, (_, i) => ({ id: 4000 + i, media_type: 'tv', name: 'Stale favorite ' + i }));
+  const added = { id: 4099, media_type: 'tv', name: '25th favorite' };
+  const options = usableFixtureOptions(stale); options.storage = { ydesign_slogan_lang: 'uk' };
+  const f = fixture(options); f.api.installWarmRowsEvents();
+  // Native Favorite events arrive while the initial scheduled pass has not started yet.
+  options.history.push(added);
+  f.listeners['favorite:add'][0]({ card: added }); f.listeners['favorite:added'][0]({ card: added });
+  f.flush(0); await Promise.resolve(); await Promise.resolve();
+  assert.equal(f.jobs.length, 4, 'the initial batch respects four concurrent requests');
+  for (let i = 0; i < 24; i++) {
+    await settle();
+    assert(f.jobs[i], 'the bounded first batch drains each stale candidate: index=' + i + ', jobs=' + f.jobs.length + ', state=' + JSON.stringify({busy:f.api.RowsStore.busy,outcome:f.api.RowsStore.outcome,queue:f.api.RowsStore.queueLength}));
+    assert.match(f.jobs[i].url, new RegExp(String(stale[i].id)));
+    f.jobs[i].success(metadataResult(stale[i].id, stale[i].name));
+    await Promise.resolve(); await Promise.resolve();
+  }
+  await settle();
+  assert.equal(f.jobs.length, 24, 'the initial batch never exceeds its 24-request cap');
+  f.flush(0); await Promise.resolve(); await Promise.resolve();
+  assert.equal(f.jobs.length, 25, 'one automatic follow-up starts without another user event');
+  assert.match(f.jobs[24].url, /4099/, 'the follow-up prioritizes the only still-uncached Favorite');
+  f.jobs[24].success(metadataResult(added.id, added.name)); await settle(); f.flush(120);
+  assert(f.api.ApiCache.get(f.api.extCacheKey(added.id, 'tv')), 'the new Favorite metadata is cached');
+  assert.equal(f.api.RowsStore.outcome, 'success');
+  assert.equal(f.api.WarmRowsStore.followupUsed, true, 'only one automatic follow-up batch is allowed per Home cycle');
+});
+
 test('Favorite read and remove refresh rows without bypassing failure backoff or refetching fresh metadata', async () => {
   const item = { id: 3701, media_type: 'tv', name: 'Favorite lifecycle' };
   const options = usableFixtureOptions([item]); options.storage = { ydesign_slogan_lang: 'uk' };
