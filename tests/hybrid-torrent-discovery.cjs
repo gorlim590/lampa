@@ -60,7 +60,7 @@ function fixture() {
   const context = { window: { localStorage, TraktPlus: { cachedHomeProgress(card) { trakt.reads++; return String(card.id) === '55' ? trakt.progress : { watched: null, episodes: [] }; } } }, Lampa, document, console, Date, Set, WeakMap, Event: function () {} };
   vm.createContext(context); vm.runInContext(redesign, context);
   context.window.Lampa = Lampa; vm.runInContext(overlay, context);
-  context.TorrentsRedesign = context.window.TorrentsRedesign; context.LampaTorrentOverlay = context.window.LampaTorrentOverlay;
+  context.TorrentsRedesign = context.window.TorrentsRedesign; context.LampaTorrentOverlay = context.window.LampaTorrentOverlay; context.seasonModel=context.window.LampaTorrentCinema.seasonBrowser;
   const adapterStart = hybrid.indexOf('    // Row view adapter');
   const adapterEnd = hybrid.indexOf('    function streamTrackerKey', adapterStart);
   assert(adapterStart >= 0 && adapterEnd > adapterStart, 'Missing production embedded row adapter');
@@ -71,8 +71,8 @@ function fixture() {
     if (selector === '.torrent-item') return list.querySelectorAll(selector);
     const tools = files.children.find(node => node.classList.contains('ctr-tools'));
     if (!tools) return [];
-    if (selector === '.ctr-tools .selector,.torrent-filter .selector') return [...nodes['.ctr-tabs'].children,...nodes['.ctr-tracker-tabs'].children].filter(node => node.className.split(/\s+/).includes('selector'));
-    if (selector === '.ctr-tabs [data-quality]') return nodes['.ctr-tabs'].children.filter(node => node.dataset.quality);
+    if (selector === '.ctr-tools .selector,.torrent-filter .selector') return [...nodes['.ctr-quality-tabs'].children,...nodes['.ctr-audio-tabs'].children,...nodes['.ctr-tracker-tabs'].children].filter(node => node.className.split(/\s+/).includes('selector'));
+    if (selector === '.ctr-quality-tabs [data-quality]') return nodes['.ctr-quality-tabs'].children.filter(node => node.dataset.quality);
     if (selector === '.ctr-tracker-tabs .selector') return nodes['.ctr-tracker-tabs'].children;
     if (selector === '.ctr-menus .selector') return nodes['.ctr-menus'].children;
     return [];
@@ -83,7 +83,7 @@ function fixture() {
   const record = { activity: {}, streamPane: pane, streamView: { isOpen: () => true }, page };
   const movie = { id: 21, source: 'tmdb', media_type: 'movie', title: 'The Others', original_title: 'The Others', release_date: '2001-08-02' };
   const child = { getFilterData: () => ({}) };
-  const st = { record, params: { movie }, child, root: rootNode, rows: [], sourceData: new WeakMap(), windowStart: 0, dead: false, wantFocus: true, session: context.LampaTorrentOverlay.session(), trackerButtons: null };
+  const st = { record, params: { movie }, child, root: rootNode, rows: [], sourceData: new WeakMap(), windowStart: 0, dead: false, wantFocus: true, session: context.LampaTorrentOverlay.session(), trackerButtons: null, audioCategory: 'all' };
   record.streamChild = st;
   function release(title, tracker, extra = {}) {
     const row = new Node('torrent-item selector'); row.nodes = { '.ctr-name': new Node('ctr-name'), '.ctr-chips': new Node('ctr-chips'), '.ctr-best': new Node('ctr-best'), '.torrent-item__title': new Node(), '.tc-info': new Node('tc-info selector') };
@@ -93,15 +93,16 @@ function fixture() {
     st.rows.push(row); st.sourceData.set(row, source); return { row, source };
   }
   const nodes = {
-    '.ctr-tabs': new Node('ctr-tabs'), '.ctr-tracker-tabs': new Node('ctr-tabs ctr-tracker-tabs'), '.ctr-menus': new Node('ctr-menus')
+    '.ctr-tabs': new Node('ctr-tabs ctr-quality-tabs'), '.ctr-quality-tabs': null, '.ctr-audio-tabs': new Node('ctr-tabs ctr-audio-tabs'), '.ctr-tracker-tabs': new Node('ctr-tabs ctr-tracker-tabs'), '.ctr-menus': new Node('ctr-menus')
   };
-  pane.querySelectorAll=selector=>selector.includes('.ctr-tabs:not(.ctr-tracker-tabs)')?nodes['.ctr-tabs'].children:selector.includes('.ctr-tracker-tabs')?nodes['.ctr-tracker-tabs'].children:selector.includes('.sh-stream-head .selector')?head.querySelectorAll('.selector'):[];
-  pane.querySelector=selector=>selector==='.focus.selector'?(focus.current?.classList.contains('focus')?focus.current:pane.querySelectorAll('.ctr-tabs:not(.ctr-tracker-tabs) .selector,.ctr-tracker-tabs .selector,.sh-stream-head .selector').find(node=>node.classList.contains('focus'))||null):pane.nodes[selector]||null;
+  nodes['.ctr-quality-tabs']=nodes['.ctr-tabs'];
+  pane.querySelectorAll=selector=>selector.includes('.ctr-quality-tabs')||selector.includes('.ctr-tabs:not(.ctr-tracker-tabs)')?nodes['.ctr-quality-tabs'].children:selector.includes('.ctr-audio-tabs')?nodes['.ctr-audio-tabs'].children:selector.includes('.ctr-tracker-tabs')?nodes['.ctr-tracker-tabs'].children:selector.includes('.sh-stream-head .selector')?head.querySelectorAll('.selector'):[];
+  pane.querySelector=selector=>selector==='.focus.selector'?(focus.current?.classList.contains('focus')?focus.current:[...nodes['.ctr-quality-tabs'].children,...nodes['.ctr-audio-tabs'].children,...nodes['.ctr-tracker-tabs'].children,...head.querySelectorAll('.selector')].find(node=>node.classList.contains('focus'))||null):pane.nodes[selector]||null;
   // Template-backed toolbar fixture: preserve the production setupStreamTools handlers.
   const filesInsert = files.insertBefore.bind(files);
   files.insertBefore = (node, before) => { node.nodes = nodes; node.querySelector = selector => nodes[selector] || null; node.classList.add('ctr-tools'); return filesInsert(node, before); };
-  const sourceFunctions = ['streamRowKey', 'streamSession', 'streamAlive', 'streamTrackerKey', 'streamSortKey', 'streamWindow', 'streamUpdateRows', 'decorateStreamRows', 'syncStreamTrackerTools', 'streamFocus', 'streamNavGroups', 'streamMove', 'moveInline', 'setupStreamTools', 'streamEpisodeDetails', 'streamEpisodeWatched', 'restoreStreamEpisodePreview', 'clearStreamEpisodePreviews', 'applyStreamEpisodePreview', 'applyStreamFileStudios', 'onStreamFile'];
-  context.$=node=>({on(type,fn){node.jqueryEnter=fn;return this;}});context.running=true;context.metadata=context.TorrentsRedesign;context.getComputedStyle=()=>({visibility:'visible',display:'block'});context.bindInline=()=>{};context.collapseInline=()=>false;
+  const sourceFunctions = ['streamSeasonCoverageBadge', 'streamRowKey', 'streamSession', 'streamAlive', 'streamTrackerKey', 'streamSortKey', 'streamWindow', 'streamUpdateRows', 'decorateStreamRows', 'streamAudioCounterRows', 'syncStreamTrackerTools', 'streamFocus', 'streamNavGroups', 'streamMove', 'moveInline', 'streamStatus', 'streamResultStatus', 'setupStreamTools', 'streamEpisodeDetails', 'streamEpisodeWatched', 'restoreStreamEpisodePreview', 'clearStreamEpisodePreviews', 'applyStreamEpisodePreview', 'applyStreamFileStudios', 'onStreamFile'];
+  context.$=node=>({on(type,fn){node.jqueryEnter=fn;return this;}});context.running=true;context.metadata=context.TorrentsRedesign;context.metadata.audioCategoryMatches=context.window.LampaTorrentCinema.audioCategoryMatches;context.getComputedStyle=()=>({visibility:'visible',display:'block'});context.bindInline=()=>{};context.collapseInline=()=>false;
   context.streamActivate = () => {};
   context.streamSelectOwner = null;
   context.streamRecord = () => record;
@@ -179,7 +180,7 @@ test('Hybrid popup rows display confirmed anime audio/studio tracks and reject t
   const nestedVoice = f.release('Frieren S01E03 1080p', 'Toloka', { info: { Voices: ['Далі Буде'] } });
   f.context.streamUpdateRows(f.st);
   const chips = amanogawa.row.textContent;
-  assert.match(amanogawa.row.querySelector('.tc-audio-label').textContent, /Українська \/ Японська/);
+  assert.equal(amanogawa.row.querySelector('.tc-audio-label').textContent, '🇺🇦 Українська · Японська');
   assert.match(chips, /Амоногава/);
   assert.match(amanogawa.row.querySelector('.tc-voice').textContent, /Багатоголосе/);
   assert.match(amanogawa.row.querySelector('.tc-subtitles').textContent, /English/);
@@ -382,7 +383,7 @@ test('Hybrid embedded controls invoke native tracker/sort handlers; async rows r
   f.st.last = allButton; f.context.streamMove(f.record, 'right');
   assert.equal(f.focus.current, tolokaButton, 'D-pad right enters the next tracker control');
   f.st.last = allButton; f.context.streamMove(f.record, 'up');
-  assert.equal(f.focus.current, f.st.uaButton, 'D-pad up from trackers enters the quality band');
+  assert.equal(f.focus.current, f.st.audioButtons.other, 'D-pad up from trackers enters the audio band');
   f.st.last = allButton; f.context.streamMove(f.record, 'down');
   assert.equal(f.focus.current, toloka.row, 'D-pad down from the last visible control group enters the first release');
   f.st.last = toloka.row; f.context.streamMove(f.record, 'down');
@@ -400,6 +401,31 @@ test('Hybrid embedded controls invoke native tracker/sort handlers; async rows r
   assert.equal(f.st.best, null, 'no trustworthy title match means no Best Choice');
   f.api.storeTrackerFilter('all'); f.st.rows = [toloka.row]; f.st.sourceData = new WeakMap([[toloka.row, toloka.source]]); f.context.streamUpdateRows(f.st);
   assert.equal(f.st.displayRows.length, 1); assert.equal(f.st.displayRows[0], toloka.row); assert.equal(f.st.best, toloka.row, 'a single valid release can be Best Choice');
+});
+
+test('audio menu categories filter rows by audio tracks, allow bilingual matches, and never infer from subtitles',()=>{
+ const f=fixture(),ua=f.release('The Others (2001) 1080p','Toloka',{AudioLanguages:['uk','en']}),ru=f.release('The Others (2001) 1080p','Mazepa',{AudioLanguages:['ru']}),en=f.release('The Others (2001) 1080p','English source',{AudioLanguages:['en']}),other=f.release('The Others (2001) 1080p','French source',{AudioLanguages:['fr']}),unknown=f.release('The Others (2001) 1080p','Unknown source',{AudioLanguages:[],SubtitleLanguages:['uk']}),releases=[ua,ru,en,other,unknown];
+ f.st.rows=releases.map(item=>item.row);f.st.sourceData=new WeakMap(releases.map(item=>[item.row,item.source]));
+ for(const [category,expected] of [['ua',[ua.row]],['ru',[ru.row]],['en',[ua.row,en.row]],['other',[other.row,unknown.row]]]){f.st.audioCategory=category;f.context.streamUpdateRows(f.st);assert.deepEqual(JSON.parse(JSON.stringify(f.st.displayRows.map(row=>row._ctrSource.Tracker).sort())),expected.map(row=>row._ctrSource.Tracker).sort(),category);}
+});
+
+test('audio category counters scope to selected season, include every collection, deduplicate hashes, and apply quality/tracker filters',()=>{
+ const f=fixture(),classes=new Set(),rows=[],sources=[];
+ function add(title,tracker,audio,hash,quality='1080p',hidden=false){const source={Title:title,Tracker:tracker,AudioLanguages:audio,InfoHash:hash,Quality:quality},row=new Node('torrent-item');row._ctrData=f.api.normalizeRelease(source);row.classList.toggle('tc-season-hidden',hidden);rows.push(row);sources.push([row,source]);}
+ add('Supernatural S08E01-E23 2012 1080p WEB-DL','Toloka.to',['uk','en'],'a'.repeat(40));
+ add('Supernatural S08E01-E23 2012 1080p WEB-DL','Toloka.to',['ru'],'a'.repeat(40));
+ add('Supernatural S01E01-E22 2005 1080p WEB-DL','Toloka.to',['uk'],'b'.repeat(40),'1080p',true);
+ add('Supernatural S15E01-E20 2019 1080p WEB-DL','Mazepa.to',['en'],'c'.repeat(40),'1080p',true);
+ add('Supernatural S01-S15 Complete Collection 1080p BluRay','Mazepa.to',['en'],'d'.repeat(40));
+ add('Supernatural S01-S03 Collection 720p WEB-DL','Other tracker',['fr'],'e'.repeat(40),'720p');
+ f.st.rows=rows;f.st.sourceData=new WeakMap(sources);f.st.child.getFilterData=()=>({quality:[]});
+ vm.runInContext([extract(hybrid,'streamRowKey'),extract(hybrid,'streamTrackerKey'),extract(hybrid,'streamAudioCounterRows')].join('\n'),f.context);
+ const counts=category=>f.context.streamAudioCounterRows(f.st).filter(entry=>f.api.audioCategoryMatches(entry.audio,category)).length;
+ assert.equal(f.context.streamAudioCounterRows(f.st).length,3,'S01/S15 releases are excluded; both collections remain and duplicate S08 hashes collapse');
+ assert.deepEqual(['ua','ru','en','other'].map(counts),[1,1,2,1],'bilingual and merged same-hash metadata count in each applicable category');
+ f.st.child.getFilterData=()=>({quality:['720p']});assert.deepEqual(['ua','ru','en','other'].map(counts),[0,0,0,1],'current quality applies to counters');
+ f.st.child.getFilterData=()=>({quality:[]});f.api.storeTrackerFilter('toloka');assert.deepEqual(['ua','ru','en','other'].map(counts),[1,1,1,0],'current tracker applies to counters while the audio choice remains independent');
+ f.api.storeTrackerFilter('all');
 });
 
 test('embedded parser status distinguishes total results from currently loaded rows', () => {
@@ -430,21 +456,26 @@ test('embedded parser status distinguishes total results from currently loaded r
 });
 
 test('quality and tracker filter bands remain independent and ordered for remote navigation',()=>{
- const f=fixture();f.release('The Others (2001) 2160p','Toloka',{AudioLanguages:['uk']});f.release('The Others (2001) 1080p','Mazepa');
+ const f=fixture(),status={textContent:''};f.st.audioCategory='ua';f.st.total=2;f.record.streamStatus=status;f.release('The Others (2001) 2160p','Toloka',{AudioLanguages:['uk']});f.release('The Others (2001) 1080p','Mazepa');
+ vm.runInContext([extract(hybrid,'streamStatus'),extract(hybrid,'streamResultStatus')].join('\n'),f.context);
  let quality=[];f.st.child.getFilterData=()=>({quality});f.st.child.setFilterData=value=>{quality=value.quality;};f.st.child.applyFilter=()=>{};
  f.context.setupStreamTools(f.st);f.context.syncStreamTrackerTools(f.st);
- const qualityAll=f.nodes['.ctr-tabs'].children.find(node=>node.dataset.quality==='all'),ua=f.nodes['.ctr-tabs'].children.at(-1),all=f.st.trackerButtons.all,mazepa=f.st.trackerButtons.mazepa;
- assert.deepEqual(f.nodes['.ctr-tabs'].children.map(node=>node.dataset.quality),['all','2160','1080','720',undefined]);
+ const qualityAll=f.nodes['.ctr-tabs'].children.find(node=>node.dataset.quality==='all'),all=f.st.trackerButtons.all,mazepa=f.st.trackerButtons.mazepa;
+ assert.deepEqual(f.nodes['.ctr-quality-tabs'].children.map(node=>node.dataset.quality),['all','2160','1080','720']);
+ assert.deepEqual(f.nodes['.ctr-audio-tabs'].children.map(node=>node.dataset.audioCategory),['ua','ru','en','other']);assert.equal(f.st.audioButtons.ua.getAttribute('aria-pressed'),'true');
  assert.deepEqual(f.nodes['.ctr-tracker-tabs'].children.map(node=>node.dataset.tracker),['all','toloka','mazepa','source']);
- f.nodes['.ctr-tabs'].children.find(node=>node.dataset.quality==='2160').dispatch('hover:enter');
+ f.nodes['.ctr-quality-tabs'].children.find(node=>node.dataset.quality==='2160').dispatch('hover:enter');
  assert.deepEqual(Array.from(quality),['4k']);
  mazepa.dispatch('hover:enter');assert.equal(f.api.selectedTrackerFilter(),'mazepa');assert.deepEqual(Array.from(quality),['4k'],'tracker action cannot reset the quality filter');
+ assert.match(status.textContent,/озвучка UA/,'changing a tracker refreshes the visible result status');
  all.dispatch('hover:enter');assert.equal(f.api.selectedTrackerFilter(),'all');assert.deepEqual(Array.from(quality),['4k'],'All trackers clears only the tracker filter');
+ f.st.audioButtons.en.dispatch('hover:enter');assert.match(status.textContent,/EN/i,'changing the audio category refreshes its visible result count');
+ f.st.audioButtons.ua.dispatch('hover:enter');
  f.st.last=all;f.context.streamMove(f.record,'left');assert.equal(f.focus.current,all,'left at the first tracker keeps focus within the tracker band');
- f.st.last=all;f.context.streamMove(f.record,'up');assert.equal(f.focus.current,ua,'up from tracker band enters the last quality action');
- f.st.last=qualityAll;f.context.streamMove(f.record,'down');assert.equal(f.focus.current,all,'down from quality band enters the first tracker');
+ f.st.last=all;f.context.streamMove(f.record,'up');assert.equal(f.focus.current,f.st.audioButtons.other,'up from tracker band enters the last audio action');
+ f.st.last=qualityAll;f.context.streamMove(f.record,'down');assert.equal(f.focus.current,f.st.audioButtons.ua,'down from quality band enters the first audio control');
  f.st.last=all;f.context.streamMove(f.record,'down');assert.equal(f.focus.current,f.st.displayRows[0],'down from tracker band enters the release list when no native filter control is visible');
- qualityAll.classList.add('focus');f.st.last=f.st.displayRows[0];f.context.streamMove(f.record,'down');assert.equal(f.focus.current,all,'navigation follows the actual focused quality control when the remembered row reference is stale');
+ qualityAll.classList.add('focus');f.st.last=f.st.displayRows[0];f.context.streamMove(f.record,'down');assert.equal(f.focus.current,f.st.audioButtons.ua,'navigation follows the actual focused quality control when the remembered row reference is stale');
 });
 
 test('D-pad stays on Info until vertical movement or Left returns to its release row',()=>{
@@ -465,7 +496,7 @@ test('compact cards lead with the actual release identity, then technical badges
  assert.match(row.querySelector('.tc-priority-row').textContent,/UA/);
  assert.match(row.querySelector('.tc-priority-row').textContent,/Toloka/);
  assert.match(row.querySelector('.tc-secondary-row').textContent,/4K/);assert.match(row.querySelector('.tc-secondary-row').textContent,/WEB-DL/);assert.match(row.querySelector('.tc-secondary-row').textContent,/HDR10/);assert.match(row.querySelector('.tc-secondary-row').textContent,/HEVC/);
- assert.match(row.querySelector('.tc-audio-label').textContent,/Українська \/ English/);assert.match(row.querySelector('.tc-voice').textContent,/Багатоголосе · Контрольна студія/);
+ assert.equal(row.querySelector('.tc-audio-label').textContent,'🇺🇦 Українська · English');assert.match(row.querySelector('.tc-voice').textContent,/Багатоголосе · Контрольна студія/);
  assert.equal(row.querySelector('.tc-raw-title').textContent,raw,'expanded detail preserves the original torrent title');
 });
 

@@ -1,7 +1,7 @@
 /* Public lifecycle. The build wraps all factories in one idempotent entry. */
-var metadata=createCinemaMetadata(),view=createCinemaView(),runtime=createCinemaRuntime(metadata);
+var metadata=createCinemaMetadata(),view=createCinemaView(),seasons=createCinemaSeasons(),runtime=createCinemaRuntime(metadata,seasons);
 var settingsRegistered=false,waitingOwner=null,waitingCallback=null,waitTimer=0,waitAttempts=0,enableOwner=null;
-var api=Object.assign({},metadata,view,{version:'2.0.0',contractVersion:2,install:install,destroy:destroy,setEnabled:setEnabled,applySettings:applySettings,diagnostics:runtime.status});
+var api=Object.assign({},metadata,view,{seasonBrowser:seasons,version:'2.1.0',contractVersion:2,install:install,destroy:destroy,setEnabled:setEnabled,applySettings:applySettings,diagnostics:runtime.status});
 // Legacy APIs point at the SAME owner, never a second initializer.
 window.LampaTorrentCinema=window.TorrentsRedesign=window.LampaTorrentOverlay=api;
 function ready(){return window.Lampa&&Lampa.Component&&Lampa.Activity&&Lampa.Controller&&Lampa.SettingsApi&&Lampa.Listener&&Lampa.Modal&&Lampa.Select;}

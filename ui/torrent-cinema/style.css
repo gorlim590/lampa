@@ -128,21 +128,34 @@
 .sh-torrent-overlay .ctr-peers{margin-top:.3em}
 .sh-torrent-overlay .sh-stream-head .ctr-button{font-size:.78em}
 .sh-torrent-overlay .tc-info{font-size:.8em;border:0;min-height:2em;border-radius:.4em}
+.sh-torrent-overlay .tc-season-selector{display:flex;align-items:center;gap:.42em;min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;white-space:nowrap;scrollbar-width:thin;scrollbar-color:#8e7aaa44 transparent;padding:.18em .22em .36em;margin:.1em 0 .05em;flex:none;scroll-padding-inline:1em;overscroll-behavior-x:contain}
+.sh-torrent-overlay .tc-season-button{flex:0 0 auto;min-width:3.65em;height:2.7em;padding:.35em .62em;border:1px solid #ffffff20;border-radius:.55em;background:linear-gradient(150deg,#211c2b,#171520);color:var(--tc-text);font-family:inherit;font-size:.88em;font-weight:700;line-height:1;cursor:pointer}
+.sh-torrent-overlay .tc-season-button[aria-pressed="true"]{border-color:#917bb4;background:linear-gradient(150deg,#443654,#292234);color:#fff;box-shadow:inset 0 0 0 1px #aa92cd33}
+.sh-torrent-overlay .tc-season-button.focus{outline:2px solid #c8b4e4;outline-offset:2px;color:#fff}
+.sh-torrent-overlay .tc-season-loading{flex:none;color:var(--tc-muted);font-size:.85em;padding:.55em .3em}
+.sh-torrent-overlay .tc-season-section{padding:.58em .35em .28em;color:#c9bbd9;font-size:.83em;font-weight:750;letter-spacing:.035em}
+.sh-torrent-overlay .tc-season-coverage{display:inline-flex!important;align-items:center;color:#e4d9ff!important;background:#49385c!important;border-color:#917bb466!important;font-weight:700;white-space:nowrap}
+.sh-torrent-overlay .torrent-item.tc-season-hidden{display:none!important}
+.sh-torrent-overlay .tc-season-selector.has-overflow{mask-image:linear-gradient(90deg,#000 0,#000 94%,transparent 100%);-webkit-mask-image:linear-gradient(90deg,#000 0,#000 94%,transparent 100%)}
+@media(max-width:800px){.sh-torrent-overlay .tc-season-button{min-width:3.35em;height:2.55em;font-size:.82em}.sh-torrent-overlay .tc-season-selector{gap:.32em}}
 @media(max-width:1350px){.sh-torrent-overlay .ctr-row{grid-template-columns:3.4em minmax(0,1.3fr) minmax(0,1fr) 6em 2.3em 1.5em;gap:.65em}.sh-torrent-overlay .sh-stream-head h2{font-size:1.15em}.sh-torrent-overlay .sh-stream-head .selector{font-size:.75em}.sh-torrent-overlay .tc-audio{font-size:.78em}}
 @media(max-width:900px){.sh-torrent-overlay .ctr-row{grid-template-columns:3em minmax(0,1fr) 5em 2em 1.5em}.sh-torrent-overlay .tc-audio{grid-column:2;grid-row:2}.sh-torrent-overlay .ctr-metrics{grid-column:3;grid-row:1/3}.sh-torrent-overlay .tc-play{grid-column:4;grid-row:1/3}.sh-torrent-overlay .tc-info{grid-column:5;grid-row:1/3}}
 
 .sh-torrent-overlay .torrent-item.sh-duplicate-hidden{display:none!important}
 
-/* Reference-led release composition: two independent filter bands, badges, and four detail columns. */
+/* Reference-led release composition: quality, audio and tracker filter bands. */
 .sh-torrent-overlay .ctr-tools{display:grid;grid-template-columns:minmax(0,1fr);gap:.32em;overflow:visible;border-bottom:1px solid #ffffff16;padding:.15em 0 .6em;margin-bottom:.55em}
 .sh-torrent-overlay .ctr-tabs,.sh-torrent-overlay .ctr-tracker-tabs{display:flex;align-items:center;gap:.38em;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;white-space:nowrap;padding:.08em .12em}
 .sh-torrent-overlay .ctr-tabs::before,.sh-torrent-overlay .ctr-tracker-tabs::before{flex:none;color:#aaa2b9;font-size:.72em;letter-spacing:.07em;text-transform:uppercase}
 .sh-torrent-overlay .ctr-tabs::before{content:'Якість'}
+.sh-torrent-overlay .ctr-audio-tabs::before{content:'Озвучка'}
 .sh-torrent-overlay .ctr-tracker-tabs::before{content:'Трекери'}
 .sh-torrent-overlay .ctr-tab{min-height:2.15em;padding:.34em .72em;border-radius:.6em;background:linear-gradient(145deg,#211b2b,#171420);border-color:#ffffff18;font-size:.82em;line-height:1.2;color:#d8d3e1}
 .sh-torrent-overlay .ctr-tracker-tabs .ctr-tab{font-size:.77em}
 .sh-torrent-overlay .ctr-tab[data-quality="all"].is-active{background:#4e4262;border-color:#88799b;color:#fff}
 .sh-torrent-overlay .ctr-tracker-tabs .ctr-tab.is-active{background:#343040;border-color:#8f81a0;color:#fff}
+.sh-torrent-overlay .ctr-audio-tabs .ctr-tab.is-active{background:#332b3e;border-color:#827092;color:#fff}
+.sh-torrent-overlay .ctr-audio-tabs [data-audio-category="ua"].is-active{background:linear-gradient(140deg,#353044,#252331);border-color:#c9a94c;color:#f6e8b7}
 .sh-torrent-overlay .ctr-tab[data-quality="2160"]{border-color:#a78c3b44}
 .sh-torrent-overlay .ctr-tab[data-quality="1080"]{border-color:#7090ce44}
 .sh-torrent-overlay .ctr-tab[data-quality="720"]{border-color:#58a9cf44}

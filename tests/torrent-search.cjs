@@ -29,7 +29,7 @@ test('native manual clarification remains unchanged',async()=>{const data={Resul
 test('native search_two English title is reused without metadata calls and reaches the UI matcher',async()=>{const m={id:93405,source:'tmdb',name:'오징어 게임',original_name:'오징어 게임',original_language:'ko'},f=fixture((p,ok)=>ok({Results:p.search==='Squid Game'?[row('Squid Game S01E01')]:[]}));assert.equal((await f.get(m,{search_two:'Squid Game'})).Results.length,1);assert.equal(f.metaCalls,0);assert(f.api.match(row('Squid Game S01E01'),m).eligible)});
 test('Korean romanized metadata works as a third query without inventing a transliteration',async()=>{const f=fixture((p,ok)=>ok({Results:p.search==='Ojingeo geim'?[row('Ojingeo geim S01E01')]:[]}));assert.equal((await f.get(fixtureData.dorama,{search:'Squid Game'})).Results.length,1);assert.equal(f.calls.length,3)});
 test('equivalent base32/hex infohashes deduplicate while malformed/different magnets remain distinct',()=>{const f=fixture(()=>{}),a=row('Same',{MagnetUri:'magnet:?xt=urn:btih:'+'0'.repeat(40)}),b=row('Same',{MagnetUri:'magnet:?xt=urn:btih:'+'A'.repeat(32)});assert.equal(f.api.dedup([a,b]).length,1);assert.equal(f.api.dedup([row('Same',{MagnetUri:'malformed:1'}),row('Same',{MagnetUri:'malformed:2'})]).length,2)});
-test('season packs include the requested season but do not admit an absent season',()=>{const f=fixture(()=>{});assert(f.api.match(row('Attack on Titan S01-S03 1080p'),fixtureData.anime,{season:2}).eligible);assert(!f.api.match(row('Attack on Titan S01-S03 1080p'),fixtureData.anime,{season:4}).eligible)});
+test('season packs remain discoverable on every season tab; only matching coverage qualifies for Best Choice in the UI',()=>{const f=fixture(()=>{});assert(f.api.match(row('Attack on Titan S01-S03 1080p'),fixtureData.anime,{season:2}).eligible);assert(f.api.match(row('Attack on Titan S01-S03 1080p'),fixtureData.anime,{season:4}).eligible)});
 test('wrapper remains inert after destroy even when another consumer retained it; reinstall is idempotent',()=>{let count=0;const f=fixture((p,ok)=>{count++;ok({Results:[]})}),get=f.L.Parser.get;f.api.destroy();get({},()=>{});assert.equal(count,1);f.api.install();assert.equal(f.L.Parser.get,get);f.api.install();assert.equal(f.L.Parser.get,get)});
 test('ordinary search completion cannot arrive on a newer anime search',()=>{const pending=[],f=fixture((p,ok)=>pending.push(ok));let old=0,current=0;f.L.Parser.get({movie:fixtureData.movie,search:'Fight Club'},()=>old++);f.L.Parser.get({movie:fixtureData.anime,search:'進撃の巨人'},()=>current++);pending[0]({Results:[row('Fight Club')]});pending[1]({Results:[row('進撃の巨人')]});assert.equal(old,0);assert.equal(current,1)});
 test('anonymous card metadata is never shared with a different anonymous card',async()=>{const f=fixture((p,ok)=>ok({Results:[row('Squid Game')]}));await f.get({name:'Squid Game',original_name:'오징어 게임',original_language:'ko'});assert(!f.api.titles({name:'Another',original_name:'別の作品',original_language:'ja'}).includes('Squid Game'))});
@@ -52,4 +52,34 @@ test('Ukrainian 100 Days of Deception query uses a verified English translation 
  const series={id:101,source:'tmdb',media_type:'tv',name:'100 днів омани',original_name:'100일의 거짓말',original_language:'ko',first_air_date:'2026-01-01'},f=fixture((p,ok)=>ok({Results:p.search==='100 Days of Deception'?[row('100 Days of Deception (2026) S01E03 1080p',{Year:2026})]:[]}),(url,ok)=>ok({id:101,name:'100일의 거짓말',translations:{translations:[{iso_639_1:'en',data:{name:'100 Days of Deception'}},{iso_639_1:'uk',data:{name:'100 днів омани'}}]},alternative_titles:{results:[]}}));
  const result=await f.get(series,{search:'100 днів омани',season:1,episode:3});assert.equal(result.Results.length,1);assert(f.calls.some(call=>call.search==='100 Days of Deception'));assert(f.calls.length<=3);assert.equal(f.metaCalls,1);assert.equal(f.api.target(series),true);
  assert.equal(f.api.match(row('100 Days of Deception (2026) S01E03 1080p'),series,{season:1,episode:3}).eligible,true);assert.equal(f.api.match(row('100 Days of Deception (2026) S02E03 1080p'),series,{season:1,episode:3}).eligible,false);
+});
+
+test('season-aware search queries explicit season variants then one bounded broad search for cross-season collections',async()=>{
+ const movie={id:701,source:'tmdb',media_type:'tv',name:'Шоу',original_name:'The Show',first_air_date:'2010-01-01'},f=fixture((p,ok)=>{
+  if(/S08/.test(p.search))return ok({Results:[row('The Show (2026) S08E01 1080p',{InfoHash:'8'.repeat(40)})]});
+  if(p.search==='The Show')return ok({Results:[row('The Show S01-S03 Complete 1080p',{InfoHash:'1'.repeat(40)}),row('The Show S01E01 1080p',{InfoHash:'2'.repeat(40)})]});
+  return ok({Results:[]});
+ });
+ const result=await f.get(movie,{season:8,search:'The Show S08',search_one:'The Show Season 8',search_two:'The Show 8 сезон'});
+ assert.deepEqual(Array.from(result.Results,r=>r.Title),['The Show (2026) S08E01 1080p','The Show S01-S03 Complete 1080p'],JSON.stringify(f.calls.map(p=>p.search)));
+ assert.deepEqual(f.calls.slice(0,2).map(p=>p.search),['The Show S08','The Show']);assert(f.calls.length<=3);assert.equal(f.calls[1].clarification,true);
+});
+
+test('season-aware fallback checks alternate naming forms within the existing three-call bound',async()=>{
+ const movie={id:702,source:'tmdb',media_type:'tv',name:'Шоу',original_name:'The Show',first_air_date:'2012-01-01'},f=fixture((p,ok)=>ok({Results:p.search==='The Show Season 8'?[row('The Show S08E01 (2025) 1080p',{InfoHash:'a'.repeat(40)})]:[]}));
+ const result=await f.get(movie,{season:8,search:'Шоу S08',search_one:'The Show Season 8',search_two:'The Show 8 сезон'});assert.equal(result.Results.length,1);assert(f.calls.length<=3);assert(f.calls.some(p=>p.search==='The Show Season 8'));assert.equal(result.Results[0].Title,'The Show S08E01 (2025) 1080p');
+});
+
+test('a season collection may return for display when it misses the selected season, but wrong single-season releases remain excluded',()=>{
+ const f=fixture(()=>{}),movie={id:703,source:'tmdb',media_type:'tv',name:'The Show',first_air_date:'2010-01-01'};assert.equal(f.api.match(row('The Show S01-S03 Complete'),movie,{season:8}).eligible,true);assert.equal(f.api.match(row('The Show S01E01'),movie,{season:8}).eligible,false);assert.equal(f.api.match(row('The Show S10E01'),movie,{season:1}).eligible,false);
+});
+
+test('localized season collections outside the active season pass title matching for the collections section',()=>{const f=fixture(()=>{}),movie={id:1622,source:'tmdb',media_type:'tv',name:'Надприродне',original_name:'Supernatural',first_air_date:'2005-09-13'};assert.equal(f.api.match(row('Надприродне (Сезони 1-2) / Supernatural (2007)'),movie,{season:15}).eligible,true);assert.equal(f.api.match(row('Надприродне (Сезони 9-15) / Supernatural (2020)'),movie,{season:8}).eligible,true);});
+
+test('S15 season packs survive exhausted alias fallback and remain available as collections',async()=>{
+ const movie={id:1622,source:'tmdb',media_type:'tv',name:'Надприродне',original_name:'Supernatural',first_air_date:'2005-09-13'};
+ const f=fixture((p,ok)=>{if(p.search==='Надприродне S15')return ok({Results:[row('Надприродне / Supernatural (Сезони 9-15 Complete) (2020) 1080p',{InfoHash:'c'.repeat(40),Year:2020})]});if(p.search==='Надприродне')return ok({Results:[row('Надприродне S01-S15 Collection (2020) 1080p',{InfoHash:'d'.repeat(40),Year:2020})]});ok({Results:[]});});
+ f.advance(1000);
+ const result=await f.get(movie,{season:15,search:'Надприродне S15',search_one:'Надприродне Season 15',search_two:'Supernatural 15 сезон'});
+ assert.equal(f.calls.length,3);assert.deepEqual(Array.from(result.Results,r=>r.Title),['Надприродне / Supernatural (Сезони 9-15 Complete) (2020) 1080p','Надприродне S01-S15 Collection (2020) 1080p']);assert.equal(result.torrent_search_raw_total,2);
 });

@@ -29,11 +29,11 @@ module.exports=function installFixture(){
         Title:`Silent Orbit (2024) ${['2160p WEB-DL HDR HEVC Ukr Eng','1080p BluRay Ukr Eng','1080p WEB-DL Eng','720p WEBRip Ukr','1080p WEB-DL','2160p HDR10 DV Eng'][i%6]} ${i>5?'Extended Edition Дуже довга назва релізу 葬送のフリーレン':''}`,
         Tracker:['toloka.to','mazepa.to','other.example'][i%3],Size:(18-i)*1024**3,Seeders:i===4?0:120-i*7,Peers:i*2,
         InfoHash:String(i+1).padStart(40,'0'),MagnetUri:'magnet:?xt=urn:btih:'+String(i+1).padStart(40,'0'),hash:String(i+1).padStart(40,'0'),
-        AudioLanguages:i===4?[]:i%3===0?['uk','en']:['en'],SubtitleLanguages:i%2?['uk']:['en'],VoiceoverStudio:i%3===0?'Контрольна студія':'',
+        AudioLanguages:['uk','en'],SubtitleLanguages:i%2?['uk']:['en'],VoiceoverStudio:i%3===0?'Контрольна студія':'',
         Quality:['4k','1080p','1080p','720p','1080p','4k'][i%6],PublishDate:'2024-02-01'
     }));
     qa.baseMovie=Object.assign({},movie);qa.baseResults=JSON.parse(JSON.stringify(qa.results));
-    qa.restoreMovie=function(){delete movie.number_of_seasons;Object.assign(movie,qa.baseMovie);qa.results=JSON.parse(JSON.stringify(qa.baseResults));L.Storage.set('torrents_filter',{season:[],voice:[],tracker:[]});qa.push();};
+    qa.restoreMovie=function(){delete movie.number_of_seasons;delete movie.seasons;Object.assign(movie,qa.baseMovie);qa.results=JSON.parse(JSON.stringify(qa.baseResults));L.Storage.set('torrents_filter',{season:[],voice:[],tracker:[]});qa.push();};
     qa.installSeries=function(){
         Object.assign(movie,{id:99117002,media_type:'tv',title:'Нічний архів',original_title:'Night Archive',name:'Нічний архів',original_name:'Night Archive',first_air_date:'2021-01-01'});
         qa.results=[{Title:'Нічний архів / Night Archive — 夜のアーカイブ — 별빛 항로 — S02E01-E03 2024 1080p WEB-DL HEVC Ukr Eng DVO',Tracker:'toloka.to',Size:7340032000,Seeders:84,Peers:11,InfoHash:'9'.repeat(40),MagnetUri:'magnet:?xt=urn:btih:'+'9'.repeat(40),hash:'9'.repeat(40),AudioLanguages:['uk','en'],SubtitleLanguages:['uk'],VoiceoverStudio:'Студія Переклад / Studio Переклад',Quality:'1080p',PublishDate:'2024-02-01'}];
@@ -43,6 +43,19 @@ module.exports=function installFixture(){
         Object.assign(movie,{id:99117003,media_type:'tv',title:'Атака титанів',original_title:'Attack on Titan',name:'Атака титанів',original_name:'Attack on Titan',first_air_date:'2013-04-07',release_date:undefined,number_of_seasons:4});
         qa.results=[{Title:'Attack on Titan (2018) S02E01-E12 1080p WEB-DL HEVC Ukr Eng',Tracker:'toloka.to',Size:7340032000,Seeders:84,Peers:11,InfoHash:'3'.repeat(40),MagnetUri:'magnet:?xt=urn:btih:'+'3'.repeat(40),hash:'3'.repeat(40),AudioLanguages:['uk','en'],SubtitleLanguages:['uk'],VoiceoverStudio:'ТакТреба',Quality:'1080p',PublishDate:'2018-04-01'}];
         qa.push();
+    };
+    qa.installCoverageContext=function(){
+        Object.assign(movie,{id:99117004,media_type:'tv',title:'Надприродне',original_title:'Supernatural',name:'Надприродне',original_name:'Supernatural',first_air_date:'2005-09-13',release_date:undefined,number_of_seasons:15,seasons:Array.from({length:15},(_,i)=>({season_number:i+1,name:'Season '+(i+1),air_date:(2005+i)+'-09-01',episode_count:22}))});
+        qa.results=[
+            {Title:'Supernatural S08E01-E23 2012 1080p WEB-DL Ukr',Tracker:'toloka.to',Size:7340032000,Seeders:84,Peers:11,InfoHash:'8'.repeat(40),MagnetUri:'magnet:?xt=urn:btih:'+'8'.repeat(40),hash:'8'.repeat(40),AudioLanguages:['uk'],SubtitleLanguages:['uk'],Quality:'1080p',PublishDate:'2012-10-01'},
+            {Title:'Supernatural S01-S15 Complete Collection 1080p BluRay',Tracker:'mazepa.to',Size:73400320000,Seeders:184,Peers:31,InfoHash:'a'.repeat(40),MagnetUri:'magnet:?xt=urn:btih:'+'a'.repeat(40),hash:'a'.repeat(40),AudioLanguages:['en'],SubtitleLanguages:['uk'],Quality:'1080p',PublishDate:'2020-01-01'},
+            {Title:'Supernatural S01-S03 Collection 720p WEB-DL',Tracker:'other.example',Size:17340000000,Seeders:24,Peers:5,InfoHash:'b'.repeat(40),MagnetUri:'magnet:?xt=urn:btih:'+'b'.repeat(40),hash:'b'.repeat(40),AudioLanguages:['en'],SubtitleLanguages:[],Quality:'720p',PublishDate:'2010-01-01'},
+            {Title:'Supernatural Complete Series 1080p',Tracker:'other.example',Size:53400000000,Seeders:14,Peers:2,InfoHash:'c'.repeat(40),MagnetUri:'magnet:?xt=urn:btih:'+'c'.repeat(40),hash:'c'.repeat(40),AudioLanguages:['en'],SubtitleLanguages:[],Quality:'1080p',PublishDate:'2020-01-01'}
+        ];qa.push();
+    };
+    qa.installLongSeasonContext=function(){
+        Object.assign(movie,{id:99117005,media_type:'tv',title:'Long Archive',original_title:'Long Archive',name:'Long Archive',original_name:'Long Archive',first_air_date:'1977-01-01',release_date:undefined,number_of_seasons:47,seasons:Array.from({length:47},(_,i)=>({season_number:i+1,name:'Season '+(i+1),air_date:(1977+i)+'-01-01',episode_count:12}))});
+        qa.results=[{Title:'Long Archive S47E01-E12 2023 1080p WEB-DL',Tracker:'toloka.to',Size:7340032000,Seeders:84,Peers:11,InfoHash:'d'.repeat(40),MagnetUri:'magnet:?xt=urn:btih:'+'d'.repeat(40),hash:'d'.repeat(40),AudioLanguages:['uk'],SubtitleLanguages:['uk'],Quality:'1080p',PublishDate:'2023-01-01'}];qa.push();
     };
     qa.selectSeasonForNextOpen=function(season){qa.pendingSelectedSeason=season;};
     qa.installCase=function(testCase){

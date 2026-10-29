@@ -15,7 +15,64 @@ test('Torrent adapter always creates a modal popup and restores Details focus/sc
 test('missing popup adapter leaves native Torrent button unclaimed instead of mounting a side panel',()=>{
  const start=hybrid.indexOf('    function setupStreams('),end=hybrid.indexOf('    function onStreamController(',start),c={metadata:{enabled:()=>true},window:{lampa_settings:{torrents_use:true}},Lampa:{Storage:{field:()=> 'jackett'}}};vm.createContext(c);vm.runInContext(hybrid.slice(start,end),c);const record={streamPane:null};c.setupStreams(record);assert.equal(record.streamPane,null);assert.equal(/sh_torrent_mode/.test(hybrid),false);
 });
+test('selected season is revealed only after the overlay is open without stealing focus',()=>{const source=fs.readFileSync(__dirname+'/../ui/torrent-cinema/runtime.js','utf8'),start=source.indexOf('    function streamSeasonButtons('),end=source.indexOf('    function renderStreamSeasons(',start),queue=[],c={window:{requestAnimationFrame:fn=>queue.push(fn)},Number};vm.createContext(c);vm.runInContext(source.slice(start,end)+';this.reveal=streamRevealSelectedSeason;',c);const selected={dataset:{season:'47'},isConnected:true,scrollIntoView(options){this.options=options;}},previousFocus={id:'previous-focus'},record={selectedSeason:47,streamSeasonRow:{querySelectorAll:()=>[selected]},streamPane:{},streamChild:{last:previousFocus},streamView:{isOpen:()=>true}};c.reveal(record);assert.equal(queue.length,1);queue.shift()();assert.equal(queue.length,1);queue.shift()();assert.equal(JSON.stringify(selected.options),JSON.stringify({block:'nearest',inline:'center',behavior:'auto'}));assert.equal(record.streamChild.last,previousFocus);});
 const movie={id:47,title:'Дюна',original_title:'Dune',release_date:'2021-01-01',media_type:'movie'},tv={id:48,name:'Frieren',original_name:'Frieren',first_air_date:'2023-01-01',media_type:'tv'};
+test('audio language categories use verified audio metadata only and keep multi-language releases in each matching category',()=>{
+ const {api}=apiFixture(),match=api.audioCategoryMatches;
+ assert.equal(typeof match,'function');
+ const audio=languages=>api.normalizeRelease({Title:'Release 1080p WEB-DL',AudioLanguages:languages}).parsed.audio;
+ assert.equal(match(audio(['uk','en']),'ua'),true);assert.equal(match(audio(['uk','en']),'en'),true);assert.equal(match(audio(['uk','en']),'ru'),false);assert.equal(match(audio(['uk','en']),'other'),false);
+ assert.equal(match(audio(['ru']),'ru'),true);assert.equal(match(audio(['en']),'en'),true);assert.equal(match(audio(['fr']),'other'),true);assert.equal(match(audio([]),'other'),true);
+ const subtitlesOnly=api.normalizeRelease({Title:'Release 1080p WEB-DL',SubtitleLanguages:['uk']}).parsed;
+ assert.equal(match(subtitlesOnly.audio,'ua'),false);assert.equal(match(subtitlesOnly.audio,'other'),true,'unknown audio belongs to Other without borrowing subtitle language');
+ const localized=[
+  [{Title:'Назва S08 1080p WEB-DL',AudioLanguages:['Українська озвучка']},'ua'],
+  [{Title:'Назва S08 1080p WEB-DL',AudioLanguages:['Українська доріжка']},'ua'],
+  [{Title:'Назва 1080p WEB-DL',AudioLanguages:['УКР']},'ua'],
+  [{Title:'Назва 1080p WEB-DL',AudioLanguages:['Ukr']},'ua'],
+  [{Title:'Назва 1080p WEB-DL',AudioLanguages:['UA']},'ua'],
+  [{Title:'Название 1080p WEB-DL',AudioLanguages:['Русский']},'ru'],
+  [{Title:'Название 1080p WEB-DL',AudioLanguages:['російська озвучка']},'ru'],
+  [{Title:'Movie 1080p WEB-DL',AudioLanguages:['RUS']},'ru'],
+  [{Title:'Movie 1080p WEB-DL',AudioLanguages:['RU']},'ru'],
+  [{Title:'Movie 1080p WEB-DL',AudioLanguages:['Англійська']},'en'],
+  [{Title:'Movie 1080p WEB-DL',AudioLanguages:['ENG']},'en'],
+  [{Title:'Movie 1080p WEB-DL',AudioLanguages:['EN']},'en']
+ ];
+ for(const [source,category] of localized){const parsed=api.normalizeRelease(source).parsed;assert.equal(match(parsed.audio,category),true,JSON.stringify(source));}
+ const unknownExplicit=api.normalizeRelease({Title:'The Others (2001) Ukr 1080p WEB-DL',AudioLanguages:['und']}).parsed;
+ assert.equal(match(unknownExplicit.audio,'ua'),false,'explicit unknown structured audio overrides a title-only token');assert.equal(match(unknownExplicit.audio,'other'),true);
+ const titleOnly=api.normalizeRelease({Title:'The Others (2001) Ukr audio 1080p WEB-DL',Tracker:'Toloka.to'}).parsed;
+ assert.equal(match(titleOnly.audio,'ua'),true,'verified release-title aliases work without structured audio metadata');
+ const subtitleLanguage=api.normalizeRelease({Title:'Movie English audio Ukrainian subtitles 1080p WEB-DL',AudioLanguages:['en'],SubtitleLanguages:['uk'],Tracker:'Toloka.to'}).parsed;
+ assert.equal(match(subtitleLanguage.audio,'en'),true);assert.equal(match(subtitleLanguage.audio,'ua'),false,'Ukrainian subtitle and tracker do not imply Ukrainian audio');
+ for(const label of ['Українська озвучка','Українська доріжка']){const structured=api.normalizeRelease({Title:'Movie 1080p WEB-DL',AudioLanguages:[label]}).parsed;assert.equal(structured.audio.ua,true,label+' sets the UA badge/scoring flag');assert.equal(match(structured.audio,'ua'),true,label+' matches the UA category');}
+ const uaFrench=api.normalizeRelease({Title:'Movie',AudioLanguages:['uk','fr']}).parsed.audio,enJapanese=api.normalizeRelease({Title:'Movie',AudioLanguages:['en','ja']}).parsed.audio;
+ assert.equal(match(uaFrench,'ua'),true);assert.equal(match(uaFrench,'other'),true,'verified French track appears in Other and UA');assert.equal(match(enJapanese,'en'),true);assert.equal(match(enJapanese,'other'),true,'verified Japanese track appears in Other and EN');
+ assert.equal(match(api.normalizeRelease({Title:'Movie',AudioLanguages:['und']}).parsed.audio,'other'),true,'unknown-only remains in Other');
+ const nativeMixedFields=api.normalizeRelease({Title:'Movie English audio Ukrainian subtitles 1080p WEB-DL',AudioLanguages:['en'],SubtitleLanguages:['uk'],ffprobe:[{codec_type:'audio',tags:{language:'eng'}},{codec_type:'audio',tags:{language:'ukr'}}]}).parsed;
+ assert.deepEqual(Array.from(nativeMixedFields.audio.languages),['English'],'explicit audio language list takes precedence over ambiguous secondary parser/ffprobe language tokens');assert.equal(match(nativeMixedFields.audio,'ua'),false);
+ assert.equal(match(api.normalizeRelease({Title:'Movie Ukr 1080p WEB-DL',Tracker:'Toloka.to',AudioLanguages:['fr']}).parsed.audio,'ua'),false,'tracker origin cannot override structured audio');
+});
+test('visible audio labels include every verified track while preserving the Ukrainian flag cue',()=>{
+ const {api}=apiFixture(),cases=[
+  [['uk'],'Українська',true],
+  [['uk','en'],'Українська · English',true],
+  [['uk','fr'],'Українська · Французька',true],
+  [['en','ja'],'English · Японська',false],
+  [['und'],'Невідомо',false]
+ ];
+ for(const [languages,label,ua] of cases){const audio=api.normalizeRelease({Title:'Release 1080p WEB-DL',AudioLanguages:languages}).parsed.audio;assert.equal(audio.label,label,JSON.stringify(languages));assert.equal(audio.ua,ua,JSON.stringify(languages));const visible=(audio.ua?'🇺🇦 ':'🔊 ')+audio.label;assert.equal(visible,(ua?'🇺🇦 ':'🔊 ')+label);}
+ const runtime=fs.readFileSync(__dirname+'/../ui/torrent-cinema/runtime.js','utf8');assert.match(runtime,/d\.parsed\.audio\.ua\?'🇺🇦 ':'🔊 '\)\+d\.parsed\.audio\.label/);
+ const view=fs.readFileSync(__dirname+'/../ui/torrent-cinema/view.js','utf8');assert.ok(view.includes("audioLine.textContent=(audio.ua?'🇺🇦 ':'')+(audio.label||'Невідомо')"));assert.match(view,/section\('tc-audio-section',[\s\S]*?\[audio\.label\|\|'Невідомо'/);
+});
+test('Torrent Cinema offers dedicated UA/RU/EN/Other audio controls, defaults to UA, and removes the quality-row UA toggle',()=>{
+ const runtime=fs.readFileSync(__dirname+'/../ui/torrent-cinema/runtime.js','utf8');
+ assert.match(runtime,/\['ua','🇺🇦 UA'\],\['ru','RU'\],\['en','EN'\],\['other','Інші'\]/);
+ assert.match(runtime,/audioCategory:record\.streamAudioCategory\|\|'ua'/);
+ assert.match(runtime,/ctr-tabs ctr-audio-tabs/);
+ assert.doesNotMatch(runtime,/Українське аудіо|uaButton|uaOnly/);
+});
 test('full release title preserves parser spelling, edition, year and raw transport exactly',()=>{const {api}=apiFixture(),source=Object.freeze({Title:'Dune.2021.2160p.WEB-DL.HDR.HEVC.Ukr.Eng',MagnetUri:'magnet:?xt=urn:btih:abc&dn=raw',InfoHash:'a'.repeat(40),Seeders:40});const before=JSON.stringify(source),view=api.releaseView(source,movie,'movie');assert.equal(view.title,source.Title);assert.match(view.release,/WEB-DL.*HDR/);assert.equal(view.raw,source.Title);assert.equal(JSON.stringify(source),before);});
 test('foreign release does not borrow the current movie title/year',()=>{const {api}=apiFixture();assert(!api.releaseView({Title:'Alien.1979.1080p'},movie,'movie').title.includes('Дюна'));assert.equal(api.releaseView({Title:'Alien.1979.1080p'},movie,'movie').title,'Alien.1979.1080p');});
 test('display identity uses only the torrent title, verified year, coverage and technical tokens',()=>{
@@ -39,7 +96,7 @@ test('visible title uses parser-provided Ukrainian/English names only and never 
  for(const [source,name] of cases){const raw=source.Title||source.Name,view=api.releaseView(source,catalog,'movie');assert.equal(view.identity.name,name);assert.equal(view.title,raw);assert.equal(view.raw,raw);assert(!view.identity.name.includes('Catalog'));}
 });
 test('removed Google TV appearance keys are not read by the canonical runtime',()=>{
- const fs=require('node:fs'),path=require('node:path'),base=path.join(__dirname,'../ui/torrent-cinema'),sources=['entry.js','runtime.js','view.js','metadata.js','style.css'].map(file=>fs.readFileSync(path.join(base,file),'utf8')).join('\n');
+ const fs=require('node:fs'),path=require('node:path'),base=path.join(__dirname,'../ui/torrent-cinema'),sources=['entry.js','runtime.js','view.js','metadata.js','seasons.js','style.css'].map(file=>fs.readFileSync(path.join(base,file),'utf8')).join('\n');
  for(const key of ['torrents_cinema_theme','torrents_cinema_tv','torrents_cinema_animations','torrents_cinema_title_lines','torrents_cinema_cards','torrents_cinema_intensity','torrents_cinema_opacity','torrents_cinema_darkness'])assert(!sources.includes(key),key+' should stay inert after retirement');
 });
 for(const [raw,want] of [['Frieren.S01E03.1080p','S01E03'],['Frieren.S02E01-E12.2160p','S02E01–E12'],['Frieren.S01E01-S01E12','S01E01–E12'],['Frieren.1x03','S01E03'],['Frieren.Season 2','S02'],['Frieren.Сезон 2','S02'],['Frieren.1 сезон, 1-12 серії','S01E01–E12'],['Frieren.[01-12].1080p','E01–E12'],['Frieren.S01-S03','S01–S03'],['Frieren.E05','E05'],['Frieren.2023.1080p.x265.10bit','епізоди не визначено']])test('verified release coverage: '+raw,()=>assert.equal(apiFixture().api.coverage(raw,{}),want));
@@ -47,7 +104,7 @@ test('localized anime/dorama and unknown titles remain readable without inventin
 test('cache identity isolates account/profile/title/type/source/query/season/episode/epoch',()=>{const {api,c}=apiFixture(),params={movie,search:'Dune'};const key=api.key(params,'movie',0);for(const p of [{...params,movie:{...movie,id:48}},{...params,movie:{...movie,source:'cub'}},{...params,search:'Other'},{...params,season:2},{...params,episode:3},{...params,filter_episode:4}])assert.notEqual(api.key(p,'movie',0),key);assert.notEqual(api.key(params,'tv',0),key);assert.notEqual(api.key(params,'movie',1),key);c.Lampa.Account.Permit.account.profile.id='b';assert.notEqual(api.key(params,'movie',0),key);c.Lampa.Account.Permit.account.id=2;assert.notEqual(api.key(params,'movie',0),key);assert(!key.includes('token'));});
 function lifecycle(){const f=apiFixture(),params={movie,search:'Dune'},record={activity:{},streamPane:{dataset:{},setAttribute(){},removeAttribute(){},querySelectorAll:()=>[],querySelector:()=>({textContent:''})},streamContent:{appendChild(){},textContent:''},streamLoad:{hidden:false},streamStatus:{}},root={classList:{add(){}},querySelector(){return null},addEventListener(){},removeEventListener(){}},pending=[],stats={created:0,destroyed:0,rendered:0,followed:0,removed:0},active={activity:record.activity};let open=false;
 record.streamView={open:()=>{open=true},close:()=>{open=false},isOpen:()=>open};
-Object.assign(f.c,{running:true,streamGeneration:0,streamCache:[],streamParams:()=>({...params}),streamStatus:()=>{},streamInfo:()=>{},streamSyncRows:()=>{},streamActivate:()=>{},clearStreamFiles(){},collapseInline(){},inlineEnter:()=>false,streamSelectOwner:null,disposeStreamQuery(){},Date,document:{querySelector(){return null}},$:()=>({remove(){}}),LampaTorrentOverlay:f.api});
+Object.assign(f.c,{running:true,streamGeneration:0,streamCache:[],streamParams:()=>({...params}),streamStatus:()=>{},streamInfo:()=>{},streamSyncRows:()=>{},streamActivate:()=>{},streamRevealSelectedSeason:()=>{},clearStreamFiles(){},collapseInline(){},inlineEnter:()=>false,streamSelectOwner:null,disposeStreamQuery(){},Date,document:{querySelector(){return null}},$:()=>({remove(){}}),LampaTorrentOverlay:f.api});
 Object.assign(f.c.Lampa,{Activity:{active:()=>active},Listener:{follow:()=>stats.followed++,remove:()=>stats.removed++},Controller:{add(){},enabled:()=>({})},Torrent:{back(fn){stats.back=fn;stats.backBindings=(stats.backBindings||0)+1},opened(){}},Parser:{get:(p,done,fail)=>pending.push({done,fail})},Component:{get:()=>function(){},create(p){stats.created++;return {render:()=>[root],initialize(){this.parse()},parse(){f.c.Lampa.Parser.get(p,()=>{stats.rendered++;this.activity.loader(false)},()=>{stats.failed=(stats.failed||0)+1;this.activity.loader(false)})},destroy(){stats.destroyed++},append(){},reset(){},next(){},applyFilter(){}}}}});
 f.c.window.TorrentsRedesign=null;vm.runInContext(hybrid.slice(hybrid.indexOf('    function streamHeaderTitle('),hybrid.indexOf('    function streamSession(')),f.c);vm.runInContext(hybrid.slice(hybrid.indexOf('    function streamSession('),hybrid.indexOf('    function streamInfo(')),f.c);vm.runInContext(hybrid.slice(hybrid.indexOf('    function streamEpisodeDetails('),hybrid.indexOf('    function applyStreamFileStudios(')),f.c);vm.runInContext(hybrid.slice(hybrid.indexOf('    function closeStreamChild('),hybrid.indexOf('    // Core button handlers')),f.c);vm.runInContext(hybrid.slice(hybrid.indexOf('    function loadStreams('),hybrid.indexOf('    function removeStreams(')),f.c);
 return {c:f.c,record,stats,pending,active,get open(){return open}};}
@@ -73,3 +130,4 @@ test('native Files sits above Torrent Cinema and named layers follow the contrac
  const levels={overlay:Number(overlay[1]),select:Number(/\.sh-cinema-select\{[^}]*z-index\s*:\s*(\d+)/.exec(css)?.[1]),files:Number(files[1]),loading:Number(/\.tc-native-loading\{[^}]*z-index\s*:\s*(\d+)/.exec(css)?.[1]),search:Number(/\.tc-native-search\{[^}]*z-index\s*:\s*(\d+)/.exec(css)?.[1]),player:Number(/\.tc-native-player\{[^}]*z-index\s*:\s*(\d+)/.exec(css)?.[1])};
  assert.deepEqual(levels,{overlay:100,select:120,files:130,loading:140,search:145,player:150});
 });
+test('season-pack Best Choice eligibility includes interior seasons but rejects packs outside the selected season',()=>{const {api}=apiFixture(),show={id:8,name:'Supernatural',original_name:'Supernatural',first_air_date:'2005-09-13',media_type:'tv'},source=title=>api.normalizeRelease({Title:title,Tracker:'toloka.to',Quality:'1080p',AudioLanguages:['uk'],InfoHash:'a'.repeat(40)}),all=source('Supernatural S01-S15 Complete Collection 1080p BluRay'),early=source('Supernatural S01-S03 Collection 720p WEB-DL');for(const season of [2,8,15])assert.equal(api.releaseMatch(all,show,{season}).eligible,true,'S01-S15 includes S'+season);assert.equal(api.releaseMatch(early,show,{season:2}).eligible,true,'S01-S03 includes S02');assert.equal(api.releaseMatch(early,show,{season:8}).eligible,false,'S01-S03 excludes S08');assert(api.releaseMatch(early,show,{season:8}).reasons.includes('Інший сезон або набір сезонів'));});
