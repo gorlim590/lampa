@@ -334,9 +334,50 @@ body.stremio-hybrid .tp-person-tool.focus{box-shadow:0 0 0 .12em var(--sh-accent
 body.stremio-hybrid .tp-person-unknown{font-size:.8em;color:var(--sh-muted)}
 @media(prefers-reduced-motion:reduce){body.stremio-hybrid .full-person{transition:none!important;transform:none!important}}
 `;
+    css += `
+body.stremio-hybrid .sh-movie-page .sh-genre-chips{display:flex;flex-wrap:wrap;align-items:center;gap:.45em;margin:.15em 0 1.15em;max-width:62em}
+body.stremio-hybrid .sh-movie-page .sh-genre-chip{display:inline-flex;align-items:center;min-height:2em;padding:.25em .8em;border:1px solid #ffffff20;border-radius:var(--sh-pill);background:linear-gradient(135deg,#ffffff12,#ffffff06);color:#e8e5f1;font-size:.82em;line-height:1.25;white-space:normal;transition:background .16s ease,border-color .16s ease,transform .16s ease}
+body.stremio-hybrid .sh-movie-page .ifx-series-info .sh-genre-chips{display:flex!important;flex-wrap:wrap!important;gap:.4em .5em!important;margin:.1em 0 .2em!important}
+body.stremio-hybrid .sh-movie-page .ifx-series-info .sh-genre-chip{display:inline-flex!important;align-items:center!important;min-height:2em!important;padding:.25em .8em!important;border:1px solid #ffffff20!important;border-radius:var(--sh-pill)!important;background:linear-gradient(135deg,#ffffff12,#ffffff06)!important;color:#e8e5f1!important;font-size:.84em!important;font-weight:400!important;line-height:1.25!important;white-space:normal!important;margin:0!important}
+body.stremio-hybrid .sh-movie-page .sh-genre-chip.focus{background:var(--sh-focus-soft);border-color:var(--sh-accent-soft);color:var(--sh-text);box-shadow:0 0 0 .12em var(--sh-accent-soft);transform:translateY(-1px)}
+body.stremio-hybrid .sh-movie-page .full-start-new__head{display:flex;align-items:center;gap:.35em;color:#c5c3cf;letter-spacing:.015em}
+body.stremio-hybrid .sh-movie-page .full-start-new__details{display:flex;flex-direction:column;gap:.35em;margin-top:.3em!important;margin-bottom:.9em!important}
+body.stremio-hybrid .sh-movie-page .sh-series-field{display:inline-flex;align-items:center;min-height:1.8em;padding:.2em .7em;border:1px solid #ffffff14;border-radius:var(--sh-pill);background:#ffffff09;color:#c7c4d1;font-size:.82em;line-height:1.35;white-space:normal}
+body.stremio-hybrid .sh-movie-page .sh-detail-section{width:100%;margin:.35em 0;padding:.65em .8em;border:1px solid #ffffff12;border-radius:.8em;background:linear-gradient(120deg,#ffffff0a,#ffffff04);box-sizing:border-box}
+body.stremio-hybrid .sh-movie-page .sh-detail-panels{position:relative;left:-10px;width:calc(100% + 20px);display:flex;flex-direction:column;gap:.35em;margin:.35em 0;box-sizing:border-box}
+body.stremio-hybrid .sh-movie-page .sh-detail-panels>.sh-detail-section{width:100%;margin:0}
+body.stremio-hybrid .sh-movie-page .tmdb-networks.sh-detail-panels-empty{display:none!important}
+body.stremio-hybrid .sh-movie-page .sh-detail-toggle{display:flex;align-items:center;justify-content:space-between;gap:1em;min-height:2.6em;padding:.2em .35em;color:#f0eef7;font-size:.95em;font-weight:500;cursor:pointer}
+body.stremio-hybrid .sh-movie-page .sh-detail-toggle::after{content:'+';display:grid;place-items:center;width:1.8em;height:1.8em;border:1px solid #ffffff20;border-radius:50%;color:#c9b9ff;font-size:1.05em;line-height:1}
+body.stremio-hybrid .sh-movie-page .sh-detail-toggle[aria-expanded="true"]::after{content:'−'}
+body.stremio-hybrid .sh-movie-page .sh-detail-toggle.focus{color:#fff;text-shadow:0 0 1em #ab91ff66;outline:2px solid var(--sh-accent-soft);outline-offset:2px;border-radius:.45em}
+body.stremio-hybrid .sh-movie-page .sh-detail-section__body{display:flex;flex-wrap:wrap;align-items:center;gap:.65em;padding:.55em .35em .25em;border-top:1px solid #ffffff10}
+body.stremio-hybrid .sh-movie-page .sh-detail-section__body[hidden]{display:none!important}
+body.stremio-hybrid .sh-movie-page .sh-detail-section__body .tag-count{flex:0 0 auto;margin:0!important}
+body.stremio-hybrid .sh-movie-page .sh-detail-section__body .platforms-group,body.stremio-hybrid .sh-movie-page .sh-detail-section__body .studios-group{display:flex;flex:1 1 100%;flex-wrap:wrap;align-items:center;gap:.55em}
+body.stremio-hybrid .sh-movie-page .sh-detail-section__body .platforms-group::before,body.stremio-hybrid .sh-movie-page .sh-detail-section__body .studios-group::before{display:block;flex:0 0 100%;color:#aaa6b6;font-size:.72em;letter-spacing:.08em;text-transform:uppercase}
+body.stremio-hybrid .sh-movie-page .sh-detail-section__body .platforms-group::before{content:'Мережа / платформа'}
+body.stremio-hybrid .sh-movie-page .sh-detail-section__body .studios-group::before{content:'Студії / виробники'}
+body.stremio-hybrid .sh-movie-page .sh-detail-section__body .network-logo{height:2.6em!important;min-height:2.6em!important;padding:.35em .55em!important;border-radius:.55em!important;background:#ffffff0a!important;border:1px solid #ffffff12!important}
+body.stremio-hybrid .sh-movie-page .sh-detail-section__body .network-logo img{max-height:1.9em!important;max-width:9em!important;object-fit:contain}
+body.stremio-hybrid .sh-movie-page .networks-wrapper .sh-detail-section{margin:0;width:100%}
+body.stremio-hybrid .sh-movie-page .tmdb-networks{margin:.35em 0!important;padding:0!important}
+body.stremio-hybrid .sh-movie-page .tmdb-networks > .items-line__body{margin:0!important}
+body.stremio-hybrid .sh-movie-page .ua-comments-root{width:auto;max-width:44em;margin:.6em 0!important}
+body.stremio-hybrid .sh-movie-page .sh-detail-section--comments .ua-comments-root{width:100%;max-width:none;margin:.35em 0!important}
+body.stremio-hybrid .sh-movie-page .sh-detail-section--comments .ua-comments-slider{max-width:100%}
+body.stremio-hybrid .sh-movie-page .items-line.sh-details-heading-hidden>.items-line__head{display:none!important}
+body.stremio-hybrid .sh-movie-page .ua-status-card{width:auto!important;max-width:100%;min-height:0!important;padding:.5em .8em!important;border:1px solid #ffffff12!important;border-radius:var(--sh-pill)!important;background:#ffffff07!important;color:#b9b5c4!important;font-size:.78em!important;line-height:1.4;white-space:normal}
+body.stremio-hybrid .sh-movie-page .items-line__head{margin:.5em 0 .4em!important}
+body.stremio-hybrid .sh-movie-page .items-line__title{font-size:1.05em;font-weight:600;letter-spacing:.01em}
+body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;overflow:hidden}
+@media(max-width:1360px){body.stremio-hybrid .sh-movie-page .sh-genre-chips{gap:.35em;margin-bottom:.8em}body.stremio-hybrid .sh-movie-page .sh-detail-section{padding:.5em .65em}body.stremio-hybrid .sh-movie-page .ua-comments-root{max-width:34em}}
+@media(prefers-reduced-motion:reduce){body.stremio-hybrid .sh-movie-page .sh-genre-chip{transition:none!important;transform:none!important}}
+`;
     // Cardify owns the native template/data. Move nodes with their handlers, never clone them.
     var movieRecords=[], movieFrame=0, movieTimers=[];
     function restoreMovie(record) {
+        restoreDetailsPresentation(record);
         if(record.ratingController&&record.ratingController.up===record.ratingUp)record.ratingController.up=record.originalRatingUp;
         (record.castLines||[]).forEach(function(entry){entry.line.unuse(entry.hook);delete entry.line._shCastHook;var rendered=entry.line.render(),node=rendered&&(rendered[0]||rendered);if(node&&node.querySelectorAll)node.querySelectorAll('.sh-cast-watched').forEach(function(n){n.remove();});});
         record.root.querySelectorAll('.sh-generated-description').forEach(function(n){n.remove();});
@@ -361,6 +402,91 @@ body.stremio-hybrid .tp-person-unknown{font-size:.8em;color:var(--sh-muted)}
     }
     function removeMovies() {
         stopMovieQueue(); movieRecords.forEach(restoreMovie); movieRecords=[];
+    }
+    function restoreDetailsPresentation(record) {
+        (record.detailPanels||[]).slice().reverse().forEach(function(panel){
+            if(panel.toggle){$(panel.toggle).off('.shDetails');panel.toggle.removeEventListener('click',panel.activate);}
+            (panel.nodes||[]).slice().reverse().forEach(function(item){
+                if(item.node&&item.parent)item.parent.insertBefore(item.node,item.next&&item.next.parentNode===item.parent?item.next:null);
+            });
+            if(panel.root&&panel.root.parentNode)panel.root.parentNode.removeChild(panel.root);
+        });
+        record.detailPanels=[];
+        if(record.detailGroup&&record.detailGroup.parentNode)record.detailGroup.parentNode.removeChild(record.detailGroup);record.detailGroup=null;
+        if(record.networkPlaceholder)record.networkPlaceholder.classList.remove('sh-detail-panels-empty');record.networkPlaceholder=null;
+        if(record.relatedListMove){var related=record.relatedListMove;if(related.node&&related.parent)related.parent.insertBefore(related.node,related.next&&related.next.parentNode===related.parent?related.next:null);record.relatedListMove=null;}
+        (record.hiddenDetailHeadings||[]).forEach(function(node){node.classList.remove('sh-details-heading-hidden');});record.hiddenDetailHeadings=[];
+        (record.nativeGenreRows||[]).forEach(function(entry){if(entry.row&&!entry.rowHadClass)entry.row.classList.remove('sh-genre-chips');(entry.chips||[]).forEach(function(chip,index){$(chip).off('.shDetails');if(!entry.genreHad[index])chip.classList.remove('sh-genre-chip');if(!entry.selectorHad[index])chip.classList.remove('selector');if(entry.roles[index]===null)chip.removeAttribute('role');else chip.setAttribute('role',entry.roles[index]);});});record.nativeGenreRows=[];
+        if(record.genreChips){record.genreChips.querySelectorAll('.sh-genre-chip').forEach(function(chip){$(chip).off('.shDetails');});if(record.genreChips.parentNode)record.genreChips.parentNode.removeChild(record.genreChips);}
+        record.genreChips=null;
+    }
+    function refreshMovieCollection(record,focus){
+        var active=Lampa.Controller.enabled();
+        if(!active||active.name!=='full_start'||!active.controller)return;
+        var target=focus&&focus.isConnected?focus:record.page.querySelector('.selector.focus');
+        Lampa.Controller.collectionSet(record.page);
+        if(target&&target.isConnected)Lampa.Controller.collectionFocus(target,record.page);
+    }
+    function detailDisclosure(record,parent,label,key,nodes,initiallyOpen) {
+        if(!parent||!nodes||!nodes.length)return null;
+        record.detailPanels=record.detailPanels||[];
+        var existing=record.detailPanels.filter(function(panel){return panel.key===key&&panel.root.isConnected;})[0];
+        if(existing)return existing;
+        nodes=nodes.filter(function(node){return node&&node.parentNode;});if(!nodes.length)return null;
+        var section=document.createElement('section');section.className='sh-detail-section sh-detail-section--'+key;
+        var toggle=document.createElement('div');toggle.className='selector sh-detail-toggle';toggle.setAttribute('role','button');toggle.setAttribute('aria-expanded',String(!!initiallyOpen));toggle.setAttribute('aria-controls','sh-detail-panel-'+key);toggle.textContent=label;
+        var body=document.createElement('div');body.className='sh-detail-section__body';body.id='sh-detail-panel-'+key;body.hidden=!initiallyOpen;
+        var panel={key:key,root:section,toggle:toggle,body:body,nodes:[]};
+        nodes.forEach(function(node){panel.nodes.push({node:node,parent:node.parentNode,next:node.nextSibling});});
+        parent.insertBefore(section,nodes[0]);section.appendChild(toggle);section.appendChild(body);nodes.forEach(function(node){body.appendChild(node);});if(initiallyOpen)section.classList.add('is-open');
+        panel.activate=function(){var open=toggle.getAttribute('aria-expanded')!=='true';toggle.setAttribute('aria-expanded',String(open));body.hidden=!open;section.classList.toggle('is-open',open);refreshMovieCollection(record,toggle);};
+        $(toggle).on('hover:enter.shDetails',panel.activate);toggle.addEventListener('click',panel.activate);
+        record.detailPanels.push(panel);
+        return panel;
+    }
+    function setupDetailsPresentation(record,movie) {
+        var page=record.page,root=record.root,tagBlock=page.querySelector('.full-descr__tags:not(.networks-wrapper)'),networks=page.querySelector('.tmdb-networks');
+        var previousPanelCount=(record.detailPanels||[]).length,previousGenreSignature=record.genreSignature||'',genreSignature='';
+        var genreControl=null,detailControls=[];
+        if(tagBlock){
+            var relatedLists=page.querySelector('.trakttv-lists');
+            if(relatedLists&&relatedLists.parentNode&&relatedLists.parentNode!==tagBlock&&!(record.detailPanels||[]).some(function(panel){return panel.key==='additional'&&panel.body.contains(relatedLists);})){if(!record.relatedListMove)record.relatedListMove={node:relatedLists,parent:relatedLists.parentNode,next:relatedLists.nextSibling};tagBlock.appendChild(relatedLists);}
+            Array.prototype.forEach.call(tagBlock.querySelectorAll('.tag-count.selector'),function(node){
+                var name=(node.querySelector('.tag-count__name')||node).textContent.trim().toLowerCase();
+                if(name.indexOf('жанр')===0)genreControl=node;
+            });
+            detailControls=Array.prototype.filter.call(tagBlock.querySelectorAll('.tag-count.selector'),function(node){var name=(node.querySelector('.tag-count__name')||node).textContent.trim().toLowerCase();return name.indexOf('жанр')===0||name.indexOf('тег')===0||node.classList.contains('trakttv-lists');});
+            if(detailControls.length)detailDisclosure(record,tagBlock,'Додаткова інформація','additional',detailControls);
+        }
+        if(networks){
+            var studioGroup=networks.querySelector('.studios-group'),platformGroup=networks.querySelector('.platforms-group'),separator=networks.querySelector('.network-separator'),networkWrapper=networks.querySelector('.networks-wrapper');
+            var hasProductionLogos=!!((platformGroup&&platformGroup.querySelectorAll('.network-logo').length)||(studioGroup&&studioGroup.querySelectorAll('.network-logo').length));
+            var studioNodes=hasProductionLogos?[platformGroup,separator,studioGroup].filter(Boolean):[];
+            var productionCount=tagBlock&&Array.prototype.filter.call(tagBlock.querySelectorAll('.tag-count.selector'),function(node){return (node.querySelector('.tag-count__name')||node).textContent.trim().toLowerCase().indexOf('виробниц')===0;})[0];
+            if(productionCount&&productionCount.parentNode===tagBlock){studioNodes.push(productionCount);}
+            if(studioNodes.length)detailDisclosure(record,networkWrapper||networks,'Студії та виробництво','production',studioNodes);
+        }
+        var comments=page.querySelector('.ua-comments-root');
+        if(comments&&comments.parentNode){Array.prototype.forEach.call(page.querySelectorAll('.items-line'),function(line){var title=line.querySelector('.items-line__title');if(title&&title.textContent.trim()==='Детально'&&line.querySelector('.ua-comments-root')){record.hiddenDetailHeadings=record.hiddenDetailHeadings||[];if(record.hiddenDetailHeadings.indexOf(line)<0)record.hiddenDetailHeadings.push(line);line.classList.add('sh-details-heading-hidden');}});detailDisclosure(record,comments.parentNode,'Коментарі','comments',[comments],true);}
+        var genres=Array.isArray(movie&&movie.genres)?movie.genres.filter(function(g){return g&&typeof g.name==='string'&&g.name.trim();}).filter(function(g,i,all){return all.findIndex(function(x){return String(x.id||x.name)===String(g.id||g.name);})===i;}):[];
+        genreSignature=genres.slice(0,6).map(function(g){return String(g.id||'')+':'+g.name.trim();}).join('|');
+        var knownGenreNames=genres.map(function(g){return g.name.trim().toLowerCase();}),nativeGenreRow=null;
+        if(knownGenreNames.length){
+            Array.prototype.some.call(root.querySelectorAll('.full-start-new__details .ifx-series-info > div'),function(row){
+                var labels=Array.prototype.map.call(row.querySelectorAll('span'),function(span){return span.textContent.trim().toLowerCase();}).filter(Boolean);
+                if(labels.length&&labels.every(function(label){return knownGenreNames.indexOf(label)>=0;})){nativeGenreRow=row;return true;}return false;
+            });
+        }
+        if(nativeGenreRow){record.nativeGenreRows=record.nativeGenreRows||[];if(!record.nativeGenreRows.some(function(entry){return entry.row===nativeGenreRow;})){var nativeChips=Array.prototype.slice.call(nativeGenreRow.querySelectorAll('span'));record.nativeGenreRows.push({row:nativeGenreRow,rowHadClass:nativeGenreRow.classList.contains('sh-genre-chips'),chips:nativeChips,roles:nativeChips.map(function(chip){return chip.getAttribute('role');}),selectorHad:nativeChips.map(function(chip){return chip.classList.contains('selector');}),genreHad:nativeChips.map(function(chip){return chip.classList.contains('sh-genre-chip');})});}nativeGenreRow.classList.add('sh-genre-chips');Array.prototype.forEach.call(nativeGenreRow.querySelectorAll('span'),function(chip){chip.classList.add('sh-genre-chip','selector');chip.setAttribute('role','button');$(chip).off('.shDetails').on('hover:enter.shDetails',function(){if(genreControl&&genreControl.isConnected)$(genreControl).trigger('hover:enter');});});}
+        if(genres.length&&!nativeGenreRow){
+            if(!record.genreChips){record.genreChips=document.createElement('div');record.genreChips.className='sh-genre-chips';record.genreChips.setAttribute('aria-label','Жанри');var anchor=record.descriptionToggle||record.description||root.querySelector('.full-start-new__details')||root.querySelector('.full-start-new__buttons');if(anchor&&anchor.parentNode)anchor.parentNode.insertBefore(record.genreChips,anchor.nextSibling);}
+            if(record.genreSignature!==genreSignature){record.genreChips.querySelectorAll('.sh-genre-chip').forEach(function(chip){$(chip).off('.shDetails');});record.genreChips.textContent='';
+                genres.slice(0,6).forEach(function(genre){var chip=document.createElement('div');chip.className='selector sh-genre-chip';chip.setAttribute('role','button');chip.dataset.genreId=String(genre.id||'');chip.textContent=genre.name.trim();var openGenre=function(){if(genreControl&&genreControl.isConnected)$(genreControl).trigger('hover:enter');};$(chip).on('hover:enter.shDetails',openGenre);record.genreChips.appendChild(chip);});record.genreSignature=genreSignature;}
+        }
+        if((!genres.length||nativeGenreRow)&&record.genreChips){record.genreChips.querySelectorAll('.sh-genre-chip').forEach(function(chip){$(chip).off('.shDetails');});record.genreChips.remove();record.genreChips=null;record.genreSignature='';}
+        var commentPanel=(record.detailPanels||[]).filter(function(panel){return panel.key==='comments';})[0],productionPanel=(record.detailPanels||[]).filter(function(panel){return panel.key==='production';})[0],additionalPanel=(record.detailPanels||[]).filter(function(panel){return panel.key==='additional';})[0];
+        if(commentPanel||productionPanel||additionalPanel){var detailsLine=Array.prototype.filter.call(page.querySelectorAll('.items-line'),function(line){var title=line.querySelector('.items-line__title');return title&&title.textContent.trim()==='Детально';})[0],parent=detailsLine&&detailsLine.parentNode;if(parent){if(!record.detailGroup){record.detailGroup=document.createElement('div');record.detailGroup.className='sh-detail-panels';parent.insertBefore(record.detailGroup,detailsLine);} [commentPanel,productionPanel,additionalPanel].forEach(function(panel){if(panel&&panel.root.isConnected)record.detailGroup.appendChild(panel.root);});if(networks){record.networkPlaceholder=networks;networks.classList.add('sh-detail-panels-empty');}}}
+        if((record.detailPanels||[]).length!==previousPanelCount||previousGenreSignature!==genreSignature)refreshMovieCollection(record);
     }
     function setupDescription(record, description) {
         if(record.descriptionToggle&&record.descriptionToggle.isConnected)return;
@@ -483,6 +609,7 @@ body.stremio-hybrid .tp-person-unknown{font-size:.8em;color:var(--sh-muted)}
         var movie=streamMovie(record);
         if(!description&&movie._tp_omit_details&&movie.overview){description=document.createElement('div');description.className='full-descr__text sh-generated-description';description.textContent=movie.overview;}
         if(description){description=plainDescription(record,description);move(description,true);record.description=description;description.classList.add('sh-movie-description');if(description.textContent.trim()&&typeof movie.overview==='string'&&movie.overview.trim())setupDescription(record,description);}
+        setupDetailsPresentation(record,movie);
         move(root.querySelector('.cardify__right-box'));
         root.querySelectorAll('.sh-movie-primary').forEach(function(n){n.classList.remove('sh-movie-primary');});
         var visible=Array.prototype.filter.call(buttons.querySelectorAll('.full-start__button'),function(n){return n.classList.contains('selector')&&!n.classList.contains('hide')&&!n.classList.contains('hidden')&&n.getAttribute('aria-disabled')!=='true'&&!n.disabled&&n.getClientRects().length>0&&getComputedStyle(n).visibility!=='hidden';});
