@@ -10092,6 +10092,10 @@
   var isAddingShowToWatching = false;
   var isInitialized$1 = false;
   var pendingExternalPlayback = null;
+  // Snapshot the exact episode identities handed to the native Android
+  // launcher. Its Just+ result_callback is translated back into per-item
+  // Lampa.Timeline.update events when the player returns.
+  var externalPlaylistReport = null;
   var pendingInternalPlayback = null;
   var timelineProgressSamples = {};
   var playbackInstanceSequence = 0;
@@ -10114,6 +10118,119 @@
     terminalPlaybackInstanceId = null;
     timelineProgressSamples = Object.create(null);
     return currentPlaybackInstance;
+  }
+
+  function buildExternalPlaylistReport(card, hash, playlist, token, generation) {
+    if (!card || getContentType$2(card) !== 'show' || !Array.isArray(playlist)) return null;
+    var entries = Object.create(null);
+    function add(item, fallbackHash) {
+      if (!item || typeof item !== 'object') return;
+      var timeline = item.timeline || {};
+      var itemHash = timeline.hash || item.hash || fallbackHash;
+      if (!itemHash || String(itemHash) === '0') return;
+      var se = extractSeasonEpisode(item);
+      var media = Object.assign({}, card, {
+        method: 'tv',
+        season_number: se.season,
+        episode_number: se.episode,
+        hash: String(itemHash)
+      });
+      var identity = verifiedShowEpisode(media);
+      if (!identity) return;
+      var key = String(itemHash);
+      var entry = entries[key];
+      if (entry) {
+        // Multiple playlist items sharing one Timeline hash are safe only if
+        // they resolve to the same Trakt episode identity.
+        if (entry.identity.id !== identity.id || entry.identity.season !== identity.season || entry.identity.episode !== identity.episode) entry.ambiguous = true;
+        return;
+      }
+      var initialPosition = Number(timeline.time);
+      entries[key] = {
+        hash: key,
+        media: media,
+        identity: identity,
+        initialPosition: isFinite(initialPosition) && initialPosition >= 0 ? initialPosition : 0,
+        lastPosition: isFinite(initialPosition) && initialPosition >= 0 ? initialPosition : 0,
+        completionState: 'none',
+        ambiguous: false
+      };
+    }
+    playlist.forEach(function (item) { add(item, null); });
+    // Some native playlist adapters omit the currently selected item from
+    // PlayerPlaylist.get(); the Player.external payload remains authoritative
+    // for that one item when it carries exact S/E coordinates.
+    if (hash) add(card, hash);
+    if (!Object.keys(entries).length) return null;
+    return {
+      token: String(token || ''),
+      identityGeneration: generation,
+      // This is a single active handoff snapshot, not a time-limited cache.
+      // Long episodes and multi-episode sessions may legitimately return much
+      // later; account, profile, and subsequent-player transitions invalidate it.
+      entries: entries
+    };
+  }
+
+  function handleExternalPlaylistTimelineUpdate(data, report) {
+    if (!report || report !== externalPlaylistReport ||
+        report.token !== String(Lampa.Storage.get('trakt_token') || '') ||
+        report.identityGeneration !== playbackIdentityGeneration || cloudInjectInProgress || !data || !data.data || !data.data.hash || !data.data.road) return false;
+    var entry = report.entries[String(data.data.hash)];
+    if (!entry || entry.ambiguous) return false;
+    var road = data.data.road;
+    var position = Number(road.time);
+    var duration = Number(road.duration);
+    // The Android wrapper's Timeline object normally carries measured time and
+    // duration for an unfinished item. On completion it resets both to zero;
+    // its auto-next path can also synthesize percent=100 for items before the
+    // current index. Without duration, those cases cannot safely be separated,
+    // so do not infer the configured threshold from percent alone.
+    if (!isFinite(position) || position < 0 || !isFinite(duration) || duration <= 0 || position < entry.lastPosition) return false;
+    var advanced = position > entry.lastPosition;
+    if (advanced) entry.lastPosition = position;
+    var percent = position / duration * 100;
+    if (!isFinite(percent) || percent < 0 || percent > 100) return false;
+    var minimum = parseInt(Lampa.Storage.field('trakt_min_progress') == null ? config.minProgress : Lampa.Storage.field('trakt_min_progress'), 10);
+    if (!isFinite(minimum)) minimum = 90;
+    if (percent < minimum) return false;
+    if (entry.completionState === 'confirmed' || entry.completionState === 'pending') return true;
+    if (!advanced && entry.completionState !== 'retryable') return false;
+    var media = Object.assign({}, entry.media, {
+      id: entry.identity.id,
+      method: 'tv',
+      season_number: entry.identity.season,
+      episode_number: entry.identity.episode,
+      hash: entry.hash
+    });
+    var key = getCompletionKey(media);
+    if (!key) return false;
+    entry.completionState = 'pending';
+    entry.completionKey = key;
+    markFinishIntent(key);
+    Promise.resolve().then(function () { return finish(media); }).then(function (result) {
+      if (externalPlaylistReport !== report || report.token !== String(Lampa.Storage.get('trakt_token') || '') || report.identityGeneration !== playbackIdentityGeneration) return;
+      entry.completionState = result && result.ok || result && result.skipped && result.reason === 'already_finished' ? 'confirmed' : 'retryable';
+    }).catch(function (e) {
+      if (externalPlaylistReport === report && report.token === String(Lampa.Storage.get('trakt_token') || '') && report.identityGeneration === playbackIdentityGeneration) entry.completionState = 'retryable';
+      slog('Just+ playlist history finish error', e && e.status || 'request_failed');
+    });
+    return true;
+  }
+
+  function externalReportMatchesPlayerStart(report, media, hash) {
+    // Only a Player.start still associated with the live external handoff can
+    // be part of its launch ordering. Once visibility returns, the Android
+    // result bridge emits Timeline updates and file callbacks, not Player.start.
+    if (!report || !pendingExternalPlayback || !hash || pendingExternalPlayback.hash !== hash || report !== externalPlaylistReport || report.token !== String(Lampa.Storage.get('trakt_token') || '') || report.identityGeneration !== playbackIdentityGeneration) return false;
+    var identity = verifiedShowEpisode(media);
+    var entry = report.entries[String(hash)];
+    if (!entry || entry.ambiguous) return false;
+    // The launch event can omit S/E on the card while the handoff snapshot has
+    // already verified the exact item. The exact callback hash selects that
+    // item, while the card still has to identify the same show.
+    if (!identity) return String(media && media.id) === entry.identity.id;
+    return identity.id === entry.identity.id && identity.season === entry.identity.season && identity.episode === entry.identity.episode;
   }
 
   function isPlaybackInstanceTerminal() {
@@ -10323,12 +10440,18 @@
         }
         var oldEpisode = previousInstance && verifiedShowEpisode(previousInstance.media);
         var newEpisode = verifiedShowEpisode(mediaForStart);
+        var returnedExternalHash = !!(externalPlaylistReport && hash && externalPlaylistReport.entries[String(hash)] && !pendingExternalPlayback);
+        if (!externalReportMatchesPlayerStart(externalPlaylistReport, mediaForStart, hash)) externalPlaylistReport = null;
         var sameHashDifferentEpisode = !!(reusedTimelineHash && oldEpisode && newEpisode && oldEpisode.id === newEpisode.id && (oldEpisode.season !== newEpisode.season || oldEpisode.episode !== newEpisode.episode));
         stopPreviousEpisodeOnPlayerStart(mediaForStart, hash || null);
         scrobbler.setCurrentMedia(mediaForStart);
         var externalHandoff = pendingExternalPlayback && pendingExternalPlayback.hash === hash;
         var activeInstance = beginPlaybackInstance(mediaForStart, hash, !!externalHandoff);
-        activeInstance.ambiguousTimelineHash = sameHashDifferentEpisode;
+        // A fresh internal Player.start may reuse the external episode's hash.
+        // Quarantine Timeline for that instance: delayed Android callbacks and
+        // internal Timeline events are indistinguishable. Actual internal video
+        // positions remain usable through the active HTML video handlers.
+        activeInstance.ambiguousTimelineHash = sameHashDifferentEpisode || returnedExternalHash;
         pendingInternalPlayback = externalHandoff ? null : { media: mediaForStart, hash: hash || null };
       } else {
         currentPlaybackInstance = null;
@@ -10380,18 +10503,34 @@
         return;
       }
       var timelineInstance = currentPlaybackInstance;
+      // Android may return the Just+ full playlist snapshot while the native
+      // Player.start instance still matches its hash. Route mapped entries
+      // through the measured-progress path first and never let a synthetic
+      // percent=100 marker fall through to the generic Timeline completion.
+      if (externalPlaylistReport && externalPlaylistReport.entries[String(hash)]) {
+        handleExternalPlaylistTimelineUpdate(data, externalPlaylistReport);
+        return;
+      }
       // Timeline hashes are the identity boundary for playback side effects.
       // Activity.active() may already point at a different episode/movie, so
       // it must never be used to attribute a stale or unassociated callback.
       var playbackInstanceMatches = !!(timelineInstance && timelineInstance.media && timelineInstance.hash && timelineInstance.hash === hash && timelineInstance.token === String(token) && timelineInstance.identityGeneration === playbackIdentityGeneration);
       if (!playbackInstanceMatches) {
+        // The official Android Lampa wrapper translates Just+ result_callback
+        // snapshots into Timeline updates for every changed playlist item.
+        // These arrive after the external player returns, when the active
+        // playback instance may already have been closed.
+        if (handleExternalPlaylistTimelineUpdate(data, externalPlaylistReport)) return;
         if (this.isLoggingEnabled()) slog('Ignoring Timeline update without current playback identity', { hash: hash });
         return;
       }
       // A reused hash cannot distinguish delayed events from the prior file.
       // In this case only actual internal-video position events may advance the
       // new session; Timeline never supplies progress or completion evidence.
-      if (timelineInstance.ambiguousTimelineHash) return;
+      if (timelineInstance.ambiguousTimelineHash) {
+        if (handleExternalPlaylistTimelineUpdate(data, externalPlaylistReport)) return;
+        return;
+      }
       var card = timelineInstance.media;
       var externalPlayback = pendingExternalPlayback;
       if (externalPlayback) {
@@ -10847,6 +10986,7 @@
           activeToken = String(Lampa.Storage.get('trakt_token') || '');
           markPlaybackInstanceTerminal();
           currentPlaybackInstance = null;
+          externalPlaylistReport = null;
           pendingExternalPlayback = null;
           pendingInternalPlayback = null;
           timelineProgressSamples = {};
@@ -10859,6 +10999,7 @@
             playbackIdentityGeneration++;
             markPlaybackInstanceTerminal();
             currentPlaybackInstance = null;
+            externalPlaylistReport = null;
             scrobbler.scrobbleStop();
             pendingExternalPlayback = null;
             pendingInternalPlayback = null;
@@ -10991,6 +11132,19 @@
           var timeline = e && e.data && e.data.timeline;
           pendingInternalPlayback = null;
           scrobbler.setCurrentMedia(card);
+          var playerPlaylist = [];
+          try {
+            playerPlaylist = Lampa.PlayerPlaylist && typeof Lampa.PlayerPlaylist.get === 'function' ? Lampa.PlayerPlaylist.get() : [];
+          } catch (playlistError) {
+            playerPlaylist = [];
+          }
+          externalPlaylistReport = buildExternalPlaylistReport(
+            card,
+            timeline && timeline.hash,
+            Array.isArray(playerPlaylist) ? playerPlaylist : [],
+            String(Lampa.Storage.get('trakt_token') || ''),
+            playbackIdentityGeneration
+          );
           pendingExternalPlayback = timeline && timeline.hash ? {
             media: card,
             hash: timeline.hash,

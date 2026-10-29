@@ -104,6 +104,7 @@ function productionMethod(owner, name) {
 function integrationFixture() {
   const f = fixture();
   f.context.shouldSendProgress = () => f.context.throttleState.lastSendTime === 0;
+  let playerPlaylist = [];
   const values = { trakt_enable_watching: true, trakt_token: 'synthetic-token', trakt_min_progress: 90 };
   const player = Object.create(null), timelineHandlers = Object.create(null), globalListeners = Object.create(null), accountListeners = Object.create(null), storageListeners = [], documentListeners = Object.create(null);
   let activityCard = null, activeVideo = null, playerOpened = false, currentCardReadCount = 0;
@@ -117,6 +118,7 @@ function integrationFixture() {
     Storage: storage,
     Activity: { active: () => ({ movie: activityCard, card: activityCard }) },
     Player: { opened: () => playerOpened, listener: { follow: on(player), remove: remove(player) } },
+    PlayerPlaylist: { get: () => playerPlaylist },
     PlayerVideo: { video: () => activeVideo },
     Timeline: { listener: { follow: on(timelineHandlers), remove: remove(timelineHandlers) } },
     Listener: { follow: on(globalListeners), remove: remove(globalListeners) },
@@ -136,16 +138,18 @@ function integrationFixture() {
     getContentType$1: media => media && (media.method === 'tv' || media.method === 'show' || media.original_name || media.first_air_date) ? 'show' : 'movie',
     isInitialized: false,
     isInitialized$1: false,
-    pendingExternalPlayback: null, pendingInternalPlayback: null, timelineProgressSamples: {},
+    pendingExternalPlayback: null, externalPlaylistReport: null, pendingInternalPlayback: null, timelineProgressSamples: {},
     playbackInstanceSequence: 0, playbackIdentityGeneration: 0, currentPlaybackInstance: null, terminalPlaybackInstanceId: null,
     setHashMeta: (hash, value) => { meta[hash] = value; }, getHashMeta: hash => meta[hash] || null,
-    extractSeasonEpisode: media => ({ season: media.season_number, episode: media.episode_number }),
+    extractSeasonEpisode: media => ({ season: media.season_number != null ? media.season_number : media.season, episode: media.episode_number != null ? media.episode_number : media.episode }),
+    getContentType$2: media => media && (media.method === 'tv' || media.type === 'tv' ? 'show' : 'movie'),
+    verifiedShowEpisode: media => media && media.method === 'tv' && Number.isInteger(media.season_number) && media.season_number >= 0 && Number.isInteger(media.episode_number) && media.episode_number >= 1 ? { id: String(media.id), season: media.season_number, episode: media.episode_number } : null,
     resolveSeasonEpisode: () => ({}), loadSessionCache: () => {}, loadHashMetaCache: () => {},
     scrobbleQueue: { init: () => {}, clear: () => { f.context.queueClearCount = (f.context.queueClearCount || 0) + 1; } },
     slog: () => {}, logWarn: (...args) => { f.context.lastWarning = args; f.context.lastWarningMessage = String(args[1]); }, logDebugOnce: () => {},
     getCompletionKey: () => 'synthetic-completion',
     markFinishIntent: () => { f.context.finishIntentCount = (f.context.finishIntentCount || 0) + 1; },
-    finish: media => { f.context.finishCallCount = (f.context.finishCallCount || 0) + 1; (f.context.finishedMedia || (f.context.finishedMedia = [])).push({ ...media }); return Promise.resolve(); },
+    finish: media => { f.context.finishCallCount = (f.context.finishCallCount || 0) + 1; (f.context.finishedMedia || (f.context.finishedMedia = [])).push({ ...media }); return Promise.resolve({ ok: true }); },
     documentListeners, storageListeners, playerHandlers: player, activityCard
   });
   const instanceHelpersStart = source.indexOf('  function beginPlaybackInstance(');
@@ -171,10 +175,10 @@ function integrationFixture() {
     (player[type] || []).slice().forEach(fn => fn(data || {}));
   };
   const storageChange = name => storageListeners.slice().forEach(fn => fn({ name }));
-  const timeline = (hash, time, percent) => {
+  const timeline = (hash, time, percent, duration = 1000) => {
     activityCard = f.currentCard || activityCard;
     f.context.activityCard = activityCard;
-    (timelineHandlers.update || []).slice().forEach(fn => fn({ data: { hash, road: { time, duration: 1000, percent } } }));
+    (timelineHandlers.update || []).slice().forEach(fn => fn({ data: { hash, road: { time, duration, percent } } }));
   };
   const launch = (media, hash) => {
     activityCard = media; f.currentCard = media; f.context.activityCard = media;
@@ -182,7 +186,7 @@ function integrationFixture() {
     playerOpened = true;
     (player.start || []).slice().forEach(fn => fn({ card: media, timeline: { hash, percent: 0 } }));
   };
-  return { ...f, values, player, playerEvent, storageChange, documentListeners, accountListeners, timeline, launch, video: () => activeVideo, watching, events, currentCardReadCount: () => currentCardReadCount };
+  return { ...f, values, player, playerEvent, storageChange, documentListeners, accountListeners, timeline, launch, video: () => activeVideo, watching, events, setPlaylist: list => { playerPlaylist = list; }, currentCardReadCount: () => currentCardReadCount };
 }
 
 async function flush() { for (let i = 0; i < 12; i++) await Promise.resolve(); }
@@ -553,6 +557,98 @@ test('external player return without any confirming Timeline clears the handoff 
   await flush();
   assert.deepEqual(f.calls, []);
   assert.equal(f.context.pendingExternalPlayback, null);
+});
+
+test('official Just+ playlist callback finalizes each exact episode through Lampa Timeline after return', async () => {
+  const f = integrationFixture();
+  const show = { id: 1396, method: 'tv', type: 'tv', name: 'Show', number_of_seasons: 3 };
+  f.setPlaylist([
+    { season: 1, episode: 2, url: 'same-pack', timeline: { hash: 'native-e2', time: 100, duration: 1000, percent: 10 } },
+    { season: 1, episode: 3, url: 'same-pack', timeline: { hash: 'native-e3', time: 0, duration: 1000, percent: 0 } }
+  ]);
+  f.playerEvent('external', { data: { card: show, timeline: { hash: 'native-e3' } } });
+  assert.deepEqual(Object.keys(f.context.externalPlaylistReport.entries).sort(), ['native-e2', 'native-e3']);
+  f.playerEvent('visibility', { hidden: false });
+  f.timeline('native-e2', 950, 95);
+  f.timeline('native-e3', 920, 92);
+  await flush();
+  assert.deepEqual(f.context.finishedMedia.map(media => [media.season_number, media.episode_number, media.hash]), [[1, 2, 'native-e2'], [1, 3, 'native-e3']]);
+  f.timeline('native-e2', 950, 95);
+  await flush();
+  assert.equal(f.context.finishedMedia.length, 2, 'repeated callback snapshot is idempotent');
+});
+
+test('Android changed-only Timeline bridge can suppress a retry after an exhausted Trakt history write', async () => {
+  const f = integrationFixture();
+  const show = { id: 1396, method: 'tv', type: 'tv', name: 'Show', season_number: 1, episode_number: 2 };
+  const hash = 'native-dedup-e2';
+  const initial = { hash, time: 0, duration: 1800, percent: 0 };
+  f.setPlaylist([{ season: 1, episode: 2, timeline: initial }]);
+  f.playerEvent('external', { data: { card: show, timeline: { hash } } });
+  f.playerEvent('visibility', { hidden: false });
+  let savedNativeTimeline = { ...initial };
+  let nativeEvents = 0;
+  let historyAttempts = 0;
+  f.context.finish = media => {
+    historyAttempts++;
+    (f.context.finishedMedia || (f.context.finishedMedia = [])).push({ ...media });
+    return Promise.resolve({ ok: false, status: 503 });
+  };
+  function nativeReport(position, duration) {
+    const next = { hash, time: position, duration, percent: Math.floor(position / duration * 100) };
+    // Mirrors Android MainActivity.handleJustPlusReport's changed-only guard,
+    // then its saveState of the updated playlist timeline.
+    if (JSON.stringify(next) === JSON.stringify(savedNativeTimeline)) return false;
+    savedNativeTimeline = next;
+    nativeEvents++;
+    f.timeline(hash, next.time, next.percent, next.duration);
+    return true;
+  }
+  assert.equal(nativeReport(1710, 1800), true, 'first changed measured report reaches the plugin');
+  await flush();
+  assert.equal(f.context.externalPlaylistReport.entries[hash].completionState, 'retryable');
+  assert.equal(nativeReport(1710, 1800), false, 'identical full Just+ report is suppressed after native state was saved');
+  await flush();
+  assert.equal(nativeEvents, 1);
+  assert.equal(historyAttempts, 1, 'the plugin cannot retry without another native Timeline event');
+  assert.equal(f.context.externalPlaylistReport.entries[hash].completionState, 'retryable');
+});
+
+test('external launch Player.start before visibility retains report; native Timeline callback after return still completes', async () => {
+  const f = integrationFixture();
+  const show = { id: 1396, method: 'tv', type: 'tv', name: 'Show', season_number: 1, episode_number: 3 };
+  f.setPlaylist([{ season: 1, episode: 3, timeline: { hash: 'return-e3', time: 0, duration: 2700 } }]);
+  f.playerEvent('external', { data: { card: show, timeline: { hash: 'return-e3' } } });
+  f.playerEvent('start', { card: show, timeline: { hash: 'return-e3' } });
+  assert.ok(f.context.externalPlaylistReport, 'start correlated with the still-pending external handoff preserves the snapshot');
+  f.playerEvent('visibility', { hidden: false });
+  f.timeline('return-e3', 0, 100, 0);
+  await flush();
+  assert.equal(f.context.finishCallCount || 0, 0, 'Android 0/0/100 normalization is not completion evidence');
+  f.timeline('return-e3', 2430, 90, 2700);
+  await flush();
+  assert.deepEqual((f.context.finishedMedia || []).map(media => [media.season_number, media.episode_number, media.hash]), [[1, 3, 'return-e3']]);
+});
+
+test('fresh internal Player.start with the same episode/hash clears external snapshot and uses real video progress', async () => {
+  const f = integrationFixture();
+  const show = { id: 1396, method: 'tv', type: 'tv', name: 'Show', season_number: 1, episode_number: 3 };
+  f.setPlaylist([{ season: 1, episode: 3, timeline: { hash: 'same-e3', time: 0, duration: 2700 } }]);
+  f.playerEvent('external', { data: { card: show, timeline: { hash: 'same-e3' } } });
+  f.playerEvent('visibility', { hidden: false });
+  f.launch(show, 'same-e3');
+  assert.equal(f.context.externalPlaylistReport, null, 'a post-return Player.start is a new internal session, not an Android result callback');
+  assert.equal(f.context.currentPlaybackInstance.ambiguousTimelineHash, true, 'reused external hash is quarantined from Timeline attribution');
+  f.timeline('same-e3', 0, 100, 0);
+  await flush();
+  assert.equal(f.context.finishCallCount || 0, 0, 'late normalized Android completion cannot finish the fresh internal session');
+  Object.assign(f.video(), { currentTime: 100, duration: 1000, paused: false });
+  f.documentListeners.playing[0]({ target: f.video() });
+  await flush();
+  Object.assign(f.video(), { currentTime: 950 });
+  f.documentListeners.timeupdate[0]({ target: f.video() });
+  await flush();
+  assert.deepEqual((f.context.finishedMedia || []).map(media => [media.season_number, media.episode_number, media.hash]), [[1, 3, 'same-e3']], 'actual internal video progress completes normally');
 });
 
 test('account change invalidates a not-yet-sent production START and its pending association', async () => {
