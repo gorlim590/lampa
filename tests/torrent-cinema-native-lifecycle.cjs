@@ -62,9 +62,9 @@ test('movie result status ignores a stale native season filter',()=>{
     const status=context.streamResultStatus({record:{kind:'movie'},total:7,rows:Array(2),displayRows:Array(2),audioCategory:'ua',child:{getFilterData:()=>({season:['1'],quality:[]})}});
     assert.equal(status,'Знайдено загалом: 7 · озвучка UA: завантажено 2');assert.doesNotMatch(status,/сезон/);
 });
-test('season status reports raw parser total separately from selected-season and collection counts',()=>{
+test('season status reports raw parser total, selected audio, and actual visible count including zero',()=>{
  const context={window:{TorrentsRedesign:{selectedTrackerFilter:()=> 'all'}}};vm.createContext(context);vm.runInContext(slice('    function streamResultStatus(','    function streamSession('),context);
- const state={record:{kind:'tv'},params:{season:8},total:5,rawTotal:23,displayRows:[{_tcSeasonGroup:'season'},{_tcSeasonGroup:'season'},{_tcSeasonGroup:'collection'}]};assert.equal(context.streamResultStatus(state),'Парсер знайшов: 23 · S08: 2 · колекції: 1');state.total=0;assert.equal(context.streamResultStatus(state),'Парсер знайшов: 23 · S08: 2 · колекції: 1');
+ const state={record:{kind:'tv'},params:{season:8},total:5,rawTotal:23,displayRows:[{_tcSeasonGroup:'season'},{_tcSeasonGroup:'season'},{_tcSeasonGroup:'collection'}]};assert.equal(context.streamResultStatus(state),'Парсер знайшов: 23 · S08: 2 · колекції: 1 · UA: 3 видимих');state.audioCategory='en';assert.match(context.streamResultStatus(state),/EN: 3 видимих$/);state.displayRows=[];state.total=0;assert.match(context.streamResultStatus(state),/Парсер знайшов: 23 · S08: 0 · колекції: 0 · EN: 0 видимих$/);
 });
 function loadingFixture(initial=[]){
     let observer=null,timer=null,disconnected=0,cleared=0;const nodes=initial.slice();

@@ -31,9 +31,9 @@ All screenshots are direct browser captures at device pixel ratio 1 (not resized
 
 Silo overlay geometry was x=77, y=36, 1126×648 at 1280×720 and x=230, y=108, 3379×1944 at 3840×2160. The document had no horizontal or vertical overflow at either size. Fifteen season controls fit in the tested 1280×720 row; focused controls remained visible. This is desktop viewport emulation, not physical Google TV verification.
 
-## Exact local artifacts
+## Earlier live season-search artifacts (historical checkpoint)
 
-The final local source bytes loaded into the browser were:
+The earlier local source bytes loaded for the season-search browser pass were; this checkpoint is superseded by the final artifact evidence below:
 
 - `ui/torrent-cinema.js` — 180,506 bytes, SHA-256 `7ee7a602346b77965067064faf9757a3e9e6da97b35156a645b4fb612c513b81`
 - `providers/torrent-search.js` — 21,773 bytes, SHA-256 `5775add9fd0c1bbd672a0d16daf9278e7154e19433743222efe388ee6a329c4b`
@@ -61,9 +61,9 @@ Focused local checks after this pass: **146/146** tests passed across season mod
 
 Standalone mode, physical Google TV, and actual playback were not exercised in this main-browser session. The standalone and Hybrid integration contracts remain covered by focused automated tests; this evidence does not claim device-level acceptance.
 
-## Audio selector hardening — 2026-10-29
+## Earlier audio selector hardening checkpoint — 2026-10-29
 
-The final local build was injected into the owner's existing main Chrome Lampa tab through the read-only loopback preview. The exact artifact was `ui/torrent-cinema.js` (185,677 UTF-8 bytes / 181,440 JavaScript characters; SHA-256 `9e8175e9fdf24da713302002e30dc7928ecf8a5767d89e8e6695818517371d53`). The parser boundary was replaced only in page memory with seven controlled releases; no configured parser endpoint, credential, proxy, or saved parser source flag was changed.
+At this checkpoint, a local build was injected into the owner's existing main Chrome Lampa tab through the read-only loopback preview. The exact artifact was `ui/torrent-cinema.js` (185,677 UTF-8 bytes / 181,440 JavaScript characters; SHA-256 `9e8175e9fdf24da713302002e30dc7928ecf8a5767d89e8e6695818517371d53`). The parser boundary was replaced only in page memory with seven controlled releases; no configured parser endpoint, credential, proxy, or saved parser source flag was changed.
 
 The controlled set contained Ukrainian-only, Russian-only, English-only, unknown-audio, Ukrainian+English, English-audio/Ukrainian-subtitle, and French-audio releases. Real ArrowLeft/ArrowRight/Enter input selected all four categories. Observed category counts were UA 2, RU 1, EN 3, Other 2; the bilingual release counted in both UA and EN. The English-audio/Ukrainian-subtitle item appeared under EN only. Unknown and French items appeared under Other. With Toloka selected, the scoped counters became UA 1, RU 0, EN 0, Other 1; returning to All Trackers restored the original counts. A separate five-release fixture with no Ukrainian audio showed UA 0 while RU 1, EN 2, and Other 2 remained populated. The default for a new title was UA.
 
@@ -84,3 +84,32 @@ Focused tests after the final patch: **225/225 passed** across metadata/overlay,
 On the same main Chrome tab and exact PR artifact, a controlled TV release was selected with the EN audio category active. Opening native Files displayed the native modal above Torrent Cinema (z-index 130 over 100) with one file; no playback was requested. The first Back closed Files and returned to the Torrent Cinema controller with the selected release focused and EN still active. A second Files open on that release also rendered the native file row. On the second Back, Lampa returned to the underlying Details controller rather than the torrent overlay; this repeat-cycle focus restoration is not accepted as a pass and remains a lifecycle limitation to investigate separately. The check used a memory-only transport fixture and did not contact configured parsers or TorrServer.
 
 After the check, the exact main Chrome tab was navigated back to `https://siaivo.isroot.in/?card=125988&media=tv&source=tmdb&settings=parser`. The app loaded its published Torrent Cinema 2.0.0; the temporary fixture and injected PR artifact were absent. Saved settings, credentials, profile and other tabs were preserved.
+
+## Final audio and native Files regression pass — 2026-10-29
+
+Final tested canonical artifact: `ui/torrent-cinema.js`, 185,901 UTF-8 bytes, SHA-256 `33015869b49ac1b38a7bc050ed680e0f0a93b9ca0a5629a253d46f2ae45a7475`. The screenshots below were captured from these exact artifact bytes (not the earlier 5a0d7e6 build), at DPR 1, with controlled fixture data.
+
+- Structured `AudioLanguages: ["Українська озвучка"]` and `["Українська доріжка"]` normalize to `languages: ["Українська"]`, `audio.ua: true`, and the UA category. This fixes the badge and Best Choice flag as well as category matching.
+- Verified mixed tracks overlap categories as requested: UA+French matches UA and Other; EN+Japanese matches EN and Other. Unknown-only audio stays in Other. Ukrainian subtitles with English audio do not match UA.
+- For a TV empty-UA fixture, the live overlay status read `Парсер знайшов: 2 · S03: 0 · колекції: 0 · UA: 0 видимих`. Choosing Other showed two rows and updated status to `Інші: 2 видимих`. This was controlled parser data, not a live provider response.
+- Final artifact browser screenshots (the 1280 case shows all three UA-matching rows; rows stay readable and toolbar does not overflow):
+
+| CSS viewport / DPR | Raster | Modal bounds | Screenshot |
+|---|---|---|---|
+| 1280×720 / 1 | 1280×720 | x77 y36, 1126×648 | [1280×720](audio-filter-final/1280x720.jpg) |
+| 1920×1080 / 1 | 1920×1080 | x115 y54, 1690×972 | [1920×1080](audio-filter-final/1920x1080.jpg) |
+| 3840×2160 / 1 | 3840×2160 | x230 y108, 3379×1944 | [3840×2160](audio-filter-final/3840x2160.jpg) |
+
+### Identical main-vs-PR Files lifecycle A/B
+
+Used the same main Chrome tab, same movie card (TMDb 1384216), same in-memory `Lampa.Parser.get` fixture (`AB Lifecycle Test 2024 1080p WEB-DL Ukrainian`, InfoHash `1111…1111`, one synthetic file), and actual Enter/Escape remote keys. Parser callbacks were replaced only in page memory; this made no parser endpoint or saved setting changes. `Torrent.back`, `selectionArmed`, controller toggle events, and native modal close were traced. The scripts had trace-only hooks around the existing `selectionArmed` assignments; base artifacts were otherwise unchanged.
+
+| Observation | Merged main #126 artifact (`dc5ce25`, SHA-256 `fbf57d83846ef27e42c16710a414f93b0a9c5173c1272c0018a57f74bee34362`) | PR #128 candidate artifact (SHA-256 above) |
+|---|---|---|
+| First Files open → Back | Modal/controller opened; one Back callback fired; `selectionArmed` cleared; returned to `sh_movie_streams` with the torrent row focused | Same |
+| Reopen same Files → Back | Files reopened; second Back callback fired; returned to `sh_movie_streams` with the same torrent row focused | Same |
+| Result | Repeated Back failure not reproduced | No regression vs main; failure not reproduced |
+
+Thus the previously reported second-cycle return-to-Details behavior did not reproduce on either side under the identical fixture. No separate inherited blocker is confirmed by this A/B. This is a browser fixture test, not a real TorrServer or playback test.
+
+Focused local tests now include direct localized-UA flag, mixed-language Other membership, subtitle separation, and TV status updates including zero visible rows. Physical Google TV and actual media playback remain untested.
