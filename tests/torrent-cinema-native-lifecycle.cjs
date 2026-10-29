@@ -55,7 +55,7 @@ test('result status distinguishes raw all-season totals from a loaded native sea
     const allSeasons={total:142,rows:Array(14),displayRows:Array(14),child:{getFilterData:()=>({season:[],quality:[]})}};
     const filtered=context.streamResultStatus(season1),progressive=context.streamResultStatus(allSeasons);
     assert.match(filtered,/Знайдено загалом: 142/);assert.match(filtered,/сезон S01: завантажено 14/);assert.doesNotMatch(filtered,/14 із 142/);
-    assert.match(progressive,/завантажено 14 із 142/);
+    assert.match(progressive,/Знайдено загалом: 142/);assert.match(progressive,/завантажено 14 із 142/);
 });
 test('season status reports raw parser total separately from selected-season and collection counts',()=>{
  const context={window:{TorrentsRedesign:{selectedTrackerFilter:()=> 'all'}}};vm.createContext(context);vm.runInContext(slice('    function streamResultStatus(','    function streamSession('),context);

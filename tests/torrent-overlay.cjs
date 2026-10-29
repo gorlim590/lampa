@@ -17,6 +17,22 @@ test('missing popup adapter leaves native Torrent button unclaimed instead of mo
 });
 test('selected season is revealed only after the overlay is open without stealing focus',()=>{const source=fs.readFileSync(__dirname+'/../ui/torrent-cinema/runtime.js','utf8'),start=source.indexOf('    function streamSeasonButtons('),end=source.indexOf('    function renderStreamSeasons(',start),queue=[],c={window:{requestAnimationFrame:fn=>queue.push(fn)},Number};vm.createContext(c);vm.runInContext(source.slice(start,end)+';this.reveal=streamRevealSelectedSeason;',c);const selected={dataset:{season:'47'},isConnected:true,scrollIntoView(options){this.options=options;}},previousFocus={id:'previous-focus'},record={selectedSeason:47,streamSeasonRow:{querySelectorAll:()=>[selected]},streamPane:{},streamChild:{last:previousFocus},streamView:{isOpen:()=>true}};c.reveal(record);assert.equal(queue.length,1);queue.shift()();assert.equal(queue.length,1);queue.shift()();assert.equal(JSON.stringify(selected.options),JSON.stringify({block:'nearest',inline:'center',behavior:'auto'}));assert.equal(record.streamChild.last,previousFocus);});
 const movie={id:47,title:'Дюна',original_title:'Dune',release_date:'2021-01-01',media_type:'movie'},tv={id:48,name:'Frieren',original_name:'Frieren',first_air_date:'2023-01-01',media_type:'tv'};
+test('audio language categories use verified audio metadata only and keep multi-language releases in each matching category',()=>{
+ const {api}=apiFixture(),match=api.audioCategoryMatches;
+ assert.equal(typeof match,'function');
+ const audio=languages=>api.normalizeRelease({Title:'Release 1080p WEB-DL',AudioLanguages:languages}).parsed.audio;
+ assert.equal(match(audio(['uk','en']),'ua'),true);assert.equal(match(audio(['uk','en']),'en'),true);assert.equal(match(audio(['uk','en']),'ru'),false);assert.equal(match(audio(['uk','en']),'other'),false);
+ assert.equal(match(audio(['ru']),'ru'),true);assert.equal(match(audio(['en']),'en'),true);assert.equal(match(audio(['fr']),'other'),true);assert.equal(match(audio([]),'other'),true);
+ const subtitlesOnly=api.normalizeRelease({Title:'Release 1080p WEB-DL',SubtitleLanguages:['uk']}).parsed;
+ assert.equal(match(subtitlesOnly.audio,'ua'),false);assert.equal(match(subtitlesOnly.audio,'other'),true,'unknown audio belongs to Other without borrowing subtitle language');
+});
+test('Torrent Cinema offers dedicated UA/RU/EN/Other audio controls, defaults to UA, and removes the quality-row UA toggle',()=>{
+ const runtime=fs.readFileSync(__dirname+'/../ui/torrent-cinema/runtime.js','utf8');
+ assert.match(runtime,/\['ua','🇺🇦 UA'\],\['ru','RU'\],\['en','EN'\],\['other','Інші'\]/);
+ assert.match(runtime,/audioCategory:record\.streamAudioCategory\|\|'ua'/);
+ assert.match(runtime,/ctr-tabs ctr-audio-tabs/);
+ assert.doesNotMatch(runtime,/Українське аудіо|uaButton|uaOnly/);
+});
 test('full release title preserves parser spelling, edition, year and raw transport exactly',()=>{const {api}=apiFixture(),source=Object.freeze({Title:'Dune.2021.2160p.WEB-DL.HDR.HEVC.Ukr.Eng',MagnetUri:'magnet:?xt=urn:btih:abc&dn=raw',InfoHash:'a'.repeat(40),Seeders:40});const before=JSON.stringify(source),view=api.releaseView(source,movie,'movie');assert.equal(view.title,source.Title);assert.match(view.release,/WEB-DL.*HDR/);assert.equal(view.raw,source.Title);assert.equal(JSON.stringify(source),before);});
 test('foreign release does not borrow the current movie title/year',()=>{const {api}=apiFixture();assert(!api.releaseView({Title:'Alien.1979.1080p'},movie,'movie').title.includes('Дюна'));assert.equal(api.releaseView({Title:'Alien.1979.1080p'},movie,'movie').title,'Alien.1979.1080p');});
 test('display identity uses only the torrent title, verified year, coverage and technical tokens',()=>{

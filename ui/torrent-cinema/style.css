@@ -143,16 +143,19 @@
 
 .sh-torrent-overlay .torrent-item.sh-duplicate-hidden{display:none!important}
 
-/* Reference-led release composition: two independent filter bands, badges, and four detail columns. */
+/* Reference-led release composition: quality, audio and tracker filter bands. */
 .sh-torrent-overlay .ctr-tools{display:grid;grid-template-columns:minmax(0,1fr);gap:.32em;overflow:visible;border-bottom:1px solid #ffffff16;padding:.15em 0 .6em;margin-bottom:.55em}
 .sh-torrent-overlay .ctr-tabs,.sh-torrent-overlay .ctr-tracker-tabs{display:flex;align-items:center;gap:.38em;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;white-space:nowrap;padding:.08em .12em}
 .sh-torrent-overlay .ctr-tabs::before,.sh-torrent-overlay .ctr-tracker-tabs::before{flex:none;color:#aaa2b9;font-size:.72em;letter-spacing:.07em;text-transform:uppercase}
 .sh-torrent-overlay .ctr-tabs::before{content:'Якість'}
+.sh-torrent-overlay .ctr-audio-tabs::before{content:'Озвучка'}
 .sh-torrent-overlay .ctr-tracker-tabs::before{content:'Трекери'}
 .sh-torrent-overlay .ctr-tab{min-height:2.15em;padding:.34em .72em;border-radius:.6em;background:linear-gradient(145deg,#211b2b,#171420);border-color:#ffffff18;font-size:.82em;line-height:1.2;color:#d8d3e1}
 .sh-torrent-overlay .ctr-tracker-tabs .ctr-tab{font-size:.77em}
 .sh-torrent-overlay .ctr-tab[data-quality="all"].is-active{background:#4e4262;border-color:#88799b;color:#fff}
 .sh-torrent-overlay .ctr-tracker-tabs .ctr-tab.is-active{background:#343040;border-color:#8f81a0;color:#fff}
+.sh-torrent-overlay .ctr-audio-tabs .ctr-tab.is-active{background:#332b3e;border-color:#827092;color:#fff}
+.sh-torrent-overlay .ctr-audio-tabs [data-audio-category="ua"].is-active{background:linear-gradient(140deg,#353044,#252331);border-color:#c9a94c;color:#f6e8b7}
 .sh-torrent-overlay .ctr-tab[data-quality="2160"]{border-color:#a78c3b44}
 .sh-torrent-overlay .ctr-tab[data-quality="1080"]{border-color:#7090ce44}
 .sh-torrent-overlay .ctr-tab[data-quality="720"]{border-color:#58a9cf44}
