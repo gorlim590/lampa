@@ -68,7 +68,7 @@ The paired screenshots show the same synthetic catalog at 1920×1080: the 120-ca
 
 ## CI gate
 
-All five GitHub Actions passed on final SHA `e97a9b57404bdaea953019e19372625873718497` (Repository checks, Home order, Home history, Parser provider regressions, Season integrity). The Repository checks log confirms `tests/trakt-more-view.cjs` ran in the Trakt/YDesign regression step, which passed 224/224.
+All five GitHub Actions passed on final code SHA `909c469c0c65a6fe146e0604d78d6d74d899c844` (Repository checks, Home order, Home history, Parser provider regressions, Season integrity). The Repository checks log confirms `tests/trakt-more-view.cjs` ran in the Trakt/YDesign regression step, which passed 225/225.
 
 ## Limitations and acceptance status
 
