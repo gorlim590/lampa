@@ -1,31 +1,56 @@
 {
-  "status": "partial-acceptance; keep-draft",
-  "browser": "owner-authorized main Chrome through Chrome DevTools MCP",
-  "testTab": "duplicate Home tab in the existing profile; original Lampa Details tab remained untouched",
+  "status": "partial acceptance; keep PR draft",
+  "testedAt": "2026-10-29",
   "testedSource": {
-    "method": "exact working-tree ui/stremio-hybrid.js bytes evaluated after destroying the old Hybrid instance; active Cardify stylesheet transferred through the new registerStyles API",
-    "hybridSha256": "a04f985c75de99bfdf4d5675b42ce5a4ca3bec76314c12f36184404955391e17",
-    "cardifySha256": "ab3e622d18e58f4c12f0192828bb0ace6551eec65cfbdae34637182df546aa74",
-    "note": "The already initialized old Cardify+ module was not re-executed; its active CSS was used to verify the exact Hybrid registry contract. No branch cold-loader delivery is claimed."
+    "branch": "feat/issue-79-static-ui-perf",
+    "commit": "pending final push",
+    "assets": {
+      "loader.js": "cb9833f6d6821464e1cc0fd4213fb599e7edc2a2205d0dd110e6b46b2115e2c1",
+      "ui/stremio-hybrid.js": "2a77c7f3c5e759acde5040589e078f52a105fd1485a8f89bc8f55fc041a9f139",
+      "ui/interface-plus.js": "e5e5c2d43f1ddf10beaa9eceae64fbdd83b846d595f555bda032223ea6377fd3",
+      "ui/design-optimized.js": "6aa3d3824a858668f84784d5860120c61ab0e0285d6c4bbc5f3875478db72de5",
+      "ui/cardify-plus.js": "ab3e622d18e58f4c12f0192828bb0ace6551eec65cfbdae34637182df546aa74"
+    }
   },
-  "checks": [
-    { "name": "Hybrid owner registry", "status": "PASS", "details": "One #stremio-hybrid-style, 3 registered modules, initCount=1; YDesign card/font and Cardify CSS." },
-    { "name": "Home D-pad and restoration", "status": "PASS", "details": "At 1280x720, ArrowRight moved to adjacent card and ArrowLeft restored prior focus; Enter opened native Details; Escape returned to Home with prior card focus and items_line controller." },
-    { "name": "1280x720", "status": "PASS", "cssViewport": [1280, 720], "dpr": 1, "screenshot": "screenshots/hybrid-1280x720.jpg" },
-    { "name": "1920x1080", "status": "PASS", "cssViewport": [1920, 1080], "dpr": 1, "screenshot": "screenshots/hybrid-1920x1080.jpg" },
-    { "name": "3840x2160", "status": "PASS", "cssViewport": [3840, 2160], "dpr": 1, "screenshot": "screenshots/hybrid-3840x2160.jpg", "details": "Independently rendered CDP viewport; JPEG dimensions verified as 3840x2160." },
-    { "name": "Standalone browser", "status": "NOT TESTED", "details": "Standalone fallback behavior is covered by source-level tests, not a separate live browser mode." },
-    { "name": "Search/Discover/Settings/Torrent/Files journeys", "status": "NOT TESTED" },
-    { "name": "Physical Google TV", "status": "NOT TESTED" }
-  ],
-  "startup": {
-    "branchColdStartupComparison": "NOT VERIFIED",
-    "reason": "The authorized DevTools connection does not expose network request interception for installing the branch loader before startup. The exact Hybrid source could be injected after appready, but that is not comparable to cold startup.",
-    "measuredPostDeliveryInjection": { "hybridShellMsAfterScriptStart": 16.1, "firstHybridFrameMsAfterScriptStart": 43.5, "meaning": "single initialized-page injection sample; not a speedup claim" },
-    "loaderDownloadOptimization": "Critical UI requests now begin together and execute in declared order. Unit test verifies request concurrency/order; cold-run latency improvement remains unmeasured."
+  "mainChrome": {
+    "connection": "Chrome DevTools MCP, authorized main Chrome",
+    "tab": "existing selected Lampa Home tab; original Details tab untouched",
+    "installation": "temporary loopback script delivery; only in-memory loader flag/list globals changed",
+    "loader": { "requested": 4, "loaded": 4, "failed": 0, "timedOut": 0 },
+    "hybridVersion": "3.1.0-single-presentation-owner",
+    "canonicalStylesheets": 1,
+    "registeredStyleOwners": ["ydesign-cards", "ydesign-font"],
+    "checks": {
+      "homeArrowRightEnterDetailsEscapeBackAndFocus": "PASS",
+      "threeAdditionalHomeDetailsBackCycles": "PASS",
+      "destroyRestoresYDesignStandaloneStyles": "PASS",
+      "branchRestartReadoptsStylesIntoOneOwner": "PASS",
+      "cardifyPlusBranchRegistrationInThisAlreadyInitializedHost": "NOT VERIFIED; covered by runtime tests",
+      "searchDiscoverSettingsTorrentFilesJourneys": "NOT TESTED"
+    },
+    "viewports": [
+      { "css": [1280, 720], "dpr": 1, "raster": [1280, 720], "screenshot": "screenshots/phase5-browser/1280x720.png" },
+      { "css": [1920, 1080], "dpr": 1, "raster": [1920, 1080], "screenshot": "screenshots/phase5-browser/1920x1080.png" },
+      { "css": [3840, 2160], "dpr": 1, "raster": [3840, 2160], "screenshot": "screenshots/phase5-browser/3840x2160.png" }
+    ],
+    "restoration": "PASS; original Home URL and 1920x937 CSS viewport restored by reload; branch globals/scripts absent"
   },
-  "restoration": {
-    "status": "PASS",
-    "details": "Duplicate tab returned to its original Home URL, viewport emulation was cleared, and main-delivered Hybrid loaded after reload. Original Lampa Details tab was not touched. No Storage, settings, parser or account changes were made."
-  }
+  "startupPerformance": {
+    "comparableColdAB": "INCONCLUSIVE",
+    "reason": "Main Chrome was already initialized. The isolated Chromium harness did not inject the loader before host bootstrap, had no Home cards, and its timings are rejected as invalid branch-vs-main evidence.",
+    "warmBranchInjection": "Hybrid shell applied about 9 ms after the Hybrid script's own start; not a cold-start comparison.",
+    "optimizationVerified": "Three critical UI requests start in parallel and retain async=false declaration order; covered by the loader fixture and observed branch delivery.",
+    "GoogleTvStyleRecalculation": "NOT MEASURED"
+  },
+  "priorYDesignBrowserFailure": {
+    "status": "ENVIRONMENTAL BLOCKER",
+    "evidence": "After supplying the missing Playwright module through a temporary alias, tests/ydesign-browser.cjs fails before page interaction with ECONNREFUSED 127.0.0.1:9222. The authorized main Chrome is connected through DevTools MCP instead."
+  },
+  "localChecks": {
+    "focusedAndRelevantRegressions": "494/494 PASS",
+    "repositoryCheck": "PASS: 78 JavaScript files, 43 manifest entries, 563 URLs",
+    "syntaxAndDiffCheck": "PASS",
+    "githubActionsOnFinalCommit": "PENDING PUSH"
+  },
+  "physicalGoogleTV": "NOT TESTED"
 }

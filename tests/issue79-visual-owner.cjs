@@ -34,7 +34,7 @@ function hybridStyleFixture(enabled = true) {
   };
   const context = {
     window: {}, document, css: '/* canonical shell */', UI_VERSION: 'fixture', style: null, destroyed: false,
-    styleStore: { order: [], modules: {} }, bootStats: { styleInsertions: 0, styleUpdates: 0 }
+    styleStore: { order: [], modules: {} }, styleIdsByOwner: { 'ydesign-cards':'ydesign-style-block', 'ydesign-font':'ydesign-font-css', 'cardify-plus':'cardify-plus-styles' }, bootStats: { styleInsertions: 0, styleUpdates: 0 }
   };
   const start = hybridSource.indexOf('    function renderOwnedStyles()');
   const end = hybridSource.indexOf('    // One static shell and stylesheet owner;', start);
@@ -130,7 +130,7 @@ test('Cardify+ transfers its presentation CSS into the Hybrid owner and Hybrid a
   assert.match(cardifySource, /hybridPresentation\.registerStyles\("cardify-plus", cardifyStyle\.textContent\)/);
   const start = hybridSource.indexOf('    function adoptAdapterStyles() {');
   const end = hybridSource.indexOf('\n    function ownsPresentation', start);
-  const context = { document: { getElementById(id) { return id === 'cardify-plus-styles' ? node : null; } }, registerStyles(name, css) { registered.push([name, css]); } };
+  const context = { document: { getElementById(id) { return id === 'cardify-plus-styles' ? node : null; } }, styleIdsByOwner: { 'ydesign-cards':'ydesign-style-block', 'ydesign-font':'ydesign-font-css', 'cardify-plus':'cardify-plus-styles' }, registerStyles(name, css) { registered.push([name, css]); } };
   const registered = [];
   let removed = 0;
   const node = { textContent: '.cardify{display:flex}', parentNode: { removeChild() { removed++; } } };

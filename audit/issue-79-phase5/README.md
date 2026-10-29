@@ -49,3 +49,35 @@ Revert the scoped changes in `loader.js`, `ui/stremio-hybrid.js`, `ui/interface-
 ## Remaining Issue #79 work
 
 Capture three comparable cold/warm startup samples with exact branch assets, identify the host/native Home readiness boundary, and test Home → Details → Back, Search, Discover, Settings, Torrent Cinema/Files and focus at desktop sizes. Physical Google TV and remote acceptance are still required. Do not close Issue #79 based on this checkpoint.
+
+## Phase 5 stabilization addendum — 2026-10-29
+
+### Lifecycle and CI
+
+- `repository-checks.yml` now runs `tests/issue79-visual-owner.cjs`, `tests/loader-critical-parallel.cjs` and `tests/settings-functional.cjs`; existing checks remain in place.
+- The full entrypoint fixture exercises Hybrid ON → OFF → ON, destroy to standalone CSS, restart/adoption, duplicate registration, stale-version registry migration, style deduplication and preservation of YDesign/Cardify adapter rules.
+- The loader fixture now exercises independent fast/slow responses, a failed sibling, bounded timeout, a late script load and delayed native `appready`. Dynamic critical scripts remain `async=false` in declaration order.
+- `tests/ydesign-browser.cjs` was inspected and run with a temporary `playwright-core` compatibility alias. It fails before touching a page because it hardcodes CDP `127.0.0.1:9222`, which returns `ECONNREFUSED` in this environment. The authorized main Chrome is exposed through Chrome DevTools MCP instead. This is an environment prerequisite mismatch, not evidence of a YDesign regression.
+
+### Main Chrome test using the exact branch assets
+
+The existing selected Lampa Home tab in the authorized main Chrome was used. The original Details tab was left untouched. A loopback preview served the branch `loader.js`, Hybrid, Interface+, YDesign and Cardify+ bytes. The page already had the host loader running, so the first injected copy correctly no-op'd; for the reversible preview, only the in-memory `LampaLoaderStarted` flag was reset, and the deferred list was set on a window global (no `Lampa.Storage` call). The local loader then reported **4 requested / 4 loaded / 0 failed / 0 timed out** (three critical UI assets plus one explicitly selected deferred Cardify+ asset). Hybrid advanced from the host-delivered 3.0.0 instance to branch 3.1.0. One canonical `#stremio-hybrid-style` remained; YDesign card/font CSS was registered. Cardify+ was already initialized by the host, so its branch registration was covered by the runtime fixture and not independently established in the browser.
+
+Actual remote-key sequence passed: ArrowRight moved to the adjacent Home card, Enter opened native Details, Escape returned to Home and restored focus to the originating card. Three additional Home → Details → Back cycles each returned to Home; after the cycles one native Activity remained active and one canonical stylesheet remained. The page's card feed continued growing during these cycles, so raw DOM totals are not treated as a comparable listener/leak measurement.
+
+The live Hybrid `destroy()` path removed its canonical style and body class while restoring YDesign's standalone card/font style elements; loading the exact branch Hybrid script again adopted those elements into one canonical style. The browser viewport was checked at CSS 1280×720, 1920×1080 and 3840×2160, DPR 1. Three independently rendered PNG screenshots are in `screenshots/phase5-browser/`. The 4K screenshot is a 3840×2160 raster capture, not an upscaled 1080p image. The browser was returned to its original Home URL and 1920×937 CSS viewport; after reload the branch preview globals and scripts were absent and the host Hybrid 3.0.0 was back. No saved settings, credentials, extension registration, Trakt history or parser configuration were changed.
+
+This live pass covers Home, focus, Details, Back, one canonical stylesheet, destroy/fallback/restart and desktop viewport rendering. Search, Discover, opening Settings, Torrent Cinema/Files and physical Google TV were not exercised in the main profile. Their functional regressions are covered by focused source tests, but browser acceptance for those journeys remains open.
+
+### Performance boundary
+
+No valid before/after cold-start delta is claimed. The direct Chrome preview necessarily began after the native app was ready. A separate Chromium harness reached native `appready` in roughly 3.9–4.7 seconds but did not successfully inject either loader revision before host bootstrap, and Home cards were absent in that harness; those runs are rejected as invalid A/B evidence. In the direct branch preview, Hybrid applied its shell about 9 ms after its own script start and completed the critical lane after 4/4 local assets loaded, but that warm injection is not comparable to cold startup. The PR's confirmed performance change is bounded parallel request start for the three critical UI files while preserving ordered execution; no device-class startup improvement is claimed. Google TV style-recalculation cost remains unmeasured.
+
+### Verification on the worktree before push
+
+- Focused UI/loader/Settings/Home/Trakt/Torrent regression set: **494/494 PASS**.
+- `node scripts/check-repository.mjs`: **PASS** (78 JavaScript files, 43 manifest entries, 563 URLs).
+- Changed-file `node --check` and `git diff --check`: **PASS**.
+- GitHub Actions for this stabilization delta are pending until the final commit is pushed; the previously reviewed SHA checks do not cover these changes.
+
+**Verdict:** keep PR #130 Draft. The style lifecycle and loader failure paths are covered and the main-browser UI smoke passed. Cold-start A/B performance, live Settings/Search/Discover/Torrent/Files acceptance, post-push Actions, and physical Google TV remain outstanding.

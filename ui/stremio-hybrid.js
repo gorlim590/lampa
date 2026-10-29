@@ -1,8 +1,31 @@
 /* Stremio × Lampa. Scoped presentation adapters preserve native cards, filters and playback. */
 (function () {
     'use strict';
-    if (window.StremioHybrid) return;
     var UI_VERSION='3.1.0-single-presentation-owner';
+    if (window.StremioHybrid) {
+        if (window.StremioHybrid.version === UI_VERSION) return;
+        if (typeof window.StremioHybrid.destroy !== 'function') return;
+        try { window.StremioHybrid.destroy(); } catch (e) { return; }
+        if (window.StremioHybrid) return;
+    }
+    var styleIdsByOwner={ 'ydesign-cards':'ydesign-style-block', 'ydesign-font':'ydesign-font-css', 'cardify-plus':'cardify-plus-styles' };
+    function standaloneStyleId(owner){return styleIdsByOwner[owner]||('stremio-hybrid-module-'+String(owner).replace(/[^a-z0-9_-]/gi,''));}
+    function writeStandaloneStyle(owner, value){
+        if(!value || !document.createElement)return;
+        var id=standaloneStyleId(owner),node=document.getElementById(id);
+        if(!node){node=document.createElement('style');node.id=id;(document.head||document.documentElement).appendChild(node);}
+        if(node.textContent!==value)node.textContent=value;
+    }
+    function restoreStyleModules(store){
+        if(!store||!Array.isArray(store.order)||!store.modules)return;
+        store.order.forEach(function(owner){if(styleIdsByOwner[owner])writeStandaloneStyle(owner,String(store.modules[owner]||''));});
+    }
+    var previousStyleStore=window.__StremioHybridStyleStore;
+    if(previousStyleStore&&previousStyleStore.version!==UI_VERSION){
+        restoreStyleModules(previousStyleStore);
+        var previousCanonicalStyle=document.getElementById('stremio-hybrid-style');
+        if(previousCanonicalStyle){if(previousCanonicalStyle.remove)previousCanonicalStyle.remove();else if(previousCanonicalStyle.parentNode&&previousCanonicalStyle.parentNode.removeChild)previousCanonicalStyle.parentNode.removeChild(previousCanonicalStyle);}
+    }
     var bootStats={scriptStartMs:uiNow(),shellAppliedMs:null,firstShellFrameMs:null,readyMs:null,initCount:0,styleInsertions:0,styleUpdates:0,shellTransitions:0,settingsLoads:0,settingsMounts:0,settingsUnmounts:0,settingsFailures:0,presentationFailures:0},shellFrame=0;
     var settingsHub=null,settingsScript=null,settingsLoading=false,settingsAttempted=false,settingsFailedApi=null;
     var overlayScriptURL=document.currentScript&&document.currentScript.src;if(!/^https?:\/\//i.test(overlayScriptURL||''))overlayScriptURL='';
@@ -13,7 +36,9 @@
         script.onerror=function(){script.remove();};document.head.appendChild(script);
     }
     var style, ready = false, destroyed = false, waiting = false, watching = false, nativeWaitTimer = 0, nativeWaitAttempts = 0, moreButton = null, menuOpen = false, searchNode = null, searchReturn = false, settingsRail = null, settingsFrame = 0, settingsParameter = null, settingsCategory = 'interface', settingsLeftConsumed = false, settingsPrimaryRouting = false, searchSources = null, searchRoots = [];
-    var styleStore = window.__StremioHybridStyleStore || { order: [], modules: {} };
+    var styleStore = previousStyleStore&&previousStyleStore.version===UI_VERSION&&Array.isArray(previousStyleStore.order)&&previousStyleStore.modules
+        ? previousStyleStore : { version:UI_VERSION, order:[], modules:{} };
+    styleStore.version=UI_VERSION;
     window.__StremioHybridStyleStore = styleStore;
     var NATIVE_WAIT_MS=100, NATIVE_WAIT_MAX=300;
     var css = `
@@ -1010,16 +1035,24 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         return true;
     }
     function adoptAdapterStyles() {
-        [['ydesign-style-block', 'ydesign-cards'], ['ydesign-font-css', 'ydesign-font'], ['cardify-plus-styles', 'cardify-plus']].forEach(function (entry) {
+        Object.keys(styleIdsByOwner).map(function(owner){return [styleIdsByOwner[owner],owner];}).forEach(function (entry) {
             var existing = document.getElementById(entry[0]);
             if (!existing || !existing.textContent) return;
             registerStyles(entry[1], existing.textContent);
-            if (existing.parentNode) existing.parentNode.removeChild(existing);
+            if(existing.remove)existing.remove();
+            else if(existing.parentNode&&existing.parentNode.removeChild)existing.parentNode.removeChild(existing);
         });
     }
     function ownsPresentation(region) {
         var regions = { theme: 1, header: 1, navigation: 1, cards: 1, details: 1, overlays: 1, settings: 1 };
         return !!regions[region] && !destroyed && !!style && !!document.body && document.body.classList.contains('stremio-hybrid');
+    }
+    function releaseStyleModules(){
+        styleStore.order.forEach(function(owner){writeStandaloneStyle(owner,String(styleStore.modules[owner]||''));});
+        styleStore.order=[];styleStore.modules={};
+        if(style){if(style.remove)style.remove();else if(style.parentNode&&style.parentNode.removeChild)style.parentNode.removeChild(style);}
+        style=null;
+        if(window.__StremioHybridStyleStore===styleStore)delete window.__StremioHybridStyleStore;
     }
     // One static shell and stylesheet owner; feature adapters register their
     // existing CSS here while retaining their data and native event behavior.
@@ -1135,11 +1168,12 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         openUtilities: openHeaderUtilities,
         setEnabled: setEnabled,
         refresh: function () { if (ready) apply(enabled()); },
-        diagnostics: function () {return {version:UI_VERSION,styleOwner:'hybrid',registeredStyleModules:styleStore.order.length,registeredStyleBytes:styleStore.order.reduce(function(total,name){return total+(styleStore.modules[name]||'').length;},0),scriptStartMs:bootStats.scriptStartMs,shellAppliedMs:bootStats.shellAppliedMs,firstShellFrameMs:bootStats.firstShellFrameMs,readyMs:bootStats.readyMs,initCount:bootStats.initCount,styleInsertions:bootStats.styleInsertions,styleUpdates:bootStats.styleUpdates,shellTransitions:bootStats.shellTransitions,settingsLoads:bootStats.settingsLoads,settingsMounts:bootStats.settingsMounts,settingsUnmounts:bootStats.settingsUnmounts,settingsFailures:bootStats.settingsFailures,presentationFailures:bootStats.presentationFailures||0,nativeReadinessTimedOut:!!bootStats.nativeReadinessTimedOut,readinessSubscribeFailures:bootStats.readinessSubscribeFailures||0};},
+        diagnostics: function () {return {version:UI_VERSION,styleOwner:'hybrid',styleStoreVersion:styleStore.version,registeredStyleModules:styleStore.order.length,registeredStyleOwners:styleStore.order.slice(),registeredStyleBytes:styleStore.order.reduce(function(total,name){return total+(styleStore.modules[name]||'').length;},0),scriptStartMs:bootStats.scriptStartMs,shellAppliedMs:bootStats.shellAppliedMs,firstShellFrameMs:bootStats.firstShellFrameMs,readyMs:bootStats.readyMs,initCount:bootStats.initCount,styleInsertions:bootStats.styleInsertions,styleUpdates:bootStats.styleUpdates,shellTransitions:bootStats.shellTransitions,settingsLoads:bootStats.settingsLoads,settingsMounts:bootStats.settingsMounts,settingsUnmounts:bootStats.settingsUnmounts,settingsFailures:bootStats.settingsFailures,presentationFailures:bootStats.presentationFailures||0,nativeReadinessTimedOut:!!bootStats.nativeReadinessTimedOut,readinessSubscribeFailures:bootStats.readinessSubscribeFailures||0};},
         destroy: function () {
             apply(false);
             removeHeaderUtilitiesSetting();
             backdropResume=null;movieBrands=[];movieEnglish=[];paletteCache=[];
+            releaseStyleModules();
             destroyed = true;
             stopWaiting();
             if(settingsScript){settingsScript.onload=null;settingsScript.onerror=null;if(settingsLoading)settingsScript.remove();settingsScript=null;}
