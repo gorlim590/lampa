@@ -424,6 +424,28 @@
         if (link.getAttribute('href') !== url) link.setAttribute('href', url);
     }
 
+    function publishStyle(owner, id, text) {
+        var hybrid = window.StremioHybrid;
+        var styleEl = document.getElementById(id);
+        text = String(text || '');
+        if (hybrid && typeof hybrid.registerStyles === 'function') {
+            if (styleEl && styleEl.parentNode) styleEl.parentNode.removeChild(styleEl);
+            if (text) hybrid.registerStyles(owner, text);
+            else if (typeof hybrid.unregisterStyles === 'function') hybrid.unregisterStyles(owner);
+            return;
+        }
+        if (!text) {
+            if (styleEl && styleEl.parentNode) styleEl.parentNode.removeChild(styleEl);
+            return;
+        }
+        if (!styleEl) {
+            styleEl = document.createElement('style');
+            styleEl.id = id;
+            document.head.appendChild(styleEl);
+        }
+        if (styleEl.textContent !== text) styleEl.textContent = text;
+    }
+
     function cssFont(font) {
         var ui   = font.ui + ',' + YDESIGN_FONT_FALLBACK;
         var disp = font.display + ',' + font.ui + ',' + YDESIGN_FONT_FALLBACK;
@@ -458,24 +480,18 @@
 
     function fontApply() {
         var font = fontActive();
-        var styleEl = document.getElementById('ydesign-font-css');
 
         if (!font) {
             fontLink('');
-            if (styleEl && styleEl.parentNode) styleEl.parentNode.removeChild(styleEl);
+            publishStyle('ydesign-font', 'ydesign-font-css', '');
             document.body.classList.remove('ydesign--font');
             return;
         }
 
         fontLink(font.url);
 
-        if (!styleEl) {
-            styleEl = document.createElement('style');
-            styleEl.id = 'ydesign-font-css';
-            document.head.appendChild(styleEl);
-        }
         var fontCss = cssFont(font);
-        if (styleEl.textContent !== fontCss) styleEl.textContent = fontCss;
+        publishStyle('ydesign-font', 'ydesign-font-css', fontCss);
         document.body.classList.add('ydesign--font');
     }
 
@@ -2375,13 +2391,6 @@
     }
 
     function injectCSS() {
-        var style = document.getElementById('ydesign-style-block');
-        if (!style) {
-            style = document.createElement('style');
-            style.id = 'ydesign-style-block';
-            document.head.appendChild(style);
-        }
-
         var __ydCss = [
             ".ydesign-active .ydesign-card .card__title {display: none !important;}",
             ".ydesign-active .ydesign-card .card__age {display: none !important;}",
@@ -2561,7 +2570,7 @@
             "body:not(.stremio-hybrid) .ydesign-series-active .online-prestige.online-prestige--full .online-prestige__timeline .time-line > div {box-shadow: 0 0 8px rgba(255,255,255,0.7) !important;transition: width 0.3s ease !important;}",
             ".ydesign-series-percent-text {position: absolute !important;top: 0 !important;left: 0 !important;right: 0 !important;bottom: 0 !important;width: 100% !important;height: 100% !important;display: flex !important;align-items: center !important;justify-content: center !important;font-size: 0.8em !important;font-weight: 500 !important;color: #000000 !important;text-shadow: none !important;z-index: 20 !important;pointer-events: none !important;line-height: 1 !important;}"
         ].join('\n');
-        style.innerHTML = ydPostCss(__ydCss);
+        publishStyle('ydesign-cards', 'ydesign-style-block', ydPostCss(__ydCss));
     }
 
     function getFlexAlign(val) {

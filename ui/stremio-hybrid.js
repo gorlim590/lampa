@@ -2,8 +2,8 @@
 (function () {
     'use strict';
     if (window.StremioHybrid) return;
-    var UI_VERSION='3.0.0-early-shell-phase1';
-    var bootStats={scriptStartMs:uiNow(),shellAppliedMs:null,firstShellFrameMs:null,readyMs:null,initCount:0,styleInsertions:0,shellTransitions:0,settingsLoads:0,settingsMounts:0,settingsUnmounts:0,settingsFailures:0,presentationFailures:0},shellFrame=0;
+    var UI_VERSION='3.1.0-single-presentation-owner';
+    var bootStats={scriptStartMs:uiNow(),shellAppliedMs:null,firstShellFrameMs:null,readyMs:null,initCount:0,styleInsertions:0,styleUpdates:0,shellTransitions:0,settingsLoads:0,settingsMounts:0,settingsUnmounts:0,settingsFailures:0,presentationFailures:0},shellFrame=0;
     var settingsHub=null,settingsScript=null,settingsLoading=false,settingsAttempted=false,settingsFailedApi=null;
     var overlayScriptURL=document.currentScript&&document.currentScript.src;if(!/^https?:\/\//i.test(overlayScriptURL||''))overlayScriptURL='';
     function ensureTorrentOverlay(){
@@ -13,6 +13,8 @@
         script.onerror=function(){script.remove();};document.head.appendChild(script);
     }
     var style, ready = false, destroyed = false, waiting = false, watching = false, nativeWaitTimer = 0, nativeWaitAttempts = 0, moreButton = null, menuOpen = false, searchNode = null, searchReturn = false, settingsRail = null, settingsFrame = 0, settingsParameter = null, settingsCategory = 'interface', settingsLeftConsumed = false, settingsPrimaryRouting = false, searchSources = null, searchRoots = [];
+    var styleStore = window.__StremioHybridStyleStore || { order: [], modules: {} };
+    window.__StremioHybridStyleStore = styleStore;
     var NATIVE_WAIT_MS=100, NATIVE_WAIT_MAX=300;
     var css = `
 body.stremio-hybrid { --sh-bg:#121023; --sh-panel:#211d35; --sh-accent:#9775fa; --sh-muted:#aba7bd; --sh-rail:#090a12; --sh-text:#f0eef8; --sh-border:#ffffff16; --sh-radius:.7em; --sh-pill:2em; --sh-gap:1.1em; --sh-speed:160ms; --sh-ring:#9775fa66; --sh-focus:#7960c9; --sh-focus-soft:#3e315b; --sh-header:transparent; --sh-panel-raised:#29233e; --sh-accent-soft:#b79bff; --sh-focus-text:#e9e0ff; --sh-focus-ink:#201536; --sh-inactive:#726d86; --sh-secondary:#d0cadf; --sh-inset:1.8em; --sh-ease:ease-out; background:#121023 !important; color:#f0eef8; }
@@ -961,26 +963,84 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         return value !== false && value !== 'false' && value !== 0 && value !== '0';
     }
     function uiNow(){return window.performance && typeof window.performance.now==='function'?Math.round(window.performance.now()*10)/10:null;}
-    // One static shell owner; native functional adapters still wait for appready.
+    function renderOwnedStyles() {
+        if (!document.head || !document.body) return;
+        var active = document.body.classList.contains('stremio-hybrid');
+        var content = active && !destroyed ? css : '';
+        for (var i = 0; i < styleStore.order.length; i++) {
+            var name = styleStore.order[i];
+            if (styleStore.modules[name]) content += '\n' + styleStore.modules[name];
+        }
+        if (content) {
+            if (!style) {
+                style = document.getElementById('stremio-hybrid-style');
+                if (!style) {
+                    style = document.createElement('style');
+                    style.id = 'stremio-hybrid-style';
+                    style.setAttribute('data-ui-version', UI_VERSION);
+                    document.head.appendChild(style);
+                    bootStats.styleInsertions++;
+                }
+            }
+            if (style.textContent !== content) {
+                style.textContent = content;
+                bootStats.styleUpdates++;
+            }
+        } else if (style) {
+            style.remove();
+            style = null;
+        }
+    }
+    function registerStyles(owner, value) {
+        var name = String(owner || '').replace(/[^a-z0-9_-]/gi, '');
+        if (!name) return false;
+        if (!Object.prototype.hasOwnProperty.call(styleStore.modules, name)) styleStore.order.push(name);
+        var text = String(value || '');
+        if (styleStore.modules[name] === text) return true;
+        styleStore.modules[name] = text;
+        renderOwnedStyles();
+        return true;
+    }
+    function unregisterStyles(owner) {
+        var name = String(owner || '').replace(/[^a-z0-9_-]/gi, '');
+        if (!name || !Object.prototype.hasOwnProperty.call(styleStore.modules, name)) return false;
+        delete styleStore.modules[name];
+        styleStore.order = styleStore.order.filter(function (item) { return item !== name; });
+        renderOwnedStyles();
+        return true;
+    }
+    function adoptAdapterStyles() {
+        [['ydesign-style-block', 'ydesign-cards'], ['ydesign-font-css', 'ydesign-font'], ['cardify-plus-styles', 'cardify-plus']].forEach(function (entry) {
+            var existing = document.getElementById(entry[0]);
+            if (!existing || !existing.textContent) return;
+            registerStyles(entry[1], existing.textContent);
+            if (existing.parentNode) existing.parentNode.removeChild(existing);
+        });
+    }
+    function ownsPresentation(region) {
+        var regions = { theme: 1, header: 1, navigation: 1, cards: 1, details: 1, overlays: 1, settings: 1 };
+        return !!regions[region] && !destroyed && !!style && !!document.body && document.body.classList.contains('stremio-hybrid');
+    }
+    // One static shell and stylesheet owner; feature adapters register their
+    // existing CSS here while retaining their data and native event behavior.
     function applyShell(on) {
         if (destroyed || !document.body) return;
-        if (on && !style) {
-            style=document.getElementById('stremio-hybrid-style');
-            if(!style){style=document.createElement('style');style.id='stremio-hybrid-style';style.textContent=css;style.setAttribute('data-ui-version',UI_VERSION);document.head.appendChild(style);bootStats.styleInsertions++;}
-        }
         if(document.body.classList.contains('stremio-hybrid')!==on)bootStats.shellTransitions++;
         document.body.classList.toggle('stremio-hybrid', on);
+        renderOwnedStyles();
         if(on){
             if(bootStats.shellAppliedMs===null)bootStats.shellAppliedMs=uiNow();
             if(bootStats.firstShellFrameMs===null && !shellFrame && typeof requestAnimationFrame==='function')shellFrame=requestAnimationFrame(function(){shellFrame=0;if(!destroyed && document.body.classList.contains('stremio-hybrid'))bootStats.firstShellFrameMs=uiNow();});
         }else if(shellFrame){cancelAnimationFrame(shellFrame);shellFrame=0;}
-        if (!on && style) { style.remove(); style = null; }
         syncHeaderPresentation();
     }
     function syncHeaderPresentation() {
         var api=window.InterfacePlusPresentation;
         if(api && api.contractVersion===1 && typeof api.syncHeader==='function'){
             try{api.syncHeader();}catch(e){bootStats.presentationFailures=(bootStats.presentationFailures||0)+1;}
+        }
+        if(api && api.contractVersion===1 && typeof api.setThemeOwner==='function'){
+            try{api.setThemeOwner(ownsPresentation('theme'));}catch(e){bootStats.presentationFailures=(bootStats.presentationFailures||0)+1;}
         }
     }
     function prepareShell() {
@@ -1069,11 +1129,13 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
         version: UI_VERSION,
         settingsHubVersion: 1,
         presentationVersion: 1,
-        ownsPresentation: function (region) { return (region==='header' || region==='navigation') && !destroyed && !!style && !!document.body && document.body.classList.contains('stremio-hybrid'); },
+        ownsPresentation: ownsPresentation,
+        registerStyles: registerStyles,
+        unregisterStyles: unregisterStyles,
         openUtilities: openHeaderUtilities,
         setEnabled: setEnabled,
         refresh: function () { if (ready) apply(enabled()); },
-        diagnostics: function () {return {version:UI_VERSION,scriptStartMs:bootStats.scriptStartMs,shellAppliedMs:bootStats.shellAppliedMs,firstShellFrameMs:bootStats.firstShellFrameMs,readyMs:bootStats.readyMs,initCount:bootStats.initCount,styleInsertions:bootStats.styleInsertions,shellTransitions:bootStats.shellTransitions,settingsLoads:bootStats.settingsLoads,settingsMounts:bootStats.settingsMounts,settingsUnmounts:bootStats.settingsUnmounts,settingsFailures:bootStats.settingsFailures,presentationFailures:bootStats.presentationFailures||0,nativeReadinessTimedOut:!!bootStats.nativeReadinessTimedOut,readinessSubscribeFailures:bootStats.readinessSubscribeFailures||0};},
+        diagnostics: function () {return {version:UI_VERSION,styleOwner:'hybrid',registeredStyleModules:styleStore.order.length,registeredStyleBytes:styleStore.order.reduce(function(total,name){return total+(styleStore.modules[name]||'').length;},0),scriptStartMs:bootStats.scriptStartMs,shellAppliedMs:bootStats.shellAppliedMs,firstShellFrameMs:bootStats.firstShellFrameMs,readyMs:bootStats.readyMs,initCount:bootStats.initCount,styleInsertions:bootStats.styleInsertions,styleUpdates:bootStats.styleUpdates,shellTransitions:bootStats.shellTransitions,settingsLoads:bootStats.settingsLoads,settingsMounts:bootStats.settingsMounts,settingsUnmounts:bootStats.settingsUnmounts,settingsFailures:bootStats.settingsFailures,presentationFailures:bootStats.presentationFailures||0,nativeReadinessTimedOut:!!bootStats.nativeReadinessTimedOut,readinessSubscribeFailures:bootStats.readinessSubscribeFailures||0};},
         destroy: function () {
             apply(false);
             removeHeaderUtilitiesSetting();
@@ -1084,6 +1146,7 @@ body.stremio-hybrid .head .sh-head-more.focus{box-shadow:0 0 0 .1em var(--sh-acc
             delete window.StremioHybrid;
         }
     };
+    adoptAdapterStyles();
     prepareShell();
     if (window.appready && window.Lampa && Lampa.SettingsApi) init();
     else {

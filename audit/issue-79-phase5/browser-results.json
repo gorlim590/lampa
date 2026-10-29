@@ -1,0 +1,31 @@
+{
+  "status": "partial-acceptance; keep-draft",
+  "browser": "owner-authorized main Chrome through Chrome DevTools MCP",
+  "testTab": "duplicate Home tab in the existing profile; original Lampa Details tab remained untouched",
+  "testedSource": {
+    "method": "exact working-tree ui/stremio-hybrid.js bytes evaluated after destroying the old Hybrid instance; active Cardify stylesheet transferred through the new registerStyles API",
+    "hybridSha256": "a04f985c75de99bfdf4d5675b42ce5a4ca3bec76314c12f36184404955391e17",
+    "cardifySha256": "ab3e622d18e58f4c12f0192828bb0ace6551eec65cfbdae34637182df546aa74",
+    "note": "The already initialized old Cardify+ module was not re-executed; its active CSS was used to verify the exact Hybrid registry contract. No branch cold-loader delivery is claimed."
+  },
+  "checks": [
+    { "name": "Hybrid owner registry", "status": "PASS", "details": "One #stremio-hybrid-style, 3 registered modules, initCount=1; YDesign card/font and Cardify CSS." },
+    { "name": "Home D-pad and restoration", "status": "PASS", "details": "At 1280x720, ArrowRight moved to adjacent card and ArrowLeft restored prior focus; Enter opened native Details; Escape returned to Home with prior card focus and items_line controller." },
+    { "name": "1280x720", "status": "PASS", "cssViewport": [1280, 720], "dpr": 1, "screenshot": "screenshots/hybrid-1280x720.jpg" },
+    { "name": "1920x1080", "status": "PASS", "cssViewport": [1920, 1080], "dpr": 1, "screenshot": "screenshots/hybrid-1920x1080.jpg" },
+    { "name": "3840x2160", "status": "PASS", "cssViewport": [3840, 2160], "dpr": 1, "screenshot": "screenshots/hybrid-3840x2160.jpg", "details": "Independently rendered CDP viewport; JPEG dimensions verified as 3840x2160." },
+    { "name": "Standalone browser", "status": "NOT TESTED", "details": "Standalone fallback behavior is covered by source-level tests, not a separate live browser mode." },
+    { "name": "Search/Discover/Settings/Torrent/Files journeys", "status": "NOT TESTED" },
+    { "name": "Physical Google TV", "status": "NOT TESTED" }
+  ],
+  "startup": {
+    "branchColdStartupComparison": "NOT VERIFIED",
+    "reason": "The authorized DevTools connection does not expose network request interception for installing the branch loader before startup. The exact Hybrid source could be injected after appready, but that is not comparable to cold startup.",
+    "measuredPostDeliveryInjection": { "hybridShellMsAfterScriptStart": 16.1, "firstHybridFrameMsAfterScriptStart": 43.5, "meaning": "single initialized-page injection sample; not a speedup claim" },
+    "loaderDownloadOptimization": "Critical UI requests now begin together and execute in declared order. Unit test verifies request concurrency/order; cold-run latency improvement remains unmeasured."
+  },
+  "restoration": {
+    "status": "PASS",
+    "details": "Duplicate tab returned to its original Home URL, viewport emulation was cleared, and main-delivered Hybrid loaded after reload. Original Lampa Details tab was not touched. No Storage, settings, parser or account changes were made."
+  }
+}

@@ -2,6 +2,8 @@
     'use strict';
     if (window.__ifx_plugin_initialized) return;
     window.__ifx_plugin_initialized = true;
+    var hybridOwnsTheme = false;
+    var currentInterfaceTheme = null;
 
     // Standalone fallback for one delegated presentation region, not a second UI controller.
     (function headerPresentation() {
@@ -28,8 +30,12 @@
             ownedStyle.textContent = css;
             document.head.appendChild(ownedStyle);
         }
-        window.InterfacePlusPresentation = {contractVersion:1, syncHeader:syncHeader};
+        window.InterfacePlusPresentation = {contractVersion:1, syncHeader:syncHeader, setThemeOwner:setHybridThemeOwner};
         syncHeader();
+        try {
+            var hybrid = window.StremioHybrid;
+            setHybridThemeOwner(!!(hybrid && hybrid.ownsPresentation && hybrid.ownsPresentation('theme')));
+        } catch (e) { /* Keep the standalone Interface+ fallback available. */ }
     })();
 
     var IFX_TITLE_SIZE_DEFAULT = 0.75;
@@ -816,8 +822,11 @@
     }
 
     function applyTheme(theme) {
+        currentInterfaceTheme = theme || 'default';
         var old = document.getElementById('interface_mod_theme');
         if (old) old.remove();
+        var hybrid = window.StremioHybrid;
+        if (hybridOwnsTheme || hybrid && hybrid.ownsPresentation && hybrid.ownsPresentation('theme')) return;
         if (!theme || theme === 'default') return;
         // Native menu rows yield to Hybrid's active rail; Settings/Select rows also yield to the active canonical owner.
         var b = 'body:not(.stremio-hybrid) .menu__item, body:not(.stremio-hybrid) .settings-folder, body:not(.stremio-hybrid) .settings-param, body:not(.stremio-hybrid) .selectbox-item, .full-start__button, .full-descr__tag, .player-panel .button, .custom-online-btn, .custom-torrent-btn, .main2-more-btn, .simple-button, body:not(.stremio-hybrid) .menu__version';
@@ -919,6 +928,18 @@
         document.head.appendChild(st);
         if (typeof ensureStylesPriority === 'function') {
             ensureStylesPriority(['interface_mod_theme']);
+        }
+    }
+
+    function setHybridThemeOwner(on) {
+        var next = !!on;
+        if (hybridOwnsTheme === next) return;
+        hybridOwnsTheme = next;
+        var current = document.getElementById('interface_mod_theme');
+        if (next) {
+            if (current) current.remove();
+        } else if (currentInterfaceTheme !== null) {
+            applyTheme(currentInterfaceTheme);
         }
     }
 

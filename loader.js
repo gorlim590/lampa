@@ -151,6 +151,20 @@
     loadOne(list[index], stage, index + 1, function () { loadSeries(list, stage, index + 1, done); });
   }
 
+  // Start the visual adapters' downloads together. Dynamic scripts with
+  // async=false still execute in insertion order, while network latency no
+  // longer accumulates across the critical shell lane.
+  function loadParallelOrdered(list, stage, done) {
+    if (!list.length) { done(); return; }
+    var remaining = list.length;
+    for (var i = 0; i < list.length; i++) {
+      loadOne(list[i], stage, i + 1, function () {
+        remaining--;
+        if (!remaining) done();
+      });
+    }
+  }
+
   function removeReadyListener() {
     if (!readinessListener) return;
     try {
@@ -261,7 +275,7 @@
     checkNativeReady();
   }
 
-  loadSeries(CRITICAL, 'critical', 0, function () {
+  loadParallelOrdered(CRITICAL, 'critical', function () {
     state.criticalFinishedAt = now();
     state.stage = 'waiting-for-appready';
     waitForAppReady();

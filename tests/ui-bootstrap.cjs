@@ -10,14 +10,16 @@ function fixture(value=true,full=false,primaryValue=false){
   addEventListener:(name,fn)=>events[name]=fn,removeEventListener:name=>delete events[name]};
  const L={Storage:{get:key=>key==='stremio_hybrid_enabled'?value:key==='stremio_hybrid_primary_settings'?primaryValue:false,set:(key,v)=>{writes.push([key,v]);if(key==='stremio_hybrid_enabled')value=v;else if(key==='stremio_hybrid_primary_settings')primaryValue=v;}},
   SettingsApi:{getParam:()=>params,addParam:p=>params.push(p)},Listener:{follow:(name,fn)=>native.push(fn),remove:(name,fn)=>{const i=native.indexOf(fn);if(i>=0)native.splice(i,1);}}};
- const c={URL,document:doc,Lampa:L,window:{appready:false,Lampa:L,performance:{now:()=>++clock}},$:()=>{},setTimeout:(fn,ms)=>{const id=++timerId;timers.set(id,{fn,ms});return id;},clearTimeout:id=>timers.delete(id),nativeWaitTimer:0,nativeWaitAttempts:0,NATIVE_WAIT_MS:100,NATIVE_WAIT_MAX:300,UI_VERSION:'fixture-v1',css:'fixture-css',style:null,ready:false,destroyed:false,waiting:false,watching:false,shellFrame:0,requestAnimationFrame:fn=>{const id=frames.size+1;frames.set(id,fn);return id;},cancelAnimationFrame:id=>frames.delete(id),
-  bootStats:{scriptStartMs:0,shellAppliedMs:null,firstShellFrameMs:null,readyMs:null,initCount:0,styleInsertions:0,shellTransitions:0,settingsLoads:0,settingsMounts:0,settingsUnmounts:0,settingsFailures:0},settingsHub:null,settingsScript:null,settingsLoading:false,settingsAttempted:false,settingsFailedApi:null,
+ const c={URL,document:doc,Lampa:L,window:{appready:false,Lampa:L,performance:{now:()=>++clock}},$:()=>{},setTimeout:(fn,ms)=>{const id=++timerId;timers.set(id,{fn,ms});return id;},clearTimeout:id=>timers.delete(id),nativeWaitTimer:0,nativeWaitAttempts:0,NATIVE_WAIT_MS:100,NATIVE_WAIT_MAX:300,UI_VERSION:'fixture-v1',css:'fixture-css',style:null,styleStore:{order:[],modules:{}},ready:false,destroyed:false,waiting:false,watching:false,shellFrame:0,requestAnimationFrame:fn=>{const id=frames.size+1;frames.set(id,fn);return id;},cancelAnimationFrame:id=>frames.delete(id),
+  bootStats:{scriptStartMs:0,shellAppliedMs:null,firstShellFrameMs:null,readyMs:null,initCount:0,styleInsertions:0,styleUpdates:0,shellTransitions:0,settingsLoads:0,settingsMounts:0,settingsUnmounts:0,settingsFailures:0},settingsHub:null,settingsScript:null,settingsLoading:false,settingsAttempted:false,settingsFailedApi:null,
   overlayScriptURL:doc.currentScript.src,setupUI:()=>{counts.setup++;c.watching=true;},removeUI:()=>{counts.remove++;c.watching=false;},updateAvatar:()=>counts.avatar++,onHeaderUtilitiesSetting:()=>{},removeHeaderUtilitiesSetting:()=>{},openHeaderUtilities:()=>{},backdropResume:null,movieBrands:[],movieEnglish:[],paletteCache:[]};
  vm.createContext(c);
  if(full)vm.runInContext(source,c);
  else{
-  const start=source.indexOf('    function enabled()'),end=source.indexOf('    window.StremioHybrid = {');
-  vm.runInContext(source.slice(start,end),c);vm.runInContext(source.slice(end,source.lastIndexOf('})();')),c);
+  const ownerStart=source.indexOf('    function renderOwnedStyles()'),ownerEnd=source.indexOf('    function mountSettings()',ownerStart);
+  const start=source.indexOf('    function enabled()'),end=source.lastIndexOf('})();');
+  vm.runInContext(source.slice(ownerStart,ownerEnd),c);
+  vm.runInContext(source.slice(start,end),c);
  }
  return {c,doc,L,nodes,classes,events,native,params,writes,counts,frames,timers,ready(){c.window.appready=true;const cb=native[0];assert(cb);cb({type:'ready'});return cb;}};
 }
