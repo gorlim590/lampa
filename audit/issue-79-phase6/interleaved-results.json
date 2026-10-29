@@ -14,7 +14,7 @@
   ],
   "results": [
     {
-      "file": "/home/gostrimchik/lampa-issue79-phase6/audit/issue-79-phase6/interleaved-runs/01-main.json",
+      "file": "audit/issue-79-phase6/interleaved-runs/01-main.json",
       "mode": "main",
       "marks": {
         "documentStart": 2902.9,
@@ -128,7 +128,7 @@
       "errors": []
     },
     {
-      "file": "/home/gostrimchik/lampa-issue79-phase6/audit/issue-79-phase6/interleaved-runs/02-branch.json",
+      "file": "audit/issue-79-phase6/interleaved-runs/02-branch.json",
       "mode": "branch",
       "marks": {
         "documentStart": 751.8,
@@ -242,7 +242,7 @@
       "errors": []
     },
     {
-      "file": "/home/gostrimchik/lampa-issue79-phase6/audit/issue-79-phase6/interleaved-runs/03-branch.json",
+      "file": "audit/issue-79-phase6/interleaved-runs/03-branch.json",
       "mode": "branch",
       "marks": {
         "documentStart": 928,
@@ -356,7 +356,7 @@
       "errors": []
     },
     {
-      "file": "/home/gostrimchik/lampa-issue79-phase6/audit/issue-79-phase6/interleaved-runs/04-main.json",
+      "file": "audit/issue-79-phase6/interleaved-runs/04-main.json",
       "mode": "main",
       "marks": {
         "documentStart": 676.7,
@@ -470,7 +470,7 @@
       "errors": []
     },
     {
-      "file": "/home/gostrimchik/lampa-issue79-phase6/audit/issue-79-phase6/interleaved-runs/05-main.json",
+      "file": "audit/issue-79-phase6/interleaved-runs/05-main.json",
       "mode": "main",
       "marks": {
         "documentStart": 914.9,
@@ -584,7 +584,7 @@
       "errors": []
     },
     {
-      "file": "/home/gostrimchik/lampa-issue79-phase6/audit/issue-79-phase6/interleaved-runs/06-branch.json",
+      "file": "audit/issue-79-phase6/interleaved-runs/06-branch.json",
       "mode": "branch",
       "marks": {
         "documentStart": 562.8,
@@ -698,7 +698,7 @@
       "errors": []
     },
     {
-      "file": "/home/gostrimchik/lampa-issue79-phase6/audit/issue-79-phase6/interleaved-runs/07-branch.json",
+      "file": "audit/issue-79-phase6/interleaved-runs/07-branch.json",
       "mode": "branch",
       "marks": {
         "documentStart": 726.6,
@@ -812,7 +812,7 @@
       "errors": []
     },
     {
-      "file": "/home/gostrimchik/lampa-issue79-phase6/audit/issue-79-phase6/interleaved-runs/08-main.json",
+      "file": "audit/issue-79-phase6/interleaved-runs/08-main.json",
       "mode": "main",
       "marks": {
         "documentStart": 744.8,
@@ -926,7 +926,7 @@
       "errors": []
     },
     {
-      "file": "/home/gostrimchik/lampa-issue79-phase6/audit/issue-79-phase6/interleaved-runs/09-main.json",
+      "file": "audit/issue-79-phase6/interleaved-runs/09-main.json",
       "mode": "main",
       "marks": {
         "documentStart": 678.9,
@@ -1040,7 +1040,7 @@
       "errors": []
     },
     {
-      "file": "/home/gostrimchik/lampa-issue79-phase6/audit/issue-79-phase6/interleaved-runs/10-branch.json",
+      "file": "audit/issue-79-phase6/interleaved-runs/10-branch.json",
       "mode": "branch",
       "marks": {
         "documentStart": 1693.2,
@@ -1153,5 +1153,6 @@
       "fixtureFavoriteCalls": 15,
       "errors": []
     }
-  ]
+  ],
+  "branchTestedCommit": "a93e941596a98e8ce48d2d0c8d250010d51ff1ee"
 }

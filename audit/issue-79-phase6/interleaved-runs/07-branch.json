@@ -3,7 +3,7 @@
   "cacheCondition": "new isolated browser context per run; empty HTTP cache/storage/cookies; real Siaivo host/core and API endpoints; repository plugin source bytes intercepted locally",
   "mode": "branch",
   "baseCommit": "c49961a0d8d7d88b609ead2def34f5c5bc2c7e6d",
-  "testedCommit": "f04d3c6c9716a3d7488887a92d14a1195bb8520b",
+  "testedCommit": "a93e941596a98e8ce48d2d0c8d250010d51ff1ee",
   "sourceHashes": {
     "loader.js": "cb9833f6d6821464e1cc0fd4213fb599e7edc2a2205d0dd110e6b46b2115e2c1",
     "ui/stremio-hybrid.js": "2a77c7f3c5e759acde5040589e078f52a105fd1485a8f89bc8f55fc041a9f139",

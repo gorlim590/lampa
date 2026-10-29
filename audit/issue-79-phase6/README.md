@@ -18,7 +18,7 @@ When a successful response changes the computed YDesign rows, a coalesced target
 
 ## Interleaved cold-start comparison
 
-Ten disposable runs were interleaved `main, branch, branch, main` and repeated; each used a new context with empty cache/storage/cookies, Chromium 156, 1920×1080 CSS viewport, DPR 1, the actual Siaivo host/core, and local repository scripts intercepted before host bootstrap. A controlled 24-TV Favorite fixture was used; no saved user Home rows, credentials, preferences, or Trakt data were copied. Full per-run timings, sanitized resource waterfall, navigation events, local source hashes, and failures are in `browser-results.json` and `interleaved-runs/`.
+Ten disposable runs were interleaved `main, branch, branch, main` and repeated; each used a new context with empty cache/storage/cookies, Chromium 156, 1920×1080 CSS viewport, DPR 1, the actual Siaivo host/core, and local repository scripts intercepted before host bootstrap. A controlled 24-TV Favorite fixture was used; no saved user Home rows, credentials, preferences, or Trakt data were copied. The branch source was tested at commit `a93e941596a98e8ce48d2d0c8d250010d51ff1ee`; the final PR head retains the same production source hash. Full per-run timings, sanitized resource waterfall, navigation events, local source hashes, and failures are in `browser-results.json` and `interleaved-runs/`.
 
 | Metric (navigation start, ms) | Main median (range) | Branch median (range) |
 |---|---:|---:|

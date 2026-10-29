@@ -893,5 +893,6 @@
         "plugins-to-enable/home-history.js": "6ad4f518561ea024b1b842349c88861d05565c30c9787e21f5d08199b5ddd3d0"
       }
     }
-  ]
+  ],
+  "branchTestedCommit": "a93e941596a98e8ce48d2d0c8d250010d51ff1ee"
 }
