@@ -891,6 +891,10 @@
                                 el._lazyQueue.forEach(function (fn) { fn(); });
                                 delete el._lazyQueue;
                             }
+                            if (el._ydesign_refreshPending) {
+                                el._ydesign_refreshPending = false;
+                                if (el._ydesign_updateNotch) el._ydesign_updateNotch();
+                            }
                             self.observer.unobserve(el);
                         }
                     });
@@ -909,6 +913,12 @@
             }
             el._lazyQueue = [fn];
             this.observer.observe(el);
+        },
+        refreshMarks: function (el) {
+            if (!el) return;
+            this.init();
+            if (this.observer) this.observer.observe(el);
+            else scheduleFallbackMarkRefresh();
         }
     };
 
@@ -1492,9 +1502,11 @@
             var card = null;
             if (t && t.classList) card = t.classList.contains('ydesign-card') ? t : (t.closest ? t.closest('.ydesign-card') : null);
             if (card) {
-                if (card._ydesign_updateMarks) card._ydesign_updateMarks();
+                card._ydesign_refreshPending = false;
+                if (card._ydesign_updateNotch) card._ydesign_updateNotch();
                 if (card._ydesign_lazyMarks) card._ydesign_lazyMarks();
                 if (card._ydesign_onFocus) card._ydesign_onFocus();
+                if (typeof IntersectionObserver === 'undefined' && RefreshFallbackInstalled) scheduleFallbackMarkRefresh();
             }
         }, true);
     }
@@ -1916,23 +1928,64 @@
 
     }
 
+    function bindCardMarkCallbacks(el, data, type, notchUpdater, marksUpdater) {
+        var getExt = function () { return el._ydesign_extData || (el._ydesign_extFailed ? EXT_FAILED : null); };
+        var refreshMarks = function () { (marksUpdater || updateCardMarks)(el, data, type, getExt()); };
+        el._ydesign_updateNotch = function () {
+            (notchUpdater || updateCardNotch)(el, data, getExt());
+            refreshMarks();
+        };
+        el._ydesign_updateMarks = refreshMarks;
+        el._ydesign_lazyMarks = function () { ensureCollection(el, data, type, getExt()); };
+        return refreshMarks;
+    }
+
     // Оновлення позначок на видимих картках після змін у таймлайні/історії (порціями, без фризів)
     var RefreshT = null;
+    var RefreshFallbackT = null;
+    var RefreshFallbackInstalled = false;
+
+    function flushFallbackMarkRefresh() {
+        RefreshFallbackT = null;
+        var cards = document.querySelectorAll('.activity--active .ydesign-card');
+        var width = window.innerWidth || document.documentElement.clientWidth || 0;
+        var height = window.innerHeight || document.documentElement.clientHeight || 0;
+        for (var i = 0; i < cards.length; i++) {
+            var card = cards[i];
+            if (!card || !card._ydesign_refreshPending || !card.getBoundingClientRect) continue;
+            var rect = card.getBoundingClientRect();
+            if (rect.bottom > 0 && rect.top < height && rect.right > 0 && rect.left < width) {
+                card._ydesign_refreshPending = false;
+                if (card._ydesign_updateNotch) card._ydesign_updateNotch();
+            }
+        }
+    }
+
+    function scheduleFallbackMarkRefresh() {
+        if (!RefreshFallbackInstalled) {
+            RefreshFallbackInstalled = true;
+            document.addEventListener('scroll', function () {
+                if (!RefreshFallbackT) RefreshFallbackT = setTimeout(flushFallbackMarkRefresh, 90);
+            }, true);
+            window.addEventListener('resize', function () {
+                if (!RefreshFallbackT) RefreshFallbackT = setTimeout(flushFallbackMarkRefresh, 90);
+            });
+        }
+        if (!RefreshFallbackT) RefreshFallbackT = setTimeout(flushFallbackMarkRefresh, 0);
+    }
+
     function scheduleRefreshMarks() {
         if (RefreshT) return;
         RefreshT = setTimeout(function () {
             RefreshT = null;
             bumpMarks();
-            var list = document.querySelectorAll('.activity--active .ydesign-card');
-            var i = 0;
-            (function step() {
-                var end = Math.min(i + 10, list.length);
-                for (; i < end; i++) {
-                    var c = list[i];
-                    if (c.offsetParent !== null && c._ydesign_updateNotch) c._ydesign_updateNotch();
-                }
-                if (i < list.length) requestAnimationFrame(step);
-            })();
+            var cards = document.querySelectorAll('.activity--active .ydesign-card');
+            for (var j = 0; j < cards.length; j++) {
+                var card = cards[j];
+                if (!card || !card._ydesign_updateNotch) continue;
+                card._ydesign_refreshPending = true;
+                LazyLoader.refreshMarks(card);
+            }
         }, 120);
     }
 
@@ -2352,15 +2405,7 @@
         if (!data.id) return;
 
 
-        var refreshMarks = function () {
-            updateCardMarks(el, data, type, el._ydesign_extData || (el._ydesign_extFailed ? EXT_FAILED : null));
-        };
-        el._ydesign_updateNotch = function () {
-            updateCardNotch(el, data, el._ydesign_extData);
-            refreshMarks();
-        };
-        el._ydesign_updateMarks = refreshMarks;
-        el._ydesign_lazyMarks = function () { ensureCollection(el, data, type, el._ydesign_extData); };
+        var refreshMarks = bindCardMarkCallbacks(el, data, type);
         refreshMarks();
 
         var buildExtendedCard = function () {
