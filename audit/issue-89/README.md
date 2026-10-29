@@ -86,3 +86,5 @@ Final-source screenshots are actual browser captures with CSS viewport and DPR 1
 | 3840×2160 | −0.011 / −0.011 CSS px | No | [final TV 4K viewport](acceptance-2026-10-29/final-tv-3840x2160.png) |
 
 Browser profile, tabs, settings, Storage, parser configuration, credentials, and Trakt history were preserved. The interactive route and viewport are restored after the final checks. Physical Google TV remains unverified.
+
+On implementation commit `a42fa3814f291f0eada13868fa9f26f076da8992`, all five GitHub Actions passed. The Seasons workflow log confirms `details-presentation.cjs` executed in the 205/205 passing Details/Hybrid/Trakt regression step. A final evidence-only checkpoint will rerun CI on its own head.
