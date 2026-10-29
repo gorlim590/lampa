@@ -1135,6 +1135,14 @@ Next publishupdatedPR50(mainmerge+marginfixonly),CI/merge;thenPR53retargettothat
 - Main Chrome was inspected read-only: the Lampa tab is initialized and the Player is closed. No real player transition or Trakt write was performed. Internal transition behavior is controlled production-handler test coverage; Just Player and Google TV Streamer 4K are **NOT VERIFIED on-device**.
 - Draft PR #129: https://github.com/gorlim590/lampa/pull/129. The implementation commit was `3ceecc4dd405a245e215423383239fe622608b23`; all five GitHub Actions also passed on the later documentation checkpoint HEAD. PR remains Draft and unmerged.
 
+### Just+ Player bridge follow-up
+
+- Started the follow-up from current `origin/main` `14f635e95a1245f26fbcfd8411a451b48879b24d` in `feat/issue-125-trakt-external-player`; PR #129's internal-player behavior remains the baseline.
+- Reviewed official Just+ Playlist API and v2.5.1 release notes, plus the official Lampa Android wrapper source at released tag v1.13.5. Lampa builds playlist items with available show IDs and S/E, passes a mutable explicit `result_callback`, and translates changed per-item callback positions into `Lampa.Timeline.update()` after return. Just+ documents callback delivery when leaving the player; `report_interval_sec` is ignored since 2.2.2, so immediate episode-switch reports are not guaranteed.
+- Added a fail-closed Trakt bridge consumer: at `Player.external`, snapshot uniquely resolvable playlist Timeline hashes and exact S/E; on native wrapper Timeline updates, use only matching advancing per-item progress and the existing idempotent account-scoped history writer. Colliding hashes for different episodes, missing identity/duration, stale token/profile generation and expired snapshots are rejected. Added seven deterministic tests and included them in `home-history-checks.yml`.
+- Main Chrome (page 4, authorized MCP) was inspected read-only: web Lampa runtime is initialized, Player is closed, `PlayerPlaylist.get()` is empty, and no AndroidJS bridge is exposed. No player launch, Trakt mutation or settings change was performed. Device callback delivery remains unverified.
+- Current checkpoint: Just+ tests 7/7; the mandatory Home-history CI command passes 222/222; extra Trakt ratings/personalization/Hybrid checks pass 58/58; repository check and syntax pass. Push/PR and GitHub Actions are pending.
+
 ## Issue #79 Phase 7 continuation — Home render/focus (2026-10-29)
 
 - Continued PR #132 on the existing branch. Main Chrome DevTools `list_pages` reused the selected Lampa page; read-only state was Home/main, `items_line`, DPR 1. ArrowRight/Left, Details Enter/Escape and Settings open/Back were exercised after foregrounding; focus returned to the originating Home card. No Storage, Trakt, parser or plugin settings were changed.

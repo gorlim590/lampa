@@ -104,6 +104,7 @@ function productionMethod(owner, name) {
 function integrationFixture() {
   const f = fixture();
   f.context.shouldSendProgress = () => f.context.throttleState.lastSendTime === 0;
+  let playerPlaylist = [];
   const values = { trakt_enable_watching: true, trakt_token: 'synthetic-token', trakt_min_progress: 90 };
   const player = Object.create(null), timelineHandlers = Object.create(null), globalListeners = Object.create(null), accountListeners = Object.create(null), storageListeners = [], documentListeners = Object.create(null);
   let activityCard = null, activeVideo = null, playerOpened = false, currentCardReadCount = 0;
@@ -117,6 +118,7 @@ function integrationFixture() {
     Storage: storage,
     Activity: { active: () => ({ movie: activityCard, card: activityCard }) },
     Player: { opened: () => playerOpened, listener: { follow: on(player), remove: remove(player) } },
+    PlayerPlaylist: { get: () => playerPlaylist },
     PlayerVideo: { video: () => activeVideo },
     Timeline: { listener: { follow: on(timelineHandlers), remove: remove(timelineHandlers) } },
     Listener: { follow: on(globalListeners), remove: remove(globalListeners) },
@@ -136,10 +138,12 @@ function integrationFixture() {
     getContentType$1: media => media && (media.method === 'tv' || media.method === 'show' || media.original_name || media.first_air_date) ? 'show' : 'movie',
     isInitialized: false,
     isInitialized$1: false,
-    pendingExternalPlayback: null, pendingInternalPlayback: null, timelineProgressSamples: {},
+    pendingExternalPlayback: null, externalPlaylistReport: null, pendingInternalPlayback: null, timelineProgressSamples: {},
     playbackInstanceSequence: 0, playbackIdentityGeneration: 0, currentPlaybackInstance: null, terminalPlaybackInstanceId: null,
     setHashMeta: (hash, value) => { meta[hash] = value; }, getHashMeta: hash => meta[hash] || null,
-    extractSeasonEpisode: media => ({ season: media.season_number, episode: media.episode_number }),
+    extractSeasonEpisode: media => ({ season: media.season_number != null ? media.season_number : media.season, episode: media.episode_number != null ? media.episode_number : media.episode }),
+    getContentType$2: media => media && (media.method === 'tv' || media.type === 'tv' ? 'show' : 'movie'),
+    verifiedShowEpisode: media => media && media.method === 'tv' && Number.isInteger(media.season_number) && media.season_number >= 0 && Number.isInteger(media.episode_number) && media.episode_number >= 1 ? { id: String(media.id), season: media.season_number, episode: media.episode_number } : null,
     resolveSeasonEpisode: () => ({}), loadSessionCache: () => {}, loadHashMetaCache: () => {},
     scrobbleQueue: { init: () => {}, clear: () => { f.context.queueClearCount = (f.context.queueClearCount || 0) + 1; } },
     slog: () => {}, logWarn: (...args) => { f.context.lastWarning = args; f.context.lastWarningMessage = String(args[1]); }, logDebugOnce: () => {},
@@ -182,7 +186,7 @@ function integrationFixture() {
     playerOpened = true;
     (player.start || []).slice().forEach(fn => fn({ card: media, timeline: { hash, percent: 0 } }));
   };
-  return { ...f, values, player, playerEvent, storageChange, documentListeners, accountListeners, timeline, launch, video: () => activeVideo, watching, events, currentCardReadCount: () => currentCardReadCount };
+  return { ...f, values, player, playerEvent, storageChange, documentListeners, accountListeners, timeline, launch, video: () => activeVideo, watching, events, setPlaylist: list => { playerPlaylist = list; }, currentCardReadCount: () => currentCardReadCount };
 }
 
 async function flush() { for (let i = 0; i < 12; i++) await Promise.resolve(); }
@@ -553,6 +557,25 @@ test('external player return without any confirming Timeline clears the handoff 
   await flush();
   assert.deepEqual(f.calls, []);
   assert.equal(f.context.pendingExternalPlayback, null);
+});
+
+test('official Just+ playlist callback finalizes each exact episode through Lampa Timeline after return', async () => {
+  const f = integrationFixture();
+  const show = { id: 1396, method: 'tv', type: 'tv', name: 'Show', number_of_seasons: 3 };
+  f.setPlaylist([
+    { season: 1, episode: 2, url: 'same-pack', timeline: { hash: 'native-e2', time: 100, duration: 1000, percent: 10 } },
+    { season: 1, episode: 3, url: 'same-pack', timeline: { hash: 'native-e3', time: 0, duration: 1000, percent: 0 } }
+  ]);
+  f.playerEvent('external', { data: { card: show, timeline: { hash: 'native-e3' } } });
+  assert.deepEqual(Object.keys(f.context.externalPlaylistReport.entries).sort(), ['native-e2', 'native-e3']);
+  f.playerEvent('visibility', { hidden: false });
+  f.timeline('native-e2', 950, 95);
+  f.timeline('native-e3', 920, 92);
+  await flush();
+  assert.deepEqual(f.context.finishedMedia.map(media => [media.season_number, media.episode_number, media.hash]), [[1, 2, 'native-e2'], [1, 3, 'native-e3']]);
+  f.timeline('native-e2', 950, 95);
+  await flush();
+  assert.equal(f.context.finishedMedia.length, 2, 'repeated callback snapshot is idempotent');
 });
 
 test('account change invalidates a not-yet-sent production START and its pending association', async () => {

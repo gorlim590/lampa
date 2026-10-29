@@ -1,0 +1,131 @@
+'use strict';
+
+const fs = require('node:fs');
+const vm = require('node:vm');
+const test = require('node:test');
+const assert = require('node:assert/strict');
+
+const source = fs.readFileSync(__dirname + '/../trakt/trakt.js', 'utf8');
+
+function productionFunction(name, nextName) {
+  const start = source.indexOf('  function ' + name + '(');
+  const end = source.indexOf('  function ' + nextName + '(', start + 1);
+  assert(start >= 0 && end > start, 'production helper ' + name + ' exists');
+  return source.slice(start, end);
+}
+
+function setup() {
+  const writes = [];
+  const context = vm.createContext({
+    Array, Object, Number, String, Date, Math, isFinite, parseInt,
+    playbackIdentityGeneration: 7,
+    cloudInjectInProgress: false,
+    config: { minProgress: 90 },
+    Lampa: { Storage: { get: () => 'account-a', field: name => name === 'trakt_min_progress' ? 90 : true } },
+    getContentType$2: media => media && (media.method === 'tv' || media.media_type === 'tv' || media.type === 'tv' || media.number_of_seasons ? 'show' : 'movie'),
+    extractSeasonEpisode: media => ({
+      season: media.season_number != null ? media.season_number : media.season,
+      episode: media.episode_number != null ? media.episode_number : media.episode
+    }),
+    verifiedShowEpisode: media => {
+      if (!media || media.method !== 'tv' || !Number.isInteger(Number(media.id)) || Number(media.id) < 1 ||
+          !Number.isInteger(Number(media.season_number)) || Number(media.season_number) < 0 ||
+          !Number.isInteger(Number(media.episode_number)) || Number(media.episode_number) < 1) return null;
+      return { id: String(media.id), season: Number(media.season_number), episode: Number(media.episode_number) };
+    },
+    getCompletionKey: media => media && media.id && Number.isInteger(media.season_number) && Number.isInteger(media.episode_number)
+      ? `episode:tmdb:${media.id}:S${media.season_number}:E${media.episode_number}` : '',
+    markFinishIntent: key => writes.push({ type: 'intent', key }),
+    finish: media => { writes.push({ type: 'finish', media }); return Promise.resolve({ ok: true }); },
+    slog: () => {}
+  });
+  vm.runInContext(productionFunction('buildExternalPlaylistReport', 'handleExternalPlaylistTimelineUpdate') +
+    productionFunction('handleExternalPlaylistTimelineUpdate', 'isPlaybackInstanceTerminal'), context);
+  return { context, writes };
+}
+
+const show = { id: 1396, method: 'tv', media_type: 'tv', name: 'The Walking Dead', number_of_seasons: 11 };
+
+test('Just+ playlist report maps native Timeline hashes to exact season and episode identities', () => {
+  const { context } = setup();
+  const report = context.buildExternalPlaylistReport(show, 'episode-h2', [
+    { url: 'same torrent', season: 2, episode: 2, timeline: { hash: 'episode-h2', time: 120, duration: 1800, percent: 6 } },
+    { url: 'same torrent', season: 2, episode: 3, timeline: { hash: 'episode-h3', time: 30, duration: 1800, percent: 1 } }
+  ], 'account-a', 7);
+  assert.deepEqual({
+    hashes: Object.keys(report.entries).sort(),
+    e2: report.entries['episode-h2'].identity,
+    e3: report.entries['episode-h3'].identity,
+    token: report.token,
+    generation: report.identityGeneration
+  }, {
+    hashes: ['episode-h2', 'episode-h3'],
+    e2: { id: '1396', season: 2, episode: 2 },
+    e3: { id: '1396', season: 2, episode: 3 },
+    token: 'account-a',
+    generation: 7
+  });
+});
+
+test('confirmed external playlist reports finalize each exact episode once after the player returns', async () => {
+  const { context, writes } = setup();
+  const report = context.buildExternalPlaylistReport(show, 'e2', [
+    { url: 'pack', season: 1, episode: 2, timeline: { hash: 'e2', time: 200, duration: 1800, percent: 11 } },
+    { url: 'pack', season: 1, episode: 3, timeline: { hash: 'e3', time: 0, duration: 1800, percent: 0 } }
+  ], 'account-a', 7);
+
+  assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e2', road: { time: 1710, duration: 1800, percent: 95 } } }, report), true);
+  assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e2', road: { time: 1710, duration: 1800, percent: 95 } } }, report), false, 'repeated full snapshots do not repeat the write');
+  assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e3', road: { time: 1656, duration: 1800, percent: 92 } } }, report), true);
+  await Promise.resolve();
+  assert.deepEqual(writes.filter(x => x.type === 'finish').map(x => [x.media.season_number, x.media.episode_number, x.media.hash]), [[1, 2, 'e2'], [1, 3, 'e3']]);
+});
+
+test('below-threshold external progress is not written, but a later confirmed advance can qualify', () => {
+  const { context, writes } = setup();
+  const report = context.buildExternalPlaylistReport(show, 'e2', [
+    { season: 1, episode: 2, timeline: { hash: 'e2', time: 100, duration: 1800, percent: 5 } }
+  ], 'account-a', 7);
+  assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e2', road: { time: 1500, duration: 1800, percent: 83 } } }, report), false);
+  assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e2', road: { time: 1620, duration: 1800, percent: 90 } } }, report), true);
+  assert.equal(writes.filter(x => x.type === 'finish').length, 1);
+});
+
+test('external percent without duration cannot pass the watched threshold', () => {
+  const { context, writes } = setup();
+  const report = context.buildExternalPlaylistReport(show, 'e2', [
+    { season: 1, episode: 2, timeline: { hash: 'e2', time: 0, duration: 0, percent: 0 } }
+  ], 'account-a', 7);
+  assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e2', road: { time: 0, duration: 0, percent: 100 } } }, report), false);
+  assert.equal(writes.filter(x => x.type === 'finish').length, 0);
+});
+
+test('ambiguous shared Timeline hash, missing S/E, and stale account generation fail closed', () => {
+  const { context, writes } = setup();
+  const ambiguous = context.buildExternalPlaylistReport(show, 'same', [
+    { season: 1, episode: 2, timeline: { hash: 'same', time: 0, percent: 0 } },
+    { season: 1, episode: 3, timeline: { hash: 'same', time: 0, percent: 0 } },
+    { title: 'no verified coordinates', timeline: { hash: 'unknown', time: 0, percent: 0 } }
+  ], 'account-a', 7);
+  assert.equal(ambiguous.entries.same.ambiguous, true);
+  assert.equal(ambiguous.entries.unknown, undefined);
+  assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'same', road: { time: 1700, duration: 1800, percent: 95 } } }, ambiguous), false);
+  assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'same', road: { time: 1700, duration: 1800, percent: 95 } } }, { ...ambiguous, token: 'account-b' }), false);
+  assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'same', road: { time: 1700, duration: 1800, percent: 95 } } }, { ...ambiguous, identityGeneration: 6 }), false);
+  assert.equal(writes.filter(x => x.type === 'finish').length, 0);
+});
+
+test('playlist mapping is bounded to ten minutes and rejects non-show launches', () => {
+  const { context } = setup();
+  assert.equal(context.buildExternalPlaylistReport({ id: 7, method: 'movie' }, 'h', [{ season: 1, episode: 1, timeline: { hash: 'h' } }], 'account-a', 7), null);
+  const report = context.buildExternalPlaylistReport(show, 'h', [{ season: 1, episode: 1, timeline: { hash: 'h', time: 0, percent: 0 } }], 'account-a', 7);
+  report.createdAt -= 10 * 60 * 1000 + 1;
+  assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'h', road: { time: 1700, duration: 1800, percent: 95 } } }, report), false);
+});
+
+test('production external handoff captures PlayerPlaylist and timeline listener routes mapped reports', () => {
+  assert.match(source, /Lampa\.PlayerPlaylist\s*&&\s*typeof Lampa\.PlayerPlaylist\.get\s*===\s*'function'/);
+  assert.match(source, /buildExternalPlaylistReport\([\s\S]{0,220}playerPlaylist/);
+  assert.match(source, /handleExternalPlaylistTimelineUpdate\(data, externalPlaylistReport\)/);
+  assert.match(source, /externalPlaylistReport\s*=\s*null/);
+});
