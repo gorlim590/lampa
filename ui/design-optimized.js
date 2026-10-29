@@ -3986,7 +3986,8 @@
         if (cards.length && !SeriesLife.timer) SeriesLife.timer = setInterval(refreshSeries, 1000);
         if (!cards.length && SeriesLife.timer) { clearInterval(SeriesLife.timer); SeriesLife.timer = null; }
         // Do not steal focus from menus, search, settings, or a valid episode.
-        var controller = Lampa.Controller && Lampa.Controller.enabled && Lampa.Controller.enabled().name;
+        var activeController = Lampa.Controller && Lampa.Controller.enabled && Lampa.Controller.enabled();
+        var controller = activeController && activeController.name;
         if (controller && /menu|head|select|settings|search/.test(controller)) return;
         var focus = root.querySelector('.focus');
         if (focus && focus.offsetParent !== null && focus.style.display !== 'none') return;
