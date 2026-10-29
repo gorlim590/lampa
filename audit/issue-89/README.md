@@ -68,3 +68,21 @@ Before/after screenshots below use the same Silo route, initial Torrent focus, n
 Movie comparison: [before](acceptance-2026-10-29/movie-before-1920x1080.jpg), [after](acceptance-2026-10-29/movie-after-1920x1080.jpg), [open Comments](acceptance-2026-10-29/movie-comments-after-1920x1080.jpg).
 
 The main tab will be returned to its original Silo URL and 1920×937 viewport after verification. Physical Google TV acceptance remains outstanding.
+
+## Final lifecycle hardening — 2026-10-29
+
+The targeted production change now scopes the Details key listener to the active Full activity and its native `full_start` / `full_descr` controller, verifies the same native Scroll owner before each animation-frame scroll, and yields while Select, Modal, Torrent, Player, or any other controller owns input. The Back wrapper delegates to native Back whenever Details is not the active input owner. The legacy “Детально” suppression now hides only its empty heading node; it leaves its `items-line` and other children intact. Disclosure mounting follows available native Comments/production/metadata nodes and does not depend on the old heading text.
+
+Production-handler regressions pass **18/18**, including native overlay/controller isolation, delayed/partial metadata, no-metadata cleanup, repeated adaptation and 20 teardown cycles. The focused Details/Hybrid/Trakt/Torrent suite passes **268/268**; repository and syntax checks pass.
+
+The exact final source was injected reversibly in the existing Chrome tab. On Silo and The Dog Stars, native focus initially remained on **Торренти**; The Dog Stars had no season controls. D-pad/OK opened and closed Comments and Studio; Escape collapsed an expanded section without leaving Details or showing an exit dialog. Native Genre Select opened under controller `select`; Escape restored focus to the same Genre control. Silo Torrent Cinema displayed live configured results; selecting the first release opened the native **Файли** modal (`z-index:130`) above the Torrent Cinema overlay (`z-index:100`), and Back returned to that release before the next Back closed the popup and restored Torrent focus. No playback was started. On a later reload the Comments provider displayed its real empty state, “Коментарі не знайдено”; the disclosure remained mounted and navigable.
+
+Final-source screenshots are actual browser captures with CSS viewport and DPR 1. The rendered screenshot dimensions match each viewport; `screen.width/height` remained 1920×1080 during 4K emulation, so this is viewport evidence, not physical 4K panel or Google TV evidence.
+
+| Viewport | Content-box left/right alignment error | Horizontal overflow | Screenshot |
+| --- | ---: | --- | --- |
+| 1280×720 | −0.014 / −0.014 CSS px | No | [final TV 720p](acceptance-2026-10-29/final-tv-1280x720.png) |
+| 1920×1080 | −0.014 / −0.014 CSS px | No | [final TV 1080p](acceptance-2026-10-29/final-tv-1920x1080.png) |
+| 3840×2160 | −0.011 / −0.011 CSS px | No | [final TV 4K viewport](acceptance-2026-10-29/final-tv-3840x2160.png) |
+
+Browser profile, tabs, settings, Storage, parser configuration, credentials, and Trakt history were preserved. The interactive route and viewport are restored after the final checks. Physical Google TV remains unverified.
