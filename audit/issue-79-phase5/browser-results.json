@@ -3,7 +3,7 @@
   "testedAt": "2026-10-29",
   "testedSource": {
     "branch": "feat/issue-79-static-ui-perf",
-    "commit": "pending final push",
+    "commit": "5d8d08f632edbfdba07b007621b0fd7c7a1dc874",
     "assets": {
       "loader.js": "cb9833f6d6821464e1cc0fd4213fb599e7edc2a2205d0dd110e6b46b2115e2c1",
       "ui/stremio-hybrid.js": "2a77c7f3c5e759acde5040589e078f52a105fd1485a8f89bc8f55fc041a9f139",
