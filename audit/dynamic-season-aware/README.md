@@ -78,3 +78,9 @@ Counter scope is the active season and quality/tracker filters, before the selec
 One visible Torrent Cinema overlay was present at each viewport. This is a real browser raster check at DPR 1, not physical Google TV testing. The controlled fixture did not start playback or call TorrServer.
 
 Focused tests after the final patch: **225/225 passed** across metadata/overlay, seasons, native lifecycle, parser search, Hybrid discovery/UI, and parser provider suites. `node scripts/build-torrent-cinema.mjs --check` and `git diff --check` passed. These browser category cases are controlled-fixture evidence; no live provider response is claimed.
+
+### Native Files and Back check after audio selection
+
+On the same main Chrome tab and exact PR artifact, a controlled TV release was selected with the EN audio category active. Opening native Files displayed the native modal above Torrent Cinema (z-index 130 over 100) with one file; no playback was requested. The first Back closed Files and returned to the Torrent Cinema controller with the selected release focused and EN still active. A second Files open on that release also rendered the native file row. On the second Back, Lampa returned to the underlying Details controller rather than the torrent overlay; this repeat-cycle focus restoration is not accepted as a pass and remains a lifecycle limitation to investigate separately. The check used a memory-only transport fixture and did not contact configured parsers or TorrServer.
+
+After the check, the exact main Chrome tab was navigated back to `https://siaivo.isroot.in/?card=125988&media=tv&source=tmdb&settings=parser`. The app loaded its published Torrent Cinema 2.0.0; the temporary fixture and injected PR artifact were absent. Saved settings, credentials, profile and other tabs were preserved.
