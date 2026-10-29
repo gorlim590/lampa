@@ -50,7 +50,7 @@
     "focusedAndRelevantRegressions": "494/494 PASS",
     "repositoryCheck": "PASS: 78 JavaScript files, 43 manifest entries, 563 URLs",
     "syntaxAndDiffCheck": "PASS",
-    "githubActionsOnFinalCommit": "PENDING PUSH"
+    "githubActionsOnCommit": "PASS: all five GitHub Actions on 2d3dbf5f336522a497a28dca418a9e7afb7456e9; repository logs show issue79-visual-owner and loader-critical-parallel in 80/80 UI tests, settings-functional in 70/70 Settings tests"
   },
   "physicalGoogleTV": "NOT TESTED"
 }

@@ -78,6 +78,6 @@ No valid before/after cold-start delta is claimed. The direct Chrome preview nec
 - Focused UI/loader/Settings/Home/Trakt/Torrent regression set: **494/494 PASS**.
 - `node scripts/check-repository.mjs`: **PASS** (78 JavaScript files, 43 manifest entries, 563 URLs).
 - Changed-file `node --check` and `git diff --check`: **PASS**.
-- GitHub Actions for this stabilization delta are pending until the final commit is pushed; the previously reviewed SHA checks do not cover these changes.
+- All five GitHub Actions passed on pushed SHA `2d3dbf5f336522a497a28dca418a9e7afb7456e9` (Repository checks, Home history, Home order, Parsers and Seasons). The Repository checks log confirms `issue79-visual-owner.cjs` and `loader-critical-parallel.cjs` ran in an 80/80 passing UI step, and `settings-functional.cjs` ran in a 70/70 passing Settings step.
 
 **Verdict:** keep PR #130 Draft. The style lifecycle and loader failure paths are covered and the main-browser UI smoke passed. Cold-start A/B performance, live Settings/Search/Discover/Torrent/Files acceptance, post-push Actions, and physical Google TV remain outstanding.
