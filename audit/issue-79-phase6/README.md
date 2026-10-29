@@ -53,3 +53,16 @@ The authorized Chrome DevTools session was used read-only. Its existing Lampa ta
 ## Rollback
 
 Revert the Phase 6 commit. It changes no stored settings and performs no data migration. No parser, Trakt, torrent, or credential configuration changes are included.
+
+## Final Home lifecycle hardening — 2026-10-29
+
+The PR #131 final review found three gaps in the targeted row-update path and one queue-boundary bug:
+
+- A Favorite `add`/`added` event after successful warmup was ignored by the success cooldown. It now schedules a coalesced targeted row refresh and a metadata pass. Per-title cache freshness is checked before filling the 24-request queue, so 23 fresh candidates do not prevent a new 25th Favorite from being fetched or trigger requests for already-fresh shows.
+- A new Home activity that became usable while an earlier Home request remained in flight could lose its refresh attempt. The coordinator now records one bounded rerun; successful stale-session responses remain in cache, then the current Home resumes and fetches only uncached candidates. Results never paint into the old Home or Details activity.
+- Targeted YDesign updates now honor native `content_rows_ydesign_week` and `content_rows_ydesign_continue` visibility flags and invoke the existing `LampaHomeHistory.applyOrder(component)` API after changes. Reordering retains the selected row; removing an empty focused YDesign row transfers focus to the nearest surviving row.
+- Favorite `read`/`remove` after a successful warmup performs no metadata refetch for fresh cache. Favorite events during failure backoff do not bypass retry limits; the regular retry still sees the latest candidate list.
+
+Deterministic regressions cover Favorite add/remove/read after success and failure, duplicate native `add` + `added` notifications, exactly one request for a new uncached candidate after 24 candidates are present, Home A → Details → Home B with a response settling in flight, cache retention, no stale DOM writes, preservation of the active row/focus, hidden native row policy, and saved Home History ordering. The focused startup suite is 14/14 PASS; the full relevant Home/YDesign, Trakt, Hybrid, Settings, and Torrent matrix is 492/492 PASS. The authorized Chrome DevTools session was checked read-only: its existing Lampa tabs, URL, storage-backed visibility values, focus, and viewport remained unchanged. No new cold-start measurements were taken and no startup speedup is claimed.
+
+Final pushed SHA, five-workflow CI status, and merge recommendation will be recorded after this lifecycle patch is pushed and its Actions complete.

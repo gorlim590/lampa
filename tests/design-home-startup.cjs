@@ -32,11 +32,20 @@ function usableFixtureOptions(history, extra = {}) {
   const focus = { getClientRects: () => [{ width: 2, height: 2 }] };
   const component = {
     items: [], active: 0, fragment: null, emitted: [], appended: 0,
-    emit(event, data) { this.emitted.push(event); if (event === 'createAndAppend') { this.items.push({ data, items: [], active: 0 }); if (this.fragment) this.fragment.appendChild({}); } },
+    emit(event, data) { this.emitted.push(event); if (event === 'createAndAppend') { const line = { data, items: [], active: 0, view: 7, emit(name, card) { if (name === 'createAndAppend') this.items.push({ data: card, render() { return {}; } }); }, render() { return [{}]; }, toggle() {} }; this.items.push(line); if (this.fragment) this.fragment.appendChild({}); } },
     scroll: { append(fragment) { component.appended += fragment.children.length; } }
   };
   return Object.assign({ history, focus, controller: { name: 'items_line' }, activity: { component: 'main', activity: { component } }, ajax() {} }, extra);
 }
+
+function metadataResult(id, name) {
+  const future = new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10);
+  return { id, name, tagline: '', countries: [], origin_country: [], production_countries: [], genres: [],
+    number_of_seasons: 1, number_of_episodes: 2, seasons: [{ season_number: 1, episode_count: 2 }],
+    next_episode_to_air: { season_number: 1, episode_number: 2, air_date: future }, images: { posters: [] } };
+}
+
+async function settle() { await Promise.resolve(); await Promise.resolve(); await new Promise(resolve => setImmediate(resolve)); }
 
 test('YDesign stops bounded readiness checks without starting pre-focus requests', () => {
   const options = {
@@ -151,4 +160,103 @@ test('successful empty optional row refresh records success cooldown and does no
   assert.equal(f.jobs.length, 0); assert.equal(f.api.RowsStore.outcome, 'fresh-cache');
   assert.ok(f.api.RowsStore.lastSuccess > 0);
   f.api.warmRows(false); assert.equal(f.jobs.length, 0);
+});
+
+test('a new Favorite after successful warmup fetches only the uncached candidate during cooldown', async () => {
+  const old = { id: 3601, media_type: 'tv', name: 'Already warm' }, alreadyCached = Array.from({ length: 23 }, (_, i) => ({ id: 3602 + i, media_type: 'tv', name: 'Cached ' + i }));
+  const added = { id: 3699, media_type: 'tv', name: 'New favorite' };
+  const options = usableFixtureOptions([old].concat(alreadyCached)); options.storage = { ydesign_slogan_lang: 'uk' };
+  const f = fixture(options); f.api.installWarmRowsEvents(); f.api.warmRows(false);
+  alreadyCached.forEach(card => f.api.ApiCache.set(f.api.extCacheKey(card.id, 'tv'), { fetched: Date.now(), next_ep: null, last_ep: null, title_uk: card.name }));
+  await Promise.resolve(); await Promise.resolve();
+  assert.equal(f.jobs.length, 1, '23 already-fresh candidates are excluded from the initial queue');
+  f.jobs[0].success(metadataResult(old.id, old.name)); await settle(); f.flush(120);
+  assert.equal(f.api.RowsStore.outcome, 'success');
+  const oldSuccess = f.api.RowsStore.lastSuccess;
+  options.history.push(added);
+  f.listeners['favorite:add'][0]({ card: added }); f.listeners['favorite:added'][0]({ card: added }); f.flush(0);
+  await Promise.resolve(); await Promise.resolve();
+  assert.equal(f.jobs.length, 2, 'only the newly added TV Favorite needs metadata');
+  assert.match(f.jobs[1].url, /3699/); assert.doesNotMatch(f.jobs[1].url, /3601/);
+  f.jobs[1].success(metadataResult(added.id, added.name)); await settle(); f.flush(120);
+  const week = options.activity.activity.component.items.find(row => row.data.home_row_id === 'ydesign_week');
+  assert(week, 'the targeted YDesign row is refreshed without a reload');
+  assert.deepEqual(Array.from(week.data.results, card => card.id), [old.id, added.id]);
+  assert.equal(f.api.RowsStore.outcome, 'success'); assert.ok(f.api.RowsStore.lastSuccess >= oldSuccess);
+});
+
+test('Favorite read and remove refresh rows without bypassing failure backoff or refetching fresh metadata', async () => {
+  const item = { id: 3701, media_type: 'tv', name: 'Favorite lifecycle' };
+  const options = usableFixtureOptions([item]); options.storage = { ydesign_slogan_lang: 'uk' };
+  const f = fixture(options); f.api.installWarmRowsEvents(); f.api.warmRows(false);
+  await Promise.resolve(); await Promise.resolve(); f.jobs[0].success(metadataResult(item.id, item.name)); await settle(); f.flush(120);
+  f.listeners['favorite:read'][0](); f.flush(0); await Promise.resolve();
+  assert.equal(f.jobs.length, 1, 'Favorite read retains fresh per-title cache');
+  options.history.splice(0, 1); f.listeners['favorite:remove'][0](); f.flush(120);
+  assert.equal(options.activity.activity.component.items.some(row => row.data.home_row_id === 'ydesign_week'), false);
+  assert.equal(f.jobs.length, 1, 'removing a Favorite does not launch metadata work');
+
+  const failedOptions = usableFixtureOptions([{ id: 3702, media_type: 'tv', name: 'Retry after Favorite event' }]);
+  const failed = fixture(failedOptions); failed.api.installWarmRowsEvents(); failed.api.warmRows(false);
+  await Promise.resolve(); await Promise.resolve(); failed.jobs[0].error(); await settle();
+  assert.equal(failed.api.RowsStore.outcome, 'failed');
+  failedOptions.history.push({ id: 3703, media_type: 'tv', name: 'Added during retry window' });
+  failed.listeners['favorite:add'][0](); failed.listeners['favorite:read'][0](); failed.flush(0);
+  failed.listeners['favorite:remove'][0](); failed.flush(120);
+  await Promise.resolve(); await Promise.resolve();
+  assert.equal(failed.jobs.length, 1, 'Favorite events do not bypass bounded failure backoff');
+  assert.equal(failed.api.RowsStore.retryAt > Date.now(), true);
+});
+
+test('in-flight Home A metadata is cached, then Home B refreshes only new candidates without stale DOM or focus writes', async () => {
+  const a = { id: 3801, media_type: 'tv', name: 'In-flight series' };
+  const b = { id: 3802, media_type: 'tv', name: 'New while away' };
+  const options = usableFixtureOptions([a]); options.storage = { ydesign_slogan_lang: 'uk' };
+  const focus = options.focus, homeA = options.activity.activity.component;
+  const f = fixture(options); f.api.installWarmRowsEvents(); f.api.warmRows(false);
+  await Promise.resolve(); await Promise.resolve(); assert.equal(f.jobs.length, 1);
+  options.activity.component = 'full'; f.listeners['lampa:activity'][0]({ type: 'start', component: 'full' });
+  const details = { component: 'full', activity: { component: { items: [], active: 0, emit() {} } } };
+  options.activity = details;
+  const homeB = { items: [{ data: { home_row_id: 'core', results: [] }, items: [], active: 0 }], active: 0, fragment: null, appended: 0,
+    emit(event, data) { if (event === 'createAndAppend') { this.items.push({ data, items: [], active: 0 }); if (this.fragment) this.fragment.appendChild({}); } },
+    scroll: { append(fragment) { homeB.appended += fragment.children.length; } } };
+  options.history.push(b); options.activity = { component: 'main', activity: { component: homeB } };
+  f.listeners['lampa:activity'][0]({ type: 'start', component: 'main' }); f.flush(0);
+  await Promise.resolve(); await Promise.resolve();
+  assert.equal(f.api.RowsStore.busy, true); assert.equal(f.jobs.length, 1);
+  const selected = homeB.items[0]; homeB.active = 0;
+  f.jobs[0].success(metadataResult(a.id, a.name)); await settle();
+  assert.equal(homeA.items.length, 0, 'Home A is detached and receives no stale row write');
+  assert.equal(details.activity.component.items.length, 0, 'Details receives no stale row write');
+  assert(f.api.ApiCache.get(f.api.extCacheKey(a.id, 'tv')), 'valid response remains cached');
+  f.flush(0); await Promise.resolve(); await Promise.resolve();
+  assert.equal(f.jobs.length, 2, 'the resumed Home B queue requests only its uncached candidate');
+  assert.match(f.jobs[1].url, /3802/); assert.doesNotMatch(f.jobs[1].url, /3801/);
+  f.jobs[1].success(metadataResult(b.id, b.name)); await settle(); f.flush(120);
+  const week = homeB.items.filter(row => row.data.home_row_id === 'ydesign_week');
+  assert.equal(week.length, 1, 'Home B gets exactly one targeted YDesign row');
+  assert.deepEqual(Array.from(week[0].data.results, card => card.id), [a.id, b.id]);
+  assert.equal(homeB.items[homeB.active], selected, 'the active Home row remains selected');
+  assert.equal(focus, options.focus, 'background refresh leaves the existing focused card object untouched');
+});
+
+test('background row append honors native hidden-row policy and delegates ordering to Home History', async () => {
+  const item = { id: 3901, media_type: 'tv', name: 'Policy row' };
+  const hiddenOptions = usableFixtureOptions([item], { storage: { ydesign_slogan_lang: 'uk', content_rows_ydesign_week: false } });
+  const hidden = fixture(hiddenOptions); hidden.api.warmRows(false); await Promise.resolve(); await Promise.resolve();
+  hidden.jobs[0].success(metadataResult(item.id, item.name)); await settle(); hidden.flush(120);
+  assert.equal(hiddenOptions.activity.activity.component.items.length, 0, 'native hidden setting prevents background row creation');
+  assert.equal(hidden.store.content_rows_ydesign_week, false, 'the saved visibility setting is not rewritten');
+
+  let orderCalls = 0;
+  const policyOptions = usableFixtureOptions([item], { storage: { ydesign_slogan_lang: 'uk', 'home_history_order_v1:file_view': { v: 1, ids: ['ydesign_week', 'core'] } },
+    homeHistory: { active: true, applyOrder(component) { orderCalls++; const selected = component.items[component.active]; const week = component.items.find(row => row.data.home_row_id === 'ydesign_week'); if (week) { component.items = [week].concat(component.items.filter(row => row !== week)); component.active = component.items.indexOf(selected); } } } });
+  const policy = fixture(policyOptions); const core = { data: { home_row_id: 'core', results: [] }, items: [], active: 0 };
+  policyOptions.activity.activity.component.items.push(core); policyOptions.activity.activity.component.active = 0;
+  policy.api.warmRows(false); await Promise.resolve(); await Promise.resolve(); policy.jobs[0].success(metadataResult(item.id, item.name)); await settle(); policy.flush(120);
+  const component = policyOptions.activity.activity.component;
+  assert.equal(orderCalls, 1, 'targeted append invokes the existing Home History ordering API');
+  assert.deepEqual(component.items.map(row => row.data.home_row_id), ['ydesign_week', 'core']);
+  assert.equal(component.items[component.active], core, 'ordering restores the selected row object');
 });

@@ -2028,7 +2028,7 @@
     }
 
     // Optional TV metadata waits for a real usable Home, then uses native row append/update APIs.
-    var WarmRowsStore = { timer: null, attempts: 0, force: false, pending: false, generation: 0, installed: false };
+    var WarmRowsStore = { timer: null, attempts: 0, force: false, pending: false, rerun: false, generation: 0, installed: false };
     var HomeRowsRefresh = { timer: null };
     function activeHomeActivity() {
         var active = Lampa.Activity && Lampa.Activity.active();
@@ -2048,7 +2048,16 @@
         if (HomeRowsRefresh.timer) return;
         HomeRowsRefresh.timer = setTimeout(function () { HomeRowsRefresh.timer = null; refreshYDesignRows(); }, 120);
     }
+    function ydesignRowEnabled(kind) {
+        if (!getSet(kind === 'cont' ? 'ydesign_row_continue' : 'ydesign_row_week')) return false;
+        try {
+            var name = kind === 'cont' ? 'ydesign_continue' : 'ydesign_week';
+            var enabled = Lampa.Storage && Lampa.Storage.get('content_rows_' + name, true);
+            return enabled !== false && enabled !== 'false';
+        } catch (e) { return true; }
+    }
     function ydesignRowPayload(kind) {
+        if (!ydesignRowEnabled(kind)) return null;
         if (kind === 'cont' && window.LampaHomeHistory && window.LampaHomeHistory.active) return null;
         var call = makeRowCall(kind, kind === 'cont' ? 'Продовжити перегляд' : 'Виходять цього тижня');
         if (typeof call !== 'function') return null;
@@ -2057,6 +2066,11 @@
         if (!data || !Array.isArray(data.results) || !data.results.length) return null;
         data.home_row_id = 'ydesign_' + kind; data.home_row_origin = 'ydesign';
         return data;
+    }
+    function applyYDesignHomeOrder(component) {
+        try {
+            if (window.LampaHomeHistory && typeof window.LampaHomeHistory.applyOrder === 'function') window.LampaHomeHistory.applyOrder(component);
+        } catch (e) {}
     }
     function ydesignRowKey(card) { return card ? String(card.source || 'tmdb') + ':' + String(card.id || '') : ''; }
     function ydesignRowSignature(cards) { return JSON.stringify(cards.map(function (card) { return [ydesignRowKey(card), card.ydesign_row || '']; })); }
@@ -2080,11 +2094,16 @@
         var cards = data && data.results || [], old = line.data && line.data.results || [];
         if (ydesignRowSignature(old) === ydesignRowSignature(cards)) return false;
         if (!cards.length) {
-            if (Lampa.Controller && Lampa.Controller.own && Lampa.Controller.own(line)) return false;
+            var ownsFocus = Lampa.Controller && Lampa.Controller.own && Lampa.Controller.own(line);
             var removeIndex = component.items.indexOf(line);
             if (removeIndex < 0) return false;
             component.items.splice(removeIndex, 1); if (line.destroy) line.destroy();
             component.active = Math.max(0, Math.min(component.active - (removeIndex < component.active ? 1 : 0), component.items.length - 1));
+            if (ownsFocus && component.items.length) {
+                var fallback = component.items[component.active];
+                if (fallback && fallback.toggle) fallback.toggle();
+                if (fallback && Lampa.Layer && Lampa.Layer.visible && fallback.render) Lampa.Layer.visible(fallback.render(true));
+            }
             return true;
         }
         var ownsFocus = Lampa.Controller && Lampa.Controller.own && Lampa.Controller.own(line);
@@ -2108,7 +2127,10 @@
         if (!active || !component || !Array.isArray(component.items) || !component.emit || !component.scroll) return false;
         var changed = false;
         ['cont', 'week'].forEach(function (kind) { if (paintYDesignRow(component, kind, ydesignRowPayload(kind))) changed = true; });
-        if (changed) component.emit('homeHistoryChanged');
+        if (changed) {
+            applyYDesignHomeOrder(component);
+            component.emit('homeHistoryChanged');
+        }
         return changed;
     }
     function finishWarmRowsReadiness() {
@@ -2148,12 +2170,29 @@
         }
         if (!WarmRowsStore.timer) WarmRowsStore.timer = setTimeout(finishWarmRowsReadiness, 0);
     }
+    function onWarmRowsFavoriteChange() {
+        if (!activeHomeActivity()) return;
+        scheduleYDesignRowsRefresh();
+        if (RowsStore.busy) {
+            WarmRowsStore.rerun = true;
+            WarmRowsStore.force = true;
+            return;
+        }
+        // Force only bypasses the global cooldown. Per-title fresh cache is still honored below.
+        scheduleWarmRows(0, true);
+    }
+    function onWarmRowsFavoriteRemove() {
+        if (activeHomeActivity()) scheduleYDesignRowsRefresh();
+    }
     function installWarmRowsEvents() {
         if (WarmRowsStore.installed) return;
         WarmRowsStore.installed = true;
         if (Lampa.Listener && Lampa.Listener.follow) Lampa.Listener.follow('activity', onWarmRowsActivity);
         if (Lampa.Controller && Lampa.Controller.listener && Lampa.Controller.listener.follow) Lampa.Controller.listener.follow('toggle', onWarmRowsReadinessSignal);
-        if (Lampa.Favorite && Lampa.Favorite.listener && Lampa.Favorite.listener.follow) ['read', 'add', 'added', 'remove'].forEach(function (name) { Lampa.Favorite.listener.follow(name, onWarmRowsReadinessSignal); });
+        if (Lampa.Favorite && Lampa.Favorite.listener && Lampa.Favorite.listener.follow) {
+            ['read', 'add', 'added'].forEach(function (name) { Lampa.Favorite.listener.follow(name, onWarmRowsFavoriteChange); });
+            Lampa.Favorite.listener.follow('remove', onWarmRowsFavoriteRemove);
+        }
         document.addEventListener('hover:focus', function (event) {
             var target = event && event.target;
             if (target && target.closest && target.closest('.activity--active .card.selector')) onWarmRowsReadinessSignal();
@@ -2166,16 +2205,16 @@
             if (!active || !usableHome()) { RowsStore.outcome = 'not-ready'; return; }
             if (!getSet('ydesign_row_continue') && !getSet('ydesign_row_week')) return;
             var now = Date.now();
-            if (RowsStore.busy) return;
+            if (RowsStore.busy) { WarmRowsStore.rerun = true; WarmRowsStore.force = WarmRowsStore.force || !!force; return; }
             if (RowsStore.retryAt > now) { scheduleWarmRows(RowsStore.retryAt - now, false); return; }
             if (!force && RowsStore.lastSuccess && now - RowsStore.lastSuccess < 20 * 60 * 1000) { RowsStore.outcome = 'fresh-cache'; scheduleYDesignRowsRefresh(); return; }
-            var candidates = rowCandidates(), queue = [];
-            for (var i = 0; i < candidates.length && queue.length < 24; i++) if (isTvMedia(candidates[i])) queue.push(candidates[i]);
-            if (!queue.length) { RowsStore.outcome = 'empty-candidates'; return; }
-            queue = queue.filter(function (card) {
-                var cached = ApiCache.get(extCacheKey(card.id, 'tv'));
-                return !cached || !cached.fetched || Date.now() - cached.fetched > 43200000;
-            });
+            var candidates = rowCandidates(), queue = [], tvCandidates = 0;
+            for (var i = 0; i < candidates.length && queue.length < 24; i++) if (isTvMedia(candidates[i])) {
+                tvCandidates++;
+                var candidateCache = ApiCache.get(extCacheKey(candidates[i].id, 'tv'));
+                if (!candidateCache || !candidateCache.fetched || Date.now() - candidateCache.fetched > 43200000) queue.push(candidates[i]);
+            }
+            if (!tvCandidates) { RowsStore.outcome = 'empty-candidates'; return; }
             if (!queue.length) {
                 RowsStore.lastSuccess = now; RowsStore.retryAt = 0; RowsStore.failures = 0; RowsStore.outcome = 'fresh-cache';
                 scheduleYDesignRowsRefresh(); return;
@@ -2200,6 +2239,8 @@
             function done() {
                 if (!RowsStore.busy) return;
                 RowsStore.busy = false;
+                var rerun = WarmRowsStore.rerun;
+                WarmRowsStore.rerun = false;
                 var completedAt = Date.now(), sameHome = activeHomeActivity() === active && WarmRowsStore.generation === generation;
                 if (successes && !failures) {
                     RowsStore.lastSuccess = completedAt; RowsStore.failures = 0; RowsStore.retryAt = 0; RowsStore.outcome = sameHome ? 'success' : 'stale-session';
@@ -2210,6 +2251,7 @@
                     if (sameHome) scheduleWarmRows(delay, false);
                 }
                 if (successes && sameHome) scheduleYDesignRowsRefresh();
+                if (rerun && activeHomeActivity()) scheduleWarmRows(0, true);
             }
             pump();
         } catch (e) {
