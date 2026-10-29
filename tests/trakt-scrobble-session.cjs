@@ -149,7 +149,7 @@ function integrationFixture() {
     slog: () => {}, logWarn: (...args) => { f.context.lastWarning = args; f.context.lastWarningMessage = String(args[1]); }, logDebugOnce: () => {},
     getCompletionKey: () => 'synthetic-completion',
     markFinishIntent: () => { f.context.finishIntentCount = (f.context.finishIntentCount || 0) + 1; },
-    finish: media => { f.context.finishCallCount = (f.context.finishCallCount || 0) + 1; (f.context.finishedMedia || (f.context.finishedMedia = [])).push({ ...media }); return Promise.resolve(); },
+    finish: media => { f.context.finishCallCount = (f.context.finishCallCount || 0) + 1; (f.context.finishedMedia || (f.context.finishedMedia = [])).push({ ...media }); return Promise.resolve({ ok: true }); },
     documentListeners, storageListeners, playerHandlers: player, activityCard
   });
   const instanceHelpersStart = source.indexOf('  function beginPlaybackInstance(');
@@ -175,10 +175,10 @@ function integrationFixture() {
     (player[type] || []).slice().forEach(fn => fn(data || {}));
   };
   const storageChange = name => storageListeners.slice().forEach(fn => fn({ name }));
-  const timeline = (hash, time, percent) => {
+  const timeline = (hash, time, percent, duration = 1000) => {
     activityCard = f.currentCard || activityCard;
     f.context.activityCard = activityCard;
-    (timelineHandlers.update || []).slice().forEach(fn => fn({ data: { hash, road: { time, duration: 1000, percent } } }));
+    (timelineHandlers.update || []).slice().forEach(fn => fn({ data: { hash, road: { time, duration, percent } } }));
   };
   const launch = (media, hash) => {
     activityCard = media; f.currentCard = media; f.context.activityCard = media;
@@ -576,6 +576,46 @@ test('official Just+ playlist callback finalizes each exact episode through Lamp
   f.timeline('native-e2', 950, 95);
   await flush();
   assert.equal(f.context.finishedMedia.length, 2, 'repeated callback snapshot is idempotent');
+});
+
+test('Just+ return snapshot survives Player.start before or after visibility and same active hash', async () => {
+  for (const order of ['start-then-visibility', 'visibility-then-start']) {
+    const f = integrationFixture();
+    const show = { id: 1396, method: 'tv', type: 'tv', name: 'Show', season_number: 1, episode_number: 3 };
+    f.setPlaylist([{ season: 1, episode: 3, timeline: { hash: 'return-e3', time: 0, duration: 2700 } }]);
+    f.playerEvent('external', { data: { card: show, timeline: { hash: 'return-e3' } } });
+    assert.ok(f.context.externalPlaylistReport);
+    if (order === 'start-then-visibility') {
+      f.playerEvent('start', { card: show, timeline: { hash: 'return-e3' } });
+      f.playerEvent('visibility', { hidden: false });
+    } else {
+      f.playerEvent('visibility', { hidden: false });
+      f.playerEvent('start', { card: show, timeline: { hash: 'return-e3' } });
+    }
+    assert.ok(f.context.externalPlaylistReport, 'valid return callbacks retain their captured playlist identity');
+    f.timeline('return-e3', 0, 100, 0);
+    await flush();
+    assert.equal(f.context.finishCallCount || 0, 0, 'Android 0/0/100 normalization is not completion evidence');
+    f.timeline('return-e3', 2430, 90, 2700);
+    await flush();
+    assert.deepEqual((f.context.finishedMedia || []).map(media => [media.season_number, media.episode_number, media.hash]), [[1, 3, 'return-e3']]);
+  }
+});
+
+test('late Player.start for another mapped playlist hash preserves identity when the native card omits S/E', async () => {
+  const f = integrationFixture();
+  const show = { id: 1396, method: 'tv', type: 'tv', name: 'Show' };
+  f.setPlaylist([
+    { season: 1, episode: 2, timeline: { hash: 'late-e2', time: 0, duration: 2700 } },
+    { season: 1, episode: 3, timeline: { hash: 'late-e3', time: 0, duration: 2700 } }
+  ]);
+  f.playerEvent('external', { data: { card: show, timeline: { hash: 'late-e2' } } });
+  f.playerEvent('visibility', { hidden: false });
+  f.playerEvent('start', { card: show, timeline: { hash: 'late-e3' } });
+  assert.ok(f.context.externalPlaylistReport, 'the exact playlist hash and show ID retain the snapshot despite absent card S/E');
+  f.timeline('late-e3', 2430, 90, 2700);
+  await flush();
+  assert.deepEqual((f.context.finishedMedia || []).map(media => [media.season_number, media.episode_number, media.hash]), [[1, 3, 'late-e3']]);
 });
 
 test('account change invalidates a not-yet-sent production START and its pending association', async () => {

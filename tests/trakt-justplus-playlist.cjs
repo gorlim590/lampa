@@ -19,6 +19,7 @@ function setup() {
   const context = vm.createContext({
     Array, Object, Number, String, Date, Math, isFinite, parseInt,
     playbackIdentityGeneration: 7,
+    externalPlaylistReport: null,
     cloudInjectInProgress: false,
     config: { minProgress: 90 },
     Lampa: { Storage: { get: () => 'account-a', field: name => name === 'trakt_min_progress' ? 90 : true } },
@@ -45,6 +46,7 @@ function setup() {
 }
 
 const show = { id: 1396, method: 'tv', media_type: 'tv', name: 'The Walking Dead', number_of_seasons: 11 };
+async function flushPromises() { for (let i = 0; i < 8; i++) await Promise.resolve(); }
 
 test('Just+ playlist report maps native Timeline hashes to exact season and episode identities', () => {
   const { context } = setup();
@@ -73,21 +75,24 @@ test('confirmed external playlist reports finalize each exact episode once after
     { url: 'pack', season: 1, episode: 2, timeline: { hash: 'e2', time: 200, duration: 1800, percent: 11 } },
     { url: 'pack', season: 1, episode: 3, timeline: { hash: 'e3', time: 0, duration: 1800, percent: 0 } }
   ], 'account-a', 7);
+  context.externalPlaylistReport = report;
 
   assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e2', road: { time: 1710, duration: 1800, percent: 95 } } }, report), true);
-  assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e2', road: { time: 1710, duration: 1800, percent: 95 } } }, report), false, 'repeated full snapshots do not repeat the write');
+  assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e2', road: { time: 1710, duration: 1800, percent: 95 } } }, report), true, 'repeated full snapshots are accepted but do not duplicate a pending write');
   assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e3', road: { time: 1656, duration: 1800, percent: 92 } } }, report), true);
-  await Promise.resolve();
+  await flushPromises();
   assert.deepEqual(writes.filter(x => x.type === 'finish').map(x => [x.media.season_number, x.media.episode_number, x.media.hash]), [[1, 2, 'e2'], [1, 3, 'e3']]);
 });
 
-test('below-threshold external progress is not written, but a later confirmed advance can qualify', () => {
+test('below-threshold external progress is not written, but a later confirmed advance can qualify', async () => {
   const { context, writes } = setup();
   const report = context.buildExternalPlaylistReport(show, 'e2', [
     { season: 1, episode: 2, timeline: { hash: 'e2', time: 100, duration: 1800, percent: 5 } }
   ], 'account-a', 7);
+  context.externalPlaylistReport = report;
   assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e2', road: { time: 1500, duration: 1800, percent: 83 } } }, report), false);
   assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e2', road: { time: 1620, duration: 1800, percent: 90 } } }, report), true);
+  await flushPromises();
   assert.equal(writes.filter(x => x.type === 'finish').length, 1);
 });
 
@@ -96,6 +101,7 @@ test('external percent without duration cannot pass the watched threshold', () =
   const report = context.buildExternalPlaylistReport(show, 'e2', [
     { season: 1, episode: 2, timeline: { hash: 'e2', time: 0, duration: 0, percent: 0 } }
   ], 'account-a', 7);
+  context.externalPlaylistReport = report;
   assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e2', road: { time: 0, duration: 0, percent: 100 } } }, report), false);
   assert.equal(writes.filter(x => x.type === 'finish').length, 0);
 });
@@ -107,6 +113,7 @@ test('ambiguous shared Timeline hash, missing S/E, and stale account generation 
     { season: 1, episode: 3, timeline: { hash: 'same', time: 0, percent: 0 } },
     { title: 'no verified coordinates', timeline: { hash: 'unknown', time: 0, percent: 0 } }
   ], 'account-a', 7);
+  context.externalPlaylistReport = ambiguous;
   assert.equal(ambiguous.entries.same.ambiguous, true);
   assert.equal(ambiguous.entries.unknown, undefined);
   assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'same', road: { time: 1700, duration: 1800, percent: 95 } } }, ambiguous), false);
@@ -115,12 +122,49 @@ test('ambiguous shared Timeline hash, missing S/E, and stale account generation 
   assert.equal(writes.filter(x => x.type === 'finish').length, 0);
 });
 
-test('playlist mapping is bounded to ten minutes and rejects non-show launches', () => {
-  const { context } = setup();
+test('external report remains valid across a 45-minute episode and two-hour multi-episode session', async () => {
+  const { context, writes } = setup();
   assert.equal(context.buildExternalPlaylistReport({ id: 7, method: 'movie' }, 'h', [{ season: 1, episode: 1, timeline: { hash: 'h' } }], 'account-a', 7), null);
-  const report = context.buildExternalPlaylistReport(show, 'h', [{ season: 1, episode: 1, timeline: { hash: 'h', time: 0, percent: 0 } }], 'account-a', 7);
-  report.createdAt -= 10 * 60 * 1000 + 1;
-  assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'h', road: { time: 1700, duration: 1800, percent: 95 } } }, report), false);
+  const report = context.buildExternalPlaylistReport(show, 'e1', [
+    { season: 1, episode: 1, timeline: { hash: 'e1', time: 0, duration: 2700 } },
+    { season: 1, episode: 2, timeline: { hash: 'e2', time: 0, duration: 2700 } }
+  ], 'account-a', 7);
+  context.externalPlaylistReport = report;
+  assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e1', road: { time: 2430, duration: 2700 } } }, report), true);
+  await flushPromises();
+  assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e2', road: { time: 1620, duration: 2700 } } }, report), false);
+  assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e2', road: { time: 2430, duration: 2700 } } }, report), true, 'later playlist item remains eligible after a two-hour session');
+  await flushPromises();
+  assert.deepEqual(writes.filter(x => x.type === 'finish').map(x => x.media.episode_number), [1, 2]);
+  const replacement = context.buildExternalPlaylistReport(show, 'e3', [{ season: 1, episode: 3, timeline: { hash: 'e3' } }], 'account-a', 7);
+  context.externalPlaylistReport = replacement;
+  assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e1', road: { time: 2600, duration: 2700 } } }, report), false, 'new handoff rejects late old snapshot');
+});
+
+test('failed history write retries from the repeated full snapshot and confirms exactly once', async () => {
+  const { context, writes } = setup();
+  const report = context.buildExternalPlaylistReport(show, 'e2', [{ season: 1, episode: 2, timeline: { hash: 'e2' } }], 'account-a', 7);
+  context.externalPlaylistReport = report;
+  let attempt = 0;
+  context.finish = media => { writes.push({ type: 'finish', media }); return Promise.resolve(++attempt === 1 ? { ok: false, status: 503 } : { ok: true }); };
+  const snapshot = { data: { hash: 'e2', road: { time: 1710, duration: 1800, percent: 95 } } };
+  assert.equal(context.handleExternalPlaylistTimelineUpdate(snapshot, report), true);
+  await flushPromises();
+  assert.equal(report.entries.e2.completionState, 'retryable');
+  assert.equal(context.handleExternalPlaylistTimelineUpdate(snapshot, report), true, 'same position retries a failed write');
+  await flushPromises();
+  assert.equal(report.entries.e2.completionState, 'confirmed');
+  context.handleExternalPlaylistTimelineUpdate(snapshot, report);
+  await flushPromises();
+  assert.equal(writes.filter(x => x.type === 'finish').length, 2);
+});
+
+test('completed Android wrapper 0/0/100 marker is not progress evidence', () => {
+  const { context, writes } = setup();
+  const report = context.buildExternalPlaylistReport(show, 'h', [{ season: 1, episode: 1, timeline: { hash: 'h' } }], 'account-a', 7);
+  context.externalPlaylistReport = report;
+  assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'h', road: { time: 0, duration: 0, percent: 100 } } }, report), false);
+  assert.equal(writes.filter(x => x.type === 'finish').length, 0);
 });
 
 test('production external handoff captures PlayerPlaylist and timeline listener routes mapped reports', () => {

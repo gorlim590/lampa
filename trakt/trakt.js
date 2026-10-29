@@ -10152,6 +10152,7 @@
         identity: identity,
         initialPosition: isFinite(initialPosition) && initialPosition >= 0 ? initialPosition : 0,
         lastPosition: isFinite(initialPosition) && initialPosition >= 0 ? initialPosition : 0,
+        completionState: 'none',
         ambiguous: false
       };
     }
@@ -10164,13 +10165,17 @@
     return {
       token: String(token || ''),
       identityGeneration: generation,
-      createdAt: Date.now(),
+      // This is a single active handoff snapshot, not a time-limited cache.
+      // Long episodes and multi-episode sessions may legitimately return much
+      // later; account, profile, and subsequent-player transitions invalidate it.
+      launchHash: hash ? String(hash) : null,
+      launchIdentity: hash && entries[String(hash)] && !entries[String(hash)].ambiguous ? entries[String(hash)].identity : null,
       entries: entries
     };
   }
 
   function handleExternalPlaylistTimelineUpdate(data, report) {
-    if (!report || Date.now() - report.createdAt > 10 * 60 * 1000 ||
+    if (!report || report !== externalPlaylistReport ||
         report.token !== String(Lampa.Storage.get('trakt_token') || '') ||
         report.identityGeneration !== playbackIdentityGeneration || cloudInjectInProgress || !data || !data.data || !data.data.hash || !data.data.road) return false;
     var entry = report.entries[String(data.data.hash)];
@@ -10183,13 +10188,16 @@
     // its auto-next path can also synthesize percent=100 for items before the
     // current index. Without duration, those cases cannot safely be separated,
     // so do not infer the configured threshold from percent alone.
-    if (!isFinite(position) || position < 0 || !isFinite(duration) || duration <= 0 || position <= entry.lastPosition) return false;
+    if (!isFinite(position) || position < 0 || !isFinite(duration) || duration <= 0 || position < entry.lastPosition) return false;
+    var advanced = position > entry.lastPosition;
+    if (advanced) entry.lastPosition = position;
     var percent = position / duration * 100;
     if (!isFinite(percent) || percent < 0 || percent > 100) return false;
-    entry.lastPosition = position;
     var minimum = parseInt(Lampa.Storage.field('trakt_min_progress') == null ? config.minProgress : Lampa.Storage.field('trakt_min_progress'), 10);
     if (!isFinite(minimum)) minimum = 90;
     if (percent < minimum) return false;
+    if (entry.completionState === 'confirmed' || entry.completionState === 'pending') return true;
+    if (!advanced && entry.completionState !== 'retryable') return false;
     var media = Object.assign({}, entry.media, {
       id: entry.identity.id,
       method: 'tv',
@@ -10199,9 +10207,30 @@
     });
     var key = getCompletionKey(media);
     if (!key) return false;
+    entry.completionState = 'pending';
+    entry.completionKey = key;
     markFinishIntent(key);
-    finish(media).catch(function (e) { slog('Just+ playlist history finish error', e && e.status || 'request_failed'); });
+    Promise.resolve().then(function () { return finish(media); }).then(function (result) {
+      if (externalPlaylistReport !== report || report.token !== String(Lampa.Storage.get('trakt_token') || '') || report.identityGeneration !== playbackIdentityGeneration) return;
+      entry.completionState = result && result.ok || result && result.skipped && result.reason === 'already_finished' ? 'confirmed' : 'retryable';
+    }).catch(function (e) {
+      if (externalPlaylistReport === report && report.token === String(Lampa.Storage.get('trakt_token') || '') && report.identityGeneration === playbackIdentityGeneration) entry.completionState = 'retryable';
+      slog('Just+ playlist history finish error', e && e.status || 'request_failed');
+    });
     return true;
+  }
+
+  function externalReportMatchesPlayerStart(report, media, hash) {
+    if (!report || report !== externalPlaylistReport || report.token !== String(Lampa.Storage.get('trakt_token') || '') || report.identityGeneration !== playbackIdentityGeneration) return false;
+    var identity = verifiedShowEpisode(media);
+    if (!hash) return !!(identity && report.launchIdentity && identity.id === report.launchIdentity.id && identity.season === report.launchIdentity.season && identity.episode === report.launchIdentity.episode);
+    var entry = report.entries[String(hash)];
+    if (!entry || entry.ambiguous) return false;
+    // The launch event can omit S/E on the card while the handoff snapshot has
+    // already verified the exact item. The exact callback hash selects that
+    // item, while the card still has to identify the same show.
+    if (!identity) return String(media && media.id) === entry.identity.id;
+    return identity.id === entry.identity.id && identity.season === entry.identity.season && identity.episode === entry.identity.episode;
   }
 
   function isPlaybackInstanceTerminal() {
@@ -10365,7 +10394,6 @@
         }
         return;
       }
-      externalPlaylistReport = null;
       Lampa.Storage.set('trakt_last_card', card);
       if (this.isLoggingEnabled()) {
         slog('Card saved to storage', card);
@@ -10412,6 +10440,7 @@
         }
         var oldEpisode = previousInstance && verifiedShowEpisode(previousInstance.media);
         var newEpisode = verifiedShowEpisode(mediaForStart);
+        if (!externalReportMatchesPlayerStart(externalPlaylistReport, mediaForStart, hash)) externalPlaylistReport = null;
         var sameHashDifferentEpisode = !!(reusedTimelineHash && oldEpisode && newEpisode && oldEpisode.id === newEpisode.id && (oldEpisode.season !== newEpisode.season || oldEpisode.episode !== newEpisode.episode));
         stopPreviousEpisodeOnPlayerStart(mediaForStart, hash || null);
         scrobbler.setCurrentMedia(mediaForStart);
@@ -10469,6 +10498,14 @@
         return;
       }
       var timelineInstance = currentPlaybackInstance;
+      // Android may return the Just+ full playlist snapshot while the native
+      // Player.start instance still matches its hash. Route mapped entries
+      // through the measured-progress path first and never let a synthetic
+      // percent=100 marker fall through to the generic Timeline completion.
+      if (externalPlaylistReport && externalPlaylistReport.entries[String(hash)]) {
+        handleExternalPlaylistTimelineUpdate(data, externalPlaylistReport);
+        return;
+      }
       // Timeline hashes are the identity boundary for playback side effects.
       // Activity.active() may already point at a different episode/movie, so
       // it must never be used to attribute a stale or unassociated callback.
