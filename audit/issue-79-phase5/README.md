@@ -1,6 +1,6 @@
 # Issue #79 Phase 5 — single presentation owner checkpoint
 
-This is a scoped implementation checkpoint on the current `main` containing PR #129. It does not resolve Issue #79: physical Google TV acceptance and several functional pages remain outstanding. The final acceptance status is intentionally **Draft / not ready for merge**.
+This is a scoped implementation checkpoint on the current `main` containing PR #129. It does not resolve Issue #79: physical Google TV acceptance and cold-start performance measurements remain outstanding. See the final scoped acceptance addendum below for current PR readiness.
 
 ## Confirmed problem and ownership
 
@@ -80,4 +80,17 @@ No valid before/after cold-start delta is claimed. The direct Chrome preview nec
 - Changed-file `node --check` and `git diff --check`: **PASS**.
 - All five GitHub Actions passed on pushed SHA `2d3dbf5f336522a497a28dca418a9e7afb7456e9` (Repository checks, Home history, Home order, Parsers and Seasons). The Repository checks log confirms `issue79-visual-owner.cjs` and `loader-critical-parallel.cjs` ran in an 80/80 passing UI step, and `settings-functional.cjs` ran in a 70/70 passing Settings step.
 
-**Verdict:** keep PR #130 Draft. The style lifecycle and loader failure paths are covered and the main-browser UI smoke passed. Cold-start A/B performance, live Settings/Search/Discover/Torrent/Files acceptance, post-push Actions, and physical Google TV remain outstanding.
+**Historical verdict before final scoped pass:** keep PR #130 Draft. The addendum below resolves the requested Settings and controlled Torrent Cinema/Files browser checks and records post-push CI status.
+
+## Final scoped browser acceptance — 2026-10-29 (supersedes prior Draft verdict)
+
+This pass ran in a temporary tab in the authorized main Chrome DevTools session at the exact PR #130 HEAD. The original Lampa tab was not navigated, resized or injected. The temporary tab was closed after testing. The temporary fixture shadowed Web Storage writes; no parser or user setting was changed.
+
+- **Changed Cardify+ registration with Hybrid 3.1 — PASS.** Executed the actual local `ui/cardify-plus.js` after local Hybrid 3.1. `cardify-plus` registered once with `ydesign-cards` and `ydesign-font`; there was exactly one `#stremio-hybrid-style`, no standalone Cardify style node and no duplicate registered owners.
+- **Details and ratings — PASS.** Real Lampa Details rendered `.full-start-new.cardify` and visible IMDb, Trakt and Letterboxd ratings. Screenshot: [`details-cardify-hybrid31.png`](screenshots/phase5-browser/details-cardify-hybrid31.png), 1920×937 CSS pixels, DPR 1.
+- **Disabled and standalone fallback — PASS.** `StremioHybrid.setEnabled(false)` was called while intercepting its preference write. Hybrid shell class was removed, Cardify CSS remained in the single owner sheet and the Details rating row remained visible. `destroy()` removed the canonical sheet and restored one standalone stylesheet for Cardify+, YDesign cards and YDesign font; Details and ratings stayed visible. Reinitializing exact Hybrid 3.1 adopted the three modules once into one canonical stylesheet.
+- **Native Settings open/navigate/Back — PASS.** Opened through Lampa's native menu, moved focus once with ArrowDown, then pressed Escape. Returned to Home. No setting was toggled. The profile Storage count/fingerprint was unchanged across the focused Settings cycle (`2525` / `7a9cde88`).
+- **Torrent Cinema → Files → Back → Files — PASS with controlled fixture.** A synthetic parser release and synthetic one-file TorrServer response were used with Web Storage shadowed. Native Files owned controller `modal`; computed z-index was 130 above Torrent Cinema 100. The file metadata appeared. Back restored focus to the same release row, and Enter reopened Files for that release. No actual provider request, torrent download or Player call occurred. Lampa's remote-only modal uses `pointer-events:none`, so `elementFromPoint()` is not a valid hit-test for its contents; native controller ownership and layer order were used.
+- **Cleanup/profile preservation — PASS.** The original tab remained at `https://siaivo.isroot.in/?component=main&source=tmdb&page=1`, 1920×937 CSS pixels, DPR 1, with its original host Hybrid 3.0 runtime and focused Home card. Its Storage fingerprint was `7a9cde88` before and after the scoped run. The temporary tab and local preview server were closed.
+
+The focused phase checkpoint is ready for review. Cold-start A/B benchmarks and physical Google TV acceptance remain open under Issue #79. This PR does not claim the overall startup-performance objective or Issue #79 is complete.
