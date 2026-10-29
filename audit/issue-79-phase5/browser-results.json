@@ -1,0 +1,56 @@
+{
+  "status": "partial acceptance; keep PR draft",
+  "testedAt": "2026-10-29",
+  "testedSource": {
+    "branch": "feat/issue-79-static-ui-perf",
+    "commit": "5d8d08f632edbfdba07b007621b0fd7c7a1dc874",
+    "assets": {
+      "loader.js": "cb9833f6d6821464e1cc0fd4213fb599e7edc2a2205d0dd110e6b46b2115e2c1",
+      "ui/stremio-hybrid.js": "2a77c7f3c5e759acde5040589e078f52a105fd1485a8f89bc8f55fc041a9f139",
+      "ui/interface-plus.js": "e5e5c2d43f1ddf10beaa9eceae64fbdd83b846d595f555bda032223ea6377fd3",
+      "ui/design-optimized.js": "6aa3d3824a858668f84784d5860120c61ab0e0285d6c4bbc5f3875478db72de5",
+      "ui/cardify-plus.js": "ab3e622d18e58f4c12f0192828bb0ace6551eec65cfbdae34637182df546aa74"
+    }
+  },
+  "mainChrome": {
+    "connection": "Chrome DevTools MCP, authorized main Chrome",
+    "tab": "existing selected Lampa Home tab; original Details tab untouched",
+    "installation": "temporary loopback script delivery; only in-memory loader flag/list globals changed",
+    "loader": { "requested": 4, "loaded": 4, "failed": 0, "timedOut": 0 },
+    "hybridVersion": "3.1.0-single-presentation-owner",
+    "canonicalStylesheets": 1,
+    "registeredStyleOwners": ["ydesign-cards", "ydesign-font"],
+    "checks": {
+      "homeArrowRightEnterDetailsEscapeBackAndFocus": "PASS",
+      "threeAdditionalHomeDetailsBackCycles": "PASS",
+      "destroyRestoresYDesignStandaloneStyles": "PASS",
+      "branchRestartReadoptsStylesIntoOneOwner": "PASS",
+      "cardifyPlusBranchRegistrationInThisAlreadyInitializedHost": "NOT VERIFIED; covered by runtime tests",
+      "searchDiscoverSettingsTorrentFilesJourneys": "NOT TESTED"
+    },
+    "viewports": [
+      { "css": [1280, 720], "dpr": 1, "raster": [1280, 720], "screenshot": "screenshots/phase5-browser/1280x720.png" },
+      { "css": [1920, 1080], "dpr": 1, "raster": [1920, 1080], "screenshot": "screenshots/phase5-browser/1920x1080.png" },
+      { "css": [3840, 2160], "dpr": 1, "raster": [3840, 2160], "screenshot": "screenshots/phase5-browser/3840x2160.png" }
+    ],
+    "restoration": "PASS; original Home URL and 1920x937 CSS viewport restored by reload; branch globals/scripts absent"
+  },
+  "startupPerformance": {
+    "comparableColdAB": "INCONCLUSIVE",
+    "reason": "Main Chrome was already initialized. The isolated Chromium harness did not inject the loader before host bootstrap, had no Home cards, and its timings are rejected as invalid branch-vs-main evidence.",
+    "warmBranchInjection": "Hybrid shell applied about 9 ms after the Hybrid script's own start; not a cold-start comparison.",
+    "optimizationVerified": "Three critical UI requests start in parallel and retain async=false declaration order; covered by the loader fixture and observed branch delivery.",
+    "GoogleTvStyleRecalculation": "NOT MEASURED"
+  },
+  "priorYDesignBrowserFailure": {
+    "status": "ENVIRONMENTAL BLOCKER",
+    "evidence": "After supplying the missing Playwright module through a temporary alias, tests/ydesign-browser.cjs fails before page interaction with ECONNREFUSED 127.0.0.1:9222. The authorized main Chrome is connected through DevTools MCP instead."
+  },
+  "localChecks": {
+    "focusedAndRelevantRegressions": "494/494 PASS",
+    "repositoryCheck": "PASS: 78 JavaScript files, 43 manifest entries, 563 URLs",
+    "syntaxAndDiffCheck": "PASS",
+    "githubActionsOnCommit": "PASS: all five GitHub Actions on 2d3dbf5f336522a497a28dca418a9e7afb7456e9; repository logs show issue79-visual-owner and loader-critical-parallel in 80/80 UI tests, settings-functional in 70/70 Settings tests"
+  },
+  "physicalGoogleTV": "NOT TESTED"
+}

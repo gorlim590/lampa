@@ -4,7 +4,7 @@ const read=p=>fs.readFileSync(__dirname+'/../'+p,'utf8');
 const iface=read('ui/interface-plus.js'),hybrid=read('ui/stremio-hybrid.js');
 function themeFixture(){
  const nodes=[];const document={getElementById:id=>nodes.find(n=>n.id===id)||null,createElement:()=>({remove(){nodes.splice(nodes.indexOf(this),1)}}),head:{appendChild:n=>nodes.push(n)}};
- const c={document};vm.runInNewContext(iface.slice(iface.indexOf('    function applyTheme('),iface.indexOf('    var STATUS_BASE_SEL')),c);return {nodes,apply:c.applyTheme};
+ const c={document,window:{},hybridOwnsTheme:false,currentInterfaceTheme:null};vm.runInNewContext(iface.slice(iface.indexOf('    function applyTheme('),iface.indexOf('    var STATUS_BASE_SEL')),c);return {nodes,apply:c.applyTheme};
 }
 const themes=[...iface.matchAll(/^            ([a-z_0-9]+):$/gm)].map(x=>x[1]);
 test('Every Interface theme yields focus and hover pseudo-rings to actual Hybrid body activity',()=>{
@@ -30,7 +30,7 @@ test('All standalone theme surfaces yield to Hybrid without changing native acti
  const f=themeFixture(),surfaces=['.settings__content','.settings-input__content','.selectbox__content','.modal__content'];
  // Compare with the pre-milestone renderer: only these four selectors may change.
  const old=iface.replace("body:not(.stremio-hybrid) .settings__content, body:not(.stremio-hybrid) .settings-input__content, body:not(.stremio-hybrid) .selectbox__content, body:not(.stremio-hybrid) .modal__content",surfaces.join(', '));
- const oldNodes=[],c={document:{getElementById:id=>oldNodes.find(n=>n.id===id)||null,createElement:()=>({remove(){oldNodes.splice(oldNodes.indexOf(this),1)}}),head:{appendChild:n=>oldNodes.push(n)}}};
+ const oldNodes=[],c={window:{},hybridOwnsTheme:false,currentInterfaceTheme:null,document:{getElementById:id=>oldNodes.find(n=>n.id===id)||null,createElement:()=>({remove(){oldNodes.splice(oldNodes.indexOf(this),1)}}),head:{appendChild:n=>oldNodes.push(n)}}};
  vm.runInNewContext(old.slice(old.indexOf('    function applyTheme('),old.indexOf('    var STATUS_BASE_SEL')),c);
  for(const name of themes){f.apply(name);c.applyTheme(name);const css=f.nodes[0].textContent,rules=css.match(/[^{}]+\{[^{}]*\}/g)||[];const panels=rules.filter(r=>r.includes('.modal__content'));assert.equal(panels.length,1,name);const selectors=panels[0].split('{')[0].split(',').map(x=>x.trim());assert.deepEqual(selectors,surfaces.map(x=>'body:not(.stremio-hybrid) '+x));
  let restored=css;for(const selector of surfaces)restored=restored.replace('body:not(.stremio-hybrid) '+selector,selector);assert.equal(restored,oldNodes[0].textContent,name+' must preserve standalone declarations and native action styling');}
@@ -41,14 +41,15 @@ test('Native Settings and Select rows yield base/focus decoration while every st
  const targets=['.settings-folder','.settings-param','.selectbox-item'],f=themeFixture();
  // Undo only this milestone's six scoped selectors, leaving card/surface gates intact.
  let previous=iface;for(const cls of targets)previous=previous.replaceAll('body:not(.stremio-hybrid) '+cls,cls);
- const nodes=[],c={document:{getElementById:id=>nodes.find(n=>n.id===id)||null,createElement:()=>({remove(){nodes.splice(nodes.indexOf(this),1)}}),head:{appendChild:n=>nodes.push(n)}}};
+ const nodes=[],c={window:{},hybridOwnsTheme:false,currentInterfaceTheme:null,document:{getElementById:id=>nodes.find(n=>n.id===id)||null,createElement:()=>({remove(){nodes.splice(nodes.indexOf(this),1)}}),head:{appendChild:n=>nodes.push(n)}}};
  vm.runInNewContext(previous.slice(previous.indexOf('    function applyTheme('),previous.indexOf('    var STATUS_BASE_SEL')),c);
  for(const name of themes){f.apply(name);c.applyTheme(name);let normalized=f.nodes[0].textContent;for(const cls of targets)normalized=normalized.replaceAll('body:not(.stremio-hybrid) '+cls,cls);assert.equal(normalized,nodes[0].textContent,name+' declarations and unselected action rules must be unchanged');
   const rules=f.nodes[0].textContent.match(/[^{}]+\{[^{}]*\}/g)||[];for(const rule of rules)for(const selector of rule.split('{')[0].split(',').map(s=>s.trim()))if(targets.some(cls=>selector.includes(cls)))assert(selector.startsWith('body:not(.stremio-hybrid) '),name+' '+selector);
  }
  // Ownership is class-based and applies in either plugin load order. No action/state handlers added.
  const block=iface.slice(iface.indexOf('    function applyTheme('),iface.indexOf('    var STATUS_BASE_SEL'));
- assert(!/MutationObserver|setInterval|setTimeout|addEventListener|StremioHybrid/.test(block));
+ assert(!/MutationObserver|setInterval|setTimeout|addEventListener/.test(block));
+ assert.match(block,/hybrid\.ownsPresentation\('theme'\)/,'legacy theme must yield to the canonical theme owner');
  assert(!/aria-disabled|:disabled|:active|\.loading|\.selected/.test(block));
 });
 
@@ -57,7 +58,7 @@ test('Sidebar menu and version decoration yields to Hybrid while all 14 standalo
  // Recreate the prior renderer; after removing only the six ownership prefixes,
  // every generated theme rule must remain byte-for-byte identical.
  let previous=iface;for(const selector of targets)previous=previous.replaceAll('body:not(.stremio-hybrid) '+selector,selector);
- const nodes=[],c={document:{getElementById:id=>nodes.find(n=>n.id===id)||null,createElement:()=>({remove(){nodes.splice(nodes.indexOf(this),1)}}),head:{appendChild:n=>nodes.push(n)}}};
+ const nodes=[],c={window:{},hybridOwnsTheme:false,currentInterfaceTheme:null,document:{getElementById:id=>nodes.find(n=>n.id===id)||null,createElement:()=>({remove(){nodes.splice(nodes.indexOf(this),1)}}),head:{appendChild:n=>nodes.push(n)}}};
  vm.runInNewContext(previous.slice(previous.indexOf('    function applyTheme('),previous.indexOf('    var STATUS_BASE_SEL')),c);
  assert.equal(themes.length,14);
  for(const name of themes){

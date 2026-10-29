@@ -1,0 +1,69 @@
+{
+  "testedCodeSha": "65356111bc6f6f0d0feb2a90ba9e80a3c1917abc",
+  "testedBranch": "feat/issue-79-static-ui-perf",
+  "browser": "Authorized main Chrome DevTools session; temporary same-profile tab, original tab untouched",
+  "viewport": { "width": 1920, "height": 937, "devicePixelRatio": 1 },
+  "changedAssets": {
+    "ui/stremio-hybrid.js": "2a77c7f3c5e759acde5040589e078f52a105fd1485a8f89bc8f55fc041a9f139",
+    "ui/cardify-plus.js": "ab3e622d18e58f4c12f0192828bb0ace6551eec65cfbdae34637182df546aa74"
+  },
+  "checks": {
+    "actualCardifyRegistrationAfterHybrid31": {
+      "status": "PASS",
+      "registeredOwners": ["ydesign-cards", "ydesign-font", "cardify-plus"],
+      "canonicalStylesheets": 1,
+      "standaloneCardifyStylesheetsWhileOwned": 0,
+      "duplicateOwners": false
+    },
+    "detailsRatingsHybridEnabled": {
+      "status": "PASS",
+      "cardifyDetailsTemplate": true,
+      "visibleRatings": ["IMDb", "Trakt", "Letterboxd"],
+      "screenshot": "screenshots/phase5-browser/details-cardify-hybrid31.png",
+      "screenshotPixels": [1920, 937]
+    },
+    "hybridDisabledAndDestroyFallback": {
+      "status": "PASS",
+      "hybridShellDisabled": true,
+      "cardifyRulesRetainedAndRatingVisible": true,
+      "destroyRemovedCanonicalSheet": true,
+      "standaloneStylesRestored": ["cardify-plus", "ydesign-cards", "ydesign-font"],
+      "hybridRestartAdoptedEachModuleOnce": true
+    },
+    "nativeSettingsOpenNavigateBack": {
+      "status": "PASS",
+      "input": ["native menu Enter", "ArrowDown", "Escape"],
+      "returnedToHome": true,
+      "changedPreferences": false,
+      "profileStorageCountBeforeAfter": [2525, 2525],
+      "profileStorageFingerprintBeforeAfter": ["7a9cde88", "7a9cde88"]
+    },
+    "torrentFilesBackReopen": {
+      "status": "PASS",
+      "fixture": "synthetic parser row and synthetic single-file TorrServer response; Web Storage writes shadowed",
+      "nativeFilesController": "modal",
+      "nativeFilesZIndex": 130,
+      "torrentCinemaZIndex": 100,
+      "filesDisplayed": true,
+      "backRestoredSameTorrentFocus": true,
+      "reopenedSameFiles": true,
+      "realProviderOrDownload": false,
+      "playerInvocation": false,
+      "layerCheckNote": "Native modal is remote-only with pointer-events:none; verified controller ownership and stacking values rather than elementFromPoint inside content."
+    },
+    "originalTabAndProfilePreserved": {
+      "status": "PASS",
+      "originalUrl": "https://siaivo.isroot.in/?component=main&source=tmdb&page=1",
+      "originalViewport": [1920, 937, 1],
+      "originalRuntimeAfterCleanup": "Hybrid 3.0.0 host runtime",
+      "originalStorageFingerprintBeforeAfter": ["7a9cde88", "7a9cde88"],
+      "temporaryTabClosed": true,
+      "previewServerStopped": true
+    }
+  },
+  "scopeLimitations": [
+    "Cold-start A/B startup benchmarks remain unverified and open under Issue #79.",
+    "Physical Google TV hardware acceptance remains unverified.",
+    "The Files smoke used controlled synthetic data and did not test real parser or TorrServer availability."
+  ]
+}

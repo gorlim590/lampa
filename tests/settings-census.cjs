@@ -31,7 +31,7 @@ test('production loader starts the canonical shell before appready and defers op
  const source=fs.readFileSync(__dirname+'/../loader.js','utf8');
  assert.match(source,/var CRITICAL = \['ui\/stremio-hybrid\.js', 'ui\/interface-plus\.js', 'ui\/design-optimized\.js'\]/);
  assert.match(source,/var DEFAULT_DEFERRED = \[[\s\S]*?'trakt\/trakt\.js', 'trakt\/trakt-plus\.js', 'providers\/torrent-search\.js'/);
- assert.match(source,/loadSeries\(CRITICAL, 'critical', 0, function \(\) \{[\s\S]*?waitForAppReady\(\);[\s\S]*?\}\);/);
+ assert.match(source,/loadParallelOrdered\(CRITICAL, 'critical', function \(\) \{[\s\S]*?waitForAppReady\(\);[\s\S]*?\}\);/);
  assert(source.includes("readinessOwner.follow('app', readinessListener)"));
  assert(source.includes('L.Listener.remove'));
  assert(!source.includes('runtime-census.js'));
