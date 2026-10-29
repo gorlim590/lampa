@@ -1049,7 +1049,15 @@ function searchSources(){
 }
 function catalogSourceEnabled(parser){return !!parser&&parser.enabled!==false&&parser.enabled!=='false'&&parser.disabled!==true&&parser.disabled!=='true';}
 function getAutoSourceFlags(){
-    var stored=Lampa.Storage.get('parser_enabled_sources_v1',null);
+    // The Auto inclusion map is object-valued. Lampa's Storage.get cache compares
+    // cached values to strings before checking their type, which throws for some
+    // object shapes after Storage.set(key, object). Read the persisted JSON string
+    // through Storage.value instead, and validate it before use.
+    var raw='';
+    try{raw=Lampa.Storage.value('parser_enabled_sources_v1','');}catch(e){try{raw=window.localStorage.getItem('parser_enabled_sources_v1')||'';}catch(ignore){}}
+    var stored=null;
+    if(raw&&typeof raw==='object'&&!Array.isArray(raw))stored=raw;
+    else if(typeof raw==='string'&&raw)try{stored=JSON.parse(raw);}catch(e){}
     if(stored&&typeof stored==='object'&&!Array.isArray(stored))return stored;
     // Safe legacy migration: only currently selected primary/secondary sources are included.
     // Do not persist a derived map until the owner explicitly changes Auto Search inclusion.
@@ -1067,7 +1075,9 @@ function initAutoSearchSettings(){
         function open(){var flags=getAutoSourceFlags();Lampa.Select.show({title:'Джерела пошуку',items:getParsers().map(function(p,i){var available=catalogSourceEnabled(p);return {title:'Джерело '+(i+1),subtitle:!available?'Вимкнено в каталозі':flags[p.base]===true?'Увімкнено':'Вимкнено',base:p.base,parser:p,available:available};}),onBack:function(){Lampa.Controller.toggle(controller);},onSelect:function(item){
             if(!item.available){open();return;}
             flags[item.base]=flags[item.base]!==true;
-            Lampa.Storage.set('parser_enabled_sources_v1',flags);if(window.ParserProviders.cancel)window.ParserProviders.cancel();open();
+            // Keep a primitive in Lampa's in-memory Storage cache. The persisted
+            // format remains the same JSON object for other readers.
+            Lampa.Storage.set('parser_enabled_sources_v1',JSON.stringify(flags));if(window.ParserProviders.cancel)window.ParserProviders.cancel();open();
         }});}open();
     }});
 }
