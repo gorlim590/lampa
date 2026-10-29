@@ -38,7 +38,7 @@ In the foreground Lampa tab, Enter opened Details and the page returned to Home.
 
 `ui/stremio-hybrid.js` caches the combined stylesheet by owner active/destroyed state and registered-module revision, invalidating when modules change. This avoids rejoining the adapter stylesheet on unchanged readiness passes and retains repair of a missing/changed DOM style. Tests cover repeated readiness calls, duplicate registration, module invalidation, enable/disable and full lifecycle.
 
-Focused Home, Hybrid, loader, Settings, Trakt and Torrent regressions: 298/298 passed. Repository checks and Torrent Cinema artifact freshness check passed. The benchmark is fixture-only and does not verify personalized Home scenarios, Search/Discover/Settings/Torrent flows or physical Google TV.
+Focused Home, Hybrid, loader, Settings, Trakt and Torrent regressions: 330/330 passed. Repository checks and Torrent Cinema artifact freshness check passed. The benchmark is fixture-only and does not verify personalized Home scenarios, Search/Discover/Settings/Torrent flows or physical Google TV.
 
 ## Remaining work
 
