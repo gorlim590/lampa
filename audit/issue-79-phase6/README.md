@@ -2,7 +2,7 @@
 
 ## Result
 
-This patch stabilizes YDesign's optional TV metadata prefetch and updates the existing Home rows when metadata arrives. It does **not** establish a reliable startup-speed improvement; Issue #79 remains open and PR #131 remains Draft.
+This patch stabilizes YDesign's optional TV metadata prefetch and updates the existing Home rows when metadata arrives. It does **not** establish a reliable startup-speed improvement; Issue #79 remains open. PR #131 is ready for review as a correctness/lifecycle checkpoint.
 
 ## Confirmed prefetch failure
 
