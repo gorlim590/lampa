@@ -339,17 +339,18 @@ body.stremio-hybrid .sh-movie-page .sh-genre-chips{display:flex;flex-wrap:wrap;a
 body.stremio-hybrid .sh-movie-page .sh-genre-chip{display:inline-flex;align-items:center;min-height:2em;padding:.25em .8em;border:1px solid #ffffff20;border-radius:var(--sh-pill);background:linear-gradient(135deg,#ffffff12,#ffffff06);color:#e8e5f1;font-size:.82em;line-height:1.25;white-space:normal;transition:background .16s ease,border-color .16s ease,transform .16s ease}
 body.stremio-hybrid .sh-movie-page .ifx-series-info .sh-genre-chips{display:flex!important;flex-wrap:wrap!important;gap:.4em .5em!important;margin:.1em 0 .2em!important}
 body.stremio-hybrid .sh-movie-page .ifx-series-info .sh-genre-chip{display:inline-flex!important;align-items:center!important;min-height:2em!important;padding:.25em .8em!important;border:1px solid #ffffff20!important;border-radius:var(--sh-pill)!important;background:linear-gradient(135deg,#ffffff12,#ffffff06)!important;color:#e8e5f1!important;font-size:.84em!important;font-weight:400!important;line-height:1.25!important;white-space:normal!important;margin:0!important}
-body.stremio-hybrid .sh-movie-page .sh-genre-chip.focus{background:var(--sh-focus-soft);border-color:var(--sh-accent-soft);color:var(--sh-text);box-shadow:0 0 0 .12em var(--sh-accent-soft);transform:translateY(-1px)}
+body.stremio-hybrid .sh-movie-page .sh-genre-chip{cursor:default}
 body.stremio-hybrid .sh-movie-page .full-start-new__head{display:flex;align-items:center;gap:.35em;color:#c5c3cf;letter-spacing:.015em}
 body.stremio-hybrid .sh-movie-page .full-start-new__details{display:flex;flex-direction:column;gap:.35em;margin-top:.3em!important;margin-bottom:.9em!important}
 body.stremio-hybrid .sh-movie-page .sh-series-field{display:inline-flex;align-items:center;min-height:1.8em;padding:.2em .7em;border:1px solid #ffffff14;border-radius:var(--sh-pill);background:#ffffff09;color:#c7c4d1;font-size:.82em;line-height:1.35;white-space:normal}
 body.stremio-hybrid .sh-movie-page .sh-detail-section{width:100%;margin:.35em 0;padding:.65em .8em;border:1px solid #ffffff12;border-radius:.8em;background:linear-gradient(120deg,#ffffff0a,#ffffff04);box-sizing:border-box}
-body.stremio-hybrid .sh-movie-page .sh-detail-panels{position:relative;left:-10px;width:calc(100% + 20px);display:flex;flex-direction:column;gap:.35em;margin:.35em 0;box-sizing:border-box}
+body.stremio-hybrid .sh-movie-page .sh-detail-panels{display:flex;align-self:stretch;width:100%;max-width:100%;min-width:0;flex-direction:column;gap:.35em;margin:.35em 0;box-sizing:border-box}
 body.stremio-hybrid .sh-movie-page .sh-detail-panels>.sh-detail-section{width:100%;margin:0}
 body.stremio-hybrid .sh-movie-page .tmdb-networks.sh-detail-panels-empty{display:none!important}
-body.stremio-hybrid .sh-movie-page .sh-detail-toggle{display:flex;align-items:center;justify-content:space-between;gap:1em;min-height:2.6em;padding:.2em .35em;color:#f0eef7;font-size:.95em;font-weight:500;cursor:pointer}
-body.stremio-hybrid .sh-movie-page .sh-detail-toggle::after{content:'+';display:grid;place-items:center;width:1.8em;height:1.8em;border:1px solid #ffffff20;border-radius:50%;color:#c9b9ff;font-size:1.05em;line-height:1}
-body.stremio-hybrid .sh-movie-page .sh-detail-toggle[aria-expanded="true"]::after{content:'−'}
+body.stremio-hybrid .sh-movie-page .sh-detail-toggle{position:relative;display:flex;align-items:center;justify-content:space-between;gap:1em;min-height:2.6em;padding:.2em 2.65em .2em .35em;color:#f0eef7;font-size:.95em;font-weight:500;cursor:pointer}
+body.stremio-hybrid .sh-movie-page .sh-detail-toggle::after{content:'';position:absolute;top:50%;right:.35em;display:block;width:1.8em;height:1.8em;border:1px solid #ffffff20;border-radius:50%;background:linear-gradient(135deg,#ffffff0d,#ffffff04);box-sizing:border-box;transform:translateY(-50%)}
+body.stremio-hybrid .sh-movie-page .sh-detail-toggle::before{content:'';position:absolute;top:50%;right:1.02em;width:.42em;height:.42em;border-right:1.5px solid #c9b9ff;border-bottom:1.5px solid #c9b9ff;transform:translateY(-68%) rotate(45deg);transition:transform .16s ease}
+body.stremio-hybrid .sh-movie-page .sh-detail-toggle[aria-expanded="true"]::before{transform:translateY(-30%) rotate(225deg)}
 body.stremio-hybrid .sh-movie-page .sh-detail-toggle.focus{color:#fff;text-shadow:0 0 1em #ab91ff66;outline:2px solid var(--sh-accent-soft);outline-offset:2px;border-radius:.45em}
 body.stremio-hybrid .sh-movie-page .sh-detail-section__body{display:flex;flex-wrap:wrap;align-items:center;gap:.65em;padding:.55em .35em .25em;border-top:1px solid #ffffff10}
 body.stremio-hybrid .sh-movie-page .sh-detail-section__body[hidden]{display:none!important}
@@ -366,13 +367,13 @@ body.stremio-hybrid .sh-movie-page .tmdb-networks > .items-line__body{margin:0!i
 body.stremio-hybrid .sh-movie-page .ua-comments-root{width:auto;max-width:44em;margin:.6em 0!important}
 body.stremio-hybrid .sh-movie-page .sh-detail-section--comments .ua-comments-root{width:100%;max-width:none;margin:.35em 0!important}
 body.stremio-hybrid .sh-movie-page .sh-detail-section--comments .ua-comments-slider{max-width:100%}
-body.stremio-hybrid .sh-movie-page .items-line.sh-details-heading-hidden>.items-line__head{display:none!important}
+body.stremio-hybrid .sh-movie-page .items-line.sh-details-heading-hidden{display:none!important}
 body.stremio-hybrid .sh-movie-page .ua-status-card{width:auto!important;max-width:100%;min-height:0!important;padding:.5em .8em!important;border:1px solid #ffffff12!important;border-radius:var(--sh-pill)!important;background:#ffffff07!important;color:#b9b5c4!important;font-size:.78em!important;line-height:1.4;white-space:normal}
 body.stremio-hybrid .sh-movie-page .items-line__head{margin:.5em 0 .4em!important}
 body.stremio-hybrid .sh-movie-page .items-line__title{font-size:1.05em;font-weight:600;letter-spacing:.01em}
 body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;overflow:hidden}
 @media(max-width:1360px){body.stremio-hybrid .sh-movie-page .sh-genre-chips{gap:.35em;margin-bottom:.8em}body.stremio-hybrid .sh-movie-page .sh-detail-section{padding:.5em .65em}body.stremio-hybrid .sh-movie-page .ua-comments-root{max-width:34em}}
-@media(prefers-reduced-motion:reduce){body.stremio-hybrid .sh-movie-page .sh-genre-chip{transition:none!important;transform:none!important}}
+@media(prefers-reduced-motion:reduce){body.stremio-hybrid .sh-movie-page .sh-genre-chip{transition:none!important;transform:none!important}body.stremio-hybrid .sh-movie-page .sh-detail-toggle::before{transition:none}}
 `;
     // Cardify owns the native template/data. Move nodes with their handlers, never clone them.
     var movieRecords=[], movieFrame=0, movieTimers=[];
@@ -403,7 +404,73 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
     function removeMovies() {
         stopMovieQueue(); movieRecords.forEach(restoreMovie); movieRecords=[];
     }
+    function setDetailDisclosure(panel,open){
+        if(!panel||!panel.toggle||!panel.body)return;
+        panel.toggle.setAttribute('aria-expanded',String(!!open));panel.body.hidden=!open;panel.root.classList.toggle('is-open',!!open);
+    }
+    function restoreGenreFocus(record){
+        var origin=record&&record.genreSelectOrigin;if(!origin)return;record.genreSelectOrigin=null;
+        if(Lampa.Select&&Lampa.Select.opened&&Lampa.Select.opened())return;
+        var active=Lampa.Activity&&Lampa.Activity.active&&Lampa.Activity.active();
+        if(!active||active.component!=='full'||!active.activity||active.activity.render()[0]!==record.page||!origin.isConnected)return;
+        var controller=Lampa.Controller&&Lampa.Controller.enabled&&Lampa.Controller.enabled();
+        if(!controller||['full_start','full_descr'].indexOf(controller.name)<0)return;
+        Lampa.Controller.collectionSet(record.page);Lampa.Controller.collectionFocus(origin,record.page);
+    }
+    function bindGenreSelectFocus(record){
+        if(record.genreSelectBound||!Lampa.Select||!Lampa.Select.listener||typeof Lampa.Select.listener.follow!=='function')return;
+        record.genreSelectBound=true;
+        record.genreSelectShow=function(){record.genreSelectOrigin=null;};
+        record.genreSelectClose=function(){if(!record.genreSelectOrigin)return;if(record.genreFocusFrame)cancelAnimationFrame(record.genreFocusFrame);record.genreFocusFrame=requestAnimationFrame(function(){record.genreFocusFrame=0;restoreGenreFocus(record);});};
+        Lampa.Select.listener.follow('fullshow',record.genreSelectShow);Lampa.Select.listener.follow('close',record.genreSelectClose);
+    }
+    function unbindGenreSelectFocus(record){
+        if(!record||!record.genreSelectBound)return;
+        if(Lampa.Select&&Lampa.Select.listener&&typeof Lampa.Select.listener.remove==='function'){Lampa.Select.listener.remove('fullshow',record.genreSelectShow);Lampa.Select.listener.remove('close',record.genreSelectClose);}
+        if(record.genreFocusFrame)cancelAnimationFrame(record.genreFocusFrame);record.genreFocusFrame=0;
+        record.genreSelectBound=false;record.genreSelectOrigin=null;
+    }
+    function installDetailsBack(record){
+        var enabled=Lampa.Controller&&Lampa.Controller.enabled&&Lampa.Controller.enabled(),controller=enabled&&enabled.controller;
+        if(!controller||['full_start','full_descr'].indexOf(enabled.name)<0||typeof controller.back!=='function')return;
+        if(record.detailsBackController===controller)return;
+        restoreDetailsBack(record);
+        var original=controller.back;
+        var wrapped=function(){
+            var focused=record.page.querySelector('.sh-detail-toggle.focus, .sh-detail-section__body .focus');
+            var panel=(record.detailPanels||[]).filter(function(item){return item.root.isConnected&&item.toggle.getAttribute('aria-expanded')==='true'&&(focused===item.toggle||item.body.contains(focused));})[0];
+            if(panel){setDetailDisclosure(panel,false);refreshMovieCollection(record,panel.toggle);return;}
+            return original.apply(this,arguments);
+        };
+        controller.back=wrapped;record.detailsBackController=controller;record.detailsBackOriginal=original;record.detailsBackWrapper=wrapped;
+    }
+    function restoreDetailsBack(record){
+        if(record&&record.detailsBackFrame)cancelAnimationFrame(record.detailsBackFrame);
+        if(record&&record.detailsBackController&&record.detailsBackController.back===record.detailsBackWrapper)record.detailsBackController.back=record.detailsBackOriginal;
+        if(record){record.detailsBackFrame=0;record.detailsBackController=null;record.detailsBackOriginal=null;record.detailsBackWrapper=null;}
+    }
+    function installDetailsScroll(record){
+        if(record.detailScrollBound||!record.detailGroup)return;
+        record.detailKeydown=function(event){
+            if(!event||!/^Arrow(Up|Down|Left|Right)$/.test(event.key)&&event.key!=='Escape'&&event.key!=='Backspace')return;
+            if(record.detailScrollFrame)cancelAnimationFrame(record.detailScrollFrame);
+            record.detailScrollFrame=requestAnimationFrame(function(){
+                record.detailScrollFrame=0;
+                var active=Lampa.Activity&&Lampa.Activity.active&&Lampa.Activity.active();
+                if(!active||active.component!=='full'||!record.page.classList.contains('activity--active'))return;
+                var focused=record.detailGroup&&record.detailGroup.querySelector('.focus');
+                var activeComponent=active.activity&&active.activity.component;
+                var nativeScroll=activeComponent&&activeComponent.scroll;
+                if(focused&&focused.isConnected&&nativeScroll&&typeof nativeScroll.immediate==='function')nativeScroll.immediate(focused);
+            });
+        };
+        document.addEventListener('keydown',record.detailKeydown,true);record.detailScrollBound=true;
+    }
     function restoreDetailsPresentation(record) {
+        unbindGenreSelectFocus(record);restoreDetailsBack(record);
+        if(record.genreActionControl){$(record.genreActionControl).off('.shDetailsFocus');record.genreActionControl=null;}
+        if(record.detailScrollFrame)cancelAnimationFrame(record.detailScrollFrame);record.detailScrollFrame=0;
+        if(record.detailScrollBound)document.removeEventListener('keydown',record.detailKeydown,true);record.detailScrollBound=false;record.detailKeydown=null;
         (record.detailPanels||[]).slice().reverse().forEach(function(panel){
             if(panel.toggle){$(panel.toggle).off('.shDetails');panel.toggle.removeEventListener('click',panel.activate);}
             (panel.nodes||[]).slice().reverse().forEach(function(item){
@@ -422,7 +489,7 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
     }
     function refreshMovieCollection(record,focus){
         var active=Lampa.Controller.enabled();
-        if(!active||active.name!=='full_start'||!active.controller)return;
+        if(!active||['full_start','full_descr'].indexOf(active.name)<0||!active.controller)return;
         var target=focus&&focus.isConnected?focus:record.page.querySelector('.selector.focus');
         Lampa.Controller.collectionSet(record.page);
         if(target&&target.isConnected)Lampa.Controller.collectionFocus(target,record.page);
@@ -439,7 +506,7 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
         var panel={key:key,root:section,toggle:toggle,body:body,nodes:[]};
         nodes.forEach(function(node){panel.nodes.push({node:node,parent:node.parentNode,next:node.nextSibling});});
         parent.insertBefore(section,nodes[0]);section.appendChild(toggle);section.appendChild(body);nodes.forEach(function(node){body.appendChild(node);});if(initiallyOpen)section.classList.add('is-open');
-        panel.activate=function(){var open=toggle.getAttribute('aria-expanded')!=='true';toggle.setAttribute('aria-expanded',String(open));body.hidden=!open;section.classList.toggle('is-open',open);refreshMovieCollection(record,toggle);};
+        panel.activate=function(){var open=toggle.getAttribute('aria-expanded')!=='true';setDetailDisclosure(panel,open);refreshMovieCollection(record,toggle);};
         $(toggle).on('hover:enter.shDetails',panel.activate);toggle.addEventListener('click',panel.activate);
         record.detailPanels.push(panel);
         return panel;
@@ -447,7 +514,7 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
     function setupDetailsPresentation(record,movie) {
         var page=record.page,root=record.root,tagBlock=page.querySelector('.full-descr__tags:not(.networks-wrapper)'),networks=page.querySelector('.tmdb-networks');
         var previousPanelCount=(record.detailPanels||[]).length,previousGenreSignature=record.genreSignature||'',genreSignature='';
-        var genreControl=null,detailControls=[];
+        var genreControl=record.genreControl&&record.genreControl.isConnected?record.genreControl:null,detailControls=[];
         if(tagBlock){
             var relatedLists=page.querySelector('.trakttv-lists');
             if(relatedLists&&relatedLists.parentNode&&relatedLists.parentNode!==tagBlock&&!(record.detailPanels||[]).some(function(panel){return panel.key==='additional'&&panel.body.contains(relatedLists);})){if(!record.relatedListMove)record.relatedListMove={node:relatedLists,parent:relatedLists.parentNode,next:relatedLists.nextSibling};tagBlock.appendChild(relatedLists);}
@@ -455,6 +522,7 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
                 var name=(node.querySelector('.tag-count__name')||node).textContent.trim().toLowerCase();
                 if(name.indexOf('жанр')===0)genreControl=node;
             });
+            if(genreControl)record.genreControl=genreControl;
             detailControls=Array.prototype.filter.call(tagBlock.querySelectorAll('.tag-count.selector'),function(node){var name=(node.querySelector('.tag-count__name')||node).textContent.trim().toLowerCase();return name.indexOf('жанр')===0||name.indexOf('тег')===0||node.classList.contains('trakttv-lists');});
             if(detailControls.length)detailDisclosure(record,tagBlock,'Додаткова інформація','additional',detailControls);
         }
@@ -477,15 +545,17 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
                 if(labels.length&&labels.every(function(label){return knownGenreNames.indexOf(label)>=0;})){nativeGenreRow=row;return true;}return false;
             });
         }
-        if(nativeGenreRow){record.nativeGenreRows=record.nativeGenreRows||[];if(!record.nativeGenreRows.some(function(entry){return entry.row===nativeGenreRow;})){var nativeChips=Array.prototype.slice.call(nativeGenreRow.querySelectorAll('span'));record.nativeGenreRows.push({row:nativeGenreRow,rowHadClass:nativeGenreRow.classList.contains('sh-genre-chips'),chips:nativeChips,roles:nativeChips.map(function(chip){return chip.getAttribute('role');}),selectorHad:nativeChips.map(function(chip){return chip.classList.contains('selector');}),genreHad:nativeChips.map(function(chip){return chip.classList.contains('sh-genre-chip');})});}nativeGenreRow.classList.add('sh-genre-chips');Array.prototype.forEach.call(nativeGenreRow.querySelectorAll('span'),function(chip){chip.classList.add('sh-genre-chip','selector');chip.setAttribute('role','button');$(chip).off('.shDetails').on('hover:enter.shDetails',function(){if(genreControl&&genreControl.isConnected)$(genreControl).trigger('hover:enter');});});}
+        if(nativeGenreRow){record.nativeGenreRows=record.nativeGenreRows||[];if(!record.nativeGenreRows.some(function(entry){return entry.row===nativeGenreRow;})){var nativeChips=Array.prototype.slice.call(nativeGenreRow.querySelectorAll('span'));record.nativeGenreRows.push({row:nativeGenreRow,rowHadClass:nativeGenreRow.classList.contains('sh-genre-chips'),chips:nativeChips,roles:nativeChips.map(function(chip){return chip.getAttribute('role');}),selectorHad:nativeChips.map(function(chip){return chip.classList.contains('selector');}),genreHad:nativeChips.map(function(chip){return chip.classList.contains('sh-genre-chip');})});}nativeGenreRow.classList.add('sh-genre-chips');Array.prototype.forEach.call(nativeGenreRow.querySelectorAll('span'),function(chip){chip.classList.add('sh-genre-chip');$(chip).off('.shDetails');if(!record.nativeGenreRows.some(function(entry){return entry.chips.indexOf(chip)>=0&&entry.selectorHad[entry.chips.indexOf(chip)];})){chip.classList.remove('selector');chip.removeAttribute('role');}});}
         if(genres.length&&!nativeGenreRow){
             if(!record.genreChips){record.genreChips=document.createElement('div');record.genreChips.className='sh-genre-chips';record.genreChips.setAttribute('aria-label','Жанри');var anchor=record.descriptionToggle||record.description||root.querySelector('.full-start-new__details')||root.querySelector('.full-start-new__buttons');if(anchor&&anchor.parentNode)anchor.parentNode.insertBefore(record.genreChips,anchor.nextSibling);}
             if(record.genreSignature!==genreSignature){record.genreChips.querySelectorAll('.sh-genre-chip').forEach(function(chip){$(chip).off('.shDetails');});record.genreChips.textContent='';
-                genres.slice(0,6).forEach(function(genre){var chip=document.createElement('div');chip.className='selector sh-genre-chip';chip.setAttribute('role','button');chip.dataset.genreId=String(genre.id||'');chip.textContent=genre.name.trim();var openGenre=function(){if(genreControl&&genreControl.isConnected)$(genreControl).trigger('hover:enter');};$(chip).on('hover:enter.shDetails',openGenre);record.genreChips.appendChild(chip);});record.genreSignature=genreSignature;}
+                genres.slice(0,6).forEach(function(genre){var chip=document.createElement('span');chip.className='sh-genre-chip';chip.textContent=genre.name.trim();record.genreChips.appendChild(chip);});record.genreSignature=genreSignature;}
         }
         if((!genres.length||nativeGenreRow)&&record.genreChips){record.genreChips.querySelectorAll('.sh-genre-chip').forEach(function(chip){$(chip).off('.shDetails');});record.genreChips.remove();record.genreChips=null;record.genreSignature='';}
         var commentPanel=(record.detailPanels||[]).filter(function(panel){return panel.key==='comments';})[0],productionPanel=(record.detailPanels||[]).filter(function(panel){return panel.key==='production';})[0],additionalPanel=(record.detailPanels||[]).filter(function(panel){return panel.key==='additional';})[0];
-        if(commentPanel||productionPanel||additionalPanel){var detailsLine=Array.prototype.filter.call(page.querySelectorAll('.items-line'),function(line){var title=line.querySelector('.items-line__title');return title&&title.textContent.trim()==='Детально';})[0],parent=detailsLine&&detailsLine.parentNode;if(parent){if(!record.detailGroup){record.detailGroup=document.createElement('div');record.detailGroup.className='sh-detail-panels';parent.insertBefore(record.detailGroup,detailsLine);} [commentPanel,productionPanel,additionalPanel].forEach(function(panel){if(panel&&panel.root.isConnected)record.detailGroup.appendChild(panel.root);});if(networks){record.networkPlaceholder=networks;networks.classList.add('sh-detail-panels-empty');}}}
+        if(commentPanel||productionPanel||additionalPanel){var detailsLine=Array.prototype.filter.call(page.querySelectorAll('.items-line'),function(line){var title=line.querySelector('.items-line__title');return title&&title.textContent.trim()==='Детально';})[0];if(detailsLine&&root){if(!record.detailGroup){record.detailGroup=document.createElement('div');record.detailGroup.className='sh-detail-panels';}if(record.detailGroup.parentNode!==root)root.appendChild(record.detailGroup);[commentPanel,productionPanel,additionalPanel].forEach(function(panel){if(panel&&panel.root.isConnected)record.detailGroup.appendChild(panel.root);});if(networks){record.networkPlaceholder=networks;networks.classList.add('sh-detail-panels-empty');}installDetailsScroll(record);}}
+        if(genreControl){bindGenreSelectFocus(record);if(record.genreActionControl!==genreControl){if(record.genreActionControl)$(record.genreActionControl).off('.shDetailsFocus');record.genreActionControl=genreControl;$(genreControl).on('hover:enter.shDetailsFocus click.shDetailsFocus',function(){if(Lampa.Select&&Lampa.Select.opened&&Lampa.Select.opened())record.genreSelectOrigin=genreControl;});}}else unbindGenreSelectFocus(record);
+        installDetailsBack(record);
         if((record.detailPanels||[]).length!==previousPanelCount||previousGenreSignature!==genreSignature)refreshMovieCollection(record);
     }
     function setupDescription(record, description) {
@@ -733,9 +803,9 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
     }
     function onStreamController(event) {
         syncNavigationState(event&&event.name);
-        if(!event||event.name!=='full_start')return;
+        if(!event||['full_start','full_descr'].indexOf(event.name)<0)return;
         var active=Lampa.Activity.active(),record=movieRecords.filter(function(r){return active&&r.activity===active.activity;})[0];
-        if(record)bindRatingNavigation(record,Lampa.Controller.enabled().controller);
+        if(record){var controller=Lampa.Controller.enabled().controller;if(event.name==='full_start')bindRatingNavigation(record,controller);if(record.detailsBackFrame)cancelAnimationFrame(record.detailsBackFrame);record.detailsBackFrame=requestAnimationFrame(function(){record.detailsBackFrame=0;if(record.page.isConnected)installDetailsBack(record);});}
     }
     function actionLabel(node) {
         var map = {'notice--icon':'Сповіщення', 'open--settings':'Налаштування', 'open--profile':'Профіль', 'full--screen':'Повний екран', 'open--broadcast':'Трансляція', 'trakt-head-action':'Trakt · статус та списки'};

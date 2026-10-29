@@ -25,28 +25,38 @@ class Node {
  removeEventListener(k){delete this.listeners[k]}
 }
 function fixture(){
- const page=new Node(),root=new Node(),tagBlock=new Node('', 'full-descr__tags'),commentsParent=new Node('', 'items-line'),commentsHead=new Node('Детально','items-line__title'),comments=new Node('Existing comments','ua-comments-root'),anchor=new Node('Synopsis toggle','selector sh-description-toggle'),genre=new Node('Жанр','tag-count selector'),genreName=new Node('Жанр','tag-count__name'),genreCount=new Node('2','tag-count__count'),tags=new Node('Теги','tag-count selector'),tagsName=new Node('Теги','tag-count__name'),tagsCount=new Node('10','tag-count__count'),production=new Node('Виробництво','tag-count selector'),productionName=new Node('Виробництво','tag-count__name');page.connected=true;
- genre.appendChild(genreName);genre.appendChild(genreCount);tags.appendChild(tagsName);tags.appendChild(tagsCount);production.appendChild(productionName);tagBlock.appendChild(genre);tagBlock.appendChild(production);tagBlock.appendChild(tags);root.connected=true;root.appendChild(anchor);root.querySelectorAll=()=>[];page.appendChild(root);page.appendChild(tagBlock);
+ const page=new Node('', 'activity--active'),root=new Node(),tagBlock=new Node('', 'full-descr__tags'),commentsParent=new Node('', 'items-line'),commentsHead=new Node('Детально','items-line__title'),comments=new Node('Existing comments','ua-comments-root'),anchor=new Node('Synopsis toggle','selector sh-description-toggle'),genre=new Node('Жанр','tag-count selector'),genreName=new Node('Жанр','tag-count__name'),genreCount=new Node('2','tag-count__count'),tags=new Node('Теги','tag-count selector'),tagsName=new Node('Теги','tag-count__name'),tagsCount=new Node('10','tag-count__count'),production=new Node('Виробництво','tag-count selector'),productionName=new Node('Виробництво','tag-count__name');page.connected=true;
+ genre.appendChild(genreName);genre.appendChild(genreCount);tags.appendChild(tagsName);tags.appendChild(tagsCount);production.appendChild(productionName);tagBlock.appendChild(genre);tagBlock.appendChild(production);tagBlock.appendChild(tags);root.connected=true;root.appendChild(anchor);const rootQueryAll=root.querySelectorAll.bind(root);root.querySelectorAll=s=>s==='.full-start-new__details .ifx-series-info > div'?[]:rootQueryAll(s);page.appendChild(root);page.appendChild(tagBlock);
  commentsParent.appendChild(commentsHead);commentsParent.appendChild(comments);page.appendChild(commentsParent);page.querySelector=s=>s==='.full-descr__tags:not(.networks-wrapper)'?tagBlock:s==='.tmdb-networks'?null:s==='.ua-comments-root'?comments:null;
- const focused=new Node('Torrent','selector focus'),calls={set:0,focus:[]},triggered=[];page.querySelector=s=>s==='.selector.focus'?focused:(s==='.full-descr__tags:not(.networks-wrapper)'?tagBlock:s==='.tmdb-networks'?null:s==='.ua-comments-root'?comments:null);
- const handlers=new WeakMap(),$=node=>({on(name,fn){let h=handlers.get(node)||{};h[name]=fn;handlers.set(node,h);return this},off(ns){let h=handlers.get(node)||{};Object.keys(h).forEach(k=>{if(ns===' .shDetails'||k.includes('shDetails'))delete h[k]});handlers.set(node,h);return this},trigger(name){triggered.push({node,name});return this}});
- const context={document:{createElement:()=>new Node()},$: $,Lampa:{Controller:{enabled:()=>({name:'full_start',controller:{}}),collectionSet(){calls.set++},collectionFocus(node){calls.focus.push(node)}}}};
- const a=source.indexOf('    function restoreDetailsPresentation('),b=source.indexOf('    function setupDescription(',a);assert(a>=0&&b>a,'presentation helpers must exist');vm.createContext(context);vm.runInContext(source.slice(a,b),context);
- return{context,page,root,tagBlock,commentsParent,comments,anchor,genre,tags,production,calls,handlers,triggered,button(){return page.querySelectorAll('.sh-detail-section').find(n=>n.className.includes('--additional'))?.children[0]}};
+ const focused=new Node('Torrent','selector focus'),calls={set:0,focus:[]},triggered=[],listeners={fullshow:[],close:[]},frames=[];let currentFocus=focused,controllerName='full_start',selectOpen=false;page.querySelector=s=>s==='.selector.focus'||s==='.sh-detail-toggle.focus, .sh-detail-section__body .focus'?currentFocus:s==='.tag-count.selector.focus'?(currentFocus&&currentFocus.classList.contains('tag-count')?currentFocus:null):(s==='.full-descr__tags:not(.networks-wrapper)'?tagBlock:s==='.tmdb-networks'?null:s==='.ua-comments-root'?comments:null);
+ const handlers=new WeakMap(),$=node=>({on(name,selector,fn){if(typeof selector==='function'){fn=selector;selector=null;}let h=handlers.get(node)||{};name.split(/\s+/).forEach(n=>h[n]=selector?{fn,selector}:fn);handlers.set(node,h);return this},off(ns){let h=handlers.get(node)||{};Object.keys(h).forEach(k=>{if(ns===' .shDetails'||k.includes('shDetails'))delete h[k]});handlers.set(node,h);return this},trigger(name){triggered.push({node,name});return this}});
+ const nativeController={back(){calls.nativeBack=(calls.nativeBack||0)+1}};let activeController=nativeController;const documentListeners={},nativeScroll={immediate(node){calls.scrolled=node}},activeComponent={scroll:nativeScroll},context={document:{createElement:()=>new Node(),addEventListener(name,fn){documentListeners[name]=fn},removeEventListener(name,fn){if(documentListeners[name]===fn)delete documentListeners[name]}},$: $,requestAnimationFrame(fn){frames.push(fn);return frames.length;},cancelAnimationFrame(){},Lampa:{Select:{opened:()=>selectOpen,listener:{follow(name,fn){listeners[name].push(fn)},remove(name,fn){listeners[name]=listeners[name].filter(x=>x!==fn)}}},Activity:{active:()=>({component:'full',activity:{component:activeComponent,render:()=>[page]}})},Controller:{enabled:()=>({name:controllerName,controller:activeController}),collectionSet(){calls.set++},collectionFocus(node){calls.focus.push(node);currentFocus=node}}}};
+ const a=source.indexOf('    function setDetailDisclosure('),b=source.indexOf('    function setupDescription(',a);assert(a>=0&&b>a,'presentation helpers must exist');vm.createContext(context);vm.runInContext(source.slice(a,b),context);
+ return{context,page,root,tagBlock,commentsParent,comments,anchor,genre,tags,production,calls,handlers,triggered,listeners,nativeController,nativeScroll,documentListeners,setFocus(node){currentFocus=node},setController(name,controller){controllerName=name;if(controller)activeController=controller},setSelectOpen(value){selectOpen=value},flushFrames(){frames.splice(0).forEach(fn=>fn())},focused,button(){return page.querySelectorAll('.sh-detail-section').find(n=>n.className.includes('--additional'))?.children[0]}};
 }
 
-test('Details turns actual TMDb genres into visible named chips and keeps native genre catalog reachable',()=>{
+test('Details shows descriptive genre labels and keeps one truthful shared native Genre control',()=>{
  const f=fixture(),record={page:f.page,root:f.root,descriptionToggle:f.anchor};
  f.context.setupDetailsPresentation(record,{genres:[{id:18,name:'Драма'},{id:10765,name:'Науково фантастичний'},{id:18,name:'Драма'}]});
- const chips=record.genreChips.children;assert.deepEqual(chips.map(n=>n.textContent),['Драма','Науково фантастичний']);assert(chips.every(n=>n.classList.contains('selector')));
- f.handlers.get(chips[0])['hover:enter.shDetails']();assert.equal(f.triggered[0].node,f.genre,'genre chip delegates to the existing native genre catalog control');
+ const chips=record.genreChips.children;assert.deepEqual(chips.map(n=>n.textContent),['Драма','Науково фантастичний']);assert(chips.every(n=>!n.classList.contains('selector')&&n.getAttribute('role')===null));
+ assert.equal(record.genreControl,f.genre,'the native Genre control is the only interactive genre filter');
  assert.equal(record.detailPanels.length,2);assert.equal(f.button().textContent,'Додаткова інформація');assert.equal(f.button().getAttribute('aria-expanded'),'false');
 });
 
-test('existing Interface+ genre chips join remote focus and retain the native genre action',()=>{
+test('existing Interface+ genre labels do not pretend to be individual filters',()=>{
  const f=fixture(),record={page:f.page,root:f.root,descriptionToggle:f.anchor},nativeRow=new Node(),drama=new Node('Драма'),sciFi=new Node('Науково фантастичний');drama.tagName=sciFi.tagName='SPAN';nativeRow.appendChild(drama);nativeRow.appendChild(sciFi);f.root.querySelectorAll=s=>s==='.full-start-new__details .ifx-series-info > div'?[nativeRow]:[];
- f.context.setupDetailsPresentation(record,{genres:[{id:18,name:'Драма'},{id:10765,name:'Науково фантастичний'}]});assert(nativeRow.classList.contains('sh-genre-chips'));assert(drama.classList.contains('selector'));assert.equal(drama.getAttribute('role'),'button');f.handlers.get(drama)['hover:enter.shDetails']();assert.equal(f.triggered.at(-1).node,f.genre,'existing genre UI delegates to the native genre selector');
- f.context.restoreDetailsPresentation(record);assert(!drama.classList.contains('selector'));assert(!drama.classList.contains('sh-genre-chip'));assert.equal(drama.getAttribute('role'),null);assert(!nativeRow.classList.contains('sh-genre-chips'));
+ f.context.setupDetailsPresentation(record,{genres:[{id:18,name:'Драма'},{id:10765,name:'Науково фантастичний'}]});assert(nativeRow.classList.contains('sh-genre-chips'));assert(!drama.classList.contains('selector'));assert.equal(drama.getAttribute('role'),null);
+ f.context.restoreDetailsPresentation(record);assert(!drama.classList.contains('sh-genre-chip'));assert(!nativeRow.classList.contains('sh-genre-chips'));
+});
+
+test('stable native Genre reference survives repeated adaptations and Select close restores the exact caller',()=>{
+ const f=fixture(),record={page:f.page,root:f.root,descriptionToggle:f.anchor},genres=[{id:18,name:'Драма'}];
+ f.context.setupDetailsPresentation(record,{genres});const original=record.genreControl,additional=record.detailPanels.find(p=>p.key==='additional');
+ assert.equal(original,f.genre);assert(additional.body.contains(original),'native control is moved, not cloned');
+ f.context.setupDetailsPresentation(record,{genres});f.context.setupDetailsPresentation(record,{genres});assert.equal(record.genreControl,original);
+ f.setFocus(original);f.listeners.fullshow.forEach(fn=>fn({}));assert.equal(record.genreSelectOrigin,null);f.setSelectOpen(true);f.handlers.get(original)['hover:enter.shDetailsFocus']();assert.equal(record.genreSelectOrigin,original);
+ f.setFocus(f.button());f.setSelectOpen(false);f.setController('full_descr');f.listeners.close.forEach(fn=>fn({}));f.flushFrames();assert.equal(f.calls.focus.at(-1),original,'Select close returns to the originating Genre control after the native controller transition');
+ f.context.restoreDetailsPresentation(record);assert.equal(f.listeners.fullshow.length,0);assert.equal(f.listeners.close.length,0);
 });
 
 test('optional comment content is preserved inside its default-open disclosure',()=>{
@@ -65,6 +75,27 @@ test('Additional Information opens/closes without replacing controls and preserv
  f.handlers.get(toggle)['hover:enter.shDetails']();assert.equal(panel.body.hidden,true);assert.equal(toggle.getAttribute('aria-expanded'),'false');assert.equal(f.calls.focus.at(-1),toggle);
 });
 
+test('Back collapses the disclosure containing focus before delegating to native Details Back',()=>{
+ const f=fixture(),record={page:f.page,root:f.root,descriptionToggle:f.anchor};f.context.setupDetailsPresentation(record,{genres:[{id:18,name:'Драма'}]});
+ const panel=record.detailPanels.find(x=>x.key==='additional');panel.activate();f.setFocus(f.genre);record.detailsBackController.back();
+ assert.equal(panel.body.hidden,true);assert.equal(f.calls.focus.at(-1),panel.toggle);assert.equal(f.calls.nativeBack||0,0);
+ f.setFocus(f.focused);record.detailsBackController.back();assert.equal(f.calls.nativeBack,1);
+});
+
+test('Back collapse hook follows the native controller transition into full_descr',()=>{
+ const f=fixture(),record={page:f.page,root:f.root,descriptionToggle:f.anchor};f.context.setupDetailsPresentation(record,{genres:[{id:18,name:'Драма'}]});
+ const previous=record.detailsBackController,descrController={back(){f.calls.nativeDescrBack=(f.calls.nativeDescrBack||0)+1}};f.setController('full_descr',descrController);f.context.setupDetailsPresentation(record,{genres:[{id:18,name:'Драма'}]});
+ const panel=record.detailPanels.find(x=>x.key==='additional');panel.activate();f.setFocus(f.genre);descrController.back();
+ assert.equal(panel.body.hidden,true);assert.equal(f.calls.focus.at(-1),panel.toggle);assert.equal(f.calls.nativeDescrBack||0,0);assert.equal(previous.back===record.detailsBackWrapper,false,'previous controller is no longer the active owner');
+});
+
+test('D-pad focus uses native Lampa Scroll positioning for the focused Details control and cleans up',()=>{
+ const f=fixture(),record={page:f.page,root:f.root,descriptionToggle:f.anchor};f.context.setupDetailsPresentation(record,{genres:[{id:18,name:'Драма'}]});
+ assert(record.detailScrollBound);const card=new Node('Comment','ua-comment-card selector focus');record.detailPanels.find(p=>p.key==='comments').body.appendChild(card);f.setFocus(card);
+ record.detailKeydown({key:'ArrowDown'});assert(f.documentListeners.keydown);f.flushFrames();assert.equal(f.calls.scrolled,card,'native Scroll.immediate positions the focused element in Lampa’s managed scroll container');
+ f.context.restoreDetailsPresentation(record);assert.equal(f.documentListeners.keydown,undefined,'teardown removes the temporary key handler');
+});
+
 test('re-adaptation is idempotent and Hybrid teardown restores original native nodes and order',()=>{
  const f=fixture(),record={page:f.page,root:f.root,descriptionToggle:f.anchor};f.context.setupDetailsPresentation(record,{genres:[{id:18,name:'Драма'}]});const panel=record.detailPanels[0],chips=record.genreChips,sectionCount=f.page.children.filter(n=>n.className.includes('sh-detail-section')).length;
  f.context.setupDetailsPresentation(record,{genres:[{id:18,name:'Драма'}]});assert.equal(record.detailPanels.length,2);assert.equal(record.genreChips,chips);assert.equal(f.page.children.filter(n=>n.className.includes('sh-detail-section')).length,sectionCount);
@@ -73,10 +104,17 @@ test('re-adaptation is idempotent and Hybrid teardown restores original native n
 
 test('Hybrid Details presentation is scoped and does not create an episode renderer or move the torrent focus action',()=>{
  assert.match(source,/body\.stremio-hybrid \.sh-movie-page \.sh-genre-chips/);assert.match(source,/body\.stremio-hybrid \.sh-movie-page \.sh-detail-section/);
- assert.match(source,/\.sh-detail-panels\{position:relative;left:-10px;width:calc\(100% \+ 20px\);display:flex;flex-direction:column/);assert(source.includes("page.querySelector('.tmdb-networks')"));assert(source.includes("root.querySelector('.full-start-new__buttons')"));
+ assert.match(source,/\.sh-detail-panels\{display:flex;align-self:stretch;width:100%;max-width:100%;min-width:0;flex-direction:column/);assert(!source.includes('left:-10px'));assert(!source.includes('width:calc(100% + 20px)'));assert(source.includes("page.querySelector('.tmdb-networks')"));assert(source.includes("root.querySelector('.full-start-new__buttons')"));
  assert(!source.includes('sh-episode-renderer'));assert(source.includes("classList.contains('view--torrent')"));
 });
 
 test('Details panels share one aligned row group in comments, studio, information order',()=>{
- assert(source.includes("record.detailGroup.className='sh-detail-panels'"));assert(source.includes("[commentPanel,productionPanel,additionalPanel].forEach"));assert(source.includes("detailDisclosure(record,comments.parentNode,'Коментарі','comments',[comments],true)"));
+ assert(source.includes("record.detailGroup.className='sh-detail-panels'"));assert(source.includes("record.detailGroup.parentNode!==root)root.appendChild(record.detailGroup)"));assert(source.includes("[commentPanel,productionPanel,additionalPanel].forEach"));assert(source.includes("detailDisclosure(record,comments.parentNode,'Коментарі','comments',[comments],true)"));
+});
+
+test('all three disclosure rows share the same compact chevron and TV focus treatment',()=>{
+ assert(source.includes('.sh-detail-toggle::before{content:\'\';position:absolute;top:50%;right:1.02em'));
+ assert(source.includes('border-right:1.5px solid #c9b9ff;border-bottom:1.5px solid #c9b9ff'));
+ assert(source.includes('.sh-detail-toggle[aria-expanded="true"]::before{transform:translateY(-30%) rotate(225deg)}'));
+ assert(source.includes('.sh-detail-toggle.focus{color:#fff;text-shadow:0 0 1em #ab91ff66;outline:2px solid var(--sh-accent-soft)'));
 });
