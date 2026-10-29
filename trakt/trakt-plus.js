@@ -301,6 +301,12 @@
     }
   }
   function qRun(j, att) {
+    // A concurrent request may activate the global 429 cooldown while this
+    // job is waiting on its ordinary transient-error retry timer. Recheck at
+    // dispatch time so that scheduled retries cannot bypass Retry-After.
+    if (Date.now() < catalogRateLimitUntil) {
+      qActive--; j.rej(rateLimitError()); qPump(); return;
+    }
     var out;
     try { out = api.get(j.u); } catch (e) { out = Promise.reject(e); }
     Promise.resolve(out).then(function (a) {

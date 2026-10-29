@@ -121,6 +121,24 @@ test('catalog queue does not automatically retry a Trakt 429 response',async()=>
   assert.equal(calls,1,'Retry-After cooldown must suppress manual retries until the server window expires');
 });
 
+test('scheduled transient retry respects a concurrent global 429 Retry-After cooldown',async()=>{
+  let calls=0;const f=fixture({transport:path=>{
+    calls++;
+    if(path.endsWith('/transient'))return Promise.reject(Object.assign(Error('temporary server failure'),{status:500}));
+    if(path.endsWith('/rate-limit'))return Promise.reject(Object.assign(Error('rate limited'),{status:429,headers:{'retry-after':'30'}}));
+    throw Error('unexpected request '+path);
+  }});
+  await f.api.__test.whenApi();
+  const transient=f.api.__test.catalogRequest('/movies/transient',true);
+  const limited=f.api.__test.catalogRequest('/movies/rate-limit',true);
+  const results=await Promise.allSettled([transient,limited]);
+  assert.equal(calls,2,'the scheduled transient retry must not reach the transport during another request\'s cooldown');
+  assert.deepEqual(results.map(x=>x.status),['rejected','rejected']);
+  assert.equal(results[0].reason.status,429);
+  assert(results[0].reason.retryAt>Date.now(),'the transient job should be rejected with the active cooldown boundary');
+  assert.equal(f.requests.length,2);
+});
+
 test('More keeps the registered row identity and opens the existing native component',()=>{
   const f=fixture(),def={name:'TraktPlusTrend_movies',fullUk:'Фільми Trakt',fullEn:'Trakt movies'};
   f.api.__test.openMore(def,'preview title');

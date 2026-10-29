@@ -52,6 +52,7 @@
     "Exact changed Trakt+ source execution in the authenticated browser"
   ],
   "followUpSourceSha256": "f732ef05c30df35ee4f9234a9ce319eaf3e97ebcf3c9cd9f101f2858dd686831",
+  "429ScheduledRetryRegression": "PASS: pending ordinary transient retry is blocked by concurrently activated global Retry-After cooldown; 148/148 focused tests",
   "nativeNavigationFollowUp": {
     "oneCardFixture": {
       "target": "real Lampa full Details for Silo",
