@@ -1,0 +1,3924 @@
+{
+  "schema": 1,
+  "baseCommit": "284e40fbc0688bdeee1c95d864a0db070d10e49d",
+  "sourceCommit": "f664f0a5fba4096bf6daeeb90e4883286c7247ed",
+  "profile": "trakt-heavy",
+  "pairs": 10,
+  "order": [
+    "main",
+    "branch",
+    "branch",
+    "main",
+    "main",
+    "branch",
+    "branch",
+    "main",
+    "main",
+    "branch",
+    "branch",
+    "main",
+    "main",
+    "branch",
+    "branch",
+    "main",
+    "main",
+    "branch",
+    "branch",
+    "main"
+  ],
+  "browser": "156.0.8078.73",
+  "viewport": [
+    1920,
+    1080
+  ],
+  "dpr": 1,
+  "cacheCondition": "Fresh isolated context each trial; host and external APIs real; local repository scripts intercepted before navigation; 24 synthetic TV Favorite identities; OS/network cache not cold.",
+  "metrics": {
+    "main": {
+      "appready": {
+        "n": 10,
+        "median": 2190.2,
+        "min": 2006.4,
+        "max": 2742.5,
+        "mean": 2263,
+        "sd": 226.3
+      },
+      "firstCard": {
+        "n": 10,
+        "median": 2998.6,
+        "min": 2769.9,
+        "max": 3351.3,
+        "mean": 3014,
+        "sd": 184.9
+      },
+      "firstHomeFocus": {
+        "n": 10,
+        "median": 2998.9,
+        "min": 2770.3,
+        "max": 3351.5,
+        "mean": 3014.3,
+        "sd": 184.9
+      },
+      "firstUsableHome": {
+        "n": 10,
+        "median": 3494.9,
+        "min": 3131.8,
+        "max": 3873.5,
+        "mean": 3502,
+        "sd": 212.8
+      },
+      "appreadyToCard": {
+        "n": 10,
+        "median": 757.8,
+        "min": 575.3,
+        "max": 1085.7,
+        "mean": 751,
+        "sd": 139
+      },
+      "cardToUsable": {
+        "n": 10,
+        "median": 478,
+        "min": 264.4,
+        "max": 683.1,
+        "mean": 488,
+        "sd": 114.3
+      },
+      "dpadResponse": {
+        "n": 10,
+        "median": 113.5,
+        "min": 52,
+        "max": 226.4,
+        "mean": 123.1,
+        "sd": 51.2
+      },
+      "dpadPass": 10,
+      "detailsPass": 10,
+      "backPass": 10,
+      "rows": [
+        7,
+        4,
+        7,
+        7,
+        7,
+        4,
+        4,
+        4,
+        7,
+        7
+      ],
+      "cards": [
+        49,
+        28,
+        49,
+        49,
+        49,
+        28,
+        28,
+        28,
+        49,
+        49
+      ],
+      "longTaskCount": [
+        3,
+        4,
+        3,
+        3,
+        3,
+        3,
+        3,
+        4,
+        3,
+        3
+      ],
+      "longTaskDurationsMs": [
+        95,
+        130,
+        125,
+        107,
+        167,
+        55,
+        134,
+        114,
+        147,
+        164,
+        119,
+        142,
+        175,
+        113,
+        164,
+        172,
+        104,
+        152,
+        135,
+        121,
+        180,
+        116,
+        113,
+        171,
+        57,
+        125,
+        113,
+        165,
+        149,
+        94,
+        148,
+        149
+      ],
+      "nativeFrameVisibleCpu": {
+        "n": 10,
+        "median": 55.3,
+        "min": 50,
+        "max": 72.2,
+        "mean": 58.9,
+        "sd": 8.3
+      },
+      "ydesignTop20Cpu": {
+        "n": 10,
+        "median": 0,
+        "min": 0,
+        "max": 24.7,
+        "mean": 7,
+        "sd": 9.2
+      }
+    },
+    "branch": {
+      "appready": {
+        "n": 10,
+        "median": 2297.2,
+        "min": 2011.1,
+        "max": 2635.5,
+        "mean": 2311.1,
+        "sd": 200.6
+      },
+      "firstCard": {
+        "n": 10,
+        "median": 3012,
+        "min": 2712.8,
+        "max": 3453.1,
+        "mean": 3022.8,
+        "sd": 229.8
+      },
+      "firstHomeFocus": {
+        "n": 10,
+        "median": 3012.2,
+        "min": 2713.2,
+        "max": 3453.3,
+        "mean": 3023.1,
+        "sd": 229.7
+      },
+      "firstUsableHome": {
+        "n": 10,
+        "median": 3391.8,
+        "min": 3113.3,
+        "max": 4011.6,
+        "mean": 3477,
+        "sd": 319.6
+      },
+      "appreadyToCard": {
+        "n": 10,
+        "median": 719.9,
+        "min": 606.9,
+        "max": 823.3,
+        "mean": 711.7,
+        "sd": 66.7
+      },
+      "cardToUsable": {
+        "n": 10,
+        "median": 420,
+        "min": 275.7,
+        "max": 636.3,
+        "mean": 454.2,
+        "sd": 131.1
+      },
+      "dpadResponse": {
+        "n": 10,
+        "median": 86.2,
+        "min": 62.6,
+        "max": 202.5,
+        "mean": 112.2,
+        "sd": 53.1
+      },
+      "dpadPass": 10,
+      "detailsPass": 10,
+      "backPass": 10,
+      "rows": [
+        7,
+        7,
+        4,
+        7,
+        7,
+        4,
+        7,
+        8,
+        7,
+        4
+      ],
+      "cards": [
+        49,
+        49,
+        28,
+        49,
+        49,
+        28,
+        49,
+        50,
+        49,
+        28
+      ],
+      "longTaskCount": [
+        3,
+        3,
+        3,
+        4,
+        4,
+        4,
+        4,
+        3,
+        3,
+        4
+      ],
+      "longTaskDurationsMs": [
+        101,
+        133,
+        129,
+        100,
+        135,
+        121,
+        102,
+        167,
+        131,
+        120,
+        172,
+        55,
+        153,
+        101,
+        146,
+        50,
+        154,
+        117,
+        185,
+        62,
+        116,
+        115,
+        153,
+        57,
+        159,
+        115,
+        169,
+        175,
+        107,
+        137,
+        146,
+        108,
+        178,
+        55,
+        114
+      ],
+      "nativeFrameVisibleCpu": {
+        "n": 10,
+        "median": 59.9,
+        "min": 46,
+        "max": 71.2,
+        "mean": 59.5,
+        "sd": 7.7
+      },
+      "ydesignTop20Cpu": {
+        "n": 10,
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "mean": 0,
+        "sd": 0
+      }
+    }
+  },
+  "individualRuns": [
+    {
+      "run": 1,
+      "pair": 1,
+      "mode": "main",
+      "appready": 2006.4,
+      "firstCard": 2769.9,
+      "firstHomeFocus": 2770.3,
+      "firstUsable": 3131.8,
+      "dpadResponse": 82.2,
+      "dpadAttempts": 1,
+      "moved": true,
+      "details": true,
+      "back": true,
+      "rows": 7,
+      "cards": 49,
+      "longTasks": [
+        95,
+        130,
+        125
+      ],
+      "topCpu": [
+        {
+          "script": "[native]",
+          "function": "(idle)",
+          "line": -1,
+          "cpuMs": 1786.8,
+          "samples": 1597
+        },
+        {
+          "script": "[native]",
+          "function": "(program)",
+          "line": -1,
+          "cpuMs": 428.1,
+          "samples": 386
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameVisible",
+          "line": 39926,
+          "cpuMs": 51.9,
+          "samples": 47
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 53810,
+          "cpuMs": 29.4,
+          "samples": 27
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameUpdate",
+          "line": 39869,
+          "cpuMs": 24,
+          "samples": 22
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 0,
+          "cpuMs": 23.3,
+          "samples": 21
+        },
+        {
+          "script": "[native]",
+          "function": "appendChild",
+          "line": -1,
+          "cpuMs": 21,
+          "samples": 19
+        },
+        {
+          "script": "/lampa/ui/stremio-hybrid.js",
+          "function": "renderOwnedStyles",
+          "line": 990,
+          "cpuMs": 17.4,
+          "samples": 16
+        }
+      ],
+      "networkRequests": 250,
+      "firstUsableOptionalTvRequests": 6
+    },
+    {
+      "run": 2,
+      "pair": 1,
+      "mode": "branch",
+      "appready": 2011.1,
+      "firstCard": 2712.8,
+      "firstHomeFocus": 2713.2,
+      "firstUsable": 3169.8,
+      "dpadResponse": 178.3,
+      "dpadAttempts": 1,
+      "moved": true,
+      "details": true,
+      "back": true,
+      "rows": 7,
+      "cards": 49,
+      "longTasks": [
+        101,
+        133,
+        129
+      ],
+      "topCpu": [
+        {
+          "script": "[native]",
+          "function": "(idle)",
+          "line": -1,
+          "cpuMs": 1708.3,
+          "samples": 1525
+        },
+        {
+          "script": "[native]",
+          "function": "(program)",
+          "line": -1,
+          "cpuMs": 438.4,
+          "samples": 402
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameVisible",
+          "line": 39926,
+          "cpuMs": 52.7,
+          "samples": 48
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameUpdate",
+          "line": 39869,
+          "cpuMs": 23,
+          "samples": 21
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 53810,
+          "cpuMs": 20.9,
+          "samples": 19
+        },
+        {
+          "script": "/lampa/ui/stremio-hybrid.js",
+          "function": "renderOwnedStyles",
+          "line": 993,
+          "cpuMs": 20.6,
+          "samples": 19
+        },
+        {
+          "script": "/vender/jquery/jquery.js",
+          "function": "buildFragment",
+          "line": 4765,
+          "cpuMs": 16.8,
+          "samples": 15
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 22254,
+          "cpuMs": 15.4,
+          "samples": 14
+        }
+      ],
+      "networkRequests": 250,
+      "firstUsableOptionalTvRequests": 13
+    },
+    {
+      "run": 3,
+      "pair": 2,
+      "mode": "branch",
+      "appready": 2296.4,
+      "firstCard": 3011.6,
+      "firstHomeFocus": 3011.7,
+      "firstUsable": 3287.3,
+      "dpadResponse": 62.6,
+      "dpadAttempts": 1,
+      "moved": true,
+      "details": true,
+      "back": true,
+      "rows": 7,
+      "cards": 49,
+      "longTasks": [
+        100,
+        135,
+        121
+      ],
+      "topCpu": [
+        {
+          "script": "[native]",
+          "function": "(idle)",
+          "line": -1,
+          "cpuMs": 2017.5,
+          "samples": 1800
+        },
+        {
+          "script": "[native]",
+          "function": "(program)",
+          "line": -1,
+          "cpuMs": 424.6,
+          "samples": 387
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameVisible",
+          "line": 39926,
+          "cpuMs": 57.7,
+          "samples": 52
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameUpdate",
+          "line": 39869,
+          "cpuMs": 27.5,
+          "samples": 25
+        },
+        {
+          "script": "[native]",
+          "function": "appendChild",
+          "line": -1,
+          "cpuMs": 25.5,
+          "samples": 23
+        },
+        {
+          "script": "/",
+          "function": "(anonymous)",
+          "line": 63,
+          "cpuMs": 25.4,
+          "samples": 23
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 53810,
+          "cpuMs": 25.4,
+          "samples": 23
+        },
+        {
+          "script": "/lampa/ui/stremio-hybrid.js",
+          "function": "renderOwnedStyles",
+          "line": 993,
+          "cpuMs": 18.4,
+          "samples": 17
+        }
+      ],
+      "networkRequests": 250,
+      "firstUsableOptionalTvRequests": 5
+    },
+    {
+      "run": 4,
+      "pair": 2,
+      "mode": "main",
+      "appready": 2742.5,
+      "firstCard": 3351.3,
+      "firstHomeFocus": 3351.5,
+      "firstUsable": 3873.5,
+      "dpadResponse": 119.2,
+      "dpadAttempts": 1,
+      "moved": true,
+      "details": true,
+      "back": true,
+      "rows": 4,
+      "cards": 28,
+      "longTasks": [
+        107,
+        167,
+        55,
+        134
+      ],
+      "topCpu": [
+        {
+          "script": "[native]",
+          "function": "(idle)",
+          "line": -1,
+          "cpuMs": 2138.3,
+          "samples": 1893
+        },
+        {
+          "script": "[native]",
+          "function": "(program)",
+          "line": -1,
+          "cpuMs": 561.9,
+          "samples": 486
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameVisible",
+          "line": 39926,
+          "cpuMs": 51.5,
+          "samples": 46
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 53810,
+          "cpuMs": 42.6,
+          "samples": 39
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameUpdate",
+          "line": 39869,
+          "cpuMs": 27.4,
+          "samples": 25
+        },
+        {
+          "script": "/lampa/ui/stremio-hybrid.js",
+          "function": "renderOwnedStyles",
+          "line": 990,
+          "cpuMs": 23.8,
+          "samples": 19
+        },
+        {
+          "script": "[native]",
+          "function": "(garbage collector)",
+          "line": -1,
+          "cpuMs": 18.7,
+          "samples": 16
+        },
+        {
+          "script": "[native]",
+          "function": "appendChild",
+          "line": -1,
+          "cpuMs": 17.4,
+          "samples": 16
+        }
+      ],
+      "networkRequests": 250,
+      "firstUsableOptionalTvRequests": 8
+    },
+    {
+      "run": 5,
+      "pair": 3,
+      "mode": "main",
+      "appready": 2128.6,
+      "firstCard": 2897.8,
+      "firstHomeFocus": 2898.2,
+      "firstUsable": 3351.5,
+      "dpadResponse": 77.8,
+      "dpadAttempts": 1,
+      "moved": true,
+      "details": true,
+      "back": true,
+      "rows": 7,
+      "cards": 49,
+      "longTasks": [
+        114,
+        147,
+        164
+      ],
+      "topCpu": [
+        {
+          "script": "[native]",
+          "function": "(idle)",
+          "line": -1,
+          "cpuMs": 1761.4,
+          "samples": 1498
+        },
+        {
+          "script": "[native]",
+          "function": "(program)",
+          "line": -1,
+          "cpuMs": 517.2,
+          "samples": 455
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameVisible",
+          "line": 39926,
+          "cpuMs": 72.2,
+          "samples": 63
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 53810,
+          "cpuMs": 34,
+          "samples": 31
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameUpdate",
+          "line": 39869,
+          "cpuMs": 27.1,
+          "samples": 22
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 0,
+          "cpuMs": 25.1,
+          "samples": 22
+        },
+        {
+          "script": "/vender/jquery/jquery.js",
+          "function": "curCSS",
+          "line": 6165,
+          "cpuMs": 22.2,
+          "samples": 20
+        },
+        {
+          "script": "[native]",
+          "function": "appendChild",
+          "line": -1,
+          "cpuMs": 22.1,
+          "samples": 20
+        }
+      ],
+      "networkRequests": 250,
+      "firstUsableOptionalTvRequests": 6
+    },
+    {
+      "run": 6,
+      "pair": 3,
+      "mode": "branch",
+      "appready": 2131.2,
+      "firstCard": 2738.1,
+      "firstHomeFocus": 2738.4,
+      "firstUsable": 3113.3,
+      "dpadResponse": 66.4,
+      "dpadAttempts": 1,
+      "moved": true,
+      "details": true,
+      "back": true,
+      "rows": 4,
+      "cards": 28,
+      "longTasks": [
+        102,
+        167,
+        131
+      ],
+      "topCpu": [
+        {
+          "script": "[native]",
+          "function": "(idle)",
+          "line": -1,
+          "cpuMs": 1596.2,
+          "samples": 1390
+        },
+        {
+          "script": "[native]",
+          "function": "(program)",
+          "line": -1,
+          "cpuMs": 463.1,
+          "samples": 408
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameVisible",
+          "line": 39926,
+          "cpuMs": 57.5,
+          "samples": 52
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 53810,
+          "cpuMs": 47.2,
+          "samples": 34
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameUpdate",
+          "line": 39869,
+          "cpuMs": 29.3,
+          "samples": 26
+        },
+        {
+          "script": "/",
+          "function": "(anonymous)",
+          "line": 63,
+          "cpuMs": 25.1,
+          "samples": 23
+        },
+        {
+          "script": "[native]",
+          "function": "appendChild",
+          "line": -1,
+          "cpuMs": 22.6,
+          "samples": 19
+        },
+        {
+          "script": "/lampa/ui/stremio-hybrid.js",
+          "function": "renderOwnedStyles",
+          "line": 993,
+          "cpuMs": 21.2,
+          "samples": 19
+        }
+      ],
+      "networkRequests": 250,
+      "firstUsableOptionalTvRequests": 3
+    },
+    {
+      "run": 7,
+      "pair": 4,
+      "mode": "branch",
+      "appready": 2629.8,
+      "firstCard": 3453.1,
+      "firstHomeFocus": 3453.3,
+      "firstUsable": 4011.6,
+      "dpadResponse": 202.5,
+      "dpadAttempts": 1,
+      "moved": true,
+      "details": true,
+      "back": true,
+      "rows": 7,
+      "cards": 49,
+      "longTasks": [
+        120,
+        172,
+        55,
+        153
+      ],
+      "topCpu": [
+        {
+          "script": "[native]",
+          "function": "(idle)",
+          "line": -1,
+          "cpuMs": 2221.5,
+          "samples": 1953
+        },
+        {
+          "script": "[native]",
+          "function": "(program)",
+          "line": -1,
+          "cpuMs": 521.1,
+          "samples": 443
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameVisible",
+          "line": 39926,
+          "cpuMs": 62,
+          "samples": 56
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 0,
+          "cpuMs": 33.5,
+          "samples": 30
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameUpdate",
+          "line": 39869,
+          "cpuMs": 30.6,
+          "samples": 27
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 53810,
+          "cpuMs": 28.9,
+          "samples": 25
+        },
+        {
+          "script": "[native]",
+          "function": "appendChild",
+          "line": -1,
+          "cpuMs": 26.9,
+          "samples": 24
+        },
+        {
+          "script": "/vender/jquery/jquery.js",
+          "function": "send",
+          "line": 9450,
+          "cpuMs": 22.4,
+          "samples": 20
+        }
+      ],
+      "networkRequests": 250,
+      "firstUsableOptionalTvRequests": 9
+    },
+    {
+      "run": 8,
+      "pair": 4,
+      "mode": "main",
+      "appready": 2246.3,
+      "firstCard": 3068.5,
+      "firstHomeFocus": 3069,
+      "firstUsable": 3662.5,
+      "dpadResponse": 226.4,
+      "dpadAttempts": 1,
+      "moved": true,
+      "details": true,
+      "back": true,
+      "rows": 7,
+      "cards": 49,
+      "longTasks": [
+        119,
+        142,
+        175
+      ],
+      "topCpu": [
+        {
+          "script": "[native]",
+          "function": "(idle)",
+          "line": -1,
+          "cpuMs": 1909.1,
+          "samples": 1662
+        },
+        {
+          "script": "[native]",
+          "function": "(program)",
+          "line": -1,
+          "cpuMs": 515.8,
+          "samples": 464
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameVisible",
+          "line": 39926,
+          "cpuMs": 71,
+          "samples": 64
+        },
+        {
+          "script": "[native]",
+          "function": "appendChild",
+          "line": -1,
+          "cpuMs": 36.1,
+          "samples": 32
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 53810,
+          "cpuMs": 27.8,
+          "samples": 25
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameUpdate",
+          "line": 39869,
+          "cpuMs": 26.6,
+          "samples": 24
+        },
+        {
+          "script": "/lampa/ui/stremio-hybrid.js",
+          "function": "renderOwnedStyles",
+          "line": 990,
+          "cpuMs": 26.3,
+          "samples": 24
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 0,
+          "cpuMs": 25.5,
+          "samples": 23
+        }
+      ],
+      "networkRequests": 250,
+      "firstUsableOptionalTvRequests": 8
+    },
+    {
+      "run": 9,
+      "pair": 5,
+      "mode": "main",
+      "appready": 2134,
+      "firstCard": 2959,
+      "firstHomeFocus": 2959.4,
+      "firstUsable": 3642.1,
+      "dpadResponse": 125.4,
+      "dpadAttempts": 1,
+      "moved": true,
+      "details": true,
+      "back": true,
+      "rows": 7,
+      "cards": 49,
+      "longTasks": [
+        113,
+        164,
+        172
+      ],
+      "topCpu": [
+        {
+          "script": "[native]",
+          "function": "(idle)",
+          "line": -1,
+          "cpuMs": 1770.9,
+          "samples": 1563
+        },
+        {
+          "script": "[native]",
+          "function": "(program)",
+          "line": -1,
+          "cpuMs": 548.6,
+          "samples": 478
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameVisible",
+          "line": 39926,
+          "cpuMs": 68.8,
+          "samples": 62
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 53810,
+          "cpuMs": 42,
+          "samples": 38
+        },
+        {
+          "script": "[native]",
+          "function": "appendChild",
+          "line": -1,
+          "cpuMs": 36.5,
+          "samples": 32
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameUpdate",
+          "line": 39869,
+          "cpuMs": 30.3,
+          "samples": 27
+        },
+        {
+          "script": "/vender/jquery/jquery.js",
+          "function": "Sizzle",
+          "line": 753,
+          "cpuMs": 24.8,
+          "samples": 19
+        },
+        {
+          "script": "[native]",
+          "function": "(garbage collector)",
+          "line": -1,
+          "cpuMs": 22.7,
+          "samples": 17
+        }
+      ],
+      "networkRequests": 250,
+      "firstUsableOptionalTvRequests": 11
+    },
+    {
+      "run": 10,
+      "pair": 5,
+      "mode": "branch",
+      "appready": 2635.5,
+      "firstCard": 3374.4,
+      "firstHomeFocus": 3374.7,
+      "firstUsable": 4010.7,
+      "dpadResponse": 82.4,
+      "dpadAttempts": 1,
+      "moved": true,
+      "details": true,
+      "back": true,
+      "rows": 7,
+      "cards": 49,
+      "longTasks": [
+        101,
+        146,
+        50,
+        154
+      ],
+      "topCpu": [
+        {
+          "script": "[native]",
+          "function": "(idle)",
+          "line": -1,
+          "cpuMs": 2258,
+          "samples": 1988
+        },
+        {
+          "script": "[native]",
+          "function": "(program)",
+          "line": -1,
+          "cpuMs": 549.4,
+          "samples": 479
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameVisible",
+          "line": 39926,
+          "cpuMs": 68.5,
+          "samples": 60
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameUpdate",
+          "line": 39869,
+          "cpuMs": 31.6,
+          "samples": 29
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 53810,
+          "cpuMs": 28.4,
+          "samples": 25
+        },
+        {
+          "script": "[native]",
+          "function": "appendChild",
+          "line": -1,
+          "cpuMs": 26.6,
+          "samples": 23
+        },
+        {
+          "script": "/vender/jquery/jquery.js",
+          "function": "send",
+          "line": 9450,
+          "cpuMs": 22.7,
+          "samples": 19
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 0,
+          "cpuMs": 21.9,
+          "samples": 20
+        }
+      ],
+      "networkRequests": 250,
+      "firstUsableOptionalTvRequests": 6
+    },
+    {
+      "run": 11,
+      "pair": 6,
+      "mode": "branch",
+      "appready": 2385.4,
+      "firstCard": 3012.4,
+      "firstHomeFocus": 3012.7,
+      "firstUsable": 3343.2,
+      "dpadResponse": 95.9,
+      "dpadAttempts": 1,
+      "moved": true,
+      "details": true,
+      "back": true,
+      "rows": 4,
+      "cards": 28,
+      "longTasks": [
+        117,
+        185,
+        62,
+        116
+      ],
+      "topCpu": [
+        {
+          "script": "[native]",
+          "function": "(idle)",
+          "line": -1,
+          "cpuMs": 1874.8,
+          "samples": 1643
+        },
+        {
+          "script": "[native]",
+          "function": "(program)",
+          "line": -1,
+          "cpuMs": 518.6,
+          "samples": 447
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameVisible",
+          "line": 39926,
+          "cpuMs": 50.7,
+          "samples": 46
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 53810,
+          "cpuMs": 34.4,
+          "samples": 31
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameUpdate",
+          "line": 39869,
+          "cpuMs": 31.6,
+          "samples": 29
+        },
+        {
+          "script": "/vender/jquery/jquery.js",
+          "function": "computeStyleTests",
+          "line": 6091,
+          "cpuMs": 29.5,
+          "samples": 26
+        },
+        {
+          "script": "/lampa/ui/stremio-hybrid.js",
+          "function": "renderOwnedStyles",
+          "line": 993,
+          "cpuMs": 29.5,
+          "samples": 24
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 0,
+          "cpuMs": 22.1,
+          "samples": 20
+        }
+      ],
+      "networkRequests": 250,
+      "firstUsableOptionalTvRequests": 6
+    },
+    {
+      "run": 12,
+      "pair": 6,
+      "mode": "main",
+      "appready": 2115.9,
+      "firstCard": 2780.8,
+      "firstHomeFocus": 2781,
+      "firstUsable": 3254.1,
+      "dpadResponse": 146.7,
+      "dpadAttempts": 1,
+      "moved": true,
+      "details": true,
+      "back": true,
+      "rows": 4,
+      "cards": 28,
+      "longTasks": [
+        104,
+        152,
+        135
+      ],
+      "topCpu": [
+        {
+          "script": "[native]",
+          "function": "(idle)",
+          "line": -1,
+          "cpuMs": 1613.2,
+          "samples": 1420
+        },
+        {
+          "script": "[native]",
+          "function": "(program)",
+          "line": -1,
+          "cpuMs": 492.2,
+          "samples": 428
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameVisible",
+          "line": 39926,
+          "cpuMs": 53,
+          "samples": 48
+        },
+        {
+          "script": "/",
+          "function": "(anonymous)",
+          "line": 63,
+          "cpuMs": 36.9,
+          "samples": 31
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 53810,
+          "cpuMs": 31.2,
+          "samples": 28
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameUpdate",
+          "line": 39869,
+          "cpuMs": 29.7,
+          "samples": 26
+        },
+        {
+          "script": "/lampa/ui/stremio-hybrid.js",
+          "function": "renderOwnedStyles",
+          "line": 990,
+          "cpuMs": 24.6,
+          "samples": 22
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 0,
+          "cpuMs": 21.8,
+          "samples": 20
+        }
+      ],
+      "networkRequests": 250,
+      "firstUsableOptionalTvRequests": 10
+    },
+    {
+      "run": 13,
+      "pair": 7,
+      "mode": "main",
+      "appready": 2298.6,
+      "firstCard": 2873.9,
+      "firstHomeFocus": 2874.1,
+      "firstUsable": 3468.8,
+      "dpadResponse": 195.8,
+      "dpadAttempts": 1,
+      "moved": true,
+      "details": true,
+      "back": true,
+      "rows": 4,
+      "cards": 28,
+      "longTasks": [
+        121,
+        180,
+        116
+      ],
+      "topCpu": [
+        {
+          "script": "[native]",
+          "function": "(idle)",
+          "line": -1,
+          "cpuMs": 1718.3,
+          "samples": 1511
+        },
+        {
+          "script": "[native]",
+          "function": "(program)",
+          "line": -1,
+          "cpuMs": 496.2,
+          "samples": 436
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameVisible",
+          "line": 39926,
+          "cpuMs": 51.9,
+          "samples": 47
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 53810,
+          "cpuMs": 31.6,
+          "samples": 27
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 0,
+          "cpuMs": 26.9,
+          "samples": 24
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameUpdate",
+          "line": 39869,
+          "cpuMs": 25.1,
+          "samples": 23
+        },
+        {
+          "script": "/lampa/ui/stremio-hybrid.js",
+          "function": "renderOwnedStyles",
+          "line": 990,
+          "cpuMs": 23.4,
+          "samples": 21
+        },
+        {
+          "script": "/vender/jquery/jquery.js",
+          "function": "send",
+          "line": 9450,
+          "cpuMs": 18.9,
+          "samples": 15
+        }
+      ],
+      "networkRequests": 250,
+      "firstUsableOptionalTvRequests": 9
+    },
+    {
+      "run": 14,
+      "pair": 7,
+      "mode": "branch",
+      "appready": 2201.9,
+      "firstCard": 2987.4,
+      "firstHomeFocus": 2988,
+      "firstUsable": 3569.2,
+      "dpadResponse": 194.3,
+      "dpadAttempts": 1,
+      "moved": true,
+      "details": true,
+      "back": true,
+      "rows": 7,
+      "cards": 49,
+      "longTasks": [
+        115,
+        153,
+        57,
+        159
+      ],
+      "topCpu": [
+        {
+          "script": "[native]",
+          "function": "(idle)",
+          "line": -1,
+          "cpuMs": 1764.7,
+          "samples": 1552
+        },
+        {
+          "script": "[native]",
+          "function": "(program)",
+          "line": -1,
+          "cpuMs": 531.2,
+          "samples": 460
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameVisible",
+          "line": 39926,
+          "cpuMs": 66.1,
+          "samples": 59
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 53810,
+          "cpuMs": 33.1,
+          "samples": 30
+        },
+        {
+          "script": "[native]",
+          "function": "appendChild",
+          "line": -1,
+          "cpuMs": 32.3,
+          "samples": 24
+        },
+        {
+          "script": "/",
+          "function": "(anonymous)",
+          "line": 63,
+          "cpuMs": 29.3,
+          "samples": 25
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameUpdate",
+          "line": 39869,
+          "cpuMs": 25.2,
+          "samples": 23
+        },
+        {
+          "script": "/vender/jquery/jquery.js",
+          "function": "curCSS",
+          "line": 6165,
+          "cpuMs": 23.8,
+          "samples": 20
+        }
+      ],
+      "networkRequests": 250,
+      "firstUsableOptionalTvRequests": 13
+    },
+    {
+      "run": 15,
+      "pair": 8,
+      "mode": "branch",
+      "appready": 2297.9,
+      "firstCard": 3053.8,
+      "firstHomeFocus": 3054.3,
+      "firstUsable": 3687.4,
+      "dpadResponse": 90,
+      "dpadAttempts": 1,
+      "moved": true,
+      "details": true,
+      "back": true,
+      "rows": 8,
+      "cards": 50,
+      "longTasks": [
+        115,
+        169,
+        175
+      ],
+      "topCpu": [
+        {
+          "script": "[native]",
+          "function": "(idle)",
+          "line": -1,
+          "cpuMs": 1830,
+          "samples": 1622
+        },
+        {
+          "script": "[native]",
+          "function": "(program)",
+          "line": -1,
+          "cpuMs": 518.9,
+          "samples": 456
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameVisible",
+          "line": 39926,
+          "cpuMs": 71.2,
+          "samples": 64
+        },
+        {
+          "script": "/",
+          "function": "(anonymous)",
+          "line": 63,
+          "cpuMs": 41.5,
+          "samples": 35
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 53810,
+          "cpuMs": 27.5,
+          "samples": 25
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameUpdate",
+          "line": 39869,
+          "cpuMs": 26.8,
+          "samples": 24
+        },
+        {
+          "script": "[native]",
+          "function": "appendChild",
+          "line": -1,
+          "cpuMs": 25,
+          "samples": 22
+        },
+        {
+          "script": "/vender/jquery/jquery.js",
+          "function": "send",
+          "line": 9450,
+          "cpuMs": 22.9,
+          "samples": 20
+        }
+      ],
+      "networkRequests": 250,
+      "firstUsableOptionalTvRequests": 6
+    },
+    {
+      "run": 16,
+      "pair": 8,
+      "mode": "main",
+      "appready": 2607,
+      "firstCard": 3250.3,
+      "firstHomeFocus": 3250.5,
+      "firstUsable": 3700.3,
+      "dpadResponse": 107.8,
+      "dpadAttempts": 1,
+      "moved": true,
+      "details": true,
+      "back": true,
+      "rows": 4,
+      "cards": 28,
+      "longTasks": [
+        113,
+        171,
+        57,
+        125
+      ],
+      "topCpu": [
+        {
+          "script": "[native]",
+          "function": "(idle)",
+          "line": -1,
+          "cpuMs": 2122.7,
+          "samples": 1882
+        },
+        {
+          "script": "[native]",
+          "function": "(program)",
+          "line": -1,
+          "cpuMs": 505.2,
+          "samples": 446
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameVisible",
+          "line": 39926,
+          "cpuMs": 50,
+          "samples": 45
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 53810,
+          "cpuMs": 31.1,
+          "samples": 28
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameUpdate",
+          "line": 39869,
+          "cpuMs": 27.4,
+          "samples": 25
+        },
+        {
+          "script": "/lampa/ui/stremio-hybrid.js",
+          "function": "renderOwnedStyles",
+          "line": 990,
+          "cpuMs": 23,
+          "samples": 21
+        },
+        {
+          "script": "[native]",
+          "function": "(garbage collector)",
+          "line": -1,
+          "cpuMs": 21.3,
+          "samples": 18
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 0,
+          "cpuMs": 18.5,
+          "samples": 17
+        }
+      ],
+      "networkRequests": 250,
+      "firstUsableOptionalTvRequests": 6
+    },
+    {
+      "run": 17,
+      "pair": 9,
+      "mode": "main",
+      "appready": 2286.1,
+      "firstCard": 3038.2,
+      "firstHomeFocus": 3038.4,
+      "firstUsable": 3521,
+      "dpadResponse": 97.4,
+      "dpadAttempts": 1,
+      "moved": true,
+      "details": true,
+      "back": true,
+      "rows": 7,
+      "cards": 49,
+      "longTasks": [
+        113,
+        165,
+        149
+      ],
+      "topCpu": [
+        {
+          "script": "[native]",
+          "function": "(idle)",
+          "line": -1,
+          "cpuMs": 1849.5,
+          "samples": 1620
+        },
+        {
+          "script": "[native]",
+          "function": "(program)",
+          "line": -1,
+          "cpuMs": 477.7,
+          "samples": 417
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameVisible",
+          "line": 39926,
+          "cpuMs": 61.1,
+          "samples": 53
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 53810,
+          "cpuMs": 39.2,
+          "samples": 31
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameUpdate",
+          "line": 39869,
+          "cpuMs": 35.9,
+          "samples": 29
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 0,
+          "cpuMs": 26.5,
+          "samples": 24
+        },
+        {
+          "script": "/lampa/ui/stremio-hybrid.js",
+          "function": "renderOwnedStyles",
+          "line": 990,
+          "cpuMs": 24.4,
+          "samples": 22
+        },
+        {
+          "script": "/",
+          "function": "(anonymous)",
+          "line": 63,
+          "cpuMs": 24.3,
+          "samples": 22
+        }
+      ],
+      "networkRequests": 250,
+      "firstUsableOptionalTvRequests": 5
+    },
+    {
+      "run": 18,
+      "pair": 9,
+      "mode": "branch",
+      "appready": 2102.3,
+      "firstCard": 2826.9,
+      "firstHomeFocus": 2827.2,
+      "firstUsable": 3136.5,
+      "dpadResponse": 75.4,
+      "dpadAttempts": 1,
+      "moved": true,
+      "details": true,
+      "back": true,
+      "rows": 7,
+      "cards": 49,
+      "longTasks": [
+        107,
+        137,
+        146
+      ],
+      "topCpu": [
+        {
+          "script": "[native]",
+          "function": "(idle)",
+          "line": -1,
+          "cpuMs": 1733,
+          "samples": 1539
+        },
+        {
+          "script": "[native]",
+          "function": "(program)",
+          "line": -1,
+          "cpuMs": 486.9,
+          "samples": 423
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameVisible",
+          "line": 39926,
+          "cpuMs": 63,
+          "samples": 56
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 53810,
+          "cpuMs": 35.8,
+          "samples": 32
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameUpdate",
+          "line": 39869,
+          "cpuMs": 27.7,
+          "samples": 25
+        },
+        {
+          "script": "[native]",
+          "function": "appendChild",
+          "line": -1,
+          "cpuMs": 20.2,
+          "samples": 18
+        },
+        {
+          "script": "/vender/jquery/jquery.js",
+          "function": "buildFragment",
+          "line": 4765,
+          "cpuMs": 17.8,
+          "samples": 16
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 0,
+          "cpuMs": 17.8,
+          "samples": 16
+        }
+      ],
+      "networkRequests": 250,
+      "firstUsableOptionalTvRequests": 1
+    },
+    {
+      "run": 19,
+      "pair": 10,
+      "mode": "branch",
+      "appready": 2419.6,
+      "firstCard": 3057.4,
+      "firstHomeFocus": 3057.8,
+      "firstUsable": 3440.5,
+      "dpadResponse": 74.5,
+      "dpadAttempts": 1,
+      "moved": true,
+      "details": true,
+      "back": true,
+      "rows": 4,
+      "cards": 28,
+      "longTasks": [
+        108,
+        178,
+        55,
+        114
+      ],
+      "topCpu": [
+        {
+          "script": "[native]",
+          "function": "(idle)",
+          "line": -1,
+          "cpuMs": 1871.2,
+          "samples": 1656
+        },
+        {
+          "script": "[native]",
+          "function": "(program)",
+          "line": -1,
+          "cpuMs": 513.9,
+          "samples": 441
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 53810,
+          "cpuMs": 48.1,
+          "samples": 43
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameVisible",
+          "line": 39926,
+          "cpuMs": 46,
+          "samples": 42
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameUpdate",
+          "line": 39869,
+          "cpuMs": 32.6,
+          "samples": 29
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 0,
+          "cpuMs": 22.7,
+          "samples": 20
+        },
+        {
+          "script": "/vender/jquery/jquery.js",
+          "function": "computeStyleTests",
+          "line": 6091,
+          "cpuMs": 20.2,
+          "samples": 18
+        },
+        {
+          "script": "/lampa/ui/stremio-hybrid.js",
+          "function": "renderOwnedStyles",
+          "line": 993,
+          "cpuMs": 18.4,
+          "samples": 17
+        }
+      ],
+      "networkRequests": 250,
+      "firstUsableOptionalTvRequests": 8
+    },
+    {
+      "run": 20,
+      "pair": 10,
+      "mode": "main",
+      "appready": 2064.5,
+      "firstCard": 3150.2,
+      "firstHomeFocus": 3150.6,
+      "firstUsable": 3414.6,
+      "dpadResponse": 52,
+      "dpadAttempts": 1,
+      "moved": true,
+      "details": true,
+      "back": true,
+      "rows": 7,
+      "cards": 49,
+      "longTasks": [
+        94,
+        148,
+        149
+      ],
+      "topCpu": [
+        {
+          "script": "[native]",
+          "function": "(idle)",
+          "line": -1,
+          "cpuMs": 2111.9,
+          "samples": 1889
+        },
+        {
+          "script": "[native]",
+          "function": "(program)",
+          "line": -1,
+          "cpuMs": 422,
+          "samples": 382
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameVisible",
+          "line": 39926,
+          "cpuMs": 57.6,
+          "samples": 52
+        },
+        {
+          "script": "/app.min.js",
+          "function": "frameUpdate",
+          "line": 39869,
+          "cpuMs": 29.4,
+          "samples": 25
+        },
+        {
+          "script": "/app.min.js",
+          "function": "(anonymous)",
+          "line": 53810,
+          "cpuMs": 29.4,
+          "samples": 27
+        },
+        {
+          "script": "/lampa/ui/stremio-hybrid.js",
+          "function": "renderOwnedStyles",
+          "line": 990,
+          "cpuMs": 25.9,
+          "samples": 21
+        },
+        {
+          "script": "[native]",
+          "function": "appendChild",
+          "line": -1,
+          "cpuMs": 25.2,
+          "samples": 23
+        },
+        {
+          "script": "/lampa/ui/design-optimized.js",
+          "function": "usableHome",
+          "line": 2046,
+          "cpuMs": 24.7,
+          "samples": 22
+        }
+      ],
+      "networkRequests": 250,
+      "firstUsableOptionalTvRequests": 0
+    }
+  ],
+  "profileSmoke": {
+    "minimal": {
+      "main": {
+        "browser": "156.0.8078.73",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "dpr": 1,
+        "cards": 49,
+        "fixtureRows": 0,
+        "appreadyMs": 2231.7,
+        "firstCardMs": 3143.6,
+        "firstUsableMs": 3470.4,
+        "dpadResponseMs": 67.7,
+        "details": true,
+        "back": true,
+        "longTasks": 3,
+        "optionalTvRequests": 0,
+        "optionalTvRequestsBeforeFirstUsable": 0,
+        "resources": 250,
+        "pageErrors": 0,
+        "consoleErrors": 10,
+        "warmReturn": null
+      },
+      "branch": {
+        "browser": "156.0.8078.73",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "dpr": 1,
+        "cards": 49,
+        "fixtureRows": 0,
+        "appreadyMs": 2113,
+        "firstCardMs": 2915,
+        "firstUsableMs": 3229.1,
+        "dpadResponseMs": 76.1,
+        "details": true,
+        "back": true,
+        "longTasks": 3,
+        "optionalTvRequests": 0,
+        "optionalTvRequestsBeforeFirstUsable": 0,
+        "resources": 250,
+        "pageErrors": 0,
+        "consoleErrors": 10,
+        "warmReturn": null
+      }
+    },
+    "many-rows": {
+      "main": {
+        "browser": "156.0.8078.73",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "dpr": 1,
+        "rows": 25,
+        "cards": 157,
+        "fixtureRows": 18,
+        "fixtureRowError": null,
+        "appreadyMs": 3139.8,
+        "firstCardMs": 3930.4,
+        "firstUsableMs": 4351.3,
+        "dpadResponseMs": 134.4,
+        "details": true,
+        "back": true,
+        "longTasks": 3,
+        "optionalTvRequests": 24,
+        "optionalTvRequestsBeforeFirstUsable": 12,
+        "resources": 250,
+        "pageErrors": 0,
+        "consoleErrors": 10,
+        "warmReturn": null
+      },
+      "branch": {
+        "browser": "156.0.8078.73",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "dpr": 1,
+        "rows": 25,
+        "cards": 157,
+        "fixtureRows": 18,
+        "fixtureRowError": null,
+        "appreadyMs": 2599.5,
+        "firstCardMs": 3367.2,
+        "firstUsableMs": 3715.2,
+        "dpadResponseMs": 67.2,
+        "details": true,
+        "back": true,
+        "longTasks": 4,
+        "optionalTvRequests": 24,
+        "optionalTvRequestsBeforeFirstUsable": 7,
+        "resources": 250,
+        "pageErrors": 0,
+        "consoleErrors": 10,
+        "warmReturn": null
+      }
+    },
+    "slow-optional": {
+      "main": {
+        "browser": "156.0.8078.73",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "dpr": 1,
+        "cards": 49,
+        "fixtureRows": 0,
+        "appreadyMs": 2035.2,
+        "firstCardMs": 2806.2,
+        "firstUsableMs": 3188.7,
+        "dpadResponseMs": 130.9,
+        "details": true,
+        "back": true,
+        "longTasks": 3,
+        "optionalTvRequests": 6,
+        "optionalTvRequestsBeforeFirstUsable": 3,
+        "resources": 250,
+        "pageErrors": 0,
+        "consoleErrors": 10,
+        "warmReturn": null
+      },
+      "branch": {
+        "browser": "156.0.8078.73",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "dpr": 1,
+        "cards": 49,
+        "fixtureRows": 0,
+        "appreadyMs": 2680.4,
+        "firstCardMs": 3506,
+        "firstUsableMs": 3952.5,
+        "dpadResponseMs": 135.1,
+        "details": true,
+        "back": true,
+        "longTasks": 3,
+        "optionalTvRequests": 6,
+        "optionalTvRequestsBeforeFirstUsable": 3,
+        "resources": 250,
+        "pageErrors": 0,
+        "consoleErrors": 10,
+        "warmReturn": null
+      }
+    },
+    "failed-optional": {
+      "main": {
+        "browser": "156.0.8078.73",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "dpr": 1,
+        "cards": 49,
+        "fixtureRows": 0,
+        "appreadyMs": 2098.1,
+        "firstCardMs": 2797.1,
+        "firstUsableMs": 3166.5,
+        "dpadResponseMs": 69.3,
+        "details": true,
+        "back": true,
+        "longTasks": 3,
+        "optionalTvRequests": 24,
+        "optionalTvRequestsBeforeFirstUsable": 6,
+        "resources": 250,
+        "pageErrors": 0,
+        "consoleErrors": 10,
+        "warmReturn": null
+      },
+      "branch": {
+        "browser": "156.0.8078.73",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "dpr": 1,
+        "cards": 28,
+        "fixtureRows": 0,
+        "appreadyMs": 2056.9,
+        "firstCardMs": 2623.7,
+        "firstUsableMs": 3418.1,
+        "dpadResponseMs": 587.1,
+        "details": true,
+        "back": true,
+        "longTasks": 3,
+        "optionalTvRequests": 24,
+        "optionalTvRequestsBeforeFirstUsable": 24,
+        "resources": 250,
+        "pageErrors": 0,
+        "consoleErrors": 10,
+        "warmReturn": null
+      }
+    },
+    "warm-return": {
+      "main": {
+        "browser": "156.0.8078.73",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "dpr": 1,
+        "rows": 7,
+        "cards": 49,
+        "fixtureRows": 0,
+        "fixtureRowError": null,
+        "appreadyMs": 2187.9,
+        "firstCardMs": 2982.3,
+        "firstUsableMs": 3244.2,
+        "dpadResponseMs": 54.3,
+        "details": true,
+        "back": true,
+        "longTasks": 3,
+        "optionalTvRequests": 24,
+        "optionalTvRequestsBeforeFirstUsable": 7,
+        "resources": 250,
+        "pageErrors": 0,
+        "consoleErrors": 10,
+        "warmReturn": {
+          "elapsedWallMs": 2605,
+          "marks": {
+            "documentStart": 166.1,
+            "domContentLoaded": 170.2,
+            "lampaRuntimeAvailable": 418,
+            "loaderRequested": 418.1,
+            "contentRowsAvailable": 418.7,
+            "lampaGlobalAvailable": 418.7,
+            "loaderExecuted": 431.5,
+            "windowLoad": 482.1,
+            "firstHybridActiveFrame": 500.1,
+            "nativeAppReady": 1711.4,
+            "firstVisibleHomeCard": 2418.5,
+            "firstHomeFocus": 2419,
+            "homeControllerReady": 2419.4
+          },
+          "rows": 7,
+          "cards": 49,
+          "controller": "items_line",
+          "cachePresent": true,
+          "tvMetadataRequests": 0,
+          "nav": {
+            "domContentLoaded": 170.3,
+            "load": 482.1
+          }
+        }
+      },
+      "branch": {
+        "browser": "156.0.8078.73",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "dpr": 1,
+        "rows": 7,
+        "cards": 49,
+        "fixtureRows": 0,
+        "fixtureRowError": null,
+        "appreadyMs": 2061.5,
+        "firstCardMs": 2790.4,
+        "firstUsableMs": 3157.1,
+        "dpadResponseMs": 62.7,
+        "details": true,
+        "back": true,
+        "longTasks": 3,
+        "optionalTvRequests": 24,
+        "optionalTvRequestsBeforeFirstUsable": 7,
+        "resources": 250,
+        "pageErrors": 0,
+        "consoleErrors": 10,
+        "warmReturn": {
+          "elapsedWallMs": 3122,
+          "marks": {
+            "documentStart": 273.6,
+            "domContentLoaded": 276.5,
+            "lampaRuntimeAvailable": 661.1,
+            "loaderRequested": 661.1,
+            "contentRowsAvailable": 669.1,
+            "lampaGlobalAvailable": 669.1,
+            "loaderExecuted": 675.2,
+            "windowLoad": 769.8,
+            "firstHybridActiveFrame": 777.3,
+            "nativeAppReady": 2410.4,
+            "firstVisibleHomeCard": 3077.1,
+            "firstHomeFocus": 3077.3,
+            "homeControllerReady": 3077.5,
+            "stageProbeStopped": 3077.5
+          },
+          "rows": 7,
+          "cards": 49,
+          "controller": "items_line",
+          "cachePresent": true,
+          "tvMetadataRequests": 0,
+          "nav": {
+            "domContentLoaded": 276.5,
+            "load": 769.8
+          }
+        }
+      }
+    }
+  },
+  "baselinePrevious": {
+    "sourceCommit": "71cb119e5530d389057f4c1a555d4d98775b77f6",
+    "summary": {
+      "main": {
+        "n": 10,
+        "metrics": {
+          "firstUsableHome": {
+            "n": 10,
+            "median": 3325.6499999999996,
+            "min": 3134.7,
+            "max": 4848.3,
+            "mean": 3531.87,
+            "sd": 479.3834040723563
+          },
+          "firstHomeFocus": {
+            "n": 10,
+            "median": 2893.3500000000004,
+            "min": 2610,
+            "max": 4302.7,
+            "mean": 3055.1200000000003,
+            "sd": 459.1597473646835
+          },
+          "nativeAppReady": {
+            "n": 10,
+            "median": 2119.3999999999996,
+            "min": 1991.8,
+            "max": 3674.2,
+            "mean": 2349.09,
+            "sd": 489.2924267756451
+          },
+          "firstVisibleHomeCard": {
+            "n": 10,
+            "median": 2893,
+            "min": 2609.8,
+            "max": 4302.5,
+            "mean": 3054.84,
+            "sd": 459.17192902005667
+          }
+        },
+        "dpadPass": 10,
+        "dpadRetries": [
+          2,
+          2,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          2
+        ],
+        "detailsPass": 10,
+        "backPass": 10,
+        "topCpu": [
+          [
+            {
+              "script": "[native]",
+              "function": "(idle)",
+              "line": -1,
+              "samples": 3040,
+              "cpuMs": 3431.7
+            },
+            {
+              "script": "[native]",
+              "function": "(program)",
+              "line": -1,
+              "samples": 352,
+              "cpuMs": 381.8
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameVisible",
+              "line": 39926,
+              "samples": 34,
+              "cpuMs": 37.6
+            },
+            {
+              "script": "/lampa/ui/design-optimized.js",
+              "function": "step",
+              "line": 1927,
+              "samples": 31,
+              "cpuMs": 33.9
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 53810,
+              "samples": 21,
+              "cpuMs": 23.1
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameUpdate",
+              "line": 39869,
+              "samples": 20,
+              "cpuMs": 22.4
+            },
+            {
+              "script": "/lampa/ui/stremio-hybrid.js",
+              "function": "renderOwnedStyles",
+              "line": 990,
+              "samples": 17,
+              "cpuMs": 18.7
+            },
+            {
+              "script": "[native]",
+              "function": "appendChild",
+              "line": -1,
+              "samples": 15,
+              "cpuMs": 16.5
+            },
+            {
+              "script": "/vender/jquery/jquery.js",
+              "function": "buildFragment",
+              "line": 4765,
+              "samples": 14,
+              "cpuMs": 15.3
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 0,
+              "samples": 12,
+              "cpuMs": 13.5
+            }
+          ],
+          [
+            {
+              "script": "[native]",
+              "function": "(idle)",
+              "line": -1,
+              "samples": 1499,
+              "cpuMs": 1693.8
+            },
+            {
+              "script": "[native]",
+              "function": "(program)",
+              "line": -1,
+              "samples": 380,
+              "cpuMs": 413.4
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameVisible",
+              "line": 39926,
+              "samples": 35,
+              "cpuMs": 38.8
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 53810,
+              "samples": 30,
+              "cpuMs": 33.9
+            },
+            {
+              "script": "/lampa/ui/design-optimized.js",
+              "function": "step",
+              "line": 1927,
+              "samples": 29,
+              "cpuMs": 32.3
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameUpdate",
+              "line": 39869,
+              "samples": 19,
+              "cpuMs": 20.7
+            },
+            {
+              "script": "[native]",
+              "function": "appendChild",
+              "line": -1,
+              "samples": 18,
+              "cpuMs": 19.9
+            },
+            {
+              "script": "/lampa/ui/stremio-hybrid.js",
+              "function": "renderOwnedStyles",
+              "line": 990,
+              "samples": 16,
+              "cpuMs": 17.4
+            },
+            {
+              "script": "[native]",
+              "function": "(garbage collector)",
+              "line": -1,
+              "samples": 14,
+              "cpuMs": 15.9
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 0,
+              "samples": 13,
+              "cpuMs": 14.3
+            }
+          ],
+          [
+            {
+              "script": "[native]",
+              "function": "(idle)",
+              "line": -1,
+              "samples": 1647,
+              "cpuMs": 1865.4
+            },
+            {
+              "script": "[native]",
+              "function": "(program)",
+              "line": -1,
+              "samples": 393,
+              "cpuMs": 433.1
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameVisible",
+              "line": 39926,
+              "samples": 44,
+              "cpuMs": 48.3
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 53810,
+              "samples": 26,
+              "cpuMs": 28.2
+            },
+            {
+              "script": "/lampa/ui/stremio-hybrid.js",
+              "function": "renderOwnedStyles",
+              "line": 990,
+              "samples": 19,
+              "cpuMs": 21
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameUpdate",
+              "line": 39869,
+              "samples": 19,
+              "cpuMs": 20.7
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 0,
+              "samples": 16,
+              "cpuMs": 17.6
+            },
+            {
+              "script": "[native]",
+              "function": "appendChild",
+              "line": -1,
+              "samples": 16,
+              "cpuMs": 17.6
+            },
+            {
+              "script": "[native]",
+              "function": "(garbage collector)",
+              "line": -1,
+              "samples": 11,
+              "cpuMs": 12.9
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 22254,
+              "samples": 11,
+              "cpuMs": 12.2
+            }
+          ],
+          [
+            {
+              "script": "[native]",
+              "function": "(idle)",
+              "line": -1,
+              "samples": 1652,
+              "cpuMs": 1863.8
+            },
+            {
+              "script": "[native]",
+              "function": "(program)",
+              "line": -1,
+              "samples": 411,
+              "cpuMs": 449.6
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameVisible",
+              "line": 39926,
+              "samples": 47,
+              "cpuMs": 52.2
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameUpdate",
+              "line": 39869,
+              "samples": 19,
+              "cpuMs": 21
+            },
+            {
+              "script": "[native]",
+              "function": "appendChild",
+              "line": -1,
+              "samples": 19,
+              "cpuMs": 20.8
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 53810,
+              "samples": 18,
+              "cpuMs": 19.5
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 0,
+              "samples": 15,
+              "cpuMs": 16.3
+            },
+            {
+              "script": "/lampa/ui/stremio-hybrid.js",
+              "function": "renderOwnedStyles",
+              "line": 990,
+              "samples": 14,
+              "cpuMs": 15.6
+            },
+            {
+              "script": "/vender/dash/dash.js",
+              "function": "n",
+              "line": 0,
+              "samples": 13,
+              "cpuMs": 14.5
+            },
+            {
+              "script": "/vender/jquery/jquery.js",
+              "function": "buildFragment",
+              "line": 4765,
+              "samples": 12,
+              "cpuMs": 13.3
+            }
+          ],
+          [
+            {
+              "script": "[native]",
+              "function": "(idle)",
+              "line": -1,
+              "samples": 1583,
+              "cpuMs": 1787.9
+            },
+            {
+              "script": "[native]",
+              "function": "(program)",
+              "line": -1,
+              "samples": 410,
+              "cpuMs": 446.1
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameVisible",
+              "line": 39926,
+              "samples": 43,
+              "cpuMs": 47.6
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 53810,
+              "samples": 23,
+              "cpuMs": 24.8
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameUpdate",
+              "line": 39869,
+              "samples": 19,
+              "cpuMs": 20.8
+            },
+            {
+              "script": "/lampa/ui/stremio-hybrid.js",
+              "function": "renderOwnedStyles",
+              "line": 990,
+              "samples": 14,
+              "cpuMs": 15.4
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 25889,
+              "samples": 14,
+              "cpuMs": 15.2
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 0,
+              "samples": 13,
+              "cpuMs": 14.5
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 22254,
+              "samples": 13,
+              "cpuMs": 14.5
+            },
+            {
+              "script": "/vender/jquery/jquery.js",
+              "function": "buildFragment",
+              "line": 4765,
+              "samples": 13,
+              "cpuMs": 14.2
+            }
+          ],
+          [
+            {
+              "script": "[native]",
+              "function": "(idle)",
+              "line": -1,
+              "samples": 2042,
+              "cpuMs": 2305.8
+            },
+            {
+              "script": "[native]",
+              "function": "(program)",
+              "line": -1,
+              "samples": 398,
+              "cpuMs": 434.6
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameVisible",
+              "line": 39926,
+              "samples": 41,
+              "cpuMs": 45.8
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 53810,
+              "samples": 32,
+              "cpuMs": 35
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameUpdate",
+              "line": 39869,
+              "samples": 22,
+              "cpuMs": 24.1
+            },
+            {
+              "script": "[native]",
+              "function": "appendChild",
+              "line": -1,
+              "samples": 18,
+              "cpuMs": 19.8
+            },
+            {
+              "script": "/lampa/ui/stremio-hybrid.js",
+              "function": "renderOwnedStyles",
+              "line": 990,
+              "samples": 18,
+              "cpuMs": 19.6
+            },
+            {
+              "script": "[native]",
+              "function": "(garbage collector)",
+              "line": -1,
+              "samples": 12,
+              "cpuMs": 13.4
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 22254,
+              "samples": 12,
+              "cpuMs": 13.3
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 0,
+              "samples": 12,
+              "cpuMs": 13.2
+            }
+          ],
+          [
+            {
+              "script": "[native]",
+              "function": "(idle)",
+              "line": -1,
+              "samples": 1983,
+              "cpuMs": 2229.5
+            },
+            {
+              "script": "[native]",
+              "function": "(program)",
+              "line": -1,
+              "samples": 416,
+              "cpuMs": 453.5
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameVisible",
+              "line": 39926,
+              "samples": 46,
+              "cpuMs": 51.5
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameUpdate",
+              "line": 39869,
+              "samples": 20,
+              "cpuMs": 21.8
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 53810,
+              "samples": 16,
+              "cpuMs": 17.6
+            },
+            {
+              "script": "[native]",
+              "function": "appendChild",
+              "line": -1,
+              "samples": 15,
+              "cpuMs": 16.6
+            },
+            {
+              "script": "/lampa/ui/stremio-hybrid.js",
+              "function": "renderOwnedStyles",
+              "line": 990,
+              "samples": 14,
+              "cpuMs": 15.2
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 0,
+              "samples": 13,
+              "cpuMs": 14.4
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 25889,
+              "samples": 12,
+              "cpuMs": 13
+            },
+            {
+              "script": "[native]",
+              "function": "(garbage collector)",
+              "line": -1,
+              "samples": 11,
+              "cpuMs": 12.2
+            }
+          ],
+          [
+            {
+              "script": "[native]",
+              "function": "(idle)",
+              "line": -1,
+              "samples": 1681,
+              "cpuMs": 1887.2
+            },
+            {
+              "script": "[native]",
+              "function": "(program)",
+              "line": -1,
+              "samples": 415,
+              "cpuMs": 464.1
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameVisible",
+              "line": 39926,
+              "samples": 51,
+              "cpuMs": 56.1
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 53810,
+              "samples": 28,
+              "cpuMs": 31.5
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameUpdate",
+              "line": 39869,
+              "samples": 23,
+              "cpuMs": 25.6
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 0,
+              "samples": 19,
+              "cpuMs": 20.6
+            },
+            {
+              "script": "[native]",
+              "function": "appendChild",
+              "line": -1,
+              "samples": 18,
+              "cpuMs": 19.7
+            },
+            {
+              "script": "/lampa/ui/stremio-hybrid.js",
+              "function": "renderOwnedStyles",
+              "line": 990,
+              "samples": 15,
+              "cpuMs": 16.6
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 22254,
+              "samples": 14,
+              "cpuMs": 15.8
+            },
+            {
+              "script": "/vender/jquery/jquery.js",
+              "function": "send",
+              "line": 9450,
+              "samples": 13,
+              "cpuMs": 15.2
+            }
+          ],
+          [
+            {
+              "script": "[native]",
+              "function": "(idle)",
+              "line": -1,
+              "samples": 1507,
+              "cpuMs": 1701.8
+            },
+            {
+              "script": "[native]",
+              "function": "(program)",
+              "line": -1,
+              "samples": 440,
+              "cpuMs": 487.1
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameVisible",
+              "line": 39926,
+              "samples": 57,
+              "cpuMs": 63
+            },
+            {
+              "script": "/",
+              "function": "(anonymous)",
+              "line": 63,
+              "samples": 27,
+              "cpuMs": 30.1
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 53810,
+              "samples": 26,
+              "cpuMs": 28.9
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameUpdate",
+              "line": 39869,
+              "samples": 25,
+              "cpuMs": 27.5
+            },
+            {
+              "script": "[native]",
+              "function": "appendChild",
+              "line": -1,
+              "samples": 19,
+              "cpuMs": 20.8
+            },
+            {
+              "script": "/lampa/ui/stremio-hybrid.js",
+              "function": "renderOwnedStyles",
+              "line": 990,
+              "samples": 18,
+              "cpuMs": 19.9
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 0,
+              "samples": 18,
+              "cpuMs": 19.8
+            },
+            {
+              "script": "/vender/jquery/jquery.js",
+              "function": "curCSS",
+              "line": 6165,
+              "samples": 17,
+              "cpuMs": 18.6
+            }
+          ],
+          [
+            {
+              "script": "[native]",
+              "function": "(idle)",
+              "line": -1,
+              "samples": 1819,
+              "cpuMs": 2043.6
+            },
+            {
+              "script": "[native]",
+              "function": "(program)",
+              "line": -1,
+              "samples": 410,
+              "cpuMs": 454.1
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameVisible",
+              "line": 39926,
+              "samples": 41,
+              "cpuMs": 48.8
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 53810,
+              "samples": 35,
+              "cpuMs": 38.5
+            },
+            {
+              "script": "/lampa/ui/design-optimized.js",
+              "function": "step",
+              "line": 1927,
+              "samples": 31,
+              "cpuMs": 34.3
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameUpdate",
+              "line": 39869,
+              "samples": 26,
+              "cpuMs": 29.3
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 0,
+              "samples": 18,
+              "cpuMs": 19.8
+            },
+            {
+              "script": "[native]",
+              "function": "appendChild",
+              "line": -1,
+              "samples": 18,
+              "cpuMs": 19.8
+            },
+            {
+              "script": "/lampa/ui/stremio-hybrid.js",
+              "function": "renderOwnedStyles",
+              "line": 990,
+              "samples": 18,
+              "cpuMs": 19.7
+            },
+            {
+              "script": "[native]",
+              "function": "(garbage collector)",
+              "line": -1,
+              "samples": 17,
+              "cpuMs": 18.7
+            }
+          ]
+        ]
+      },
+      "branch": {
+        "n": 10,
+        "metrics": {
+          "firstUsableHome": {
+            "n": 10,
+            "median": 3361.05,
+            "min": 3050.2,
+            "max": 3702.3,
+            "mean": 3335.6700000000005,
+            "sd": 219.9915727931414
+          },
+          "firstHomeFocus": {
+            "n": 10,
+            "median": 2833.3999999999996,
+            "min": 2658.1,
+            "max": 3197.1,
+            "mean": 2872.41,
+            "sd": 186.91865851219882
+          },
+          "nativeAppReady": {
+            "n": 10,
+            "median": 2125,
+            "min": 1910.3,
+            "max": 2490.2,
+            "mean": 2145.9100000000003,
+            "sd": 199.26777185485864
+          },
+          "firstVisibleHomeCard": {
+            "n": 10,
+            "median": 2833.2,
+            "min": 2657.8,
+            "max": 3196.7,
+            "mean": 2872.1,
+            "sd": 186.84422388717292
+          }
+        },
+        "dpadPass": 10,
+        "dpadRetries": [
+          1,
+          1,
+          2,
+          2,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "detailsPass": 10,
+        "backPass": 10,
+        "topCpu": [
+          [
+            {
+              "script": "[native]",
+              "function": "(idle)",
+              "line": -1,
+              "samples": 1673,
+              "cpuMs": 1895.1
+            },
+            {
+              "script": "[native]",
+              "function": "(program)",
+              "line": -1,
+              "samples": 390,
+              "cpuMs": 428.8
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameVisible",
+              "line": 39926,
+              "samples": 43,
+              "cpuMs": 47.7
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 53810,
+              "samples": 25,
+              "cpuMs": 29
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 0,
+              "samples": 18,
+              "cpuMs": 19.8
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameUpdate",
+              "line": 39869,
+              "samples": 18,
+              "cpuMs": 19.5
+            },
+            {
+              "script": "[native]",
+              "function": "appendChild",
+              "line": -1,
+              "samples": 15,
+              "cpuMs": 16.4
+            },
+            {
+              "script": "/lampa/ui/stremio-hybrid.js",
+              "function": "renderOwnedStyles",
+              "line": 993,
+              "samples": 14,
+              "cpuMs": 15.4
+            },
+            {
+              "script": "/vender/jquery/jquery.js",
+              "function": "curCSS",
+              "line": 6165,
+              "samples": 12,
+              "cpuMs": 13.3
+            },
+            {
+              "script": "[native]",
+              "function": "(garbage collector)",
+              "line": -1,
+              "samples": 11,
+              "cpuMs": 12.9
+            }
+          ],
+          [
+            {
+              "script": "[native]",
+              "function": "(idle)",
+              "line": -1,
+              "samples": 1550,
+              "cpuMs": 1758
+            },
+            {
+              "script": "[native]",
+              "function": "(program)",
+              "line": -1,
+              "samples": 360,
+              "cpuMs": 395.3
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameVisible",
+              "line": 39926,
+              "samples": 40,
+              "cpuMs": 45.1
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 53810,
+              "samples": 26,
+              "cpuMs": 28.6
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameUpdate",
+              "line": 39869,
+              "samples": 21,
+              "cpuMs": 23.2
+            },
+            {
+              "script": "/lampa/ui/stremio-hybrid.js",
+              "function": "renderOwnedStyles",
+              "line": 993,
+              "samples": 21,
+              "cpuMs": 23.1
+            },
+            {
+              "script": "[native]",
+              "function": "(garbage collector)",
+              "line": -1,
+              "samples": 16,
+              "cpuMs": 18
+            },
+            {
+              "script": "[native]",
+              "function": "appendChild",
+              "line": -1,
+              "samples": 16,
+              "cpuMs": 17.5
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 25889,
+              "samples": 13,
+              "cpuMs": 14.7
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 0,
+              "samples": 13,
+              "cpuMs": 14.4
+            }
+          ],
+          [
+            {
+              "script": "[native]",
+              "function": "(idle)",
+              "line": -1,
+              "samples": 1773,
+              "cpuMs": 1999.4
+            },
+            {
+              "script": "[native]",
+              "function": "(program)",
+              "line": -1,
+              "samples": 380,
+              "cpuMs": 413.9
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameVisible",
+              "line": 39926,
+              "samples": 32,
+              "cpuMs": 36
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameUpdate",
+              "line": 39869,
+              "samples": 23,
+              "cpuMs": 25.3
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 53810,
+              "samples": 23,
+              "cpuMs": 25.1
+            },
+            {
+              "script": "[native]",
+              "function": "appendChild",
+              "line": -1,
+              "samples": 20,
+              "cpuMs": 21.9
+            },
+            {
+              "script": "/lampa/ui/stremio-hybrid.js",
+              "function": "renderOwnedStyles",
+              "line": 993,
+              "samples": 15,
+              "cpuMs": 17.3
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 0,
+              "samples": 15,
+              "cpuMs": 16.8
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 22254,
+              "samples": 11,
+              "cpuMs": 12.2
+            },
+            {
+              "script": "/vender/dash/dash.js",
+              "function": "n",
+              "line": 0,
+              "samples": 11,
+              "cpuMs": 12.1
+            }
+          ],
+          [
+            {
+              "script": "[native]",
+              "function": "(idle)",
+              "line": -1,
+              "samples": 1724,
+              "cpuMs": 1956.4
+            },
+            {
+              "script": "[native]",
+              "function": "(program)",
+              "line": -1,
+              "samples": 352,
+              "cpuMs": 384
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameVisible",
+              "line": 39926,
+              "samples": 44,
+              "cpuMs": 48.6
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameUpdate",
+              "line": 39869,
+              "samples": 19,
+              "cpuMs": 20.9
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 0,
+              "samples": 17,
+              "cpuMs": 19.4
+            },
+            {
+              "script": "/lampa/ui/stremio-hybrid.js",
+              "function": "renderOwnedStyles",
+              "line": 993,
+              "samples": 16,
+              "cpuMs": 17.8
+            },
+            {
+              "script": "/lampa/ui/design-optimized.js",
+              "function": "step",
+              "line": 1927,
+              "samples": 16,
+              "cpuMs": 17.6
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 53810,
+              "samples": 16,
+              "cpuMs": 17.1
+            },
+            {
+              "script": "[native]",
+              "function": "appendChild",
+              "line": -1,
+              "samples": 15,
+              "cpuMs": 16.4
+            },
+            {
+              "script": "[native]",
+              "function": "(garbage collector)",
+              "line": -1,
+              "samples": 13,
+              "cpuMs": 14.2
+            }
+          ],
+          [
+            {
+              "script": "[native]",
+              "function": "(idle)",
+              "line": -1,
+              "samples": 1533,
+              "cpuMs": 1737.8
+            },
+            {
+              "script": "[native]",
+              "function": "(program)",
+              "line": -1,
+              "samples": 395,
+              "cpuMs": 434.9
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameVisible",
+              "line": 39926,
+              "samples": 46,
+              "cpuMs": 50.7
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 53810,
+              "samples": 27,
+              "cpuMs": 29.7
+            },
+            {
+              "script": "/lampa/ui/stremio-hybrid.js",
+              "function": "renderOwnedStyles",
+              "line": 993,
+              "samples": 17,
+              "cpuMs": 18.8
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameUpdate",
+              "line": 39869,
+              "samples": 17,
+              "cpuMs": 18.7
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 0,
+              "samples": 15,
+              "cpuMs": 16.7
+            },
+            {
+              "script": "[native]",
+              "function": "appendChild",
+              "line": -1,
+              "samples": 13,
+              "cpuMs": 14.4
+            },
+            {
+              "script": "[native]",
+              "function": "(garbage collector)",
+              "line": -1,
+              "samples": 12,
+              "cpuMs": 13.5
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 22254,
+              "samples": 12,
+              "cpuMs": 13.4
+            }
+          ],
+          [
+            {
+              "script": "[native]",
+              "function": "(idle)",
+              "line": -1,
+              "samples": 1818,
+              "cpuMs": 2053
+            },
+            {
+              "script": "[native]",
+              "function": "(program)",
+              "line": -1,
+              "samples": 401,
+              "cpuMs": 438
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameVisible",
+              "line": 39926,
+              "samples": 46,
+              "cpuMs": 50.5
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameUpdate",
+              "line": 39869,
+              "samples": 21,
+              "cpuMs": 23.2
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 0,
+              "samples": 17,
+              "cpuMs": 19.1
+            },
+            {
+              "script": "[native]",
+              "function": "appendChild",
+              "line": -1,
+              "samples": 16,
+              "cpuMs": 17.4
+            },
+            {
+              "script": "/lampa/ui/stremio-hybrid.js",
+              "function": "renderOwnedStyles",
+              "line": 993,
+              "samples": 14,
+              "cpuMs": 15.2
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 22254,
+              "samples": 13,
+              "cpuMs": 14.8
+            },
+            {
+              "script": "[native]",
+              "function": "(garbage collector)",
+              "line": -1,
+              "samples": 13,
+              "cpuMs": 14.4
+            },
+            {
+              "script": "/vender/jquery/jquery.js",
+              "function": "curCSS",
+              "line": 6165,
+              "samples": 12,
+              "cpuMs": 13.3
+            }
+          ],
+          [
+            {
+              "script": "[native]",
+              "function": "(idle)",
+              "line": -1,
+              "samples": 1563,
+              "cpuMs": 1765.4
+            },
+            {
+              "script": "[native]",
+              "function": "(program)",
+              "line": -1,
+              "samples": 380,
+              "cpuMs": 415.8
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameVisible",
+              "line": 39926,
+              "samples": 44,
+              "cpuMs": 48.2
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 53810,
+              "samples": 26,
+              "cpuMs": 28.5
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameUpdate",
+              "line": 39869,
+              "samples": 21,
+              "cpuMs": 23.1
+            },
+            {
+              "script": "[native]",
+              "function": "appendChild",
+              "line": -1,
+              "samples": 17,
+              "cpuMs": 19
+            },
+            {
+              "script": "/lampa/ui/stremio-hybrid.js",
+              "function": "renderOwnedStyles",
+              "line": 993,
+              "samples": 17,
+              "cpuMs": 18.8
+            },
+            {
+              "script": "[native]",
+              "function": "(garbage collector)",
+              "line": -1,
+              "samples": 14,
+              "cpuMs": 15.3
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 22254,
+              "samples": 12,
+              "cpuMs": 13.4
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 0,
+              "samples": 11,
+              "cpuMs": 12.2
+            }
+          ],
+          [
+            {
+              "script": "[native]",
+              "function": "(idle)",
+              "line": -1,
+              "samples": 1577,
+              "cpuMs": 1775.7
+            },
+            {
+              "script": "[native]",
+              "function": "(program)",
+              "line": -1,
+              "samples": 418,
+              "cpuMs": 464.3
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameVisible",
+              "line": 39926,
+              "samples": 54,
+              "cpuMs": 61.1
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 53810,
+              "samples": 29,
+              "cpuMs": 32.5
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameUpdate",
+              "line": 39869,
+              "samples": 25,
+              "cpuMs": 27.7
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 0,
+              "samples": 19,
+              "cpuMs": 21.2
+            },
+            {
+              "script": "/lampa/ui/stremio-hybrid.js",
+              "function": "renderOwnedStyles",
+              "line": 993,
+              "samples": 17,
+              "cpuMs": 18.5
+            },
+            {
+              "script": "[native]",
+              "function": "(garbage collector)",
+              "line": -1,
+              "samples": 15,
+              "cpuMs": 17.6
+            },
+            {
+              "script": "[native]",
+              "function": "appendChild",
+              "line": -1,
+              "samples": 14,
+              "cpuMs": 15.3
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 22254,
+              "samples": 14,
+              "cpuMs": 15.1
+            }
+          ],
+          [
+            {
+              "script": "[native]",
+              "function": "(idle)",
+              "line": -1,
+              "samples": 1885,
+              "cpuMs": 2119.7
+            },
+            {
+              "script": "[native]",
+              "function": "(program)",
+              "line": -1,
+              "samples": 433,
+              "cpuMs": 472.2
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameVisible",
+              "line": 39926,
+              "samples": 54,
+              "cpuMs": 60.1
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 53810,
+              "samples": 28,
+              "cpuMs": 31.6
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameUpdate",
+              "line": 39869,
+              "samples": 23,
+              "cpuMs": 25.6
+            },
+            {
+              "script": "/lampa/ui/stremio-hybrid.js",
+              "function": "renderOwnedStyles",
+              "line": 993,
+              "samples": 18,
+              "cpuMs": 19.5
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 0,
+              "samples": 16,
+              "cpuMs": 18.1
+            },
+            {
+              "script": "[native]",
+              "function": "(garbage collector)",
+              "line": -1,
+              "samples": 14,
+              "cpuMs": 15.7
+            },
+            {
+              "script": "/vender/jquery/jquery.js",
+              "function": "send",
+              "line": 9450,
+              "samples": 13,
+              "cpuMs": 14.2
+            },
+            {
+              "script": "[native]",
+              "function": "appendChild",
+              "line": -1,
+              "samples": 13,
+              "cpuMs": 14.2
+            }
+          ],
+          [
+            {
+              "script": "[native]",
+              "function": "(idle)",
+              "line": -1,
+              "samples": 1883,
+              "cpuMs": 2103.8
+            },
+            {
+              "script": "[native]",
+              "function": "(program)",
+              "line": -1,
+              "samples": 442,
+              "cpuMs": 496.9
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameVisible",
+              "line": 39926,
+              "samples": 57,
+              "cpuMs": 63.1
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 53810,
+              "samples": 26,
+              "cpuMs": 30.5
+            },
+            {
+              "script": "[native]",
+              "function": "appendChild",
+              "line": -1,
+              "samples": 23,
+              "cpuMs": 25.7
+            },
+            {
+              "script": "/app.min.js",
+              "function": "frameUpdate",
+              "line": 39869,
+              "samples": 23,
+              "cpuMs": 25.3
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 0,
+              "samples": 22,
+              "cpuMs": 24
+            },
+            {
+              "script": "[native]",
+              "function": "(garbage collector)",
+              "line": -1,
+              "samples": 17,
+              "cpuMs": 20.1
+            },
+            {
+              "script": "/lampa/ui/stremio-hybrid.js",
+              "function": "renderOwnedStyles",
+              "line": 993,
+              "samples": 16,
+              "cpuMs": 17.5
+            },
+            {
+              "script": "/app.min.js",
+              "function": "(anonymous)",
+              "line": 25889,
+              "samples": 15,
+              "cpuMs": 16.3
+            }
+          ]
+        ]
+      }
+    }
+  },
+  "focusInvestigation": {
+    "mainTabArrowRightBeforeExplicitForeground": "NO_CHANGE",
+    "afterSelectPage": "ArrowRight changed focus index 8→9, ArrowLeft restored id 1384216; Details Enter/Escape restored that same card; Settings menu open/Back returned to Home URL and ArrowDown restored the same card; live page focus was not foregrounded until explicit select_page."
+  },
+  "limitations": [
+    "No Search, Discover or Torrent Cinema/Files live interaction in the owner profile; no parser or player requests were initiated.",
+    "No physical Google TV measurement.",
+    "No causal startup improvement detected; branch remains Draft."
+  ],
+  "sourceHashes": {
+    "loader.js": "cb9833f6d6821464e1cc0fd4213fb599e7edc2a2205d0dd110e6b46b2115e2c1",
+    "ui/stremio-hybrid.js": "b512f2024e64e7310ee577f7e458acaf0ba5f7f1eb737a8e2e7489baafc18aca",
+    "ui/interface-plus.js": "e5e5c2d43f1ddf10beaa9eceae64fbdd83b846d595f555bda032223ea6377fd3",
+    "ui/design-optimized.js": "6b318ff929d00371bc03a44a7b6c8032ab286912042baf8a7f56e7d85a07cbd1",
+    "ui/cardify-plus.js": "ab3e622d18e58f4c12f0192828bb0ace6551eec65cfbdae34637182df546aa74",
+    "plugins-to-enable/home-history.js": "6ad4f518561ea024b1b842349c88861d05565c30c9787e21f5d08199b5ddd3d0",
+    "plugins-to-enable/home-policy.js": "f93cde2372e4e04ca18b889e71fdbc001e85ecb9b34a26e86239c5cc73f00e27"
+  },
+  "callbackDiagnostic": {
+    "method": "ContentRows callback functions wrapped before native ContentRows.call, then per-callback invocation durations recorded; one isolated run per revision, supplementary only and excluded from the paired 10-run benchmark.",
+    "main": {
+      "invocation": {
+        "screen": "main",
+        "inputCallbacks": 8,
+        "returnedCallbacks": 10,
+        "synchronousCallMs": 3.6
+      },
+      "measuredCallbacks": [
+        0.8,
+        0.2,
+        0.3,
+        0.2
+      ]
+    },
+    "branch": {
+      "invocation": {
+        "screen": "main",
+        "inputCallbacks": 8,
+        "returnedCallbacks": 13,
+        "synchronousCallMs": 4
+      },
+      "measuredCallbacks": [
+        0.8,
+        0.3,
+        0.4,
+        0.2,
+        0.1,
+        0.2,
+        0.1
+      ]
+    },
+    "caveat": "One sample each; callback invocation count depends on asynchronous provider registration. Not evidence of a startup optimization."
+  },
+  "pairedDifferences": {
+    "method": "branch minus main within each of 10 alternating pairs; approximate 95% t interval (df=9)",
+    "firstVisibleCardMs": {
+      "mean": 8.8,
+      "sd": 262.9,
+      "interval95": [
+        -179.3,
+        196.9
+      ]
+    },
+    "firstUsableHomeMs": {
+      "mean": -25.1,
+      "sd": 301.8,
+      "interval95": [
+        -241,
+        190.8
+      ]
+    },
+    "nativeAppReadyMs": {
+      "mean": 48.1,
+      "sd": 318.3,
+      "interval95": [
+        -179.6,
+        275.8
+      ]
+    },
+    "dpadResponseMs": {
+      "mean": -10.8,
+      "sd": 44.4,
+      "interval95": [
+        -42.6,
+        20.9
+      ]
+    }
+  },
+  "status": "No statistically persuasive/meaningful startup improvement; leave PR Draft.",
+  "productionChange": {
+    "file": "ui/design-optimized.js",
+    "behavior": "scheduleRefreshMarks measures card rectangles once and queues refresh only for cards intersecting the viewport; previously deferred offscreen cards recompute marks/notch on native hover:focus before interaction.",
+    "test": "tests/ydesign.cjs: 25-row/150-card fixture refreshes only 12 visible cards; focus hook refreshes deferred offscreen card state.",
+    "performanceVerdict": "No measurable first-startup/first-usable-Home gain in 10 matched pairs. Change reduces redundant work after a mark-refresh event and remains a scoped runtime optimization, not a claimed startup speedup."
+  },
+  "measuredConclusion": "Native Lampa app.min.js frameVisible/frameUpdate plus DOM append activity are the strongest recurring sampled render costs. appready-to-first-card median was about 0.72–0.76 s. The repo-side YDesign refresh change is not the first-card/focus critical path; paired first-usable timing confidence interval crosses zero. No meaningful startup improvement established; PR must remain Draft.",
+  "localValidation": {
+    "workflowSuites": 534,
+    "additionalLifecycleSuites": 173,
+    "total": 707,
+    "repositoryCheck": "PASS: 78 JS files, 43 manifest entries, 566 URLs",
+    "torrentArtifactFreshness": "PASS",
+    "syntaxAndWhitespace": "PASS"
+  }
+}
