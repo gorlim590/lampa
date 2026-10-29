@@ -145,7 +145,7 @@ test('external report remains valid after a measured 45-minute episode and two h
   assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e1', road: { time: 2600, duration: 2700 } } }, report), false, 'new handoff rejects late old snapshot');
 });
 
-test('failed history write retries from the repeated full snapshot and confirms exactly once', async () => {
+test('failed history write can retry if the handler receives the repeated measured snapshot', async () => {
   const { context, writes } = setup();
   const report = context.buildExternalPlaylistReport(show, 'e2', [{ season: 1, episode: 2, timeline: { hash: 'e2' } }], 'account-a', 7);
   context.externalPlaylistReport = report;

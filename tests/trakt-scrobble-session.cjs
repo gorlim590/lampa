@@ -578,6 +578,42 @@ test('official Just+ playlist callback finalizes each exact episode through Lamp
   assert.equal(f.context.finishedMedia.length, 2, 'repeated callback snapshot is idempotent');
 });
 
+test('Android changed-only Timeline bridge can suppress a retry after an exhausted Trakt history write', async () => {
+  const f = integrationFixture();
+  const show = { id: 1396, method: 'tv', type: 'tv', name: 'Show', season_number: 1, episode_number: 2 };
+  const hash = 'native-dedup-e2';
+  const initial = { hash, time: 0, duration: 1800, percent: 0 };
+  f.setPlaylist([{ season: 1, episode: 2, timeline: initial }]);
+  f.playerEvent('external', { data: { card: show, timeline: { hash } } });
+  f.playerEvent('visibility', { hidden: false });
+  let savedNativeTimeline = { ...initial };
+  let nativeEvents = 0;
+  let historyAttempts = 0;
+  f.context.finish = media => {
+    historyAttempts++;
+    (f.context.finishedMedia || (f.context.finishedMedia = [])).push({ ...media });
+    return Promise.resolve({ ok: false, status: 503 });
+  };
+  function nativeReport(position, duration) {
+    const next = { hash, time: position, duration, percent: Math.floor(position / duration * 100) };
+    // Mirrors Android MainActivity.handleJustPlusReport's changed-only guard,
+    // then its saveState of the updated playlist timeline.
+    if (JSON.stringify(next) === JSON.stringify(savedNativeTimeline)) return false;
+    savedNativeTimeline = next;
+    nativeEvents++;
+    f.timeline(hash, next.time, next.percent, next.duration);
+    return true;
+  }
+  assert.equal(nativeReport(1710, 1800), true, 'first changed measured report reaches the plugin');
+  await flush();
+  assert.equal(f.context.externalPlaylistReport.entries[hash].completionState, 'retryable');
+  assert.equal(nativeReport(1710, 1800), false, 'identical full Just+ report is suppressed after native state was saved');
+  await flush();
+  assert.equal(nativeEvents, 1);
+  assert.equal(historyAttempts, 1, 'the plugin cannot retry without another native Timeline event');
+  assert.equal(f.context.externalPlaylistReport.entries[hash].completionState, 'retryable');
+});
+
 test('external launch Player.start before visibility retains report; native Timeline callback after return still completes', async () => {
   const f = integrationFixture();
   const show = { id: 1396, method: 'tv', type: 'tv', name: 'Show', season_number: 1, episode_number: 3 };
