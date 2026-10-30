@@ -16,4 +16,23 @@ Before installation verify the APK applicationId is **top.rootu.lampa.issue125pr
 
 For the controlled web fixture, run webview-probe/serve.py, reverse its port with ADB and launch the debug Activity with `issue125_probe_url`. The debug-only `issue125_probe_play` JSON is passed to the original runPlayer/configureJustPlusPlaylistIntent path; fixture card and playlist identities must match the JS fixture. `issue125_probe_recreate=true` calls Android recreate() once. These are explicitly new test-only hooks, not upstream APIs.
 
-The physical test uses the actual Kotlin receiver/take/handle/normalizer, the proposed raw bridge, actual WebView, production JS helpers and finish(), with mock API transport. Plugin bootstrap and Trakt+ UI are controlled; see the acceptance limitations. The debug APK is not approved for production replacement.
+The parallel site-test APK has a separate package and label `Lampa Trakt Test`. It injects the exact repository `trakt/trakt.js` asset only for the GitHub Pages `/lampa/trakt/trakt.js` resource, and the override is compiled only in the debug test source. Do not use it to replace the official application.
+
+Install/update without clearing its data:
+
+```sh
+adb install -r artifacts/issue125/lampa-1.13.5-issue125-site-test.apk
+adb shell am start -n top.rootu.lampa.issue125probe/top.rootu.lampa.MainActivity \
+  --es issue125_probe_url 'https://siaivo.github.io'
+```
+
+Before installation, verify package ID and SHA-256 in `build-metadata.json`. The APK is intentionally outside Git. To roll back the test build, force-stop it and reopen the untouched official application:
+
+```sh
+adb shell am force-stop top.rootu.lampa.issue125probe
+adb shell am start -n top.rootu.lampa/top.rootu.lampa.MainActivity
+```
+
+This leaves test-app data and the official app/settings intact. Uninstall the test package only if its local test profile is no longer needed.
+
+The physical test uses the actual Kotlin receiver/take/handle/normalizer, the proposed raw bridge, actual WebView, production JS helpers and finish(), with mock API transport. The read-only actual-site smoke check is documented separately. Authenticated Trakt API writes and actual Trakt+ UI rendering remain unverified; the debug APK is not approved as a permanent production replacement.

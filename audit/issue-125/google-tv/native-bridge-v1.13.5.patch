@@ -134,7 +134,7 @@ diff --git a/app/src/main/java/top/rootu/lampa/MainActivity.kt b/app/src/main/ja
              for (i in playlist.indices) {
                  val pos = positions.optInt(i, -1)
                  val dur = durations.optInt(i, -1)
-@@ -839,6 +881,82 @@
+@@ -839,6 +881,83 @@
                  }
              }
          }
@@ -148,7 +148,8 @@ diff --git a/app/src/main/java/top/rootu/lampa/MainActivity.kt b/app/src/main/ja
 +    private var rawDeliveryBusy = false
 +
 +    // One coalesced full snapshot for the active launch; six bounded attempts.
-+    // JavaScript acknowledges only a matching live account/profile/handoff.
++    // JS ACK follows validation and confirmation of any eligible Trakt write;
++    // a valid below-threshold or disabled-sync snapshot is consumed without a write.
 +    private fun deliverPendingJustPlusRaw(resetBudget: Boolean = false) {
 +        val pending = pendingRawDelivery ?: return
 +        if (pending.session != justPlusNativeSessionId) { pendingRawDelivery = null; return }

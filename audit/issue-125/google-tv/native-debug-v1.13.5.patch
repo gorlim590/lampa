@@ -179,7 +179,7 @@ index 861c78f..aa050b9 100644
              for (i in playlist.indices) {
                  val pos = positions.optInt(i, -1)
                  val dur = durations.optInt(i, -1)
-@@ -841,6 +900,82 @@ class MainActivity : BaseActivity(),
+@@ -841,6 +900,83 @@ class MainActivity : BaseActivity(),
          }
      }
  
@@ -191,7 +191,8 @@ index 861c78f..aa050b9 100644
 +    private var rawDeliveryBusy = false
 +
 +    // One coalesced full snapshot for the active launch; six bounded attempts.
-+    // JavaScript acknowledges only a matching live account/profile/handoff.
++    // JS ACK follows validation and confirmation of any eligible Trakt write;
++    // a valid below-threshold or disabled-sync snapshot is consumed without a write.
 +    private fun deliverPendingJustPlusRaw(resetBudget: Boolean = false) {
 +        val pending = pendingRawDelivery ?: return
 +        if (pending.session != justPlusNativeSessionId) { pendingRawDelivery = null; return }

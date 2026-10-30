@@ -17,6 +17,7 @@ function productionFunction(name, nextName) {
 function setup() {
   const writes = [];
   let clock = 1_000_000;
+  let watchingEnabled = true;
   class TestDate extends Date { static now() { return clock; } }
   const context = vm.createContext({
     Array, Object, Number, String, Date: TestDate, Math, isFinite, parseInt,
@@ -24,7 +25,7 @@ function setup() {
     externalPlaylistReport: null,
     cloudInjectInProgress: false,
     config: { minProgress: 90 },
-    Lampa: { Storage: { get: () => 'account-a', field: name => name === 'trakt_min_progress' ? 90 : true } },
+    Lampa: { Storage: { get: () => 'account-a', field: name => name === 'trakt_min_progress' ? 90 : name === 'trakt_enable_watching' ? watchingEnabled : true } },
     getContentType$2: media => media && (media.method === 'tv' || media.media_type === 'tv' || media.type === 'tv' || media.number_of_seasons ? 'show' : 'movie'),
     extractSeasonEpisode: media => ({
       season: media.season_number != null ? media.season_number : media.season,
@@ -45,8 +46,9 @@ function setup() {
   vm.runInContext(productionFunction('buildExternalPlaylistReport', 'handleExternalPlaylistTimelineUpdate') +
     productionFunction('handleExternalPlaylistTimelineUpdate', 'bindJustPlusSession') +
     productionFunction('bindJustPlusSession', 'handleJustPlusRawReport') +
+    productionFunction('validateJustPlusRawReport', 'handleJustPlusRawReport') +
     productionFunction('handleJustPlusRawReport', 'externalReportMatchesPlayerStart'), context);
-  return { context, writes, advanceTime: ms => { clock += ms; } };
+  return { context, writes, advanceTime: ms => { clock += ms; }, setWatchingEnabled: enabled => { watchingEnabled = enabled; } };
 }
 
 const show = { id: 1396, method: 'tv', media_type: 'tv', name: 'The Walking Dead', number_of_seasons: 11 };
@@ -220,6 +222,84 @@ test('raw Just+ bridge rejects under-threshold, synthetic, unknown-visit and zer
   assert.equal(writes.filter(x => x.type === 'finish').length, 0);
 });
 
+test('raw callback ACK means structurally consumed, including 89 percent, not Trakt confirmation', async () => {
+  const { context, writes } = setup();
+  const report = context.buildExternalPlaylistReport(show, 'e2', [
+    { season: 1, episode: 2, timeline: { hash: 'e2', time: 0, duration: 1000 } }
+  ], 'account-a', 7);
+  context.externalPlaylistReport = report;
+  report.nativeSessionId = 'fixture-native-session';
+  const event = { detail: { version: 2, session_id: 'fixture-native-session', card_id: '1396', end_by: 'interval', items: [
+    { index: 0, hash: 'e2', season: 1, episode: 2, position_sec: 890, duration_sec: 1000, has_visit: true }
+  ] } };
+  assert.equal(context.handleJustPlusRawReportEvent(event, report), true);
+  assert.equal(event.detail.__lampa_trakt_ack, true);
+  await flushPromises();
+  assert.equal(writes.filter(x => x.type === 'finish').length, 0, '89 percent is consumed but not written');
+
+  const malformed = { detail: { ...event.detail, __lampa_trakt_ack: false, items: [] } };
+  assert.equal(context.handleJustPlusRawReportEvent(malformed, report), false);
+  assert.equal(malformed.detail.__lampa_trakt_ack, false, 'malformed snapshot remains unacknowledged');
+  const wrongEpisode = { detail: { ...event.detail, __lampa_trakt_ack: false, items: [{ ...event.detail.items[0], episode: 3 }] } };
+  assert.equal(context.handleJustPlusRawReportEvent(wrongEpisode, report), false);
+  assert.equal(wrongEpisode.detail.__lampa_trakt_ack, false, 'identity mismatch remains unacknowledged');
+});
+
+test('eligible raw callback remains unacknowledged through pending and failed API writes', async () => {
+  const { context, writes } = setup();
+  const report = context.buildExternalPlaylistReport(show, 'e2', [
+    { season: 1, episode: 2, timeline: { hash: 'e2', time: 0, duration: 1000 } }
+  ], 'account-a', 7);
+  context.externalPlaylistReport = report;
+  report.nativeSessionId = 'fixture-native-session';
+  let resolveFirst;
+  let attempts = 0;
+  context.finish = media => {
+    writes.push({ type: 'finish', media });
+    attempts++;
+    if (attempts === 1) return new Promise(resolve => { resolveFirst = resolve; });
+    return Promise.resolve({ ok: attempts > 1, status: attempts === 1 ? 503 : 200 });
+  };
+  const payload = { version: 2, session_id: 'fixture-native-session', card_id: '1396', end_by: 'user', items: [
+    { index: 0, hash: 'e2', season: 1, episode: 2, position_sec: 950, duration_sec: 1000, has_visit: true }
+  ] };
+  const first = { detail: { ...payload } };
+  assert.equal(context.handleJustPlusRawReportEvent(first, report), false);
+  assert.equal(first.detail.__lampa_trakt_ack, undefined, 'pending write is not acknowledged');
+  await flushPromises();
+  resolveFirst({ ok: false, status: 503 });
+  await flushPromises();
+  assert.equal(report.entries.e2.completionState, 'retryable');
+
+  const retry = { detail: { ...payload } };
+  assert.equal(context.handleJustPlusRawReportEvent(retry, report), false);
+  assert.equal(retry.detail.__lampa_trakt_ack, undefined, 'retry is pending until API confirmation');
+  await flushPromises();
+  assert.equal(report.entries.e2.completionState, 'confirmed');
+
+  const confirmed = { detail: { ...payload } };
+  assert.equal(context.handleJustPlusRawReportEvent(confirmed, report), true);
+  assert.equal(confirmed.detail.__lampa_trakt_ack, true);
+  assert.equal(attempts, 2, 'one initial failed request and one successful retry; repeated confirmation does not write again');
+});
+
+test('raw callback is consumed without a write when Watching Sync is disabled', async () => {
+  const { context, writes, setWatchingEnabled } = setup();
+  const report = context.buildExternalPlaylistReport(show, 'e2', [
+    { season: 1, episode: 2, timeline: { hash: 'e2', time: 0, duration: 1000 } }
+  ], 'account-a', 7);
+  context.externalPlaylistReport = report;
+  report.nativeSessionId = 'fixture-native-session';
+  setWatchingEnabled(false);
+  const event = { detail: { version: 2, session_id: 'fixture-native-session', card_id: '1396', end_by: 'user', items: [
+    { index: 0, hash: 'e2', season: 1, episode: 2, position_sec: 1000, duration_sec: 1000, has_visit: true }
+  ] } };
+  assert.equal(context.handleJustPlusRawReportEvent(event, report), true);
+  assert.equal(event.detail.__lampa_trakt_ack, true);
+  await flushPromises();
+  assert.equal(writes.filter(x => x.type === 'finish').length, 0);
+});
+
 test('raw Just+ bridge recovers measured 96–100 percent before Android zero/zero normalization', async () => {
   const { context, writes } = setup();
   const report = context.buildExternalPlaylistReport(show, 'e96', [
@@ -266,7 +346,8 @@ test('raw Just+ bridge retries a failed identical full snapshot and rejects stal
 test('production watching lifecycle installs and removes the optional native raw-report event listener', () => {
   assert.match(source, /window\.addEventListener\('lampa:justplus-raw-report', this\._onJustPlusRawReport\)/);
   assert.match(source, /window\.removeEventListener\('lampa:justplus-raw-report', this\._onJustPlusRawReport\)/);
-  assert.match(source, /handleJustPlusRawReport\(raw, owner\)/);
+  assert.match(source, /handleJustPlusRawReportEvent\(event, externalPlaylistReport\)/);
+  assert.match(source, /raw\.__lampa_trakt_ack = true/);
 });
 
 test('production external handoff captures PlayerPlaylist and timeline listener routes mapped reports', () => {

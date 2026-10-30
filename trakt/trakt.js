@@ -10246,24 +10246,61 @@
     return true;
   }
 
-  function handleJustPlusRawReport(payload, report) {
+  function validateJustPlusRawReport(payload, report) {
     report = report || externalPlaylistReport;
     if (!payload || payload.version !== 2 || !Array.isArray(payload.items) || !report || report !== externalPlaylistReport ||
         !report.nativeSessionId || payload.session_id !== report.nativeSessionId ||
         report.token !== String(Lampa.Storage.get('trakt_token') || '') || report.identityGeneration !== playbackIdentityGeneration ||
         cloudInjectInProgress || !['completion', 'user', 'interval'].includes(String(payload.end_by || ''))) return false;
-    if (String(payload.card_id || '') !== report.cardId) return false;
+    if (String(payload.card_id || '') !== report.cardId || payload.items.length === 0) return false;
+    var structurallyValid = payload.items.every(function (item) {
+      // Repeated indexes are valid: each entry is a separate measured visit
+      // (for example E02 → E03 → restart E02). The progress handler keeps the
+      // greatest confirmed position and ignores later lower restart positions.
+      if (!item || item.has_visit !== true || !Number.isInteger(item.index) || item.index < 0) return false;
+      var entry = report.indexedEntries[String(item.index)];
+      return !!(entry && String(item.hash) === entry.hash && Number.isInteger(item.season) && Number.isInteger(item.episode) &&
+        item.season === entry.identity.season && item.episode === entry.identity.episode &&
+        Number.isInteger(item.position_sec) && item.position_sec >= 0 &&
+        Number.isInteger(item.duration_sec) && item.duration_sec > 0);
+    });
+    if (!structurallyValid) return false;
+    return { valid: true, watchingEnabled: !!Lampa.Storage.field('trakt_enable_watching') };
+  }
+
+  function handleJustPlusRawReport(payload, report) {
+    report = report || externalPlaylistReport;
+    if (!validateJustPlusRawReport(payload, report) || !Lampa.Storage.field('trakt_enable_watching')) return false;
     var accepted = false;
     payload.items.forEach(function (item) {
-      if (!item || item.has_visit !== true || !Number.isInteger(item.index) || item.index < 0) return;
       var entry = report.indexedEntries[String(item.index)];
-      if (!entry || String(item.hash) !== entry.hash) return;
-      if (!Number.isInteger(item.season) || !Number.isInteger(item.episode) || item.season !== entry.identity.season || item.episode !== entry.identity.episode) return;
-      var position = Number(item.position_sec), duration = Number(item.duration_sec);
-      if (!Number.isInteger(position) || position < 0 || !Number.isInteger(duration) || duration <= 0) return;
-      if (handleExternalPlaylistEntryUpdate({ time: position, duration: duration }, entry, report)) accepted = true;
+      if (handleExternalPlaylistEntryUpdate({ time: item.position_sec, duration: item.duration_sec }, entry, report)) accepted = true;
     });
     return accepted;
+  }
+
+  function handleJustPlusRawReportEvent(event, report) {
+    var raw = event && event.detail;
+    var validation = validateJustPlusRawReport(raw, report);
+    if (!validation) return false;
+    // A disabled feature or a valid below-threshold snapshot needs no history
+    // write, so it can be consumed. Eligible progress stays unacknowledged
+    // until the Trakt writer confirms it; the native bridge then retries the
+    // same full snapshot. This ACK is never an API-success placeholder.
+    if (!validation.watchingEnabled) {
+      raw.__lampa_trakt_ack = true;
+      return true;
+    }
+    handleJustPlusRawReport(raw, report);
+    var minimum = parseInt(Lampa.Storage.field('trakt_min_progress') == null ? config.minProgress : Lampa.Storage.field('trakt_min_progress'), 10);
+    if (!isFinite(minimum)) minimum = 90;
+    var allResolved = raw.items.every(function (item) {
+      var entry = report.indexedEntries[String(item.index)];
+      return item.position_sec / item.duration_sec * 100 < minimum || entry.completionState === 'confirmed';
+    });
+    if (!allResolved) return false;
+    raw.__lampa_trakt_ack = true;
+    return true;
   }
 
   function externalReportMatchesPlayerStart(report, media, hash) {
@@ -10423,12 +10460,7 @@
       if (window.addEventListener) {
         this._onJustPlusRawReport = function (event) {
           try {
-            var raw = event && event.detail;
-            var owner = externalPlaylistReport;
-            if (raw && owner && raw.version === 2 && raw.session_id === owner.nativeSessionId &&
-                String(raw.card_id || '') === owner.cardId && owner.token === String(Lampa.Storage.get('trakt_token') || '') &&
-                owner.identityGeneration === playbackIdentityGeneration && !cloudInjectInProgress) raw.__lampa_trakt_ack = true;
-            handleJustPlusRawReport(raw, owner);
+            handleJustPlusRawReportEvent(event, externalPlaylistReport);
           } catch (error) {
             slog('Just+ raw report rejected', error && error.name || 'invalid_report');
           }

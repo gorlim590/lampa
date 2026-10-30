@@ -1,10 +1,10 @@
 # Issue #125 — Google TV / Just+ evidence
 
-The latest acceptance is [native/WebView acceptance](native-webview-acceptance.md). It supersedes earlier NOT VERIFIED statements about building the companion APK and Just+ interval delivery.
+The latest acceptance is [native/WebView acceptance](native-webview-acceptance.md), including a read-only smoke check of the real Siaivo Home and the exact PR JS bytes. It supersedes earlier NOT VERIFIED statements about building the companion APK and Just+ interval delivery.
 
 A separate official-source Android Lampa debug APK was built and installed, preserving production Lampa. Physical test media exercised receiver → take/keptReports → handle → WebView → the production JS helpers and actual finish/history writer with mocked transport. Regular interval reports were observed at 120/240/360 seconds; measured 47/52 and 50/52 completion, shared hashes, per-visit restart history, delayed JS readiness, Activity recreation and a transient 503 were covered.
 
-This is controlled physical integration acceptance. Stock website bootstrap/handoff recovery, authenticated Trakt API and actual Trakt+ renderer remain unverified. PR #138 remains Draft and Issue #125 open. No real Trakt history or production settings were changed.
+This is controlled physical integration acceptance plus real-site read-only bootstrap validation. A synthetic malformed callback confirmed the production listener does not ACK invalid payloads. Eligible callbacks remain unacknowledged until the API writer confirms; below-threshold/disabled-sync snapshots are consumed without writes. A bounded native six-attempt delivery is still not a durable queue. Real torrent playback with the owner session, authenticated Trakt write/confirmation, session recovery after site reload and actual Trakt+ watched renderer remain unverified. The latest parallel debug package is installed; production Lampa remains untouched. PR #138 remains Draft and Issue #125 open. No real Trakt history or production settings were changed.
 
 - [Component matrix and correlated timeline](native-webview-acceptance.md)
 - [Build and executed-source hashes](build-metadata.json)

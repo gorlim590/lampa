@@ -1,5 +1,17 @@
 # Physical native/WebView acceptance — 2026-10-30
 
+## Actual Siaivo site smoke check — 2026-10-30
+
+After the owner logged into the parallel `Lampa Trakt Test` application, its WebView was checked read-only against the configured site. The stored launch URL was read from the application before the APK update as `https://siaivo.github.io`; the live page redirects to `http://siaivo.isroot.in/`. The actual Home UI rendered and reported Activity `main`, Hybrid `3.1.0-single-presentation-owner`, and Trakt+ `3.4.1-rating-widgets`. Trakt token presence and Watching Sync were checked only as booleans; no credential value was read or printed.
+
+The test APK intercepted only `/lampa/trakt/trakt.js` and served the current PR source from its local asset. Android log tag `Issue125SiteOverride` recorded the asset SHA. `Debugger.getScriptSource` then returned the executed script with SHA-256 `f2caf253a4bba7fae573792b4b465f26cd8b47850eac85633262e586bc378b13`, equal to the repository source. A malformed synthetic raw-report event was dispatched as a negative smoke test; the production handler left its ACK unset. The read-only network guard remained active and rejected non-read methods to Trakt and the Siaivo proxy. No player was started and no Trakt write was attempted.
+
+The same app received the updated JS through `adb install -r`, preserving its app data; no URL field was saved. A test-only launch parameter supplied the previously verified site URL. The official production app was not changed. This proves actual-site bootstrap and script-byte ownership, but does **not** prove a real torrent → Just+ → raw report → history write or Trakt+ watched-card refresh.
+
+The final ACK regression semantics are now explicit: malformed or identity-mismatched reports remain unacknowledged; valid below-threshold and disabled-sync reports are consumed without a write; eligible reports stay unacknowledged while the history writer is pending or retryable and receive ACK only after confirmation. Production tests cover the pending → 503 → retry → confirmed path. This narrows the data-loss window, but the native retry budget is still bounded to six attempts and there is no durable JS queue after that budget or process death. No real player/session was started in this follow-up, so the new ACK code was verified in production-handler tests and its exact script bytes in the real site WebView, not as an eligible physical Trakt write.
+
+Final test APK after the ACK regression fix: `artifacts/issue125/lampa-1.13.5-issue125-site-test.apk` (outside Git), SHA-256 `348f965a915d9d89469d16157674004cd5b93f3bbc25b827641f463149929547`; signer certificate SHA-256 `e796a3d3972f0b1e598b43e2dc84834ee3be241bae8b351601f676147990ad9b`. Its executed JS SHA-256 is `3e5a791f72fbc3f109c8269b78807a9c31ff1330c171f9ed6aece08278423b56`.
+
 ## Scope and artifact identity
 
 Hardware: Google TV Streamer 4K, Android 14; installed Just+ 2.5.1. Production Lampa 1.13.5 was not replaced. An official v1.13.5 source build with the proposed bridge and debug-only instrumentation was compiled with JDK 17, SDK 34 and Build Tools 30.0.3, installed as **top.rootu.lampa.issue125probe**. Upstream base is f6d9a9318a889b53edccd81fbe7050ec17dfd2ba.
