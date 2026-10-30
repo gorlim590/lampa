@@ -24,9 +24,9 @@ Used the existing Chrome DevTools Lampa tab (page 3), with the local source serv
 
 Live TV case — The Last of Us (`100088`): native TMDb aggregate credits returned 159 people; first Category page rendered 30 cards and 30 image elements. D-pad Down entered the cast row on **Всі актори**, Right focused the first actor, Left returned to the action, and Up/Down moved between adjacent native rows without an Activity transition. Enter opened `sh_full_cast_grid`; Enter on an actor opened native `actor`; Back restored the same actor card; Back restored Details with focus on the originating action.
 
-Live movie case — Fight Club (`550`): native movie credits returned 75 people; first Category page rendered 30 cards and images. D-pad reached the next native page and cumulative live DOM grew to 60 cards and 60 image elements; the remaining page was not loaded in this browser pass. Enter opened a person; Back restored the exact person card, and Back returned to movie Details. Screenshots show focus rings, names, roles, missing-photo fallback, and responsive card layout.
+Live movie case — Fight Club (`550`): native movie credits returned 75 people; the active Category rendered 30 cards and 30 image elements. The visible D-pad path did not invoke the next-page callback in this browser session. A broad page query briefly counted a second, hidden Activity's 30 cards; those were not additional cards in the active Category. Enter opened a person; Back restored the exact person card, and Back returned to movie Details. Screenshots show focus rings, names, roles, missing-photo fallback, and responsive card layout.
 
-The native D-pad sequence advanced the live movie Category to 60 cards but did not reach 120+ cards. Cumulative live DOM/image growth after 120 cards is **NOT VERIFIED**. The 159-card six-batch result is deterministic production-handler evidence, not a claim that 159 DOM nodes were observed in Chrome. Physical Google TV remains **NOT VERIFIED**.
+The active live Category remained at 30 cards; cumulative live DOM/image growth after 120 cards is **NOT VERIFIED**. The 159-card six-batch result is deterministic production-handler evidence, not a claim that 159 DOM nodes were observed in Chrome. Physical Google TV remains **NOT VERIFIED**.
 
 ### Screenshots
 
