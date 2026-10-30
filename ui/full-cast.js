@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  if (window.LampaFullCast && window.LampaFullCast.version === '1.0.1') return;
+  if (window.LampaFullCast && window.LampaFullCast.version === '1.0.5') return;
   if (!window.Lampa || !Lampa.Component || !Lampa.Maker || !Lampa.Listener || !Lampa.Api) return;
 
   var PREVIEW_LIMIT = 10;
@@ -18,13 +18,20 @@
   var styleInstallTimer = null;
 
   var css = [
-    'body.stremio-hybrid .items-line .sh-full-cast-open-card .card__view{display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#302a45,#191822)}',
-    'body.stremio-hybrid .items-line .sh-full-cast-open-card .card__view:after{content:"↗";display:flex;align-items:center;justify-content:center;width:2.1em;height:2.1em;border:1px solid var(--sh-border);border-radius:50%;background:#17151fd9;color:var(--sh-accent-soft);font-size:1.25em}',
-    'body.stremio-hybrid .items-line .sh-full-cast-open-card .card__title{color:var(--sh-accent-soft);font-weight:700;white-space:normal}',
+    'body.stremio-hybrid .items-line .full-person.sh-full-cast-open-card{background:linear-gradient(145deg,#302a45,#191822);border:1px solid var(--sh-border);border-radius:var(--sh-radius);padding:.45em;box-sizing:border-box}',
+    'body.stremio-hybrid .items-line .full-person.sh-full-cast-open-card .full-person__photo{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(145deg,#39314f,#191822);border:1px solid #ffffff18}',
+    'body.stremio-hybrid .items-line .full-person.sh-full-cast-open-card .full-person__photo img{opacity:.2}',
+    'body.stremio-hybrid .items-line .full-person.sh-full-cast-open-card .full-person__photo:after{content:"↗";position:absolute;z-index:1;left:50%;top:50%;display:flex;align-items:center;justify-content:center;width:2.25em;height:2.25em;transform:translate(-50%,-50%);border:1px solid var(--sh-border);border-radius:50%;background:#17151fd9;color:var(--sh-accent-soft);font-size:1.35em;pointer-events:none}',
+    'body.stremio-hybrid .items-line .full-person.sh-full-cast-open-card .full-person__body{padding:.35em .15em .1em;text-align:center}',
+    'body.stremio-hybrid .items-line .full-person.sh-full-cast-open-card .full-person__name{color:var(--sh-accent-soft);font-weight:700;white-space:normal}',
+    'body.stremio-hybrid .items-line .full-person.sh-full-cast-open-card .full-person__role{color:var(--sh-muted);white-space:normal}',
+    'body.stremio-hybrid .items-line .full-person.sh-full-cast-open-card.focus{box-shadow:0 0 0 .14em var(--sh-accent-soft),0 0 1.2em #a78bfa66;background:linear-gradient(145deg,#463864,#201b30)}',
     'body.stremio-hybrid .sh-full-cast-grid .card__title{font-size:1.04em;font-weight:600;line-height:1.3;white-space:normal}',
     'body.stremio-hybrid .sh-full-cast-grid .sh-full-cast-role{position:static;display:-webkit-box;margin:.28em .4em .65em;max-height:3.9em;overflow:hidden;color:var(--sh-muted);font-size:.82em;line-height:1.3;white-space:normal;-webkit-line-clamp:3;-webkit-box-orient:vertical;pointer-events:none}',
     'body.stremio-hybrid .sh-full-cast-grid .card.focus .sh-full-cast-role{color:var(--sh-text)}',
-    'body.stremio-hybrid .sh-full-cast-grid .sh-full-cast-status{padding:.7em 1em;color:#d6d1e2;font-size:.9em}',
+    'body.stremio-hybrid .sh-full-cast-grid{position:relative}',
+    'body.stremio-hybrid .sh-full-cast-grid .sh-full-cast-status{position:absolute;z-index:5;top:0;left:0;right:0;box-sizing:border-box;min-height:3em;padding:.7em 1em;border-bottom:1px solid #ffffff12;background:#171522;color:#d6d1e2;font-size:.9em;pointer-events:none}',
+    'body.stremio-hybrid .sh-full-cast-grid .mapping--grid{padding-top:3.2em;box-sizing:border-box}',
     'body.stremio-hybrid .sh-full-cast-grid .card.sh-full-cast-retry .card__view{display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#2b2640,#171725)}',
     'body.stremio-hybrid .sh-full-cast-grid .card.sh-full-cast-retry .card__view:after{content:"↻";font-size:3em;color:#d4c6ff}'
   ].join('\n');
@@ -149,8 +156,10 @@
     return jobs[key];
   }
 
-  function previewActors(actors) {
-    return [{ id: '__sh_full_cast_action__', name: 'Всі актори', character: 'Повний акторський склад', profile_path: null, source: 'tmdb', media_type: 'person', _shCastAction: true }].concat((actors || []).slice(0, PREVIEW_LIMIT));
+  function previewActors(actors, knownComplete) {
+    var people = (actors || []).slice(0, PREVIEW_LIMIT);
+    if (knownComplete && (actors || []).length <= PREVIEW_LIMIT) return people;
+    return [{ id: '__sh_full_cast_action__', name: 'Всі актори', character: 'Повний акторський склад', profile_path: null, source: 'tmdb', media_type: 'person', _shCastAction: true }].concat(people);
   }
 
   function hybridOwnsDetails() {
@@ -282,7 +291,7 @@
     if (!state || !state.data || !state.data.persons || !Array.isArray(state.data.persons.cast) || !hybridOwnsDetails() || !liveOwner(state)) return;
     state.actors = actors;
     state.complete = !!knownComplete;
-    var list = previewActors(actors);
+    var list = previewActors(actors, knownComplete);
     state.cast.splice.apply(state.cast, [0, state.cast.length].concat(list));
     state.applied = true;
     var rowData = actorRowData(state);
@@ -344,9 +353,13 @@
       offset = 0; built = true;
       if (!all.length) { comp.empty(); showGridStatus(comp, 'У джерелі немає акторських кредитів.'); return; }
       var first = all.slice(0, PAGE_SIZE); offset = first.length;
+      // Native Category's onLoadNext gate compares object.page with total_pages.
+      // Maker.make does not initialize object.page from build({page:1}), so an
+      // undefined page permanently disables scroll.onEnd pagination.
+      comp.object.page = 1;
       comp.build({ title: object.title || 'Всі актори', results: first, page: 1, total_pages: Math.max(1, Math.ceil(all.length / PAGE_SIZE)) });
       comp.activity.loader(false);
-      showGridStatus(comp, isError ? 'Повний склад не завантажився. Оберіть «Повторити завантаження».' : (all.length + ' акторів · повний склад'));
+      showGridStatus(comp, isError ? 'Повний склад не завантажився. Оберіть «Повторити завантаження».' : ('Показано ' + Math.min(offset, actors.length) + ' із ' + actors.length + ' акторів'));
     }
     function retry() {
       showGridStatus(comp, 'Завантажуємо повний склад акторів…');
@@ -379,7 +392,7 @@
         var page = Math.floor(offset / PAGE_SIZE) + 1, cards = all.slice(offset, offset + PAGE_SIZE);
         offset += cards.length;
         resolve.call(this, { title: object.title || 'Всі актори', results: cards, page: page, total_pages: Math.max(1, Math.ceil(all.length / PAGE_SIZE)) });
-        if (offset >= all.length) showGridStatus(comp, 'Усі ' + all.length + ' акторів завантажено.');
+        showGridStatus(comp, offset >= all.length ? ('Показано ' + all.length + ' із ' + all.length + ' акторів') : ('Показано ' + offset + ' із ' + all.length + ' акторів'));
       },
       onInstance: function (card, data) {
         card.use({ onlyMenu: false, onlyEnter: function () {
@@ -429,7 +442,12 @@
     var route = event.object || {}, method = route.method === 'tv' ? 'tv' : 'movie', source = route.source || 'tmdb';
     if (source !== 'tmdb' || !validId(event.data.movie.id) || event.data.movie.adult || !event.data.persons) return;
     var prior = stateFor(event.link, event.data, event.data.movie.id);
-    if (prior) return;
+    if (prior) {
+      var ready = !prior.complete && cached(prior.kind, prior.id);
+      if (ready) { prior.actors = ready; prior.complete = true; }
+      if (prior.complete && hybridOwnsDetails() && liveOwner(prior)) applyCast(prior, prior.actors, true);
+      return;
+    }
     // Native Full reuses its component link between activity instances. Retire the
     // previous owner before binding a new title so late credits cannot target it.
     states = states.filter(function (entry) { return entry.component !== event.link; });
@@ -477,7 +495,7 @@
 
   register();
   window.LampaFullCast = {
-    version: '1.0.1',
+    version: '1.0.5',
     normalizeCredits: normalizeCredits,
     loadCredits: loadCredits,
     open: function (kind, id, cast, title) {

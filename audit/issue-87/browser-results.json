@@ -2,10 +2,9 @@
   "reviewComment": "https://github.com/gorlim590/lampa/pull/137#issuecomment-6513764119",
   "date": "2026-10-30",
   "branch": "feat/issue-87-full-cast",
-  "source": {
-    "browserVisualRunSha256": "5f2b0d29413702b66c0f9e6b3a003b8b47e0237dbc06fa3a252008820c41021d",
-    "finalSourceSha256": "b3d55e9a39a24073ed73ffe467963cd11d80820b848e68682afd9ad57dfc796f",
-    "note": "The final source adds only a second live controller-owner guard after native row replacement. That guard is covered by a production-handler regression. The UI/route browser pass used the immediately preceding source; no other production source changed in the pass."
+  "testedSource": {
+    "version": "1.0.5",
+    "sha256": "f150b5f7f49dc270f4c9e1c5790a87fb9228340b76c8f858ddcb82d8138f4039"
   },
   "browser": {
     "connection": "existing authorized Chrome DevTools MCP",
@@ -13,32 +12,37 @@
     "tabCountChanged": false,
     "storageSettingsTraktOrTorrentChanged": false,
     "viewports": ["1280x720 DPR1", "1920x1080 DPR1", "3840x2160 DPR1"],
-    "restored": "Original page 3 URL, active movie cast route, first-card focus, and 1280x720 DPR1 viewport restored. Storage/settings unchanged."
+    "restored": "The existing page-3 Lampa tab returned to its initially observed The Last of Us Full Cast page-1 URL at 1920x1080 DPR1. Saved data and settings were not modified."
   },
   "liveCases": {
     "lastOfUs": {
       "media": "tv",
       "tmdbId": 100088,
       "provider": "configured native Lampa TMDb source",
-      "aggregateCredits": 159,
-      "initialCategoryCards": 30,
-      "initialCategoryImageElements": 30,
-      "dpad": ["Down enters cast row on first All Actors action", "Right focuses first actor", "Left returns to action", "Up/Down cross neighboring native rows without changing Activity"],
-      "enterBack": ["Enter opens full native Category", "Enter on actor opens native actor route", "Back restores same actor card", "Back restores Details focus on originating cast action"],
-      "allPagesLive": "NOT VERIFIED: remote arrows in this browser session did not naturally trigger the native Category next-page callback."
+      "liveCredits": 159,
+      "nativeCategoryPages": 6,
+      "activeProgression": [30, 60, 90, 120, 150, 159],
+      "finalPage": "6/6",
+      "finalVisibleStatus": "Показано 159 із 159 акторів",
+      "uniqueCreditIds": 159,
+      "dpad": "Actual Arrow navigation advanced the active native Category through all six pages; page 2 actor 31, page 3 actors 60 and 61, and the final 159th credit were reachable.",
+      "profileAndBack": "Enter on actor 31 opened native actor profile id 10402; Back restored actor 31 on page 2 at the prior position. Back from the correctly stacked Category returned to Details with the originating All Actors action focused.",
+      "domCounting": "Only the active Category was counted. Native viewport virtualization was observed; a document-wide count would include hidden Activities."
     },
     "fightClub": {
       "media": "movie",
       "tmdbId": 550,
       "provider": "configured native Lampa TMDb source",
-      "returnedCredits": 75,
-      "initialCategoryCards": 30,
-      "initialCategoryImageElements": 30,
-      "activeCategoryAfterRemoteArrows": 30,
-      "remotePagination": "NOT VERIFIED: Arrow navigation did not invoke the next-page callback in this browser pass. A 60-card document-wide query included a second hidden Activity with 30 cards; active Category was 30.",
-      "enterBack": ["Enter opens Peter Iacangelo actor profile (id 7500)", "Back restores exact Peter Iacangelo card", "Back returns to movie Details"],
-      "responsiveCardLayout": "PASS at 720p, 1080p, 4K DPR1",
-      "remainingMoviePage": "NOT VERIFIED: active remote navigation did not advance the Category beyond its first 30-card page."
+      "liveCredits": 75,
+      "activeCategoryProgression": "Remote pagination through all 75 credits and native actor-profile/back restoration verified on the same source version before final progress-background styling adjustment.",
+      "layout": "720p, 1080p and 4K DPR1 responsive card layout verified; 4K was viewport emulation only."
+    },
+    "nativeAction": {
+      "element": ".full-person.sh-full-cast-open-card",
+      "icon": ".full-person__photo:after",
+      "label": ".full-person__name",
+      "role": ".full-person__role",
+      "focus": "Native .focus state displayed; one action and no duplicate control/controller."
     }
   },
   "productionHandlerFixture": {
@@ -47,19 +51,17 @@
     "pageMetadata": [1, 2, 3, 4, 5, 6],
     "portraitPaths": 158,
     "missingPortraitRetained": true,
-    "domImageMeasurement": "Fixture payload count only; no claim of live DOM retention past 120 cards."
+    "testCommand": "node --test --test-timeout=15000 tests/full-cast.cjs tests/loader-critical-parallel.cjs"
   },
   "screenshots": [
-    {"file": "screenshots/review-6513764119/the-last-of-us-720-action-focused.png", "width": 1280, "height": 720, "dpr": 1, "state": "Details native All Actors first card focused"},
-    {"file": "screenshots/review-6513764119/the-last-of-us-1080-action-focused.png", "width": 1920, "height": 1080, "dpr": 1, "state": "Details native All Actors first card focused"},
-    {"file": "screenshots/review-6513764119/the-last-of-us-720-actor-focused.png", "width": 1280, "height": 720, "dpr": 1, "state": "Full cast actor card focused"},
-    {"file": "screenshots/review-6513764119/the-last-of-us-1080-actor-focused.png", "width": 1920, "height": 1080, "dpr": 1, "state": "Full cast actor card focused"},
-    {"file": "screenshots/review-6513764119/the-last-of-us-4k-actor-focused.png", "width": 3840, "height": 2160, "dpr": 1, "state": "Full cast actor card focused"},
-    {"file": "screenshots/review-6513764119/fight-club-720-focused-card.png", "width": 1280, "height": 720, "dpr": 1, "state": "Movie full cast focused card"},
-    {"file": "screenshots/review-6513764119/fight-club-1080-action-focused.png", "width": 1920, "height": 1080, "dpr": 1, "state": "Movie Details cast action focused"},
-    {"file": "screenshots/review-6513764119/fight-club-1080-focused-card.png", "width": 1920, "height": 1080, "dpr": 1, "state": "Movie full cast focused card"},
-    {"file": "screenshots/review-6513764119/fight-club-4k-focused-card.png", "width": 3840, "height": 2160, "dpr": 1, "state": "Movie full cast focused card"}
+    {"file": "screenshots/pagination-6513764119/all-actors-action-1280x720.png", "width": 1280, "height": 720, "dpr": 1, "state": "Native action in Details"},
+    {"file": "screenshots/pagination-6513764119/all-actors-action-1920x1080.png", "width": 1920, "height": 1080, "dpr": 1, "state": "Native action in Details"},
+    {"file": "screenshots/pagination-6513764119/all-actors-action-3840x2160.png", "width": 3840, "height": 2160, "dpr": 1, "state": "Native action 4K layout emulation"},
+    {"file": "screenshots/pagination-6513764119/tlou-page1-progress-1920x1080.png", "width": 1920, "height": 1080, "dpr": 1, "state": "Full Cast page 1 progress visible"},
+    {"file": "screenshots/pagination-6513764119/tlou-page2-actor31-1280x720.png", "width": 1280, "height": 720, "dpr": 1, "state": "Page 2 actor 31 focused"},
+    {"file": "screenshots/pagination-6513764119/tlou-page2-actor31-1920x1080.png", "width": 1920, "height": 1080, "dpr": 1, "state": "Page 2 actor 31 focused"}
   ],
+  "nativeDomWindowGrowthBeyondViewport": "NOT VERIFIED",
   "physicalGoogleTv": "NOT VERIFIED",
-  "finalGitHubActions": "Five workflows passed on documentation SHA c92f4f6a625792bdd8faa013c60efd3822a50e80. A final evidence correction is being rechecked on the latest PR head; links for the exact head will be in the PR description."
+  "githubActionsFinalSha": "PENDING"
 }

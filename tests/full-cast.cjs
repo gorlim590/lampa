@@ -12,11 +12,11 @@ function harness(options) {
   const requests = [], listeners = {}, pushed = [], styles = [], controllerCalls = [];
   let activeActivity = null, activeController = options.controller || null, language = options.language || 'uk', hybridOwner = options.hybridActive !== false;
   const categoryRoot = { children: [], appendChild(node) { node.parentNode = this; this.children.push(node); }, querySelector(selector) { return selector === '.sh-full-cast-status' ? this.children.find(node => node.className === 'sh-full-cast-status') || null : null; } };
-  const category = { destroyed: false, html: { addClass(value) { category.className = value; } }, activity: { loader(value) { category.loading = value; } }, use(value) { category.options = value; }, build(value) { category.page = value; }, render() { return [categoryRoot]; }, empty() { category.emptyState = true; }, root: categoryRoot };
+  const category = { destroyed: false, html: { addClass(value) { category.className = value; } }, activity: { loader(value) { category.loading = value; } }, use(value) { category.options = value; }, build(value) { category.page = value; category.total_pages = value.total_pages; }, render() { return [categoryRoot]; }, empty() { category.emptyState = true; category.loading = false; }, root: categoryRoot };
   const Lampa = {
     Component: { add(name, factory) { Lampa.component = factory; Lampa.componentName = name; } },
     Listener: { follow(name, fn) { listeners[name] = fn; } },
-    Maker: { make() { return category; } },
+    Maker: { make(_name, object) { category.object = object; return category; } },
     Api: { sources: { tmdb: { get(route, params, done, fail) { requests.push({ route, params, done, fail }); } } } },
     Activity: { push(value) { pushed.push(value); }, active() { return activeActivity; } },
     Controller: { enabled() { return activeController; }, collectionSet() { controllerCalls.push('collectionSet'); }, collectionFocus() { controllerCalls.push('collectionFocus'); } },
@@ -124,6 +124,13 @@ test('late Hybrid initialization receives cast CSS through the single style owne
   assert.equal(h.styles.length, 1);
   assert.equal(h.styles[0].name, 'full-cast');
   assert.match(h.styles[0].css, /\.sh-full-cast-role/);
+  assert.match(h.styles[0].css, /\.full-person__photo:after/, 'native Full action icon targets the actual portrait node');
+  assert.match(h.styles[0].css, /\.full-person__photo:after\{[^}]*position:absolute/, 'the action icon overlays the native placeholder instead of being pushed outside the crop');
+  assert.match(h.styles[0].css, /\.full-person__name/, 'native Full action label targets the actual person name');
+  assert.match(h.styles[0].css, /\.full-person\.sh-full-cast-open-card\.focus/, 'native focus state targets the action card');
+  assert.match(h.styles[0].css, /\.sh-full-cast-grid \.sh-full-cast-status\{position:absolute/, 'progress status is pinned inside the active Category viewport');
+  assert.match(h.styles[0].css, /\.sh-full-cast-grid \.sh-full-cast-status\{[^}]*background:#171522/, 'progress has an opaque background so scrolling credits cannot show through it');
+  assert.match(h.styles[0].css, /\.sh-full-cast-grid \.mapping--grid\{padding-top/, 'the first actor row clears the pinned progress status');
 });
 
 test('cache and in-flight jobs are partitioned by configured TMDB language', async () => {
@@ -167,19 +174,21 @@ test('animated movie preview stays synchronous and fetches full movie credits on
   assert.equal(h.category.page.results[0]._shCastPerson.character, 'Animated Hero / Narrator');
 });
 
-test('a genuinely small TV cast keeps all source actors and one native first-position full-cast action', async () => {
+test('a verified complete small TV cast removes the temporary All Actors action and keeps every source actor', async () => {
   const h = harness(), cast = credits(2).cast, link = { destroyed: false, activity: {}, rows: [], items: [] };
   h.setActivity({ component: 'full', activity: link.activity, id: 900 });
   h.listeners.full({ type: 'start', link, object: { id: 900, method: 'tv', source: 'tmdb' }, data: { movie: { id: 900, name: 'Small Cast' }, persons: { cast } } });
   assert.equal(cast.length, 3);
+  assert.equal(cast[0]._shCastAction, true, 'unknown completeness keeps the action available until TMDb confirms the source result');
   const line = buildPeopleRow(h, link, cast);
   assert.equal(line.data.results[0]._shCastAction, true);
   assert.equal(line.data.results.filter(person => person._shCastAction).length, 1);
   assert.equal(h.requests.length, 1);
   h.requests[0].done(credits(2));
   await new Promise(setImmediate);
-  assert.equal(cast.length, 3);
-  assert.deepEqual(cast.slice(1).map(person => person.name), ['Actor 1', 'Actor 2']);
+  assert.equal(cast.length, 2);
+  assert.equal(cast.some(person => person._shCastAction), false);
+  assert.deepEqual(cast.map(person => person.name), ['Actor 1', 'Actor 2']);
 });
 
 test('parallel TV aggregate requests coalesce, use native TMDB transport and stay cached', async () => {
@@ -285,6 +294,23 @@ test('late credits while another Activity owns the screen are cached without mut
   assert.equal((await h.api.loadCredits('tv', 100088)).length, 159, 'valid provider data remains cached');
 });
 
+test('completed credits received under another Activity apply safely when the same Details owner returns', async () => {
+  const h = harness(), activity = {}, link = { destroyed: false, activity, id: 100088, rows: [], items: [] }, cast = credits(4).cast;
+  const data = { movie: { id: 100088, name: 'The Last of Us' }, persons: { cast } }, route = { id: 100088, method: 'tv', source: 'tmdb' };
+  h.setActivity({ component: 'full', activity, id: 100088 });
+  h.listeners.full({ type: 'start', link, object: route, data });
+  buildPeopleRow(h, link, cast);
+  h.setActivity({ component: 'settings', activity: {}, id: 'interface' });
+  h.setController({ name: 'settings', controller: { link: { last: h.element('settings-focus') } } });
+  h.requests[0].done(credits(159)); await new Promise(setImmediate);
+  assert.equal(cast.length, 5, 'late response only updates its cache/state while another Activity owns the screen');
+  h.setActivity({ component: 'full', activity, id: 100088 });
+  h.listeners.full({ type: 'start', link, object: route, data });
+  assert.equal(cast.length, 11, 'cached complete data is applied when its original Details Activity returns');
+  assert.equal(cast[0]._shCastAction, true);
+  assert.equal(h.controllerCalls.length, 0, 'return refresh does not claim native controller focus');
+});
+
 test('focused Full cast refresh restores the same actor only when its native items-line owns focus', async () => {
   const h = harness(), activity = {}, link = { destroyed: false, activity, id: 100088, rows: [], items: [] }, cast = credits(4).cast;
   h.setActivity({ component: 'full', activity, id: 100088 });
@@ -368,6 +394,18 @@ test('the first native cast card opens All Actors without forcing ten ArrowRight
   assert.equal(h.styles[0].name, 'full-cast');
 });
 
+test('a verified complete cast no larger than the preview removes the redundant All Actors action', async () => {
+  const h = harness(), activity = {}, link = { destroyed: false, activity, id: 550, rows: [], items: [] }, cast = credits(4).cast;
+  h.setActivity({ component: 'full', activity, id: 550 });
+  h.listeners.full({ type: 'start', link, object: { id: 550, method: 'movie', source: 'tmdb' }, data: { movie: { id: 550, title: 'Small cast' }, persons: { cast } } });
+  const line = buildPeopleRow(h, link, cast);
+  assert.equal(cast[0]._shCastAction, true, 'unknown completeness keeps the full-cast route available while credits load');
+  h.requests[0].done(credits(4)); await new Promise(setImmediate);
+  assert.equal(cast.length, 4);
+  assert.equal(cast.some(person => person._shCastAction), false, 'verified complete small cast has no dead-end All Actors card');
+  assert.equal(line.data.results.some(person => person._shCastAction), false);
+});
+
 test('deferred adapter recovers a deep-linked active Full and places All Actors first in the native row when it mounts', async () => {
   const h = harness({ activeFull: true }), component = h.Lampa.Activity.active().activity.component;
   assert.equal(component.items.length, 0, 'the existing Full currently has not mounted its hidden persons line');
@@ -408,6 +446,7 @@ test('native cast grid exposes loading, empty, retryable error and successful re
   assert.equal(h.category.loading, true);
   h.requests[0].done({ cast: [] }); await new Promise(setImmediate);
   assert.equal(h.category.emptyState, true);
+  assert.equal(h.category.loading, false, 'empty credits stop the native loading indicator');
   assert.match(h.category.root.querySelector('.sh-full-cast-status').textContent, /немає акторських кредитів/);
 
   const retryHarness = harness(), retryComp = retryHarness.Lampa.component({ kind: 'movie', id: 550, title: 'Всі актори' }), retryOwner = {};
@@ -456,20 +495,27 @@ test('159 native Category cards paginate in six ordered batches with truthful pa
   const actors = h.api.normalizeCredits({ cast: movieCredits }, 'movie');
   const comp = h.Lampa.component({ kind: 'movie', id: 550, title: 'Всі актори · Movie', cast: actors });
   h.category.options.onCreate.call(h.category);
+  assert.equal(h.category.object.page, 1, 'native Category scroll-end gate requires the current page on its route object');
   assert.equal(h.category.page.results.length, 30);
   assert.equal(h.category.page.page, 1);
   assert.equal(h.category.page.total_pages, 6);
   assert.equal(h.category.page.results[0]._shCastPerson.id, 1);
   assert.equal(h.category.page.results[0]._shCastPerson.character, 'Role 1');
+  assert.equal(h.category.root.querySelector('.sh-full-cast-status').textContent, 'Показано 30 із 159 акторів');
 
   const pages = [h.category.page.results], pageSizes = [30];
   const pageNumbers = [];
-  const loadNext = () => new Promise(resolve => h.category.options.onNext.call(h.category, { call(_self, page) { pageNumbers.push(page.page); resolve(page.results); } }, { call() { resolve([]); } }));
+  const loadNext = () => new Promise(resolve => {
+    // Native Category increments object.page before emitting `next` from onLoadNext.
+    h.category.object.page++;
+    h.category.options.onNext.call(h.category, { call(_self, page) { pageNumbers.push(page.page); assert.equal(page.page, h.category.object.page); h.category.page = page; resolve(page.results); } }, { call() { resolve([]); } });
+  });
   let chain = Promise.resolve();
   for (let i = 0; i < 5; i++) chain = chain.then(() => loadNext()).then(page => { pages.push(page); pageSizes.push(page.length); });
   return chain.then(() => {
     assert.deepEqual(pageSizes, [30, 30, 30, 30, 30, 9]);
     assert.deepEqual(pageNumbers, [2, 3, 4, 5, 6]);
+    assert.equal(h.category.root.querySelector('.sh-full-cast-status').textContent, 'Показано 159 із 159 акторів');
     const allCards = pages.flat(), ids = allCards.map(person => person._shCastPerson.id);
     assert.equal(new Set(ids).size, 159);
     assert.deepEqual(ids, Array.from({ length: 159 }, (_, index) => index + 1));

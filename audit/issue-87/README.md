@@ -18,15 +18,27 @@ The built-in adapter only modifies Details when `StremioHybrid.ownsPresentation(
 
 The category pagination metadata reports page 1 on the first batch and page 2 onward accurately. Production-handler tests cover 159 cards in six ordered native batches (30/30/30/30/30/9); the fixture has 158 portrait paths and retains one missing portrait as fallback. The same tests verify loading, empty results, provider failure, reachable retry, and a successful retry.
 
+## Paging and action acceptance — PR #137 final pass
+
+The live paging failure was in the native Category gate, not the credits source. The grid built page 1 for display but left `Category.object.page` undefined. Native `onLoadNext` compares that field with `total_pages`, so `scroll.onEnd` could never advance. The adapter now initializes `object.page = 1` before the native first build and continues using native `onLoadNext`, `build`, Category scroll ownership and the same result set. Progress is pinned visibly inside the active Category and reports the currently rendered count.
+
+The **Всі актори** preview entry is still one native `.full-person` action. Its styles now target `.full-person__photo`, `.full-person__body`, `.full-person__name`, `.full-person__role`, and the native `.focus` class. The icon overlays the portrait placeholder; the label and role remain below the photo. A complete source of at most ten people removes the now-redundant action. Cached complete credits are applied when the same Details owner returns after a response received under another Activity.
+
+Exact-source Chrome acceptance used the existing page 3 and source SHA `f150b5f7f49dc270f4c9e1c5790a87fb9228340b76c8f858ddcb82d8138f4039` (Full Cast source v1.0.5):
+
+- The Last of Us (`tv/100088`) returned 159 live aggregate credits. Native remote navigation advanced the **active Category** from 30 to 60, then 90, then through 120 and 150 to 159. The active Category reached native page 6/6; all 159 source person IDs were unique. The displayed count reached `Показано 159 із 159 акторів`. Counts were read from the active Category, not hidden Activities.
+- Arrow navigation selected the actual 31st person, Alanna Ubach (TMDb 10402, Hanrahan). Enter opened that native actor profile; Back restored actor 31, page 2 and its position. Further remote navigation reached actor 60 as page 3 loaded and actor 61 (Yayu Unru, TMDb 1645600). The final batch was reachable by D-pad.
+- From the native Details stack, Back from Full Cast restored Details with exactly the originating All Actors action focused. (A separate Escape trial from a deep-linked `Activity.replace` route had no Details beneath it; native Select appeared, and was dismissed without changing a selection. The acceptance route was repeated using Details → All Actors so Back ownership was tested with its proper parent.)
+- Fight Club (`movie/550`) had 75 live movie credits. Its active Category also advanced through pages to 75 using remote navigation, with actor profile and exact Back restoration previously verified on the same source version before the final status-background-only adjustment. The Last of Us final action card was inspected at 720p/1080p/4K DPR1; 4K is viewport emulation, not hardware acceptance.
+- Native action computed style showed one `.full-person.sh-full-cast-open-card`, the arrow on `.full-person__photo:after`, label/role on their native nodes, and the native focus treatment. No second button or navigation controller was added.
+
+Live visible states are captured in `screenshots/pagination-6513764119/`. Page 1/2 and action evidence are saved. Page 3, final 159 count and intermediate 60/90/120/150 counts were confirmed by live DOM/controller state while navigating; no screenshot is claimed for those unsaved intermediate states. Native Category retains its normal viewport DOM window, so a query over the whole document is not used as an active-page count.
+
 ## Browser acceptance
 
-Used the existing Chrome DevTools Lampa tab (page 3), with the local source served from `http://127.0.0.1:8767/full-cast.js`; the served SHA matched the source at browser capture time (`5f2b0d29413702b66c0f9e6b3a003b8b47e0237dbc06fa3a252008820c41021d`). The final source adds a post-row-replacement controller-owner recheck after that visual/browser pass; that exact race is covered by a production-handler regression. No browser profile, storage, settings, Trakt history, parser configuration, or torrent state was changed.
+Used the existing Chrome DevTools Lampa tab (page 3), with the local source served from `http://127.0.0.1:8767/full-cast.js`; the final pagination/action browser pass used v1.0.5 SHA `f150b5f7f49dc270f4c9e1c5790a87fb9228340b76c8f858ddcb82d8138f4039`. No browser profile, storage, settings, Trakt history, parser configuration, or torrent state was changed. Page count remained unchanged. At wrap-up, page 3 was returned to its observed initial The Last of Us Full Cast page-1 URL and 1920×1080 DPR1 viewport.
 
-Live TV case — The Last of Us (`100088`): native TMDb aggregate credits returned 159 people; first Category page rendered 30 cards and 30 image elements. D-pad Down entered the cast row on **Всі актори**, Right focused the first actor, Left returned to the action, and Up/Down moved between adjacent native rows without an Activity transition. Enter opened `sh_full_cast_grid`; Enter on an actor opened native `actor`; Back restored the same actor card; Back restored Details with focus on the originating action.
-
-Live movie case — Fight Club (`550`): native movie credits returned 75 people; the active Category rendered 30 cards and 30 image elements. The visible D-pad path did not invoke the next-page callback in this browser session. A broad page query briefly counted a second, hidden Activity's 30 cards; those were not additional cards in the active Category. Enter opened a person; Back restored the exact person card, and Back returned to movie Details. Screenshots show focus rings, names, roles, missing-photo fallback, and responsive card layout.
-
-The active live Category remained at 30 cards; cumulative live DOM/image growth after 120 cards is **NOT VERIFIED**. The 159-card six-batch result is deterministic production-handler evidence, not a claim that 159 DOM nodes were observed in Chrome. Physical Google TV remains **NOT VERIFIED**.
+The final PR acceptance pass and full D-pad page progression are recorded above. This supersedes the earlier review pass that had stopped at the first page. Native Category virtualization retains its normal viewport DOM window; cumulative retained DOM/image growth beyond that window is **NOT VERIFIED**. Physical Google TV remains **NOT VERIFIED**.
 
 ### Screenshots
 
@@ -48,6 +60,17 @@ Final review pass (DPR 1):
 
 The 4K screenshots are desktop viewport emulation at DPR 1. They are not physical television acceptance.
 
+Pagination hardening captures (DPR 1):
+
+| State | Screenshot |
+| --- | --- |
+| Native All Actors action at 720p | ![Action 720p](screenshots/pagination-6513764119/all-actors-action-1280x720.png) |
+| Native All Actors action at 1080p | ![Action 1080p](screenshots/pagination-6513764119/all-actors-action-1920x1080.png) |
+| Native All Actors action at 4K viewport | ![Action 4K](screenshots/pagination-6513764119/all-actors-action-3840x2160.png) |
+| TLOU page-1 visible progress | ![Page 1 progress](screenshots/pagination-6513764119/tlou-page1-progress-1920x1080.png) |
+| TLOU page-2 actor 31 focused at 720p | ![Actor 31 720p](screenshots/pagination-6513764119/tlou-page2-actor31-1280x720.png) |
+| TLOU page-2 actor 31 focused at 1080p | ![Actor 31 1080p](screenshots/pagination-6513764119/tlou-page2-actor31-1920x1080.png) |
+
 ## Automated coverage
 
 `tests/full-cast.cjs` covers actual production handlers: source order and IDs, duplicate people/roles, TV and movie credits, voice roles, missing portraits, small casts, deep-link recovery, Hybrid disabled/delayed ownership, language cache partitioning, controller ownership races, retry/empty/loading states, actor routes, and six-page 159-person pagination. `tests/loader-critical-parallel.cjs` verifies built-in deferred adapter ordering without modifying user preferences.
@@ -58,4 +81,4 @@ Focused command:
 node --test --test-timeout=15000 tests/full-cast.cjs tests/loader-critical-parallel.cjs
 ```
 
-Latest local result: 28/28 passed. Repository checks passed. Final GitHub Actions status and exact pushed SHA are recorded in the PR after final push.
+Latest local result before final delivery: 30/30 passed. Repository checks passed. Final GitHub Actions status and exact pushed SHA are recorded in the PR after final push.
