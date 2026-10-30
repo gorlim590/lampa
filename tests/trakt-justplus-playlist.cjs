@@ -43,7 +43,8 @@ function setup() {
     slog: () => {}
   });
   vm.runInContext(productionFunction('buildExternalPlaylistReport', 'handleExternalPlaylistTimelineUpdate') +
-    productionFunction('handleExternalPlaylistTimelineUpdate', 'handleJustPlusRawReport') +
+    productionFunction('handleExternalPlaylistTimelineUpdate', 'bindJustPlusSession') +
+    productionFunction('bindJustPlusSession', 'handleJustPlusRawReport') +
     productionFunction('handleJustPlusRawReport', 'externalReportMatchesPlayerStart'), context);
   return { context, writes, advanceTime: ms => { clock += ms; } };
 }
@@ -79,6 +80,7 @@ test('confirmed external playlist reports finalize each exact episode once after
     { url: 'pack', season: 1, episode: 3, timeline: { hash: 'e3', time: 0, duration: 1800, percent: 0 } }
   ], 'account-a', 7);
   context.externalPlaylistReport = report;
+  report.nativeSessionId = 'fixture-native-session';
 
   assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e2', road: { time: 1710, duration: 1800, percent: 95 } } }, report), true);
   assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e2', road: { time: 1710, duration: 1800, percent: 95 } } }, report), true, 'repeated full snapshots are accepted but do not duplicate a pending write');
@@ -93,6 +95,7 @@ test('below-threshold external progress is not written, but a later confirmed ad
     { season: 1, episode: 2, timeline: { hash: 'e2', time: 100, duration: 1800, percent: 5 } }
   ], 'account-a', 7);
   context.externalPlaylistReport = report;
+  report.nativeSessionId = 'fixture-native-session';
   assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e2', road: { time: 1500, duration: 1800, percent: 83 } } }, report), false);
   assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e2', road: { time: 1620, duration: 1800, percent: 90 } } }, report), true);
   await flushPromises();
@@ -105,6 +108,7 @@ test('external percent without duration cannot pass the watched threshold', () =
     { season: 1, episode: 2, timeline: { hash: 'e2', time: 0, duration: 0, percent: 0 } }
   ], 'account-a', 7);
   context.externalPlaylistReport = report;
+  report.nativeSessionId = 'fixture-native-session';
   assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e2', road: { time: 0, duration: 0, percent: 100 } } }, report), false);
   assert.equal(writes.filter(x => x.type === 'finish').length, 0);
 });
@@ -133,6 +137,7 @@ test('external report remains valid after a measured 45-minute episode and two h
     { season: 1, episode: 2, timeline: { hash: 'e2', time: 0, duration: 2700 } }
   ], 'account-a', 7);
   context.externalPlaylistReport = report;
+  report.nativeSessionId = 'fixture-native-session';
   advanceTime(45 * 60 * 1000);
   assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'e1', road: { time: 2430, duration: 2700 } } }, report), true);
   await flushPromises();
@@ -150,6 +155,7 @@ test('failed history write can retry if the handler receives the repeated measur
   const { context, writes } = setup();
   const report = context.buildExternalPlaylistReport(show, 'e2', [{ season: 1, episode: 2, timeline: { hash: 'e2' } }], 'account-a', 7);
   context.externalPlaylistReport = report;
+  report.nativeSessionId = 'fixture-native-session';
   let attempt = 0;
   context.finish = media => { writes.push({ type: 'finish', media }); return Promise.resolve(++attempt === 1 ? { ok: false, status: 503 } : { ok: true }); };
   const snapshot = { data: { hash: 'e2', road: { time: 1710, duration: 1800, percent: 95 } } };
@@ -173,6 +179,7 @@ test('95 percent measured report is supported; Android-normalized 96/99/100 perc
     { season: 1, episode: 4, timeline: { hash: 'h100' } }
   ], 'account-a', 7);
   context.externalPlaylistReport = report;
+  report.nativeSessionId = 'fixture-native-session';
   assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash: 'h95', road: { time: 95, duration: 100, percent: 95 } } }, report), true);
   await flushPromises();
   for (const hash of ['h96', 'h99', 'h100']) {
@@ -187,8 +194,9 @@ test('raw Just+ bridge accepts genuinely measured 90–95 percent visits with ex
     { season: 1, episode: 2, timeline: { hash: 'e2', time: 120, duration: 1800 } }
   ], 'account-a', 7);
   context.externalPlaylistReport = report;
+  report.nativeSessionId = 'fixture-native-session';
   const payload = {
-    version: 1, card_id: '1396', end_by: 'user',
+    version: 2, session_id: 'fixture-native-session', card_id: '1396', end_by: 'user',
     items: [{ index: 0, hash: 'e2', season: 1, episode: 2, position_sec: 1710, duration_sec: 1800, has_visit: true }]
   };
   assert.equal(context.handleJustPlusRawReport(payload, report), true);
@@ -202,11 +210,12 @@ test('raw Just+ bridge rejects under-threshold, synthetic, unknown-visit and zer
     { season: 1, episode: 2, timeline: { hash: 'e2', time: 0, duration: 1800 } }
   ], 'account-a', 7);
   context.externalPlaylistReport = report;
+  report.nativeSessionId = 'fixture-native-session';
   const item = { index: 0, hash: 'e2', season: 1, episode: 2, position_sec: 1602, duration_sec: 1800, has_visit: true };
-  assert.equal(context.handleJustPlusRawReport({ version: 1, card_id: '1396', end_by: 'user', items: [item] }, report), false, '89% is below threshold');
-  assert.equal(context.handleJustPlusRawReport({ version: 1, card_id: '1396', end_by: 'user', items: [{ ...item, has_visit: false, position_sec: 1800 }] }, report), false, 'synthetic/unvisited item is not evidence');
-  assert.equal(context.handleJustPlusRawReport({ version: 1, card_id: '1396', end_by: 'user', items: [{ ...item, duration_sec: 0, position_sec: 0 }] }, report), false, 'zero duration cannot qualify');
-  assert.equal(context.handleJustPlusRawReport({ version: 1, card_id: '1396', end_by: 'user', items: [{ ...item, episode: 3, position_sec: 1800 }] }, report), false, 'wrong episode cannot qualify');
+  assert.equal(context.handleJustPlusRawReport({ version: 2, session_id: 'fixture-native-session', card_id: '1396', end_by: 'user', items: [item] }, report), false, '89% is below threshold');
+  assert.equal(context.handleJustPlusRawReport({ version: 2, session_id: 'fixture-native-session', card_id: '1396', end_by: 'user', items: [{ ...item, has_visit: false, position_sec: 1800 }] }, report), false, 'synthetic/unvisited item is not evidence');
+  assert.equal(context.handleJustPlusRawReport({ version: 2, session_id: 'fixture-native-session', card_id: '1396', end_by: 'user', items: [{ ...item, duration_sec: 0, position_sec: 0 }] }, report), false, 'zero duration cannot qualify');
+  assert.equal(context.handleJustPlusRawReport({ version: 2, session_id: 'fixture-native-session', card_id: '1396', end_by: 'user', items: [{ ...item, episode: 3, position_sec: 1800 }] }, report), false, 'wrong episode cannot qualify');
   await flushPromises();
   assert.equal(writes.filter(x => x.type === 'finish').length, 0);
 });
@@ -219,12 +228,13 @@ test('raw Just+ bridge recovers measured 96–100 percent before Android zero/ze
     { season: 1, episode: 4, timeline: { hash: 'e100', time: 0, duration: 1800 } }
   ], 'account-a', 7);
   context.externalPlaylistReport = report;
+  report.nativeSessionId = 'fixture-native-session';
   const items = [
     { index: 0, hash: 'e96', season: 1, episode: 2, position_sec: 1728, duration_sec: 1800, has_visit: true },
     { index: 1, hash: 'e99', season: 1, episode: 3, position_sec: 1782, duration_sec: 1800, has_visit: true },
     { index: 2, hash: 'e100', season: 1, episode: 4, position_sec: 1800, duration_sec: 1800, has_visit: true }
   ];
-  assert.equal(context.handleJustPlusRawReport({ version: 1, card_id: '1396', end_by: 'completion', items }, report), true);
+  assert.equal(context.handleJustPlusRawReport({ version: 2, session_id: 'fixture-native-session', card_id: '1396', end_by: 'completion', items }, report), true);
   await flushPromises();
   assert.deepEqual(writes.filter(x => x.type === 'finish').map(x => x.media.episode_number), [2, 3, 4]);
 });
@@ -235,9 +245,10 @@ test('raw Just+ bridge retries a failed identical full snapshot and rejects stal
     { season: 1, episode: 2, timeline: { hash: 'e2', time: 0, duration: 1800 } }
   ], 'account-a', 7);
   context.externalPlaylistReport = report;
+  report.nativeSessionId = 'fixture-native-session';
   let attempt = 0;
   context.finish = media => { writes.push({ type: 'finish', media }); return Promise.resolve(++attempt === 1 ? { ok: false, status: 503 } : { ok: true }); };
-  const payload = { version: 1, card_id: '1396', end_by: 'user', items: [{ hash: 'e2', season: 1, episode: 2, position_sec: 1710, duration_sec: 1800, has_visit: true }] };
+  const payload = { version: 2, session_id: 'fixture-native-session', card_id: '1396', end_by: 'user', items: [{ index: 0, hash: 'e2', season: 1, episode: 2, position_sec: 1710, duration_sec: 1800, has_visit: true }] };
   assert.equal(context.handleJustPlusRawReport(payload, { ...report, token: 'account-b' }), false);
   assert.equal(context.handleJustPlusRawReport(payload, { ...report, identityGeneration: 6 }), false);
   assert.equal(context.handleJustPlusRawReport({ ...payload, card_id: '999' }, report), false);
@@ -255,7 +266,7 @@ test('raw Just+ bridge retries a failed identical full snapshot and rejects stal
 test('production watching lifecycle installs and removes the optional native raw-report event listener', () => {
   assert.match(source, /window\.addEventListener\('lampa:justplus-raw-report', this\._onJustPlusRawReport\)/);
   assert.match(source, /window\.removeEventListener\('lampa:justplus-raw-report', this\._onJustPlusRawReport\)/);
-  assert.match(source, /handleJustPlusRawReport\(event && event\.detail, externalPlaylistReport\)/);
+  assert.match(source, /handleJustPlusRawReport\(raw, owner\)/);
 });
 
 test('production external handoff captures PlayerPlaylist and timeline listener routes mapped reports', () => {
@@ -273,7 +284,8 @@ for (const percent of [89, 90, 93, 95, 96, 99, 100]) {
       { season: 1, episode: 3, timeline: { hash: 'e3', time: 0, duration: 1000 } }
     ], 'account-a', 7);
     context.externalPlaylistReport = report;
-    const payload = { version: 1, card_id: '1396', end_by: 'user', items: [
+  report.nativeSessionId = 'fixture-native-session';
+    const payload = { version: 2, session_id: 'fixture-native-session', card_id: '1396', end_by: 'user', items: [
       { index: 0, hash: 'e2', season: 1, episode: 2, position_sec: percent * 10, duration_sec: 1000, has_visit: true },
       { index: 1, hash: 'e3', season: 1, episode: 3, position_sec: 1, duration_sec: 1000, has_visit: true }
     ] };
@@ -283,3 +295,51 @@ for (const percent of [89, 90, 93, 95, 96, 99, 100]) {
     assert.deepEqual(writes.filter(x => x.type === 'finish').map(x => x.media.episode_number), percent >= 90 ? [2] : []);
   });
 }
+
+test('95 percent visit remains eligible after the same episode restarts at zero', async () => {
+  const { context, writes } = setup();
+  const report = context.buildExternalPlaylistReport(show, 'e2', [
+    { season: 1, episode: 2, timeline: { hash: 'e2', time: 0, duration: 1000 } }
+  ], 'account-a', 7);
+  context.externalPlaylistReport = report;
+  report.nativeSessionId = 'fixture-native-session';
+  const visit = { index: 0, hash: 'e2', season: 1, episode: 2, duration_sec: 1000, has_visit: true };
+  context.handleJustPlusRawReport({ version: 2, session_id: 'fixture-native-session', card_id: '1396', end_by: 'user', items: [
+    { ...visit, position_sec: 950 }, { ...visit, position_sec: 0 }
+  ] }, report);
+  await flushPromises();
+  assert.equal(writes.filter(x => x.type === 'finish').length, 1);
+  assert.equal(report.entries.e2.lastPosition, 950);
+});
+
+test('native session handshake and exact index distinguish files sharing a Timeline hash', async () => {
+  const { context, writes } = setup();
+  const report = context.buildExternalPlaylistReport(show, 'pack', [
+    { season: 1, episode: 2, timeline: { hash: 'pack', time: 0 } },
+    { season: 1, episode: 3, timeline: { hash: 'pack', time: 0 } }
+  ], 'account-a', 7);
+  context.externalPlaylistReport = report;
+  const descriptor = {version:2,session_id:'native-a',card_id:'1396',items:[
+    {index:0,hash:'pack',season:1,episode:2},{index:1,hash:'pack',season:1,episode:3}
+  ]};
+  const payload = {...descriptor,end_by:'user',items:[{...descriptor.items[0],has_visit:true,position_sec:950,duration_sec:1000},{...descriptor.items[1],has_visit:true,position_sec:10,duration_sec:1000}]};
+  assert.equal(context.handleJustPlusRawReport(payload,report),false,'unbound raw report rejected');
+  assert.equal(context.bindJustPlusSession(descriptor,report),true);
+  assert.equal(context.bindJustPlusSession({...descriptor,session_id:'native-stale'},report),false);
+  assert.equal(context.handleJustPlusRawReport({...payload,session_id:'native-stale'},report),false);
+  assert.equal(context.handleJustPlusRawReport({...payload,items:[{...payload.items[0],index:1}]},report),false,'wrong index cannot borrow E02 progress');
+  assert.equal(context.handleJustPlusRawReport(payload,report),true);
+  await flushPromises();
+  assert.deepEqual(writes.filter(x=>x.type==='finish').map(x=>x.media.episode_number),[2]);
+  assert.equal(context.handleExternalPlaylistTimelineUpdate({data:{hash:'pack',road:{time:1000,duration:1000}}},report),false,'ambiguous legacy Timeline stays rejected');
+});
+
+test('account change before queued raw completion cannot write under the new account', async () => {
+ const { context, writes } = setup();
+ const report=context.buildExternalPlaylistReport(show,'e2',[{season:1,episode:2,timeline:{hash:'e2',time:0}}],'account-a',7);
+ context.externalPlaylistReport=report;report.nativeSessionId='native-a';
+ assert.equal(context.handleJustPlusRawReport({version:2,session_id:'native-a',card_id:'1396',end_by:'user',items:[{index:0,hash:'e2',season:1,episode:2,position_sec:950,duration_sec:1000,has_visit:true}]},report),true);
+ context.Lampa.Storage.get=()=> 'account-b';
+ await flushPromises();
+ assert.equal(writes.filter(x=>x.type==='finish').length,0);
+});

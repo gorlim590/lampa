@@ -6,4 +6,6 @@ Build with JDK 17 and Android SDK platform/build-tools 33. Gradle app project is
 
 Launch component: `org.lampa.justplusprobe/.ProbeActivity`; optional boolean extra `interval=true` requests 120-second reports. Each fresh Activity launch creates a UUID. Receiver is explicit and non-exported, PendingIntent mutable and unique by action. ActivityResult is journaled separately. Read `files/events.jsonl` with ADB run-as. Do not use this app for private streams.
 
-The probe remains installed as an independent app after testing. Production Lampa and Just+ were not replaced. It can be removed later without touching either production application.
+The probe was installed independently for the physical tests and removed after evidence capture. Production Lampa and Just+ were retained. Rebuild/reinstall the probe to repeat the tests.
+
+Long mode (`--ez long true`) serves a public Big Buck Bunny fixture through the probe's read-only media provider. Copy the licensed public file to files/bunny.mp4 in this separate debug package before launch. The provider is exported solely for this one public test file and rejects write mode; it exposes no user files. The callback receiver remains non-exported. The successful long run used unique per-session item URIs and explicit zero positions.

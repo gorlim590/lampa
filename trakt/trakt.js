@@ -10123,7 +10123,8 @@
   function buildExternalPlaylistReport(card, hash, playlist, token, generation) {
     if (!card || getContentType$2(card) !== 'show' || !Array.isArray(playlist)) return null;
     var entries = Object.create(null);
-    function add(item, fallbackHash) {
+    var indexedEntries = Object.create(null);
+    function add(item, fallbackHash, index) {
       if (!item || typeof item !== 'object') return;
       var timeline = item.timeline || {};
       var itemHash = timeline.hash || item.hash || fallbackHash;
@@ -10138,25 +10139,22 @@
       var identity = verifiedShowEpisode(media);
       if (!identity) return;
       var key = String(itemHash);
+      var initialPosition = Number(timeline.time);
+      var candidate = {
+        hash: key, media: media, identity: identity,
+        initialPosition: isFinite(initialPosition) && initialPosition >= 0 ? initialPosition : 0,
+        lastPosition: isFinite(initialPosition) && initialPosition >= 0 ? initialPosition : 0,
+        completionState: 'none', ambiguous: false
+      };
+      if (Number.isInteger(index) && index >= 0) indexedEntries[String(index)] = candidate;
       var entry = entries[key];
       if (entry) {
-        // Multiple playlist items sharing one Timeline hash are safe only if
-        // they resolve to the same Trakt episode identity.
         if (entry.identity.id !== identity.id || entry.identity.season !== identity.season || entry.identity.episode !== identity.episode) entry.ambiguous = true;
         return;
       }
-      var initialPosition = Number(timeline.time);
-      entries[key] = {
-        hash: key,
-        media: media,
-        identity: identity,
-        initialPosition: isFinite(initialPosition) && initialPosition >= 0 ? initialPosition : 0,
-        lastPosition: isFinite(initialPosition) && initialPosition >= 0 ? initialPosition : 0,
-        completionState: 'none',
-        ambiguous: false
-      };
+      entries[key] = candidate;
     }
-    playlist.forEach(function (item) { add(item, null); });
+    playlist.forEach(function (item, index) { add(item, null, index); });
     // Some native playlist adapters omit the currently selected item from
     // PlayerPlaylist.get(); the Player.external payload remains authoritative
     // for that one item when it carries exact S/E coordinates.
@@ -10169,7 +10167,9 @@
       // This is a single active handoff snapshot, not a time-limited cache.
       // Long episodes and multi-episode sessions may legitimately return much
       // later; account, profile, and subsequent-player transitions invalidate it.
-      entries: entries
+      entries: entries,
+      indexedEntries: indexedEntries,
+      nativeSessionId: null
     };
   }
 
@@ -10179,7 +10179,11 @@
         report.identityGeneration !== playbackIdentityGeneration || cloudInjectInProgress || !data || !data.data || !data.data.hash || !data.data.road) return false;
     var entry = report.entries[String(data.data.hash)];
     if (!entry || entry.ambiguous) return false;
-    var road = data.data.road;
+    return handleExternalPlaylistEntryUpdate(data.data.road, entry, report);
+  }
+
+  function handleExternalPlaylistEntryUpdate(road, entry, report) {
+    if (!entry || report !== externalPlaylistReport || report.token !== String(Lampa.Storage.get('trakt_token') || '') || report.identityGeneration !== playbackIdentityGeneration || cloudInjectInProgress) return false;
     var position = Number(road.time);
     var duration = Number(road.duration);
     // The Android wrapper's Timeline object normally carries measured time and
@@ -10209,7 +10213,10 @@
     entry.completionState = 'pending';
     entry.completionKey = key;
     markFinishIntent(key);
-    Promise.resolve().then(function () { return finish(media); }).then(function (result) {
+    Promise.resolve().then(function () {
+      if (externalPlaylistReport !== report || report.token !== String(Lampa.Storage.get('trakt_token') || '') || report.identityGeneration !== playbackIdentityGeneration) return { skipped: true, reason: 'stale_owner' };
+      return finish(media);
+    }).then(function (result) {
       if (externalPlaylistReport !== report || report.token !== String(Lampa.Storage.get('trakt_token') || '') || report.identityGeneration !== playbackIdentityGeneration) return;
       entry.completionState = result && result.ok || result && result.skipped && result.reason === 'already_finished' ? 'confirmed' : 'retryable';
     }).catch(function (e) {
@@ -10219,25 +10226,42 @@
     return true;
   }
 
+  function bindJustPlusSession(payload, report) {
+    report = report || externalPlaylistReport;
+    if (!report || report !== externalPlaylistReport || !payload || payload.version !== 2 ||
+        typeof payload.session_id !== 'string' || !payload.session_id || payload.session_id.length > 128 ||
+        String(payload.card_id || '') !== report.cardId || !Array.isArray(payload.items) || !payload.items.length || payload.items.length !== Object.keys(report.indexedEntries).length ||
+        report.token !== String(Lampa.Storage.get('trakt_token') || '') || report.identityGeneration !== playbackIdentityGeneration || cloudInjectInProgress) return false;
+    if (report.nativeSessionId && report.nativeSessionId !== payload.session_id) return false;
+    var seenIndices = Object.create(null);
+    var valid = payload.items.every(function (item) {
+      if (!item || seenIndices[String(item.index)]) return false;
+      seenIndices[String(item.index)] = true;
+      var entry = item && Number.isInteger(item.index) && report.indexedEntries[String(item.index)];
+      return !!(entry && String(item.hash) === entry.hash && Number.isInteger(item.season) && Number.isInteger(item.episode) &&
+        item.season === entry.identity.season && item.episode === entry.identity.episode);
+    });
+    if (!valid) return false;
+    report.nativeSessionId = payload.session_id;
+    return true;
+  }
+
   function handleJustPlusRawReport(payload, report) {
     report = report || externalPlaylistReport;
-    if (!payload || payload.version !== 1 || !Array.isArray(payload.items) || !report || report !== externalPlaylistReport ||
+    if (!payload || payload.version !== 2 || !Array.isArray(payload.items) || !report || report !== externalPlaylistReport ||
+        !report.nativeSessionId || payload.session_id !== report.nativeSessionId ||
         report.token !== String(Lampa.Storage.get('trakt_token') || '') || report.identityGeneration !== playbackIdentityGeneration ||
         cloudInjectInProgress || !['completion', 'user', 'interval'].includes(String(payload.end_by || ''))) return false;
-    var payloadCardId = String(payload.card_id || '');
-    if (report.cardId && payloadCardId !== report.cardId) return false;
+    if (String(payload.card_id || '') !== report.cardId) return false;
     var accepted = false;
     payload.items.forEach(function (item) {
-      if (!item || item.has_visit !== true || !item.hash) return;
-      var entry = report.entries[String(item.hash)];
-      if (!entry || entry.ambiguous) return;
-      var season = Number(item.season), episode = Number(item.episode);
-      if (!Number.isInteger(season) || !Number.isInteger(episode) || season !== entry.identity.season || episode !== entry.identity.episode) return;
+      if (!item || item.has_visit !== true || !Number.isInteger(item.index) || item.index < 0) return;
+      var entry = report.indexedEntries[String(item.index)];
+      if (!entry || String(item.hash) !== entry.hash) return;
+      if (!Number.isInteger(item.season) || !Number.isInteger(item.episode) || item.season !== entry.identity.season || item.episode !== entry.identity.episode) return;
       var position = Number(item.position_sec), duration = Number(item.duration_sec);
-      if (!isFinite(position) || position < 0 || !isFinite(duration) || duration <= 0) return;
-      if (handleExternalPlaylistTimelineUpdate({
-        data: { hash: String(item.hash), road: { time: position, duration: duration, percent: position / duration * 100 } }
-      }, report)) accepted = true;
+      if (!Number.isInteger(position) || position < 0 || !Number.isInteger(duration) || duration <= 0) return;
+      if (handleExternalPlaylistEntryUpdate({ time: position, duration: duration }, entry, report)) accepted = true;
     });
     return accepted;
   }
@@ -10399,12 +10423,19 @@
       if (window.addEventListener) {
         this._onJustPlusRawReport = function (event) {
           try {
-            handleJustPlusRawReport(event && event.detail, externalPlaylistReport);
+            var raw = event && event.detail;
+            var owner = externalPlaylistReport;
+            if (raw && owner && raw.version === 2 && raw.session_id === owner.nativeSessionId &&
+                String(raw.card_id || '') === owner.cardId && owner.token === String(Lampa.Storage.get('trakt_token') || '') &&
+                owner.identityGeneration === playbackIdentityGeneration && !cloudInjectInProgress) raw.__lampa_trakt_ack = true;
+            handleJustPlusRawReport(raw, owner);
           } catch (error) {
             slog('Just+ raw report rejected', error && error.name || 'invalid_report');
           }
         };
         window.addEventListener('lampa:justplus-raw-report', this._onJustPlusRawReport);
+        this._onJustPlusSession = function (event) { bindJustPlusSession(event && event.detail, externalPlaylistReport); };
+        window.addEventListener('lampa:justplus-session', this._onJustPlusSession);
       }
 
       // Слідкуємо за стартом програвача для збереження поточної картки
@@ -10895,6 +10926,10 @@
         delete this._onTimelineUpdate;
       }
 
+      if (this._onJustPlusSession && window.removeEventListener) {
+        window.removeEventListener('lampa:justplus-session', this._onJustPlusSession);
+        delete this._onJustPlusSession;
+      }
       if (this._onJustPlusRawReport && window.removeEventListener) {
         window.removeEventListener('lampa:justplus-raw-report', this._onJustPlusRawReport);
         delete this._onJustPlusRawReport;

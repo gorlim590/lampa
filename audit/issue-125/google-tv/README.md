@@ -1,3 +1,23 @@
+# Issue #125 — Google TV / Just+ evidence
+
+The latest acceptance is [native/WebView acceptance](native-webview-acceptance.md). It supersedes earlier NOT VERIFIED statements about building the companion APK and Just+ interval delivery.
+
+A separate official-source Android Lampa debug APK was built and installed, preserving production Lampa. Physical test media exercised receiver → take/keptReports → handle → WebView → the production JS helpers and actual finish/history writer with mocked transport. Regular interval reports were observed at 120/240/360 seconds; measured 47/52 and 50/52 completion, shared hashes, per-visit restart history, delayed JS readiness, Activity recreation and a transient 503 were covered.
+
+This is controlled physical integration acceptance. Stock website bootstrap/handoff recovery, authenticated Trakt API and actual Trakt+ renderer remain unverified. PR #138 remains Draft and Issue #125 open. No real Trakt history or production settings were changed.
+
+- [Component matrix and correlated timeline](native-webview-acceptance.md)
+- [Build and executed-source hashes](build-metadata.json)
+- [Sanitized WebView journal](webview-events.jsonl)
+- [Sanitized native journal](native-bridge-events.jsonl)
+- [Long-video interval journal](probe-long-events.jsonl)
+- [Native production bridge patch](native-bridge-v1.13.5.patch)
+- [Separate debug package/instrumentation patch](native-debug-v1.13.5.patch)
+- [Build procedure](native-build.md)
+- [Reviewable WebView fixture](webview-probe/README.md)
+
+<details><summary>Earlier below-threshold investigation (historical)</summary>
+
 > Updated physical callback evidence: [Independent Callback Probe results](callback-probe-results.md). In particular, interval=120 is now VERIFIED on Just+ 2.5.1. Earlier observations below are retained as historical evidence.
 
 # Issue #125 — Google TV / Just+ field report
@@ -55,3 +75,5 @@ See [`adb-environment.md`](adb-environment.md), [`event-timeline.md`](event-time
 ## Prepared native bridge
 
 `native-bridge-v1.13.5.patch` is a scoped source patch against the Android wrapper tag matching the installed Lampa package. It passes whitespace and reverse-apply checks, but compilation is blocked: only JDK 21 is installed, while this wrapper uses Gradle 7.5.1 (unsupported class-file version 65), and the Android SDK has platform-tools only. It has not been installed or tested on hardware. The current production plugin cannot recover progress the native wrapper has already normalized away; the paired event contract is required for both 90–95% auto-next transitions and >=96% completion normalization.
+
+</details>

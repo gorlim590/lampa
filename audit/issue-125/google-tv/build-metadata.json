@@ -1,0 +1,15 @@
+{
+  "native_base_tag": "v1.13.5",
+  "native_base_commit": "f6d9a9318a889b53edccd81fbe7050ec17dfd2ba",
+  "debug_package": "top.rootu.lampa.issue125probe",
+  "apk_sha256": "033152e49bc435d18fbceed2f43ca868113cc624083edbbcffbff8d3600b3208",
+  "native_debug_source_sha256": "31a2476755a6bc8775d09c0725a0af9416237963a9b87859e1aed79bd74eaa72",
+  "production_js_sha256": "ea076f8a76cf692b38531656d6a30345cd22cd3c5f2ac43c57efd4b9309e4f58",
+  "served_instrumented_js_sha256": "27a5065b1ede4a85c6f67839f047b4f64d5951f1c794fef0a4a376521a3d4970",
+  "loaded_script_url": "http://127.0.0.1:18766/trakt-instrumented.js",
+  "instrumentation": "webview-probe/hook.js; controlled Lampa facade, actual finish(), mocked Trakt API transport and UI confirmation stub",
+  "executed_webview_script_sha256": "27a5065b1ede4a85c6f67839f047b4f64d5951f1c794fef0a4a376521a3d4970",
+  "executed_webview_script_url": "http://127.0.0.1:18766/trakt-instrumented.js",
+  "executed_script_matches_served": true,
+  "post_test_device_state": "Diagnostic packages removed after evidence capture; production Lampa 1.13.5/581 and Just+ 2.5.1/2005001 retained; production Lampa foreground; temporary ADB routes removed."
+}

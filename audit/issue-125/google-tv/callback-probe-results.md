@@ -1,3 +1,5 @@
+> Latest evidence: [compiled native/WebView acceptance](native-webview-acceptance.md). Earlier build/callback limitations below are historical; stock production WebView and real Trakt/UI remain unverified.
+
 # Independent Just+ Callback Probe — 2026-10-30
 
 ## Physical evidence
