@@ -1,0 +1,46 @@
+{
+  "testDate": "2026-10-30",
+  "branch": "feat/issue-87-full-cast",
+  "testedSource": {
+    "file": "ui/full-cast.js",
+    "sha256": "7523153ca4af8ae1bbb124295a2bd540d05f9dfe9a307a5f55daefbbfd2c5358"
+  },
+  "browser": {
+    "connection": "existing Chrome DevTools MCP session",
+    "pageId": 3,
+    "testRoute": "https://siaivo.isroot.in/?card=100088&media=tv&source=tmdb",
+    "restoredRoute": "https://siaivo.isroot.in/?card=125988&media=tv&source=tmdb",
+    "restoredViewport": "1920x937 DPR 1",
+    "profileOrStorageChanged": false
+  },
+  "provider": {
+    "name": "configured native Lampa TMDb source",
+    "requestPaths": ["tv/100088/aggregate_credits"],
+    "requestCount": 1,
+    "returnedCredits": 159,
+    "syntheticData": false
+  },
+  "observations": {
+    "beforeNativePreviewCount": 4,
+    "afterPreviewCreditCount": 10,
+    "fullCastInitialPageCount": 30,
+    "duplicatePeopleInFullCast": 0,
+    "roleOverlayComputedPosition": "absolute",
+    "remoteNavigation": [
+      "Right to All Actors; Enter opens sh_full_cast_grid",
+      "Right and Enter open native actor route for Pedro Pascal (id 1253360)",
+      "Escape returns to same Pedro Pascal card in sh_full_cast_grid",
+      "Escape returns to Details focused on originating All Actors action",
+      "Enter reopens full cast with first actor focused"
+    ]
+  },
+  "screenshots": [
+    {"file": "screenshots/before-1280x720.png", "width": 1280, "height": 720, "dpr": 1},
+    {"file": "screenshots/before-1920x1080.png", "width": 1920, "height": 1080, "dpr": 1},
+    {"file": "screenshots/after-1280x720.png", "width": 1280, "height": 720, "dpr": 1},
+    {"file": "screenshots/after-1920x1080.png", "width": 1920, "height": 1080, "dpr": 1},
+    {"file": "screenshots/full-cast-1280x720.png", "width": 1280, "height": 720, "dpr": 1},
+    {"file": "screenshots/full-cast-1920x1080.png", "width": 1920, "height": 1080, "dpr": 1}
+  ],
+  "physicalGoogleTv": "NOT VERIFIED"
+}

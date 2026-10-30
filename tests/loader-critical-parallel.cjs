@@ -92,8 +92,11 @@ test('late native dependencies start the deferred adapter only after appready ar
   poll.fn();
   assert.equal(window.LampaLoaderDiagnostics.stage, 'deferred');
   assert.equal(scripts.length, 4);
-  assert.equal(new URL(scripts[3].src).pathname, '/lampa/ui/cardify-plus.js');
+  assert.equal(new URL(scripts[3].src).pathname, '/lampa/ui/full-cast.js', 'the built-in UI capability starts before optional user adapters');
   scripts[3].onload();
+  assert.equal(scripts.length, 5);
+  assert.equal(new URL(scripts[4].src).pathname, '/lampa/ui/cardify-plus.js');
+  scripts[4].onload();
   assert.equal(window.LampaLoaderDiagnostics.stage, 'complete');
-  assert.equal(window.LampaLoaderDiagnostics.loaded, 4);
+  assert.equal(window.LampaLoaderDiagnostics.loaded, 5);
 });
