@@ -1,46 +1,65 @@
 {
-  "testDate": "2026-10-30",
+  "reviewComment": "https://github.com/gorlim590/lampa/pull/137#issuecomment-6513764119",
+  "date": "2026-10-30",
   "branch": "feat/issue-87-full-cast",
-  "testedSource": {
-    "file": "ui/full-cast.js",
-    "sha256": "7523153ca4af8ae1bbb124295a2bd540d05f9dfe9a307a5f55daefbbfd2c5358"
+  "source": {
+    "browserVisualRunSha256": "5f2b0d29413702b66c0f9e6b3a003b8b47e0237dbc06fa3a252008820c41021d",
+    "finalSourceSha256": "b3d55e9a39a24073ed73ffe467963cd11d80820b848e68682afd9ad57dfc796f",
+    "note": "The final source adds only a second live controller-owner guard after native row replacement. That guard is covered by a production-handler regression. The UI/route browser pass used the immediately preceding source; no other production source changed in the pass."
   },
   "browser": {
-    "connection": "existing Chrome DevTools MCP session",
+    "connection": "existing authorized Chrome DevTools MCP",
     "pageId": 3,
-    "testRoute": "https://siaivo.isroot.in/?card=100088&media=tv&source=tmdb",
-    "restoredRoute": "https://siaivo.isroot.in/?card=125988&media=tv&source=tmdb",
-    "restoredViewport": "1920x937 DPR 1",
-    "profileOrStorageChanged": false
+    "tabCountChanged": false,
+    "storageSettingsTraktOrTorrentChanged": false,
+    "viewports": ["1280x720 DPR1", "1920x1080 DPR1", "3840x2160 DPR1"],
+    "restored": "Original page 3 URL and 1280x720 DPR1 viewport restored. Native Category now retains 60 cards from D-pad pagination (initially 30); this is transient page state, not saved preference or storage."
   },
-  "provider": {
-    "name": "configured native Lampa TMDb source",
-    "requestPaths": ["tv/100088/aggregate_credits"],
-    "requestCount": 1,
-    "returnedCredits": 159,
-    "syntheticData": false
+  "liveCases": {
+    "lastOfUs": {
+      "media": "tv",
+      "tmdbId": 100088,
+      "provider": "configured native Lampa TMDb source",
+      "aggregateCredits": 159,
+      "initialCategoryCards": 30,
+      "initialCategoryImageElements": 30,
+      "dpad": ["Down enters cast row on first All Actors action", "Right focuses first actor", "Left returns to action", "Up/Down cross neighboring native rows without changing Activity"],
+      "enterBack": ["Enter opens full native Category", "Enter on actor opens native actor route", "Back restores same actor card", "Back restores Details focus on originating cast action"],
+      "allPagesLive": "NOT VERIFIED: remote arrows in this browser session did not naturally trigger the native Category next-page callback."
+    },
+    "fightClub": {
+      "media": "movie",
+      "tmdbId": 550,
+      "provider": "configured native Lampa TMDb source",
+      "returnedCredits": 75,
+      "initialCategoryCards": 30,
+      "initialCategoryImageElements": 30,
+      "afterDpadNextPageCards": 60,
+      "afterDpadNextPageImageElements": 60,
+      "enterBack": ["Enter opens Peter Iacangelo actor profile (id 7500)", "Back restores exact Peter Iacangelo card", "Back returns to movie Details"],
+      "responsiveCardLayout": "PASS at 720p, 1080p, 4K DPR1",
+      "remainingMoviePage": "NOT VERIFIED: this interaction pass stopped after native pagination reached 60 of 75 returned credits."
+    }
   },
-  "observations": {
-    "beforeNativePreviewCount": 4,
-    "afterPreviewCreditCount": 10,
-    "fullCastInitialPageCount": 30,
-    "duplicatePeopleInFullCast": 0,
-    "roleOverlayComputedPosition": "absolute",
-    "remoteNavigation": [
-      "Right to All Actors; Enter opens sh_full_cast_grid",
-      "Right and Enter open native actor route for Pedro Pascal (id 1253360)",
-      "Escape returns to same Pedro Pascal card in sh_full_cast_grid",
-      "Escape returns to Details focused on originating All Actors action",
-      "Enter reopens full cast with first actor focused"
-    ]
+  "productionHandlerFixture": {
+    "totalCredits": 159,
+    "batches": [30, 30, 30, 30, 30, 9],
+    "pageMetadata": [1, 2, 3, 4, 5, 6],
+    "portraitPaths": 158,
+    "missingPortraitRetained": true,
+    "domImageMeasurement": "Fixture payload count only; no claim of live DOM retention past 120 cards."
   },
   "screenshots": [
-    {"file": "screenshots/before-1280x720.png", "width": 1280, "height": 720, "dpr": 1},
-    {"file": "screenshots/before-1920x1080.png", "width": 1920, "height": 1080, "dpr": 1},
-    {"file": "screenshots/after-1280x720.png", "width": 1280, "height": 720, "dpr": 1},
-    {"file": "screenshots/after-1920x1080.png", "width": 1920, "height": 1080, "dpr": 1},
-    {"file": "screenshots/full-cast-1280x720.png", "width": 1280, "height": 720, "dpr": 1},
-    {"file": "screenshots/full-cast-1920x1080.png", "width": 1920, "height": 1080, "dpr": 1}
+    {"file": "screenshots/review-6513764119/the-last-of-us-720-action-focused.png", "width": 1280, "height": 720, "dpr": 1, "state": "Details native All Actors first card focused"},
+    {"file": "screenshots/review-6513764119/the-last-of-us-1080-action-focused.png", "width": 1920, "height": 1080, "dpr": 1, "state": "Details native All Actors first card focused"},
+    {"file": "screenshots/review-6513764119/the-last-of-us-720-actor-focused.png", "width": 1280, "height": 720, "dpr": 1, "state": "Full cast actor card focused"},
+    {"file": "screenshots/review-6513764119/the-last-of-us-1080-actor-focused.png", "width": 1920, "height": 1080, "dpr": 1, "state": "Full cast actor card focused"},
+    {"file": "screenshots/review-6513764119/the-last-of-us-4k-actor-focused.png", "width": 3840, "height": 2160, "dpr": 1, "state": "Full cast actor card focused"},
+    {"file": "screenshots/review-6513764119/fight-club-720-focused-card.png", "width": 1280, "height": 720, "dpr": 1, "state": "Movie full cast focused card"},
+    {"file": "screenshots/review-6513764119/fight-club-1080-action-focused.png", "width": 1920, "height": 1080, "dpr": 1, "state": "Movie Details cast action focused"},
+    {"file": "screenshots/review-6513764119/fight-club-1080-focused-card.png", "width": 1920, "height": 1080, "dpr": 1, "state": "Movie full cast focused card"},
+    {"file": "screenshots/review-6513764119/fight-club-4k-focused-card.png", "width": 3840, "height": 2160, "dpr": 1, "state": "Movie full cast focused card"}
   ],
-  "physicalGoogleTv": "NOT VERIFIED"
+  "physicalGoogleTv": "NOT VERIFIED",
+  "finalGitHubActions": "PENDING FINAL PUSH"
 }

@@ -1,51 +1,61 @@
 # Issue #87 — Full cast
 
-## Findings
+## Findings and implementation
 
-The Last of Us Details route (`card=100088&media=tv`) rendered exactly four people in the native `Full` cast row: Bella Ramsey, Gabriel Luna, Isabela Merced and Young Mazino. The row was not being clipped by CSS: native `Full` received four `data.persons.cast` entries. A read-only request through Lampa's configured TMDb source to `tv/100088/aggregate_credits` returned 159 credited people. The missing actors came from the short native credits payload.
+The Last of Us Details route (`card=100088&media=tv`) initially had four people in native `Full`'s cast row. It was not CSS clipping: the native payload itself contained four entries. The configured TMDb source returned 159 aggregate TV credits for `tv/100088/aggregate_credits`.
 
-The implementation retains native `Full`, `Person`, `Category` and actor-profile routes. `ui/full-cast.js` runs as a built-in deferred adapter after native `appready`. It leaves the initial Full event synchronous and asks for expanded credits only after the native persons row is built (or when the user opens the full-cast screen). No per-person biography, Trakt or profile requests are issued. Requests coalesce and use a bounded 16-title, six-hour cache.
+The implementation retains native Lampa `Full`, `Person`, and `Category` routes. Details stays synchronous; expanded credits load only when the cast row is built or the user opens the full screen. Requests coalesce and use a bounded 16-title, six-hour cache scoped by `kind:id:tmdb_lang`. No biography, Trakt, or per-person profile requests are made.
 
-For the preview it keeps the first ten unique credited people in source order, preserving stable person IDs, portraits and verified characters/aggregate roles. It adds a native-person-style **Всі актори** card when more credits exist or while discovery is pending. The full screen uses native Lampa `Category` pagination in pages of 30; actor Enter opens the native `actor` component. Duplicate IDs are merged without changing first credit order; missing portraits remain missing and use native fallback rendering. Provider errors can be retried from the Category rather than replaced with fabricated data.
+The preview preserves the first ten unique credited people, stable TMDb IDs, portraits, credit order, and verified characters/aggregate roles. It adds exactly one native **Всі актори** action as the first item in the existing `Актори` row. Moving Down into that row reaches the action immediately; there is no duplicate heading action or need to traverse the actor carousel. Actor names and role captions use separate card text space; role captions do not cover faces. Equivalent aggregate role captions are deduplicated without merging distinct roles.
 
-The built-in loader lane ensures this Hybrid capability loads even when an installation has a user-selected deferred-plugin list. It does not edit that stored list or enable other plugins. Cast-specific CSS registers under the single Hybrid style owner and retries registration for a bounded interval if a deep-linked Details page reaches the adapter before Hybrid initialization.
+The full screen uses the native Lampa `Category`, in pages of 30. Actor Enter opens the native `actor` route. Missing portraits remain in the cast with native fallback artwork. Loading, empty-source, provider-error, retry, and completion states are visible. Retry remains a native Category card action.
+
+The built-in adapter only modifies Details when `StremioHybrid.ownsPresentation('details')` is true. Its CSS registers with the existing Hybrid style owner. It supports a deep-linked `Full` route and delayed Hybrid initialization without modifying the saved plugin list.
+
+## Independent review hardening — 2026-10-30
+
+`replaceCastLine()` now restores focus only when the current Full Activity and Hybrid own the Details screen and the native `items_line` controller currently owns a focused card inside that row. It checks again after the synchronous native row replacement, immediately before `collectionSet` and `collectionFocus`; a new Select/other controller owner prevents focus mutation. Tests resolve pending credits while Select, Torrent Cinema, modal, unrelated Activity, and a controller changed during row replacement are active.
+
+The category pagination metadata reports page 1 on the first batch and page 2 onward accurately. Production-handler tests cover 159 cards in six ordered native batches (30/30/30/30/30/9); the fixture has 158 portrait paths and retains one missing portrait as fallback. The same tests verify loading, empty results, provider failure, reachable retry, and a successful retry.
 
 ## Browser acceptance
 
-Tested in the existing Chrome DevTools Lampa tab (page 3), on the exact local `ui/full-cast.js` source served from loopback; no other browser profile or tab was opened. Native Lampa TMDb transport was used; no synthetic results were injected. The page was The Last of Us (`100088`, TV). Instrumentation observed one `tv/100088/aggregate_credits` request, returning 159 source credits; the full Category rendered 30 cards initially. The first card was Bella Ramsey as Ellie Williams. The focused Pedro Pascal card displayed the aggregate roles returned by TMDb.
+Used the existing Chrome DevTools Lampa tab (page 3), with the local source served from `http://127.0.0.1:8767/full-cast.js`; the served SHA matched the source at browser capture time (`5f2b0d29413702b66c0f9e6b3a003b8b47e0237dbc06fa3a252008820c41021d`). The final source adds a post-row-replacement controller-owner recheck after that visual/browser pass; that exact race is covered by a production-handler regression. No browser profile, storage, settings, Trakt history, parser configuration, or torrent state was changed.
 
-Real remote-key actions verified:
+Live TV case — The Last of Us (`100088`): native TMDb aggregate credits returned 159 people; first Category page rendered 30 cards and 30 image elements. D-pad Down entered the cast row on **Всі актори**, Right focused the first actor, Left returned to the action, and Up/Down moved between adjacent native rows without an Activity transition. Enter opened `sh_full_cast_grid`; Enter on an actor opened native `actor`; Back restored the same actor card; Back restored Details with focus on the originating action.
 
-1. Right through the native preview to **Всі актори**, then Enter opened `sh_full_cast_grid`.
-2. Right/Enter on a person opened the native `actor` route (`id=1253360`, Pedro Pascal).
-3. Escape returned to the cast grid with focus on the same Pedro Pascal card.
-4. Escape returned to Details with focus on the originating **Всі актори** card.
-5. A second Enter from that restored action reopened the grid and started focus on the first cast card.
+Live movie case — Fight Club (`550`): native movie credits returned 75 people; first Category page rendered 30 cards and images. D-pad reached the next native page and cumulative live DOM grew to 60 cards and 60 image elements; the remaining page was not loaded in this browser pass. Enter opened a person; Back restored the exact person card, and Back returned to movie Details. Screenshots show focus rings, names, roles, missing-photo fallback, and responsive card layout.
 
-The full-cast grid contained real source entries and visible role labels. Computed role style was `position:absolute` under the registered Hybrid owner stylesheet. Screenshots were captured in the same tab with DPR 1 at 1280×720 and 1920×1080:
+The native D-pad sequence advanced the live movie Category to 60 cards but did not reach 120+ cards. Cumulative live DOM/image growth after 120 cards is **NOT VERIFIED**. The 159-card six-batch result is deterministic production-handler evidence, not a claim that 159 DOM nodes were observed in Chrome. Physical Google TV remains **NOT VERIFIED**.
+
+### Screenshots
+
+Earlier before/after captures are retained here:
 
 | State | 1280×720 | 1920×1080 |
 | --- | --- | --- |
-| Before (native four-person preview) | ![Before 720p](screenshots/before-1280x720.png) | ![Before 1080p](screenshots/before-1920x1080.png) |
-| After (ten-person preview and All Actors) | ![After 720p](screenshots/after-1280x720.png) | ![After 1080p](screenshots/after-1920x1080.png) |
-| Full native Category | ![Full cast 720p](screenshots/full-cast-1280x720.png) | ![Full cast 1080p](screenshots/full-cast-1920x1080.png) |
+| Before (native four-person payload) | ![Before 720p](screenshots/before-1280x720.png) | ![Before 1080p](screenshots/before-1920x1080.png) |
+| After (cast preview) | ![After 720p](screenshots/after-1280x720.png) | ![After 1080p](screenshots/after-1920x1080.png) |
 
-Before screenshots show the main branch's four-person native payload. After screenshots show the first ten aggregate credits plus the full-cast action. Full-cast screenshots show the native grid with verified roles. Desktop viewport emulation is not physical Google TV validation.
+Final review pass (DPR 1):
+
+| View | 1280×720 | 1920×1080 | 3840×2160 |
+| --- | --- | --- | --- |
+| The Last of Us — focused full-cast action | ![TV action 720p](screenshots/review-6513764119/the-last-of-us-720-action-focused.png) | ![TV action 1080p](screenshots/review-6513764119/the-last-of-us-1080-action-focused.png) | — |
+| The Last of Us — focused actor card | ![TV actor 720p](screenshots/review-6513764119/the-last-of-us-720-actor-focused.png) | ![TV actor 1080p](screenshots/review-6513764119/the-last-of-us-1080-actor-focused.png) | ![TV actor 4K](screenshots/review-6513764119/the-last-of-us-4k-actor-focused.png) |
+| Fight Club — focused native card | ![Movie card 720p](screenshots/review-6513764119/fight-club-720-focused-card.png) | ![Movie card 1080p](screenshots/review-6513764119/fight-club-1080-focused-card.png) | ![Movie card 4K](screenshots/review-6513764119/fight-club-4k-focused-card.png) |
+| Fight Club — focused cast action | — | ![Movie action 1080p](screenshots/review-6513764119/fight-club-1080-action-focused.png) | — |
+
+The 4K screenshots are desktop viewport emulation at DPR 1. They are not physical television acceptance.
 
 ## Automated coverage
 
-`tests/full-cast.cjs` exercises production handlers for source order, stable IDs, duplicate merging, TV aggregate roles, movie character/animated voice credits, missing photographs, small casts, asynchronous enrichment, reused Full activity/data ownership, in-flight request coalescing, cache, retry after provider failure, native Category/actor routes, 30-card paging of a large movie cast, and lazy/non-blocking loading. `tests/loader-critical-parallel.cjs` checks that the built-in deferred adapter is loaded before optional adapters without changing user configuration. Both are included in the repository-checks GitHub Actions workflow.
+`tests/full-cast.cjs` covers actual production handlers: source order and IDs, duplicate people/roles, TV and movie credits, voice roles, missing portraits, small casts, deep-link recovery, Hybrid disabled/delayed ownership, language cache partitioning, controller ownership races, retry/empty/loading states, actor routes, and six-page 159-person pagination. `tests/loader-critical-parallel.cjs` verifies built-in deferred adapter ordering without modifying user preferences.
 
-At initial authoring, focused command:
+Focused command:
 
 ```sh
 node --test --test-timeout=15000 tests/full-cast.cjs tests/loader-critical-parallel.cjs
 ```
 
-Result: 18/18 passing. Repository checks and the five Actions are reported against the final pushed SHA in the PR.
-
-## Source identity and limits
-
-The final browser-tested `ui/full-cast.js` SHA-256 at capture time was `7523153ca4af8ae1bbb124295a2bd540d05f9dfe9a307a5f55daefbbfd2c5358`; `loader.js` was `beda1cc9ce6bfe5ff44534301285f2685b78ed19f7ac900d8ce15324cbcd972a`. `ui/full-cast.js` did not change after those screenshots. All data came from the configured TMDb provider through native Lampa; the runtime check observed one TV aggregate-credit request. Movie large-cast paging, animated voice credits, a small cast, missing images, and failure/retry are covered by deterministic production-handler fixtures, not claimed as live-provider browser cases.
-
-Physical Google TV remote, other provider failures in production, and movie/animated/small-cast live routes remain **NOT VERIFIED**. The original Silo browser tab is restored after testing; no settings, Trakt data, parser configuration or credentials were changed.
+Latest local result: 28/28 passed. Repository checks passed. Final GitHub Actions status and exact pushed SHA are recorded in the PR after final push.
