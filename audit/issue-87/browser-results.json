@@ -11,7 +11,11 @@
     "pageId": 3,
     "tabCountChanged": false,
     "storageSettingsTraktOrTorrentChanged": false,
-    "viewports": ["1280x720 DPR1", "1920x1080 DPR1", "3840x2160 DPR1"],
+    "viewports": [
+      "1280x720 DPR1",
+      "1920x1080 DPR1",
+      "3840x2160 DPR1"
+    ],
     "restored": "The existing page-3 Lampa tab returned to its initially observed The Last of Us Full Cast page-1 URL at 1920x1080 DPR1. Saved data and settings were not modified."
   },
   "liveCases": {
@@ -21,7 +25,14 @@
       "provider": "configured native Lampa TMDb source",
       "liveCredits": 159,
       "nativeCategoryPages": 6,
-      "activeProgression": [30, 60, 90, 120, 150, 159],
+      "activeProgression": [
+        30,
+        60,
+        90,
+        120,
+        150,
+        159
+      ],
       "finalPage": "6/6",
       "finalVisibleStatus": "Показано 159 із 159 акторів",
       "uniqueCreditIds": 159,
@@ -47,21 +58,101 @@
   },
   "productionHandlerFixture": {
     "totalCredits": 159,
-    "batches": [30, 30, 30, 30, 30, 9],
-    "pageMetadata": [1, 2, 3, 4, 5, 6],
+    "batches": [
+      30,
+      30,
+      30,
+      30,
+      30,
+      9
+    ],
+    "pageMetadata": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
     "portraitPaths": 158,
     "missingPortraitRetained": true,
     "testCommand": "node --test --test-timeout=15000 tests/full-cast.cjs tests/loader-critical-parallel.cjs"
   },
   "screenshots": [
-    {"file": "screenshots/pagination-6513764119/all-actors-action-1280x720.png", "width": 1280, "height": 720, "dpr": 1, "state": "Native action in Details"},
-    {"file": "screenshots/pagination-6513764119/all-actors-action-1920x1080.png", "width": 1920, "height": 1080, "dpr": 1, "state": "Native action in Details"},
-    {"file": "screenshots/pagination-6513764119/all-actors-action-3840x2160.png", "width": 3840, "height": 2160, "dpr": 1, "state": "Native action 4K layout emulation"},
-    {"file": "screenshots/pagination-6513764119/tlou-page1-progress-1920x1080.png", "width": 1920, "height": 1080, "dpr": 1, "state": "Full Cast page 1 progress visible"},
-    {"file": "screenshots/pagination-6513764119/tlou-page2-actor31-1280x720.png", "width": 1280, "height": 720, "dpr": 1, "state": "Page 2 actor 31 focused"},
-    {"file": "screenshots/pagination-6513764119/tlou-page2-actor31-1920x1080.png", "width": 1920, "height": 1080, "dpr": 1, "state": "Page 2 actor 31 focused"}
+    {
+      "file": "screenshots/pagination-6513764119/all-actors-action-1280x720.png",
+      "width": 1280,
+      "height": 720,
+      "dpr": 1,
+      "state": "Native action in Details"
+    },
+    {
+      "file": "screenshots/pagination-6513764119/all-actors-action-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1,
+      "state": "Native action in Details"
+    },
+    {
+      "file": "screenshots/pagination-6513764119/all-actors-action-3840x2160.png",
+      "width": 3840,
+      "height": 2160,
+      "dpr": 1,
+      "state": "Native action 4K layout emulation"
+    },
+    {
+      "file": "screenshots/pagination-6513764119/tlou-page1-progress-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1,
+      "state": "Full Cast page 1 progress visible"
+    },
+    {
+      "file": "screenshots/pagination-6513764119/tlou-page2-actor31-1280x720.png",
+      "width": 1280,
+      "height": 720,
+      "dpr": 1,
+      "state": "Page 2 actor 31 focused"
+    },
+    {
+      "file": "screenshots/pagination-6513764119/tlou-page2-actor31-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1,
+      "state": "Page 2 actor 31 focused"
+    }
   ],
   "nativeDomWindowGrowthBeyondViewport": "NOT VERIFIED",
   "physicalGoogleTv": "NOT VERIFIED",
-  "githubActionsFinalSha": "PENDING"
+  "githubActions": {
+    "sourceCommit": "5bacd6beb089861e8049546b4170f2ba7ed4856d",
+    "workflowRuns": [
+      {
+        "name": "Repository checks",
+        "runId": 41008083004,
+        "conclusion": "success"
+      },
+      {
+        "name": "Home history",
+        "runId": 41008082990,
+        "conclusion": "success"
+      },
+      {
+        "name": "Home order",
+        "runId": 41008083172,
+        "conclusion": "success"
+      },
+      {
+        "name": "Parser providers",
+        "runId": 41008083020,
+        "conclusion": "success"
+      },
+      {
+        "name": "Season integrity",
+        "runId": 41008083080,
+        "conclusion": "success"
+      }
+    ],
+    "note": "All five passed on this production-code commit. Any later commit is limited to acceptance evidence; verify checks again on the final PR head."
+  }
 }
