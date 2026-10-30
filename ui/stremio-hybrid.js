@@ -268,7 +268,7 @@ body.stremio-hybrid .sh-movie .full-start-new__details > div > div { margin:0 !i
 body.stremio-hybrid .sh-movie .full-start-new__details span:not(.full-start-new__split) { background:rgba(255,255,255,.07) !important; color:var(--sm-muted) !important; font-size:.95em !important; font-weight:400; border:0 !important; border-radius:2em !important; padding:.3em .8em !important; margin:0 !important; }
 body.stremio-hybrid .sh-movie .cardify__right-box { order:4; position:static !important; margin:0 0 .9em; gap:.7em; }
 body.stremio-hybrid .sh-movie .cardify__right-box > * { margin:0 !important; font-size:.8em; background:rgba(255,255,255,.06) !important; color:var(--sm-muted) !important; border:1px solid #ffffff26; padding:.2em .6em; border-radius:.3em; }
-body.stremio-hybrid .sh-movie .sh-movie-description { order:6; position:static !important; width:100% !important; max-width:49em; padding:0 !important; margin:0 0 1.5em; pointer-events:auto !important; border:0; border-radius:0; background:none; z-index:auto !important; }
+body.stremio-hybrid .sh-movie-page .sh-movie-description { display:block; position:static; width:100%; max-width:72ch; padding:0; margin:0 0 1.1em; pointer-events:auto; border:0; border-radius:0; background:none; z-index:auto; }
 body.stremio-hybrid .sh-movie .full-descr__text { color:#e0e0e8 !important; font-size:1em !important; line-height:1.65 !important; text-align:left !important; text-shadow:none !important; max-height:8.25em !important; padding:0 !important; margin:0 !important; width:100%; }
 body.stremio-hybrid .sh-movie .full-start-new__buttons { order:5; display:flex !important; flex-wrap:nowrap !important; align-items:center; gap:.6em !important; max-width:100%; overflow-x:auto; overflow-y:hidden; padding:.2em .2em 1.4em; margin:0 -.2em; scrollbar-width:none; }
 body.stremio-hybrid .sh-movie .full-start__button { font-size:1em !important; flex:0 0 auto; display:flex; align-items:center; justify-content:center; min-height:2.9em !important; height:2.9em !important; width:3.1em; min-width:3.1em; margin:0 !important; padding:0 .85em !important; border-radius:.55em !important; background:rgba(255,255,255,.08) !important; border:1px solid #ffffff12; box-shadow:none; transform:none !important; }
@@ -310,9 +310,7 @@ body.stremio-hybrid .sh-series .full-descr__text { max-height:6.6em !important; 
 
 `;
     css += `
-body.stremio-hybrid .sh-movie .full-descr__text{display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:3;max-height:4.95em!important;overflow:hidden;white-space:normal!important}
-body.stremio-hybrid .sh-movie.sh-description-expanded .full-descr__text{display:block!important;-webkit-line-clamp:unset;max-height:none!important;overflow:visible;white-space:pre-line!important}
-body.stremio-hybrid .sh-movie .sh-description-toggle{order:7;align-self:flex-start;margin:0 0 1.2em;display:flex;align-items:center;justify-content:center;width:auto;min-width:0;min-height:2.9em;flex:0 0 auto;font-size:.85em!important;color:var(--sm-text);padding:0 .8em!important;border-radius:.55em;background:#ffffff12;border:1px solid #ffffff18}\nbody.stremio-hybrid .sh-movie .sh-description-toggle.focus{background:var(--sh-focus-soft);box-shadow:0 0 0 .12em var(--sh-accent-soft)}
+body.stremio-hybrid .sh-movie .full-descr__text{display:block!important;-webkit-line-clamp:unset;max-height:none!important;overflow:visible;white-space:pre-line!important}
 body.stremio-hybrid .head .head__title{max-width:20vw}
 body.stremio-hybrid .sh-profile-menu .selectbox__content{position:absolute;right:1.8em;top:5em;bottom:auto;left:auto;width:23em;max-width:90vw;max-height:calc(100vh - 7em);border:1px solid var(--sh-border);box-shadow:0 .7em 2em #0005}
 body.stremio-hybrid .selectbox-item{transition:opacity var(--sh-speed) var(--sh-ease)!important}
@@ -352,15 +350,27 @@ body.stremio-hybrid .sh-movie-page .sh-detail-toggle::after{content:'';position:
 body.stremio-hybrid .sh-movie-page .sh-detail-toggle::before{content:'';position:absolute;top:50%;right:1.02em;width:.42em;height:.42em;border-right:1.5px solid #c9b9ff;border-bottom:1.5px solid #c9b9ff;transform:translateY(-68%) rotate(45deg);transition:transform .16s ease}
 body.stremio-hybrid .sh-movie-page .sh-detail-toggle[aria-expanded="true"]::before{transform:translateY(-30%) rotate(225deg)}
 body.stremio-hybrid .sh-movie-page .sh-detail-toggle.focus{color:#fff;text-shadow:0 0 1em #ab91ff66;outline:2px solid var(--sh-accent-soft);outline-offset:2px;border-radius:.45em}
+body.stremio-hybrid .sh-movie-page .sh-detail-toggle,body.stremio-hybrid .sh-movie-page .full-person{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+body.stremio-hybrid .sh-movie-page .sh-detail-toggle.focus,body.stremio-hybrid .sh-movie-page .full-person.focus{transform:none!important}
 body.stremio-hybrid .sh-movie-page .sh-detail-section__body{display:flex;flex-wrap:wrap;align-items:center;gap:.65em;padding:.55em .35em .25em;border-top:1px solid #ffffff10}
 body.stremio-hybrid .sh-movie-page .sh-detail-section__body[hidden]{display:none!important}
+body.stremio-hybrid .sh-movie-page .sh-details-secondary{display:flex;flex-direction:column;align-items:flex-start;gap:.15em;width:100%;box-sizing:border-box;margin:1em 0 1.4em;padding:1.1em clamp(1em,3vw,2.2em);border:1px solid #ffffff1b;border-radius:1em;background:rgba(13,15,22,.42);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);}
+body.stremio-hybrid .sh-movie-page .sh-details-secondary>.sh-movie-description{order:0!important;}
+body.stremio-hybrid .sh-movie-page .sh-details-secondary>.sh-detail-panels{order:1!important;}
+body.stremio-hybrid .sh-movie-page .sh-details-zone-title{align-self:stretch;margin:0 0 .8em;padding:0 0 .45em;border-bottom:1px solid #ffffff12;color:#b9a5f3;font-size:.78em;font-weight:600;letter-spacing:.08em;text-transform:uppercase;}
+body.stremio-hybrid .sh-movie-page .sh-details-zone-title--content{margin:1.4em 0 .6em;}
+body.stremio-hybrid .sh-movie-page .items-line.sh-details-empty-native-row{display:none;}
+body.stremio-hybrid .sh-movie-page .sh-movie-description,body.stremio-hybrid .sh-movie-page .sh-movie-description .full-descr__text{display:block;color:#f4f2fa!important;-webkit-text-fill-color:#f4f2fa!important;text-shadow:0 1px 2px #0009!important;background:none!important;filter:none!important;opacity:1!important;-webkit-line-clamp:unset;-webkit-mask-image:none!important;mask-image:none!important;max-height:none!important;overflow:visible!important;white-space:pre-line;line-height:1.7!important;}
 body.stremio-hybrid .sh-movie-page .sh-detail-section__body .tag-count{flex:0 0 auto;margin:0!important}
 body.stremio-hybrid .sh-movie-page .sh-detail-section__body .platforms-group,body.stremio-hybrid .sh-movie-page .sh-detail-section__body .studios-group{display:flex;flex:1 1 100%;flex-wrap:wrap;align-items:center;gap:.55em}
 body.stremio-hybrid .sh-movie-page .sh-detail-section__body .platforms-group::before,body.stremio-hybrid .sh-movie-page .sh-detail-section__body .studios-group::before{display:block;flex:0 0 100%;color:#aaa6b6;font-size:.72em;letter-spacing:.08em;text-transform:uppercase}
 body.stremio-hybrid .sh-movie-page .sh-detail-section__body .platforms-group::before{content:'Мережа / платформа'}
 body.stremio-hybrid .sh-movie-page .sh-detail-section__body .studios-group::before{content:'Студії / виробники'}
-body.stremio-hybrid .sh-movie-page .sh-detail-section__body .network-logo{height:2.6em!important;min-height:2.6em!important;padding:.35em .55em!important;border-radius:.55em!important;background:#ffffff0a!important;border:1px solid #ffffff12!important}
-body.stremio-hybrid .sh-movie-page .sh-detail-section__body .network-logo img{max-height:1.9em!important;max-width:9em!important;object-fit:contain}
+body.stremio-hybrid .sh-movie-page .sh-detail-section__body .network-separator{display:none!important}
+body.stremio-hybrid .sh-movie-page .sh-detail-section__body .network-logo{display:inline-flex!important;align-items:center!important;justify-content:flex-start!important;gap:.55em!important;width:auto!important;max-width:min(24em,100%)!important;height:3.1em!important;min-height:3.1em!important;padding:.45em .8em!important;border-radius:.65em!important;background:rgba(248,248,252,.9)!important;color:#171720!important;border:1px solid #ffffff65!important;box-sizing:border-box!important}
+body.stremio-hybrid .sh-movie-page .sh-detail-section__body .network-logo img{display:block!important;flex:0 1 auto!important;width:auto!important;max-width:5em!important;height:auto!important;max-height:2.1em!important;object-fit:contain}
+body.stremio-hybrid .sh-movie-page .sh-detail-section__body .network-logo[data-sh-name]::after{content:attr(data-sh-name);display:block;min-width:0;overflow:hidden;color:#171720;font-size:.76em;font-weight:600;line-height:1.2;text-overflow:ellipsis;white-space:nowrap}
+body.stremio-hybrid .sh-movie-page .tag-count.selector.sh-production-count-hidden{display:none!important}
 body.stremio-hybrid .sh-movie-page .networks-wrapper .sh-detail-section{margin:0;width:100%}
 body.stremio-hybrid .sh-movie-page .tmdb-networks{margin:.35em 0!important;padding:0!important}
 body.stremio-hybrid .sh-movie-page .tmdb-networks > .items-line__body{margin:0!important}
@@ -368,7 +378,7 @@ body.stremio-hybrid .sh-movie-page .ua-comments-root{width:auto;max-width:44em;m
 body.stremio-hybrid .sh-movie-page .sh-detail-section--comments .ua-comments-root{width:100%;max-width:none;margin:.35em 0!important}
 body.stremio-hybrid .sh-movie-page .sh-detail-section--comments .ua-comments-slider{max-width:100%}
 body.stremio-hybrid .sh-movie-page .sh-detail-section--comments .ua-comment-card{flex-basis:min(34ch,72vw);width:min(34ch,72vw);max-width:min(34ch,72vw)}
-body.stremio-hybrid .sh-movie-page .items-line__title.sh-details-heading-hidden{display:none}
+body.stremio-hybrid .sh-movie-page .items-line__head.sh-details-heading-hidden,body.stremio-hybrid .sh-movie-page .items-line__title.sh-details-heading-hidden{display:none}
 body.stremio-hybrid .sh-movie-page .ua-status-card{width:auto!important;max-width:100%;min-height:0!important;padding:.5em .8em!important;border:1px solid #ffffff12!important;border-radius:var(--sh-pill)!important;background:#ffffff07!important;color:#b9b5c4!important;font-size:.78em!important;line-height:1.4;white-space:normal}
 body.stremio-hybrid .sh-movie-page .items-line__head{margin:.5em 0 .4em!important}
 body.stremio-hybrid .sh-movie-page .items-line__title{font-size:1.05em;font-weight:600;letter-spacing:.01em}
@@ -420,23 +430,129 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
         if(!enabled||['full_start','full_descr'].indexOf(enabled.name)<0||!enabled.controller||(controller&&enabled.controller!==controller)||nativeOverlayOwnsInput())return null;
         return {active:active,controller:enabled.controller,scroll:active.activity.component&&active.activity.component.scroll};
     }
-    function restoreGenreFocus(record){
-        var origin=record&&record.genreSelectOrigin;if(!origin)return;record.genreSelectOrigin=null;
-        if(!origin.isConnected||!detailsInputOwner(record))return;
-        Lampa.Controller.collectionSet(record.page);Lampa.Controller.collectionFocus(origin,record.page);
+    function detailsPageOwner(record){
+        var active=Lampa.Activity&&Lampa.Activity.active&&Lampa.Activity.active();
+        if(!active||active.component!=='full'||!active.activity||!record.page.isConnected||!record.page.classList.contains('activity--active'))return null;
+        if(typeof active.activity.render==='function'&&active.activity.render()[0]!==record.page)return null;
+        if(nativeOverlayOwnsInput())return null;
+        return active;
     }
-    function bindGenreSelectFocus(record){
-        if(record.genreSelectBound||!Lampa.Select||!Lampa.Select.listener||typeof Lampa.Select.listener.follow!=='function')return;
-        record.genreSelectBound=true;
-        record.genreSelectShow=function(){record.genreSelectOrigin=null;};
-        record.genreSelectClose=function(){if(!record.genreSelectOrigin)return;if(record.genreFocusFrame)cancelAnimationFrame(record.genreFocusFrame);record.genreFocusFrame=requestAnimationFrame(function(){record.genreFocusFrame=0;restoreGenreFocus(record);});};
-        Lampa.Select.listener.follow('fullshow',record.genreSelectShow);Lampa.Select.listener.follow('close',record.genreSelectClose);
+    function detailsNeedsScroll(node){
+        var box=node&&node.getBoundingClientRect&&node.getBoundingClientRect(),viewport=window.innerHeight||document.documentElement&&document.documentElement.clientHeight||0;
+        return !box||!viewport||box.top<0||box.bottom>viewport;
     }
-    function unbindGenreSelectFocus(record){
-        if(!record||!record.genreSelectBound)return;
-        if(Lampa.Select&&Lampa.Select.listener&&typeof Lampa.Select.listener.remove==='function'){Lampa.Select.listener.remove('fullshow',record.genreSelectShow);Lampa.Select.listener.remove('close',record.genreSelectClose);}
-        if(record.genreFocusFrame)cancelAnimationFrame(record.genreFocusFrame);record.genreFocusFrame=0;
-        record.genreSelectBound=false;record.genreSelectOrigin=null;
+    function detailsZoneTarget(record,preferred){
+        var scope=record.detailsHostLine||record.page,focused=record.page&&record.page.querySelector('.selector.focus'),candidates=[preferred,record.detailLastFocus,focused,record.descriptionToggle];
+        (record.detailPanels||[]).forEach(function(panel){candidates.push(panel.toggle);});
+        for(var i=0;i<candidates.length;i++){var node=candidates[i];if(node&&node.isConnected&&node.offsetParent!==null&&scope.contains(node)&&node.classList.contains('selector'))return node;}
+        var selectors=scope.querySelectorAll?scope.querySelectorAll('.selector'):[];
+        for(var j=0;j<selectors.length;j++)if(selectors[j].isConnected&&selectors[j].offsetParent!==null)return selectors[j];
+        return null;
+    }
+    function enterDetailsZone(record,preferred){
+        var enabled=Lampa.Controller&&Lampa.Controller.enabled&&Lampa.Controller.enabled(),scope=record.detailsHostLine||record.page,target=detailsZoneTarget(record,preferred);
+        if(!enabled||enabled.name!=='full_start'||!enabled.controller||!target||!scope)return false;
+        // This Lampa runtime has one native Full Start controller for both the
+        // hero and Details content. Switch its native collection instead of
+        // toggling an unregistered synthetic `full_descr` controller.
+        Lampa.Controller.collectionSet(scope,null,true);Lampa.Controller.collectionFocus(target,scope);
+        enabled=Lampa.Controller.enabled();if(!enabled||enabled.name!=='full_start'||!enabled.controller)return false;
+        if(enabled.controller.link)enabled.controller.link.last=target;
+        record.detailsZoneActive=true;record.detailLastFocus=target;
+        var active=Lampa.Activity&&Lampa.Activity.active&&Lampa.Activity.active(),scroll=active&&active.activity&&active.activity.component&&active.activity.component.scroll;
+        if(scroll&&typeof scroll.immediate==='function'&&detailsNeedsScroll(target))scroll.immediate(target);
+        return true;
+    }
+    function leaveDetailsZone(record,preferred){
+        var enabled=Lampa.Controller&&Lampa.Controller.enabled&&Lampa.Controller.enabled(),torrent=record.root&&record.root.querySelector('.view--torrent'),focus=preferred||record.page&&record.page.querySelector('.selector.focus'),scope=record.detailsHostLine||record.page;
+        if(!enabled||enabled.name!=='full_start'||!enabled.controller||!torrent||!torrent.isConnected||torrent.offsetParent===null)return false;
+        if(!record.detailsZoneActive&&!(scope&&focus&&scope.contains(focus)))return false;
+        Lampa.Controller.collectionSet(record.root,null,true);Lampa.Controller.collectionFocus(torrent,record.root);
+        enabled=Lampa.Controller.enabled();if(enabled&&enabled.name==='full_start'&&enabled.controller&&enabled.controller.link)enabled.controller.link.last=torrent;
+        record.detailsZoneActive=false;
+        var active=Lampa.Activity&&Lampa.Activity.active&&Lampa.Activity.active(),scroll=active&&active.activity&&active.activity.component&&active.activity.component.scroll;
+        if(scroll&&typeof scroll.reset==='function')scroll.reset();
+        return true;
+    }
+    function restoreDetailSelectFocus(record,attempt){
+        if(!record||!record.detailSelectOrigin)return;
+        attempt=attempt||0;
+        if(Lampa.Select&&Lampa.Select.opened&&Lampa.Select.opened()){
+            if(attempt<30)record.detailSelectFrame=requestAnimationFrame(function(){record.detailSelectFrame=0;restoreDetailSelectFocus(record,attempt+1);});
+            else record.detailSelectOrigin=null;
+            return;
+        }
+        // Native Select hides its surface before the controller/route handoff
+        // finishes. Wait two rendered frames after opened() becomes false so
+        // its late focus restoration cannot overwrite the invoking control.
+        if(attempt<2){record.detailSelectFrame=requestAnimationFrame(function(){record.detailSelectFrame=0;restoreDetailSelectFocus(record,attempt+1);});return;}
+        var origin=record.detailSelectOrigin;record.detailSelectOrigin=null;
+        var active=detailsPageOwner(record),enabled=Lampa.Controller&&Lampa.Controller.enabled&&Lampa.Controller.enabled();
+        if(!active||!origin.isConnected||!enabled||['full_start','full_descr','items_line'].indexOf(enabled.name)<0)return;
+        if(enabled.name==='items_line')Lampa.Controller.toggle('full_start');
+        enabled=Lampa.Controller.enabled();if(!enabled||['full_start','full_descr'].indexOf(enabled.name)<0)return;
+        var scope=enabled.name==='full_descr'||(record.detailsHostLine&&record.detailsHostLine.contains(origin))?(record.detailsHostLine||record.page):record.root;
+        record.detailsZoneActive=!!record.detailsHostLine&&scope===record.detailsHostLine;
+        if(record.detailsZoneActive)record.detailLastFocus=origin;
+        Lampa.Controller.collectionSet(scope,null,true);Lampa.Controller.collectionFocus(origin,scope);if(enabled.controller&&enabled.controller.link)enabled.controller.link.last=origin;
+        var scroll=active.activity.component&&active.activity.component.scroll;if(scroll&&typeof scroll.immediate==='function'&&detailsNeedsScroll(origin))scroll.immediate(origin);
+    }
+    function bindDetailSelectFocus(record,controls){
+        controls=controls||[];var previous=record.detailSelectControls||[];
+        previous.forEach(function(node){if(controls.indexOf(node)<0)$(node).off('.shDetailsFocus');});
+        controls.forEach(function(node){if(previous.indexOf(node)<0)$(node).on('hover:enter.shDetailsFocus click.shDetailsFocus',function(){
+            record.detailSelectOrigin=null;
+            var capture=record.detailSelectCapture=(record.detailSelectCapture||0)+1;
+            if(Lampa.Select&&Lampa.Select.opened&&Lampa.Select.opened())record.detailSelectOrigin=node;
+            requestAnimationFrame(function(){if(record.detailSelectCapture===capture&&Lampa.Select&&Lampa.Select.opened&&Lampa.Select.opened())record.detailSelectOrigin=node;});
+        });});
+        record.detailSelectControls=controls.slice();
+        if(!controls.length){unbindDetailSelectFocus(record);return;}
+        if(record.detailSelectBound||!Lampa.Select||!Lampa.Select.listener||typeof Lampa.Select.listener.follow!=='function')return;
+        record.detailSelectBound=true;
+        record.detailSelectClose=function(){if(!record.detailSelectOrigin)return;if(record.detailSelectFrame)cancelAnimationFrame(record.detailSelectFrame);record.detailSelectFrame=requestAnimationFrame(function(){record.detailSelectFrame=0;restoreDetailSelectFocus(record);});};
+        Lampa.Select.listener.follow('close',record.detailSelectClose);
+    }
+    function unbindDetailSelectFocus(record){
+        if(!record)return;
+        (record.detailSelectControls||[]).forEach(function(node){$(node).off('.shDetailsFocus');});record.detailSelectControls=[];
+        if(!record.detailSelectBound){record.detailSelectOrigin=null;return;}
+        if(Lampa.Select&&Lampa.Select.listener&&typeof Lampa.Select.listener.remove==='function')Lampa.Select.listener.remove('close',record.detailSelectClose);
+        if(record.detailSelectFrame)cancelAnimationFrame(record.detailSelectFrame);record.detailSelectFrame=0;
+        record.detailSelectBound=false;record.detailSelectOrigin=null;
+    }
+    function installDetailsDown(record){
+        var owner=detailsInputOwner(record),controller=owner&&owner.controller;
+        if(!controller||typeof controller.down!=='function')return;
+        if(record.detailsDownController===controller)return;
+        restoreDetailsDown(record);
+        var original=controller.down;
+        var wrapped=function(){
+            var inputOwner=detailsInputOwner(record,controller),enabled=Lampa.Controller&&Lampa.Controller.enabled&&Lampa.Controller.enabled();
+            var torrent=record.root&&record.root.querySelector('.view--torrent');
+            var focused=record.page&&record.page.querySelector('.selector.focus');
+            if(inputOwner&&enabled&&enabled.name==='full_start'&&torrent&&focused===torrent&&record.detailGroup&&record.detailGroup.isConnected){
+                // The native Full controller continues its ArrowDown dispatch
+                // after `down()` returns. Defer only this controller handoff
+                // until that dispatch finishes, then revalidate ownership.
+                if(record.detailsDownFrame)cancelAnimationFrame(record.detailsDownFrame);
+                record.detailsDownFrame=requestAnimationFrame(function(){
+                    record.detailsDownFrame=0;
+                    var current=detailsInputOwner(record,controller),active=Lampa.Controller&&Lampa.Controller.enabled&&Lampa.Controller.enabled();
+                    if(!current||!active||active.name!=='full_start'||record.page.querySelector('.selector.focus')!==torrent)return;
+                    enterDetailsZone(record,record.detailLastFocus||null);
+                });
+                return;
+            }
+            return original.apply(this,arguments);
+        };
+        controller.down=wrapped;record.detailsDownController=controller;record.detailsDownOriginal=original;record.detailsDownWrapper=wrapped;
+    }
+    function restoreDetailsDown(record){
+        if(record&&record.detailsDownFrame)cancelAnimationFrame(record.detailsDownFrame);
+        if(record)record.detailsDownFrame=0;
+        if(record&&record.detailsDownController&&record.detailsDownController.down===record.detailsDownWrapper)record.detailsDownController.down=record.detailsDownOriginal;
+        if(record){record.detailsDownController=null;record.detailsDownOriginal=null;record.detailsDownWrapper=null;}
     }
     function installDetailsBack(record){
         var owner=detailsInputOwner(record),controller=owner&&owner.controller;
@@ -445,10 +561,26 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
         restoreDetailsBack(record);
         var original=controller.back;
         var wrapped=function(){
-            if(!detailsInputOwner(record,controller))return original.apply(this,arguments);
+            var inputOwner=detailsInputOwner(record,controller);if(!inputOwner)return original.apply(this,arguments);
             var focused=record.page.querySelector('.sh-detail-toggle.focus, .sh-detail-section__body .focus');
             var panel=(record.detailPanels||[]).filter(function(item){return item.root.isConnected&&item.toggle.getAttribute('aria-expanded')==='true'&&(focused===item.toggle||item.body.contains(focused));})[0];
             if(panel){setDetailDisclosure(panel,false);refreshMovieCollection(record,panel.toggle);return;}
+            var enabled=Lampa.Controller&&Lampa.Controller.enabled&&Lampa.Controller.enabled();
+            if(enabled&&enabled.name==='full_start'&&leaveDetailsZone(record,focused))return;
+            if(enabled&&enabled.name==='full_descr'){
+                var torrent=record.root&&record.root.querySelector('.view--torrent');
+                if(torrent&&torrent.isConnected&&torrent.offsetParent!==null){
+                    Lampa.Controller.toggle('full_start');
+                    if(inputOwner.scroll&&typeof inputOwner.scroll.reset==='function')inputOwner.scroll.reset();
+                    // Controller.toggle() restores Lampa's native Full Start
+                    // collection and its cross-controller Down route. Replacing
+                    // that shared collection with the hero-only subset makes
+                    // the next Down skip Full Description and land in items_line.
+                    Lampa.Controller.collectionFocus(torrent);
+                    enabled=Lampa.Controller.enabled();if(enabled&&enabled.name==='full_start'&&enabled.controller&&enabled.controller.link)enabled.controller.link.last=torrent;
+                    return;
+                }
+            }
             return original.apply(this,arguments);
         };
         controller.back=wrapped;record.detailsBackController=controller;record.detailsBackOriginal=original;record.detailsBackWrapper=wrapped;
@@ -463,20 +595,33 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
         var initialOwner=detailsInputOwner(record);if(!initialOwner||!initialOwner.scroll)return;
         record.detailScrollOwner=initialOwner.scroll;
         record.detailKeydown=function(event){
-            if(!event||event.defaultPrevented||!/^Arrow(Up|Down)$/.test(event.key)||!detailsInputOwner(record))return;
+            if(!event||event.defaultPrevented||!/^Arrow(Up|Down|Left|Right)$/.test(event.key)||!detailsInputOwner(record))return;
+            var vertical=/^Arrow(Up|Down)$/.test(event.key);
+            var currentController=Lampa.Controller.enabled(),currentFocus=record.page&&record.page.querySelector('.selector.focus');
+            if(currentController&&['full_descr','full_start'].indexOf(currentController.name)>=0&&currentFocus&&currentFocus.isConnected&&currentFocus.offsetParent!==null&&(record.detailsHostLine||record.page).contains(currentFocus))record.detailLastFocus=currentFocus;
             if(record.detailScrollFrame)cancelAnimationFrame(record.detailScrollFrame);
             record.detailScrollFrame=requestAnimationFrame(function(){
                 record.detailScrollFrame=0;
                 var owner=detailsInputOwner(record);if(!owner||owner.scroll!==record.detailScrollOwner)return;
-                var focused=record.detailGroup&&record.detailGroup.querySelector('.focus');
-                if(focused&&focused.isConnected&&owner.scroll&&typeof owner.scroll.immediate==='function')owner.scroll.immediate(focused);
+                // Full Details controls above the disclosure group (notably
+                // the description expander) use the same native scroll area.
+                // Keep any currently focused Full selector in view, not only
+                // selectors nested in the three disclosure panels.
+                var focused=record.page&&record.page.querySelector('.selector.focus');
+                var enabled=Lampa.Controller&&Lampa.Controller.enabled&&Lampa.Controller.enabled(),scope=record.detailsHostLine||record.page;
+                if(enabled&&['full_descr','full_start'].indexOf(enabled.name)>=0&&enabled.controller===owner.controller&&enabled.controller.link&&focused&&focused.isConnected&&focused.offsetParent!==null&&scope.contains(focused)){
+                    enabled.controller.link.last=focused;
+                    if(enabled.name==='full_descr'||record.detailsZoneActive)record.detailLastFocus=focused;
+                }
+                if(vertical&&focused&&focused.isConnected&&focused.offsetParent!==null&&owner.scroll&&typeof owner.scroll.immediate==='function'&&detailsNeedsScroll(focused))owner.scroll.immediate(focused);
             });
         };
         document.addEventListener('keydown',record.detailKeydown,true);record.detailScrollBound=true;
     }
     function restoreDetailsPresentation(record) {
-        unbindGenreSelectFocus(record);restoreDetailsBack(record);
-        if(record.genreActionControl){$(record.genreActionControl).off('.shDetailsFocus');record.genreActionControl=null;}
+        unbindDetailSelectFocus(record);restoreDetailsDown(record);restoreDetailsBack(record);
+        if(record.relatedListObserver){record.relatedListObserver.disconnect();record.relatedListObserver=null;}
+        if(record.relatedListFrame)cancelAnimationFrame(record.relatedListFrame);record.relatedListFrame=0;record.relatedListsPending=false;
         if(record.detailScrollFrame)cancelAnimationFrame(record.detailScrollFrame);record.detailScrollFrame=0;record.detailScrollOwner=null;
         if(record.detailScrollBound)document.removeEventListener('keydown',record.detailKeydown,true);record.detailScrollBound=false;record.detailKeydown=null;
         (record.detailPanels||[]).slice().reverse().forEach(function(panel){
@@ -488,9 +633,16 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
         });
         record.detailPanels=[];
         if(record.detailGroup&&record.detailGroup.parentNode)record.detailGroup.parentNode.removeChild(record.detailGroup);record.detailGroup=null;
+        restoreInertCommentStatuses(record);
+        (record.hiddenProductionCounts||[]).forEach(function(node){node.classList.remove('sh-production-count-hidden');});record.hiddenProductionCounts=[];
+        restoreProductionLabels(record);
         if(record.networkPlaceholder)record.networkPlaceholder.classList.remove('sh-detail-panels-empty');record.networkPlaceholder=null;
         if(record.relatedListMove){var related=record.relatedListMove;if(related.node&&related.parent)related.parent.insertBefore(related.node,related.next&&related.next.parentNode===related.parent?related.next:null);record.relatedListMove=null;}
         (record.hiddenDetailHeadings||[]).forEach(function(node){node.classList.remove('sh-details-heading-hidden');});record.hiddenDetailHeadings=[];
+        (record.emptyDetailsRows||[]).forEach(function(node){node.classList.remove('sh-details-empty-native-row');});record.emptyDetailsRows=[];
+        if(record.detailsSecondary&&record.detailsSecondary.parentNode)record.detailsSecondary.parentNode.removeChild(record.detailsSecondary);
+        if(record.detailsPeopleHeading&&record.detailsPeopleHeading.parentNode)record.detailsPeopleHeading.parentNode.removeChild(record.detailsPeopleHeading);
+        record.detailsSecondary=null;record.detailsSecondaryHeading=null;record.detailsPeopleHeading=null;
         (record.nativeGenreRows||[]).forEach(function(entry){if(entry.row&&!entry.rowHadClass)entry.row.classList.remove('sh-genre-chips');(entry.chips||[]).forEach(function(chip,index){$(chip).off('.shDetails');if(!entry.genreHad[index])chip.classList.remove('sh-genre-chip');if(!entry.selectorHad[index])chip.classList.remove('selector');if(entry.roles[index]===null)chip.removeAttribute('role');else chip.setAttribute('role',entry.roles[index]);});});record.nativeGenreRows=[];
         if(record.genreChips){record.genreChips.querySelectorAll('.sh-genre-chip').forEach(function(chip){$(chip).off('.shDetails');});if(record.genreChips.parentNode)record.genreChips.parentNode.removeChild(record.genreChips);}
         record.genreChips=null;
@@ -498,15 +650,86 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
     function refreshMovieCollection(record,focus){
         var active=Lampa.Controller.enabled();
         if(!active||['full_start','full_descr'].indexOf(active.name)<0||!active.controller)return;
-        var target=focus&&focus.isConnected?focus:record.page.querySelector('.selector.focus');
-        Lampa.Controller.collectionSet(record.page);
-        if(target&&target.isConnected)Lampa.Controller.collectionFocus(target,record.page);
+        var nativeLast=active.controller.link&&active.controller.link.last,visual=focus||record.page.querySelector('.selector.focus'),detailsScope=record.detailsHostLine;
+        var inDetails=active.name==='full_descr'||(active.name==='full_start'&&detailsScope&&(record.detailsZoneActive||(visual&&detailsScope.contains(visual))||(nativeLast&&detailsScope.contains(nativeLast))||(focus&&detailsScope.contains(focus))));
+        var scope=inDetails?(detailsScope||record.page):record.root;if(inDetails)record.detailsZoneActive=active.name==='full_start';
+        var staleNativeFocus=nativeLast&&(!nativeLast.isConnected||nativeLast.offsetParent===null||!scope.contains(nativeLast));
+        var target=focus&&focus.isConnected&&focus.offsetParent!==null?focus:(staleNativeFocus?null:record.page.querySelector('.selector.focus'));
+        if(!target||!target.isConnected||target.offsetParent===null||!scope.contains(target)){
+            var visualToggles=record.page.querySelectorAll?Array.prototype.slice.call(record.page.querySelectorAll('.sh-detail-toggle')):(record.detailPanels||[]).map(function(panel){return panel.toggle;});
+            target=[record.descriptionToggle].concat(visualToggles).filter(function(node){return node&&node.isConnected&&node.offsetParent!==null&&scope.contains(node);})[0]||null;
+        }
+        // Native collectionSet defaults to every `.selector`, including
+        // descendants hidden by collapsed disclosures. Its third argument
+        // uses Lampa's own offsetParent visibility filter.
+        Lampa.Controller.collectionSet(scope,null,true);
+        if(target&&target.isConnected&&target.offsetParent!==null&&scope.contains(target)){Lampa.Controller.collectionFocus(target,scope);if(active.controller.link)active.controller.link.last=target;if(inDetails)record.detailLastFocus=target;}
+    }
+    function refreshActiveDetailsCollection(record,focus){
+        var enabled=Lampa.Controller&&Lampa.Controller.enabled&&Lampa.Controller.enabled();
+        if(!enabled||enabled.name!=='full_descr'&&!(enabled.name==='full_start'&&record.detailsZoneActive))return false;
+        refreshMovieCollection(record,focus);return true;
+    }
+    function hideEmptyNativeDetailsRow(record,line){
+        if(!line||!line.classList||!line.classList.contains('items-line'))return false;
+        var body=line.querySelector('.items-line__body')||line;
+        if(body.textContent&&body.textContent.replace(/\s/g,''))return false;
+        if(['.selector','img','video','audio','input','button','a','.full-episode','.full-person','.card'].some(function(selector){return !!body.querySelector(selector);}))return false;
+        record.emptyDetailsRows=record.emptyDetailsRows||[];
+        if(record.emptyDetailsRows.indexOf(line)<0){record.emptyDetailsRows.push(line);line.classList.add('sh-details-empty-native-row');}
+        return true;
+    }
+    function hideNativeDetailsHeading(record,line){
+        if(record.nativeDetailsHeading)record.nativeDetailsHeading.classList.remove('sh-details-heading-hidden');
+        record.nativeDetailsHeading=null;
+        var head=line&&line.querySelector('.items-line__head'),title=head&&head.querySelector('.items-line__title');if(!title)return;
+        var controls=head.querySelector('.selector,button,a,input,[role="button"]'),target=!controls&&head.children.length===1&&head.children[0]===title?head:title;
+        target.classList.add('sh-details-heading-hidden');record.hiddenDetailHeadings=record.hiddenDetailHeadings||[];
+        if(record.hiddenDetailHeadings.indexOf(target)<0)record.hiddenDetailHeadings.push(target);record.nativeDetailsHeading=target;
+    }
+    function organizeDetailsZones(record){
+        var root=record.root;if(!root)return;
+        var lines=record.page.querySelectorAll('.items-line'),host=record.descriptionNativeLine&&record.descriptionNativeLine.isConnected?record.descriptionNativeLine:(record.detailsHostLine&&record.detailsHostLine.isConnected?record.detailsHostLine:null);
+        if(!host)Array.prototype.some.call(lines,function(line){if(line.querySelector('.full-descr')){host=line;return true;}return false;});
+        hideNativeDetailsHeading(record,host);
+        record.detailsHostLine=host;
+        var hostBody=host&&(Array.prototype.filter.call(host.children,function(child){return child.classList&&child.classList.contains('items-line__body');})[0]||host.querySelector('.items-line__body')||host),parent=hostBody||root;
+        if(!record.detailsSecondary){
+            record.detailsSecondary=document.createElement('section');record.detailsSecondary.className='sh-details-secondary';
+            record.detailsSecondaryHeading=document.createElement('div');record.detailsSecondaryHeading.className='sh-details-zone-title';record.detailsSecondaryHeading.textContent='Опис і додаткова інформація';
+            record.detailsSecondary.appendChild(record.detailsSecondaryHeading);
+        }
+        if(record.detailsSecondary.parentNode!==parent)parent.appendChild(record.detailsSecondary);
+        [record.description,record.descriptionToggle,record.genreChips,record.detailGroup].forEach(function(node){if(node&&node.isConnected&&node.parentNode!==record.detailsSecondary)record.detailsSecondary.appendChild(node);});
+        Array.prototype.forEach.call(lines,function(line){
+            if(line===host||line===record.detailsSecondary)return;
+            if(hideEmptyNativeDetailsRow(record,line))return;
+            // Native providers may populate a line after the first adaptation.
+            // Re-evaluate previously hidden rows before skipping them so text,
+            // actions and media cards can re-enter the visible native feed.
+            line.classList.remove('sh-details-empty-native-row');
+        });
+        var firstContent=null;
+        Array.prototype.some.call(lines,function(line){
+            if(line===host||line===record.detailsSecondary||line.classList.contains('sh-details-empty-native-row'))return false;
+            if(line.querySelector('.full-episode')||line.querySelector('.full-person')||line.querySelector('.card.selector')){firstContent=line;return true;}
+            return false;
+        });
+        if(firstContent){
+            if(!record.detailsPeopleHeading){record.detailsPeopleHeading=document.createElement('div');record.detailsPeopleHeading.className='sh-details-zone-title sh-details-zone-title--content';}
+            record.detailsPeopleHeading.textContent=record.kind==='tv'?'Епізоди, актори та схоже':'Актори та схоже';
+            if(record.detailsPeopleHeading.parentNode!==firstContent.parentNode)firstContent.parentNode.insertBefore(record.detailsPeopleHeading,firstContent);
+            else if(record.detailsPeopleHeading.nextSibling!==firstContent)firstContent.parentNode.insertBefore(record.detailsPeopleHeading,firstContent);
+        }else if(record.detailsPeopleHeading&&record.detailsPeopleHeading.parentNode)record.detailsPeopleHeading.parentNode.removeChild(record.detailsPeopleHeading);
     }
     function detailDisclosure(record,parent,label,key,nodes,initiallyOpen) {
         if(!parent||!nodes||!nodes.length)return null;
         record.detailPanels=record.detailPanels||[];
         var existing=record.detailPanels.filter(function(panel){return panel.key===key&&panel.root.isConnected;})[0];
-        if(existing)return existing;
+        if(existing){
+            nodes.filter(function(node){return node&&node.parentNode&&!existing.nodes.some(function(item){return item.node===node;});}).forEach(function(node){existing.nodes.push({node:node,parent:node.parentNode,next:node.nextSibling});existing.body.appendChild(node);});
+            return existing;
+        }
         nodes=nodes.filter(function(node){return node&&node.parentNode;});if(!nodes.length)return null;
         var section=document.createElement('section');section.className='sh-detail-section sh-detail-section--'+key;
         var toggle=document.createElement('div');toggle.className='selector sh-detail-toggle';toggle.setAttribute('role','button');toggle.setAttribute('aria-expanded',String(!!initiallyOpen));toggle.setAttribute('aria-controls','sh-detail-panel-'+key);toggle.textContent=label;
@@ -519,30 +742,82 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
         record.detailPanels.push(panel);
         return panel;
     }
+    function decorateProductionLabels(record,networks){
+        if(!record||!networks||!networks.querySelectorAll)return;
+        record.productionLabelAttrs=record.productionLabelAttrs||[];
+        Array.prototype.forEach.call(networks.querySelectorAll('.network-logo'),function(node){
+            var image=node.querySelector&&node.querySelector('img'),name=image&&(image.getAttribute('alt')||'').trim();
+            if(!name)name=(node.getAttribute('aria-label')||node.getAttribute('title')||'').trim();
+            if(!name)return;
+            if(!record.productionLabelAttrs.some(function(item){return item.node===node;}))record.productionLabelAttrs.push({node:node,attrs:['data-sh-name','aria-label','title'].map(function(key){return {key:key,value:node.getAttribute(key)};})});
+            node.setAttribute('data-sh-name',name);
+            if(!node.getAttribute('aria-label'))node.setAttribute('aria-label',name);
+            if(!node.getAttribute('title'))node.setAttribute('title',name);
+        });
+    }
+    function restoreProductionLabels(record){
+        (record.productionLabelAttrs||[]).forEach(function(item){item.attrs.forEach(function(attr){if(attr.value===null)item.node.removeAttribute(attr.key);else item.node.setAttribute(attr.key,attr.value);});});record.productionLabelAttrs=[];
+    }
+    function stripInertCommentStatuses(record,comments){
+        var changed=false,focused=false;
+        if(!record||!comments||!comments.querySelectorAll)return {changed:false,focused:false};
+        record.inertCommentStatuses=record.inertCommentStatuses||[];
+        Array.prototype.forEach.call(comments.querySelectorAll('.ua-status-card.selector'),function(node){
+            if(!record.inertCommentStatuses.some(function(item){return item.node===node;}))record.inertCommentStatuses.push({node:node,selector:node.classList.contains('selector'),focus:node.classList.contains('focus')});
+            var enabled=Lampa.Controller&&Lampa.Controller.enabled&&Lampa.Controller.enabled(),last=enabled&&enabled.controller&&enabled.controller.link&&enabled.controller.link.last;
+            last=last&&(last[0]||last);
+            if(node.classList.contains('focus')||document.activeElement===node||last===node)focused=true;
+            node.classList.remove('selector');node.classList.remove('focus');changed=true;
+        });
+        return {changed:changed,focused:focused};
+    }
+    function restoreInertCommentStatuses(record){
+        (record.inertCommentStatuses||[]).forEach(function(item){if(!item.node||!item.node.classList)return;if(item.selector)item.node.classList.add('selector');if(item.focus)item.node.classList.add('focus');});
+        record.inertCommentStatuses=[];
+    }
+    function watchRelatedLists(record){
+        if(!record||record.relatedListObserver||typeof MutationObserver!=='function'||record.page.querySelector('.trakttv-lists'))return;
+        var observer=new MutationObserver(function(){
+            if(!record.page.isConnected){observer.disconnect();record.relatedListObserver=null;return;}
+            if(!record.page.querySelector('.trakttv-lists'))return;
+            observer.disconnect();record.relatedListObserver=null;
+            var active=detailsPageOwner(record);if(!active){record.relatedListsPending=true;return;}
+            if(record.relatedListFrame)cancelAnimationFrame(record.relatedListFrame);
+            record.relatedListFrame=requestAnimationFrame(function(){record.relatedListFrame=0;if(detailsPageOwner(record)){record.relatedListsPending=false;adaptMovie();}else record.relatedListsPending=true;});
+        });
+        record.relatedListObserver=observer;observer.observe(record.page,{childList:true,subtree:true});
+    }
     function setupDetailsPresentation(record,movie) {
         var page=record.page,root=record.root,tagBlock=page.querySelector('.full-descr__tags:not(.networks-wrapper)'),networks=page.querySelector('.tmdb-networks');
-        var previousPanelCount=(record.detailPanels||[]).length,previousGenreSignature=record.genreSignature||'',genreSignature='';
+        var previousPanelCount=(record.detailPanels||[]).length,previousGenreSignature=record.genreSignature||'',genreSignature='',productionCountFocus=false;
         var genreControl=record.genreControl&&record.genreControl.isConnected?record.genreControl:null,detailControls=[];
         if(tagBlock){
             var relatedLists=page.querySelector('.trakttv-lists');
+            if(!relatedLists)watchRelatedLists(record);
             if(relatedLists&&relatedLists.parentNode&&relatedLists.parentNode!==tagBlock&&!(record.detailPanels||[]).some(function(panel){return panel.key==='additional'&&panel.body.contains(relatedLists);})){if(!record.relatedListMove)record.relatedListMove={node:relatedLists,parent:relatedLists.parentNode,next:relatedLists.nextSibling};tagBlock.appendChild(relatedLists);}
             Array.prototype.forEach.call(tagBlock.querySelectorAll('.tag-count.selector'),function(node){
                 var name=(node.querySelector('.tag-count__name')||node).textContent.trim().toLowerCase();
                 if(name.indexOf('жанр')===0)genreControl=node;
             });
             if(genreControl)record.genreControl=genreControl;
-            detailControls=Array.prototype.filter.call(tagBlock.querySelectorAll('.tag-count.selector'),function(node){var name=(node.querySelector('.tag-count__name')||node).textContent.trim().toLowerCase();return name.indexOf('жанр')===0||name.indexOf('тег')===0||node.classList.contains('trakttv-lists');});
+            // This native row can label keyword filters as "Ключові слова"
+            // (and plugins may localize them differently). Every non-production
+            // selector moved into Additional Information needs Select focus
+            // restoration; identify the Studio control by ownership, not label.
+            detailControls=Array.prototype.filter.call(tagBlock.querySelectorAll('.tag-count.selector'),function(node){var name=(node.querySelector('.tag-count__name')||node).textContent.trim().toLowerCase();return name.indexOf('виробниц')!==0;});
             if(detailControls.length)detailDisclosure(record,tagBlock,'Додаткова інформація','additional',detailControls);
         }
+        if(genreControl&&detailControls.indexOf(genreControl)<0)detailControls.push(genreControl);
+        var productionCount=tagBlock&&Array.prototype.filter.call(tagBlock.querySelectorAll('.tag-count.selector'),function(node){return (node.querySelector('.tag-count__name')||node).textContent.trim().toLowerCase().indexOf('виробниц')===0;})[0];
+        if(productionCount&&productionCount.parentNode===tagBlock){var enabledBeforeProduction=Lampa.Controller&&Lampa.Controller.enabled&&Lampa.Controller.enabled();productionCountFocus=productionCount.classList.contains('focus')||document.activeElement===productionCount||!!(enabledBeforeProduction&&enabledBeforeProduction.controller&&enabledBeforeProduction.controller.link&&enabledBeforeProduction.controller.link.last===productionCount);record.hiddenProductionCounts=record.hiddenProductionCounts||[];if(!record.hiddenProductionCounts.some(function(node){return node===productionCount;})){record.hiddenProductionCounts.push(productionCount);productionCount.classList.add('sh-production-count-hidden');}}
         if(networks){
+            decorateProductionLabels(record,networks);
             var studioGroup=networks.querySelector('.studios-group'),platformGroup=networks.querySelector('.platforms-group'),separator=networks.querySelector('.network-separator'),networkWrapper=networks.querySelector('.networks-wrapper');
             var hasProductionLogos=!!((platformGroup&&platformGroup.querySelectorAll('.network-logo').length)||(studioGroup&&studioGroup.querySelectorAll('.network-logo').length));
             var studioNodes=hasProductionLogos?[platformGroup,separator,studioGroup].filter(Boolean):[];
-            var productionCount=tagBlock&&Array.prototype.filter.call(tagBlock.querySelectorAll('.tag-count.selector'),function(node){return (node.querySelector('.tag-count__name')||node).textContent.trim().toLowerCase().indexOf('виробниц')===0;})[0];
-            if(productionCount&&productionCount.parentNode===tagBlock){studioNodes.push(productionCount);}
             if(studioNodes.length)detailDisclosure(record,networkWrapper||networks,'Студії та виробництво','production',studioNodes);
         }
-        var comments=page.querySelector('.ua-comments-root');
+        var comments=page.querySelector('.ua-comments-root'),commentStatus=stripInertCommentStatuses(record,comments);
         if(comments&&comments.parentNode)detailDisclosure(record,comments.parentNode,'Коментарі','comments',[comments],true);
         var genres=Array.isArray(movie&&movie.genres)?movie.genres.filter(function(g){return g&&typeof g.name==='string'&&g.name.trim();}).filter(function(g,i,all){return all.findIndex(function(x){return String(x.id||x.name)===String(g.id||g.name);})===i;}):[];
         genreSignature=genres.slice(0,6).map(function(g){return String(g.id||'')+':'+g.name.trim();}).join('|');
@@ -561,29 +836,37 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
         }
         if((!genres.length||nativeGenreRow)&&record.genreChips){record.genreChips.querySelectorAll('.sh-genre-chip').forEach(function(chip){$(chip).off('.shDetails');});record.genreChips.remove();record.genreChips=null;record.genreSignature='';}
         var commentPanel=(record.detailPanels||[]).filter(function(panel){return panel.key==='comments';})[0],productionPanel=(record.detailPanels||[]).filter(function(panel){return panel.key==='production';})[0],additionalPanel=(record.detailPanels||[]).filter(function(panel){return panel.key==='additional';})[0];
-        if(commentPanel||productionPanel||additionalPanel){if(root){if(!record.detailGroup){record.detailGroup=document.createElement('div');record.detailGroup.className='sh-detail-panels';}if(record.detailGroup.parentNode!==root)root.appendChild(record.detailGroup);[commentPanel,productionPanel,additionalPanel].forEach(function(panel){if(panel&&panel.root.isConnected)record.detailGroup.appendChild(panel.root);});if(networks){record.networkPlaceholder=networks;networks.classList.add('sh-detail-panels-empty');}installDetailsScroll(record);}}else if(record.detailGroup){record.detailGroup.remove();record.detailGroup=null;record.detailPanels=[];restoreDetailsBack(record);}
+        if(commentPanel||productionPanel||additionalPanel){if(root){if(!record.detailGroup){record.detailGroup=document.createElement('div');record.detailGroup.className='sh-detail-panels';}if(record.detailGroup.parentNode!==root&&record.detailGroup.parentNode!==record.detailsSecondary)root.appendChild(record.detailGroup);[commentPanel,productionPanel,additionalPanel].forEach(function(panel){if(panel&&panel.root.isConnected)record.detailGroup.appendChild(panel.root);});if(networks){record.networkPlaceholder=networks;networks.classList.add('sh-detail-panels-empty');}installDetailsScroll(record);}}else if(record.detailGroup){record.detailGroup.remove();record.detailGroup=null;record.detailPanels=[];restoreDetailsBack(record);}
         if(record.detailGroup){var commentPanelForHeading=(record.detailPanels||[]).filter(function(panel){return panel.key==='comments';})[0];Array.prototype.forEach.call(page.querySelectorAll('.items-line__title'),function(title){if(title.textContent.trim()!=='Детально'||!title.parentNode)return;var line=title.parentNode;while(line&&line!==page&&!line.classList.contains('items-line'))line=line.parentNode;var emptyTags=line&&line.querySelector('.full-descr__tags:not(.networks-wrapper)'),ownsMovedComments=commentPanelForHeading&&commentPanelForHeading.nodes.some(function(item){return item.parent===line;});if(line&&(ownsMovedComments||(emptyTags&&!emptyTags.querySelector('.tag-count.selector')))){record.hiddenDetailHeadings=record.hiddenDetailHeadings||[];if(record.hiddenDetailHeadings.indexOf(title)<0)record.hiddenDetailHeadings.push(title);title.classList.add('sh-details-heading-hidden');}});}
-        if(genreControl){bindGenreSelectFocus(record);if(record.genreActionControl!==genreControl){if(record.genreActionControl)$(record.genreActionControl).off('.shDetailsFocus');record.genreActionControl=genreControl;$(genreControl).on('hover:enter.shDetailsFocus click.shDetailsFocus',function(){if(Lampa.Select&&Lampa.Select.opened&&Lampa.Select.opened())record.genreSelectOrigin=genreControl;});}}else unbindGenreSelectFocus(record);
+        // Bind the controls actually mounted in the disclosure. Interface and
+        // Trakt can move/add selectors between adaptations, so the source row's
+        // pre-move query is not authoritative for Select return focus.
+        var mountedSelectControls=additionalPanel?Array.prototype.slice.call(additionalPanel.body.querySelectorAll('.tag-count.selector')):detailControls.slice();
+        if(genreControl&&mountedSelectControls.indexOf(genreControl)<0)mountedSelectControls.push(genreControl);
+        bindDetailSelectFocus(record,mountedSelectControls);
         if((record.detailPanels||[]).length)installDetailsBack(record);else restoreDetailsBack(record);
-        if((record.detailPanels||[]).length!==previousPanelCount||previousGenreSignature!==genreSignature)refreshMovieCollection(record);
+        if(commentStatus.focused&&commentPanel)refreshMovieCollection(record,commentPanel.toggle);
+        else if(commentStatus.changed)refreshMovieCollection(record);
+        else if(productionCountFocus)refreshMovieCollection(record,(productionPanel||commentPanel||additionalPanel)&&((productionPanel||commentPanel||additionalPanel).toggle));
+        else if((record.detailPanels||[]).length!==previousPanelCount||previousGenreSignature!==genreSignature)refreshMovieCollection(record);
+    }
+    function removeDescriptionToggles(record){
+        record.moves=record.moves||[];
+        var nodes=record.root&&record.root.querySelectorAll?record.root.querySelectorAll('.sh-description-toggle'):[];
+        Array.prototype.forEach.call(nodes,function(node){
+            if(!record.moves.some(function(item){return item.node===node;})&&node.parentNode)record.moves.push({node:node,parent:node.parentNode,next:node.nextSibling});
+            if(node.parentNode)node.parentNode.removeChild(node);
+        });
     }
     function setupDescription(record, description) {
-        if(record.descriptionToggle&&record.descriptionToggle.isConnected)return;
-        clearDescription(record);
-        var button=document.createElement("div");button.className="selector sh-description-toggle";
-        button.setAttribute("role","button");button.setAttribute("aria-expanded","false");button.textContent="Показати більше";
-        record.descriptionToggle=button;
-        record.toggleDescription=function(){
-            var expanded=button.getAttribute("aria-expanded")!=="true";
-            button.setAttribute("aria-expanded",String(expanded));button.textContent=expanded?"Показати менше":"Показати більше";
-            record.root.classList.toggle("sh-description-expanded",expanded);
-        };
-        $(button).on("hover:enter.shDescription",record.toggleDescription);
-        description.insertAdjacentElement('afterend',button);
+        if(record.descriptionPrepared===description){removeDescriptionToggles(record);return;}
+        clearDescription(record);record.descriptionPrepared=description;record.description=description;record.descriptionToggle=null;record.toggleDescription=null;
+        removeDescriptionToggles(record);
+        record.root.classList.add("sh-description-expanded");record.page.classList.add("sh-description-expanded");
     }
     function clearDescription(record) {
         if(record.descriptionToggle){$(record.descriptionToggle).off(".shDescription").remove();record.descriptionToggle=null;record.toggleDescription=null;}
-        record.root.classList.remove("sh-description-expanded");
+        record.descriptionPrepared=null;record.root.classList.remove("sh-description-expanded");if(record.page)record.page.classList.remove("sh-description-expanded");
     }
     function plainDescription(record, description) {
         if(description.classList.contains('sh-generated-description'))return description;
@@ -599,14 +882,17 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
     }
     function focusMovieActions(record, visible) {
         var controller=Lampa.Controller.enabled(),link=controller.controller&&controller.controller.link;
-        if(controller.name!=='full_start'||!link||!visible.length)return;
+        if(controller.name!=='full_start'||!link||!visible.length||nativeOverlayOwnsInput())return;
         bindRatingNavigation(record,controller.controller);
-        var primary=visible.filter(function(node){return node.classList.contains('view--torrent');})[0]||visible[0];
-        var focus=record.root.querySelector('.selector.focus'),last=link.last&&(link.last[0]||link.last);
-        if(!record.initialFocusDone||!focus||(last&&!record.root.contains(last))){
-            var target=record.initialFocusDone&&focus?focus:primary;
-            link.last=target;Lampa.Controller.collectionSet(record.root);Lampa.Controller.collectionFocus(target,record.root);
+        var primary=visible.filter(function(node){return node.classList.contains('view--torrent');})[0]||visible[0],focus=record.page&&record.page.querySelector('.selector.focus'),focusVisible=focus&&focus.isConnected!==false&&focus.offsetParent!==null;
+        var detailsScope=record.detailsHostLine||record.page,detailsOwned=record.detailsZoneActive&&detailsScope&&((focusVisible&&detailsScope.contains(focus))||(link.last&&detailsScope.contains(link.last))),scope=detailsOwned?detailsScope:record.root;
+        var inScope=function(node){return node&&node.isConnected!==false&&node.offsetParent!==null&&scope.contains(node);},focusInScope=focusVisible&&inScope(focus),lastInScope=inScope(link.last),safePrimary=detailsOwned?detailsZoneTarget(record,record.detailLastFocus):primary;
+        if(!record.initialFocusDone){
+            if(detailsOwned&&safePrimary){link.last=safePrimary;Lampa.Controller.collectionSet(scope,null,true);Lampa.Controller.collectionFocus(safePrimary,scope);record.detailLastFocus=safePrimary;}
+            else{link.last=primary;Lampa.Controller.collectionSet(record.root,null,true);Lampa.Controller.collectionFocus(primary,record.root);}
         }
+        else if(focusInScope)link.last=focus;
+        else if(!lastInScope)link.last=safePrimary||primary;
         record.initialFocusDone=true;
     }
     function bindRatingNavigation(record,controller) {
@@ -676,7 +962,7 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
         page.querySelectorAll('.full-descr__details').forEach(function(fields){if(fields.parentNode){record.moves.push({node:fields,parent:fields.parentNode,next:fields.nextSibling});fields.remove();}});
         function move(node,afterButtons){
             if(!node)return;
-            var placed=node.parentNode===left&&(afterButtons?node.previousSibling===buttons:node.nextSibling===buttons);
+            var placed=node.parentNode===left&&(afterButtons?node.previousSibling===buttons:node.nextSibling===buttons)||(node===record.description&&record.detailsSecondary&&node.parentNode===record.detailsSecondary);
             if(placed)return;
             if(!record.moves.some(function(item){return item.node===node;}))record.moves.push({node:node,parent:node.parentNode,next:node.nextSibling});
             var reference=afterButtons?buttons.nextSibling:buttons;
@@ -687,8 +973,9 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
         var description=root.querySelector('.custom-ghost-main') || page.querySelector('.full-descr__text');
         var movie=streamMovie(record);
         if(!description&&movie._tp_omit_details&&movie.overview){description=document.createElement('div');description.className='full-descr__text sh-generated-description';description.textContent=movie.overview;}
-        if(description){description=plainDescription(record,description);move(description,true);record.description=description;description.classList.add('sh-movie-description');if(description.textContent.trim()&&typeof movie.overview==='string'&&movie.overview.trim())setupDescription(record,description);}
+        if(description){description=plainDescription(record,description);record.description=description;var sourceLine=description.parentNode;while(sourceLine&&sourceLine!==page&&!(sourceLine.classList&&sourceLine.classList.contains('items-line')))sourceLine=sourceLine.parentNode;if(sourceLine&&sourceLine!==page)record.descriptionNativeLine=sourceLine;move(description,true);description.classList.add('sh-movie-description');if(description.textContent.trim()&&typeof movie.overview==='string'&&movie.overview.trim())setupDescription(record,description);}
         setupDetailsPresentation(record,movie);
+        organizeDetailsZones(record);
         move(root.querySelector('.cardify__right-box'));
         root.querySelectorAll('.sh-movie-primary').forEach(function(n){n.classList.remove('sh-movie-primary');});
         var visible=Array.prototype.filter.call(buttons.querySelectorAll('.full-start__button'),function(n){return n.classList.contains('selector')&&!n.classList.contains('hide')&&!n.classList.contains('hidden')&&n.getAttribute('aria-disabled')!=='true'&&!n.disabled&&n.getClientRects().length>0&&getComputedStyle(n).visibility!=='hidden';});
@@ -814,7 +1101,7 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
         syncNavigationState(event&&event.name);
         if(!event||['full_start','full_descr'].indexOf(event.name)<0)return;
         var active=Lampa.Activity.active(),record=movieRecords.filter(function(r){return active&&r.activity===active.activity;})[0];
-        if(record){var controller=Lampa.Controller.enabled().controller;if(event.name==='full_start')bindRatingNavigation(record,controller);if(record.detailsBackFrame)cancelAnimationFrame(record.detailsBackFrame);record.detailsBackFrame=requestAnimationFrame(function(){record.detailsBackFrame=0;if(record.page.isConnected)installDetailsBack(record);});}
+        if(record){var controller=Lampa.Controller.enabled().controller;if(event.name==='full_start'){bindRatingNavigation(record,controller);installDetailsDown(record);}if(record.detailsBackFrame)cancelAnimationFrame(record.detailsBackFrame);record.detailsBackFrame=requestAnimationFrame(function(){record.detailsBackFrame=0;if(record.page.isConnected){if(event.name==='full_descr'||event.name==='full_start'&&record.detailsZoneActive)refreshActiveDetailsCollection(record,record.detailLastFocus);installDetailsDown(record);installDetailsBack(record);}});}
     }
     function actionLabel(node) {
         var map = {'notice--icon':'Сповіщення', 'open--settings':'Налаштування', 'open--profile':'Профіль', 'full--screen':'Повний екран', 'open--broadcast':'Трансляція', 'trakt-head-action':'Trakt · статус та списки'};
