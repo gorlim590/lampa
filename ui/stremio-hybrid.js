@@ -701,14 +701,17 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
         }
         if(record.detailsSecondary.parentNode!==parent)parent.appendChild(record.detailsSecondary);
         [record.description,record.descriptionToggle,record.genreChips,record.detailGroup].forEach(function(node){if(node&&node.isConnected&&node.parentNode!==record.detailsSecondary)record.detailsSecondary.appendChild(node);});
-        var firstContent=null;
-        Array.prototype.some.call(lines,function(line){
-            if(line===host||line===record.detailsSecondary)return false;
-            if(hideEmptyNativeDetailsRow(record,line))return false;
+        Array.prototype.forEach.call(lines,function(line){
+            if(line===host||line===record.detailsSecondary)return;
+            if(hideEmptyNativeDetailsRow(record,line))return;
             // Native providers may populate a line after the first adaptation.
             // Re-evaluate previously hidden rows before skipping them so text,
             // actions and media cards can re-enter the visible native feed.
             line.classList.remove('sh-details-empty-native-row');
+        });
+        var firstContent=null;
+        Array.prototype.some.call(lines,function(line){
+            if(line===host||line===record.detailsSecondary||line.classList.contains('sh-details-empty-native-row'))return false;
             if(line.querySelector('.full-episode')||line.querySelector('.full-person')||line.querySelector('.card.selector')){firstContent=line;return true;}
             return false;
         });

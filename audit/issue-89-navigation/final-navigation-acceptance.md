@@ -43,3 +43,16 @@ On the same Silo route and exact current local `ui/stremio-hybrid.js` bytes (pre
 The local script was removed by restoring the original Silo URL with a page navigation. The original viewport (1920×937, DPR 1) is restored; other tabs and saved state were untouched.
 
 Regression additions cover the production organizer un-hiding late text/actions/cards, fast same-turn ArrowDown/ArrowRight → OK with one action, and Full Start `link.last` isolation from actor/Details zones without an artificial Torrent focus call.
+
+## PR #136 review follow-up — 2026-10-30
+
+On the same authorized Chrome tab (page 3, Silo, 1920×937/DPR 1), the current working-tree `ui/stremio-hybrid.js` was served from the branch preview and its response SHA-256 was verified as `902cce6885015d0aed2f10c5e54a5cb305dea30f6852277c3e321d8addf22bb4`.
+
+- Real remote ArrowDown followed immediately by Enter moved focus from Коментарі to Студії та виробництво. CSS focus equaled native `full_start` `Controller.link.last`; only the Studio disclosure handler ran once, and neither the previous Comments action nor Additional Information ran.
+- Native Genre Select → Escape returned to the exact Жанр control in the native `full_descr` controller, with `link.last` matching and Select closed. No filter value was selected.
+- The production-organizer regression now places an existing episode row before two initially empty rows. It verifies the first content lookup still chooses the episode, complete visibility reconciliation hides both empty rows, then a provider action inserted in the later row makes only that row visible on the next adaptation while preserving node identity and order.
+- A production-handler regression verifies native `full_start` collection ownership through delayed provider adaptation and return from cast/episode and Select contexts; focus and `link.last` remain on the remembered Details control or exact Select origin.
+- Focused `details-presentation.cjs`: **48/48 passed**. Full local CI-command matrix: Repository checks and checker **PASS (16)**; UI/repository regression batch **477/477**; Home history **227/227**; Home order **54/54**; Parser providers **187/187**; Seasons **235/235**.
+- The branch preview and temporary browser event observers were removed by reloading the original Silo URL. The page returned to the original 1920×937/DPR 1 viewport with default Torrent focus; no other tab, profile data, settings or Trakt state was changed.
+
+Physical Google TV acceptance remains **NOT VERIFIED**.
