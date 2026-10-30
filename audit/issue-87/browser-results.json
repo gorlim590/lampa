@@ -61,5 +61,5 @@
     {"file": "screenshots/review-6513764119/fight-club-4k-focused-card.png", "width": 3840, "height": 2160, "dpr": 1, "state": "Movie full cast focused card"}
   ],
   "physicalGoogleTv": "NOT VERIFIED",
-  "finalGitHubActions": "PENDING FINAL PUSH"
+  "finalGitHubActions": "Five workflows passed on b34fc22fb2ed11e2681e44b2fa8b1808fd634c6e. The PR description will link the exact current-head run set after the final evidence checkpoint."
 }
