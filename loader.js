@@ -19,6 +19,9 @@
     'trakt/trakt.js', 'trakt/trakt-plus.js', 'providers/torrent-search.js',
     'media/average-rating.js', 'ui/cardify-plus.js', 'localization/translate.js'
   ];
+  // The optional full-cast browser is a built-in Hybrid capability. Load it
+  // after appready even when an installation has an explicit optional list.
+  var BUILTIN_DEFERRED = ['ui/full-cast.js'];
   var TORRENT_ENTRY='ui/torrent-cinema.js';
   var seen = {};
   var state = {
@@ -50,7 +53,7 @@
       var url = new URL(value, base.href);
       var pathname = url.pathname.replace(/^\//, '');
       if((url.origin===base.origin||url.hostname==='gorlim590.github.io')&&/(?:^|\/)(?:torrents-redesign\.js|ui\/torrent-overlay\.js|ui\/torrent-cinema\.js)$/.test(pathname))return TORRENT_ENTRY;
-      var known = CRITICAL.concat(DEFAULT_DEFERRED);
+      var known = CRITICAL.concat(DEFAULT_DEFERRED, BUILTIN_DEFERRED);
       for (var i = 0; i < known.length; i++) if (pathname === known[i] || pathname.slice(-known[i].length) === known[i]) return known[i];
       if (url.origin === base.origin && url.pathname.indexOf(base.pathname) === 0) return url.pathname.slice(base.pathname.length);
       return url.origin + url.pathname;
@@ -227,10 +230,12 @@
     var traktCore = [], traktPlus = [], independent = [];
     for (var i = 0; i < configured.length; i++) {
       var key = pathKey(configured[i]);
+      if (BUILTIN_DEFERRED.indexOf(key) >= 0) continue;
       if (key === 'trakt/trakt.js') traktCore.push(configured[i]);
       else if (key === 'trakt/trakt-plus.js') traktPlus.push(configured[i]);
       else independent.push(configured[i]);
     }
+    independent = BUILTIN_DEFERRED.concat(independent);
     state.activeDeferredLanes = 0;
     var completed = 0;
     function laneDone() {

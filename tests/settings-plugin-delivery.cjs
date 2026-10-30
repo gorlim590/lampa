@@ -23,7 +23,7 @@ function fixture(options={}){
 }
 
 test('Hybrid and essential presentation start before appready; optional modules wait for native readiness',()=>{
- const f=fixture({responses:['ok','ok','ok','pending','pending']});
+ const f=fixture({responses:['ok','ok','ok','pending','pending','pending']});
  assert.deepEqual(f.scripts.map(x=>x.src),[
   'https://fixture.invalid/plugins/ui/stremio-hybrid.js?v=fixture',
   'https://fixture.invalid/plugins/ui/interface-plus.js?v=fixture',
@@ -32,13 +32,15 @@ test('Hybrid and essential presentation start before appready; optional modules 
  assert.equal(f.storageReads.length,0,'the optional list and its storage key are not read before critical UI finishes');
  assert.equal(f.window.LampaLoaderDiagnostics.waitingForAppReady,true);
  f.fireReady();
- assert.deepEqual(f.scripts.slice(3).map(x=>new URL(x.src).pathname),['/plugins/trakt/trakt.js','/plugins/providers/torrent-search.js']);
+ assert.deepEqual(f.scripts.slice(3).map(x=>new URL(x.src).pathname),['/plugins/trakt/trakt.js','/plugins/ui/full-cast.js']);
  assert.equal(f.window.LampaLoaderDiagnostics.activeDeferredLanes,2,'bounded to a Trakt dependency lane and one independent lane');
  assert.equal(f.scripts.some(x=>x.src.includes('trakt-plus')),false,'Trakt+ waits for successful Trakt Core completion');
+ f.resolve(4);
+ assert.equal(new URL(f.scripts[5].src).pathname,'/plugins/providers/torrent-search.js');
 });
 
 test('late Lampa API arrival is observed once and starts the full default plugin graph after native readiness',()=>{
- const f=fixture({lateLampa:true,responses:Array(9).fill('ok')});
+ const f=fixture({lateLampa:true,responses:Array(10).fill('ok')});
  assert.equal(f.window.LampaLoaderDiagnostics.stage,'waiting-for-appready');
  assert.equal(f.scripts.length,3,'critical UI is delivered before native API availability');
  assert.equal(f.window.LampaLoaderDiagnostics.waitingForAppReady,true);
@@ -47,14 +49,14 @@ test('late Lampa API arrival is observed once and starts the full default plugin
  f.fireReady();
  assert.deepEqual(f.scripts.map(x=>new URL(x.src).pathname),[
   '/plugins/ui/stremio-hybrid.js','/plugins/ui/interface-plus.js','/plugins/ui/design-optimized.js',
-  '/plugins/trakt/trakt.js','/plugins/trakt/trakt-plus.js','/plugins/providers/torrent-search.js',
+  '/plugins/trakt/trakt.js','/plugins/trakt/trakt-plus.js','/plugins/ui/full-cast.js','/plugins/providers/torrent-search.js',
   '/plugins/media/average-rating.js','/plugins/ui/cardify-plus.js','/plugins/localization/translate.js'
  ]);
  assert.equal(f.window.LampaLoaderDiagnostics.stage,'complete');
  assert.equal(f.storageReads.filter(key=>key==='gl_loader_plugins').length,1);
  assert.equal(f.removeCount,1,'the one-shot native listener is removed after startup');
  f.fireReady();
- assert.equal(f.scripts.length,9,'a repeated ready event cannot start a second sequence');
+ assert.equal(f.scripts.length,10,'a repeated ready event cannot start a second sequence');
 });
 
 test('missing native API reaches an explicit bounded timeout without silently claiming deferred success',()=>{
@@ -71,7 +73,7 @@ test('missing native API reaches an explicit bounded timeout without silently cl
 });
 
 test('Trakt+ is skipped when Trakt Core fails while independent deferred providers continue',()=>{
- const f=fixture({responses:['ok','ok','ok','error','ok','ok','ok','ok','ok']});
+ const f=fixture({responses:['ok','ok','ok','error','ok','ok','ok','ok','ok','ok']});
  f.fireReady();
  assert.equal(f.scripts.some(x=>x.src.includes('trakt-plus')),false);
  assert.equal(f.scripts.some(x=>x.src.includes('torrent-search')),true);
@@ -81,16 +83,18 @@ test('Trakt+ is skipped when Trakt Core fails while independent deferred provide
 });
 
 test('Trakt+ starts only after Trakt Core succeeds and both deferred lanes remain independent',()=>{
- const f=fixture({responses:['ok','ok','ok','ok','pending','pending']});f.fireReady();
+ const f=fixture({responses:['ok','ok','ok','pending','ok','pending','pending']});f.fireReady();
  assert.equal(new URL(f.scripts[3].src).pathname,'/plugins/trakt/trakt.js');
- assert.equal(new URL(f.scripts[4].src).pathname,'/plugins/trakt/trakt-plus.js');
+ assert.equal(new URL(f.scripts[4].src).pathname,'/plugins/ui/full-cast.js');
  assert.equal(new URL(f.scripts[5].src).pathname,'/plugins/providers/torrent-search.js');
+ f.resolve(3);
+ assert.equal(new URL(f.scripts[6].src).pathname,'/plugins/trakt/trakt-plus.js');
  assert.equal(f.window.LampaLoaderDiagnostics.activeDeferredLanes,2);
 });
 
 test('timeout advances once; a late load is counted without loading a dependent twice',()=>{
- const f=fixture({responses:['ok','ok','ok','pending','pending']});f.fireReady();
- const before=f.scripts.length;assert.equal(before,5);
+ const f=fixture({responses:['ok','ok','ok','pending','ok','pending']});f.fireReady();
+ const before=f.scripts.length;assert.equal(before,6);
  f.timeout(3);
  assert.equal(f.scripts.some(x=>x.src.includes('trakt-plus')),false);
  assert.equal(f.window.LampaLoaderDiagnostics.timedOut,1);
@@ -101,11 +105,11 @@ test('timeout advances once; a late load is counted without loading a dependent 
 });
 
 test('a late optional delivery error removes its failed script node without advancing twice',()=>{
- const f=fixture({responses:['ok','ok','ok','pending','pending']});f.fireReady();f.timeout(3);const failed=f.scripts[3];
+ const f=fixture({responses:['ok','ok','ok','pending','ok','pending']});f.fireReady();f.timeout(3);const failed=f.scripts[3];
  f.resolve(3,'error');
  assert.equal(failed.parentNode,null);
  assert.equal(f.window.LampaLoaderDiagnostics.lateLoads,1);
- assert.equal(f.window.LampaLoaderDiagnostics.requested,5);
+ assert.equal(f.window.LampaLoaderDiagnostics.requested,6);
 });
 
 test('custom list preserves its order, deduplicates critical/duplicate URLs and keeps private query text out of logs',()=>{
@@ -119,8 +123,9 @@ test('custom list preserves its order, deduplicates critical/duplicate URLs and 
 });
 
 test('an explicit empty custom list keeps only the critical UI entry',()=>{
- const f=fixture({appready:true,responses:['ok','ok','ok'],list:[]});
- assert.equal(f.scripts.length,3);
+ const f=fixture({appready:true,responses:['ok','ok','ok','ok'],list:[]});
+ assert.equal(f.scripts.length,4);
+ assert.equal(new URL(f.scripts[3].src).pathname,'/plugins/ui/full-cast.js');
  assert.equal(f.window.LampaLoaderDiagnostics.stage,'complete');
 });
 
@@ -140,9 +145,10 @@ test('native API without a Listener remains bounded and reports readiness failur
 
 
 test('legacy torrent URLs in a custom loader list normalize to one canonical request',()=>{
- const f=fixture({appready:true,list:['torrents-redesign.js','ui/torrent-overlay.js','ui/torrent-cinema.js'],responses:Array(4).fill('ok')});
- assert.equal(f.scripts.length,4);
- assert.equal(f.scripts[3].src,'https://fixture.invalid/plugins/ui/torrent-cinema.js?v=fixture');
+ const f=fixture({appready:true,list:['torrents-redesign.js','ui/torrent-overlay.js','ui/torrent-cinema.js'],responses:Array(5).fill('ok')});
+ assert.equal(f.scripts.length,5);
+ assert.equal(new URL(f.scripts[3].src).pathname,'/plugins/ui/full-cast.js');
+ assert.equal(f.scripts[4].src,'https://fixture.invalid/plugins/ui/torrent-cinema.js?v=fixture');
  assert.equal(f.scripts.filter(s=>/torrent-cinema/.test(s.src)).length,1);
  assert(!f.scripts.some(s=>/torrents-redesign|torrent-overlay/.test(s.src)));
 });

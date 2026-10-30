@@ -1,0 +1,158 @@
+{
+  "reviewComment": "https://github.com/gorlim590/lampa/pull/137#issuecomment-6513764119",
+  "date": "2026-10-30",
+  "branch": "feat/issue-87-full-cast",
+  "testedSource": {
+    "version": "1.0.5",
+    "sha256": "f150b5f7f49dc270f4c9e1c5790a87fb9228340b76c8f858ddcb82d8138f4039"
+  },
+  "browser": {
+    "connection": "existing authorized Chrome DevTools MCP",
+    "pageId": 3,
+    "tabCountChanged": false,
+    "storageSettingsTraktOrTorrentChanged": false,
+    "viewports": [
+      "1280x720 DPR1",
+      "1920x1080 DPR1",
+      "3840x2160 DPR1"
+    ],
+    "restored": "The existing page-3 Lampa tab returned to its initially observed The Last of Us Full Cast page-1 URL at 1920x1080 DPR1. Saved data and settings were not modified."
+  },
+  "liveCases": {
+    "lastOfUs": {
+      "media": "tv",
+      "tmdbId": 100088,
+      "provider": "configured native Lampa TMDb source",
+      "liveCredits": 159,
+      "nativeCategoryPages": 6,
+      "activeProgression": [
+        30,
+        60,
+        90,
+        120,
+        150,
+        159
+      ],
+      "finalPage": "6/6",
+      "finalVisibleStatus": "Показано 159 із 159 акторів",
+      "uniqueCreditIds": 159,
+      "dpad": "Actual Arrow navigation advanced the active native Category through all six pages; page 2 actor 31, page 3 actors 60 and 61, and the final 159th credit were reachable.",
+      "profileAndBack": "Enter on actor 31 opened native actor profile id 10402; Back restored actor 31 on page 2 at the prior position. Back from the correctly stacked Category returned to Details with the originating All Actors action focused.",
+      "domCounting": "Only the active Category was counted. Native viewport virtualization was observed; a document-wide count would include hidden Activities."
+    },
+    "fightClub": {
+      "media": "movie",
+      "tmdbId": 550,
+      "provider": "configured native Lampa TMDb source",
+      "liveCredits": 75,
+      "activeCategoryProgression": "Remote pagination through all 75 credits and native actor-profile/back restoration verified on the same source version before final progress-background styling adjustment.",
+      "layout": "720p, 1080p and 4K DPR1 responsive card layout verified; 4K was viewport emulation only."
+    },
+    "nativeAction": {
+      "element": ".full-person.sh-full-cast-open-card",
+      "icon": ".full-person__photo:after",
+      "label": ".full-person__name",
+      "role": ".full-person__role",
+      "focus": "Native .focus state displayed; one action and no duplicate control/controller."
+    }
+  },
+  "productionHandlerFixture": {
+    "totalCredits": 159,
+    "batches": [
+      30,
+      30,
+      30,
+      30,
+      30,
+      9
+    ],
+    "pageMetadata": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "portraitPaths": 158,
+    "missingPortraitRetained": true,
+    "testCommand": "node --test --test-timeout=15000 tests/full-cast.cjs tests/loader-critical-parallel.cjs"
+  },
+  "screenshots": [
+    {
+      "file": "screenshots/pagination-6513764119/all-actors-action-1280x720.png",
+      "width": 1280,
+      "height": 720,
+      "dpr": 1,
+      "state": "Native action in Details"
+    },
+    {
+      "file": "screenshots/pagination-6513764119/all-actors-action-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1,
+      "state": "Native action in Details"
+    },
+    {
+      "file": "screenshots/pagination-6513764119/all-actors-action-3840x2160.png",
+      "width": 3840,
+      "height": 2160,
+      "dpr": 1,
+      "state": "Native action 4K layout emulation"
+    },
+    {
+      "file": "screenshots/pagination-6513764119/tlou-page1-progress-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1,
+      "state": "Full Cast page 1 progress visible"
+    },
+    {
+      "file": "screenshots/pagination-6513764119/tlou-page2-actor31-1280x720.png",
+      "width": 1280,
+      "height": 720,
+      "dpr": 1,
+      "state": "Page 2 actor 31 focused"
+    },
+    {
+      "file": "screenshots/pagination-6513764119/tlou-page2-actor31-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1,
+      "state": "Page 2 actor 31 focused"
+    }
+  ],
+  "nativeDomWindowGrowthBeyondViewport": "NOT VERIFIED",
+  "physicalGoogleTv": "NOT VERIFIED",
+  "githubActions": {
+    "sourceCommit": "5bacd6beb089861e8049546b4170f2ba7ed4856d",
+    "workflowRuns": [
+      {
+        "name": "Repository checks",
+        "runId": 41008083004,
+        "conclusion": "success"
+      },
+      {
+        "name": "Home history",
+        "runId": 41008082990,
+        "conclusion": "success"
+      },
+      {
+        "name": "Home order",
+        "runId": 41008083172,
+        "conclusion": "success"
+      },
+      {
+        "name": "Parser providers",
+        "runId": 41008083020,
+        "conclusion": "success"
+      },
+      {
+        "name": "Season integrity",
+        "runId": 41008083080,
+        "conclusion": "success"
+      }
+    ],
+    "note": "All five passed on this production-code commit. Any later commit is limited to acceptance evidence; verify checks again on the final PR head."
+  }
+}
