@@ -28,8 +28,8 @@
   var CACHE_VER = 7;      // v7: verified account owner; credentials are never persisted as identity
   var TOP_INDEX = 0;      // з якої позиції починаються рядки Trakt на головній (0 = самий верх)
   var QUEUE_MAX = 3;      // скільки запитів до Trakt одночасно (щоб не ловити 429)
-  var FULL_FIRST = 600;   // перший екран «Ще»: великий список без збільшення рядів головної
-  var FULL_PAGE = 200;    // унікальних карток у наступній порції
+  var FULL_FIRST = 24;    // перша порція нативного Category
+  var FULL_PAGE = 24;     // одна помірна порція за кожен запит нативного Category
   var FULL_SCAN = 12;     // межа пошуку після фільтрації в одному запиті UI
 
   var TREND_ROWS = [
@@ -181,6 +181,9 @@
     accountTimer = setTimeout(function () { accountTimer = null; loadWatched(true).then(function () { decorateAll(); }); syncRatings().catch(function () {}); }, 150);
   }
   function notify(text) { try { Lampa.Bell.push({ text: text }); } catch (e) {} }
+  function notifyFullPageFailure(rateLimited) {
+    notify(rateLimited ? tr('Trakt обмежив частоту запитів. Зачекайте й натисніть униз для повтору.', 'Trakt rate-limited this request. Wait, then press Down at the end to retry.') : tr('Не вдалося завантажити наступну сторінку. Натисніть униз ще раз, щоб повторити.', 'Could not load the next page. Press Down at the end again to retry.'));
+  }
   function field(name, def) {
     var v = Lampa.Storage.field(name);
     return (v === undefined || v === null || v === '') ? def : v;
@@ -272,21 +275,48 @@
   }
 
   // ───────────── ЧЕРГА ЗАПИТІВ (обмеження паралельності + повтор при збої) ─────────────
-  var qActive = 0, qWait = [];
+  var qActive = 0, qWait = [], catalogRateLimitUntil = 0;
+  function responseStatus(error) {
+    return Number(error && (error.status || error.statusCode || error.response && error.response.status)) || 0;
+  }
+  function retryAfterValue(error) {
+    var headers = error && (error.headers || error.response && error.response.headers), value = null;
+    if (headers && typeof headers.get === 'function') value = headers.get('Retry-After') || headers.get('retry-after');
+    else if (headers && typeof headers === 'object') Object.keys(headers).some(function (key) { if (key.toLowerCase() === 'retry-after') { value = headers[key]; return true; } return false; });
+    if (value === null || value === undefined || value === '') return 30000;
+    var seconds = Number(value), delay = isFinite(seconds) ? seconds * 1000 : Date.parse(value) - Date.now();
+    if (!(delay > 0)) return 30000;
+    return Math.min(delay, 86400000);
+  }
+  function rateLimitError() {
+    var error = new Error('Trakt catalog rate limited');
+    error.status = 429; error.retryAt = catalogRateLimitUntil; return error;
+  }
   function qPump() {
     while (qActive < QUEUE_MAX && qWait.length) {
       var j = qWait.shift();
+      if (Date.now() < catalogRateLimitUntil) { j.rej(rateLimitError()); continue; }
       qActive++;
       qRun(j, 0);
     }
   }
   function qRun(j, att) {
+    // A concurrent request may activate the global 429 cooldown while this
+    // job is waiting on its ordinary transient-error retry timer. Recheck at
+    // dispatch time so that scheduled retries cannot bypass Retry-After.
+    if (Date.now() < catalogRateLimitUntil) {
+      qActive--; j.rej(rateLimitError()); qPump(); return;
+    }
     var out;
     try { out = api.get(j.u); } catch (e) { out = Promise.reject(e); }
     Promise.resolve(out).then(function (a) {
+      if (responseStatus(a) === 429) catalogRateLimitUntil = Math.max(catalogRateLimitUntil, Date.now() + retryAfterValue(a));
       qActive--; j.res(a); qPump();
     }, function (e) {
-      if (att < 2) setTimeout(function () { qRun(j, att + 1); }, 1500 * (att + 1));
+      // A 429 is an explicit server backoff signal. Never retry it on a timer;
+      // leave the source cursor intact and let the user retry after the notice.
+      if (responseStatus(e) === 429) catalogRateLimitUntil = Math.max(catalogRateLimitUntil, Date.now() + retryAfterValue(e));
+      if (att < 2 && responseStatus(e) !== 429) setTimeout(function () { qRun(j, att + 1); }, 1500 * (att + 1));
       else { qActive--; j.rej(e); qPump(); }
     });
   }
@@ -898,23 +928,32 @@
     }).then(function () {
       var specs = (foreground && def.fullUrls ? def.fullUrls(ch) : def.urls(ch)) || [];
       return Promise.all([loadWatched(), Promise.all(specs.map(function (s) {
-        return qget(s.u, foreground).then(function (a) { return Array.isArray(a) ? { arr: a } : { arr: [], err: true }; },
-          function () { return { arr: [], err: true }; })
+        return qget(s.u, foreground).then(function (a) { return Array.isArray(a) ? { arr: a } : { arr: [], err: true, rateLimited: Number(a && (a.status || a.statusCode)) === 429 }; },
+          function (error) { return { arr: [], err: true, rateLimited: Number(error && (error.status || error.statusCode || error.response && error.response.status)) === 429 }; })
           .then(function (x) {
-            return { spec: s, err: !!x.err, raw: x.arr.length, cards: x.arr.map(function (e) { return toCard(e, s.hint); }).filter(Boolean) };
+            return { spec: s, err: !!x.err, rateLimited: !!x.rateLimited, raw: x.arr.length, cards: x.arr.map(function (e) { return toCard(e, s.hint); }).filter(Boolean) };
           });
       }))]);
     }).then(function (r) {
-      var raw = 0, errs = 0;
-      r[1].forEach(function (g) { raw += g.raw; if (g.err) errs++; });
+      var raw = 0, errs = 0, rateLimited = false;
+      r[1].forEach(function (g) { raw += g.raw; if (g.err) errs++; if (g.rateLimited) rateLimited = true; });
       return {
-        cards: (def.combine || combineDefault)(r[1], def), raw: raw, errs: errs,
+        cards: (def.combine || combineDefault)(r[1], def), raw: raw, errs: errs, rateLimited: rateLimited,
         moreSources: !!(foreground && def.fullHasMore && def.fullHasMore(ch))
       };
     });
   }
 
   function defTitle(def) { return def.titleFn ? def.titleFn() : tr(def.uk, def.en); }
+
+  function fullViewOwner() {
+    observeSession();
+    return { epoch: sessionEpoch, profile: ratingProfile(), account: accountOwner };
+  }
+  function fullViewOwnerCurrent(owner) {
+    observeSession();
+    return !!owner && owner.epoch === sessionEpoch && owner.profile === ratingProfile() && (!owner.account || owner.account === accountOwner);
+  }
 
   function getRow(def, force) {
     if (def.personalRatings) return ratedCards(force).then(function (cards) { return { cards: cards, title: defTitle(def), nextChunk: 1, exhausted: true }; });
@@ -1676,9 +1715,10 @@
     if (fav.length) fav.after(li); else list.append(li);
   }
 
-  function createFullPager(def, initial) {
-    var seen = {}, pending = [], chunk = initial.nextChunk || 2;
+  function createFullPager(def, initial, owner) {
+    var seen = {}, pending = [], chunk = initial.nextChunk || 2, failed = false, rateLimited = false;
     var done = !!initial.exhausted;
+    function checkOwner() { if (!fullViewOwnerCurrent(owner)) throw cancelledError(); }
     function append(cards) {
       (cards || []).forEach(function (card) {
         var key = card.method + ':' + card.id;
@@ -1690,20 +1730,31 @@
     append(initial.cards);
     return {
       hasMore: function () { return pending.length > 0 || !done; },
+      takeReady: function (limit) { return pending.splice(0, limit); },
+      failed: function () { return failed; },
+      rateLimited: function () { return rateLimited; },
       take: function (limit) {
         var tries = 0;
+        failed = false; rateLimited = false;
         function step() {
+          checkOwner();
           if (done || pending.length >= limit || tries++ >= FULL_SCAN) {
             return Promise.resolve(pending.splice(0, limit));
           }
           return loadChunk(def, chunk, true).then(function (r) {
+            checkOwner();
             append(r.cards);
             // Partial/error responses must be retried at the same source page.
-            if (r.errs) return pending.splice(0, limit);
+            if (r.errs) { failed = true; rateLimited = !!r.rateLimited; return pending.splice(0, limit); }
             chunk++;
+            failed = false;
             if (!r.raw && !r.moreSources) done = true;
             return step();
-          }, function () { return pending.splice(0, limit); });
+          }, function (error) {
+            if (error && error.cancelled) throw error;
+            failed = true; rateLimited = Number(error && (error.status || error.statusCode || error.response && error.response.status)) === 429;
+            return pending.splice(0, limit);
+          });
         }
         return step();
       }
@@ -1716,39 +1767,81 @@
     Lampa.Component.add('trakt_plus_view', function (object) {
       var comp = Lampa.Maker.make('Category', object);
       var def = ROWS[object.row];
-      var pager = null, next = 2;
+      var pager = null, next = 2, endNotified = false, owner = fullViewOwner();
+      function notifyEnd() {
+        if (endNotified) return;
+        endNotified = true; notify(tr('Усі доступні результати цієї категорії завантажені.', 'All available results in this catalog are loaded.'));
+      }
+      function reportSessionChange() {
+        if (comp.empty) comp.empty();
+        notify(tr('Змінився профіль Trakt. Поверніться назад і відкрийте «Ще» знову.', 'The Trakt profile changed. Go back and reopen “More”.'));
+      }
 
       comp.use({
         onCreate: function () {
           var self = this;
           if (!def) { self.empty(); return; }
           getRow(def).then(function (r) {
-            pager = createFullPager(def, r);
-            return pager.take(FULL_FIRST).then(function (cards) {
+            if (!fullViewOwnerCurrent(owner)) { reportSessionChange(); return; }
+            pager = createFullPager(def, r, owner);
+            var ready = pager.takeReady(FULL_FIRST);
+            function build(cards) {
               if (self.destroyed) return;
+              if (!fullViewOwnerCurrent(owner)) { reportSessionChange(); return; }
               if (!cards.length) { self.empty(); return; }
               try {
                 self.build({ results: cards, total_pages: pager.hasMore() ? 2 : 1, page: 1 });
+                if (!pager.hasMore()) notifyEnd();
               } catch (err) { self.empty(); }
-            });
-          }, function () { self.empty(); });
+            }
+            // Build from the row's already-loaded/cacheable data first. Only a truly
+            // empty cached row needs an initial foreground request; do not wait for
+            // hundreds of later pages before native Category becomes usable.
+            if (ready.length) { build(ready); return; }
+            if (!pager.hasMore()) { build(ready); return; }
+            pager.take(FULL_FIRST).then(function (cards) {
+              if (!fullViewOwnerCurrent(owner)) { reportSessionChange(); return; }
+              if (pager.failed()) notify(pager.rateLimited() ? tr('Trakt обмежив частоту запитів. Зачекайте, потім поверніться донизу для повтору.', 'Trakt rate-limited this request. Wait, then return to the bottom to retry.') : tr('Не вдалося завантажити каталог. Поверніться назад і відкрийте «Ще» повторно.', 'Could not load the catalog. Go back and reopen “More” to retry.'));
+              build(cards);
+            }, function (error) { if (error && error.cancelled) reportSessionChange(); else build([]); });
+          }, function () {
+            if (self.destroyed) return;
+            if (!fullViewOwnerCurrent(owner)) { reportSessionChange(); return; }
+            self.empty();
+            notify(tr('Не вдалося завантажити каталог. Поверніться назад і відкрийте «Ще» повторно.', 'Could not load the catalog. Go back and reopen “More” to retry.'));
+          });
         },
         onNext: function (resolve, reject) {
           var self = this;
-          if (!def || !pager || !pager.hasMore()) return reject.call(self);
+          if (!def || !pager) return reject.call(self);
+          if (!fullViewOwnerCurrent(owner)) { self.object.page = next - 1; reportSessionChange(); return reject.call(self); }
+          if (!pager.hasMore()) {
+            return reject.call(self);
+          }
           pager.take(FULL_PAGE).then(function (res) {
             if (self.destroyed) return;
+            if (!fullViewOwnerCurrent(owner)) { self.object.page = next - 1; reportSessionChange(); return reject.call(self); }
+            if (pager.failed() && res.length) notify(tr('Частину каталогу не вдалося завантажити. Доступні результати показані; наступна спроба повторить ту саму сторінку.', 'Some catalog results could not be loaded. Available results are shown; the next attempt will retry the same page.'));
             if (!res.length) {
               self.object.page = next - 1;
               if (!pager.hasMore()) self.total_pages = next - 1;
+              if (pager.failed()) notifyFullPageFailure(pager.rateLimited());
+              else if (!pager.hasMore()) notifyEnd();
               return reject.call(self);
             }
             var pg = next++;
             // Lampa Category.Next ignores new_data.total_pages: update the instance too.
             self.total_pages = pager.hasMore() ? pg + 1 : pg;
             self.object.page = pg;
+            if (!pager.hasMore()) notifyEnd();
             resolve.call(self, { results: res, total_pages: self.total_pages, page: pg });
-          }, function () { self.object.page = next - 1; reject.call(self); });
+          }, function (error) {
+            if (self.destroyed) return;
+            self.object.page = next - 1;
+            if (error && error.cancelled || !fullViewOwnerCurrent(owner)) { reportSessionChange(); return reject.call(self); }
+            notifyFullPageFailure(pager.rateLimited());
+            reject.call(self);
+          });
         },
         onInstance: function (card, element) {
           card.use({ onlyMenu: false, onlyEnter: function () { openFull(element); } });
