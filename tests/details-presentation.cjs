@@ -63,7 +63,7 @@ test('non-genre Details Select restores its exact origin after native focus fall
  const f=fixture(),record={page:f.page,root:f.root,descriptionToggle:f.anchor};f.context.setupDetailsPresentation(record,{genres:[{id:18,name:'Драма'}]});
  f.setSelectOpen(true);f.handlers.get(f.tags)['click.shDetailsFocus']();assert.equal(record.detailSelectOrigin,f.tags);
  f.setSelectOpen(false);f.setController('items_line');f.setFocus(f.focused);f.listeners.close.forEach(fn=>fn({}));f.flushFrames();
- assert.equal(f.calls.toggled,'full_descr','restoration re-enters the native Full description controller when Select left an unrelated row controller active');
+ assert.equal(f.calls.toggled,'full_start','restoration returns to the actual native Full Start controller when Select left an unrelated row controller active');
  assert.equal(f.calls.focus.at(-1),f.tags);assert.equal(f.calls.setArgs.at(-1)[2],true);assert.equal(f.calls.scrolled,f.tags);
  f.context.restoreDetailsPresentation(record);assert.equal(f.listeners.close.length,0);
 });
@@ -71,7 +71,7 @@ test('non-genre Details Select restores its exact origin after native focus fall
 test('Select close waits for the native hide/controller handoff before restoring its invoking control',()=>{
  const f=fixture(),record={page:f.page,root:f.root,descriptionToggle:f.anchor};f.context.setupDetailsPresentation(record,{genres:[{id:18,name:'Драма'}]});
  f.setSelectOpen(true);f.handlers.get(f.tags)['click.shDetailsFocus']();f.setController('select');f.setFocus(f.focused);f.listeners.close.forEach(fn=>fn({}));const focusCalls=f.calls.focus.length;
- f.flushOneFrame();assert.equal(f.calls.focus.length,focusCalls,'one immediate frame does not race the native menu that is still closing');assert.equal(record.detailSelectOrigin,f.tags,'origin survives while native Select.opened() remains true');f.setSelectOpen(false);f.setController('items_line');f.flushFrames();assert.equal(f.calls.toggled,'full_descr');assert.equal(f.calls.focus.at(-1),f.tags,'late native focus fallback is overridden only after the menu is closed');f.context.restoreDetailsPresentation(record);
+ f.flushOneFrame();assert.equal(f.calls.focus.length,focusCalls,'one immediate frame does not race the native menu that is still closing');assert.equal(record.detailSelectOrigin,f.tags,'origin survives while native Select.opened() remains true');f.setSelectOpen(false);f.setController('items_line');f.flushFrames();assert.equal(f.calls.toggled,'full_start');assert.equal(f.calls.focus.at(-1),f.tags,'late native focus fallback is overridden only after the menu is closed');f.context.restoreDetailsPresentation(record);
 });
 
 test('Select return restores visible Genre focus without an extra page shift',()=>{
@@ -82,7 +82,7 @@ test('Select return restores visible Genre focus without an extra page shift',()
 test('localized keyword controls keep Select return focus without relying on the visible label',()=>{
  const f=fixture(),record={page:f.page,root:f.root,descriptionToggle:f.anchor};f.tagsName.textContent='Ключові слова';f.context.setupDetailsPresentation(record,{genres:[{id:18,name:'Драма'}]});
  assert(record.detailSelectControls.includes(f.tags),'non-production tag controls remain part of the Additional Information action set');f.setSelectOpen(true);f.handlers.get(f.tags)['click.shDetailsFocus']();
- assert.equal(record.detailSelectOrigin,f.tags);f.setSelectOpen(false);f.setController('items_line');f.listeners.close.forEach(fn=>fn({}));f.flushFrames();assert.equal(f.calls.focus.at(-1),f.tags);assert.equal(f.calls.toggled,'full_descr');f.context.restoreDetailsPresentation(record);
+ assert.equal(record.detailSelectOrigin,f.tags);f.setSelectOpen(false);f.setController('items_line');f.listeners.close.forEach(fn=>fn({}));f.flushFrames();assert.equal(f.calls.focus.at(-1),f.tags);assert.equal(f.calls.toggled,'full_start');f.context.restoreDetailsPresentation(record);
 });
 
 test('optional comment content is preserved inside its default-open disclosure',()=>{
@@ -94,6 +94,18 @@ test('inert comment loading/empty status stays visible but leaves the native D-p
  f.context.setupDetailsPresentation(record,{genres:[]});const panel=record.detailPanels.find(item=>item.key==='comments');
  assert(panel);assert.equal(status.textContent,'Коментарі не знайдено','the visible empty-state copy remains available');assert(!status.classList.contains('selector'),'inert status cannot be reached by D-pad');assert(!status.classList.contains('focus'),'stale status focus is removed');assert.equal(f.calls.focus.at(-1),panel.toggle,'a status that held native focus transfers to the visible Comments disclosure');assert.equal(f.nativeController.link.last,panel.toggle);
  f.context.restoreDetailsPresentation(record);assert(status.classList.contains('selector'),'native state is restored during teardown');assert(status.classList.contains('focus'));
+});
+
+test('ArrowDown/ArrowRight followed immediately by OK keeps the visible native action and link.last aligned',()=>{
+ const first=new Node('Коментарі','selector'),down=new Node('Студії','selector'),right=new Node('Додаткова інформація','selector');[first,down,right].forEach(node=>node.offsetParent={});
+ let focus=first,frameId=0;const frames=new Map(),listeners={},link={last:first},scroll={immediate(){throw new Error('these already-visible controls must not scroll')},reset(){}},controller={name:'full_descr',link},host={contains:node=>[first,down,right].includes(node)},page={isConnected:true,classList:{contains:name=>name==='activity--active'},querySelector(selector){return selector==='.selector.focus'?focus:null;}},activity={render:()=>[page],component:{scroll}},active={component:'full',activity},calls=new Map();
+ const owner={controller,scroll},context={window:{innerHeight:720},document:{documentElement:{clientHeight:720},addEventListener(name,fn){listeners[name]=fn;},removeEventListener(name,fn){if(listeners[name]===fn)delete listeners[name];}},Lampa:{Activity:{active:()=>active},Controller:{enabled:()=>controller}},nativeOverlayOwnsInput:()=>false,detailsInputOwner:()=>owner,detailsNeedsScroll:()=>false,requestAnimationFrame(fn){const id=++frameId;frames.set(id,fn);return id;},cancelAnimationFrame(id){frames.delete(id);}};
+ vm.createContext(context);const start=source.indexOf('    function installDetailsScroll('),end=source.indexOf('    function restoreDetailsPresentation(',start);assert(start>=0&&end>start);vm.runInContext(source.slice(start,end),context);
+ const record={page,detailsHostLine:host,detailGroup:{},detailScrollBound:false};context.installDetailsScroll(record);const keydown=listeners.keydown;assert.equal(typeof keydown,'function');
+ function nativeArrow(key,next){keydown({key,defaultPrevented:false});focus=next;link.last=next;}
+ function immediateOk(){assert.equal(link.last,focus,'native Last agrees with the visually focused selector at OK time');calls.set(focus,(calls.get(focus)||0)+1);}
+ nativeArrow('ArrowDown',down);immediateOk();nativeArrow('ArrowRight',right);immediateOk();assert.equal(calls.get(down),1);assert.equal(calls.get(right),1,'each fast OK dispatch activates exactly one current action');assert.equal(calls.size,2,'no earlier or later control receives a duplicate action');
+ frames.forEach(fn=>fn());frames.clear();assert.equal(link.last,right,'coalesced post-key reconciliation uses the actual latest visual focus');assert.equal(focus,right);
 });
 
 test('related Trakt lists move into Additional Information and restore to their native parent',()=>{
@@ -138,14 +150,14 @@ test('Back from a collapsed Details panel returns to the hero with native Torren
  f.context.restoreDetailsPresentation(record);
 });
 
-test('Torrent → Details → Back → Torrent → Details keeps the native route and restores the remembered Details control',()=>{
+test('Torrent → Details → Back → Torrent → Details switches native Full Start collections without synthetic controllers',()=>{
  const f=fixture(),record={page:f.page,root:f.root,descriptionToggle:f.anchor,detailPanels:[]},torrent=new Node('Торренти','full-start__button view--torrent selector'),details=new Node('Коментарі','selector sh-detail-toggle'),group=new Node('','sh-detail-panels');
  torrent.offsetParent=details.offsetParent={};f.page.classList.add('activity--active');f.root.appendChild(torrent);const host=new Node('','items-line');host.appendChild(details);host.appendChild(group);f.page.appendChild(host);record.detailsHostLine=host;record.detailGroup=group;record.detailLastFocus=details;
  f.setFocus(torrent);f.nativeController.link.last=torrent;let nativeDown=0;f.nativeController.down=()=>{nativeDown++};
  f.setController('full_start',f.nativeController);f.context.installDetailsDown(record);f.context.installDetailsBack(record);
- f.nativeController.down();assert.equal(f.calls.toggled,undefined,'controller handoff waits until native key dispatch finishes');f.flushFrames();assert.equal(f.calls.toggled,'full_descr','Down from Torrent enters the native Description controller');assert.equal(f.calls.focus.at(-1),details);assert.equal(f.nativeController.link.last,details);
- f.setFocus(details);record.detailsBackController.back();assert.equal(f.calls.toggled,'full_start','Back returns to the hero controller');assert.equal(f.calls.focus.at(-1),torrent);assert.equal(f.nativeController.link.last,torrent);
- f.nativeController.down();f.flushFrames();assert.equal(f.calls.toggled,'full_descr','Down after returning to the hero re-enters Description instead of skipping to items_line');assert.equal(f.calls.focus.at(-1),details);assert.equal(f.nativeController.link.last,details);assert.equal(nativeDown,0,'the native route is overridden only at the Torrent → Description boundary');
+ f.nativeController.down();assert.equal(f.calls.set,0,'handoff waits until native key dispatch finishes');f.flushFrames();assert.equal(f.calls.toggled,undefined,'the browser runtime has one Full Start controller, not a synthetic full_descr controller');assert.equal(f.calls.setArgs.at(-1)[0],host,'Down from Torrent scopes Lampa’s native collection to the Details row');assert.equal(f.calls.focus.at(-1),details);assert.equal(f.nativeController.link.last,details);assert.equal(record.detailsZoneActive,true);
+ f.setFocus(details);record.detailsBackController.back();assert.equal(f.calls.toggled,undefined,'Back returns within the native Full Start controller');assert.equal(f.calls.focus.at(-1),torrent);assert.equal(f.nativeController.link.last,torrent);assert.equal(record.detailsZoneActive,false);assert.equal(f.calls.scrollReset,1);
+ f.nativeController.down();f.flushFrames();assert.equal(f.calls.setArgs.at(-1)[0],host,'Down after returning to the hero re-enters Details instead of skipping to items_line');assert.equal(f.calls.focus.at(-1),details);assert.equal(f.nativeController.link.last,details);assert.equal(nativeDown,0,'native Full Start collection handoff owns the Torrent → Details boundary');
  f.context.restoreDetailsDown(record);assert.equal(f.nativeController.down instanceof Function,true);assert.equal(record.detailsDownController,null);f.context.restoreDetailsBack(record);
 });
 
@@ -158,7 +170,7 @@ test('D-pad focus uses native Lampa Scroll positioning for the focused Details c
 
 test('post-key native Details focus is synchronized to the active Controller link before OK can use stale Last',()=>{
  const f=fixture(),record={page:f.page,root:f.root,descriptionToggle:f.anchor};f.setController('full_descr',f.nativeController);f.context.setupDetailsPresentation(record,{genres:[{id:18,name:'Драма'}]});
- const target=record.detailPanels.find(panel=>panel.key==='additional').toggle;f.nativeController.link.last=f.production;f.setFocus(f.genre);record.detailKeydown({key:'ArrowDown'});f.setFocus(target);f.flushFrames();assert.equal(f.nativeController.link.last,target,'remote navigation target replaces the stale hidden production selector in native Controller state');
+ const target=record.detailPanels.find(panel=>panel.key==='additional').toggle;f.nativeController.link.last=f.production;f.setFocus(f.genre);record.detailKeydown({key:'ArrowDown'});f.setFocus(target);f.flushFrames();assert.equal(f.nativeController.link.last,target,'remote navigation target replaces the stale hidden production selector in native Controller state');assert.equal(record.detailLastFocus,target,'post-movement Details focus, not the pre-key control, is remembered for overlay return');
  f.context.restoreDetailsPresentation(record);
 });
 
@@ -213,7 +225,7 @@ test('Details focus survives the Description → episodes/actors → Description
  f.setController('items_line');f.setFocus(f.focused);f.setController('full_descr');f.context.refreshActiveDetailsCollection(record,record.detailLastFocus);assert.equal(f.calls.focus.at(-1),additional,'returning from episodes or cast restores the exact previous Details control');
 });
 
-test('native Full controller entry retains only calm, stable Details focus styling',()=>{assert(source.includes('.sh-detail-toggle,body.stremio-hybrid .sh-movie-page .full-person{transition:none!important;animation:none!important;scroll-behavior:auto!important}'));assert(source.includes('.sh-detail-toggle.focus,body.stremio-hybrid .sh-movie-page .full-person.focus{transform:none!important}'));assert(source.includes("if(event.name==='full_descr')refreshActiveDetailsCollection(record,record.detailLastFocus)"));});
+test('native Full controller entry retains only calm, stable Details focus styling',()=>{assert(source.includes('.sh-detail-toggle,body.stremio-hybrid .sh-movie-page .full-person{transition:none!important;animation:none!important;scroll-behavior:auto!important}'));assert(source.includes('.sh-detail-toggle.focus,body.stremio-hybrid .sh-movie-page .full-person.focus{transform:none!important}'));assert(source.includes("if(event.name==='full_descr'||event.name==='full_start'&&record.detailsZoneActive)refreshActiveDetailsCollection(record,record.detailLastFocus)"));});
 
 test('Details key and Back handlers yield to Select, Modal, Torrent, Player, and unrelated controllers',()=>{
  const f=fixture(),record={page:f.page,root:f.root,descriptionToggle:f.anchor};f.context.setupDetailsPresentation(record,{genres:[{id:18,name:'Драма'}]});const panel=record.detailPanels.find(x=>x.key==='additional');panel.activate();f.setFocus(f.genre);
@@ -304,6 +316,19 @@ test('Details zones remove only a truly empty native line and place cast/episode
  const record={root,page:parent,kind:'tv',description:native,descriptionToggle:toggle,descriptionNativeLine:host,detailsHostLine:empty,detailGroup:new Node('', 'sh-detail-panels')};root.appendChild(native);root.appendChild(toggle);root.appendChild(record.detailGroup);
  context.organizeDetailsZones(record);assert.equal(record.detailsHostLine,host,'the Details row that originally owned the description wins over a stale earlier Full row');assert(hostHead.classList.contains('sh-details-heading-hidden'),'the native duplicate heading is hidden structurally');assert(!host.classList.contains('sh-details-empty-native-row'),'native Full Details controller host remains visible');assert(!focusableEmpty.classList.contains('sh-details-empty-native-row'),'a row with a real selector is never hidden');assert.equal(record.detailsSecondary.parentNode,hostBody,'middle zone is mounted in the direct native Full Details body, not the hidden networks placeholder');assert.equal(native.parentNode,record.detailsSecondary);assert.equal(record.detailsSecondary.children[1],native);assert.equal(record.detailsSecondary.children[2],toggle);assert.equal(record.detailGroup.parentNode,record.detailsSecondary);assert.equal(record.detailsPeopleHeading.textContent,'Епізоди, актори та схоже');assert.equal(record.detailsPeopleHeading.nextSibling,content);
  context.organizeDetailsZones(record);assert.equal(hostBody.children.filter(n=>n.classList.contains('sh-details-secondary')).length,1);assert.equal(parent.children.filter(n=>n.classList.contains('sh-details-zone-title--content')).length,1,'re-adaptation does not duplicate zone headings');
+});
+
+test('an empty native line is unhidden by the real organizer after an async provider inserts content',()=>{
+ const page=new Node('', 'activity--active'),root=new Node('', 'full-start-new'),host=new Node('', 'items-line'),hostBody=new Node('', 'items-line__body'),description=new Node('Synopsis','full-descr full-descr__text'),lateLine=new Node('', 'items-line'),lateBody=new Node('', 'items-line__body');
+ page.connected=true;host.appendChild(hostBody);hostBody.appendChild(description);lateLine.appendChild(lateBody);page.appendChild(root);page.appendChild(host);page.appendChild(lateLine);
+ page.querySelectorAll=selector=>selector==='.items-line'?[host,lateLine]:[];host.querySelector=selector=>selector==='.items-line__body'?hostBody:selector==='.full-descr'?description:null;lateLine.querySelector=selector=>selector==='.items-line__body'?lateBody:null;
+ const context={document:{createElement:()=>new Node()}};vm.createContext(context);const start=source.indexOf('    function hideEmptyNativeDetailsRow('),end=source.indexOf('    function detailDisclosure(',start);assert(start>=0&&end>start);vm.runInContext(source.slice(start,end),context);
+ const record={root,page,kind:'movie',description,descriptionNativeLine:host,detailsHostLine:host};
+ context.organizeDetailsZones(record);assert(lateLine.classList.contains('sh-details-empty-native-row'),'first pass hides a genuinely empty native row');assert(page.contains(lateLine),'the native row stays mounted in its original feed position');
+ const lateAction=new Node('Провайдер','selector');lateBody.appendChild(lateAction);context.organizeDetailsZones(record);
+ assert(!lateLine.classList.contains('sh-details-empty-native-row'),'late meaningful text/action removes the stale hidden state on the next real adaptation');assert.equal(lateAction.parentNode,lateBody);assert(page.contains(lateLine),'adaptation does not replace or detach the native provider row');
+ const lateCard=new Node('Картка','card selector');lateBody.appendChild(lateCard);context.organizeDetailsZones(record);assert(!lateLine.classList.contains('sh-details-empty-native-row'),'late media cards remain visible too');
+ assert(page.contains(lateLine),'the native row and provider-owned children stay mounted in the original feed position');assert(!lateLine.classList.contains('sh-details-empty-native-row'));
 });
 
 test('production description setup removes current and late-inserted Show More controls without losing their restoration position',()=>{

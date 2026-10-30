@@ -441,6 +441,39 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
         var box=node&&node.getBoundingClientRect&&node.getBoundingClientRect(),viewport=window.innerHeight||document.documentElement&&document.documentElement.clientHeight||0;
         return !box||!viewport||box.top<0||box.bottom>viewport;
     }
+    function detailsZoneTarget(record,preferred){
+        var scope=record.detailsHostLine||record.page,focused=record.page&&record.page.querySelector('.selector.focus'),candidates=[preferred,record.detailLastFocus,focused,record.descriptionToggle];
+        (record.detailPanels||[]).forEach(function(panel){candidates.push(panel.toggle);});
+        for(var i=0;i<candidates.length;i++){var node=candidates[i];if(node&&node.isConnected&&node.offsetParent!==null&&scope.contains(node)&&node.classList.contains('selector'))return node;}
+        var selectors=scope.querySelectorAll?scope.querySelectorAll('.selector'):[];
+        for(var j=0;j<selectors.length;j++)if(selectors[j].isConnected&&selectors[j].offsetParent!==null)return selectors[j];
+        return null;
+    }
+    function enterDetailsZone(record,preferred){
+        var enabled=Lampa.Controller&&Lampa.Controller.enabled&&Lampa.Controller.enabled(),scope=record.detailsHostLine||record.page,target=detailsZoneTarget(record,preferred);
+        if(!enabled||enabled.name!=='full_start'||!enabled.controller||!target||!scope)return false;
+        // This Lampa runtime has one native Full Start controller for both the
+        // hero and Details content. Switch its native collection instead of
+        // toggling an unregistered synthetic `full_descr` controller.
+        Lampa.Controller.collectionSet(scope,null,true);Lampa.Controller.collectionFocus(target,scope);
+        enabled=Lampa.Controller.enabled();if(!enabled||enabled.name!=='full_start'||!enabled.controller)return false;
+        if(enabled.controller.link)enabled.controller.link.last=target;
+        record.detailsZoneActive=true;record.detailLastFocus=target;
+        var active=Lampa.Activity&&Lampa.Activity.active&&Lampa.Activity.active(),scroll=active&&active.activity&&active.activity.component&&active.activity.component.scroll;
+        if(scroll&&typeof scroll.immediate==='function'&&detailsNeedsScroll(target))scroll.immediate(target);
+        return true;
+    }
+    function leaveDetailsZone(record,preferred){
+        var enabled=Lampa.Controller&&Lampa.Controller.enabled&&Lampa.Controller.enabled(),torrent=record.root&&record.root.querySelector('.view--torrent'),focus=preferred||record.page&&record.page.querySelector('.selector.focus'),scope=record.detailsHostLine||record.page;
+        if(!enabled||enabled.name!=='full_start'||!enabled.controller||!torrent||!torrent.isConnected||torrent.offsetParent===null)return false;
+        if(!record.detailsZoneActive&&!(scope&&focus&&scope.contains(focus)))return false;
+        Lampa.Controller.collectionSet(record.root,null,true);Lampa.Controller.collectionFocus(torrent,record.root);
+        enabled=Lampa.Controller.enabled();if(enabled&&enabled.name==='full_start'&&enabled.controller&&enabled.controller.link)enabled.controller.link.last=torrent;
+        record.detailsZoneActive=false;
+        var active=Lampa.Activity&&Lampa.Activity.active&&Lampa.Activity.active(),scroll=active&&active.activity&&active.activity.component&&active.activity.component.scroll;
+        if(scroll&&typeof scroll.reset==='function')scroll.reset();
+        return true;
+    }
     function restoreDetailSelectFocus(record,attempt){
         if(!record||!record.detailSelectOrigin)return;
         attempt=attempt||0;
@@ -456,9 +489,11 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
         var origin=record.detailSelectOrigin;record.detailSelectOrigin=null;
         var active=detailsPageOwner(record),enabled=Lampa.Controller&&Lampa.Controller.enabled&&Lampa.Controller.enabled();
         if(!active||!origin.isConnected||!enabled||['full_start','full_descr','items_line'].indexOf(enabled.name)<0)return;
-        if(enabled.name==='items_line')Lampa.Controller.toggle('full_descr');
+        if(enabled.name==='items_line')Lampa.Controller.toggle('full_start');
         enabled=Lampa.Controller.enabled();if(!enabled||['full_start','full_descr'].indexOf(enabled.name)<0)return;
-        var scope=enabled.name==='full_descr'?(record.detailsHostLine||record.page):record.root;
+        var scope=enabled.name==='full_descr'||(record.detailsHostLine&&record.detailsHostLine.contains(origin))?(record.detailsHostLine||record.page):record.root;
+        record.detailsZoneActive=!!record.detailsHostLine&&scope===record.detailsHostLine;
+        if(record.detailsZoneActive)record.detailLastFocus=origin;
         Lampa.Controller.collectionSet(scope,null,true);Lampa.Controller.collectionFocus(origin,scope);if(enabled.controller&&enabled.controller.link)enabled.controller.link.last=origin;
         var scroll=active.activity.component&&active.activity.component.scroll;if(scroll&&typeof scroll.immediate==='function'&&detailsNeedsScroll(origin))scroll.immediate(origin);
     }
@@ -505,7 +540,7 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
                     record.detailsDownFrame=0;
                     var current=detailsInputOwner(record,controller),active=Lampa.Controller&&Lampa.Controller.enabled&&Lampa.Controller.enabled();
                     if(!current||!active||active.name!=='full_start'||record.page.querySelector('.selector.focus')!==torrent)return;
-                    Lampa.Controller.toggle('full_descr');refreshActiveDetailsCollection(record,record.detailLastFocus||null);
+                    enterDetailsZone(record,record.detailLastFocus||null);
                 });
                 return;
             }
@@ -531,6 +566,7 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
             var panel=(record.detailPanels||[]).filter(function(item){return item.root.isConnected&&item.toggle.getAttribute('aria-expanded')==='true'&&(focused===item.toggle||item.body.contains(focused));})[0];
             if(panel){setDetailDisclosure(panel,false);refreshMovieCollection(record,panel.toggle);return;}
             var enabled=Lampa.Controller&&Lampa.Controller.enabled&&Lampa.Controller.enabled();
+            if(enabled&&enabled.name==='full_start'&&leaveDetailsZone(record,focused))return;
             if(enabled&&enabled.name==='full_descr'){
                 var torrent=record.root&&record.root.querySelector('.view--torrent');
                 if(torrent&&torrent.isConnected&&torrent.offsetParent!==null){
@@ -562,7 +598,7 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
             if(!event||event.defaultPrevented||!/^Arrow(Up|Down|Left|Right)$/.test(event.key)||!detailsInputOwner(record))return;
             var vertical=/^Arrow(Up|Down)$/.test(event.key);
             var currentController=Lampa.Controller.enabled(),currentFocus=record.page&&record.page.querySelector('.selector.focus');
-            if(currentController&&currentController.name==='full_descr'&&currentFocus&&currentFocus.isConnected&&currentFocus.offsetParent!==null&&(record.detailsHostLine||record.page).contains(currentFocus))record.detailLastFocus=currentFocus;
+            if(currentController&&['full_descr','full_start'].indexOf(currentController.name)>=0&&currentFocus&&currentFocus.isConnected&&currentFocus.offsetParent!==null&&(record.detailsHostLine||record.page).contains(currentFocus))record.detailLastFocus=currentFocus;
             if(record.detailScrollFrame)cancelAnimationFrame(record.detailScrollFrame);
             record.detailScrollFrame=requestAnimationFrame(function(){
                 record.detailScrollFrame=0;
@@ -573,8 +609,10 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
                 // selectors nested in the three disclosure panels.
                 var focused=record.page&&record.page.querySelector('.selector.focus');
                 var enabled=Lampa.Controller&&Lampa.Controller.enabled&&Lampa.Controller.enabled(),scope=record.detailsHostLine||record.page;
-                if(enabled&&enabled.name==='full_descr'&&enabled.controller===owner.controller&&enabled.controller.link&&focused&&focused.isConnected&&focused.offsetParent!==null&&scope.contains(focused))enabled.controller.link.last=focused;
-                else if(enabled&&enabled.name==='full_start'&&enabled.controller===owner.controller&&enabled.controller.link&&focused&&focused.isConnected&&focused.offsetParent!==null&&record.root.contains(focused))enabled.controller.link.last=focused;
+                if(enabled&&['full_descr','full_start'].indexOf(enabled.name)>=0&&enabled.controller===owner.controller&&enabled.controller.link&&focused&&focused.isConnected&&focused.offsetParent!==null&&scope.contains(focused)){
+                    enabled.controller.link.last=focused;
+                    if(enabled.name==='full_descr'||record.detailsZoneActive)record.detailLastFocus=focused;
+                }
                 if(vertical&&focused&&focused.isConnected&&focused.offsetParent!==null&&owner.scroll&&typeof owner.scroll.immediate==='function'&&detailsNeedsScroll(focused))owner.scroll.immediate(focused);
             });
         };
@@ -612,8 +650,9 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
     function refreshMovieCollection(record,focus){
         var active=Lampa.Controller.enabled();
         if(!active||['full_start','full_descr'].indexOf(active.name)<0||!active.controller)return;
-        var scope=active.name==='full_descr'?(record.detailsHostLine||record.page):record.root;
-        var nativeLast=active.controller.link&&active.controller.link.last;
+        var nativeLast=active.controller.link&&active.controller.link.last,visual=focus||record.page.querySelector('.selector.focus'),detailsScope=record.detailsHostLine;
+        var inDetails=active.name==='full_descr'||(active.name==='full_start'&&detailsScope&&(record.detailsZoneActive||(visual&&detailsScope.contains(visual))||(nativeLast&&detailsScope.contains(nativeLast))||(focus&&detailsScope.contains(focus))));
+        var scope=inDetails?(detailsScope||record.page):record.root;if(inDetails)record.detailsZoneActive=active.name==='full_start';
         var staleNativeFocus=nativeLast&&(!nativeLast.isConnected||nativeLast.offsetParent===null||!scope.contains(nativeLast));
         var target=focus&&focus.isConnected&&focus.offsetParent!==null?focus:(staleNativeFocus?null:record.page.querySelector('.selector.focus'));
         if(!target||!target.isConnected||target.offsetParent===null||!scope.contains(target)){
@@ -624,11 +663,11 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
         // descendants hidden by collapsed disclosures. Its third argument
         // uses Lampa's own offsetParent visibility filter.
         Lampa.Controller.collectionSet(scope,null,true);
-        if(target&&target.isConnected&&target.offsetParent!==null&&scope.contains(target)){Lampa.Controller.collectionFocus(target,scope);if(active.controller.link)active.controller.link.last=target;if(active.name==='full_descr')record.detailLastFocus=target;}
+        if(target&&target.isConnected&&target.offsetParent!==null&&scope.contains(target)){Lampa.Controller.collectionFocus(target,scope);if(active.controller.link)active.controller.link.last=target;if(inDetails)record.detailLastFocus=target;}
     }
     function refreshActiveDetailsCollection(record,focus){
         var enabled=Lampa.Controller&&Lampa.Controller.enabled&&Lampa.Controller.enabled();
-        if(!enabled||enabled.name!=='full_descr')return false;
+        if(!enabled||enabled.name!=='full_descr'&&!(enabled.name==='full_start'&&record.detailsZoneActive))return false;
         refreshMovieCollection(record,focus);return true;
     }
     function hideEmptyNativeDetailsRow(record,line){
@@ -664,8 +703,12 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
         [record.description,record.descriptionToggle,record.genreChips,record.detailGroup].forEach(function(node){if(node&&node.isConnected&&node.parentNode!==record.detailsSecondary)record.detailsSecondary.appendChild(node);});
         var firstContent=null;
         Array.prototype.some.call(lines,function(line){
-            if(line===host||line===record.detailsSecondary||line.classList.contains('sh-details-empty-native-row'))return false;
+            if(line===host||line===record.detailsSecondary)return false;
             if(hideEmptyNativeDetailsRow(record,line))return false;
+            // Native providers may populate a line after the first adaptation.
+            // Re-evaluate previously hidden rows before skipping them so text,
+            // actions and media cards can re-enter the visible native feed.
+            line.classList.remove('sh-details-empty-native-row');
             if(line.querySelector('.full-episode')||line.querySelector('.full-person')||line.querySelector('.card.selector')){firstContent=line;return true;}
             return false;
         });
@@ -838,12 +881,15 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
         var controller=Lampa.Controller.enabled(),link=controller.controller&&controller.controller.link;
         if(controller.name!=='full_start'||!link||!visible.length||nativeOverlayOwnsInput())return;
         bindRatingNavigation(record,controller.controller);
-        var primary=visible.filter(function(node){return node.classList.contains('view--torrent');})[0]||visible[0];
-        var focus=record.page&&record.page.querySelector('.selector.focus'),focusVisible=focus&&focus.isConnected!==false&&focus.offsetParent!==null,scope=record.page||record.root;
+        var primary=visible.filter(function(node){return node.classList.contains('view--torrent');})[0]||visible[0],focus=record.page&&record.page.querySelector('.selector.focus'),focusVisible=focus&&focus.isConnected!==false&&focus.offsetParent!==null;
+        var detailsScope=record.detailsHostLine||record.page,detailsOwned=record.detailsZoneActive&&detailsScope&&((focusVisible&&detailsScope.contains(focus))||(link.last&&detailsScope.contains(link.last))),scope=detailsOwned?detailsScope:record.root;
+        var inScope=function(node){return node&&node.isConnected!==false&&node.offsetParent!==null&&scope.contains(node);},focusInScope=focusVisible&&inScope(focus),lastInScope=inScope(link.last),safePrimary=detailsOwned?detailsZoneTarget(record,record.detailLastFocus):primary;
         if(!record.initialFocusDone){
-            link.last=primary;Lampa.Controller.collectionSet(record.root,null,true);Lampa.Controller.collectionFocus(primary,record.root);
+            if(detailsOwned&&safePrimary){link.last=safePrimary;Lampa.Controller.collectionSet(scope,null,true);Lampa.Controller.collectionFocus(safePrimary,scope);record.detailLastFocus=safePrimary;}
+            else{link.last=primary;Lampa.Controller.collectionSet(record.root,null,true);Lampa.Controller.collectionFocus(primary,record.root);}
         }
-        else if(focusVisible)link.last=focus;
+        else if(focusInScope)link.last=focus;
+        else if(!lastInScope)link.last=safePrimary||primary;
         record.initialFocusDone=true;
     }
     function bindRatingNavigation(record,controller) {
@@ -1052,7 +1098,7 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
         syncNavigationState(event&&event.name);
         if(!event||['full_start','full_descr'].indexOf(event.name)<0)return;
         var active=Lampa.Activity.active(),record=movieRecords.filter(function(r){return active&&r.activity===active.activity;})[0];
-        if(record){var controller=Lampa.Controller.enabled().controller;if(event.name==='full_start'){bindRatingNavigation(record,controller);installDetailsDown(record);}if(record.detailsBackFrame)cancelAnimationFrame(record.detailsBackFrame);record.detailsBackFrame=requestAnimationFrame(function(){record.detailsBackFrame=0;if(record.page.isConnected){if(event.name==='full_descr')refreshActiveDetailsCollection(record,record.detailLastFocus);installDetailsDown(record);installDetailsBack(record);}});}
+        if(record){var controller=Lampa.Controller.enabled().controller;if(event.name==='full_start'){bindRatingNavigation(record,controller);installDetailsDown(record);}if(record.detailsBackFrame)cancelAnimationFrame(record.detailsBackFrame);record.detailsBackFrame=requestAnimationFrame(function(){record.detailsBackFrame=0;if(record.page.isConnected){if(event.name==='full_descr'||event.name==='full_start'&&record.detailsZoneActive)refreshActiveDetailsCollection(record,record.detailLastFocus);installDetailsDown(record);installDetailsBack(record);}});}
     }
     function actionLabel(node) {
         var map = {'notice--icon':'Сповіщення', 'open--settings':'Налаштування', 'open--profile':'Профіль', 'full--screen':'Повний екран', 'open--broadcast':'Трансляція', 'trakt-head-action':'Trakt · статус та списки'};

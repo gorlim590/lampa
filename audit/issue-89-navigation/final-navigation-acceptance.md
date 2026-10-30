@@ -27,3 +27,19 @@ The `Виробництво 1` action was absent in the final local-source check
 - Physical Google TV acceptance: NOT VERIFIED.
 - The legacy standalone browser suite requiring CDP port 9222: NOT VERIFIED; this acceptance used the authorized Chrome DevTools connection.
 - A real Torrent-row → Files action was not performed because the browser action approval rejected Enter on a real release row as a possible playback/torrent operation. No playback or download was started. Native Files lifecycle remains covered by deterministic tests only for this pass.
+
+## PR #136 final hardening — 2026-10-30
+
+The installed browser showed two native Full navigation states during real D-pad use: `full_start` for the hero and, depending on the path, either the native `full_descr` controller or the same `full_start` controller for the Details collection. The implementation now supports both: when native `full_descr` is not active, it scopes the existing Full Start collection to the Details row instead of assuming an unregistered controller; Back restores the hero collection and Torrent focus.
+
+On the same Silo route and exact current local `ui/stremio-hybrid.js` bytes (preview SHA-256 `8aea7e40830a82d1487c56b366b36a997a63e0b83835d448012072fc85d95955`):
+
+- Torrent → ArrowDown → Comments: the native route entered Details and CSS focus matched `Controller.link.last`.
+- Back collapsed the open Comments disclosure; the next Back returned to hero with Torrent focused and `link.last` matching. Down re-entered Details, including the repeated path where `full_start` owned the scoped Details collection.
+- Rapid Down → Enter on collapsed Comments and Studios activated the visible disclosure once; ArrowRight → Enter on the focused Studios control collapsed only that control.
+- Additional Information → Genre → Enter opened native Select. Escape returned to the exact Genre control with `Controller.link.last` matching and the original card URL restored.
+- ArrowDown to a native comment card → Enter → Escape returned to the same comment card with the native Full controller and `link.last` matching; no duplicate action was observed.
+
+The local script was removed by restoring the original Silo URL with a page navigation. The original viewport (1920×937, DPR 1) is restored; other tabs and saved state were untouched.
+
+Regression additions cover the production organizer un-hiding late text/actions/cards, fast same-turn ArrowDown/ArrowRight → OK with one action, and Full Start `link.last` isolation from actor/Details zones without an artificial Torrent focus call.
