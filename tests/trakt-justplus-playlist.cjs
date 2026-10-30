@@ -264,3 +264,22 @@ test('production external handoff captures PlayerPlaylist and timeline listener 
   assert.match(source, /handleExternalPlaylistTimelineUpdate\(data, externalPlaylistReport\)/);
   assert.match(source, /externalPlaylistReport\s*=\s*null/);
 });
+
+for (const percent of [89, 90, 93, 95, 96, 99, 100]) {
+  test('raw measured Android payload at '+percent+'% applies the configured threshold without transferring progress', async () => {
+    const { context, writes } = setup();
+    const report = context.buildExternalPlaylistReport(show, 'e2', [
+      { season: 1, episode: 2, timeline: { hash: 'e2', time: 0, duration: 1000 } },
+      { season: 1, episode: 3, timeline: { hash: 'e3', time: 0, duration: 1000 } }
+    ], 'account-a', 7);
+    context.externalPlaylistReport = report;
+    const payload = { version: 1, card_id: '1396', end_by: 'user', items: [
+      { index: 0, hash: 'e2', season: 1, episode: 2, position_sec: percent * 10, duration_sec: 1000, has_visit: true },
+      { index: 1, hash: 'e3', season: 1, episode: 3, position_sec: 1, duration_sec: 1000, has_visit: true }
+    ] };
+    context.handleJustPlusRawReport(payload, report);
+    context.handleJustPlusRawReport(payload, report);
+    await flushPromises();
+    assert.deepEqual(writes.filter(x => x.type === 'finish').map(x => x.media.episode_number), percent >= 90 ? [2] : []);
+  });
+}

@@ -1,3 +1,5 @@
+> Updated physical callback evidence: [Independent Callback Probe results](callback-probe-results.md). In particular, interval=120 is now VERIFIED on Just+ 2.5.1. Earlier observations below are retained as historical evidence.
+
 # ADB environment (sanitized)
 
 - Device: Google TV Streamer 4K, Android 14 / API 34.

@@ -1,3 +1,5 @@
+> Physical callback update: [JustPlusCallbackProbe results](../audit/issue-125/google-tv/callback-probe-results.md) verify interval=120, Home, Back and completion delivery on Just+ 2.5.1. Earlier unverified callback statements below are superseded by that bounded test evidence.
+
 # Issue #125 — Trakt episode transitions
 
 ## Runtime event boundary

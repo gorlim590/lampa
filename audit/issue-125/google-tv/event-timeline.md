@@ -1,3 +1,5 @@
+> Updated physical callback evidence: [Independent Callback Probe results](callback-probe-results.md). In particular, interval=120 is now VERIFIED on Just+ 2.5.1. Earlier observations below are retained as historical evidence.
+
 # Sanitized device event timeline
 
 All timestamps below are relative ordering from the ADB session; wall-clock timestamps and private media identifiers are omitted.
