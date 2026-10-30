@@ -8,19 +8,19 @@ Installed apps: Lampa Android wrapper 1.13.5 (581); Just+ Player 2.5.1 (2005001)
 
 **Verified on hardware:** Lampa launched the configured native Files/player handoff to Just+ with a real 10-item episodic playlist. Just+ showed the selected episode identity and media duration. The user switched inside the same Just+ session from S03E07 to S03E08; the active playlist item changed and playback position restarted at zero. Lampa did not become foreground during that transition.
 
-**Not verified:** an Android result callback at the switch; periodic `report_interval_sec` delivery; clean player-exit callback delivery; >=96% normalization on this installed device; any Trakt history request/acknowledgement; and the post-write watched indicator. The `Keep Player Connection` setting was not read because the production app's private preferences are inaccessible without changing app state, and it was not toggled.
+**Not verified:** an Android result callback at the switch; clean player-exit callback delivery; >=90% or >=96% completion reports on this installed device; any Trakt history request/acknowledgement; and the post-write watched indicator. The native menu was inspected read-only and offered “Увімкнути утримання сокета”, confirming `Keep Player Connection` is OFF. I closed the menu without selecting the action. The Trakt threshold was not read from the Android WebView.
 
 The measured E07 position was approximately 18m37s of 54m38s (~34%). E08 was stopped well below the configured watched threshold. Therefore no history entry was eligible or intentionally written. This run confirms the real transition path but does not reproduce a missed eligible completion.
 
 ## Root-cause assessment
 
-The observed switch itself does not establish that a callback reaches Lampa immediately. The official Just+ API page contradicts itself about periodic reports: its schema says `report_interval_sec` reports while playing, while another sentence says the feature is ignored since 2.2.2. The released Lampa 1.13.5 source has an interval report path, but only asks for a 120-second interval when `Keep Player Connection` is enabled. That installed setting is unknown, and public Just+ source is older than the installed APK.
+The first missing stage for an in-player switch is clearer: `Keep Player Connection` is OFF, so Lampa v1.13.5 does not request its optional 120-second `report_interval_sec`. An index change inside Just+ therefore has no configured periodic report path. The official API documents a full snapshot when the viewer leaves or stops; this is the earliest expected delivery, but the actual exit callback was not captured. The official Just+ API page also contradicts itself about interval support, but that ambiguity is immaterial for this run because Lampa sent no interval request.
 
-The strongest code-confirmed completion gap is in the Lampa Android wrapper: it normalizes playback at >=96% to `time=0,duration=0,percent=100`, and its `playerAutoNext` path can synthesize the same marker for previous items when switching episodes. The current wrapper source defaults `playerAutoNext` to true, but the effective owner setting on this device was not inspected. The plugin cannot distinguish a measured 96–100% visit from synthetic completion and correctly fails closed. Thus the same-hash episode switch is visible to Android, but a previous item can reach JS only as an ambiguous completion marker. A plugin-only change cannot recover raw position/duration/provenance already discarded by the native wrapper.
+The real ten-item playlist confirms that Lampa used its native playlist path; v1.13.5 only builds that multi-item state when `playerAutoNext` is true, and the source default is true. On a delivered result, that option can mark earlier items complete regardless of their measured progress, replacing them with `time=0,duration=0,percent=100`. At >=96%, the separate completion normalizer can produce the same marker. The installed plugin correctly rejects the ambiguous marker, so measured 90–95% may also be lost after switching when auto-next synthesizes completion. This mechanism is source-confirmed and fits the reported case, but the >=90% callback sequence was not tested on-device.
 
-**Required safe fix:** add an Android-side, session-scoped raw Just+ report bridge before normalization, carrying exact item index/hash and S/E identity, raw position, measured duration, visit provenance, and end reason. Do not alter persisted Timeline normalization. Only real measured visits should be eligible; auto-next-only markers must remain ineligible. The report must reach JS even when normalized Timeline is unchanged, so repeated full snapshots can retry a failed history write.
+**Prepared fix:** this branch adds a guarded JS consumer and regression coverage for a raw report event. The matching native wrapper patch is included in [`native-bridge-v1.13.5.patch`](native-bridge-v1.13.5.patch). It emits item/hash/S/E identity, raw position, duration, visit provenance, and end reason before normalization, without changing persisted Timeline behavior. Repeated snapshots can retry a failed history write. This event does not exist in the currently installed APK until the native patch is built and installed.
 
-No JavaScript production change is justified by this device run. The report bridge belongs in the Android Lampa wrapper and needs its own scoped native implementation and test build.
+The repository change is integration support for that native bridge, not a standalone fix for the installed APK. The Android patch has not been compiled or installed. Physical completion tests at 90–95% and 96–100% remain blocked until a disposable Trakt test profile is available; no real history entry has been created.
 
 ## Privacy and evidence
 
@@ -37,10 +37,19 @@ See [`adb-environment.md`](adb-environment.md), [`event-timeline.md`](event-time
 | Native Lampa → Just+ playlist handoff | PASS | Real playlist of 10 items opened; current episode metadata visible |
 | Direct episode switch in Just+ | PASS | Active item 6/S03E07 → item 7/S03E08 in one session |
 | Lampa stays backgrounded at switch | PASS | Foreground Activity remained Just+ during transition |
-| Immediate callback on switch | NOT VERIFIED | No callback was observed in available logs; logs are not conclusive and exact interval preference is unknown |
-| 120-second periodic report | NOT VERIFIED | The observed playback interval did not provide a conclusive receiver event; Just+ docs conflict |
+| Keep Player Connection | VERIFIED OFF | Read-only native menu offered “Увімкнути утримання сокета”; no setting changed |
+| 120-second interval requested by Lampa | VERIFIED NOT REQUESTED | v1.13.5 adds it only when Keep Player Connection is ON |
+| Just+ periodic callback behavior in v2.5.1 | NOT VERIFIED | Official API is contradictory; this configuration sent no interval request |
+| Immediate callback on switch | NOT VERIFIED | No callback captured; no periodic report was requested |
 | Callback on normal exit | NOT VERIFIED | A clean Just+ exit callback was not captured |
-| >=96% raw vs normalized report | NOT VERIFIED on device | Source confirms normalization, but threshold playback was not performed |
+| >=90–95% or >=96–100% report | NOT VERIFIED on device | No threshold playback was performed |
 | Trakt history attempt/confirmation | NOT TESTED | No eligible progress; no production history mutation |
 | Physical playback of actual video | PASS, limited | Stream played in Just+ for several minutes; no claim about completion |
 | End-to-end watched sync | NOT VERIFIED | No eligible episode and no Trakt acknowledgement observed |
+| Controlled Trakt, transition and raw-bridge regressions | PASS, 179/179 | Includes measured 90–95%, 96–100%, no-visit rejection, stale owner rejection and retry after transient API failure |
+| Android wrapper patch static checks | PASS | `git diff --check` and reverse-apply validation against the exact v1.13.5 source |
+| Android wrapper compile | NOT VERIFIED | Gradle 7.5.1 is incompatible with installed JDK 21; installed Android SDK has platform-tools only |
+
+## Prepared native bridge
+
+`native-bridge-v1.13.5.patch` is a scoped source patch against the Android wrapper tag matching the installed Lampa package. It passes whitespace and reverse-apply checks, but compilation is blocked: only JDK 21 is installed, while this wrapper uses Gradle 7.5.1 (unsupported class-file version 65), and the Android SDK has platform-tools only. It has not been installed or tested on hardware. The current production plugin cannot recover progress the native wrapper has already normalized away; the paired event contract is required for both 90–95% auto-next transitions and >=96% completion normalization.

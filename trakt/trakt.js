@@ -10165,6 +10165,7 @@
     return {
       token: String(token || ''),
       identityGeneration: generation,
+      cardId: String(card.tmdb_id || card.id || ''),
       // This is a single active handoff snapshot, not a time-limited cache.
       // Long episodes and multi-episode sessions may legitimately return much
       // later; account, profile, and subsequent-player transitions invalidate it.
@@ -10216,6 +10217,29 @@
       slog('Just+ playlist history finish error', e && e.status || 'request_failed');
     });
     return true;
+  }
+
+  function handleJustPlusRawReport(payload, report) {
+    report = report || externalPlaylistReport;
+    if (!payload || payload.version !== 1 || !Array.isArray(payload.items) || !report || report !== externalPlaylistReport ||
+        report.token !== String(Lampa.Storage.get('trakt_token') || '') || report.identityGeneration !== playbackIdentityGeneration ||
+        cloudInjectInProgress || !['completion', 'user', 'interval'].includes(String(payload.end_by || ''))) return false;
+    var payloadCardId = String(payload.card_id || '');
+    if (report.cardId && payloadCardId !== report.cardId) return false;
+    var accepted = false;
+    payload.items.forEach(function (item) {
+      if (!item || item.has_visit !== true || !item.hash) return;
+      var entry = report.entries[String(item.hash)];
+      if (!entry || entry.ambiguous) return;
+      var season = Number(item.season), episode = Number(item.episode);
+      if (!Number.isInteger(season) || !Number.isInteger(episode) || season !== entry.identity.season || episode !== entry.identity.episode) return;
+      var position = Number(item.position_sec), duration = Number(item.duration_sec);
+      if (!isFinite(position) || position < 0 || !isFinite(duration) || duration <= 0) return;
+      if (handleExternalPlaylistTimelineUpdate({
+        data: { hash: String(item.hash), road: { time: position, duration: duration, percent: position / duration * 100 } }
+      }, report)) accepted = true;
+    });
+    return accepted;
   }
 
   function externalReportMatchesPlayerStart(report, media, hash) {
@@ -10367,6 +10391,20 @@
         this._onTimelineUpdate = this.processTimelineUpdate.bind(this);
         Lampa.Timeline.listener.follow('update', this._onTimelineUpdate);
         slog('Timeline listener attached');
+      }
+
+      // Native Android Lampa may provide the unnormalized Just+ report through
+      // this optional window event. It is separate from Timeline because the
+      // wrapper's resume Timeline can collapse measured and synthetic completion.
+      if (window.addEventListener) {
+        this._onJustPlusRawReport = function (event) {
+          try {
+            handleJustPlusRawReport(event && event.detail, externalPlaylistReport);
+          } catch (error) {
+            slog('Just+ raw report rejected', error && error.name || 'invalid_report');
+          }
+        };
+        window.addEventListener('lampa:justplus-raw-report', this._onJustPlusRawReport);
       }
 
       // Слідкуємо за стартом програвача для збереження поточної картки
@@ -10855,6 +10893,11 @@
       if (this._onTimelineUpdate && window.Lampa && Lampa.Timeline && Lampa.Timeline.listener && Lampa.Timeline.listener.remove) {
         Lampa.Timeline.listener.remove('update', this._onTimelineUpdate);
         delete this._onTimelineUpdate;
+      }
+
+      if (this._onJustPlusRawReport && window.removeEventListener) {
+        window.removeEventListener('lampa:justplus-raw-report', this._onJustPlusRawReport);
+        delete this._onJustPlusRawReport;
       }
 
       // Remove Player listener

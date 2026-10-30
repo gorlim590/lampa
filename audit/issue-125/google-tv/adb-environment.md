@@ -8,7 +8,7 @@
 - Lampa `PlayerReportReceiver` component is declared/resolvable in the installed package.
 - TorrServer/parser settings were not changed.
 - Trakt credentials/account settings were not read or changed. No history write was made.
-- `run-as top.rootu.lampa` is denied because this is a non-debuggable production package; private preferences cannot be inspected through that route. `Keep Player Connection` was not toggled, and its current value remains unknown.
+- `run-as top.rootu.lampa` is denied because this is a non-debuggable production package. `Keep Player Connection` was verified OFF through its native read-only menu label (“Увімкнути утримання сокета”); the menu was closed without selecting it. The Trakt completion threshold remains unread because it belongs to the Android WebView's private Lampa storage.
 - ADB shell, package inspection, foreground Activity/window inspection, MediaSession inspection, and remote key input were available.
 
 No LAN address, pairing code, account data, transport URL, or torrent identity is included.

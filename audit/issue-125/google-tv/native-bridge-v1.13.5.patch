@@ -1,0 +1,87 @@
+diff --git a/app/src/main/java/top/rootu/lampa/MainActivity.kt b/app/src/main/java/top/rootu/lampa/MainActivity.kt
+index 861c78f..e4db740 100644
+--- a/app/src/main/java/top/rootu/lampa/MainActivity.kt
++++ b/app/src/main/java/top/rootu/lampa/MainActivity.kt
+@@ -293,12 +293,17 @@ class MainActivity : BaseActivity(),
+             val positions = intent.getIntArrayExtra("positions_sec") ?: IntArray(0)
+             // Durations come per visit in history; the last known one of each item wins.
+             val durations = IntArray(positions.size) { -1 }
++            val hasVisit = BooleanArray(positions.size)
+             @Suppress("DEPRECATION")
+             intent.getParcelableArrayExtra("history")?.forEach { visit ->
+                 val v = visit as? Bundle ?: return@forEach
+                 val i = v.getInt("index", -1)
++                val position = v.getInt("position_sec", -1)
+                 val d = v.getInt("duration_sec", -1)
+-                if (i in durations.indices && d > 0) durations[i] = d
++                if (i in durations.indices && position >= 0) {
++                    hasVisit[i] = true
++                    if (d > 0) durations[i] = d
++                }
+             }
+             val index = intent.getIntExtra("index", -1)
+             val duration = intent.getIntExtra("duration_sec", -1)
+@@ -312,6 +317,7 @@ class MainActivity : BaseActivity(),
+                 put("error", intent.getStringExtra("error_message"))
+                 put("positions", JSONArray(positions.toList()))
+                 put("durations", JSONArray(durations.toList()))
++                put("has_visits", JSONArray(hasVisit.toList()))
+             }
+         }
+     }
+@@ -797,6 +803,9 @@ class MainActivity : BaseActivity(),
+                 logDebug("Player report does not fit the playlist [${positions.length()} / ${playlist.size}]")
+                 return@launch
+             }
++            // Preserve actual Just+ measurements for Trakt before auto-next and >=96% normalization.
++            // This dispatch is independent of the changed-only Timeline update below.
++            emitJustPlusMeasuredReport(report, state, card)
+             for (i in playlist.indices) {
+                 val pos = positions.optInt(i, -1)
+                 val dur = durations.optInt(i, -1)
+@@ -841,6 +850,45 @@ class MainActivity : BaseActivity(),
+         }
+     }
+ 
++    /** Sends raw, measured Just+ item progress to JS without logging or persisting it in Timeline. */
++    private fun emitJustPlusMeasuredReport(
++        report: JSONObject,
++        state: PlayerStateManager.PlaybackState,
++        card: LampaCard?
++    ) {
++        val positions = report.optJSONArray("positions") ?: return
++        val durations = report.optJSONArray("durations") ?: return
++        val hasVisits = report.optJSONArray("has_visits") ?: return
++        if (positions.length() != state.playlist.size || durations.length() != state.playlist.size || hasVisits.length() != state.playlist.size) return
++
++        val items = JSONArray()
++        state.playlist.forEachIndexed { index, item ->
++            val hash = item.timeline?.hash?.takeIf { it.isNotEmpty() && it != "0" } ?: return@forEachIndexed
++            val position = positions.optInt(index, -1)
++            val duration = durations.optInt(index, -1)
++            if (!hasVisits.optBoolean(index, false) || position < 0 || duration <= 0) return@forEachIndexed
++            items.put(JSONObject().apply {
++                put("index", index)
++                put("hash", hash)
++                put("season", item.season ?: JSONObject.NULL)
++                put("episode", item.episode ?: JSONObject.NULL)
++                put("position_sec", position)
++                put("duration_sec", duration)
++                put("has_visit", true)
++            })
++        }
++        if (items.length() == 0) return
++        val payload = JSONObject().apply {
++            put("version", 1)
++            put("card_id", card?.tmdb_id?.takeIf { it.isNotEmpty() } ?: card?.id)
++            put("end_by", report.optString("end_by"))
++            put("items", items)
++        }
++        val quoted = JSONObject.quote(payload.toString())
++        val js = "(function(){try{var p=JSON.parse($quoted);if(window.dispatchEvent&&window.CustomEvent)window.dispatchEvent(new CustomEvent('lampa:justplus-raw-report',{detail:p}));}catch(e){}})();"
++        if (browserInitComplete && loaderView.isGone) browser?.evaluateJavascript(js, null)
++    }
++
+     /**
+      * The "viewed" eye of the online plugin (online.js): its playlist items carry `callback: file.mark`,
+      * which Lampa's own player calls as each episode starts. An external player gets the playlist as

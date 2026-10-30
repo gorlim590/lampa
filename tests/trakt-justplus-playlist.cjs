@@ -43,7 +43,8 @@ function setup() {
     slog: () => {}
   });
   vm.runInContext(productionFunction('buildExternalPlaylistReport', 'handleExternalPlaylistTimelineUpdate') +
-    productionFunction('handleExternalPlaylistTimelineUpdate', 'isPlaybackInstanceTerminal'), context);
+    productionFunction('handleExternalPlaylistTimelineUpdate', 'handleJustPlusRawReport') +
+    productionFunction('handleJustPlusRawReport', 'externalReportMatchesPlayerStart'), context);
   return { context, writes, advanceTime: ms => { clock += ms; } };
 }
 
@@ -178,6 +179,83 @@ test('95 percent measured report is supported; Android-normalized 96/99/100 perc
     assert.equal(context.handleExternalPlaylistTimelineUpdate({ data: { hash, road: { time: 0, duration: 0, percent: 100 } } }, report), false, hash + ' normalized completion is unsupported');
   }
   assert.deepEqual(writes.filter(x => x.type === 'finish').map(x => x.media.episode_number), [1]);
+});
+
+test('raw Just+ bridge accepts genuinely measured 90–95 percent visits with exact episode identity', async () => {
+  const { context, writes } = setup();
+  const report = context.buildExternalPlaylistReport(show, 'e2', [
+    { season: 1, episode: 2, timeline: { hash: 'e2', time: 120, duration: 1800 } }
+  ], 'account-a', 7);
+  context.externalPlaylistReport = report;
+  const payload = {
+    version: 1, card_id: '1396', end_by: 'user',
+    items: [{ index: 0, hash: 'e2', season: 1, episode: 2, position_sec: 1710, duration_sec: 1800, has_visit: true }]
+  };
+  assert.equal(context.handleJustPlusRawReport(payload, report), true);
+  await flushPromises();
+  assert.deepEqual(writes.filter(x => x.type === 'finish').map(x => [x.media.season_number, x.media.episode_number]), [[1, 2]]);
+});
+
+test('raw Just+ bridge rejects under-threshold, synthetic, unknown-visit and zero-duration snapshots', async () => {
+  const { context, writes } = setup();
+  const report = context.buildExternalPlaylistReport(show, 'e2', [
+    { season: 1, episode: 2, timeline: { hash: 'e2', time: 0, duration: 1800 } }
+  ], 'account-a', 7);
+  context.externalPlaylistReport = report;
+  const item = { index: 0, hash: 'e2', season: 1, episode: 2, position_sec: 1602, duration_sec: 1800, has_visit: true };
+  assert.equal(context.handleJustPlusRawReport({ version: 1, card_id: '1396', end_by: 'user', items: [item] }, report), false, '89% is below threshold');
+  assert.equal(context.handleJustPlusRawReport({ version: 1, card_id: '1396', end_by: 'user', items: [{ ...item, has_visit: false, position_sec: 1800 }] }, report), false, 'synthetic/unvisited item is not evidence');
+  assert.equal(context.handleJustPlusRawReport({ version: 1, card_id: '1396', end_by: 'user', items: [{ ...item, duration_sec: 0, position_sec: 0 }] }, report), false, 'zero duration cannot qualify');
+  assert.equal(context.handleJustPlusRawReport({ version: 1, card_id: '1396', end_by: 'user', items: [{ ...item, episode: 3, position_sec: 1800 }] }, report), false, 'wrong episode cannot qualify');
+  await flushPromises();
+  assert.equal(writes.filter(x => x.type === 'finish').length, 0);
+});
+
+test('raw Just+ bridge recovers measured 96–100 percent before Android zero/zero normalization', async () => {
+  const { context, writes } = setup();
+  const report = context.buildExternalPlaylistReport(show, 'e96', [
+    { season: 1, episode: 2, timeline: { hash: 'e96', time: 0, duration: 1800 } },
+    { season: 1, episode: 3, timeline: { hash: 'e99', time: 0, duration: 1800 } },
+    { season: 1, episode: 4, timeline: { hash: 'e100', time: 0, duration: 1800 } }
+  ], 'account-a', 7);
+  context.externalPlaylistReport = report;
+  const items = [
+    { index: 0, hash: 'e96', season: 1, episode: 2, position_sec: 1728, duration_sec: 1800, has_visit: true },
+    { index: 1, hash: 'e99', season: 1, episode: 3, position_sec: 1782, duration_sec: 1800, has_visit: true },
+    { index: 2, hash: 'e100', season: 1, episode: 4, position_sec: 1800, duration_sec: 1800, has_visit: true }
+  ];
+  assert.equal(context.handleJustPlusRawReport({ version: 1, card_id: '1396', end_by: 'completion', items }, report), true);
+  await flushPromises();
+  assert.deepEqual(writes.filter(x => x.type === 'finish').map(x => x.media.episode_number), [2, 3, 4]);
+});
+
+test('raw Just+ bridge retries a failed identical full snapshot and rejects stale owner data', async () => {
+  const { context, writes } = setup();
+  const report = context.buildExternalPlaylistReport(show, 'e2', [
+    { season: 1, episode: 2, timeline: { hash: 'e2', time: 0, duration: 1800 } }
+  ], 'account-a', 7);
+  context.externalPlaylistReport = report;
+  let attempt = 0;
+  context.finish = media => { writes.push({ type: 'finish', media }); return Promise.resolve(++attempt === 1 ? { ok: false, status: 503 } : { ok: true }); };
+  const payload = { version: 1, card_id: '1396', end_by: 'user', items: [{ hash: 'e2', season: 1, episode: 2, position_sec: 1710, duration_sec: 1800, has_visit: true }] };
+  assert.equal(context.handleJustPlusRawReport(payload, { ...report, token: 'account-b' }), false);
+  assert.equal(context.handleJustPlusRawReport(payload, { ...report, identityGeneration: 6 }), false);
+  assert.equal(context.handleJustPlusRawReport({ ...payload, card_id: '999' }, report), false);
+  assert.equal(context.handleJustPlusRawReport({ ...payload, card_id: '' }, report), false, 'missing native card identity is rejected');
+  assert.equal(context.handleJustPlusRawReport({ ...payload, end_by: 'error' }, report), false);
+  assert.equal(context.handleJustPlusRawReport(payload, report), true);
+  await flushPromises();
+  assert.equal(report.entries.e2.completionState, 'retryable');
+  assert.equal(context.handleJustPlusRawReport(payload, report), true);
+  await flushPromises();
+  assert.equal(report.entries.e2.completionState, 'confirmed');
+  assert.equal(writes.filter(x => x.type === 'finish').length, 2);
+});
+
+test('production watching lifecycle installs and removes the optional native raw-report event listener', () => {
+  assert.match(source, /window\.addEventListener\('lampa:justplus-raw-report', this\._onJustPlusRawReport\)/);
+  assert.match(source, /window\.removeEventListener\('lampa:justplus-raw-report', this\._onJustPlusRawReport\)/);
+  assert.match(source, /handleJustPlusRawReport\(event && event\.detail, externalPlaylistReport\)/);
 });
 
 test('production external handoff captures PlayerPlaylist and timeline listener routes mapped reports', () => {
