@@ -1,5 +1,13 @@
 # Physical native/WebView acceptance — 2026-10-30
 
+## Latest update — pause suppression and live state, 2026-10-31
+
+The earlier statement below that pause suppression was not installed is superseded: the parallel APK was rebuilt/installed from the current candidate before the physical E05/E06 run. The >=80% suppression branch is physically confirmed at E05 86.01% during Just+ Next: JS emitted `external_pause_suppressed` / `progress_too_high`, sent no E05 `/pause` or `/stop`, and started E06 with HTTP 201 `action=start`. E06 exited at 6.99% with `/pause` HTTP 201. Neither episode created a history entry. Exact current-run detail is in [pause-suppression-live-acceptance.md](pause-suppression-live-acceptance.md) and [pause-suppression-events.jsonl](pause-suppression-events.jsonl).
+
+Read-only `GET /users/me/watching` returned the correct E06 object and `action=scrobble` during playback. Later after WebView reload, readback was empty, and a subsequent no-cache GET returned HTTP 401. The reason is unverified, and the Siaivo home UI did not independently show an active Now Watching item or expiry transition. Therefore live start is confirmed, but current-state continuity/expiry is only partially confirmed.
+
+The real website reload removed the in-memory external playlist handoff (`PlayerPlaylist.get()` length 0). E06 snapshots at 486/1903 and 606/1903 were received natively but exhausted six bounded JS ACK attempts. They were below the history threshold; no write occurred. Force-stop killed the parallel app process and explicit launch restored it without clearing data, but pending-event recovery at the time of death was not exercised. Process-death durable recovery remains unverified.
+
 ## Real Siaivo / Ted Lasso acceptance — 2026-10-31
 
 This section supersedes the earlier statement that no real Siaivo season torrent or authenticated history write had been exercised. The separate Android package `top.rootu.lampa.issue125probe` opened the actual configured Siaivo page `http://siaivo.isroot.in`, used its real torrent overlay and 36-file season pack (two unnumbered special slots followed by S01E01 at native index 2, E02 at 3, E03 at 4, E04 at 5), and launched those files in Just+ 2.5.1. `Lampa.PlayerPlaylist.get()` returned all 36 items with the same exact S/E at the native indexes; the session descriptor matched card ID 97546 and the known episode entries. No production APK, parser, TorrServer or setting was changed.

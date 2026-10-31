@@ -26,6 +26,16 @@
   "post_test_device_state": "Parallel package top.rootu.lampa.issue125probe v1.13.5-dirty-issue125-probe/581 updated and foreground on actual Siaivo; official production top.rootu.lampa v1.13.5/581 and Just+ 2.5.1/2005001 remain installed and unchanged.",
   "installed_on_device": true,
   "install_method": "adb install -r to parallel package only; app data retained; no pm clear",
-  "final_physical_acceptance": "Ted Lasso S01 E01-E04 only; authenticated history readback [1,2,3,4]; UI showed 4/44; live start HTTP 201 for E03/E04; pause >=80% returned progress_too_high (422) before worktree suppression fix",
-  "candidate_pause_suppression_physical_status": "not independently exercised after final rebuild"
+  "final_physical_acceptance": "Ted Lasso S01 E01-E04: authenticated history readback with one unique event ID each; separate E05/E06 no-history live test physically exercised pause suppression at >=80%, start HTTP 201 action=start, E06 low-progress exit pause HTTP 201",
+  "candidate_pause_suppression_physical_status": "verified on parallel APK: E05 86.01% transition emitted external_pause_suppressed/progress_too_high and made no pause/stop request; E06 started with HTTP 201 action=start",
+  "process_death_relaunch_test": "force-stop killed parallel process without clearing data; explicit launch restored Siaivo home. Pending-report recovery at instant of death not tested.",
+  "webview_reload_recovery_status": "failed closed on actual site: playlist/handoff absent after reload; E06 low-progress raw reports received six bounded raw-ack-false retries",
+  "users_me_watching_status": "read-only GET returned E06 action=scrobble during playback; later no-cache GET returned HTTP 401; UI expiry not confirmed",
+  "history_event_id_readback": [
+    {"episode":"S01E01","event_id":"14589097178"},
+    {"episode":"S01E02","event_id":"14589119621"},
+    {"episode":"S01E03","event_id":"14589126441"},
+    {"episode":"S01E04","event_id":"14589127879"}
+  ],
+  "new_history_writes_after_e01_e04_allowance": 0
 }

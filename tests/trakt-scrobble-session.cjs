@@ -104,6 +104,22 @@ test('external episode transition never STOP-scrobbles and skips an invalid high
   assert.equal(f.api.getActiveSession().key, 'show:1396:1:3');
 });
 
+test('external episode transition pauses below 80% but suppresses pause and stop at and above 80%', async () => {
+  for (const progress of [79, 80, 89, 90, 95, 99, 100]) {
+    const f = fixture(), previous = episode(5), next = episode(6);
+    await f.api.scrobbleStart(previous, progress, true);
+    await f.api.scrobbleStart(next, 0, true);
+    const actions = f.calls.map(call => [call.action, call.media.episode_number]);
+    if (progress < 80) {
+      assert.deepEqual(actions, [['start', 5], ['pause', 5], ['start', 6]], `${progress}% closes the prior episode with pause`);
+    } else {
+      assert.deepEqual(actions, [['start', 5], ['start', 6]], `${progress}% must not send invalid pause or watched stop`);
+    }
+    assert.equal(actions.some(([action]) => action === 'stop'), false, 'external transitions never use Trakt stop');
+    assert.equal(f.api.getActiveSession().key, 'show:1396:1:6');
+  }
+});
+
 test('stale stop for another episode cannot stop the current session', async () => {
   const f = fixture(), current = episode(3);
   await f.api.scrobbleStart(current, 12);
@@ -776,6 +792,28 @@ test('Google TV empty-PlayerPlaylist race keeps 90.8/94.7 visits through 503 ret
   assert.equal(payload.__lampa_trakt_ack, true);
   assert.deepEqual(attempts, { 1: 2, 2: 1, 3: 0 });
   assert.deepEqual(f.context.finishedMedia.map(item => item.episode_number), [1, 2, 1]);
+});
+
+test('WebView reload without a reconstructed external handoff rejects the old raw snapshot without ACK or writes', () => {
+  const f = integrationFixture();
+  const show = { id: 97546, tmdb_id: 97546, method: 'tv', type: 'tv', name: 'Ted Lasso', number_of_seasons: 4 };
+  const playlist = [{ season: 1, episode: 1, timeline: { hash: 'reload-e01', time: 0, duration: 1856 } }];
+  f.setPlaylist([]);
+  f.playerEvent('external', { card: show, timeline: { hash: 'reload-e01' }, playlist });
+  const oldReport = f.context.externalPlaylistReport;
+  const descriptor = { version: 2, session_id: 'reload-session-before-webview-reload', card_id: '97546', items: [{ index: 0, hash: 'reload-e01', season: 1, episode: 1 }] };
+  assert.equal(f.context.bindJustPlusSession(descriptor, oldReport), true);
+  const raw = { version: 2, session_id: descriptor.session_id, card_id: '97546', end_by: 'interval', items: [
+    { index: 0, hash: 'reload-e01', season: 1, episode: 1, position_sec: 1686, duration_sec: 1856, has_visit: true }
+  ] };
+
+  // A normal page reload creates a new JS realm; its volatile handoff is empty.
+  // The native retry must fail closed instead of attributing this old callback.
+  f.context.externalPlaylistReport = null;
+  assert.equal(f.context.handleJustPlusRawReportEvent({ detail: raw }, null), false);
+  assert.equal(raw.__lampa_trakt_ack, undefined, 'invalid ownership is not acknowledged as delivered');
+  assert.equal(f.context.finishCallCount || 0, 0, 'stale report cannot write history after reload');
+  assert.deepEqual(f.calls, [], 'stale report cannot start or mutate live scrobbling');
 });
 
 test('Android changed-only Timeline bridge can suppress a retry after an exhausted Trakt history write', async () => {
