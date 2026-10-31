@@ -30,7 +30,7 @@
   "candidate_pause_suppression_physical_status": "verified on parallel APK: E05 86.01% transition emitted external_pause_suppressed/progress_too_high and made no pause/stop request; E06 started with HTTP 201 action=start",
   "process_death_relaunch_test": "force-stop killed parallel process without clearing data; explicit launch restored Siaivo home. Pending-report recovery at instant of death not tested.",
   "webview_reload_recovery_status": "failed closed on actual site: playlist/handoff absent after reload; E06 low-progress raw reports received six bounded raw-ack-false retries",
-  "users_me_watching_status": "read-only GET returned E06 action=scrobble during playback; later no-cache GET returned HTTP 401; UI expiry not confirmed",
+  "users_me_watching_status": "read-only GET returned E06 action=scrobble during playback; later corrected authenticated GET /users/me/watching with cache:false returned HTTP 204 after paused-session expiry; prior HTTP 401 was caused by wrong api.get argument order (options passed as unauthorized); exact expiry timing and UI transition not confirmed",
   "history_event_id_readback": [
     {"episode":"S01E01","event_id":"14589097178"},
     {"episode":"S01E02","event_id":"14589119621"},

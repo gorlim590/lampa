@@ -26,7 +26,9 @@ The existing successful readback identified the only authorized event IDs as E01
 
 During an active E06 session, a read-only `GET /users/me/watching` returned one episode object with `action=scrobble`, TMDB show ID 162639, season 1, episode 6, `started_at=2026-10-31T05:20:57Z`, and `expires_at=2026-10-31T05:54:57Z`. This identifies the correct active episode at that sample. The expiry timestamp is the server's reported expiry, not a physically observed expiry transition.
 
-After WebView reload, an earlier no-cache read returned an empty object while Just+ was still on E06. A subsequent read-only request returned HTTP 401 (`TraktTV API Error`). The underlying reason was not isolated; no conclusion is made that Trakt itself is at fault. The actual Siaivo page rendered after return, but its home UI did not expose a direct Now Watching card that could independently confirm the episode or expiry. Thus live start is physically accepted, but persistent Now Watching state and UI expiry are **not fully confirmed**.
+The earlier HTTP 401 was a diagnostic-call bug, not evidence of stale authorization or a Trakt failure. The caller used `api.get(path, {cache:false})`, but this API signature is `get(path, unauthorized=false, options={})`; the options object was interpreted as `unauthorized=true`, so the request omitted bearer auth. Repeating the read-only request with the correct call `api.get('/users/me/watching', false, {cache:false, withMeta:true})` returned HTTP 204 with no body. The response was observed after the E06 session had been paused for hours, so it confirms there is no active Now Watching item now; it does not physically establish when the server expired the earlier item.
+
+The actual Siaivo page rendered after return, but its home UI did not expose a direct Now Watching card that could independently confirm the episode or expiry. Thus live start and the correct active E06 read during playback are confirmed, while UI expiry transition is **not fully confirmed**. A sanitized corrected read is recorded in `pause-suppression-events.jsonl`.
 
 ## Reload and process lifecycle
 
@@ -49,8 +51,8 @@ Focused suite: `node --test tests/trakt-scrobble-session.cjs` — 50/50 PASS.
 - **Live start:** physically confirmed by HTTP 201 `action=start` for E05/E06.
 - **High-progress history safety:** no new history writes; prior unique event IDs E01–E04 unchanged; E05/E06 absent.
 - **Low-progress exit pause:** HTTP 201 for E06 at 6.99%.
-- **Now Watching:** correct E06 returned once by read-only endpoint during playback; later requests were empty/401 and actual UI did not independently expose it. Expiry is unverified.
+- **Now Watching:** correct E06 returned once by read-only endpoint during playback. The earlier 401 was caused by a malformed diagnostic call; the correctly authenticated read now returns HTTP 204 after the paused session expired. Expiry timing and a matching UI transition are unverified.
 - **Reload recovery:** fails closed and exhausts bounded retries; **not ready** for production reliability.
-- **Process-death pending recovery:** not tested with a pending event; no durable queue guarantee.
+- **Process-death pending recovery:** not tested with a pending event. The native pending raw snapshot and JS history completion state are volatile / Activity-saved state, not a durable process-independent queue. Durable retry is not implemented or verified.
 
 Do not mark Issue #125 complete or PR #138 ready to merge. The tested pause fix is ready for owner review, while full Now Watching and reload/process-death recovery remain blockers.
