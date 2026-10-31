@@ -19,11 +19,13 @@ function setup() {
   let clock = 1_000_000;
   let watchingEnabled = true;
   class TestDate extends Date { static now() { return clock; } }
-  const context = vm.createContext({
+  let context;
+  context = vm.createContext({
     Array, Object, Number, String, Date: TestDate, Math, isFinite, parseInt,
     playbackIdentityGeneration: 7,
     externalPlaylistReport: null,
     cloudInjectInProgress: false,
+    JUSTPLUS_RECOVERY_KEY: 'test-recovery-key',
     config: { minProgress: 90 },
     Lampa: { Storage: { get: () => 'account-a', field: name => name === 'trakt_min_progress' ? 90 : name === 'trakt_enable_watching' ? watchingEnabled : true } },
     getContentType$2: media => media && (media.method === 'tv' || media.media_type === 'tv' || media.type === 'tv' || media.number_of_seasons ? 'show' : 'movie'),
@@ -39,6 +41,16 @@ function setup() {
     },
     getCompletionKey: media => media && media.id && Number.isInteger(media.season_number) && Number.isInteger(media.episode_number)
       ? `episode:tmdb:${media.id}:S${media.season_number}:E${media.episode_number}` : '',
+    readJustPlusLocal: () => null,
+    writeJustPlusLocal: () => true,
+    enqueueJustPlusHistory: (media, entry) => {
+      const owner = context.Lampa.Storage.get('trakt_token');
+      entry.completionState = 'pending';
+      Promise.resolve().then(() => context.Lampa.Storage.get('trakt_token') === owner ? context.finish(media) : { ok: false, reason: 'stale_owner' }).then(result => {
+        entry.completionState = result && result.ok ? 'confirmed' : 'retryable';
+      }, () => { entry.completionState = 'retryable'; });
+      return true;
+    },
     markFinishIntent: key => writes.push({ type: 'intent', key }),
     finish: media => { writes.push({ type: 'finish', media }); return Promise.resolve({ ok: true }); },
     slog: () => {}, issue125Diag: () => {}
