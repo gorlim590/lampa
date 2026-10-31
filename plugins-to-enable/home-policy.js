@@ -177,10 +177,19 @@
             }
         }
         function bootstrap() {
+            var gate = window.LampaTraktHomeGate;
+            if (gate && gate.homePolicyReady) gate.homePolicyReady();
             if (booted) return; booted = true;
             var active = L.Activity && L.Activity.active(), comp = component();
+            if (active && active.component === 'main') {
+                if (gate && gate.requestHomeBuild) { gate.requestHomeBuild(); return; }
+            }
             // Existing untagged Home predates activation; rebuild once through the filtered pipeline.
-            if (comp && comp.items && comp.items.some(function (item) { return !stableId(item.data); }) && L.Activity.replace) L.Activity.replace({ component: 'main', source: active.source || 'tmdb', page: 1 });
+            if (comp && comp.items && comp.items.some(function (item) { return !stableId(item.data); })) {
+                var gate = window.LampaTraktHomeGate;
+                if (gate && gate.requestHomeBuild) gate.requestHomeBuild();
+                else if (L.Activity.replace) L.Activity.replace({ component: 'main', source: active.source || 'tmdb', page: 1 });
+            }
         }
         return { prepare: prepare, wrap: wrap, register: register, install: install, bootstrap: bootstrap, apply: apply, visible: visible, saveVisible: saveVisible, reset: reset, editor: editor,
             inventory: function () { return Object.keys(inventory).map(function (id) { return inventory[id]; }); }, classify: identify };

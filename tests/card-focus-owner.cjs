@@ -19,6 +19,10 @@ test('Hybrid supplies one native-card ring for remote focus and mouse hover; sta
  const ring=rules.find(r=>r.includes('box-shadow:0 0 0 .14em var(--sh-text)'));assert(ring.includes('.card.focus .card__view'));assert(ring.includes('.card.hover .card__view'));
  assert(hybrid.includes('@media(prefers-reduced-motion:reduce)'));
 });
+test('Hybrid card focus keeps a stable size and signals focus with its outline only',()=>{
+ assert.match(hybrid,/body\.stremio-hybrid \.card\.focus \{ transform:none !important; z-index:20; \}/);
+ assert.doesNotMatch(hybrid,/body\.stremio-hybrid \.card\.focus \{ transform:scale\(/);
+});
 
 test('Verification entry restores the prior loader base on success/failure without storage or global observers',()=>{
  const source=read('audit/ui/phase2-loader.js');

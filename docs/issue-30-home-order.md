@@ -4,7 +4,7 @@ Status: implemented for the verified native TMDB/CUB Home builders; review/physi
 
 ## One Home integration point
 
-`plugins-to-enable/home-history.js` owns the existing ContentRows boundary and native activity/append lifecycle. It loads sibling `home-policy.js` automatically, preserving the version query. The helper has no independent listeners, polling, observers or Home API fetches. Do not register it as another Lampa extension. `loader.js` defaults remain unchanged: the user still explicitly activates home-history after publication.
+`plugins-to-enable/home-history.js` owns the existing ContentRows boundary and native activity/append lifecycle. The built-in `loader.js` loads `home-policy.js` then `home-history.js` automatically; neither needs a separate extension registration. The helper has no independent listeners, polling, observers or Home API fetches.
 
 The native registry does not expose previously registered row objects. We therefore identify native callbacks by exact whitespace-normalized source from the actual deployed app, not title/icon/TMDB poster source. Evidence: `audit/issue-30/core-builders.json`, app URL and SHA256 included. Future unknown core versions fail open: preserve unknown callbacks rather than delete potentially unrelated plugin content. A new native app version may require updating the reviewed signatures.
 

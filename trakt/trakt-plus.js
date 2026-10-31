@@ -74,6 +74,7 @@
   var ROWS = {};
   var syncing = false;
   var rowCalled = false;
+  var rowsRegistered = false;
   var credentialSeen, sessionEpoch = 0, accountOwner = null, identityPromise = null, identityRetryAt = 0;
   var sessionJobs = [], activeSync = null, accountTimer = null;
 
@@ -1401,16 +1402,23 @@
         rowCalled = true;
         if (!cfg().enable || !token()) return;
         return function (call) {
+          var finished = false;
+          function complete(data) {
+            if (finished) return; finished = true;
+            call(data);
+            var gate = window.LampaTraktHomeGate;
+            if (gate && gate.homeRowComplete) gate.homeRowComplete(def.name);
+          }
           function attempt(n) {
             getRow(def, n > 0).then(function (r) {
-              if (!r.cards || r.cards.length < 4) return call();
+              if (!r.cards || r.cards.length < 4) return complete();
               var unique = homeRecommendationCards(params, def.name, r.cards);
-              if (!unique.length) return call();
-              call(lineFor(def, Object.assign({}, r, { cards: unique })));
+              if (!unique.length) return complete();
+              complete(lineFor(def, Object.assign({}, r, { cards: unique })));
             }).catch(function () {
               // тимчасовий збій (ліміт запитів / мережа) — пробуємо ще раз, а не лишаємо рядок порожнім
               if (n < 3) setTimeout(function () { attempt(n + 1); }, 2500 * (n + 1));
-              else call();
+              else complete();
             });
           }
           attempt(0);
@@ -1433,7 +1441,8 @@
   }
 
   function registerRows() {
-    if (!Lampa.ContentRows || typeof Lampa.ContentRows.add !== 'function') return;
+    if (rowsRegistered) return true;
+    if (!Lampa.ContentRows || typeof Lampa.ContentRows.add !== 'function') return false;
     var defs = buildDefs();
     defs.sort(function (a, b) { return a.index - b.index; });
     defs.forEach(function (d, i) { d.index = TOP_INDEX + i; registerRow(d); }); // Trakt-рядки — з самого верху
@@ -1444,8 +1453,13 @@
       return function (call) { getRow(rated).then(function (result) {
         if (window.LampaHomeHistory && window.LampaHomeHistory.active) return call();
         call(result.cards.length ? lineFor(rated, result) : undefined);
-      }, function () { call(); }); };
+        var gate = window.LampaTraktHomeGate; if (gate && gate.homeRowComplete) gate.homeRowComplete(rated.name);
+      }, function () { call(); var gate = window.LampaTraktHomeGate; if (gate && gate.homeRowComplete) gate.homeRowComplete(rated.name); }); };
     } });
+
+    rowsRegistered = true;
+    var homeGate = window.LampaTraktHomeGate;
+    if (homeGate && homeGate.traktRowsReady) homeGate.traktRowsReady(defs.map(function (def) { return def.name; }));
 
     if (Lampa.Maker && Lampa.Maker.map) return; // one canonical native Full owner
     // Блок «Подібні (Trakt)» у картці (якщо ця збірка Lampa підтримує рядки в full)
@@ -2289,6 +2303,8 @@
   }
 
   function ensureHome() {
+    var gate = window.LampaTraktHomeGate;
+    if (gate && gate.requestHomeBuild) { gate.requestHomeBuild(); return; }
     function check() {
       try {
         var a = Lampa.Activity && Lampa.Activity.active && Lampa.Activity.active();
@@ -2726,6 +2742,7 @@
       return;
     }
     booted = true;
+    try { registerRows(); } catch (e) {}
     try { hydrateWatched(); } catch (e) {}
     try { injectStyle(); } catch (e) {}
     try { initSettings(); } catch (e) {}

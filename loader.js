@@ -1,7 +1,7 @@
 /*
  * Lampa single-entry loader. Keep startup-critical code ES5 for TV WebViews.
- * Hybrid and its essential presentation adapters load before appready; optional
- * providers wait for the native app lifecycle and never block the first shell.
+ * Trakt Home is assembled before the first visible Home; optional providers
+ * wait for the native app lifecycle.
  */
 (function () {
   'use strict';
@@ -10,14 +10,18 @@
   window.LampaLoaderStarted = true;
 
   var BASE = String(window.LAMPA_PLUGINS_BASE || 'https://gorlim590.github.io/lampa/').replace(/\/?$/, '/');
-  var VERSION = String(window.LAMPA_PLUGINS_VERSION || '20261028-torrent-cinema-2.0.0');
+  var VERSION = String(window.LAMPA_PLUGINS_VERSION || '20261031-trakt-home-first-1');
   var TIMEOUT_MS = 8000;
   var READY_CHECK_MS = 100;
   var READY_MAX_CHECKS = 300;
-  var CRITICAL = ['ui/stremio-hybrid.js', 'ui/interface-plus.js', 'ui/design-optimized.js'];
+  var CRITICAL = [
+    'ui/stremio-hybrid.js', 'ui/interface-plus.js', 'ui/design-optimized.js',
+    'trakt/trakt.js', 'trakt/trakt-plus.js',
+    'plugins-to-enable/home-policy.js', 'plugins-to-enable/home-history.js'
+  ];
   var DEFAULT_DEFERRED = [
-    'trakt/trakt.js', 'trakt/trakt-plus.js', 'providers/torrent-search.js',
-    'media/average-rating.js', 'ui/cardify-plus.js', 'localization/translate.js'
+    'providers/torrent-search.js', 'media/average-rating.js', 'ui/cardify-plus.js',
+    'localization/translate.js'
   ];
   // The optional full-cast browser is a built-in Hybrid capability. Load it
   // after appready even when an installation has an explicit optional list.
@@ -40,6 +44,94 @@
     catch (e) { /* Use the legacy clock below. */ }
     return new Date().getTime();
   }
+
+  function installTraktHomeGate() {
+    if (window.LAMPA_TRAKT_HOME_FIRST === false) return null;
+    var root = document.documentElement;
+    if (!root || !root.classList || typeof document.createElement !== 'function') return null;
+    var gate = {
+      policyReady: false, rowsReady: false, requested: false, building: false,
+      expected: [], completed: {}, timer: null, poll: null, deadline: 0, node: null,
+      status: 'waiting', reason: null
+    };
+    var style = document.createElement('style');
+    style.id = 'lampa-trakt-home-gate-style';
+    style.textContent = 'html.lampa-trakt-home-pending .activity--active{visibility:hidden!important}#lampa-trakt-home-gate{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:4vw;box-sizing:border-box;background:#121023;color:#f0eef8;font:500 clamp(18px,2vw,32px)/1.45 system-ui,sans-serif;text-align:center}#lampa-trakt-home-gate button{display:block;margin:1.4em auto 0;padding:.7em 1.4em;border:1px solid #9775fa;border-radius:.6em;background:#29233e;color:#fff;font:inherit;cursor:pointer}';
+    if (document.head && document.head.appendChild) document.head.appendChild(style);
+    root.classList.add('lampa-trakt-home-pending');
+    state.traktHomeGate = { status: 'waiting', reason: null };
+
+    function update(message, retry) {
+      if (!document.body) return;
+      if (!gate.node) {
+        gate.node = document.createElement('div'); gate.node.id = 'lampa-trakt-home-gate';
+        document.body.appendChild(gate.node);
+      }
+      while (gate.node.firstChild) gate.node.removeChild(gate.node.firstChild);
+      var text = document.createElement('div'); text.textContent = message; gate.node.appendChild(text);
+      if (retry) {
+        var button = document.createElement('button'); button.type = 'button'; button.textContent = 'Спробувати ще';
+        button.onclick = function () { gate.completed = {}; gate.building = false; gate.requested = true; gate.deadline = now() + 45000; gate.status = 'waiting'; gate.reason = null; state.traktHomeGate = { status: gate.status, reason: null }; update('Завантажую категорії Trakt…'); tryBuild(); };
+        gate.node.appendChild(button);
+      }
+    }
+    function release(status, reason) {
+      gate.status = status; gate.reason = reason || null; state.traktHomeGate = { status: status, reason: gate.reason };
+      root.classList.remove('lampa-trakt-home-pending');
+      if (gate.node && gate.node.parentNode) gate.node.parentNode.removeChild(gate.node);
+      if (style.parentNode) style.parentNode.removeChild(style);
+      if (gate.timer) clearTimeout(gate.timer); if (gate.poll) clearTimeout(gate.poll);
+    }
+    function hasTraktRows() {
+      var active = window.Lampa && Lampa.Activity && Lampa.Activity.active && Lampa.Activity.active();
+      var comp = active && active.component === 'main' && active.activity && active.activity.component;
+      return !!(comp && Array.isArray(comp.items) && comp.items.some(function (item) {
+        var data = item && item.data;
+        return data && data.home_row_origin === 'trakt' && Array.isArray(data.results) && data.results.length > 0;
+      }));
+    }
+    function pollRows() {
+      if (gate.status !== 'waiting') return;
+      if (hasTraktRows() && gate.expected.every(function (name) { return !!gate.completed[name]; })) return release('ready', null);
+      if (now() >= gate.deadline) {
+        gate.status = 'error'; gate.reason = hasTraktRows() ? 'trakt-rows-incomplete' : 'no-trakt-rows';
+        state.traktHomeGate = { status: gate.status, reason: gate.reason };
+        update('Не вдалося завантажити категорії Trakt. Перевір авторизацію та мережу.', true); return;
+      }
+      gate.poll = setTimeout(pollRows, 150);
+    }
+    function tryBuild() {
+      if (!gate.requested || !gate.policyReady || !gate.rowsReady || gate.building || gate.status !== 'waiting') return;
+      var active = window.Lampa && Lampa.Activity && Lampa.Activity.active && Lampa.Activity.active();
+      if (active && active.component !== 'main') return release('bypassed', 'initial-route-not-home');
+      if (!active || !Lampa.Activity.replace) { gate.poll = setTimeout(tryBuild, 120); return; }
+      gate.building = true; gate.deadline = now() + 45000; state.traktHomeGate = { status: 'building', reason: null };
+      update('Завантажую категорії Trakt…');
+      try { Lampa.Activity.replace({ url: '', title: 'Main', component: 'main', source: active.source || 'tmdb', page: 1 }); }
+      catch (error) { gate.building = false; gate.reason = 'home-build-failed'; gate.status = 'error'; state.traktHomeGate = { status: gate.status, reason: gate.reason }; update('Не вдалося відкрити категорії Trakt.', true); return; }
+      gate.poll = setTimeout(pollRows, 150);
+    }
+    gate.homePolicyReady = function () {
+      gate.policyReady = true;
+      var active = window.Lampa && Lampa.Activity && Lampa.Activity.active && Lampa.Activity.active();
+      if (active && active.component !== 'main') return release('bypassed', 'initial-route-not-home');
+      if (active && active.component === 'main' && !gate.requested) { gate.requested = true; gate.deadline = now() + 45000; }
+      tryBuild();
+    };
+    gate.traktRowsReady = function (names) { gate.expected = Array.isArray(names) ? names.slice() : []; gate.rowsReady = gate.expected.length > 0; tryBuild(); };
+    gate.requestHomeBuild = function () {
+      if (gate.status === 'ready' || gate.status === 'bypassed') return;
+      gate.requested = true; gate.deadline = now() + 45000; tryBuild();
+    };
+    gate.homeRowComplete = function (name) { if (gate.expected.indexOf(name) >= 0) gate.completed[name] = true; };
+    gate.fail = function (reason) { gate.status = 'error'; gate.reason = reason || 'startup-dependency-failed'; state.traktHomeGate = { status: gate.status, reason: gate.reason }; update('Не вдалося завантажити категорії Trakt.', true); };
+    gate.timer = setTimeout(function () { if (gate.status === 'waiting' && !gate.building) gate.fail('startup-dependency-timeout'); }, 45000);
+    update('Завантажую категорії Trakt…');
+    window.LampaTraktHomeGate = gate;
+    return gate;
+  }
+
+  var traktHomeGate = installTraktHomeGate();
 
   function log(stage, index, result) {
     try { if (window.console && console.log) console.log('[lampa-loader] ' + stage + ' ' + index + ' ' + result); }

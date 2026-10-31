@@ -31,7 +31,7 @@ Browser used synthetic read-only Trakt responses and isolated in-memory fixture 
 
 ## Delivery and remaining manual checks
 
-Both sibling files must be published from main's root Pages source; home-history derives home-policy URL from its own script URL and preserves its query. No loader defaults or manifest activation changes are needed or made. Activate only home-history after the normal loader; do not register the helper separately. Update an existing optional URL with a fresh version query and restart Lampa to replace in-memory code. The main loader's old version tag can leave patched YDesign/Hybrid/Trakt producers cached; use its documented LAMPA_PLUGINS_VERSION override or refresh the application cache while preserving user data.
+Historical delivery note superseded by the built-in Home startup integration: the current `loader.js` loads Home Policy and Home History itself. Do not register Home History as a separate extension. Publish the updated loader and both source files together, then advance the loader version so existing WebViews do not retain stale assets; no app-data clearing is needed.
 
 Physical Google TV: verify Settings up/down/direct position/reset, arrows/OK/Back, scrolling and return from the actual player. Original account examples, external-player position reporting and live backend feeds remain unverified. Existing optional-plugin configurations beyond this focused pass are not certified. Do not close unrelated issues, enable optional plugins globally, delete unrelated branches, or merge PR29.
 

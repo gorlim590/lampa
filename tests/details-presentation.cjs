@@ -110,6 +110,16 @@ test('native Controller.move followed immediately by Controller.enter activates 
  frames.forEach(fn=>fn());frames.clear();assert.equal(link.last,right);assert.equal(focus,right);
 });
 
+test('Details entry focuses the complete section heading and Up returns directly to Torrent',()=>{
+ const heading=new Node('Опис і додаткова інформація','selector sh-details-zone-title'),extra=new Node('Додаткова інформація','selector sh-detail-toggle');heading.offsetParent={};extra.offsetParent={};heading.connected=true;extra.connected=true;
+ const scope={connected:true,contains:n=>n===heading||n===extra,querySelectorAll:()=>[heading,extra],querySelector:()=>null},record={detailsHostLine:scope,page:scope,detailsSecondaryHeading:heading,detailPanels:[]};
+ const targetContext={};vm.createContext(targetContext);const targetStart=source.indexOf('    function detailsZoneTarget('),targetEnd=source.indexOf('    function enterDetailsZone(',targetStart);vm.runInContext(source.slice(targetStart,targetEnd),targetContext);
+ assert.equal(targetContext.detailsZoneTarget(record,null),heading,'the first Down from Torrent lands on the unified Details heading');
+ let left=0,original=0,focus=heading;const controller={link:{},up(){original++;}},root={querySelector(){return null;}},page={querySelector:()=>focus};Object.assign(record,{root,page});
+ const navContext={leaveDetailsZone:(r,n)=>{assert.equal(r,record);assert.equal(n,heading);left++;return true;},Lampa:{Controller:{collectionSet(){},collectionFocus(){}}}};vm.createContext(navContext);const bindStart=source.indexOf('    function bindRatingNavigation('),bindEnd=source.indexOf('    function movieButtonFocus(',bindStart);vm.runInContext(source.slice(bindStart,bindEnd),navContext);navContext.bindRatingNavigation(record,controller);controller.up();
+ assert.equal(left,1,'Up from the section heading restores the Torrent focus target');assert.equal(original,0);
+});
+
 test('related Trakt lists move into Additional Information and restore to their native parent',()=>{
  const f=fixture(),record={page:f.page,root:f.root,descriptionToggle:f.anchor},networks=new Node('', 'tmdb-networks'),wrapper=new Node('', 'full-descr__tags networks-wrapper'),related=new Node("Пов'язані списки",'tag-count selector trakttv-lists');wrapper.appendChild(related);networks.querySelector=s=>s==='.networks-wrapper'?wrapper:null;f.page.querySelector=s=>s==='.full-descr__tags:not(.networks-wrapper)'?f.tagBlock:s==='.tmdb-networks'?networks:s==='.trakttv-lists'?related:s==='.ua-comments-root'?f.comments:null;
  f.context.setupDetailsPresentation(record,{genres:[]});const additional=record.detailPanels.find(x=>x.key==='additional');assert(additional);assert.equal(related.parentNode,additional.body);assert(additional.toggle.textContent==='Додаткова інформація');f.context.setupDetailsPresentation(record,{genres:[]});assert.equal(related.parentNode,additional.body,'repeat adaptation leaves the list in its disclosure');f.context.restoreDetailsPresentation(record);assert.equal(related.parentNode,wrapper);

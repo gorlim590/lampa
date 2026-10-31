@@ -27,7 +27,6 @@
 | 17 | Каталог — приховування контенту | <https://gorlim590.github.io/lampa/filters/hide-content.js> | Увімкнено | Фільтри та чорний список |
 | 18 | TMDb — обробка блокувань | <https://gorlim590.github.io/lampa/filters/anti-dmca.js> | Увімкнено | Обробка заблокованих відповідей TMDb |
 | 19 | Деталі — додаткові кнопки | <https://gorlim590.github.io/lampa/ui/buttons-plus.js> | Увімкнено | Додаткові кнопки Details |
-| 20 | Головна — історія та продовження | <https://gorlim590.github.io/lampa/plugins-to-enable/home-history.js> | Увімкнено | Continue Watching та History |
 | 21 | LParty | <https://nrsua.github.io/lampa-nrs/lparty.js> | Вимкнено | Опціональний LParty |
 | 22 | Vinyl | <https://lampame.github.io/main/music.js> | Вимкнено | Опціональний музичний плагін |
 
