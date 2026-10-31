@@ -1238,3 +1238,10 @@ Next publishupdatedPR50(mainmerge+marginfixonly),CI/merge;thenPR53retargettothat
 - Evidence: `audit/issue-125/google-tv/pause-suppression-live-acceptance.md`, `pause-suppression-events.jsonl`; previous session log remains `ted-lasso-live-events.jsonl`. Current JS SHA `9ed680d5355e8c51928f5ee2e601f3fa957059a286f9bd76f681f7320a981bf3`; parallel APK SHA `3fd009efdd0ef9777c59a7a11c29b056d9e5b6fab7dc0e070187696e1f29ecf3`.
 - Native raw delivery and JS history retry are bounded but not durable across process death; pending report recovery after process death remains untested. No durable retry guarantee is claimed.
 - Verdict: **pause suppression passes physical acceptance; Now Watching expiry timing/UI and reload/process-death recovery remain incomplete. NOT READY for owner acceptance as a complete fix.**
+
+## Issue #125 persistent recovery continuation — 2026-10-31
+
+- Added owner/profile-bound WebView session candidate recovery and bounded localStorage history outbox with preflight/read-back duplicate checks. Native SharedPreferences persists the active Just+ descriptor and raw reports before Activity delivery; ACK now requires an exact queued report ID.
+- Added regression for new-JS-instance 503 recovery, stable episode identity, mock unique event ID read-back, and duplicate callback suppression. Targeted suite currently 52 cases; rerun before commit.
+- Physical Google TV: killed only the parallel test app process during Just+ E07 at 454/1928 sec. Native snapshot survived with exact index 6/S01E07 mapping. Cold Siaivo page did not request Trakt JS, so bounded raw delivery ACKs were false. After the exact repository script was loaded through test-only asset override, JS restored the matching handoff and native ACK became true. No history write (23.55%, below 90%).
+- Current cold-page plugin auto-load and continuous Now Watching are still blockers. No production APK/data or Trakt history was changed. Full evidence: `audit/issue-125/google-tv/persistent-recovery-acceptance.md`.

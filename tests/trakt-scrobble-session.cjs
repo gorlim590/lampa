@@ -12,6 +12,7 @@ function fixture() {
   assert(start >= 0 && end > start, 'production scrobbler session block is present');
   const context = {
     Promise, Math, Number,
+    setTimeout: () => 1, clearTimeout: () => {},
     throttleState: { lastSendTime: 0, lastSentPercent: 0, currentMedia: null, timerId: null },
     getContentType$2: media => media.method === 'tv' || media.original_name ? 'show' : 'movie',
     shouldSendProgress: () => false,
@@ -145,13 +146,15 @@ function productionMethod(owner, name) {
   return source.slice(start, end + 6).slice(source.indexOf('function', start) - start);
 }
 
-function integrationFixture() {
+function integrationFixture(persistedLocalValues) {
   const f = fixture();
   f.context.shouldSendProgress = () => f.context.throttleState.lastSendTime === 0;
   let playerPlaylist = [];
   const values = { trakt_enable_watching: true, trakt_token: 'synthetic-token', trakt_min_progress: 90 };
   const player = Object.create(null), timelineHandlers = Object.create(null), globalListeners = Object.create(null), accountListeners = Object.create(null), storageListeners = [], documentListeners = Object.create(null);
-  let activityCard = null, activeVideo = null, playerOpened = false, currentCardReadCount = 0;
+  let activityCard = null, activeVideo = null, playerOpened = false, currentCardReadCount = 0, nativeDescriptor = null;
+  const localValues = persistedLocalValues || new Map(), nativeAcks = [], mockHistoryRows = [];
+  let mockHistoryEventId = 0;
   const on = map => (name, fn) => { (map[name] || (map[name] = [])).push(fn); };
   const remove = map => (name, fn) => { map[name] = (map[name] || []).filter(item => item !== fn); };
   const storage = {
@@ -174,8 +177,24 @@ function integrationFixture() {
   const markProgressEnd = source.indexOf('\n  }', markProgressStart) + 4;
   assert(markProgressStart >= 0 && markProgressEnd > markProgressStart, 'production Timeline timestamp helper exists');
   vm.runInContext(source.slice(markProgressStart, markProgressEnd), f.context);
+  const windowListeners = Object.create(null);
+  const window = {
+    Lampa, appready: true, localStorage: {
+      getItem: key => localValues.has(key) ? localValues.get(key) : null,
+      setItem: (key, value) => localValues.set(key, String(value)),
+      removeItem: key => localValues.delete(key)
+    },
+    addEventListener: on(windowListeners), removeEventListener: remove(windowListeners),
+    dispatchEvent: event => { (windowListeners[event.type] || []).slice().forEach(fn => fn(event)); return true; },
+    AndroidJS: {
+      issue125TokenFingerprint: token => 'fp:' + token,
+      issue125RecoveryState: () => nativeDescriptor ? JSON.stringify(nativeDescriptor) : '',
+      issue125AckRawReport: (session, id) => { nativeAcks.push({ session, id }); return true; },
+      issue125ReplayPendingReports: () => true
+    }
+  };
   Object.assign(f.context, {
-    Lampa, window: { Lampa, appready: true }, document: {
+    Lampa, window, CustomEvent: function CustomEvent(type, init) { this.type = type; this.detail = init && init.detail; }, document: {
       addEventListener: on(documentListeners), removeEventListener: remove(documentListeners)
     },
     config: { minProgress: 90 }, cloudInjectInProgress: false,
@@ -191,12 +210,23 @@ function integrationFixture() {
     resolveSeasonEpisode: () => ({}), loadSessionCache: () => {}, loadHashMetaCache: () => {},
     scrobbleQueue: { init: () => {}, clear: () => { f.context.queueClearCount = (f.context.queueClearCount || 0) + 1; } },
     slog: () => {}, issue125Diag: () => {}, logWarn: (...args) => { f.context.lastWarning = args; f.context.lastWarningMessage = String(args[1]); }, logDebugOnce: () => {},
-    getCompletionKey: () => 'synthetic-completion',
+    getCompletionKey: () => 'synthetic-completion', api$1: {
+      get: () => Promise.resolve(mockHistoryRows.slice()),
+      addToHistory: data => {
+        const ep = data.episodes && data.episodes[0] || {};
+        const media = { id: data.id, ids: data.ids || {}, method: 'tv', season_number: data.season_number, episode_number: ep.number, hash: data.hash };
+        return Promise.resolve(f.context.finish(media)).then(result => {
+          if (!result || result.ok !== true) throw Object.assign(new Error('mock history failure'), { status: result && result.status || 0 });
+          mockHistoryRows.push({ id: 'mock-event-' + (++mockHistoryEventId), watched_at: ep.watched_at, show: { ids: { tmdb: String(data.id), trakt: String(data.ids && data.ids.trakt || '') } }, episode: { season: data.season_number, number: ep.number } });
+          return { status: result.status || 200 };
+        });
+      }
+    }, refreshConfirmedShowProgress: () => {},
     markFinishIntent: () => { f.context.finishIntentCount = (f.context.finishIntentCount || 0) + 1; },
     finish: media => { f.context.finishCallCount = (f.context.finishCallCount || 0) + 1; (f.context.finishedMedia || (f.context.finishedMedia = [])).push({ ...media }); return Promise.resolve({ ok: true }); },
     documentListeners, storageListeners, playerHandlers: player, activityCard
   });
-  const instanceHelpersStart = source.indexOf('  function beginPlaybackInstance(');
+  const instanceHelpersStart = source.indexOf('  var JUSTPLUS_RECOVERY_KEY =');
   const instanceHelpersEnd = source.indexOf('\n\n  /**\n   * Модуль для відстеження перегляду', instanceHelpersStart);
   assert(instanceHelpersStart >= 0 && instanceHelpersEnd > instanceHelpersStart, 'production playback-instance helpers exist');
   vm.runInContext(source.slice(instanceHelpersStart, instanceHelpersEnd), f.context);
@@ -230,10 +260,10 @@ function integrationFixture() {
     playerOpened = true;
     (player.start || []).slice().forEach(fn => fn({ card: media, timeline: { hash, percent: 0 } }));
   };
-  return { ...f, values, player, playerEvent, storageChange, documentListeners, accountListeners, timeline, launch, video: () => activeVideo, watching, events, setPlaylist: list => { playerPlaylist = list; }, currentCardReadCount: () => currentCardReadCount };
+  return { ...f, values, player, playerEvent, storageChange, documentListeners, accountListeners, timeline, launch, video: () => activeVideo, watching, events, setPlaylist: list => { playerPlaylist = list; }, currentCardReadCount: () => currentCardReadCount, localValues, nativeAcks, setNativeDescriptor: value => { nativeDescriptor = value; } };
 }
 
-async function flush() { for (let i = 0; i < 12; i++) await Promise.resolve(); }
+async function flush() { for (let i = 0; i < 12; i++) await Promise.resolve(); await new Promise(resolve => setImmediate(resolve)); }
 
 test('production player launch does not START until Timeline advances; advancing Timeline starts once', async () => {
   const f = integrationFixture(), media = movie();
@@ -705,7 +735,7 @@ test('Just+ 90% interval writes custom-threshold history once and avoids default
   assert.equal(f.context.bindJustPlusSession(descriptor, report), true);
   const visit = { index: 0, hash: item.timeline.hash, season: 1, episode: 1, position_sec: 900, duration_sec: 1000, has_visit: true };
   const event = endBy => ({ detail: { version: 2, session_id: descriptor.session_id, card_id: descriptor.card_id, end_by: endBy, current_index: 0, items: [visit] } });
-  assert.equal(f.context.handleJustPlusRawReportEvent(event('interval'), report), false, 'eligible history waits for the finish confirmation');
+  assert.equal(f.context.handleJustPlusRawReportEvent(event('interval'), report), true, 'eligible snapshot ACKs after durable outbox commit, before API confirmation');
   await flush();
   assert.equal(f.context.finishCallCount, 1);
   assert.equal(report.indexedEntries['0'].completionState, 'confirmed');
@@ -745,7 +775,7 @@ test('Google TV season pack preserves native indexes with unnumbered special slo
   const e01 = { version: 2, session_id: descriptor.session_id, card_id: '97546', end_by: 'user', items: [
     { index: 2, hash: 's1e1', season: 1, episode: 1, position_sec: 1686, duration_sec: 1856, has_visit: true }
   ] };
-  assert.equal(f.context.handleJustPlusRawReportEvent({ detail: e01 }, report), false, 'eligible E01 waits for mock API confirmation');
+  assert.equal(f.context.handleJustPlusRawReportEvent({ detail: e01 }, report), true, 'eligible E01 is acknowledged only after durable queueing');
   await flush();
   assert.deepEqual(f.context.finishedMedia.map(item => [item.season_number, item.episode_number, item.hash]), [[1, 1, 's1e1']]);
   assert.equal(f.context.handleJustPlusRawReportEvent({ detail: e01 }, report), true);
@@ -780,21 +810,27 @@ test('Google TV empty-PlayerPlaylist race keeps 90.8/94.7 visits through 503 ret
     { index: 1, hash: 'e02', season: 1, episode: 2, position_sec: 1667, duration_sec: 1760, has_visit: true },
     { index: 2, hash: 'e03', season: 1, episode: 3, position_sec: 153, duration_sec: 1824, has_visit: true }
   ] };
-  assert.equal(f.context.handleJustPlusRawReportEvent({ detail: payload }, report), false, 'eligible episodes remain unacknowledged while history is pending');
+  assert.equal(f.context.handleJustPlusRawReportEvent({ detail: payload }, report), true, 'native ACK follows durable persistence, independently of Trakt API');
   await flush();
-  assert.equal(report.indexedEntries['0'].completionState, 'retryable', 'mock 503 stays retryable');
+  assert.equal(report.indexedEntries['0'].completionState, 'durable_pending', 'mock 503 remains durably queued');
   assert.equal(report.indexedEntries['1'].completionState, 'confirmed', 'E02 confirms independently');
   assert.equal(attempts[3], 0, 'below-threshold E03 never calls the writer');
-  assert.equal(f.context.handleJustPlusRawReportEvent({ detail: payload }, report), false, 'E01 retry must confirm before ACK');
+  const outbox = f.context.justPlusOutboxState();
+  outbox.pending.find(item => item.episode === 1).next_retry_at = 0;
+  f.context.saveJustPlusOutbox(outbox);
+  assert.equal(f.context.handleJustPlusRawReportEvent({ detail: payload }, report), true, 'duplicate callback ACKs from the durable pending entry');
+  f.context.drainJustPlusHistoryOutbox();
   await flush();
   assert.equal(report.indexedEntries['0'].completionState, 'confirmed');
   assert.equal(f.context.handleJustPlusRawReportEvent({ detail: payload }, report), true, 'next duplicate snapshot may ACK all confirmed/below-threshold entries');
   assert.equal(payload.__lampa_trakt_ack, true);
   assert.deepEqual(attempts, { 1: 2, 2: 1, 3: 0 });
   assert.deepEqual(f.context.finishedMedia.map(item => item.episode_number), [1, 2, 1]);
+  const receipt = f.context.justPlusOutboxState().receipts.find(item => item.id.endsWith(':97546:1:1'));
+  assert.deepEqual(Array.from(receipt.event_ids), ['mock-event-2'], 'the confirmed receipt stores the exact read-back event ID after retry');
 });
 
-test('WebView reload without a reconstructed external handoff rejects the old raw snapshot without ACK or writes', () => {
+test('WebView reload restores the exact owner-bound descriptor and accepts a durable raw snapshot', () => {
   const f = integrationFixture();
   const show = { id: 97546, tmdb_id: 97546, method: 'tv', type: 'tv', name: 'Ted Lasso', number_of_seasons: 4 };
   const playlist = [{ season: 1, episode: 1, timeline: { hash: 'reload-e01', time: 0, duration: 1856 } }];
@@ -803,17 +839,110 @@ test('WebView reload without a reconstructed external handoff rejects the old ra
   const oldReport = f.context.externalPlaylistReport;
   const descriptor = { version: 2, session_id: 'reload-session-before-webview-reload', card_id: '97546', items: [{ index: 0, hash: 'reload-e01', season: 1, episode: 1 }] };
   assert.equal(f.context.bindJustPlusSession(descriptor, oldReport), true);
+  f.context.persistJustPlusRecoveryCandidate(oldReport, show, 'reload-e01', playlist);
+  const candidate = JSON.parse(f.localValues.get('trakt_justplus_recovery_v1'));
+  candidate.session_id = descriptor.session_id;
+  f.localValues.set('trakt_justplus_recovery_v1', JSON.stringify(candidate));
+  descriptor.created_at_ms = Date.now();
+  f.setNativeDescriptor(descriptor);
   const raw = { version: 2, session_id: descriptor.session_id, card_id: '97546', end_by: 'interval', items: [
-    { index: 0, hash: 'reload-e01', season: 1, episode: 1, position_sec: 1686, duration_sec: 1856, has_visit: true }
+    { index: 0, hash: 'reload-e01', season: 1, episode: 1, position_sec: 400, duration_sec: 1856, has_visit: true }
   ] };
 
-  // A normal page reload creates a new JS realm; its volatile handoff is empty.
-  // The native retry must fail closed instead of attributing this old callback.
+  // Emulate a new JS realm: localStorage and Android SharedPreferences survive,
+  // but the module's in-memory report is gone.
   f.context.externalPlaylistReport = null;
-  assert.equal(f.context.handleJustPlusRawReportEvent({ detail: raw }, null), false);
-  assert.equal(raw.__lampa_trakt_ack, undefined, 'invalid ownership is not acknowledged as delivered');
-  assert.equal(f.context.finishCallCount || 0, 0, 'stale report cannot write history after reload');
-  assert.deepEqual(f.calls, [], 'stale report cannot start or mutate live scrobbling');
+  const recovered = f.context.restoreJustPlusReport(JSON.parse(f.localValues.get('trakt_justplus_recovery_v1')), descriptor);
+  assert.ok(recovered, 'exact session handoff is reconstructed from persistent candidate and native descriptor');
+  assert.equal(recovered.nativeSessionId, descriptor.session_id);
+  assert.equal(f.context.handleJustPlusRawReportEvent({ detail: raw }, recovered), true, 'below-threshold raw snapshot is handled and ACKable after reload');
+  assert.equal(raw.__lampa_trakt_ack, true);
+  assert.equal(f.context.finishCallCount || 0, 0, 'reload recovery below threshold creates no Trakt history write');
+  assert.deepEqual(f.calls, [], 'recovery does not fabricate live scrobbling without an interval confirmation');
+});
+
+test('persistent Just+ recovery rejects changed profile, changed Trakt owner, and stale native session', () => {
+  const f = integrationFixture();
+  const show = { id: 97546, tmdb_id: 97546, method: 'tv', type: 'tv', name: 'Ted Lasso' };
+  const playlist = [{ season: 1, episode: 6, timeline: { hash: 'recovery-owner-e06', time: 0, duration: 1903 } }];
+  f.context.Lampa.Account.Permit = { account: { profile: { id: 'profile-a' } } };
+  f.setPlaylist([]);
+  f.playerEvent('external', { card: show, timeline: { hash: 'recovery-owner-e06' }, playlist });
+  const report = f.context.externalPlaylistReport;
+  f.context.persistJustPlusRecoveryCandidate(report, show, 'recovery-owner-e06', playlist);
+  const candidate = JSON.parse(f.localValues.get('trakt_justplus_recovery_v1'));
+  const descriptor = { version: 2, session_id: 'recovery-session-a', card_id: '97546', created_at_ms: candidate.created_at_ms + 1000, items: [{ index: 0, hash: 'recovery-owner-e06', season: 1, episode: 6 }] };
+
+  f.context.Lampa.Account.Permit.account.profile.id = 'profile-b';
+  assert.equal(f.context.restoreJustPlusReport(candidate, descriptor), null, 'same token under another profile cannot claim old snapshots');
+  f.context.Lampa.Account.Permit.account.profile.id = 'profile-a';
+  f.context.Lampa.Storage.set('trakt_token', 'different-owner-token');
+  assert.equal(f.context.restoreJustPlusReport(candidate, descriptor), null, 'old owner fingerprint cannot replay under a changed Trakt account');
+  f.context.Lampa.Storage.set('trakt_token', 'synthetic-token');
+  descriptor.session_id = 'different-native-session';
+  descriptor.created_at_ms = candidate.created_at_ms + 1000;
+  candidate.session_id = 'recovery-session-a';
+  assert.equal(f.context.restoreJustPlusReport(candidate, descriptor), null, 'a stale native UUID cannot bind to the retained descriptor');
+  assert.equal(f.context.finishCallCount || 0, 0);
+});
+
+test('process-reloaded JS drains a durable 503 history item once and records its unique read-back event ID', async () => {
+  const first = integrationFixture();
+  const show = { id: 97546, tmdb_id: 97546, method: 'tv', type: 'tv', name: 'Ted Lasso' };
+  const playlist = [{ season: 1, episode: 6, timeline: { hash: 'durable-reload-e06', time: 0, duration: 1903 } }];
+  first.context.Lampa.Account.Permit = { account: { profile: { id: 'profile-a' } } };
+  const firstWriter = first.context.api$1.addToHistory;
+  first.context.api$1.addToHistory = (data => {
+    let attempts = 0;
+    return request => ++attempts === 1 ? Promise.reject(Object.assign(new Error('mock 503'), { status: 503 })) : data(request);
+  })(firstWriter);
+  first.setPlaylist([]);
+  first.playerEvent('external', { card: show, timeline: { hash: 'durable-reload-e06' }, playlist });
+  const report = first.context.externalPlaylistReport;
+  first.context.persistJustPlusRecoveryCandidate(report, show, 'durable-reload-e06', playlist);
+  const candidate = JSON.parse(first.localValues.get('trakt_justplus_recovery_v1'));
+  const descriptor = {
+    version: 2, session_id: 'durable-restart-session', card_id: '97546',
+    created_at_ms: candidate.created_at_ms,
+    items: [{ index: 0, hash: 'durable-reload-e06', season: 1, episode: 6 }]
+  };
+  assert.equal(first.context.bindJustPlusSession(descriptor, report), true);
+  const raw = { version: 2, session_id: descriptor.session_id, report_id: 'report-before-restart', card_id: '97546', end_by: 'interval', items: [
+    { index: 0, hash: 'durable-reload-e06', season: 1, episode: 6, position_sec: 1724, duration_sec: 1903, has_visit: true }
+  ] };
+  assert.equal(first.context.handleJustPlusRawReportEvent({ detail: raw }, report), true, 'native delivery can ACK after durable local outbox commit');
+  await flush();
+  const pendingBeforeRestart = JSON.parse(first.localValues.get('trakt_justplus_history_outbox_v1'));
+  assert.equal(pendingBeforeRestart.pending.length, 1);
+  assert.equal(pendingBeforeRestart.pending[0].last_status, 503);
+  assert.equal(pendingBeforeRestart.pending[0].episode, 6);
+
+  // A new module instance shares only browser localStorage and Android's
+  // persisted descriptor, matching a WebView reload or process recreation.
+  const restarted = integrationFixture(first.localValues);
+  restarted.context.Lampa.Account.Permit = { account: { profile: { id: 'profile-a' } } };
+  restarted.setNativeDescriptor(descriptor);
+  const recoveryDiagnostics = [];
+  restarted.context.issue125Diag = (code, data) => recoveryDiagnostics.push({ code, data });
+  const recoveredCandidate = JSON.parse(restarted.localValues.get('trakt_justplus_recovery_v1'));
+  assert.equal(recoveredCandidate.session_id, descriptor.session_id);
+  assert.equal(restarted.context.justPlusIdentityItemsMatch(recoveredCandidate.items, descriptor.items), true);
+  const recovered = restarted.context.restoreJustPlusReport(recoveredCandidate, descriptor);
+  assert.ok(recovered, JSON.stringify(recoveryDiagnostics));
+  const outbox = restarted.context.justPlusOutboxState();
+  outbox.pending[0].next_retry_at = 0;
+  restarted.context.saveJustPlusOutbox(outbox);
+  restarted.context.drainJustPlusHistoryOutbox();
+  await flush();
+  const receipt = restarted.context.justPlusOutboxState().receipts.find(item => item.id.endsWith(':97546:1:6'));
+  assert.ok(receipt, 'successful retry moves the same stable item identity to receipts');
+  assert.deepEqual(Array.from(receipt.event_ids), ['mock-event-1']);
+  assert.equal(restarted.context.finishedMedia.length, 1);
+  assert.equal(restarted.context.finishedMedia[0].episode_number, 6);
+
+  assert.equal(restarted.context.handleJustPlusRawReportEvent({ detail: raw }, recovered), true, 'duplicate snapshot is ACKed from the durable receipt');
+  await flush();
+  assert.equal(restarted.context.finishedMedia.length, 1, 'duplicate callback does not issue a second history POST');
 });
 
 test('Android changed-only Timeline bridge can suppress a retry after an exhausted Trakt history write', async () => {

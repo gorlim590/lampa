@@ -1,8 +1,16 @@
 diff --git a/app/build.gradle b/app/build.gradle
-index 6652bc0..3683173 100644
+index 6652bc0..213b8cf 100644
 --- a/app/build.gradle
 +++ b/app/build.gradle
-@@ -97,6 +97,10 @@ android {
+@@ -5,6 +5,7 @@ plugins {
+ }
+ 
+ def getVersionCode = { ->
++    if (project.hasProperty('issue125VersionCode')) return Integer.parseInt(project.property('issue125VersionCode').toString())
+     try {
+         def code = new ByteArrayOutputStream()
+         exec {
+@@ -97,6 +98,10 @@ android {
      }
  
      buildTypes {
@@ -13,32 +21,143 @@ index 6652bc0..3683173 100644
          release {
              signingConfig signingConfigs.release
              minifyEnabled false
+diff --git a/app/src/debug/res/values/strings.xml b/app/src/debug/res/values/strings.xml
+new file mode 100644
+index 0000000..be01786
+--- /dev/null
++++ b/app/src/debug/res/values/strings.xml
+@@ -0,0 +1 @@
++<resources><string name="app_name" translatable="false">Lampa Trakt Test</string></resources>
+diff --git a/app/src/main/java/top/rootu/lampa/AndroidJS.kt b/app/src/main/java/top/rootu/lampa/AndroidJS.kt
+index ceb1856..d9f1768 100644
+--- a/app/src/main/java/top/rootu/lampa/AndroidJS.kt
++++ b/app/src/main/java/top/rootu/lampa/AndroidJS.kt
+@@ -41,6 +41,7 @@ import top.rootu.lampa.net.Http
+ import top.rootu.lampa.recs.RecsService
+ import top.rootu.lampa.tmdb.TMDB
+ import kotlin.system.exitProcess
++import java.security.MessageDigest
+ 
+ class AndroidJS(private val mainActivity: MainActivity, private val browser: Browser) {
+ 
+@@ -207,6 +208,32 @@ class AndroidJS(private val mainActivity: MainActivity, private val browser: Bro
+         return BuildConfig.VERSION_NAME + "-" + BuildConfig.VERSION_CODE
+     }
+ 
++    @JavascriptInterface
++    @org.xwalk.core.JavascriptInterface
++    fun issue125TokenFingerprint(token: String): String {
++        if (token.length > 4096) return ""
++        val bytes = MessageDigest.getInstance("SHA-256").digest(token.toByteArray(Charsets.UTF_8))
++        return bytes.joinToString("") { "%02x".format(it) }
++    }
++
++    @JavascriptInterface
++    @org.xwalk.core.JavascriptInterface
++    fun issue125RecoveryState(): String = MainActivity.justPlusRecoveryState()
++
++    @JavascriptInterface
++    @org.xwalk.core.JavascriptInterface
++    fun issue125AckRawReport(sessionId: String, reportId: String): Boolean =
++        MainActivity.acknowledgeJustPlusReport(sessionId, reportId)
++
++    @JavascriptInterface
++    @org.xwalk.core.JavascriptInterface
++    fun issue125ReplayPendingReports(): Boolean = MainActivity.replayPendingJustPlusReports()
++
++    @JavascriptInterface
++    @org.xwalk.core.JavascriptInterface
++    fun issue125MockTransportEnabled(): Boolean =
++        BuildConfig.DEBUG && mainActivity.packageName == "top.rootu.lampa.issue125probe"
++
+     @JavascriptInterface
+     @org.xwalk.core.JavascriptInterface
+     fun exit() {
 diff --git a/app/src/main/java/top/rootu/lampa/MainActivity.kt b/app/src/main/java/top/rootu/lampa/MainActivity.kt
-index 861c78f..aa050b9 100644
+index 861c78f..8ad3611 100644
 --- a/app/src/main/java/top/rootu/lampa/MainActivity.kt
 +++ b/app/src/main/java/top/rootu/lampa/MainActivity.kt
-@@ -277,6 +277,7 @@ class MainActivity : BaseActivity(),
+@@ -86,6 +86,7 @@ import top.rootu.lampa.helpers.Backup.loadFromBackup
+ import top.rootu.lampa.helpers.Backup.backupSettings
+ import top.rootu.lampa.helpers.Backup.validateStorageBackup
+ import top.rootu.lampa.helpers.Helpers
++import top.rootu.lampa.helpers.Prefs.storagePrefs
+ import top.rootu.lampa.helpers.Helpers.debugLogIntentData
+ import top.rootu.lampa.helpers.Helpers.dp2px
+ import top.rootu.lampa.helpers.Helpers.getJson
+@@ -277,6 +278,9 @@ class MainActivity : BaseActivity(),
          // Just+ Player report callback extras: the launch's activity and card
          private const val REPORT_ACTIVITY_EXTRA = "lampa_activity"
          private const val REPORT_CARD_EXTRA = "lampa_card"
 +        private const val REPORT_SESSION_EXTRA = "lampa_justplus_session"
++        private const val JP_STORE_DESCRIPTOR = "issue125.jp.descriptor.v1"
++        private const val JP_STORE_REPORTS = "issue125.jp.reports.v1"
          private var instance: java.lang.ref.WeakReference<MainActivity>? = null
  
          /**
-@@ -285,7 +286,11 @@ class MainActivity : BaseActivity(),
+@@ -285,7 +289,60 @@ class MainActivity : BaseActivity(),
           * brought in meanwhile.
           */
          fun onPlayerReport(intent: Intent) {
 -            instance?.get()?.takeIf { !it.isFinishing }?.takeJustPlusReport(justPlusReport(intent))
++            val report = justPlusReport(intent)
++            val session = report.optString("session_id")
++            val prefs = App.context.storagePrefs
++            val descriptor = prefs.getString(JP_STORE_DESCRIPTOR, null)?.let { runCatching { JSONObject(it) }.getOrNull() }
++            if (session.isEmpty() || descriptor?.optString("session_id") != session) return
++            val reports = runCatching { JSONArray(prefs.getString(JP_STORE_REPORTS, "[]")) }.getOrDefault(JSONArray())
++            if (reports.length() >= 64) return
++            reports.put(report)
++            val serialized = reports.toString()
++            if (serialized.length > 2 * 1024 * 1024) return
++            if (!prefs.edit().putString(JP_STORE_REPORTS, serialized).commit()) return
 +            instance?.get()?.takeIf { !it.isFinishing }?.let { activity ->
-+                val report = justPlusReport(intent)
-+                activity.traceIssue125("receiver", report)
++                activity.traceIssue125("receiver_persisted", report)
 +                activity.takeJustPlusReport(report)
 +            }
++        }
++
++        fun justPlusRecoveryState(): String {
++            val prefs = App.context.storagePrefs
++            val descriptor = prefs.getString(JP_STORE_DESCRIPTOR, null) ?: return ""
++            val result = runCatching { JSONObject(descriptor) }.getOrNull() ?: return ""
++            val created = result.optLong("created_at_ms", 0L)
++            if (created <= 0L || System.currentTimeMillis() - created > 7L * 24 * 60 * 60 * 1000) return ""
++            return result.toString()
++        }
++
++        fun acknowledgeJustPlusReport(sessionId: String, reportId: String): Boolean {
++            val prefs = App.context.storagePrefs
++            val descriptor = prefs.getString(JP_STORE_DESCRIPTOR, null)?.let { runCatching { JSONObject(it) }.getOrNull() } ?: return false
++            if (descriptor.optString("session_id") != sessionId || reportId.isBlank()) return false
++            val reports = runCatching { JSONArray(prefs.getString(JP_STORE_REPORTS, "[]")) }.getOrDefault(JSONArray())
++            val kept = JSONArray()
++            var found = false
++            for (i in 0 until reports.length()) {
++                val item = reports.optJSONObject(i) ?: continue
++                if (item.optString("report_id") == reportId) found = true else kept.put(item)
++            }
++            // A duplicate or forged ACK must not report success when the
++            // durable queue did not contain this exact session/report pair.
++            return found && prefs.edit().putString(JP_STORE_REPORTS, kept.toString()).commit()
++        }
++
++        fun persistJustPlusDescriptor(descriptor: JSONObject) {
++            if (descriptor.optInt("version") != 2 || descriptor.optString("session_id").length !in 1..64) return
++            App.context.storagePrefs.edit().putString(JP_STORE_DESCRIPTOR, descriptor.toString()).putString(JP_STORE_REPORTS, "[]").commit()
++        }
++
++        fun replayPendingJustPlusReports(): Boolean {
++            val activity = instance?.get()?.takeIf { !it.isFinishing } ?: return false
++            val reports = runCatching { JSONArray(App.context.storagePrefs.getString(JP_STORE_REPORTS, "[]")) }.getOrDefault(JSONArray())
++            activity.runOnUiThread {
++                for (i in 0 until reports.length()) reports.optJSONObject(i)?.let(activity::takeJustPlusReport)
++            }
++            return true
          }
  
          /** com.justplus.player.result as JSON: everything handleJustPlusReport needs, nothing else. */
-@@ -293,17 +298,29 @@ class MainActivity : BaseActivity(),
+@@ -293,25 +350,39 @@ class MainActivity : BaseActivity(),
              val positions = intent.getIntArrayExtra("positions_sec") ?: IntArray(0)
              // Durations come per visit in history; the last known one of each item wins.
              val durations = IntArray(positions.size) { -1 }
@@ -68,8 +187,10 @@ index 861c78f..aa050b9 100644
 +                put("session_id", intent.getStringExtra(REPORT_SESSION_EXTRA))
                  put("key", intent.getStringExtra(REPORT_ACTIVITY_EXTRA) ?: lampaActivity)
                  put("card", intent.getStringExtra(REPORT_CARD_EXTRA))
-                 put("uri", intent.getStringExtra("uri") ?: intent.dataString)
-@@ -312,6 +329,8 @@ class MainActivity : BaseActivity(),
+-                put("uri", intent.getStringExtra("uri") ?: intent.dataString)
++                put("report_id", java.util.UUID.randomUUID().toString())
+                 put("index", index)
+                 put("end_by", intent.getStringExtra("end_by"))
                  put("error", intent.getStringExtra("error_message"))
                  put("positions", JSONArray(positions.toList()))
                  put("durations", JSONArray(durations.toList()))
@@ -78,12 +199,24 @@ index 861c78f..aa050b9 100644
              }
          }
      }
-@@ -331,7 +350,12 @@ class MainActivity : BaseActivity(),
+@@ -331,7 +402,24 @@ class MainActivity : BaseActivity(),
  
      override fun onCreate(savedInstanceState: Bundle?) {
          super.onCreate(savedInstanceState)
 -        LAMPA_URL = appUrl
 +        LAMPA_URL = if (BuildConfig.DEBUG) intent.getStringExtra("issue125_probe_url") ?: savedInstanceState?.getString("issue125_probe_url") ?: appUrl else appUrl
++        App.context.storagePrefs.getString("issue125.jp.descriptor.v1", null)?.let { saved ->
++            runCatching { JSONObject(saved) }.getOrNull()?.let { descriptor ->
++                justPlusNativeSessionId = descriptor.optString("session_id").takeIf { it.isNotEmpty() }
++                justPlusSessionDescriptor = descriptor
++            }
++        }
++        runCatching { JSONArray(App.context.storagePrefs.getString("issue125.jp.reports.v1", "[]")) }
++            .getOrDefault(JSONArray()).let { reports ->
++                for (i in 0 until reports.length()) reports.optJSONObject(i)?.let { report ->
++                    keptReports[report.optString("key") + report.optString("card") + report.optString("report_id")] = report
++                }
++            }
 +        savedInstanceState?.getString("issue125_native_session")?.let { justPlusNativeSessionId = it }
 +        savedInstanceState?.getString("issue125_descriptor")?.let { justPlusSessionDescriptor = JSONObject(it) }
 +        savedInstanceState?.getString("issue125_pending_raw")?.let { js ->
@@ -92,7 +225,7 @@ index 861c78f..aa050b9 100644
          SELECTED_PLAYER = appPlayer
          keepPlayerConnection = playerKeepConnection
  		useKodiPlaylist = kodiPlaylistEnabled
-@@ -342,6 +366,9 @@ class MainActivity : BaseActivity(),
+@@ -342,6 +430,9 @@ class MainActivity : BaseActivity(),
              purgeOldStates()
          }
          instance = java.lang.ref.WeakReference(this)
@@ -102,7 +235,7 @@ index 861c78f..aa050b9 100644
  
          setupActivity()
          setupBrowser()
-@@ -356,6 +383,14 @@ class MainActivity : BaseActivity(),
+@@ -356,6 +447,14 @@ class MainActivity : BaseActivity(),
          }
      }
  
@@ -117,7 +250,7 @@ index 861c78f..aa050b9 100644
      override fun onNewIntent(intent: Intent) {
          super.onNewIntent(intent)
          setIntent(intent) // getIntent() should always return the most recent
-@@ -375,6 +410,7 @@ class MainActivity : BaseActivity(),
+@@ -375,6 +474,7 @@ class MainActivity : BaseActivity(),
          logDebug("onResume() browserInitComplete $browserInitComplete")
          if (browserInitComplete)
              browser?.resumeTimers()
@@ -125,7 +258,7 @@ index 861c78f..aa050b9 100644
          logDebug("onResume() isSafeForUse ${browser.isSafeForUse()}")
          if (browser.isSafeForUse()) {
              lifecycleScope.launch {
-@@ -488,6 +524,7 @@ class MainActivity : BaseActivity(),
+@@ -488,6 +588,7 @@ class MainActivity : BaseActivity(),
          }
          // Switch Loader (Note it control delayedVoidJsFunc)
          loaderView.visibility = View.GONE
@@ -133,11 +266,11 @@ index 861c78f..aa050b9 100644
  
          Log.d(TAG, "LAMPA onLoadFinished $url")
  
-@@ -760,15 +797,34 @@ class MainActivity : BaseActivity(),
+@@ -760,15 +861,40 @@ class MainActivity : BaseActivity(),
      private val keptReports = LinkedHashMap<String, JSONObject>()
  
      // Applied in the foreground, so sync plugins send from a visible page; interval reports at once
-+    private fun traceIssue125(stage: String, report: JSONObject? = null) {
++    private fun traceIssue125(stage: String, report: JSONObject? = null, details: JSONObject? = null) {
 +        if (!BuildConfig.DEBUG || !packageName.endsWith(".issue125probe")) return
 +        Log.i("Issue125Bridge", JSONObject().apply {
 +            put("stage", stage); put("wall_ms", System.currentTimeMillis())
@@ -146,6 +279,7 @@ index 861c78f..aa050b9 100644
 +                put("session", report.optString("session_id")); put("end_by", report.optString("end_by"))
 +                put("positions", report.optJSONArray("positions")); put("durations", report.optJSONArray("durations"))
 +            }
++            details?.keys()?.forEach { key -> put(key, details.opt(key)) }
 +        }.toString())
 +    }
 +
@@ -160,7 +294,12 @@ index 861c78f..aa050b9 100644
  
      // Just+ Player report: a position per item, -1 = never opened. The state stays: reports come mid-session
      fun handleJustPlusReport(report: JSONObject) {
-+        traceIssue125("handle", report)
++        traceIssue125("handle", report, JSONObject().apply {
++            put("position_count", report.optJSONArray("positions")?.length() ?: 0)
++            put("visit_count", report.optJSONArray("measured_visits")?.length() ?: 0)
++            put("card_id_match", report.optString("card") == (justPlusSessionDescriptor?.optString("card_id") ?: ""))
++            put("descriptor_count", justPlusSessionDescriptor?.optJSONArray("items")?.length() ?: 0)
++        })
 +        val nativeSession = report.optString("session_id")
 +        if (nativeSession.isNotEmpty() && nativeSession != justPlusNativeSessionId) {
 +            traceIssue125("stale-native-session", report)
@@ -169,7 +308,7 @@ index 861c78f..aa050b9 100644
          val endBy = report.optString("end_by")
          if (endBy != "completion" && endBy != "user" && endBy != "interval") {
              when (endBy) {
-@@ -797,6 +853,9 @@ class MainActivity : BaseActivity(),
+@@ -797,6 +923,9 @@ class MainActivity : BaseActivity(),
                  logDebug("Player report does not fit the playlist [${positions.length()} / ${playlist.size}]")
                  return@launch
              }
@@ -179,7 +318,16 @@ index 861c78f..aa050b9 100644
              for (i in playlist.indices) {
                  val pos = positions.optInt(i, -1)
                  val dur = durations.optInt(i, -1)
-@@ -841,6 +900,83 @@ class MainActivity : BaseActivity(),
+@@ -822,7 +951,7 @@ class MainActivity : BaseActivity(),
+                 activityJson = key,
+                 playlist = playlist,
+                 currentIndex = index,
+-                currentUrl = report.optString("uri").takeIf { it.isNotEmpty() } ?: playlist[index].url,
++                currentUrl = playlist[index].url,
+                 currentPosition = positions.optInt(index, 0).coerceAtLeast(0) * 1000L,
+                 startIndex = state.startIndex,
+                 extras = state.extras
+@@ -841,6 +970,93 @@ class MainActivity : BaseActivity(),
          }
      }
  
@@ -191,8 +339,7 @@ index 861c78f..aa050b9 100644
 +    private var rawDeliveryBusy = false
 +
 +    // One coalesced full snapshot for the active launch; six bounded attempts.
-+    // JS ACK follows validation and confirmation of any eligible Trakt write;
-+    // a valid below-threshold or disabled-sync snapshot is consumed without a write.
++    // JavaScript acknowledges only a matching live account/profile/handoff.
 +    private fun deliverPendingJustPlusRaw(resetBudget: Boolean = false) {
 +        val pending = pendingRawDelivery ?: return
 +        if (pending.session != justPlusNativeSessionId) { pendingRawDelivery = null; return }
@@ -222,9 +369,11 @@ index 861c78f..aa050b9 100644
 +        card: LampaCard?
 +    ) {
 +        val sessionId = report.optString("session_id")
-+        if (sessionId.isEmpty() || sessionId != justPlusNativeSessionId) return
-+        val descriptor = justPlusSessionDescriptor ?: return
-+        val visits = report.optJSONArray("measured_visits") ?: return
++        if (sessionId.isEmpty() || sessionId != justPlusNativeSessionId) {
++            traceIssue125("raw-reject", report, JSONObject().put("reason", "native_session_mismatch")); return
++        }
++        val descriptor = justPlusSessionDescriptor ?: run { traceIssue125("raw-reject", report, JSONObject().put("reason", "descriptor_missing")); return }
++        val visits = report.optJSONArray("measured_visits") ?: run { traceIssue125("raw-reject", report, JSONObject().put("reason", "visits_missing")); return }
 +        val items = JSONArray()
 +        // Every actual visit matters: restarting A can reset positions[A] to zero
 +        // after an earlier eligible visit. Never derive maximum progress from the latest position.
@@ -236,6 +385,13 @@ index 861c78f..aa050b9 100644
 +            val position = visit.optInt("position_sec", -1)
 +            val duration = visit.optInt("duration_sec", -1)
 +            if (position < 0 || duration <= 0) continue
++            val identity = descriptor.optJSONArray("items")?.let { list -> (0 until list.length()).mapNotNull { list.optJSONObject(it) }.firstOrNull { it.optInt("index", -1) == index } }
++            traceIssue125("raw-item-map", report, JSONObject().apply {
++                put("index", index); put("hash_match", identity?.optString("hash") == hash)
++                put("season_match", identity?.optInt("season", -1) == item.season)
++                put("episode_match", identity?.optInt("episode", -1) == item.episode)
++                put("has_season_episode", item.season != null && item.episode != null)
++            })
 +            items.put(JSONObject().apply {
 +                put("index", index); put("hash", hash)
 +                put("season", item.season ?: JSONObject.NULL)
@@ -244,10 +400,11 @@ index 861c78f..aa050b9 100644
 +                put("has_visit", true)
 +            })
 +        }
-+        if (items.length() == 0) return
++        if (items.length() == 0) { traceIssue125("raw-reject", report, JSONObject().put("reason", "no_mappable_visits")); return }
 +        val payload = JSONObject().apply {
 +            put("version", 2)
 +            put("session_id", sessionId)
++            put("report_id", report.optString("report_id"))
 +            put("card_id", card?.tmdb_id?.takeIf { it.isNotEmpty() } ?: card?.id)
 +            put("end_by", report.optString("end_by"))
 +            put("current_index", report.optInt("index", -1))
@@ -256,7 +413,7 @@ index 861c78f..aa050b9 100644
 +        val descriptorQuoted = JSONObject.quote(descriptor.toString())
 +        val quoted = JSONObject.quote(payload.toString())
 +        val js = "(function(){try{var d=JSON.parse($descriptorQuoted),p=JSON.parse($quoted);if(window.dispatchEvent&&window.CustomEvent){window.dispatchEvent(new CustomEvent('lampa:justplus-session',{detail:d}));window.dispatchEvent(new CustomEvent('lampa:justplus-raw-report',{detail:p}));return p.__lampa_trakt_ack===true;}}catch(e){}})();"
-+        traceIssue125("raw-queued", report)
++        traceIssue125("raw-queued", report, JSONObject().apply { put("item_count", items.length()); put("card_id_match", payload.optString("card_id") == descriptor.optString("card_id")) })
 +        pendingRawDelivery = RawDelivery(sessionId, js)
 +        deliverPendingJustPlusRaw()
 +    }
@@ -264,7 +421,7 @@ index 861c78f..aa050b9 100644
      /**
       * The "viewed" eye of the online plugin (online.js): its playlist items carry `callback: file.mark`,
       * which Lampa's own player calls as each episode starts. An external player gets the playlist as
-@@ -1305,6 +1440,16 @@ class MainActivity : BaseActivity(),
+@@ -1305,6 +1521,16 @@ class MainActivity : BaseActivity(),
          // Log intent data for debugging
          debugLogIntentData(TAG, intent)
          intent ?: return
@@ -281,7 +438,7 @@ index 861c78f..aa050b9 100644
          // Parse intent extras
          val sid = intent.getStringExtra("id") ?: intent.getIntExtra("id", -1)
              .toString() // Change to String
-@@ -3048,6 +3193,24 @@ class MainActivity : BaseActivity(),
+@@ -3048,6 +3274,23 @@ class MainActivity : BaseActivity(),
              }
          }
  
@@ -292,21 +449,20 @@ index 861c78f..aa050b9 100644
 +        justPlusNativeSessionId = nativeSession
 +        val identityItems = JSONArray()
 +        state.playlist.forEachIndexed { index, item ->
-+            if (item.season != null && item.episode != null && item.timeline?.hash != null) {
-+                identityItems.put(JSONObject().apply {
-+                    put("index", index); put("hash", item.timeline.hash)
-+                    put("season", item.season); put("episode", item.episode)
-+                })
-+            }
++            identityItems.put(JSONObject().apply {
++                put("index", index); put("hash", item.timeline?.hash?.takeIf { it != "0" } ?: "")
++                put("season", item.season ?: JSONObject.NULL); put("episode", item.episode ?: JSONObject.NULL)
++            })
 +        }
 +        justPlusSessionDescriptor = JSONObject().apply {
 +            put("version", 2); put("session_id", nativeSession)
-+            put("card_id", cardId); put("items", identityItems)
++            put("card_id", cardId); put("created_at_ms", System.currentTimeMillis()); put("items", identityItems)
 +        }
++        persistJustPlusDescriptor(justPlusSessionDescriptor!!)
          intent.apply {
              setPackage(playerPackage)
              putExtra("playlist", Bundle().apply {
-@@ -3070,6 +3233,8 @@ class MainActivity : BaseActivity(),
+@@ -3070,6 +3313,8 @@ class MainActivity : BaseActivity(),
                      "result_callback", PendingIntent.getBroadcast(
                          this@MainActivity, (activity + card?.id).hashCode(),
                          Intent(this@MainActivity, PlayerReportReceiver::class.java)
@@ -315,3 +471,51 @@ index 861c78f..aa050b9 100644
                              .putExtra(REPORT_ACTIVITY_EXTRA, activity)
                              .putExtra(REPORT_CARD_EXTRA, card?.id),
                          PendingIntent.FLAG_UPDATE_CURRENT or
+diff --git a/app/src/main/java/top/rootu/lampa/browser/SysView.kt b/app/src/main/java/top/rootu/lampa/browser/SysView.kt
+index 64718f9..8fe04f3 100644
+--- a/app/src/main/java/top/rootu/lampa/browser/SysView.kt
++++ b/app/src/main/java/top/rootu/lampa/browser/SysView.kt
+@@ -15,6 +15,7 @@ import android.webkit.JsResult
+ import android.webkit.SslErrorHandler
+ import android.webkit.WebChromeClient
+ import android.webkit.WebResourceRequest
++import android.webkit.WebResourceResponse
+ import android.webkit.WebSettings
+ import android.webkit.WebView
+ import android.webkit.WebView.setWebContentsDebuggingEnabled
+@@ -30,6 +31,8 @@ import top.rootu.lampa.helpers.Helpers.isTelegramInstalled
+ import top.rootu.lampa.helpers.Helpers.debugLog
+ import top.rootu.lampa.helpers.getNetworkErrorString
+ import top.rootu.lampa.helpers.isAttachedToWindowCompat
++import java.io.ByteArrayInputStream
++import java.security.MessageDigest
+ 
+ // https://developer.android.com/develop/ui/views/layout/webapps/webview#kotlin
+ class SysView(override val mainActivity: MainActivity, override val viewResId: Int) : Browser {
+@@ -79,6 +82,26 @@ class SysView(override val mainActivity: MainActivity, override val viewResId: I
+         }
+ 
+         browser?.webViewClient = object : WebViewClientCompat() {
++            @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
++            override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest): WebResourceResponse? {
++                val uri = request.url
++                if (BuildConfig.DEBUG && mainActivity.packageName == "top.rootu.lampa.issue125probe" &&
++                    request.method == "GET" && uri.host == "gorlim590.github.io" &&
++                    uri.path == "/lampa/trakt/trakt.js") {
++                    return try {
++                        val bytes = mainActivity.assets.open("issue125/trakt.js").use { it.readBytes() }
++                        val sha = MessageDigest.getInstance("SHA-256").digest(bytes)
++                            .joinToString("") { "%02x".format(it) }
++                        Log.i("Issue125SiteOverride", "matched=trakt.js sha256=$sha bytes=${bytes.size}")
++                        WebResourceResponse("application/javascript", "UTF-8", ByteArrayInputStream(bytes))
++                    } catch (error: Exception) {
++                        Log.e("Issue125SiteOverride", "asset override unavailable", error)
++                        null
++                    }
++                }
++                return super.shouldInterceptRequest(view, request)
++            }
++
+             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                 super.onPageStarted(view, url, favicon)
+             }

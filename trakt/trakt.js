@@ -10127,6 +10127,13 @@
   var playbackIdentityGeneration = 0;
   var currentPlaybackInstance = null;
   var terminalPlaybackInstanceId = null;
+  var JUSTPLUS_RECOVERY_KEY = 'trakt_justplus_recovery_v1';
+  var JUSTPLUS_HISTORY_OUTBOX_KEY = 'trakt_justplus_history_outbox_v1';
+  var JUSTPLUS_HISTORY_OUTBOX_MAX = 64;
+  var JUSTPLUS_HISTORY_RECEIPTS_MAX = 128;
+  var JUSTPLUS_RECOVERY_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+  var justPlusHistoryDrainRunning = false;
+  var justPlusHistoryDrainTimer = null;
 
   // Opt-in diagnostics for the parallel Android acceptance APK only. Never
   // include credentials, cookies, stream URLs, or raw torrent hashes.
@@ -10137,6 +10144,319 @@
       window.dispatchEvent(new CustomEvent('issue125:diagnostic', { detail: record }));
       console.info('[Issue125Diag]', JSON.stringify(record));
     } catch (e) {}
+  }
+
+  function getJustPlusProfileId() {
+    var account = Lampa.Account && Lampa.Account.Permit && Lampa.Account.Permit.account;
+    var profile = account && account.profile;
+    return String(profile && profile.id != null ? profile.id : 'default');
+  }
+
+  function getJustPlusTokenFingerprint(token) {
+    try {
+      var bridge = window.AndroidJS;
+      if (!bridge || typeof bridge.issue125TokenFingerprint !== 'function' || !token) return '';
+      return String(bridge.issue125TokenFingerprint(String(token)) || '');
+    } catch (e) { return ''; }
+  }
+
+  function readJustPlusLocal(key) {
+    try {
+      if (!window.localStorage) return null;
+      var value = window.localStorage.getItem(key);
+      return value ? JSON.parse(value) : null;
+    } catch (e) { return null; }
+  }
+
+  function writeJustPlusLocal(key, value) {
+    try {
+      if (!window.localStorage) return false;
+      var serialized = JSON.stringify(value);
+      if (serialized.length > 96 * 1024) return false;
+      window.localStorage.setItem(key, serialized);
+      return true;
+    } catch (e) { return false; }
+  }
+
+  function clearJustPlusRecoveryCandidate() {
+    try { if (window.localStorage) window.localStorage.removeItem(JUSTPLUS_RECOVERY_KEY); } catch (e) {}
+    try {
+      if (window.AndroidJS && typeof window.AndroidJS.issue125ClearSession === 'function') window.AndroidJS.issue125ClearSession('');
+    } catch (e) {}
+  }
+
+  function persistJustPlusRecoveryCandidate(report, card, hash, playlist) {
+    if (!report || !card || !Array.isArray(playlist) || !report.cardId) return false;
+    var token = String(Lampa.Storage.get('trakt_token') || '');
+    var tokenFingerprint = getJustPlusTokenFingerprint(token);
+    if (!tokenFingerprint) {
+      issue125Diag('recovery_candidate_not_saved', { reason: 'native_fingerprint_unavailable' });
+      return false;
+    }
+    var items = playlist.map(function (item, index) {
+      var timeline = item && item.timeline || {};
+      var itemHash = timeline.hash || item && item.hash || '';
+      var se = extractSeasonEpisode(item);
+      var season = Number(se.season), episode = Number(se.episode);
+      return {
+        index: index,
+        hash: itemHash && String(itemHash) !== '0' ? String(itemHash).slice(0, 256) : '',
+        season: Number.isInteger(season) && season >= 0 ? season : null,
+        episode: Number.isInteger(episode) && episode >= 0 ? episode : null
+      };
+    });
+    var safeCard = {
+      id: String(card.id || card.tmdb_id || ''),
+      tmdb_id: String(card.tmdb_id || card.id || ''),
+      ids: card.ids && typeof card.ids === 'object' ? {
+        tmdb: card.ids.tmdb || card.tmdb_id || card.id || null,
+        trakt: card.ids.trakt || null,
+        imdb: card.ids.imdb || null,
+        tvdb: card.ids.tvdb || null
+      } : { tmdb: card.tmdb_id || card.id || null },
+      method: 'tv', type: 'tv', card_type: 'tv', media_type: 'tv',
+      title: String(card.title || card.name || '').slice(0, 256),
+      name: String(card.name || card.title || '').slice(0, 256),
+      original_name: String(card.original_name || card.original_title || card.title || '').slice(0, 256),
+      first_air_date: String(card.first_air_date || '').slice(0, 32),
+      number_of_seasons: Number(card.number_of_seasons) || 0,
+      number_of_episodes: Number(card.number_of_episodes) || 0
+    };
+    var candidate = {
+      version: 1,
+      created_at_ms: Date.now(),
+      session_id: null,
+      card_id: report.cardId,
+      selected_hash: String(hash || ''),
+      token_fingerprint: tokenFingerprint,
+      profile_id: getJustPlusProfileId(),
+      card: safeCard,
+      items: items
+    };
+    var saved = writeJustPlusLocal(JUSTPLUS_RECOVERY_KEY, candidate);
+    issue125Diag('recovery_candidate_saved', { saved: saved, item_count: items.length, card_id: candidate.card_id });
+    return saved;
+  }
+
+  function nativeJustPlusRecoveryState() {
+    try {
+      var bridge = window.AndroidJS;
+      if (!bridge || typeof bridge.issue125RecoveryState !== 'function') return null;
+      var raw = bridge.issue125RecoveryState();
+      return typeof raw === 'string' ? JSON.parse(raw) : raw;
+    } catch (e) { return null; }
+  }
+
+  function justPlusIdentityItemsMatch(savedItems, nativeItems) {
+    if (!Array.isArray(savedItems) || !Array.isArray(nativeItems) || savedItems.length !== nativeItems.length) return false;
+    var seen = Object.create(null);
+    return nativeItems.every(function (item) {
+      if (!item || !Number.isInteger(item.index) || seen[String(item.index)]) return false;
+      seen[String(item.index)] = true;
+      var saved = savedItems[item.index];
+      if (!saved || saved.index !== item.index || String(saved.hash || '') !== String(item.hash || '')) return false;
+      var nativeSeason = Number.isInteger(item.season) ? item.season : null;
+      var nativeEpisode = Number.isInteger(item.episode) ? item.episode : null;
+      return saved.season === nativeSeason && saved.episode === nativeEpisode;
+    });
+  }
+
+  function restoreJustPlusReport(candidate, descriptor) {
+    var token = String(Lampa.Storage.get('trakt_token') || '');
+    var fingerprint = getJustPlusTokenFingerprint(token);
+    var age = Date.now() - Number(descriptor && descriptor.created_at_ms);
+    var handoffAge = Number(descriptor && descriptor.created_at_ms) - Number(candidate && candidate.created_at_ms);
+    var reason = !candidate ? 'missing_candidate' : !descriptor ? 'missing_native_descriptor' : !token ? 'logged_out' : !fingerprint || fingerprint !== candidate.token_fingerprint ? 'account_changed' : getJustPlusProfileId() !== candidate.profile_id ? 'profile_changed' : String(descriptor.card_id || '') !== String(candidate.card_id || '') ? 'card_id_mismatch' : !Array.isArray(descriptor.items) || !justPlusIdentityItemsMatch(candidate.items, descriptor.items) ? 'playlist_mismatch' : !Number.isFinite(age) || age < 0 || age > JUSTPLUS_RECOVERY_MAX_AGE_MS ? 'stale_native_session' : candidate.session_id && candidate.session_id !== descriptor.session_id ? 'stale_session_id' : !candidate.session_id && (!Number.isFinite(handoffAge) || handoffAge < -10000 || handoffAge > 5 * 60 * 1000) ? 'handoff_time_mismatch' : null;
+    if (reason) {
+      issue125Diag('recovery_rejected', { reason, native_item_count: descriptor && Array.isArray(descriptor.items) ? descriptor.items.length : null, saved_item_count: candidate && Array.isArray(candidate.items) ? candidate.items.length : null });
+      return null;
+    }
+    var playlist = candidate.items.map(function (item) {
+      return { season: item.season, episode: item.episode, timeline: { hash: item.hash, time: 0, duration: 0, percent: 0 } };
+    });
+    var report = buildExternalPlaylistReport(candidate.card, candidate.selected_hash, playlist, token, playbackIdentityGeneration);
+    if (!report || report.playlistCount !== candidate.items.length) {
+      issue125Diag('recovery_rejected', { reason: 'report_rebuild_failed' });
+      return null;
+    }
+    // bindJustPlusSession deliberately requires the active report to be the
+    // same object. Install it only for the duration of validation and roll
+    // back on rejection, so reload recovery follows the normal validator.
+    var previous = externalPlaylistReport;
+    externalPlaylistReport = report;
+    if (!bindJustPlusSession(descriptor, report)) {
+      externalPlaylistReport = previous;
+      return null;
+    }
+    candidate.session_id = descriptor.session_id;
+    writeJustPlusLocal(JUSTPLUS_RECOVERY_KEY, candidate);
+    issue125Diag('recovery_restored', { item_count: descriptor.items.length, card_id: report.cardId });
+    return report;
+  }
+
+  function justPlusOutboxState() {
+    var state = readJustPlusLocal(JUSTPLUS_HISTORY_OUTBOX_KEY);
+    if (!state || state.version !== 1 || !Array.isArray(state.pending) || !Array.isArray(state.receipts)) return { version: 1, pending: [], receipts: [] };
+    state.pending = state.pending.filter(function (record) { return record && record.id && record.owner_fingerprint && record.profile_id; });
+    state.receipts = state.receipts.filter(function (receipt) { return receipt && receipt.id; }).slice(-JUSTPLUS_HISTORY_RECEIPTS_MAX);
+    return state;
+  }
+
+  function saveJustPlusOutbox(state) {
+    if (!state || state.pending.length > JUSTPLUS_HISTORY_OUTBOX_MAX) return false;
+    return writeJustPlusLocal(JUSTPLUS_HISTORY_OUTBOX_KEY, state);
+  }
+
+  function enqueueJustPlusHistory(media, entry, report, index, percent) {
+    var token = String(Lampa.Storage.get('trakt_token') || '');
+    var owner = getJustPlusTokenFingerprint(token);
+    if (!owner || !report.nativeSessionId || getJustPlusProfileId() === '') return false;
+    var season = Number(entry.identity.season), episode = Number(entry.identity.episode);
+    var tmdb = String(entry.identity.id || media.id || media.tmdb_id || '');
+    if (!tmdb || !Number.isInteger(season) || season < 0 || !Number.isInteger(episode) || episode < 1) return false;
+    var id = [report.nativeSessionId, index, tmdb, season, episode].join(':');
+    var state = justPlusOutboxState();
+    if (state.receipts.some(function (receipt) { return receipt.id === id; })) {
+      entry.completionState = 'confirmed';
+      return true;
+    }
+    var existing = state.pending.find(function (record) { return record.id === id; });
+    if (existing) {
+      if (existing.owner_fingerprint !== owner || existing.profile_id !== getJustPlusProfileId()) return false;
+      existing.max_position_sec = Math.max(existing.max_position_sec || 0, entry.lastPosition || 0);
+      existing.max_percent = Math.max(existing.max_percent || 0, percent || 0);
+      entry.completionState = 'durable_pending';
+      var savedExisting = saveJustPlusOutbox(state);
+      if (savedExisting) drainJustPlusHistoryOutbox();
+      return savedExisting;
+    }
+    if (state.pending.length >= JUSTPLUS_HISTORY_OUTBOX_MAX) {
+      issue125Diag('history_outbox_rejected', { reason: 'capacity', pending_count: state.pending.length });
+      return false;
+    }
+    var record = {
+      id: id,
+      session_id: report.nativeSessionId,
+      card_id: report.cardId,
+      index: index,
+      hash: entry.hash,
+      tmdb_show_id: tmdb,
+      trakt_show_id: entry.media && entry.media.ids && entry.media.ids.trakt || null,
+      season: season,
+      episode: episode,
+      watched_at: new Date().toISOString(),
+      max_position_sec: entry.lastPosition || 0,
+      max_percent: Number(percent) || 0,
+      owner_fingerprint: owner,
+      profile_id: getJustPlusProfileId(),
+      state: 'queued',
+      attempts: 0,
+      next_retry_at: 0,
+      created_at: Date.now(),
+      last_status: null
+    };
+    state.pending.push(record);
+    if (!saveJustPlusOutbox(state)) return false;
+    entry.completionState = 'durable_pending';
+    issue125Diag('history_durable_queued', { index: index, season: season, episode: episode, progress: Math.round((Number(percent) || 0) * 100) / 100 });
+    drainJustPlusHistoryOutbox();
+    return true;
+  }
+
+  // Called after the Trakt plugin has attached its native event listeners.
+  // appready alone is too early on reload: AndroidJS exists before this module.
+  function recoverJustPlusSession() {
+    var candidate = readJustPlusLocal(JUSTPLUS_RECOVERY_KEY);
+    var descriptor = nativeJustPlusRecoveryState();
+    if (candidate && descriptor && !externalPlaylistReport) {
+      var recovered = restoreJustPlusReport(candidate, descriptor);
+      if (recovered && window.AndroidJS && typeof window.AndroidJS.issue125ReplayPendingReports === 'function') window.AndroidJS.issue125ReplayPendingReports();
+    }
+    drainJustPlusHistoryOutbox();
+  }
+
+  function drainJustPlusHistoryOutbox() {
+    if (justPlusHistoryDrainRunning) return;
+    var state = justPlusOutboxState();
+    var record = state.pending.find(function (item) {
+      return item.state !== 'blocked_owner' && Number(item.next_retry_at || 0) <= Date.now();
+    });
+    if (!record) return;
+    var token = String(Lampa.Storage.get('trakt_token') || '');
+    if (!token || getJustPlusTokenFingerprint(token) !== record.owner_fingerprint || getJustPlusProfileId() !== record.profile_id) {
+      issue125Diag('history_outbox_blocked', { reason: !token ? 'logged_out' : 'owner_mismatch', season: record.season, episode: record.episode });
+      return;
+    }
+    justPlusHistoryDrainRunning = true;
+    // Preserve the queue before the request. Retries keep the same episode
+    // identity and watched_at; confirmed records move to a bounded receipt set.
+    record.state = 'sending';
+    record.attempts = Number(record.attempts || 0) + 1;
+    saveJustPlusOutbox(state);
+    var ownerGeneration = playbackIdentityGeneration;
+    var media = { id: record.tmdb_show_id, tmdb_id: record.tmdb_show_id, ids: { tmdb: record.tmdb_show_id, trakt: record.trakt_show_id || undefined }, method: 'tv', type: 'tv', media_type: 'tv', name: '', original_name: '', season_number: record.season, episode_number: record.episode, hash: record.hash };
+    var watchedAt = record.watched_at;
+    var from = new Date(new Date(watchedAt).getTime() - 10 * 60 * 1000).toISOString();
+    var to = new Date(new Date(watchedAt).getTime() + 10 * 60 * 1000).toISOString();
+    var verifyUrl = '/users/me/history/episodes?start_at=' + encodeURIComponent(from) + '&end_at=' + encodeURIComponent(to) + '&page=1&limit=100';
+    function findConfirmedHistory(rows) {
+      var list = Array.isArray(rows) ? rows : rows && Array.isArray(rows.data) ? rows.data : [];
+      return list.find(function (row) {
+        var showIds = row && row.show && row.show.ids || {};
+        var ep = row && row.episode || {};
+        var showMatch = String(showIds.tmdb || '') === String(record.tmdb_show_id) || record.trakt_show_id && String(showIds.trakt || '') === String(record.trakt_show_id);
+        var time = Date.parse(row && row.watched_at || '');
+        return showMatch && Number(ep.season) === record.season && Number(ep.number) === record.episode && Number.isFinite(time) && Math.abs(time - Date.parse(watchedAt)) <= 10 * 60 * 1000;
+      });
+    }
+    Promise.resolve(api$1.get(verifyUrl, false, { cache: false })).then(function (rows) {
+      var match = findConfirmedHistory(rows);
+      if (match) return { ok: true, status: 200, verified_existing: true, event_id: match.id == null ? null : String(match.id) };
+      if (String(Lampa.Storage.get('trakt_token') || '') !== token || getJustPlusTokenFingerprint(token) !== record.owner_fingerprint || getJustPlusProfileId() !== record.profile_id || ownerGeneration !== playbackIdentityGeneration) return { ok: false, status: 499, reason: 'owner_changed' };
+      issue125Diag('history_outbox_post', { season: record.season, episode: record.episode, attempt: record.attempts });
+      return api$1.addToHistory({ method: 'show', id: record.tmdb_show_id, ids: media.ids, season_number: record.season, hash: record.hash, episodes: [{ number: record.episode, watched_at: watchedAt }] }).then(function (response) {
+        var status = Number(response && response.status) || 200;
+        // Trakt's sync response usually reports counts rather than history event IDs.
+        // Read back once after a successful POST so receipts can retain the exact event ID
+        // when the API exposes it; a failed read-back does not undo the successful POST.
+        return Promise.resolve(api$1.get(verifyUrl, false, { cache: false })).then(function (verifiedRows) {
+          var verified = findConfirmedHistory(verifiedRows);
+          return { ok: true, status: status, data: response, verified_existing: !!verified, event_id: verified && verified.id != null ? String(verified.id) : response && response.id != null ? String(response.id) : null };
+        }, function () {
+          return { ok: true, status: status, data: response, event_id: response && response.id != null ? String(response.id) : null };
+        });
+      });
+    }).then(function (result) {
+      var latest = justPlusOutboxState();
+      var pending = latest.pending.find(function (item) { return item.id === record.id; });
+      if (!pending) return;
+      if (result && (result.ok || result.skipped && result.reason === 'already_finished')) {
+        latest.pending = latest.pending.filter(function (item) { return item.id !== record.id; });
+        latest.receipts.push({ id: record.id, confirmed_at: Date.now(), event_ids: result.event_id ? [result.event_id] : [] });
+        latest.receipts = latest.receipts.slice(-JUSTPLUS_HISTORY_RECEIPTS_MAX);
+        saveJustPlusOutbox(latest);
+        if (externalPlaylistReport && externalPlaylistReport.nativeSessionId === record.session_id && externalPlaylistReport.indexedEntries[String(record.index)]) externalPlaylistReport.indexedEntries[String(record.index)].completionState = 'confirmed';
+        issue125Diag('history_outbox_confirmed', { season: record.season, episode: record.episode, status: Number(result.status) || null, readback: !!result.verified_existing });
+        refreshConfirmedShowProgress(media, token, ownerGeneration);
+      } else {
+        var status = Number(result && result.status || result && result.error && result.error.status || 0);
+        pending.state = status === 401 || status === 403 ? 'blocked_owner' : 'queued';
+        pending.last_status = status;
+        pending.next_retry_at = Date.now() + Math.min(6 * 60 * 60 * 1000, Math.pow(2, Math.min(pending.attempts, 10)) * 30000);
+        saveJustPlusOutbox(latest);
+        issue125Diag('history_outbox_retry_scheduled', { season: record.season, episode: record.episode, status: status, attempts: pending.attempts });
+      }
+    }).catch(function (error) {
+      var latest = justPlusOutboxState();
+      var pending = latest.pending.find(function (item) { return item.id === record.id; });
+      if (pending) { var status = Number(error && error.status) || 0; pending.state = status === 401 || status === 403 ? 'blocked_owner' : 'queued'; pending.last_status = status; pending.next_retry_at = Date.now() + Math.min(6 * 60 * 60 * 1000, Math.pow(2, Math.min(pending.attempts, 10)) * 30000); saveJustPlusOutbox(latest); issue125Diag('history_outbox_retry_scheduled', { season: record.season, episode: record.episode, status: status, attempts: pending.attempts }); }
+    }).then(function () {
+      justPlusHistoryDrainRunning = false;
+      if (justPlusHistoryDrainTimer) clearTimeout(justPlusHistoryDrainTimer);
+      var next = justPlusOutboxState().pending.some(function (item) { return item.state !== 'blocked_owner' && Number(item.next_retry_at || 0) <= Date.now(); });
+      if (next) drainJustPlusHistoryOutbox();
+      else justPlusHistoryDrainTimer = setTimeout(drainJustPlusHistoryOutbox, 30000);
+    });
   }
 
   function beginPlaybackInstance(media, hash, external) {
@@ -10264,25 +10584,25 @@
       episode_number: entry.identity.episode,
       hash: entry.hash
     });
+    var index = Number(Object.keys(report.indexedEntries).find(function (i) { return report.indexedEntries[i] === entry; }));
+    if (report.nativeSessionId) {
+      // Native delivery ACK means this measured eligible snapshot is durably
+      // in the site-origin outbox, not that Trakt has confirmed it.
+      return enqueueJustPlusHistory(media, entry, report, index, percent);
+    }
+    // Preserve the pre-existing Timeline path for other external players.
     var key = getCompletionKey(media);
     if (!key) return false;
     entry.completionState = 'pending';
     entry.completionKey = key;
     markFinishIntent(key);
-    issue125Diag('history_queued', { index: Object.keys(report.indexedEntries).find(function (i) { return report.indexedEntries[i] === entry; }) || null, season: entry.identity.season, episode: entry.identity.episode, percent: Math.round(percent * 100) / 100 });
     Promise.resolve().then(function () {
       if (externalPlaylistReport !== report || report.token !== String(Lampa.Storage.get('trakt_token') || '') || report.identityGeneration !== playbackIdentityGeneration) return { skipped: true, reason: 'stale_owner' };
-      issue125Diag('history_finish_called', { season: entry.identity.season, episode: entry.identity.episode });
       return finish(media);
     }).then(function (result) {
       if (externalPlaylistReport !== report || report.token !== String(Lampa.Storage.get('trakt_token') || '') || report.identityGeneration !== playbackIdentityGeneration) return;
       entry.completionState = result && result.ok || result && result.skipped && result.reason === 'already_finished' ? 'confirmed' : 'retryable';
-      issue125Diag('history_finish_result', { season: entry.identity.season, episode: entry.identity.episode, state: entry.completionState, http_status: result && result.status || null, reason: result && result.reason || (result && result.error && result.error.status === 0 ? 'transport_status_0' : result && result.clientError ? 'http_client_error' : null) });
-    }).catch(function (e) {
-      if (externalPlaylistReport === report && report.token === String(Lampa.Storage.get('trakt_token') || '') && report.identityGeneration === playbackIdentityGeneration) entry.completionState = 'retryable';
-      issue125Diag('history_finish_error', { season: entry.identity.season, episode: entry.identity.episode, state: 'retryable', http_status: Number(e && e.status) || 0, reason: Number(e && e.status) === 0 ? 'transport_status_0' : 'writer_exception' });
-      slog('Just+ playlist history finish error', e && e.status || 'request_failed');
-    });
+    }).catch(function () { if (externalPlaylistReport === report) entry.completionState = 'retryable'; });
     return true;
   }
 
@@ -10308,6 +10628,11 @@
     });
     if (!valid || Object.keys(report.indexedEntries).some(function (index) { return !seenIndices[index]; })) { issue125Diag('session_bind_rejected', { reason: 'item_identity_mismatch' }); return false; }
     report.nativeSessionId = payload.session_id;
+    var saved = readJustPlusLocal(JUSTPLUS_RECOVERY_KEY);
+    if (saved && saved.card_id === report.cardId) {
+      saved.session_id = payload.session_id;
+      writeJustPlusLocal(JUSTPLUS_RECOVERY_KEY, saved);
+    }
     issue125Diag('session_bound', { card_id: report.cardId, session_id: payload.session_id, item_count: payload.items.length });
     return true;
   }
@@ -10428,13 +10753,13 @@
     var allResolved = raw.items.every(function (item) {
       var entry = report.indexedEntries[String(item.index)];
       var percent = item.position_sec / item.duration_sec * 100;
-      var resolved = percent < minimum || entry.completionState === 'confirmed';
+      var resolved = percent < minimum || entry.completionState === 'confirmed' || entry.completionState === 'durable_pending';
       issue125Diag('raw_item_decision', { index: item.index, season: item.season, episode: item.episode, percent: Math.round(percent * 100) / 100, threshold: minimum, completion_state: entry.completionState, decision: percent < minimum ? 'below_threshold' : entry.completionState === 'confirmed' ? 'confirmed' : entry.completionState === 'pending' ? 'history_pending' : 'history_retryable' });
       return resolved;
     });
     if (!allResolved) { issue125Diag('raw_ack_pending', { reason: 'eligible_history_not_confirmed' }); return false; }
     raw.__lampa_trakt_ack = true;
-    issue125Diag('raw_ack', { reason: 'all_items_below_threshold_or_confirmed' });
+    issue125Diag('raw_ack', { reason: 'below_threshold_confirmed_or_durably_queued' });
     return true;
   }
 
@@ -10602,7 +10927,11 @@
       if (window.addEventListener) {
         this._onJustPlusRawReport = function (event) {
           try {
-            handleJustPlusRawReportEvent(event, externalPlaylistReport);
+            var accepted = handleJustPlusRawReportEvent(event, externalPlaylistReport);
+            var detail = event && event.detail;
+            if (accepted && detail && window.AndroidJS && typeof window.AndroidJS.issue125AckRawReport === 'function') {
+              window.AndroidJS.issue125AckRawReport(String(detail.session_id || ''), String(detail.report_id || ''));
+            }
           } catch (error) {
             slog('Just+ raw report rejected', error && error.name || 'invalid_report');
           }
@@ -10610,6 +10939,9 @@
         window.addEventListener('lampa:justplus-raw-report', this._onJustPlusRawReport);
         this._onJustPlusSession = function (event) { bindJustPlusSession(event && event.detail, externalPlaylistReport); };
         window.addEventListener('lampa:justplus-session', this._onJustPlusSession);
+        // The native descriptor and site-origin candidate survive reloads.
+        // Run after both listeners are attached, independent of appready timing.
+        recoverJustPlusSession();
       }
 
       // Слідкуємо за стартом програвача для збереження поточної картки
@@ -11427,6 +11759,10 @@
             String(Lampa.Storage.get('trakt_token') || ''),
             playbackIdentityGeneration
           );
+          if (externalPlaylistReport) {
+            persistJustPlusRecoveryCandidate(externalPlaylistReport, card, timeline && timeline.hash, playerPlaylist);
+            issue125Diag('external_handoff_persisted', { card_id: externalPlaylistReport.cardId, player_playlist_count: playerPlaylistCount, event_playlist_count: eventPlaylistCount, indexed_count: Object.keys(externalPlaylistReport.indexedEntries).length });
+          }
           issue125Diag('handoff_owner', { watching_enabled: !!Lampa.Storage.field('trakt_enable_watching'), token_present: !!Lampa.Storage.get('trakt_token'), card_id: String(card.tmdb_id || card.id || ''), playlist_count: Array.isArray(playerPlaylist) ? playerPlaylist.length : 0, report_created: !!externalPlaylistReport });
           pendingExternalPlayback = timeline && timeline.hash ? {
             media: card,

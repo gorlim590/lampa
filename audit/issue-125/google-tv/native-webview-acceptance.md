@@ -10,9 +10,9 @@ The real website reload removed the in-memory external playlist handoff (`Player
 
 ## Real Siaivo / Ted Lasso acceptance — 2026-10-31
 
-This section supersedes the earlier statement that no real Siaivo season torrent or authenticated history write had been exercised. The separate Android package `top.rootu.lampa.issue125probe` opened the actual configured Siaivo page `http://siaivo.isroot.in`, used its real torrent overlay and 36-file season pack (two unnumbered special slots followed by S01E01 at native index 2, E02 at 3, E03 at 4, E04 at 5), and launched those files in Just+ 2.5.1. `Lampa.PlayerPlaylist.get()` returned all 36 items with the same exact S/E at the native indexes; the session descriptor matched card ID 97546 and the known episode entries. No production APK, parser, TorrServer or setting was changed.
+This section supersedes the earlier statement that no real Siaivo season torrent or authenticated history write had been exercised. The separate Android package `top.rootu.lampa.issue125probe` opened the actual configured Siaivo page `http://siaivo.isroot.in`, used its real torrent overlay and 36-file season pack (two unnumbered special slots followed by S01E01 at native index 2, E02 at 3, E03 at 4, E04 at 5), and launched those files in Just+ 2.5.1. `Lampa.PlayerPlaylist.get()` returned all 36 items with the same exact S/E at the native indexes; the session descriptor matched TMDB show ID 97546 and the known episode entries. No production APK, parser, TorrServer or setting was changed.
 
-The authenticated read-only precheck showed Ted Lasso Trakt ID 162639 and no S01E02–E04 history. The owner had authorized at most E01–E04. Exactly those four episode histories are now confirmed; no other Trakt data was changed. E01/E02 confirmation predates the final portion of the retained log. E03/E04 and the exact correlated Android/WebView/API events are retained in `ted-lasso-live-events.jsonl`.
+The authenticated read-only precheck showed Ted Lasso Trakt show ID 162639 (TMDB show ID 97546) and no S01E02–E04 history. The owner had authorized at most E01–E04. Exactly those four episode histories are now confirmed; no other Trakt data was changed. E01/E02 confirmation predates the final portion of the retained log. E03/E04 and the exact correlated Android/WebView/API events are retained in `ted-lasso-live-events.jsonl`.
 
 | Episode | Physical Just+ measurement used for acceptance | JS/history decision | Remote result/readback |
 |---|---:|---|---|
@@ -25,7 +25,7 @@ Progress for E02–E04 used the seek controls in Just+ and is therefore a **seek
 
 ### Correlated live/ACK events
 
-The same native session UUID `d6a43d2d-1923-427d-8ce8-53635214d762` generated 120-second snapshots at 06:34:08, 06:36:08, 06:38:08 and 06:40:08 local time. The first snapshot held E02 at index 3 = 1616/1760 and E03 at index 4 = 167/1824. The second had E03 at 287/1824; its JS live event started S01E03 at 15.73%, and the start request returned HTTP 201. The third had E03 1686/1824 (92.43%): the plugin queued the exact history, left raw ACK false while the write was pending, got HTTP 201, and ACKed at 06:38:11. The fourth included E04 1884/2018 (93.36%): JS started the exact E04 live session, queued history, got HTTP 201, then ACKed at 06:40:11. The per-event timestamps and safe fields are in `ted-lasso-live-events.jsonl`.
+The same native test session (UUID redacted) generated 120-second snapshots at 06:34:08, 06:36:08, 06:38:08 and 06:40:08 local time. The first snapshot held E02 at index 3 = 1616/1760 and E03 at index 4 = 167/1824. The second had E03 at 287/1824; its JS live event started S01E03 at 15.73%, and the start request returned HTTP 201. The third had E03 1686/1824 (92.43%): the plugin queued the exact history, left raw ACK false while the write was pending, got HTTP 201, and ACKed at 06:38:11. The fourth included E04 1884/2018 (93.36%): JS started the exact E04 live session, queued history, got HTTP 201, then ACKed at 06:40:11. The per-event timestamps and safe fields are in `ted-lasso-live-events.jsonl`.
 
 The Lampa detail UI subsequently showed `Trakt · Переглянуто: 4/44`, “Остання переглянута: For the Children” (E04), and “Наступна непереглянута: Tan Lines” (E05). This is a real Siaivo/Trakt+ detail-page refresh, not the previous controlled fixture. It verifies aggregate watched rendering and exact latest/next labels; it does not verify every separate season-card badge or UI after process restart.
 
@@ -61,7 +61,7 @@ The fixture loads the full Trakt source definitions and preserves production hel
 
 ## Independent long-video reports
 
-Probe session `9c5e7ae2-9b77-4578-a069-a8f9118e86e1` used a local read-only public Big Buck Bunny fixture, duration 596 seconds. No seeking was used. The receiver journal is `probe-long-events.jsonl`.
+Probe session (UUID redacted) used a local read-only public Big Buck Bunny fixture, duration 596 seconds. No seeking was used. The receiver journal is `probe-long-events.jsonl`.
 
 | Event | Wall time (ms) | Since launch | Actual position/duration |
 |---|---:|---:|---|
@@ -127,3 +127,9 @@ PR #138 must remain Draft pending native integration review, real website handof
 After evidence capture, both temporary diagnostic packages were uninstalled, their public fixture files removed, and ADB reverse/forward routes removed. Production Lampa 1.13.5/581 and Just+ 2.5.1/2005001 remain installed; production Lampa is foreground. The compiled debug APK remains in the Linux workspace artifacts directory, with its hash recorded in build-metadata.json. No real Trakt account/history or production settings were changed.
 
 Final focused Trakt/Details/session/account regressions: **189/189 PASS**. Repository validation passed (80 JavaScript files, manifest and links). Native debug build succeeded and both native patches pass application checks against the pinned upstream base. GitHub Actions results for the final pushed SHA are recorded in the PR description.
+
+## Persistent recovery follow-up (2026-10-31)
+
+The latest test APK was reinstalled beside the official package with `adb install -r`; the pulled installed `base.apk` SHA matched the retained artifact. The test app's separate data remained intact. After killing the test package process while Just+ was foreground, a real E07 `end_by=user` report at 454/1928 seconds was delivered to the restarted app. Native index 6 matched its stored hash/S/E and the ten-item descriptor. The Trakt module had not been requested by the cold Siaivo page, so six bounded JS delivery attempts returned false and the snapshot stayed in the native durable queue. Loading the repository Trakt script via the test-only local asset override restored the owner-bound handoff and ACKed that same snapshot; 454/1928 is below 90%, so no history write was eligible or attempted.
+
+Exact stage summaries are in `persistent-recovery-events.jsonl`; the implementation and limits are in `persistent-recovery-acceptance.md`. This demonstrates process-death transport and JS recovery after the plugin becomes ready. Automatic plugin loading on the current cold Siaivo home remains a blocker to calling recovery fully automatic.

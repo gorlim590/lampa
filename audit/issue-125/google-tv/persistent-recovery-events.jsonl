@@ -1,0 +1,5 @@
+{"time":"2026-10-31T16:50:02.524+02:00","stage":"native_handle_after_process_restart","item_index":6,"season":1,"episode":7,"position_sec":454,"duration_sec":1928,"descriptor_count":10,"identity_match":{"hash":true,"season":true,"episode":true},"owner_data":"redacted"}
+{"time":"2026-10-31T16:50:06.383+02:00","stage":"raw_delivery_ack","result":false,"reason":"Trakt JS module not loaded in cold page"}
+{"time":"2026-10-31T16:50:37.897+02:00","stage":"raw_delivery_retry_budget_exhausted","native_snapshot_still_persisted":true}
+{"time":"2026-10-31T16:52:50.094+02:00","stage":"test_site_override_loaded","url_path":"/lampa/trakt/trakt.js","sha256":"4057ba0b6d162efe55671560561f288029058722f978134fa6daae7aea2d3cad"}
+{"time":"2026-10-31T16:52:51.813+02:00","stage":"raw_delivery_ack","result":true,"episode":"S01E07","progress_percent":23.55,"history_write":false}
