@@ -41,7 +41,7 @@ function setup() {
       ? `episode:tmdb:${media.id}:S${media.season_number}:E${media.episode_number}` : '',
     markFinishIntent: key => writes.push({ type: 'intent', key }),
     finish: media => { writes.push({ type: 'finish', media }); return Promise.resolve({ ok: true }); },
-    slog: () => {}
+    slog: () => {}, issue125Diag: () => {}
   });
   vm.runInContext(productionFunction('buildExternalPlaylistReport', 'handleExternalPlaylistTimelineUpdate') +
     productionFunction('handleExternalPlaylistTimelineUpdate', 'bindJustPlusSession') +

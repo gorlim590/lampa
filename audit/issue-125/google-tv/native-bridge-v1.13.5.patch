@@ -207,6 +207,7 @@ diff --git a/app/src/main/java/top/rootu/lampa/MainActivity.kt b/app/src/main/ja
 +            put("session_id", sessionId)
 +            put("card_id", card?.tmdb_id?.takeIf { it.isNotEmpty() } ?: card?.id)
 +            put("end_by", report.optString("end_by"))
++            put("current_index", report.optInt("index", -1))
 +            put("items", items)
 +        }
 +        val descriptorQuoted = JSONObject.quote(descriptor.toString())

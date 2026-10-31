@@ -16,6 +16,7 @@ function fixture() {
     getContentType$2: media => media.method === 'tv' || media.original_name ? 'show' : 'movie',
     shouldSendProgress: () => false,
     debugEnabled: () => false,
+    issue125Diag: () => {},
     performScrobble: (action, media, progress) => { calls.push({ action, media: { ...media }, progress }); return Promise.resolve({ ok: true }); },
     updateThrottleState: percent => { context.throttleState.lastSentPercent = percent; context.throttleState.lastSendTime = Date.now(); }
   };
@@ -74,6 +75,33 @@ test('pause/resume is idempotent and uses Timeline position rather than elapsed 
   assert.equal(f.calls[1].progress, 2.7);
   assert.equal(f.calls[2].progress, 11.5);
   assert.equal(f.api.getActiveSession().state, 'playing');
+});
+
+test('external pause is sent below Trakt gateway cutoff and suppressed at 80% through 100%', async () => {
+  for (const progress of [0, 20, 79, 80, 89, 90, 95, 99, 100]) {
+    const f = fixture(), media = episode(4);
+    await f.api.scrobbleStart(media, progress, true);
+    const result = await f.api.scrobblePause(media, progress);
+    if (progress < 80) {
+      assert.deepEqual(f.calls.map(call => call.action), ['start', 'pause'], `${progress}% should save a valid pause`);
+      assert.equal(result && result.ok, true);
+    } else {
+      assert.deepEqual(f.calls.map(call => call.action), ['start'], `${progress}% must avoid 422 and the default 80% stop cutoff`);
+      assert.equal(result && result.skipped, true);
+      assert.equal(result && result.reason, 'progress_too_high');
+      assert.equal(f.api.getActiveSession().state, 'paused');
+    }
+  }
+});
+
+test('external episode transition never STOP-scrobbles and skips an invalid high-progress pause', async () => {
+  const f = fixture(), second = episode(2), third = episode(3);
+  await f.api.scrobbleStart(second, 94, true);
+  await f.api.scrobbleStart(third, 0, true);
+  assert.deepEqual(f.calls.map(call => [call.action, call.media.episode_number]), [['start', 2], ['start', 3]]);
+  assert.equal(f.calls.some(call => call.action === 'stop'), false);
+  assert.equal(f.calls.some(call => call.action === 'pause'), false, 'Trakt rejects /pause over 80%');
+  assert.equal(f.api.getActiveSession().key, 'show:1396:1:3');
 });
 
 test('stale stop for another episode cannot stop the current session', async () => {
@@ -146,7 +174,7 @@ function integrationFixture() {
     verifiedShowEpisode: media => media && media.method === 'tv' && Number.isInteger(media.season_number) && media.season_number >= 0 && Number.isInteger(media.episode_number) && media.episode_number >= 1 ? { id: String(media.id), season: media.season_number, episode: media.episode_number } : null,
     resolveSeasonEpisode: () => ({}), loadSessionCache: () => {}, loadHashMetaCache: () => {},
     scrobbleQueue: { init: () => {}, clear: () => { f.context.queueClearCount = (f.context.queueClearCount || 0) + 1; } },
-    slog: () => {}, logWarn: (...args) => { f.context.lastWarning = args; f.context.lastWarningMessage = String(args[1]); }, logDebugOnce: () => {},
+    slog: () => {}, issue125Diag: () => {}, logWarn: (...args) => { f.context.lastWarning = args; f.context.lastWarningMessage = String(args[1]); }, logDebugOnce: () => {},
     getCompletionKey: () => 'synthetic-completion',
     markFinishIntent: () => { f.context.finishIntentCount = (f.context.finishIntentCount || 0) + 1; },
     finish: media => { f.context.finishCallCount = (f.context.finishCallCount || 0) + 1; (f.context.finishedMedia || (f.context.finishedMedia = [])).push({ ...media }); return Promise.resolve({ ok: true }); },
@@ -528,6 +556,16 @@ test('disabling Watching invokes production auth callback and stops without Refe
   assert.equal(f.context.pendingInternalPlayback, null);
 });
 
+test('disabling Watching during high-progress external playback avoids invalid pause and stop', async () => {
+  const f = integrationFixture(), media = episode(5);
+  await f.api.scrobbleStart(media, 89, true);
+  f.values.trakt_enable_watching = false;
+  f.storageChange('trakt_enable_watching');
+  await flush();
+  assert.deepEqual(f.calls.map(call => call.action), ['start']);
+  assert.equal(f.calls.some(call => call.action === 'stop'), false);
+});
+
 test('external handoff is retained through player destroy and needs advancing Timeline; return without Timeline stops safely', async () => {
   const f = integrationFixture(), media = movie(9);
   f.launch(media, 'external-hash');
@@ -543,7 +581,7 @@ test('external handoff is retained through player destroy and needs advancing Ti
   f.playerEvent('visibility', { hidden: false });
   f.playerEvent('destroy', { type: 'destroy' });
   await flush();
-  assert.deepEqual(f.calls.map(call => call.action), ['start', 'stop']);
+  assert.deepEqual(f.calls.map(call => call.action), ['start', 'pause'], 'external exit uses pause to avoid Trakt default 80% auto-scrobble');
   assert.equal(f.context.pendingExternalPlayback, null);
 });
 
@@ -576,6 +614,168 @@ test('official Just+ playlist callback finalizes each exact episode through Lamp
   f.timeline('native-e2', 950, 95);
   await flush();
   assert.equal(f.context.finishedMedia.length, 2, 'repeated callback snapshot is idempotent');
+});
+
+test('Google TV direct external payload creates and binds the real indexed handoff before raw ACK', async () => {
+  const f = integrationFixture();
+  const show = { id: 97546, tmdb_id: 97546, method: 'tv', type: 'tv', name: 'Ted Lasso', number_of_seasons: 4 };
+  const nativePlaylist = [
+    { season: 1, episode: 1, timeline: { hash: 'e01-hash', time: 0, duration: 1856 } },
+    { season: 1, episode: 2, timeline: { hash: 'e02-hash', time: 0, duration: 1760 } }
+  ];
+  // Android's real external event arrives before PlayerPlaylist.get() has
+  // settled. The selected native playlist is on the event itself.
+  f.setPlaylist([]);
+  f.playerEvent('external', { card: show, timeline: { hash: 'e01-hash' }, playlist: nativePlaylist });
+  const report = f.context.externalPlaylistReport;
+  assert.ok(report, 'direct event payload must build externalPlaylistReport');
+  assert.equal(report.cardId, '97546');
+  assert.equal(Object.keys(report.indexedEntries).length, 2);
+  const descriptor = { version: 2, session_id: 'google-tv-session', card_id: '97546', items: [
+    { index: 0, hash: 'e01-hash', season: 1, episode: 1 },
+    { index: 1, hash: 'e02-hash', season: 1, episode: 2 }
+  ] };
+  assert.equal(f.context.bindJustPlusSession(descriptor, report), true);
+  const raw = { version: 2, session_id: 'google-tv-session', card_id: '97546', end_by: 'user', items: [
+    { index: 0, hash: 'e01-hash', season: 1, episode: 1, position_sec: 371, duration_sec: 1856, has_visit: true }
+  ] };
+  assert.equal(f.context.handleJustPlusRawReportEvent({ detail: raw }, report), true, 'valid under-threshold snapshot can ACK without history write');
+  assert.equal(raw.__lampa_trakt_ack, true);
+  assert.equal(f.context.finishCallCount || 0, 0);
+});
+
+test('Just+ interval starts the exact current episode, switches with pause, and never STOP-scrobbles external playback', async () => {
+  const f = integrationFixture();
+  const show = { id: 97546, tmdb_id: 97546, method: 'tv', type: 'tv', name: 'Ted Lasso', number_of_seasons: 4 };
+  const playlist = [
+    { season: 1, episode: 1, timeline: { hash: 'live-e01', time: 0, duration: 1856 } },
+    { season: 1, episode: 2, timeline: { hash: 'live-e02', time: 0, duration: 1760 } }
+  ];
+  f.setPlaylist([]);
+  f.playerEvent('external', { card: show, timeline: { hash: 'live-e01' }, playlist });
+  const report = f.context.externalPlaylistReport;
+  const descriptor = { version: 2, session_id: 'live-session-1', card_id: '97546', items: playlist.map((item, index) => ({ index, hash: item.timeline.hash, season: item.season, episode: item.episode })) };
+  assert.equal(f.context.bindJustPlusSession(descriptor, report), true);
+  const raw = (endBy, currentIndex, items) => ({ detail: { version: 2, session_id: descriptor.session_id, card_id: descriptor.card_id, end_by: endBy, current_index: currentIndex, items } });
+  const visit = (index, hash, episodeNumber, position, duration) => ({ index, hash, season: 1, episode: episodeNumber, position_sec: position, duration_sec: duration, has_visit: true });
+
+  assert.equal(f.context.handleJustPlusRawReportEvent(raw('interval', 0, [visit(0, 'live-e01', 1, 120, 1856)]), report), true);
+  await flush();
+  assert.deepEqual(f.calls.map(call => [call.action, call.media.episode_number]), [['start', 1]]);
+  assert.ok(Math.abs(f.calls[0].progress - 120 / 1856 * 100) < 0.001);
+  assert.equal(f.api.getActiveSession().external, true);
+
+  assert.equal(f.context.handleJustPlusRawReportEvent(raw('interval', 1, [visit(0, 'live-e01', 1, 240, 1856), visit(1, 'live-e02', 2, 80, 1760)]), report), true);
+  await flush();
+  assert.deepEqual(f.calls.map(call => [call.action, call.media.episode_number]), [['start', 1], ['pause', 1], ['start', 2]]);
+  assert.equal(f.api.getActiveSession().key, 'show:97546:1:2');
+  assert.equal(f.api.getActiveSession().progress, 80 / 1760 * 100);
+
+  assert.equal(f.context.handleJustPlusRawReportEvent(raw('user', 1, [visit(0, 'live-e01', 1, 240, 1856), visit(1, 'live-e02', 2, 80, 1760)]), report), true);
+  await flush();
+  assert.deepEqual(f.calls.map(call => [call.action, call.media.episode_number]), [['start', 1], ['pause', 1], ['start', 2], ['pause', 2]]);
+  assert.equal(f.calls.some(call => call.action === 'stop'), false, 'external lifecycle never invokes Trakt 80% stop threshold');
+  assert.equal(f.context.finishCallCount || 0, 0, 'below 90% interval snapshots create no history writes');
+});
+
+test('Just+ 90% interval writes custom-threshold history once and avoids default Trakt stop cutoff', async () => {
+  const f = integrationFixture();
+  const show = { id: 97546, tmdb_id: 97546, method: 'tv', type: 'tv', name: 'Ted Lasso', number_of_seasons: 4 };
+  const item = { season: 1, episode: 1, timeline: { hash: 'live-threshold-e01', time: 0, duration: 1000 } };
+  f.setPlaylist([]);
+  f.playerEvent('external', { card: show, timeline: { hash: item.timeline.hash }, playlist: [item] });
+  const report = f.context.externalPlaylistReport;
+  const descriptor = { version: 2, session_id: 'live-threshold-session', card_id: '97546', items: [{ index: 0, hash: item.timeline.hash, season: 1, episode: 1 }] };
+  assert.equal(f.context.bindJustPlusSession(descriptor, report), true);
+  const visit = { index: 0, hash: item.timeline.hash, season: 1, episode: 1, position_sec: 900, duration_sec: 1000, has_visit: true };
+  const event = endBy => ({ detail: { version: 2, session_id: descriptor.session_id, card_id: descriptor.card_id, end_by: endBy, current_index: 0, items: [visit] } });
+  assert.equal(f.context.handleJustPlusRawReportEvent(event('interval'), report), false, 'eligible history waits for the finish confirmation');
+  await flush();
+  assert.equal(f.context.finishCallCount, 1);
+  assert.equal(report.indexedEntries['0'].completionState, 'confirmed');
+  assert.equal(f.context.handleJustPlusRawReportEvent(event('user'), report), true);
+  await flush();
+  assert.deepEqual(f.calls.map(call => call.action), ['start']);
+  assert.equal(f.calls[0].progress, 90);
+  assert.equal(f.context.finishCallCount, 1, 'repeated final callback is idempotent');
+});
+
+test('Google TV season pack preserves native indexes with unnumbered special slots', async () => {
+  const f = integrationFixture();
+  const show = { id: 97546, tmdb_id: 97546, method: 'tv', type: 'tv', name: 'Ted Lasso', number_of_seasons: 4 };
+  const nativePlaylist = [
+    { season: 1, episode: 0, timeline: { hash: 'special-a', time: 0, duration: 60 } },
+    { season: 1, episode: 0, timeline: { hash: 'special-b', time: 0, duration: 60 } }
+  ];
+  for (const [season, count] of [[1, 10], [2, 12], [3, 12]]) {
+    for (let episode = 1; episode <= count; episode++) {
+      nativePlaylist.push({ season, episode, timeline: { hash: `s${season}e${episode}`, time: 0, duration: 1800 } });
+    }
+  }
+  f.setPlaylist([]);
+  f.playerEvent('external', { card: show, timeline: { hash: 's1e1' }, playlist: nativePlaylist });
+  const report = f.context.externalPlaylistReport;
+  assert.equal(report.playlistCount, 36);
+  assert.equal(Object.keys(report.indexedEntries).length, 34);
+  assert.equal(report.unmappedIndices['0'], 'unverified_episode');
+  assert.equal(report.unmappedIndices['1'], 'unverified_episode');
+  const descriptor = { version: 2, session_id: 'google-tv-36-slot-session', card_id: '97546', items: nativePlaylist.map((item, index) => ({ index, hash: item.timeline.hash, season: item.season, episode: item.episode })) };
+  assert.equal(f.context.bindJustPlusSession(descriptor, report), true, 'descriptor count matches physical playlist slots, including two unnumbered slots');
+  const unknownSpecial = { version: 2, session_id: descriptor.session_id, card_id: '97546', end_by: 'user', items: [
+    { index: 0, hash: 'special-a', season: 1, episode: 0, position_sec: 59, duration_sec: 60, has_visit: true }
+  ] };
+  assert.equal(f.context.handleJustPlusRawReportEvent({ detail: unknownSpecial }, report), false, 'unmapped special cannot become watched');
+  assert.equal(f.context.finishCallCount || 0, 0);
+  const e01 = { version: 2, session_id: descriptor.session_id, card_id: '97546', end_by: 'user', items: [
+    { index: 2, hash: 's1e1', season: 1, episode: 1, position_sec: 1686, duration_sec: 1856, has_visit: true }
+  ] };
+  assert.equal(f.context.handleJustPlusRawReportEvent({ detail: e01 }, report), false, 'eligible E01 waits for mock API confirmation');
+  await flush();
+  assert.deepEqual(f.context.finishedMedia.map(item => [item.season_number, item.episode_number, item.hash]), [[1, 1, 's1e1']]);
+  assert.equal(f.context.handleJustPlusRawReportEvent({ detail: e01 }, report), true);
+  assert.equal(f.context.finishCallCount, 1, 'duplicate callback does not duplicate history');
+});
+
+test('Google TV empty-PlayerPlaylist race keeps 90.8/94.7 visits through 503 retry and ACKs only after mock confirmation', async () => {
+  const f = integrationFixture();
+  const show = { id: 97546, tmdb_id: 97546, method: 'tv', type: 'tv', name: 'Ted Lasso', number_of_seasons: 4 };
+  const nativePlaylist = [
+    { season: 1, episode: 1, timeline: { hash: 'e01', time: 0, duration: 1856 } },
+    { season: 1, episode: 2, timeline: { hash: 'e02', time: 0, duration: 1760 } },
+    { season: 1, episode: 3, timeline: { hash: 'e03', time: 0, duration: 1824 } }
+  ];
+  f.setPlaylist([]);
+  f.playerEvent('external', { card: show, timeline: { hash: 'e01' }, playlist: nativePlaylist });
+  const report = f.context.externalPlaylistReport;
+  assert.ok(report, 'event playlist fallback creates the handoff while PlayerPlaylist.get() is empty');
+  const descriptor = { version: 2, session_id: 'google-tv-e01-e03', card_id: '97546', items: nativePlaylist.map((item, index) => ({ index, hash: item.timeline.hash, season: item.season, episode: item.episode })) };
+  assert.equal(f.context.bindJustPlusSession(descriptor, report), true);
+
+  const attempts = { 1: 0, 2: 0, 3: 0 };
+  f.context.finish = media => {
+    const episode = media.episode_number;
+    attempts[episode]++;
+    (f.context.finishedMedia || (f.context.finishedMedia = [])).push({ ...media });
+    if (episode === 1 && attempts[episode] === 1) return Promise.resolve({ ok: false, status: 503 });
+    return Promise.resolve({ ok: true, status: 200 });
+  };
+  const payload = { version: 2, session_id: 'google-tv-e01-e03', card_id: '97546', end_by: 'user', items: [
+    { index: 0, hash: 'e01', season: 1, episode: 1, position_sec: 1686, duration_sec: 1856, has_visit: true },
+    { index: 1, hash: 'e02', season: 1, episode: 2, position_sec: 1667, duration_sec: 1760, has_visit: true },
+    { index: 2, hash: 'e03', season: 1, episode: 3, position_sec: 153, duration_sec: 1824, has_visit: true }
+  ] };
+  assert.equal(f.context.handleJustPlusRawReportEvent({ detail: payload }, report), false, 'eligible episodes remain unacknowledged while history is pending');
+  await flush();
+  assert.equal(report.indexedEntries['0'].completionState, 'retryable', 'mock 503 stays retryable');
+  assert.equal(report.indexedEntries['1'].completionState, 'confirmed', 'E02 confirms independently');
+  assert.equal(attempts[3], 0, 'below-threshold E03 never calls the writer');
+  assert.equal(f.context.handleJustPlusRawReportEvent({ detail: payload }, report), false, 'E01 retry must confirm before ACK');
+  await flush();
+  assert.equal(report.indexedEntries['0'].completionState, 'confirmed');
+  assert.equal(f.context.handleJustPlusRawReportEvent({ detail: payload }, report), true, 'next duplicate snapshot may ACK all confirmed/below-threshold entries');
+  assert.equal(payload.__lampa_trakt_ack, true);
+  assert.deepEqual(attempts, { 1: 2, 2: 1, 3: 0 });
+  assert.deepEqual(f.context.finishedMedia.map(item => item.episode_number), [1, 2, 1]);
 });
 
 test('Android changed-only Timeline bridge can suppress a retry after an exhausted Trakt history write', async () => {

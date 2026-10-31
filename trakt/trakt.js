@@ -562,6 +562,9 @@
       }
       $.ajax(ajaxParams).done(function (data, _textStatus, jqXHR) {
         var status = jqXHR && typeof jqXHR.status === 'number' ? jqXHR.status : 200;
+        var safePath = '';
+        try { safePath = new URL(url, window.location.href).pathname; } catch (e) {}
+        if (/\/(?:search\/tmdb|sync\/history|scrobble\/start|scrobble\/pause|scrobble\/stop)(?:\/|$)/.test(safePath)) issue125Diag('api_response', { method: method, host: (function () { try { return new URL(url, window.location.href).host; } catch (e) { return ''; } })(), path: safePath, status: status });
         resolve({
           data: data,
           status: status,
@@ -569,6 +572,10 @@
         });
       }).fail(function (jqXHR) {
         var status = jqXHR && jqXHR.status ? jqXHR.status : 0;
+        var safePath = '';
+        var safeHost = '';
+        try { var parsedUrl = new URL(url, window.location.href); safePath = parsedUrl.pathname; safeHost = parsedUrl.host; } catch (e) {}
+        if (/\/(?:search\/tmdb|sync\/history|scrobble\/start|scrobble\/pause|scrobble\/stop)(?:\/|$)/.test(safePath)) issue125Diag('api_failure', { method: method, host: safeHost, path: safePath, status: status, ready_state: Number(jqXHR && jqXHR.readyState) || 0, status_text: String(jqXHR && jqXHR.statusText || '').slice(0, 40) });
         reject(Object.assign(new Error('TraktTV API Error'), {
           status: status,
           headers: parseResponseHeaders(jqXHR),
@@ -9042,7 +9049,21 @@
     var epoch = playbackActionEpoch;
     var operation = playbackActionChain.then(function () {
       if (epoch !== playbackActionEpoch) return;
-      if (previous && previous.started) return performScrobble('stop', previous.media, previous.progress);
+      // External players use our 90% history writer as the only watched
+      // authority. Trakt's /stop can scrobble at its lower default threshold,
+      // so close a Just+ episode with /pause before opening another episode.
+      if (previous && previous.started) {
+        // The Trakt gateway rejects /pause once progress exceeds 80% with
+        // progress_too_high. /stop at that point would let Trakt's lower
+        // default threshold create history before our configured threshold
+        // writer. A new START supersedes the old Now Watching item; otherwise
+        // Trakt expires it after the remaining runtime (documented API behavior).
+        if (previous.external && previous.progress >= 80) {
+          issue125Diag('external_pause_suppressed', { reason: 'progress_too_high', progress: previous.progress, next_episode: key });
+          return;
+        }
+        return performScrobble(previous.external ? 'pause' : 'stop', previous.media, previous.progress);
+      }
     }).then(function () {
       if (epoch !== playbackActionEpoch || activePlaybackSession !== session) return false;
       return performScrobble('start', session.media, session.progress).then(function (result) {
@@ -9060,6 +9081,10 @@
     if (!session || media && playbackSessionKey(media) !== session.key || session.state === 'paused' || session.state === 'stopping') return Promise.resolve(false);
     if (progress !== undefined && progress !== null) session.progress = Math.max(0, Math.min(100, Number(progress) || 0));
     session.state = 'paused';
+    if (session.external && session.progress >= 80) {
+      issue125Diag('external_pause_suppressed', { reason: 'progress_too_high', progress: session.progress, episode: session.media && session.media.episode_number });
+      return Promise.resolve({ skipped: true, reason: 'progress_too_high' });
+    }
     return queuePlaybackAction('pause', session, session.progress);
   }
   function resumePlaybackSession() {
@@ -10103,6 +10128,17 @@
   var currentPlaybackInstance = null;
   var terminalPlaybackInstanceId = null;
 
+  // Opt-in diagnostics for the parallel Android acceptance APK only. Never
+  // include credentials, cookies, stream URLs, or raw torrent hashes.
+  function issue125Diag(code, data) {
+    if (window.__ISSUE125_DIAGNOSTICS__ !== true) return;
+    var record = Object.assign({ code: code, wall_ms: Date.now() }, data || {});
+    try {
+      window.dispatchEvent(new CustomEvent('issue125:diagnostic', { detail: record }));
+      console.info('[Issue125Diag]', JSON.stringify(record));
+    } catch (e) {}
+  }
+
   function beginPlaybackInstance(media, hash, external) {
     if (!media) return null;
     playbackInstanceSequence++;
@@ -10121,14 +10157,24 @@
   }
 
   function buildExternalPlaylistReport(card, hash, playlist, token, generation) {
-    if (!card || getContentType$2(card) !== 'show' || !Array.isArray(playlist)) return null;
+    if (!card || getContentType$2(card) !== 'show' || !Array.isArray(playlist)) {
+      issue125Diag('handoff_rejected', { reason: !card ? 'missing_card' : getContentType$2(card) !== 'show' ? 'not_show' : 'playlist_not_array' });
+      return null;
+    }
     var entries = Object.create(null);
     var indexedEntries = Object.create(null);
+    var unmappedIndices = Object.create(null);
     function add(item, fallbackHash, index) {
-      if (!item || typeof item !== 'object') return;
+      if (!item || typeof item !== 'object') {
+        if (Number.isInteger(index) && index >= 0) unmappedIndices[String(index)] = 'invalid_item';
+        return;
+      }
       var timeline = item.timeline || {};
       var itemHash = timeline.hash || item.hash || fallbackHash;
-      if (!itemHash || String(itemHash) === '0') return;
+      if (!itemHash || String(itemHash) === '0') {
+        if (Number.isInteger(index) && index >= 0) unmappedIndices[String(index)] = 'missing_hash';
+        return;
+      }
       var se = extractSeasonEpisode(item);
       var media = Object.assign({}, card, {
         method: 'tv',
@@ -10137,7 +10183,10 @@
         hash: String(itemHash)
       });
       var identity = verifiedShowEpisode(media);
-      if (!identity) return;
+      if (!identity) {
+        if (Number.isInteger(index) && index >= 0) unmappedIndices[String(index)] = 'unverified_episode';
+        return;
+      }
       var key = String(itemHash);
       var initialPosition = Number(timeline.time);
       var candidate = {
@@ -10159,8 +10208,11 @@
     // PlayerPlaylist.get(); the Player.external payload remains authoritative
     // for that one item when it carries exact S/E coordinates.
     if (hash) add(card, hash);
-    if (!Object.keys(entries).length) return null;
-    return {
+    if (!Object.keys(entries).length) {
+      issue125Diag('handoff_rejected', { reason: 'no_verified_entries', playlist_count: playlist.length });
+      return null;
+    }
+    var report = {
       token: String(token || ''),
       identityGeneration: generation,
       cardId: String(card.tmdb_id || card.id || ''),
@@ -10169,8 +10221,12 @@
       // later; account, profile, and subsequent-player transitions invalidate it.
       entries: entries,
       indexedEntries: indexedEntries,
+      playlistCount: playlist.length,
+      unmappedIndices: unmappedIndices,
       nativeSessionId: null
     };
+    issue125Diag('handoff_created', { card_id: report.cardId, playlist_count: playlist.length, indexed_count: Object.keys(indexedEntries).length, unique_hash_count: Object.keys(entries).length });
+    return report;
   }
 
   function handleExternalPlaylistTimelineUpdate(data, report) {
@@ -10213,14 +10269,18 @@
     entry.completionState = 'pending';
     entry.completionKey = key;
     markFinishIntent(key);
+    issue125Diag('history_queued', { index: Object.keys(report.indexedEntries).find(function (i) { return report.indexedEntries[i] === entry; }) || null, season: entry.identity.season, episode: entry.identity.episode, percent: Math.round(percent * 100) / 100 });
     Promise.resolve().then(function () {
       if (externalPlaylistReport !== report || report.token !== String(Lampa.Storage.get('trakt_token') || '') || report.identityGeneration !== playbackIdentityGeneration) return { skipped: true, reason: 'stale_owner' };
+      issue125Diag('history_finish_called', { season: entry.identity.season, episode: entry.identity.episode });
       return finish(media);
     }).then(function (result) {
       if (externalPlaylistReport !== report || report.token !== String(Lampa.Storage.get('trakt_token') || '') || report.identityGeneration !== playbackIdentityGeneration) return;
       entry.completionState = result && result.ok || result && result.skipped && result.reason === 'already_finished' ? 'confirmed' : 'retryable';
+      issue125Diag('history_finish_result', { season: entry.identity.season, episode: entry.identity.episode, state: entry.completionState, http_status: result && result.status || null, reason: result && result.reason || (result && result.error && result.error.status === 0 ? 'transport_status_0' : result && result.clientError ? 'http_client_error' : null) });
     }).catch(function (e) {
       if (externalPlaylistReport === report && report.token === String(Lampa.Storage.get('trakt_token') || '') && report.identityGeneration === playbackIdentityGeneration) entry.completionState = 'retryable';
+      issue125Diag('history_finish_error', { season: entry.identity.season, episode: entry.identity.episode, state: 'retryable', http_status: Number(e && e.status) || 0, reason: Number(e && e.status) === 0 ? 'transport_status_0' : 'writer_exception' });
       slog('Just+ playlist history finish error', e && e.status || 'request_failed');
     });
     return true;
@@ -10228,31 +10288,34 @@
 
   function bindJustPlusSession(payload, report) {
     report = report || externalPlaylistReport;
-    if (!report || report !== externalPlaylistReport || !payload || payload.version !== 2 ||
-        typeof payload.session_id !== 'string' || !payload.session_id || payload.session_id.length > 128 ||
-        String(payload.card_id || '') !== report.cardId || !Array.isArray(payload.items) || !payload.items.length || payload.items.length !== Object.keys(report.indexedEntries).length ||
-        report.token !== String(Lampa.Storage.get('trakt_token') || '') || report.identityGeneration !== playbackIdentityGeneration || cloudInjectInProgress) return false;
-    if (report.nativeSessionId && report.nativeSessionId !== payload.session_id) return false;
+    var reason = !report || report !== externalPlaylistReport ? 'no_current_handoff' : !payload ? 'missing_descriptor' : payload.version !== 2 ? 'protocol_version' : typeof payload.session_id !== 'string' || !payload.session_id || payload.session_id.length > 128 ? 'invalid_session_id' : String(payload.card_id || '') !== report.cardId ? 'card_id_mismatch' : !Array.isArray(payload.items) || !payload.items.length ? 'empty_descriptor' : payload.items.length !== report.playlistCount ? 'playlist_count_mismatch' : report.token !== String(Lampa.Storage.get('trakt_token') || '') ? 'account_changed' : report.identityGeneration !== playbackIdentityGeneration ? 'profile_changed' : cloudInjectInProgress ? 'cloud_inject' : null;
+    if (reason) { issue125Diag('session_bind_rejected', { reason, native_count: payload && Array.isArray(payload.items) ? payload.items.length : null, js_count: report ? Object.keys(report.indexedEntries).length : null, card_match: !!(payload && report && String(payload.card_id || '') === report.cardId) }); return false; }
+    if (report.nativeSessionId && report.nativeSessionId !== payload.session_id) { issue125Diag('session_bind_rejected', { reason: 'stale_session_id' }); return false; }
     var seenIndices = Object.create(null);
     var valid = payload.items.every(function (item) {
       if (!item || seenIndices[String(item.index)]) return false;
       seenIndices[String(item.index)] = true;
-      var entry = item && Number.isInteger(item.index) && report.indexedEntries[String(item.index)];
-      return !!(entry && String(item.hash) === entry.hash && Number.isInteger(item.season) && Number.isInteger(item.episode) &&
-        item.season === entry.identity.season && item.episode === entry.identity.episode);
+      if (!Number.isInteger(item.index) || item.index < 0 || item.index >= report.playlistCount) return false;
+      var entry = report.indexedEntries[String(item.index)];
+      if (!entry) {
+        issue125Diag('session_item_unmapped', { index: item.index, reason: report.unmappedIndices[String(item.index)] || 'unknown_slot' });
+        return !!report.unmappedIndices[String(item.index)];
+      }
+      var hashMatch = !!(entry && String(item.hash) === entry.hash);
+      var seMatch = !!(entry && Number.isInteger(item.season) && Number.isInteger(item.episode) && item.season === entry.identity.season && item.episode === entry.identity.episode);
+      issue125Diag('session_item_match', { index: Number(item.index), hash_match: hashMatch, se_match: seMatch });
+      return !!(entry && hashMatch && seMatch);
     });
-    if (!valid) return false;
+    if (!valid || Object.keys(report.indexedEntries).some(function (index) { return !seenIndices[index]; })) { issue125Diag('session_bind_rejected', { reason: 'item_identity_mismatch' }); return false; }
     report.nativeSessionId = payload.session_id;
+    issue125Diag('session_bound', { card_id: report.cardId, session_id: payload.session_id, item_count: payload.items.length });
     return true;
   }
 
   function validateJustPlusRawReport(payload, report) {
     report = report || externalPlaylistReport;
-    if (!payload || payload.version !== 2 || !Array.isArray(payload.items) || !report || report !== externalPlaylistReport ||
-        !report.nativeSessionId || payload.session_id !== report.nativeSessionId ||
-        report.token !== String(Lampa.Storage.get('trakt_token') || '') || report.identityGeneration !== playbackIdentityGeneration ||
-        cloudInjectInProgress || !['completion', 'user', 'interval'].includes(String(payload.end_by || ''))) return false;
-    if (String(payload.card_id || '') !== report.cardId || payload.items.length === 0) return false;
+    var reason = !payload ? 'missing_payload' : payload.version !== 2 ? 'protocol_version' : !Array.isArray(payload.items) ? 'items_not_array' : !report || report !== externalPlaylistReport ? 'no_current_handoff' : !report.nativeSessionId ? 'session_not_bound' : payload.session_id !== report.nativeSessionId ? 'stale_session_id' : report.token !== String(Lampa.Storage.get('trakt_token') || '') ? 'account_changed' : report.identityGeneration !== playbackIdentityGeneration ? 'profile_changed' : cloudInjectInProgress ? 'cloud_inject' : !['completion', 'user', 'interval'].includes(String(payload.end_by || '')) ? 'invalid_end_reason' : String(payload.card_id || '') !== report.cardId ? 'card_id_mismatch' : payload.items.length === 0 ? 'empty_items' : null;
+    if (reason) { issue125Diag('raw_rejected', { reason, item_count: payload && Array.isArray(payload.items) ? payload.items.length : null }); return false; }
     var structurallyValid = payload.items.every(function (item) {
       // Repeated indexes are valid: each entry is a separate measured visit
       // (for example E02 → E03 → restart E02). The progress handler keeps the
@@ -10264,7 +10327,8 @@
         Number.isInteger(item.position_sec) && item.position_sec >= 0 &&
         Number.isInteger(item.duration_sec) && item.duration_sec > 0);
     });
-    if (!structurallyValid) return false;
+    if (!structurallyValid) { issue125Diag('raw_rejected', { reason: 'item_structure_or_identity_mismatch', item_count: payload.items.length }); return false; }
+    issue125Diag('raw_validated', { session_id: payload.session_id, card_id: report.cardId, item_count: payload.items.length, end_by: String(payload.end_by) });
     return { valid: true, watchingEnabled: !!Lampa.Storage.field('trakt_enable_watching') };
   }
 
@@ -10279,6 +10343,71 @@
     return accepted;
   }
 
+  function handleJustPlusScrobbleSnapshot(raw, report) {
+    if (typeof scrobbler === 'undefined') {
+      issue125Diag('live_scrobble_ignored', { reason: 'scrobbler_unavailable' });
+      return false;
+    }
+    if (!raw || !report || report !== externalPlaylistReport ||
+        raw.session_id !== report.nativeSessionId ||
+        report.scrobbleSessionId && raw.session_id !== report.scrobbleSessionId ||
+        report.token !== String(Lampa.Storage.get('trakt_token') || '') ||
+        report.identityGeneration !== playbackIdentityGeneration ||
+        !Lampa.Storage.field('trakt_enable_watching')) {
+      issue125Diag('live_scrobble_ignored', { reason: 'stale_or_disabled_owner' });
+      return false;
+    }
+    var active = scrobbler.getActiveSession && scrobbler.getActiveSession();
+    if (raw.end_by !== 'interval') {
+      if (active && active.external) {
+        issue125Diag('live_scrobble_pause', { reason: 'external_session_ended', end_by: String(raw.end_by || '') });
+        scrobbler.scrobblePause(active.media, active.progress);
+      }
+      return false;
+    }
+    if (!Number.isInteger(raw.current_index) || raw.current_index < 0) {
+      issue125Diag('live_scrobble_ignored', { reason: 'missing_current_index' });
+      return false;
+    }
+    var entry = report.indexedEntries[String(raw.current_index)];
+    if (!entry || entry.ambiguous) {
+      if (active && active.external) scrobbler.scrobblePause(active.media, active.progress);
+      issue125Diag('live_scrobble_ignored', { reason: 'unmapped_current_index', index: raw.current_index });
+      return false;
+    }
+    var visit = null;
+    (Array.isArray(raw.items) ? raw.items : []).forEach(function (item) {
+      if (item && item.index === raw.current_index && item.has_visit === true) visit = item;
+    });
+    if (!visit || !Number.isInteger(visit.position_sec) || visit.position_sec <= 0 ||
+        !Number.isInteger(visit.duration_sec) || visit.duration_sec <= 0 ||
+        String(visit.hash) !== entry.hash || visit.season !== entry.identity.season || visit.episode !== entry.identity.episode) {
+      issue125Diag('live_scrobble_ignored', { reason: 'current_visit_unverified', index: raw.current_index });
+      return false;
+    }
+    var media = Object.assign({}, entry.media, {
+      id: entry.identity.id,
+      method: 'tv',
+      season_number: entry.identity.season,
+      episode_number: entry.identity.episode,
+      hash: entry.hash
+    });
+    var percent = Math.max(0, Math.min(100, visit.position_sec / visit.duration_sec * 100));
+    var activeKey = active && active.key;
+    var targetKey = playbackSessionKey(media);
+    report.scrobbleSessionId = raw.session_id;
+    report.lastScrobbleIndex = raw.current_index;
+    if (!active || activeKey !== targetKey || !active.external) {
+      issue125Diag('live_scrobble_start', { index: raw.current_index, season: entry.identity.season, episode: entry.identity.episode, percent: Math.round(percent * 100) / 100, reason: active && active.external ? 'episode_transition' : 'first_measured_interval' });
+      scrobbler.scrobbleStart(media, percent, true);
+      return true;
+    }
+    scrobbler.updatePlaybackSession(media, percent);
+    issue125Diag('live_scrobble_progress', { index: raw.current_index, season: entry.identity.season, episode: entry.identity.episode, percent: Math.round(percent * 100) / 100 });
+    scrobbler.onProgressUpdate(entry.hash, percent, { time: visit.position_sec, duration: visit.duration_sec, percent: percent }, media);
+    return true;
+  }
+
   function handleJustPlusRawReportEvent(event, report) {
     var raw = event && event.detail;
     var validation = validateJustPlusRawReport(raw, report);
@@ -10289,17 +10418,23 @@
     // same full snapshot. This ACK is never an API-success placeholder.
     if (!validation.watchingEnabled) {
       raw.__lampa_trakt_ack = true;
+      issue125Diag('raw_ack', { reason: 'watching_disabled' });
       return true;
     }
+    handleJustPlusScrobbleSnapshot(raw, report);
     handleJustPlusRawReport(raw, report);
     var minimum = parseInt(Lampa.Storage.field('trakt_min_progress') == null ? config.minProgress : Lampa.Storage.field('trakt_min_progress'), 10);
     if (!isFinite(minimum)) minimum = 90;
     var allResolved = raw.items.every(function (item) {
       var entry = report.indexedEntries[String(item.index)];
-      return item.position_sec / item.duration_sec * 100 < minimum || entry.completionState === 'confirmed';
+      var percent = item.position_sec / item.duration_sec * 100;
+      var resolved = percent < minimum || entry.completionState === 'confirmed';
+      issue125Diag('raw_item_decision', { index: item.index, season: item.season, episode: item.episode, percent: Math.round(percent * 100) / 100, threshold: minimum, completion_state: entry.completionState, decision: percent < minimum ? 'below_threshold' : entry.completionState === 'confirmed' ? 'confirmed' : entry.completionState === 'pending' ? 'history_pending' : 'history_retryable' });
+      return resolved;
     });
-    if (!allResolved) return false;
+    if (!allResolved) { issue125Diag('raw_ack_pending', { reason: 'eligible_history_not_confirmed' }); return false; }
     raw.__lampa_trakt_ack = true;
+    issue125Diag('raw_ack', { reason: 'all_items_below_threshold_or_confirmed' });
     return true;
   }
 
@@ -10337,6 +10472,12 @@
     if (!previousKey || nextKey && previousKey === nextKey) return;
     var active = scrobbler.getActiveSession && scrobbler.getActiveSession();
     if (!active || active.key !== previousKey || playbackSessionKey(active.media) !== previousKey) return;
+    // External playback has its own measured history bridge. Never use Trakt's
+    // default /stop cutoff to finish it during a Lampa player transition.
+    if (active.external) {
+      scrobbler.scrobblePause(active.media, active.progress);
+      return;
+    }
 
     var previousIdentity = verifiedShowEpisode(previous.media);
     var nextIdentity = verifiedShowEpisode(nextMedia);
@@ -10362,7 +10503,8 @@
       markFinishIntent(getCompletionKey(completed));
       finish(completed).catch(function (e) { slog('episode transition finish error', e && e.status || 'request_failed'); });
     }
-    scrobbler.scrobbleStop(active.media, progress);
+            if (active.external) scrobbler.scrobblePause(active.media, progress);
+            else scrobbler.scrobbleStop(active.media, progress);
   }
 
   function finishAmbiguousEpisodeAtProgress(instance, progress) {
@@ -10542,7 +10684,9 @@
         var oldEpisode = previousInstance && verifiedShowEpisode(previousInstance.media);
         var newEpisode = verifiedShowEpisode(mediaForStart);
         var returnedExternalHash = !!(externalPlaylistReport && hash && externalPlaylistReport.entries[String(hash)] && !pendingExternalPlayback);
-        if (!externalReportMatchesPlayerStart(externalPlaylistReport, mediaForStart, hash)) externalPlaylistReport = null;
+        var externalStartMatch = externalReportMatchesPlayerStart(externalPlaylistReport, mediaForStart, hash);
+        if (externalPlaylistReport && !externalStartMatch) issue125Diag('handoff_cleared', { reason: 'player_start_mismatch', has_hash: !!hash, pending_handoff: !!pendingExternalPlayback, card_id_match: String(mediaForStart.tmdb_id || mediaForStart.id || '') === externalPlaylistReport.cardId });
+        if (!externalStartMatch) externalPlaylistReport = null;
         var sameHashDifferentEpisode = !!(reusedTimelineHash && oldEpisode && newEpisode && oldEpisode.id === newEpisode.id && (oldEpisode.season !== newEpisode.season || oldEpisode.episode !== newEpisode.episode));
         stopPreviousEpisodeOnPlayerStart(mediaForStart, hash || null);
         scrobbler.setCurrentMedia(mediaForStart);
@@ -11092,6 +11236,7 @@
       if (Lampa.Storage && Lampa.Storage.listener) {
         var activeToken = String(Lampa.Storage.get('trakt_token') || '');
         var invalidatePlaybackIdentity = function invalidatePlaybackIdentity() {
+          issue125Diag('handoff_cleared', { reason: 'identity_invalidated' });
           playbackIdentityGeneration++;
           activeToken = String(Lampa.Storage.get('trakt_token') || '');
           markPlaybackInstanceTerminal();
@@ -11106,11 +11251,14 @@
         var _authChangeHandler = function _authChangeHandler(e) {
           if (!e) return;
           if (e.name === 'trakt_enable_watching' && !Lampa.Storage.field('trakt_enable_watching')) {
+            issue125Diag('handoff_cleared', { reason: 'watching_disabled' });
             playbackIdentityGeneration++;
             markPlaybackInstanceTerminal();
             currentPlaybackInstance = null;
             externalPlaylistReport = null;
-            scrobbler.scrobbleStop();
+            var activeSession = scrobbler.getActiveSession && scrobbler.getActiveSession();
+            if (activeSession && activeSession.external) scrobbler.scrobblePause(activeSession.media, activeSession.progress);
+            else scrobbler.scrobbleStop();
             pendingExternalPlayback = null;
             pendingInternalPlayback = null;
             timelineProgressSamples = {};
@@ -11119,6 +11267,7 @@
           if (e.name !== 'trakt_token') return;
           var nextToken = String(Lampa.Storage.get('trakt_token') || '');
           if (nextToken === activeToken) return;
+          issue125Diag('handoff_cleared', { reason: 'account_changed' });
           invalidatePlaybackIdentity();
         };
         Lampa.Storage.listener.follow('change', _authChangeHandler);
@@ -11127,6 +11276,7 @@
         });
         if (Lampa.Account && Lampa.Account.listener) {
           var _profileChangeHandler = function _profileChangeHandler() {
+            issue125Diag('handoff_cleared', { reason: 'profile_changed' });
             invalidatePlaybackIdentity();
           };
           Lampa.Account.listener.follow('profile_select', _profileChangeHandler);
@@ -11148,7 +11298,9 @@
             timelineProgressSamples = {};
             if (!isExternalHandoff) markPlaybackInstanceTerminal();
             if (!Lampa.Storage.field('trakt_enable_watching')) {
-              if (scrobbler.getActiveSession()) scrobbler.scrobbleStop();
+              var disabledSession = scrobbler.getActiveSession && scrobbler.getActiveSession();
+              if (disabledSession && disabledSession.external) scrobbler.scrobblePause(disabledSession.media, disabledSession.progress);
+              else if (disabledSession) scrobbler.scrobbleStop();
               return;
             }
             var token = Lampa.Storage.get('trakt_token');
@@ -11173,11 +11325,14 @@
             }
             var currentProgress = playback ? playback.progress : lastTimeline.road && lastTimeline.road.percent || 0;
             var minProgress = parseInt(Lampa.Storage.field('trakt_min_progress') || 90, 10);
-            if (playback && typeof scrobbler.scrobbleStop === 'function') scrobbler.scrobbleStop(playback.media, currentProgress);
+            if (playback) {
+              if (playback.external) scrobbler.scrobblePause(playback.media, currentProgress);
+              else if (typeof scrobbler.scrobbleStop === 'function') scrobbler.scrobbleStop(playback.media, currentProgress);
+            }
 
             // Primary finish route is timeline update.
             // Ended without a hash may use a fallback only after the normal completion threshold.
-            var shouldFallbackFinish = !!(evt && evt.type === 'ended' && !lastTimeline.hash && currentProgress >= minProgress);
+            var shouldFallbackFinish = !!(evt && evt.type === 'ended' && !(playback && playback.external) && !lastTimeline.hash && currentProgress >= minProgress);
             if (shouldFallbackFinish && watching && typeof watching.finish === 'function') {
               var key = watching && typeof watching.getCompletionKey === 'function' ? watching.getCompletionKey(media) : null;
               if (key && typeof watching.markFinishIntent === 'function') watching.markFinishIntent(key);
@@ -11210,7 +11365,9 @@
               pendingExternalPlayback = null;
               markPlaybackInstanceTerminal();
               currentPlaybackInstance = null;
-              if (playback && playback.external) scrobbler.scrobbleStop(playback.media, playback.progress);
+              // Trakt /stop may create watched history at its default 80% cutoff.
+              // The Just+ history writer applies the user's configured threshold.
+              if (playback && playback.external) scrobbler.scrobblePause(playback.media, playback.progress);
             }
           }
         };
@@ -11235,11 +11392,16 @@
       // External hand-off is not proof of playback. Wait for a real Timeline position.
       var _externalHandler = function _externalHandler(e) {
         try {
+          // Lampa's event emitter calls the `external` listener with the
+          // payload itself ({card, timeline, ...}); some wrappers instead
+          // nest it under `data`. Accept both forms without guessing identity.
+          var externalData = e && e.data && typeof e.data === 'object' ? e.data : e;
+          issue125Diag('player_external_seen', { shape: e && e.data && typeof e.data === 'object' ? 'nested_data' : 'direct_payload', event_keys: e && typeof e === 'object' ? Object.keys(e).slice(0, 32) : [], has_card: !!(externalData && externalData.card), has_timeline: !!(externalData && externalData.timeline), has_hash: !!(externalData && externalData.timeline && externalData.timeline.hash) });
           if (!Lampa.Storage.field('trakt_enable_watching')) return;
           if (!Lampa.Storage.get('trakt_token')) return;
-          var card = e && e.data && (e.data.card || Lampa.Storage.get('trakt_last_card'));
+          var card = externalData && externalData.card || Lampa.Storage.get('trakt_last_card');
           if (!card) return;
-          var timeline = e && e.data && e.data.timeline;
+          var timeline = externalData && externalData.timeline;
           pendingInternalPlayback = null;
           scrobbler.setCurrentMedia(card);
           var playerPlaylist = [];
@@ -11248,6 +11410,16 @@
           } catch (playlistError) {
             playerPlaylist = [];
           }
+          var eventPlaylist = externalData && externalData.playlist;
+          var eventPlaylistItems = Array.isArray(eventPlaylist) ? eventPlaylist :
+            eventPlaylist && Array.isArray(eventPlaylist.items) ? eventPlaylist.items : null;
+          var playerPlaylistCount = Array.isArray(playerPlaylist) ? playerPlaylist.length : 0;
+          var eventPlaylistCount = eventPlaylistItems ? eventPlaylistItems.length : 0;
+          // In Android's real `external` event, the selected playlist is
+          // present on the payload, while PlayerPlaylist.get() can still be
+          // empty because the native handoff runs before the UI model settles.
+          if (!playerPlaylistCount && eventPlaylistItems) playerPlaylist = eventPlaylistItems;
+          issue125Diag('external_playlist_source', { player_playlist_count: playerPlaylistCount, event_playlist_type: Array.isArray(eventPlaylist) ? 'array' : eventPlaylist && typeof eventPlaylist === 'object' ? 'object' : typeof eventPlaylist, event_playlist_count: eventPlaylistCount });
           externalPlaylistReport = buildExternalPlaylistReport(
             card,
             timeline && timeline.hash,
@@ -11255,6 +11427,7 @@
             String(Lampa.Storage.get('trakt_token') || ''),
             playbackIdentityGeneration
           );
+          issue125Diag('handoff_owner', { watching_enabled: !!Lampa.Storage.field('trakt_enable_watching'), token_present: !!Lampa.Storage.get('trakt_token'), card_id: String(card.tmdb_id || card.id || ''), playlist_count: Array.isArray(playerPlaylist) ? playerPlaylist.length : 0, report_created: !!externalPlaylistReport });
           pendingExternalPlayback = timeline && timeline.hash ? {
             media: card,
             hash: timeline.hash,

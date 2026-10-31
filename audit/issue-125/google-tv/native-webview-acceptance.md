@@ -1,5 +1,36 @@
 # Physical native/WebView acceptance — 2026-10-30
 
+## Real Siaivo / Ted Lasso acceptance — 2026-10-31
+
+This section supersedes the earlier statement that no real Siaivo season torrent or authenticated history write had been exercised. The separate Android package `top.rootu.lampa.issue125probe` opened the actual configured Siaivo page `http://siaivo.isroot.in`, used its real torrent overlay and 36-file season pack (two unnumbered special slots followed by S01E01 at native index 2, E02 at 3, E03 at 4, E04 at 5), and launched those files in Just+ 2.5.1. `Lampa.PlayerPlaylist.get()` returned all 36 items with the same exact S/E at the native indexes; the session descriptor matched card ID 97546 and the known episode entries. No production APK, parser, TorrServer or setting was changed.
+
+The authenticated read-only precheck showed Ted Lasso Trakt ID 162639 and no S01E02–E04 history. The owner had authorized at most E01–E04. Exactly those four episode histories are now confirmed; no other Trakt data was changed. E01/E02 confirmation predates the final portion of the retained log. E03/E04 and the exact correlated Android/WebView/API events are retained in `ted-lasso-live-events.jsonl`.
+
+| Episode | Physical Just+ measurement used for acceptance | JS/history decision | Remote result/readback |
+|---|---:|---|---|
+| S01E01 | 1686/1856 = 90.84% at interval; later actual exit snapshot 1839/1855 = 99.14% | Exact native index/S/E; eligible at configured 90% | `/sync/history` accepted (HTTP 201); authenticated history read showed E01 once |
+| S01E02 | 1616/1760 = 91.82% interval snapshot (earlier interval had lower position) | Exact native index 3 / S01E02; eligible | History readback after E02: S01 `[1,2]`; one effective row |
+| S01E03 | 1686/1824 = 92.43%; prior interval was 287/1824 = 15.73% | Live session on E03; history queued and ACK held until API confirmation | `/sync/history` HTTP 201; authenticated readback `[1,2,3]`; native ACK true after confirmation |
+| S01E04 | 1884/2018 = 93.36%; final user snapshot 1924/2018 = 95.34% | Exact index 5 / S01E04; eligible | `/sync/history` HTTP 201; authenticated readback `[1,2,3,4]`; native ACK true after confirmation |
+
+Progress for E02–E04 used the seek controls in Just+ and is therefore a **seek-based integration test**, not evidence of watching those episodes in real time. It did use actual player positions, actual `duration_sec`, Just+ interval callbacks, Android receiver delivery and authenticated API confirmation; no JS payload or progress number was forged. Four was the total authorized write ceiling and it was not exceeded.
+
+### Correlated live/ACK events
+
+The same native session UUID `d6a43d2d-1923-427d-8ce8-53635214d762` generated 120-second snapshots at 06:34:08, 06:36:08, 06:38:08 and 06:40:08 local time. The first snapshot held E02 at index 3 = 1616/1760 and E03 at index 4 = 167/1824. The second had E03 at 287/1824; its JS live event started S01E03 at 15.73%, and the start request returned HTTP 201. The third had E03 1686/1824 (92.43%): the plugin queued the exact history, left raw ACK false while the write was pending, got HTTP 201, and ACKed at 06:38:11. The fourth included E04 1884/2018 (93.36%): JS started the exact E04 live session, queued history, got HTTP 201, then ACKed at 06:40:11. The per-event timestamps and safe fields are in `ted-lasso-live-events.jsonl`.
+
+The Lampa detail UI subsequently showed `Trakt · Переглянуто: 4/44`, “Остання переглянута: For the Children” (E04), and “Наступна непереглянута: Tan Lines” (E05). This is a real Siaivo/Trakt+ detail-page refresh, not the previous controlled fixture. It verifies aggregate watched rendering and exact latest/next labels; it does not verify every separate season-card badge or UI after process restart.
+
+### Real raw ACK failure and live pause defect
+
+Earlier raw `ack=false` events in this run were transient and correct while an eligible `/sync/history` request was pending. They became `ack=true` only after HTTP 201 and the writer changed the episode state to `confirmed`. In the prior failed runtime, permanent `ack=false` was caused by the local read-only CDP guard blocking the history POST, compounded by the real season pack having 36 native slots (including two specials) while the old handoff assumed only numbered entries. Removing the guard and binding all indexed slots with exact S/E fixed the runtime; the 36-item production handoff and raw report are now physically accepted.
+
+Live scrobbling is **partly accepted**: actual interval reports started E03 at 15.73% and E04 at 93.36%, and their `/trakt/scrobble/start` responses were HTTP 201. However, switching away from high-progress E03 and exiting high-progress E04 caused `/trakt/scrobble/pause` HTTP 422. A sanitized replay of the same pause body exposed the response code `progress_too_high`. This is a real gateway response, not a CORS or `status:0` transport failure. The current worktree suppresses invalid pause calls at >=80% to avoid the known 422 and never uses `/stop` (which could create watched history at Trakt's lower default threshold); a new start replaces the old live item, otherwise the accepted start expires after its remaining runtime. The suppression change has unit coverage but is **not yet installed or physically re-verified**.
+
+An authenticated `GET /sync/playback` returned an empty list. Trakt documents this endpoint as saved playback progress after a pause, not a live Now Watching query, so that result neither disproves nor confirms the public Now Watching display. The physical `scrobble/start` HTTP 201 is confirmed; direct user-specific Now Watching UI/readback remains unverified. Likewise, pause suppression's expiry behavior still needs a post-build runtime check before declaring live scrobbling complete.
+
+The currently installed parallel APK predates the pause-suppression change. It must be rebuilt from the final worktree JS, checksum/signature checked and installed over the **parallel** package before any further runtime acceptance. Production `top.rootu.lampa` remains untouched. Real history count remains exactly four, E01–E04.
+
 ## Actual Siaivo site smoke check — 2026-10-30
 
 After the owner logged into the parallel `Lampa Trakt Test` application, its WebView was checked read-only against the configured site. The stored launch URL was read from the application before the APK update as `https://siaivo.github.io`; the live page redirects to `http://siaivo.isroot.in/`. The actual Home UI rendered and reported Activity `main`, Hybrid `3.1.0-single-presentation-owner`, and Trakt+ `3.4.1-rating-widgets`. Trakt token presence and Watching Sync were checked only as booleans; no credential value was read or printed.

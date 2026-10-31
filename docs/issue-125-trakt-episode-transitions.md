@@ -61,6 +61,14 @@ The Android wrapper's reviewed `handleJustPlusReport()` path emits `Lampa.Timeli
 
 Android compares each normalized playlist item with its saved Timeline and emits `Lampa.Timeline.update()` only when they differ; it then persists the new playlist. If the first qualifying event reaches the plugin but all bounded Trakt history attempts fail, a repeated identical Just+ result normally emits no second Timeline event. The `retryable` state allows a later eligible callback to retry, but does not schedule a durable retry itself. A later measured position change can trigger another attempt; after the final result callback this is **best effort / NOT GUARANTEED**. A production-handler regression models the changed-only guard and confirms that an identical report is suppressed after failure.
 
+### 2026-10-31 real Siaivo / Ted Lasso result
+
+The separate v1.13.5 parallel APK opened the actual Siaivo UI and its 36-file S01 torrent. Its native playlist index map was `[2→S01E01, 3→S01E02, 4→S01E03, 5→S01E04]` after two unnumbered specials; `Lampa.PlayerPlaylist.get()` and native descriptor agreed on exact S/E. Just+ callbacks reached the Android receiver and WebView every 120 seconds. Four owner-authorized history writes, E01–E04 only, are confirmed by authenticated readback; Siaivo's detail UI refreshed to `4/44`, latest E04 “For the Children”, next E05 “Tan Lines”. E02–E04 used actual Just+ seek position for the integration test, so these are not real-time full-watch claims. See [the physical acceptance log](../audit/issue-125/google-tv/native-webview-acceptance.md) and [sanitized correlated events](../audit/issue-125/google-tv/ted-lasso-live-events.jsonl).
+
+Raw callback ACK was false only while a qualifying history write remained pending; after HTTP 201 and local `completionState=confirmed`, ACK became true. The earlier permanent false state came from the read-only CDP guard blocking POST plus a handoff that did not account for all 36 season-pack slots. Both conditions are removed in the tested parallel build.
+
+Live `/scrobble/start` is physically accepted for E03 and E04 (HTTP 201). High-progress `/scrobble/pause` physically returns HTTP 422 with gateway reason `progress_too_high`. The worktree now suppresses pause at >=80% and avoids `/stop`, preserving the custom 90% history rule; this fix has regression tests but has not yet been built/installed/rechecked on device. Thus history is physically accepted; live start is accepted; live pause/Now Watching expiry remains **NOT READY for owner acceptance** until the rebuilt candidate is verified. `/sync/playback` returning an empty list is not evidence about Now Watching because that endpoint exposes saved resume progress after pause.
+
 ### Physical Google TV acceptance procedure
 
 Use a patched test build and a mocked Trakt transport (or a disposable test account), never the owner's production Trakt history.
