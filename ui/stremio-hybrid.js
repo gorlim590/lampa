@@ -64,10 +64,10 @@ body.stremio-hybrid .items-line__head { padding:0 1.8em 1em; }
 body.stremio-hybrid .items-line__title { font-size:1.2em; font-weight:500; letter-spacing:.01em; }
 body.stremio-hybrid .items-line .scroll__content { padding-left:1.8em; padding-right:var(--sh-inset); }
 body.stremio-hybrid .items-line:not(.vinyl-line) .scroll__body { gap:var(--ydesign-card-gap,var(--sh-gap)); }
-body.stremio-hybrid .card { transition:transform var(--sh-speed) var(--sh-ease) !important; backface-visibility:visible !important; transform:none; }
+body.stremio-hybrid .card { transition:box-shadow var(--sh-speed) var(--sh-ease) !important; backface-visibility:visible !important; transform:none; }
 body.stremio-hybrid .ydesign-card, body.stremio-hybrid .ydesign-card.focus { animation:none !important; }
-body.stremio-hybrid .card.focus { transform:scale(1.035) !important; z-index:20; }
-body.stremio-hybrid .card .card__view { border-radius:var(--sh-radius) !important; transition:none !important; }
+body.stremio-hybrid .card.focus { transform:none !important; z-index:20; }
+body.stremio-hybrid .card .card__view { border-radius:var(--sh-radius) !important; transition:box-shadow var(--sh-speed) var(--sh-ease) !important; }
 body.stremio-hybrid .card.ydesign-card .card__view { border-radius:var(--yd-r,var(--sh-radius)) !important; }
 body.stremio-hybrid .card.focus .card__view, body.stremio-hybrid .card.hover .card__view { box-shadow:0 0 0 .14em var(--sh-text),0 0 0 .27em var(--sh-ring) !important; }
 /* One outer card focus renderer; native/Interface pseudo-rings yield to the shell. */
@@ -358,6 +358,8 @@ body.stremio-hybrid .sh-movie-page .sh-details-secondary{display:flex;flex-direc
 body.stremio-hybrid .sh-movie-page .sh-details-secondary>.sh-movie-description{order:0!important;}
 body.stremio-hybrid .sh-movie-page .sh-details-secondary>.sh-detail-panels{order:1!important;}
 body.stremio-hybrid .sh-movie-page .sh-details-zone-title{align-self:stretch;margin:0 0 .8em;padding:0 0 .45em;border-bottom:1px solid #ffffff12;color:#b9a5f3;font-size:.78em;font-weight:600;letter-spacing:.08em;text-transform:uppercase;}
+body.stremio-hybrid .sh-movie-page .sh-details-zone-title.selector{cursor:pointer;}
+body.stremio-hybrid .sh-movie-page .sh-details-zone-title.selector.focus{outline:2px solid var(--sh-accent-soft);outline-offset:3px;border-radius:.25em;color:#fff;}
 body.stremio-hybrid .sh-movie-page .sh-details-zone-title--content{margin:1.4em 0 .6em;}
 body.stremio-hybrid .sh-movie-page .items-line.sh-details-empty-native-row{display:none;}
 body.stremio-hybrid .sh-movie-page .sh-movie-description,body.stremio-hybrid .sh-movie-page .sh-movie-description .full-descr__text{display:block;color:#f4f2fa!important;-webkit-text-fill-color:#f4f2fa!important;text-shadow:0 1px 2px #0009!important;background:none!important;filter:none!important;opacity:1!important;-webkit-line-clamp:unset;-webkit-mask-image:none!important;mask-image:none!important;max-height:none!important;overflow:visible!important;white-space:pre-line;line-height:1.7!important;}
@@ -696,7 +698,7 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
         var hostBody=host&&(Array.prototype.filter.call(host.children,function(child){return child.classList&&child.classList.contains('items-line__body');})[0]||host.querySelector('.items-line__body')||host),parent=hostBody||root;
         if(!record.detailsSecondary){
             record.detailsSecondary=document.createElement('section');record.detailsSecondary.className='sh-details-secondary';
-            record.detailsSecondaryHeading=document.createElement('div');record.detailsSecondaryHeading.className='sh-details-zone-title';record.detailsSecondaryHeading.textContent='Опис і додаткова інформація';
+            record.detailsSecondaryHeading=document.createElement('div');record.detailsSecondaryHeading.className='sh-details-zone-title selector';record.detailsSecondaryHeading.setAttribute('role','heading');record.detailsSecondaryHeading.setAttribute('tabindex','0');record.detailsSecondaryHeading.textContent='Опис і додаткова інформація';
             record.detailsSecondary.appendChild(record.detailsSecondaryHeading);
         }
         if(record.detailsSecondary.parentNode!==parent)parent.appendChild(record.detailsSecondary);
@@ -901,6 +903,8 @@ body.stremio-hybrid .sh-movie-page .full-episode--small{border-radius:.75em;over
         var original=controller.up;
         record.ratingController=controller;record.originalRatingUp=original;
         record.ratingUp=function(){
+            var focused=record.page&&record.page.querySelector('.selector.focus');
+            if(focused===record.detailsSecondaryHeading&&leaveDetailsZone(record,focused))return;
             var from=record.root.querySelector('.full-start-new__buttons .selector.focus'),rating=record.root.querySelector('.tp-personal-rating');
             if(from&&rating&&rating.getClientRects().length&&record.root.isConnected){
                 if(controller.link)controller.link.last=rating;

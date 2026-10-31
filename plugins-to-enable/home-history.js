@@ -1,4 +1,4 @@
-/* Home rows: native playback positions and confirmed Trakt truth are independent. */
+/* Built-in Home rows: native playback positions and confirmed Trakt truth are independent. */
 (function () {
     'use strict';
     if (window.LampaHomeHistory) return;
@@ -334,6 +334,8 @@
         function ready() {
             if (window.createHomeHistoryPolicy) policy = window.createHomeHistoryPolicy(L, { scope: scope, node: node, refresh: queue });
             window.LampaHomeHistory.policyReady = !!policy; install();
+            var gate = window.LampaTraktHomeGate;
+            if (gate && gate.homePolicyReady) gate.homePolicyReady();
         }
         if (window.createHomeHistoryPolicy || !entryUrl || !document.head) return ready();
         var script = document.createElement('script');

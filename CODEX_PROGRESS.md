@@ -1,5 +1,11 @@
 # Stremio × Lampa — прогрес
 
+## Home стартує одразу з Trakt-категоріями (2026-10-31)
+- `loader.js` тепер у критичному порядку завантажує Trakt core → Trakt+ → Home Policy → Home History; окремий URL `home-history.js` більше не потрібен. Версію loader піднято для cache busting.
+- Перший активний Home прихований до побудови Trakt-рядків. Home Policy просить одноразово зібрати Main через штатний ContentRows pipeline; loader відкриває екран після завершення очікуваних Trakt rows. За відсутності авторизації/відповідей показує помилку з retry замість старих категорій. Якщо стартовий маршрут не Home, gate знімається.
+- Оновлено loader regression для критичного порядку та gate, документацію активації й інвентар: Home History тепер built-in. Сайт ще не розгортався; production Lampa й її налаштування не змінювалися.
+- Перевірка: targeted loader/Home/Trakt regression run пройшов (111 tests). Фізичний запуск на Google TV і перевірка публічної сторінки після deploy не виконувалися.
+
 ## Етап 1: середовище (2026-10-22)
 - Робоча директорія доступна; кореневий `.git` — read-only заглушка, не Git-клон. Буде використано окремий локальний репозиторій доставки.
 - XDG_SESSION_TYPE=x11, DISPLAY=:0; wmctrl і xdotool: Cannot open display. Нові скриншоти вікна Stremio — BLOCKED. Безпеку X11 не змінювали. Є наданий раніше stremio-reference/test.png: це весь робочий стіл, частково закритий терміналом; лише допоміжний референс, не нова перевірка.
@@ -1246,3 +1252,11 @@ Next publishupdatedPR50(mainmerge+marginfixonly),CI/merge;thenPR53retargettothat
 - Physical Google TV: killed only the parallel test app process during Just+ E07 at 454/1928 sec. Native snapshot survived with exact index 6/S01E07 mapping. Cold Siaivo page did not request Trakt JS, so bounded raw delivery ACKs were false. After the exact repository script was loaded through test-only asset override, JS restored the matching handoff and native ACK became true. No history write (23.55%, below 90%).
 - Current cold-page plugin auto-load and continuous Now Watching are still blockers. No production APK/data or Trakt history was changed. Full evidence: `audit/issue-125/google-tv/persistent-recovery-acceptance.md`.
 - Commits `ddf922c` (implementation/evidence) and `4187805` (playlist harness). All five GitHub Actions passed on `4187805`; PR #138 remains Draft.
+
+## Home startup and Details navigation report (2026-10-31)
+- Baseline `d03488375965e8cfa152eb8df2299a1a238ee269`, isolated local branch `fix/home-startup-and-details-navigation`; no production site/APK changes or pushes.
+- Source diagnosis (superseded by the Home startup implementation below): `home-policy.bootstrap()` and Trakt+ `ensureHome()` could cause late Home rebuilds. The current change moves those owners into the early ordered loader lane and gates the initial Home until Trakt rows are ready.
+- Hybrid had an explicit `scale(1.035)` on focused cards. Removed scaling, retaining a smooth outline transition.
+- Details heading was plain text and absent from the controller collection, so the first Down from Torrent skipped to the first selectable disclosure toggle. Made the unified “Опис і додаткова інформація” heading focusable and wired Up to return to the native Torrent action; synopsis remains expanded by the existing no-clamp CSS.
+- Focused verification: `node --check` on changed JS; targeted Details, card-focus and Home-order tests; `git diff --check` PASS. Device/source was inspected read-only; changed scripts were not deployed, so UI changes have not been physically accepted on the TV.
+- PR #140 release checks initially exposed one stale loader-order assertion in `tests/settings-census.cjs`; updated it to assert the new ordered Trakt/Home critical lane. CI-equivalent local suite: **640/640 PASS**, repository checker and changed-file syntax PASS. GitHub Actions rerun is required on the follow-up commit before merge.

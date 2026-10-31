@@ -27,10 +27,12 @@ test('script inventory strips credentials/query strings and never serializes fun
  const doc={querySelectorAll:()=>[{getAttribute:()=> 'https://user:secret@example.org/plugin.js?token=fixture-secret'}]};
  const r=census.capture(L,doc),json=JSON.stringify(r);assert(!json.includes('fixture-secret'));assert(!json.includes('user:secret'));assert.deepEqual(r.scripts,[{host:'example.org',path:'/plugin.js'}]);
 });
-test('production loader starts the canonical shell before appready and defers optional services',()=>{
+test('production loader starts Trakt Home owners before appready and defers optional services',()=>{
  const source=fs.readFileSync(__dirname+'/../loader.js','utf8');
- assert.match(source,/var CRITICAL = \['ui\/stremio-hybrid\.js', 'ui\/interface-plus\.js', 'ui\/design-optimized\.js'\]/);
- assert.match(source,/var DEFAULT_DEFERRED = \[[\s\S]*?'trakt\/trakt\.js', 'trakt\/trakt-plus\.js', 'providers\/torrent-search\.js'/);
+ const critical=source.match(/var CRITICAL = \[([\s\S]*?)\];/)[1],deferred=source.match(/var DEFAULT_DEFERRED = \[([\s\S]*?)\];/)[1];
+ const entries=["'ui/stremio-hybrid.js'","'ui/interface-plus.js'","'ui/design-optimized.js'","'trakt/trakt.js'","'trakt/trakt-plus.js'","'plugins-to-enable/home-policy.js'","'plugins-to-enable/home-history.js'"].map(path=>critical.indexOf(path));
+ assert(entries.every(index=>index>=0));assert.deepEqual(entries,[...entries].sort((a,b)=>a-b));
+ assert.match(deferred,/providers\/torrent-search\.js/);assert(!deferred.includes('trakt/trakt.js')&&!deferred.includes('trakt/trakt-plus.js'));
  assert.match(source,/loadParallelOrdered\(CRITICAL, 'critical', function \(\) \{[\s\S]*?waitForAppReady\(\);[\s\S]*?\}\);/);
  assert(source.includes("readinessOwner.follow('app', readinessListener)"));
  assert(source.includes('L.Listener.remove'));
