@@ -124,7 +124,7 @@ test('late native dependencies start the deferred adapter only after appready ar
   assert.equal(window.LampaLoaderDiagnostics.loaded, 9);
 });
 
-test('first Home remains hidden until Trakt rows are built and complete', () => {
+test('first Home releases after its initial Trakt rows complete without waiting for lazy catalogue rows', () => {
   const { scripts, timers, window, document, rootClasses } = fixture([]);
   assert(rootClasses.has('lampa-trakt-home-pending'));
   scripts.forEach(script => script.onload());
@@ -133,13 +133,18 @@ test('first Home remains hidden until Trakt rows are built and complete', () => 
   window.Lampa = { Activity: { active: () => active, replace() { replacements++; active = { component: 'main', source: 'tmdb', activity: { component: { items: [] } } }; } } };
   const gate = window.LampaTraktHomeGate;
   gate.homePolicyReady();
-  gate.traktRowsReady(['trakt-popular', 'trakt-trending']);
+  const names = ['trakt-popular', 'trakt-trending', 'trakt-dorama', 'trakt-cartoons', 'trakt-anime', 'trakt-because', 'trakt-gems', 'trakt-top', 'trakt-genre-horror', 'trakt-fresh', 'trakt-anticipated', 'trakt-weekly', 'trakt-classics', 'trakt-top-shows', 'trakt-new-shows', 'trakt-genre-comedy', 'trakt-genre-mystery', 'trakt-genre-documentary', 'trakt-genre-thriller', 'trakt-genre-scifi'];
+  gate.traktRowsReady(names);
+  assert.equal(gate.totalExpected, 20, 'Trakt+ may register more rows than Lampa requests during initial Home construction');
+  assert.deepEqual(gate.expected, names.slice(0, 4), 'startup waits only for the first four ordered categories');
   gate.requestHomeBuild();
   assert.equal(replacements, 1);
   assert(rootClasses.has('lampa-trakt-home-pending'), 'initial/native categories stay hidden while Trakt is loading');
   gate.homeRowComplete('trakt-popular');
   active.activity.component.items.push({ data: { home_row_origin: 'trakt', results: [{ id: 1 }] } });
   gate.homeRowComplete('trakt-trending');
+  gate.homeRowComplete('trakt-dorama');
+  gate.homeRowComplete('trakt-cartoons');
   const poll = Array.from(timers.values()).find(timer => timer.ms === 150);
   assert(poll);
   poll.fn();

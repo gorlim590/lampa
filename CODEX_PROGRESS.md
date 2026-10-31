@@ -1,5 +1,11 @@
 # Stremio × Lampa — прогрес
 
+## Home First — фізичний startup fix після PR #140 (2026-10-31)
+- Baseline `main` `b60cad011f23c1637f025fb9300fce11b399abd4`. На Google TV паралельна APK `top.rootu.lampa.issue125probe` запускала справжній Siaivo, але loader gate помилково чекав завершення всіх 20 Trakt+ рядів, хоча Lampa запитує їх ліниво. Після 45 с gate завершувався `trakt-rows-incomplete`, блокуючи весь Home.
+- При reload WebView фактичний тракт-скрипт відповідав застарілому кешованому URL із версією `20261031-trakt-home-first-1` (604503 байти); поточний файл з GitHub Pages — 602879 байтів. Loader/Home Policy/Home History збігалися з main. Startup Trakt запити, які спостерігались у performance entries, мали HTTP 200.
+- Локальний фікс: startup gate чекає перші 4 впорядковані Trakt категорії, не весь lazy-каталог; піднято cache-busting версію до `20261031-trakt-home-first-2`. Регресія моделює 20 зареєстрованих категорій, де після чотирьох готових UI розблоковується, хоча решта lazy rows іще не викликані.
+- Перевірка до фізичного повтору: loader/Home focused suite 69/69 PASS, JS syntax та `git diff --check` PASS. Чекає ізольований PR/CI/Pages deploy і фізичне відкриття на тестовій APK; не змінювати налаштування/дані офіційної Lampa.
+
 ## Home стартує одразу з Trakt-категоріями (2026-10-31)
 - `loader.js` тепер у критичному порядку завантажує Trakt core → Trakt+ → Home Policy → Home History; окремий URL `home-history.js` більше не потрібен. Версію loader піднято для cache busting.
 - Перший активний Home прихований до побудови Trakt-рядків. Home Policy просить одноразово зібрати Main через штатний ContentRows pipeline; loader відкриває екран після завершення очікуваних Trakt rows. За відсутності авторизації/відповідей показує помилку з retry замість старих категорій. Якщо стартовий маршрут не Home, gate знімається.
