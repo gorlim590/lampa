@@ -1,0 +1,13 @@
+<!doctype html><meta charset="utf-8"><body style="background:#181820;color:white;font:24px sans-serif"><h1>Issue125 isolated native/WebView probe</h1><pre id="status"></pre><script>
+window.plugin_trakt_ready=true;window.probeFailFirst=location.search.indexOf("failfirst=1")>=0;
+window.probeRecord=function(e){e.wall_ms=Date.now();document.getElementById('status').textContent=JSON.stringify(e);fetch('/events',{method:'POST',body:JSON.stringify(e)});};
+window.onerror=function(m,u,l){probeRecord({stage:'js-error',message:String(m),line:l});};
+var store={trakt_token:'fixture-account'};
+window.Lampa={Storage:{get:function(k,d){return k in store?store[k]:d;},field:function(k){if(k==='trakt_min_progress')return 90;if(k==='language')return 'uk';return false;},set:function(k,v){store[k]=v;}},Utils:{hash:function(s){return String(s);}},Listener:{follow:function(){},send:function(){}},Lang:{translate:function(k){return k;}},Platform:{is:function(){return false;}}};
+window.TraktPlus={detailsProgress:function(){probeRecord({stage:'mock-ui-confirmed'});return Promise.resolve({confirmed:true});}};
+</script><script src="/trakt-instrumented.js"></script><script>
+var card={id:1396,method:'tv',media_type:'tv',name:'Probe series',number_of_seasons:1};
+var playlist=[{url:'https://media.w3.org/2010/05/sintel/trailer.mp4?native=queue-1',season:1,episode:8,timeline:{hash:'shared-pack',time:0,duration:52}},{url:'https://media.w3.org/2010/05/sintel/trailer.mp4?native=queue-2',season:1,episode:9,timeline:{hash:'shared-pack',time:0,duration:52}}];
+window.__issue125.prepare(card,playlist);
+Lampa.Timeline={update:function(t){probeRecord({stage:'native-timeline',hash:t.hash,road:t.road||t,accepted:window.__issue125.timeline(t)});}};
+</script>

@@ -1,0 +1,7 @@
+
+  api$1.get = function(path) { probeRecord({stage:'api-read-mock',path:path}); return Promise.resolve([{show:{ids:{trakt:1,tmdb:1396}}}]); };
+  var probeHistoryAttempts = 0;
+  api$1.addToHistory = function(body) { probeHistoryAttempts++; if(window.probeFailFirst && probeHistoryAttempts === 1){probeRecord({stage:'history-mock-failed',status:503});return Promise.reject(Object.assign(new Error('fixture transient failure'),{status:503}));} probeRecord({stage:'history-mock-confirmed',body:body}); return Promise.resolve({added:{episodes:1}}); };
+  window.__issue125 = { prepare:function(card,playlist){ externalPlaylistReport=buildExternalPlaylistReport(card,playlist[0].timeline.hash,playlist,'fixture-account',playbackIdentityGeneration); probeRecord({stage:'js-handoff',card_id:String(card.id),count:playlist.length}); }, timeline:function(t){return handleExternalPlaylistTimelineUpdate({data:{hash:t.hash,road:t.road||t}},externalPlaylistReport);} };
+  window.addEventListener('lampa:justplus-session',function(e){probeRecord({stage:'js-session',session:e.detail.session_id,accepted:bindJustPlusSession(e.detail,externalPlaylistReport)});});
+  window.addEventListener('lampa:justplus-raw-report',function(e){var p=e.detail;var r=externalPlaylistReport;if(r&&p.session_id===r.nativeSessionId&&r.token===String(Lampa.Storage.get('trakt_token')||'')&&r.identityGeneration===playbackIdentityGeneration){p.__lampa_trakt_ack=true;}probeRecord({stage:'js-raw',session:p.session_id,items:p.items,accepted:handleJustPlusRawReport(p,r)});});

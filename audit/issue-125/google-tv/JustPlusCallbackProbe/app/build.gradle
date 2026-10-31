@@ -1,0 +1,2 @@
+plugins { id 'com.android.application' }
+android { namespace 'org.lampa.justplusprobe'; compileSdk 33; defaultConfig { applicationId 'org.lampa.justplusprobe'; minSdk 23; targetSdk 33; versionCode 1; versionName '1.0' } }

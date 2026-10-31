@@ -1,0 +1,407 @@
+diff --git a/app/src/main/java/top/rootu/lampa/AndroidJS.kt b/app/src/main/java/top/rootu/lampa/AndroidJS.kt
+index ceb1856..e243530 100644
+--- a/app/src/main/java/top/rootu/lampa/AndroidJS.kt
++++ b/app/src/main/java/top/rootu/lampa/AndroidJS.kt
+@@ -41,6 +41,7 @@ import top.rootu.lampa.net.Http
+ import top.rootu.lampa.recs.RecsService
+ import top.rootu.lampa.tmdb.TMDB
+ import kotlin.system.exitProcess
++import java.security.MessageDigest
+ 
+ class AndroidJS(private val mainActivity: MainActivity, private val browser: Browser) {
+ 
+@@ -207,6 +208,27 @@ class AndroidJS(private val mainActivity: MainActivity, private val browser: Bro
+         return BuildConfig.VERSION_NAME + "-" + BuildConfig.VERSION_CODE
+     }
+ 
++    @JavascriptInterface
++    @org.xwalk.core.JavascriptInterface
++    fun issue125TokenFingerprint(token: String): String {
++        if (token.length > 4096) return ""
++        val bytes = MessageDigest.getInstance("SHA-256").digest(token.toByteArray(Charsets.UTF_8))
++        return bytes.joinToString("") { "%02x".format(it) }
++    }
++
++    @JavascriptInterface
++    @org.xwalk.core.JavascriptInterface
++    fun issue125RecoveryState(): String = MainActivity.justPlusRecoveryState()
++
++    @JavascriptInterface
++    @org.xwalk.core.JavascriptInterface
++    fun issue125AckRawReport(sessionId: String, reportId: String): Boolean =
++        MainActivity.acknowledgeJustPlusReport(sessionId, reportId)
++
++    @JavascriptInterface
++    @org.xwalk.core.JavascriptInterface
++    fun issue125ReplayPendingReports(): Boolean = MainActivity.replayPendingJustPlusReports()
++
+     @JavascriptInterface
+     @org.xwalk.core.JavascriptInterface
+     fun exit() {
+diff --git a/app/src/main/java/top/rootu/lampa/MainActivity.kt b/app/src/main/java/top/rootu/lampa/MainActivity.kt
+index 861c78f..4c38d0b 100644
+--- a/app/src/main/java/top/rootu/lampa/MainActivity.kt
++++ b/app/src/main/java/top/rootu/lampa/MainActivity.kt
+@@ -86,6 +86,7 @@ import top.rootu.lampa.helpers.Backup.loadFromBackup
+ import top.rootu.lampa.helpers.Backup.backupSettings
+ import top.rootu.lampa.helpers.Backup.validateStorageBackup
+ import top.rootu.lampa.helpers.Helpers
++import top.rootu.lampa.helpers.Prefs.storagePrefs
+ import top.rootu.lampa.helpers.Helpers.debugLogIntentData
+ import top.rootu.lampa.helpers.Helpers.dp2px
+ import top.rootu.lampa.helpers.Helpers.getJson
+@@ -277,6 +278,9 @@ class MainActivity : BaseActivity(),
+         // Just+ Player report callback extras: the launch's activity and card
+         private const val REPORT_ACTIVITY_EXTRA = "lampa_activity"
+         private const val REPORT_CARD_EXTRA = "lampa_card"
++        private const val REPORT_SESSION_EXTRA = "lampa_justplus_session"
++        private const val JP_STORE_DESCRIPTOR = "issue125.jp.descriptor.v1"
++        private const val JP_STORE_REPORTS = "issue125.jp.reports.v1"
+         private var instance: java.lang.ref.WeakReference<MainActivity>? = null
+ 
+         /**
+@@ -285,7 +289,60 @@ class MainActivity : BaseActivity(),
+          * brought in meanwhile.
+          */
+         fun onPlayerReport(intent: Intent) {
+-            instance?.get()?.takeIf { !it.isFinishing }?.takeJustPlusReport(justPlusReport(intent))
++            val report = justPlusReport(intent)
++            val session = report.optString("session_id")
++            val prefs = App.context.storagePrefs
++            val descriptor = prefs.getString(JP_STORE_DESCRIPTOR, null)?.let { runCatching { JSONObject(it) }.getOrNull() }
++            if (session.isEmpty() || descriptor?.optString("session_id") != session) return
++            val reports = runCatching { JSONArray(prefs.getString(JP_STORE_REPORTS, "[]")) }.getOrDefault(JSONArray())
++            if (reports.length() >= 64) return
++            reports.put(report)
++            val serialized = reports.toString()
++            if (serialized.length > 2 * 1024 * 1024) return
++            if (!prefs.edit().putString(JP_STORE_REPORTS, serialized).commit()) return
++            instance?.get()?.takeIf { !it.isFinishing }?.let { activity ->
++                activity.traceIssue125("receiver_persisted", report)
++                activity.takeJustPlusReport(report)
++            }
++        }
++
++        fun justPlusRecoveryState(): String {
++            val prefs = App.context.storagePrefs
++            val descriptor = prefs.getString(JP_STORE_DESCRIPTOR, null) ?: return ""
++            val result = runCatching { JSONObject(descriptor) }.getOrNull() ?: return ""
++            val created = result.optLong("created_at_ms", 0L)
++            if (created <= 0L || System.currentTimeMillis() - created > 7L * 24 * 60 * 60 * 1000) return ""
++            return result.toString()
++        }
++
++        fun acknowledgeJustPlusReport(sessionId: String, reportId: String): Boolean {
++            val prefs = App.context.storagePrefs
++            val descriptor = prefs.getString(JP_STORE_DESCRIPTOR, null)?.let { runCatching { JSONObject(it) }.getOrNull() } ?: return false
++            if (descriptor.optString("session_id") != sessionId || reportId.isBlank()) return false
++            val reports = runCatching { JSONArray(prefs.getString(JP_STORE_REPORTS, "[]")) }.getOrDefault(JSONArray())
++            val kept = JSONArray()
++            var found = false
++            for (i in 0 until reports.length()) {
++                val item = reports.optJSONObject(i) ?: continue
++                if (item.optString("report_id") == reportId) found = true else kept.put(item)
++            }
++            // A duplicate or forged ACK must not report success when the
++            // durable queue did not contain this exact session/report pair.
++            return found && prefs.edit().putString(JP_STORE_REPORTS, kept.toString()).commit()
++        }
++
++        fun persistJustPlusDescriptor(descriptor: JSONObject) {
++            if (descriptor.optInt("version") != 2 || descriptor.optString("session_id").length !in 1..64) return
++            App.context.storagePrefs.edit().putString(JP_STORE_DESCRIPTOR, descriptor.toString()).putString(JP_STORE_REPORTS, "[]").commit()
++        }
++
++        fun replayPendingJustPlusReports(): Boolean {
++            val activity = instance?.get()?.takeIf { !it.isFinishing } ?: return false
++            val reports = runCatching { JSONArray(App.context.storagePrefs.getString(JP_STORE_REPORTS, "[]")) }.getOrDefault(JSONArray())
++            activity.runOnUiThread {
++                for (i in 0 until reports.length()) reports.optJSONObject(i)?.let(activity::takeJustPlusReport)
++            }
++            return true
+         }
+ 
+         /** com.justplus.player.result as JSON: everything handleJustPlusReport needs, nothing else. */
+@@ -293,25 +350,39 @@ class MainActivity : BaseActivity(),
+             val positions = intent.getIntArrayExtra("positions_sec") ?: IntArray(0)
+             // Durations come per visit in history; the last known one of each item wins.
+             val durations = IntArray(positions.size) { -1 }
++            val hasVisit = BooleanArray(positions.size)
++            val measuredVisits = JSONArray()
+             @Suppress("DEPRECATION")
+             intent.getParcelableArrayExtra("history")?.forEach { visit ->
+                 val v = visit as? Bundle ?: return@forEach
+                 val i = v.getInt("index", -1)
++                val position = v.getInt("position_sec", -1)
+                 val d = v.getInt("duration_sec", -1)
+-                if (i in durations.indices && d > 0) durations[i] = d
++                if (i in durations.indices && position >= 0) {
++                    hasVisit[i] = true
++                    if (d > 0) {
++                        durations[i] = d
++                        measuredVisits.put(JSONObject().apply {
++                            put("index", i); put("position_sec", position); put("duration_sec", d)
++                        })
++                    }
++                }
+             }
+             val index = intent.getIntExtra("index", -1)
+             val duration = intent.getIntExtra("duration_sec", -1)
+             if (index in durations.indices && duration > 0) durations[index] = duration
+             return JSONObject().apply {
++                put("session_id", intent.getStringExtra(REPORT_SESSION_EXTRA))
+                 put("key", intent.getStringExtra(REPORT_ACTIVITY_EXTRA) ?: lampaActivity)
+                 put("card", intent.getStringExtra(REPORT_CARD_EXTRA))
+-                put("uri", intent.getStringExtra("uri") ?: intent.dataString)
++                put("report_id", java.util.UUID.randomUUID().toString())
+                 put("index", index)
+                 put("end_by", intent.getStringExtra("end_by"))
+                 put("error", intent.getStringExtra("error_message"))
+                 put("positions", JSONArray(positions.toList()))
+                 put("durations", JSONArray(durations.toList()))
++                put("has_visits", JSONArray(hasVisit.toList()))
++                put("measured_visits", measuredVisits)
+             }
+         }
+     }
+@@ -332,6 +403,23 @@ class MainActivity : BaseActivity(),
+     override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
+         LAMPA_URL = appUrl
++        App.context.storagePrefs.getString("issue125.jp.descriptor.v1", null)?.let { saved ->
++            runCatching { JSONObject(saved) }.getOrNull()?.let { descriptor ->
++                justPlusNativeSessionId = descriptor.optString("session_id").takeIf { it.isNotEmpty() }
++                justPlusSessionDescriptor = descriptor
++            }
++        }
++        runCatching { JSONArray(App.context.storagePrefs.getString("issue125.jp.reports.v1", "[]")) }
++            .getOrDefault(JSONArray()).let { reports ->
++                for (i in 0 until reports.length()) reports.optJSONObject(i)?.let { report ->
++                    keptReports[report.optString("key") + report.optString("card") + report.optString("report_id")] = report
++                }
++            }
++        savedInstanceState?.getString("issue125_native_session")?.let { justPlusNativeSessionId = it }
++        savedInstanceState?.getString("issue125_descriptor")?.let { justPlusSessionDescriptor = JSONObject(it) }
++        savedInstanceState?.getString("issue125_pending_raw")?.let { js ->
++            justPlusNativeSessionId?.let { pendingRawDelivery = RawDelivery(it, js) }
++        }
+         SELECTED_PLAYER = appPlayer
+         keepPlayerConnection = playerKeepConnection
+ 		useKodiPlaylist = kodiPlaylistEnabled
+@@ -342,6 +430,9 @@ class MainActivity : BaseActivity(),
+             purgeOldStates()
+         }
+         instance = java.lang.ref.WeakReference(this)
++        lifecycle.addObserver(androidx.lifecycle.LifecycleEventObserver { _, event ->
++            if (event == Lifecycle.Event.ON_RESUME) deliverPendingJustPlusRaw(resetBudget = true)
++        })
+ 
+         setupActivity()
+         setupBrowser()
+@@ -356,6 +447,13 @@ class MainActivity : BaseActivity(),
+         }
+     }
+ 
++    override fun onSaveInstanceState(outState: Bundle) {
++        outState.putString("issue125_native_session", justPlusNativeSessionId)
++        outState.putString("issue125_descriptor", justPlusSessionDescriptor?.toString())
++        outState.putString("issue125_pending_raw", pendingRawDelivery?.js)
++        super.onSaveInstanceState(outState)
++    }
++
+     override fun onNewIntent(intent: Intent) {
+         super.onNewIntent(intent)
+         setIntent(intent) // getIntent() should always return the most recent
+@@ -375,6 +473,7 @@ class MainActivity : BaseActivity(),
+         logDebug("onResume() browserInitComplete $browserInitComplete")
+         if (browserInitComplete)
+             browser?.resumeTimers()
++        deliverPendingJustPlusRaw(resetBudget = true)
+         logDebug("onResume() isSafeForUse ${browser.isSafeForUse()}")
+         if (browser.isSafeForUse()) {
+             lifecycleScope.launch {
+@@ -488,6 +587,7 @@ class MainActivity : BaseActivity(),
+         }
+         // Switch Loader (Note it control delayedVoidJsFunc)
+         loaderView.visibility = View.GONE
++        deliverPendingJustPlusRaw(resetBudget = true)
+ 
+         Log.d(TAG, "LAMPA onLoadFinished $url")
+ 
+@@ -760,15 +860,29 @@ class MainActivity : BaseActivity(),
+     private val keptReports = LinkedHashMap<String, JSONObject>()
+ 
+     // Applied in the foreground, so sync plugins send from a visible page; interval reports at once
++    private fun traceIssue125(stage: String, report: JSONObject? = null, details: JSONObject? = null) {}
++
+     fun takeJustPlusReport(report: JSONObject) {
++        traceIssue125("take", report)
+         if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) ||
+             report.optString("end_by") == "interval" && keepPlayerConnection
+         ) handleJustPlusReport(report)
+-        else keptReports[report.optString("key") + report.optString("card")] = report
++        else { traceIssue125("deferred", report); keptReports[report.optString("key") + report.optString("card")] = report }
+     }
+ 
+     // Just+ Player report: a position per item, -1 = never opened. The state stays: reports come mid-session
+     fun handleJustPlusReport(report: JSONObject) {
++        traceIssue125("handle", report, JSONObject().apply {
++            put("position_count", report.optJSONArray("positions")?.length() ?: 0)
++            put("visit_count", report.optJSONArray("measured_visits")?.length() ?: 0)
++            put("card_id_match", report.optString("card") == (justPlusSessionDescriptor?.optString("card_id") ?: ""))
++            put("descriptor_count", justPlusSessionDescriptor?.optJSONArray("items")?.length() ?: 0)
++        })
++        val nativeSession = report.optString("session_id")
++        if (nativeSession.isNotEmpty() && nativeSession != justPlusNativeSessionId) {
++            traceIssue125("stale-native-session", report)
++            return
++        }
+         val endBy = report.optString("end_by")
+         if (endBy != "completion" && endBy != "user" && endBy != "interval") {
+             when (endBy) {
+@@ -797,6 +911,9 @@ class MainActivity : BaseActivity(),
+                 logDebug("Player report does not fit the playlist [${positions.length()} / ${playlist.size}]")
+                 return@launch
+             }
++            // Preserve actual Just+ measurements for Trakt before auto-next and >=96% normalization.
++            // This dispatch is independent of the changed-only Timeline update below.
++            emitJustPlusMeasuredReport(report, state, card)
+             for (i in playlist.indices) {
+                 val pos = positions.optInt(i, -1)
+                 val dur = durations.optInt(i, -1)
+@@ -822,7 +939,7 @@ class MainActivity : BaseActivity(),
+                 activityJson = key,
+                 playlist = playlist,
+                 currentIndex = index,
+-                currentUrl = report.optString("uri").takeIf { it.isNotEmpty() } ?: playlist[index].url,
++                currentUrl = playlist[index].url,
+                 currentPosition = positions.optInt(index, 0).coerceAtLeast(0) * 1000L,
+                 startIndex = state.startIndex,
+                 extras = state.extras
+@@ -841,6 +958,93 @@ class MainActivity : BaseActivity(),
+         }
+     }
+ 
++    private var justPlusNativeSessionId: String? = null
++    private var justPlusSessionDescriptor: JSONObject? = null
++    private data class RawDelivery(val session: String, val js: String, var attempts: Int = 0)
++    private var pendingRawDelivery: RawDelivery? = null
++    private var rawDeliveryJob: kotlinx.coroutines.Job? = null
++    private var rawDeliveryBusy = false
++
++    // One coalesced full snapshot for the active launch; six bounded attempts.
++    // JavaScript acknowledges only a matching live account/profile/handoff.
++    private fun deliverPendingJustPlusRaw(resetBudget: Boolean = false) {
++        val pending = pendingRawDelivery ?: return
++        if (pending.session != justPlusNativeSessionId) { pendingRawDelivery = null; return }
++        if (resetBudget) pending.attempts = 0
++        if (rawDeliveryBusy || !browserInitComplete || !loaderView.isGone ||
++            (!lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) && !keepPlayerConnection)) return
++        if (pending.attempts >= 6) return
++        rawDeliveryJob?.cancel()
++        rawDeliveryBusy = true
++        pending.attempts++
++        browser?.evaluateJavascript(pending.js) { result ->
++            rawDeliveryBusy = false
++            traceIssue125("raw-ack-" + result)
++            if (pendingRawDelivery !== pending) { deliverPendingJustPlusRaw(); return@evaluateJavascript }
++            if (result == "true") { pendingRawDelivery = null; return@evaluateJavascript }
++            if (pending.attempts < 6) rawDeliveryJob = lifecycleScope.launch {
++                delay((1000L shl (pending.attempts - 1)).coerceAtMost(16000L))
++                deliverPendingJustPlusRaw()
++            }
++        }
++    }
++
++    /** Sends raw, measured Just+ item progress to JS without logging or persisting it in Timeline. */
++    private fun emitJustPlusMeasuredReport(
++        report: JSONObject,
++        state: PlayerStateManager.PlaybackState,
++        card: LampaCard?
++    ) {
++        val sessionId = report.optString("session_id")
++        if (sessionId.isEmpty() || sessionId != justPlusNativeSessionId) {
++            traceIssue125("raw-reject", report, JSONObject().put("reason", "native_session_mismatch")); return
++        }
++        val descriptor = justPlusSessionDescriptor ?: run { traceIssue125("raw-reject", report, JSONObject().put("reason", "descriptor_missing")); return }
++        val visits = report.optJSONArray("measured_visits") ?: run { traceIssue125("raw-reject", report, JSONObject().put("reason", "visits_missing")); return }
++        val items = JSONArray()
++        // Every actual visit matters: restarting A can reset positions[A] to zero
++        // after an earlier eligible visit. Never derive maximum progress from the latest position.
++        for (v in maxOf(0, visits.length() - 500) until visits.length()) {
++            val visit = visits.optJSONObject(v) ?: continue
++            val index = visit.optInt("index", -1)
++            val item = state.playlist.getOrNull(index) ?: continue
++            val hash = item.timeline?.hash?.takeIf { it.isNotEmpty() && it != "0" } ?: continue
++            val position = visit.optInt("position_sec", -1)
++            val duration = visit.optInt("duration_sec", -1)
++            if (position < 0 || duration <= 0) continue
++            val identity = descriptor.optJSONArray("items")?.let { list -> (0 until list.length()).mapNotNull { list.optJSONObject(it) }.firstOrNull { it.optInt("index", -1) == index } }
++            traceIssue125("raw-item-map", report, JSONObject().apply {
++                put("index", index); put("hash_match", identity?.optString("hash") == hash)
++                put("season_match", identity?.optInt("season", -1) == item.season)
++                put("episode_match", identity?.optInt("episode", -1) == item.episode)
++                put("has_season_episode", item.season != null && item.episode != null)
++            })
++            items.put(JSONObject().apply {
++                put("index", index); put("hash", hash)
++                put("season", item.season ?: JSONObject.NULL)
++                put("episode", item.episode ?: JSONObject.NULL)
++                put("position_sec", position); put("duration_sec", duration)
++                put("has_visit", true)
++            })
++        }
++        if (items.length() == 0) { traceIssue125("raw-reject", report, JSONObject().put("reason", "no_mappable_visits")); return }
++        val payload = JSONObject().apply {
++            put("version", 2)
++            put("session_id", sessionId)
++            put("report_id", report.optString("report_id"))
++            put("card_id", card?.tmdb_id?.takeIf { it.isNotEmpty() } ?: card?.id)
++            put("end_by", report.optString("end_by"))
++            put("current_index", report.optInt("index", -1))
++            put("items", items)
++        }
++        val descriptorQuoted = JSONObject.quote(descriptor.toString())
++        val quoted = JSONObject.quote(payload.toString())
++        val js = "(function(){try{var d=JSON.parse($descriptorQuoted),p=JSON.parse($quoted);if(window.dispatchEvent&&window.CustomEvent){window.dispatchEvent(new CustomEvent('lampa:justplus-session',{detail:d}));window.dispatchEvent(new CustomEvent('lampa:justplus-raw-report',{detail:p}));return p.__lampa_trakt_ack===true;}}catch(e){}})();"
++        traceIssue125("raw-queued", report, JSONObject().apply { put("item_count", items.length()); put("card_id_match", payload.optString("card_id") == descriptor.optString("card_id")) })
++        pendingRawDelivery = RawDelivery(sessionId, js)
++        deliverPendingJustPlusRaw()
++    }
++
+     /**
+      * The "viewed" eye of the online plugin (online.js): its playlist items carry `callback: file.mark`,
+      * which Lampa's own player calls as each episode starts. An external player gets the playlist as
+@@ -3048,6 +3252,23 @@ class MainActivity : BaseActivity(),
+             }
+         }
+ 
++        val nativeSession = java.util.UUID.randomUUID().toString()
++        rawDeliveryJob?.cancel()
++        pendingRawDelivery = null
++        rawDeliveryBusy = false
++        justPlusNativeSessionId = nativeSession
++        val identityItems = JSONArray()
++        state.playlist.forEachIndexed { index, item ->
++            identityItems.put(JSONObject().apply {
++                put("index", index); put("hash", item.timeline?.hash?.takeIf { it != "0" } ?: "")
++                put("season", item.season ?: JSONObject.NULL); put("episode", item.episode ?: JSONObject.NULL)
++            })
++        }
++        justPlusSessionDescriptor = JSONObject().apply {
++            put("version", 2); put("session_id", nativeSession)
++            put("card_id", cardId); put("created_at_ms", System.currentTimeMillis()); put("items", identityItems)
++        }
++        persistJustPlusDescriptor(justPlusSessionDescriptor!!)
+         intent.apply {
+             setPackage(playerPackage)
+             putExtra("playlist", Bundle().apply {
+@@ -3070,6 +3291,8 @@ class MainActivity : BaseActivity(),
+                     "result_callback", PendingIntent.getBroadcast(
+                         this@MainActivity, (activity + card?.id).hashCode(),
+                         Intent(this@MainActivity, PlayerReportReceiver::class.java)
++                            .setAction("top.rootu.lampa.JUSTPLUS_REPORT." + nativeSession)
++                            .putExtra(REPORT_SESSION_EXTRA, nativeSession)
+                             .putExtra(REPORT_ACTIVITY_EXTRA, activity)
+                             .putExtra(REPORT_CARD_EXTRA, card?.id),
+                         PendingIntent.FLAG_UPDATE_CURRENT or

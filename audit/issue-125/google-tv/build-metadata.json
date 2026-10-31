@@ -1,0 +1,74 @@
+{
+  "native_base_tag": "v1.13.5",
+  "native_base_commit": "f6d9a9318a889b53edccd81fbe7050ec17dfd2ba",
+  "debug_package": "top.rootu.lampa.issue125probe",
+  "apk_sha256": "f6568a51afde05933f111cea2c5ea21292b9aa51f65f2dabe5962e04f34c0b97",
+  "apk_path_outside_git": "artifacts/issue125/lampa-1.13.5-issue125-persistent-test.apk",
+  "apk_signer_certificate_sha256": "e796a3d3972f0b1e598b43e2dc84834ee3be241bae8b351601f676147990ad9b",
+  "native_debug_source_sha256": "31a2476755a6bc8775d09c0725a0af9416237963a9b87859e1aed79bd74eaa72",
+  "production_js_sha256": "9ed680d5355e8c51928f5ee2e601f3fa957059a286f9bd76f681f7320a981bf3",
+  "site_webview_url_origin": "http://siaivo.isroot.in",
+  "site_configured_launch_url": "https://siaivo.github.io",
+  "site_ui_runtime_verified": true,
+  "site_watch_sync_enabled_read_only": true,
+  "site_trakt_token_present_read_only": true,
+  "site_runtime_script_url": "https://gorlim590.github.io/lampa/trakt/trakt.js?v=20261028-torrent-cinema-2.0.0",
+  "site_runtime_script_sha256": "9ed680d5355e8c51928f5ee2e601f3fa957059a286f9bd76f681f7320a981bf3",
+  "site_runtime_script_contains_validated_ack_handler": true,
+  "site_runtime_malformed_event_ack": false,
+  "site_runtime_smoke": "Real Siaivo Home in parallel test APK; Hybrid 3.1 and Trakt+ 3.4.1 initialized; Watching Sync enabled and configured threshold 90 read-only; malformed synthetic raw event received no ACK; mutating requests to Trakt and isroot.in were blocked by the active DevTools guard.",
+  "served_instrumented_js_sha256": "27a5065b1ede4a85c6f67839f047b4f64d5951f1c794fef0a4a376521a3d4970",
+  "loaded_script_url": "http://127.0.0.1:18766/trakt-instrumented.js",
+  "instrumentation": "webview-probe/hook.js; controlled Lampa facade, actual finish(), mocked Trakt API transport and UI confirmation stub",
+  "executed_webview_script_sha256": "9ed680d5355e8c51928f5ee2e601f3fa957059a286f9bd76f681f7320a981bf3",
+  "executed_webview_script_url": "https://gorlim590.github.io/lampa/trakt/trakt.js?v=20261028-torrent-cinema-2.0.0",
+  "executed_script_matches_served": true,
+  "post_test_device_state": "Parallel package top.rootu.lampa.issue125probe v1.13.5-dirty-issue125-probe/581 updated and foreground on actual Siaivo; official production top.rootu.lampa v1.13.5/581 and Just+ 2.5.1/2005001 remain installed and unchanged.",
+  "installed_on_device": true,
+  "install_method": "adb install -r to parallel package only; app data retained; no pm clear",
+  "final_physical_acceptance": "Ted Lasso S01 E01-E04: authenticated history readback with one unique event ID each; separate E05/E06 no-history live test physically exercised pause suppression at >=80%, start HTTP 201 action=start, E06 low-progress exit pause HTTP 201",
+  "candidate_pause_suppression_physical_status": "verified on parallel APK: E05 86.01% transition emitted external_pause_suppressed/progress_too_high and made no pause/stop request; E06 started with HTTP 201 action=start",
+  "process_death_relaunch_test": "force-stop killed parallel process without clearing data; explicit launch restored Siaivo home. Pending-report recovery at instant of death not tested.",
+  "webview_reload_recovery_status": "failed closed on actual site: playlist/handoff absent after reload; E06 low-progress raw reports received six bounded raw-ack-false retries",
+  "users_me_watching_status": "read-only GET returned E06 action=scrobble during playback; later corrected authenticated GET /users/me/watching with cache:false returned HTTP 204 after paused-session expiry; prior HTTP 401 was caused by wrong api.get argument order (options passed as unauthorized); exact expiry timing and UI transition not confirmed",
+  "history_event_id_readback": [
+    {
+      "episode": "S01E01",
+      "event_id": "redacted-S01E01"
+    },
+    {
+      "episode": "S01E02",
+      "event_id": "redacted-S01E02"
+    },
+    {
+      "episode": "S01E03",
+      "event_id": "redacted-S01E03"
+    },
+    {
+      "episode": "S01E04",
+      "event_id": "redacted-S01E04"
+    }
+  ],
+  "new_history_writes_after_e01_e04_allowance": 0,
+  "debug_version_code": 581,
+  "debug_version_name": "1.13.5-dirty-issue125-probe",
+  "installed_base_apk_sha256": "f6568a51afde05933f111cea2c5ea21292b9aa51f65f2dabe5962e04f34c0b97",
+  "production_js_source_sha256": "ba14c7f87974377c81272ed288370e9318a0044f4eec7bd0fb2a4628b6eb25f0",
+  "executed_test_js_sha256": "4057ba0b6d162efe55671560561f288029058722f978134fa6daae7aea2d3cad",
+  "executed_test_js_url": "https://gorlim590.github.io/lampa/trakt/trakt.js?v=20261028-torrent-cinema-2.0.0 (debug local asset override)",
+  "site_url_observed": "http://siaivo.isroot.in/",
+  "tmdb_show_id": 97546,
+  "trakt_show_id": 162639,
+  "webview_reload_recovery": "JS candidate and Android descriptor restored after script handshake; cold Siaivo page did not auto-request Trakt JS in this run",
+  "process_death_pending_recovery": "native report survived process kill and was acknowledged after patched Trakt JS loaded; E07 454/1928 sec (23.55%); no history write",
+  "durable_retry": "mock 503-to-success implemented; regression covers fresh JS realm and event-ID read-back; no real history writes this turn",
+  "history_idempotency": "preflight read plus stable session/index/show/S/E key; event ID recorded on mock/read-back when available; no claim of server idempotency if read-back unavailable",
+  "now_watching_continuity": "intervals are processed after returning from Just+; continuous foreground Now Watching unverified",
+  "new_real_history_writes_this_turn": 0,
+  "ready_for_owner_acceptance": false,
+  "not_ready_reasons": [
+    "Siaivo cold home did not automatically request configured Trakt JS; recovery waits until module loads",
+    "continuous live Now Watching during external Just+ remains unverified",
+    "production Android fork patch not merged or installed"
+  ]
+}
