@@ -10,7 +10,10 @@
   window.LampaLoaderStarted = true;
 
   var BASE = String(window.LAMPA_PLUGINS_BASE || 'https://gorlim590.github.io/lampa/').replace(/\/?$/, '/');
-  var VERSION = String(window.LAMPA_PLUGINS_VERSION || '20261031-trakt-home-first-1');
+  var VERSION = String(window.LAMPA_PLUGINS_VERSION || '20261031-trakt-home-first-2');
+  // Lampa requests Home rows lazily. Only the first few registered Trakt rows
+  // are part of startup; waiting for every catalogue row can deadlock Home.
+  var INITIAL_TRAKT_ROW_COUNT = 4;
   var TIMEOUT_MS = 8000;
   var READY_CHECK_MS = 100;
   var READY_MAX_CHECKS = 300;
@@ -51,7 +54,7 @@
     if (!root || !root.classList || typeof document.createElement !== 'function') return null;
     var gate = {
       policyReady: false, rowsReady: false, requested: false, building: false,
-      expected: [], completed: {}, timer: null, poll: null, deadline: 0, node: null,
+      expected: [], totalExpected: 0, completed: {}, timer: null, poll: null, deadline: 0, node: null,
       status: 'waiting', reason: null
     };
     var style = document.createElement('style');
@@ -118,7 +121,13 @@
       if (active && active.component === 'main' && !gate.requested) { gate.requested = true; gate.deadline = now() + 45000; }
       tryBuild();
     };
-    gate.traktRowsReady = function (names) { gate.expected = Array.isArray(names) ? names.slice() : []; gate.rowsReady = gate.expected.length > 0; tryBuild(); };
+    gate.traktRowsReady = function (names) {
+      var all = Array.isArray(names) ? names : [];
+      gate.totalExpected = all.length;
+      gate.expected = all.slice(0, Math.min(INITIAL_TRAKT_ROW_COUNT, all.length));
+      gate.rowsReady = gate.expected.length > 0;
+      tryBuild();
+    };
     gate.requestHomeBuild = function () {
       if (gate.status === 'ready' || gate.status === 'bypassed') return;
       gate.requested = true; gate.deadline = now() + 45000; tryBuild();
