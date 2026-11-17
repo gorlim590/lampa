@@ -10,7 +10,7 @@
   window.LampaLoaderStarted = true;
 
   var BASE = String(window.LAMPA_PLUGINS_BASE || 'https://gorlim590.github.io/lampa/').replace(/\/?$/, '/');
-  var VERSION = String(window.LAMPA_PLUGINS_VERSION || '20261031-trakt-home-first-2');
+  var VERSION = String(window.LAMPA_PLUGINS_VERSION || '20261118-home-nonblocking-1');
   // Lampa requests Home rows lazily. Only the first few registered Trakt rows
   // are part of startup; waiting for every catalogue row can deadlock Home.
   var INITIAL_TRAKT_ROW_COUNT = 4;
@@ -49,7 +49,9 @@
   }
 
   function installTraktHomeGate() {
-    if (window.LAMPA_TRAKT_HOME_FIRST === false) return null;
+    // Keep Trakt rows available, but never block the native Home by default.
+    // Installations can still opt in to the older gate explicitly if needed.
+    if (window.LAMPA_TRAKT_HOME_FIRST !== true) return null;
     var root = document.documentElement;
     if (!root || !root.classList || typeof document.createElement !== 'function') return null;
     var gate = {

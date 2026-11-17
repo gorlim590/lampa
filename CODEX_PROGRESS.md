@@ -1,5 +1,11 @@
 # Stremio × Lampa — прогрес
 
+## Home без блокування Trakt (2026-11-18)
+- Baseline `main` `2fba0326775bff634e2a8511eb782754558bc5ec`. На Google TV офіційна Lampa показувала повноекранну помилку `Не вдалося завантажити категорії Trakt`, приховуючи Home, коли Trakt auth/network не повертав перші рядки.
+- Зроблено gate opt-in замість opt-out: Home більше не чекає на Trakt-категорії за замовчуванням; Trakt-плагіни та дані залишаються активними. Версію loader піднято для cache busting.
+- Перевірка: `node --check loader.js`; targeted `node --test tests/loader-critical-parallel.cjs`; `git diff --check`. Фізична Lampa ще не перезавантажена з новими GitHub Pages bytes на цьому checkpoint.
+- Далі: опублікувати зміну в `main`, дочекатися GitHub Pages, force-stop/relaunch лише `top.rootu.lampa` без очищення даних і підтвердити, що Home відкривається.
+
 ## Home First — фізичний startup fix після PR #140 (2026-10-31)
 - Baseline `main` `b60cad011f23c1637f025fb9300fce11b399abd4`. На Google TV паралельна APK `top.rootu.lampa.issue125probe` запускала справжній Siaivo, але loader gate помилково чекав завершення всіх 20 Trakt+ рядів, хоча Lampa запитує їх ліниво. Після 45 с gate завершувався `trakt-rows-incomplete`, блокуючи весь Home.
 - При reload WebView фактичний тракт-скрипт відповідав застарілому кешованому URL із версією `20261031-trakt-home-first-1` (604503 байти); поточний файл з GitHub Pages — 602879 байтів. Loader/Home Policy/Home History збігалися з main. Startup Trakt запити, які спостерігались у performance entries, мали HTTP 200.

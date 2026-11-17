@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const source = fs.readFileSync(__dirname + '/../loader.js', 'utf8');
 
-function fixture(deferred = ['ui/cardify-plus.js']) {
+function fixture(deferred = ['ui/cardify-plus.js'], traktHomeFirst = false) {
   const scripts = [];
   const nodes = [];
   const rootClasses = new Set();
@@ -36,6 +36,7 @@ function fixture(deferred = ['ui/cardify-plus.js']) {
     LAMPA_PLUGINS_BASE: 'https://gorlim590.github.io/lampa/',
     LAMPA_PLUGINS_VERSION: 'fixture',
     LAMPA_PLUGINS_LIST: deferred,
+    LAMPA_TRAKT_HOME_FIRST: traktHomeFirst,
     appready: false,
     console: { log() {} }
   };
@@ -124,8 +125,15 @@ test('late native dependencies start the deferred adapter only after appready ar
   assert.equal(window.LampaLoaderDiagnostics.loaded, 9);
 });
 
+test('Home is not hidden while Trakt rows load unless the startup gate is explicitly enabled', () => {
+  const { window, document, rootClasses } = fixture([]);
+  assert.equal(window.LampaTraktHomeGate, undefined);
+  assert.equal(rootClasses.has('lampa-trakt-home-pending'), false);
+  assert.equal(document.body.children.length, 0);
+});
+
 test('first Home releases after its initial Trakt rows complete without waiting for lazy catalogue rows', () => {
-  const { scripts, timers, window, document, rootClasses } = fixture([]);
+  const { scripts, timers, window, document, rootClasses } = fixture([], true);
   assert(rootClasses.has('lampa-trakt-home-pending'));
   scripts.forEach(script => script.onload());
   let active = { component: 'main', source: 'tmdb', activity: { component: { items: [] } } };
