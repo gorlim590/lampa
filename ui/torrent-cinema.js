@@ -311,7 +311,7 @@ function createCinemaSeasons() {
         return title+' '+suffix;
     }
     function coverage(raw,source){
-        raw=String(raw||'');source=source||{};var nums=[],range=null,episode=false,explicit=false,m;
+        raw=String(raw||'').replace(/_/g,' ');source=source||{};var nums=[],range=null,episode=false,explicit=false,m;
         var episodeRx=/\bS(\d{1,3})E\d{1,4}(?:\s*[-–]\s*(?:S(\d{1,3}))?E?\d{1,4})?/gi;
         while((m=episodeRx.exec(raw))){var n=Number(m[1]);if(nums.indexOf(n)<0)nums.push(n);episode=true;explicit=true;}
         var packRx=/\bS(\d{1,3})\s*[-–]\s*S?(\d{1,3})\b|\bSeasons?\s*(\d{1,3})\s*[-–]\s*(?:Seasons?\s*)?(\d{1,3})\b|Сезони?\s*(\d{1,3})\s*[-–]\s*(?:Сезони?\s*)?(\d{1,3})/giu;
