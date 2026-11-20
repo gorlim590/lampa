@@ -84,6 +84,18 @@ test('selected season always queries localized and original titles, merges valid
  assert.equal(result.torrent_search_raw_total,4);
 });
 
+test('a slow localized alias yields the last bounded call to the original English title',async()=>{
+ const movie={id:881,source:'tmdb',media_type:'tv',name:'Володар перснів: Персні влади',original_name:'The Lord of the Rings: The Rings of Power'},f=fixture((p,ok)=>{
+  if(p.search==='Володар перснів: Персні влади S03')return ok({Results:[row('Володар перснів: Персні влади S03E01 Ukr',{InfoHash:'5'.repeat(40)})]});
+  if(p.search==='Володар перснів: Персні влади')return;
+  if(p.search==='The Lord of the Rings: The Rings of Power')return ok({Results:[row('The Lord of the Rings: The Rings of Power S03E02 Eng',{InfoHash:'6'.repeat(40)})]});
+  ok({Results:[]});
+ });
+ const pending=f.get(movie,{season:3,search:'Володар перснів: Персні влади S03'});assert.deepEqual(f.calls.map(p=>p.search),['Володар перснів: Персні влади S03','Володар перснів: Персні влади']);
+ const [id,timer]=Array.from(f.timers.entries())[0];f.timers.delete(id);f.advance(timer.ms);timer.fn();
+ const result=await pending;assert.deepEqual(f.calls.map(p=>p.search),['Володар перснів: Персні влади S03','Володар перснів: Персні влади','The Lord of the Rings: The Rings of Power']);assert.equal(f.calls.length,3);assert.deepEqual(Array.from(result.Results,r=>r.Title),['Володар перснів: Персні влади S03E01 Ukr','The Lord of the Rings: The Rings of Power S03E02 Eng']);
+});
+
 test('a season collection may return for display when it misses the selected season, but wrong single-season releases remain excluded',()=>{
  const f=fixture(()=>{}),movie={id:703,source:'tmdb',media_type:'tv',name:'The Show',first_air_date:'2010-01-01'};assert.equal(f.api.match(row('The Show S01-S03 Complete'),movie,{season:8}).eligible,true);assert.equal(f.api.match(row('The Show S01E01'),movie,{season:8}).eligible,false);assert.equal(f.api.match(row('The Show S10E01'),movie,{season:1}).eligible,false);
 });
