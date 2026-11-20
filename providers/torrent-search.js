@@ -196,11 +196,11 @@
                 if (!alive()) return;
                 used[normalize(query)] = true; calls++; stats.calls = calls;
                 var request = fallback || !params.search ? Object.assign({}, params, { search: query, torrent_search_owner: params }) : params; if (fallback) request.clarification = true;
-                if (fallback) timer = setTimeout(function () { if (!alive()) return; clearTransport(L.Parser); finish(Object.assign({}, lastData, { Results:seasonRows.length?dedup(seasonRows):[] })); }, Math.min(4000, remaining()));
+                if (fallback) timer = setTimeout(function () { if (!alive()) return; clearTransport(L.Parser); if(seasonScoped&&nextSeasonQuery())return;finish(Object.assign({}, lastData, { Results:seasonRows.length?dedup(seasonRows):[] })); }, Math.min(4000, remaining()));
                 dispatch(self, request, function (data) {
                     if (!alive()) return; lastData = data || { Results: [] };
                     var rawRows=Array.isArray(lastData.Results)?lastData.Results:[],rejected={},rows = dedup(rawRows.filter(function (row) { var result=match(row, movie, Object.assign({}, params, params.params || {}), names);if(!result.eligible)(result.reasons||[]).forEach(function(reason){var key=String(reason).split(':')[0];rejected[key]=(rejected[key]||0)+1;});return result.eligible; }));var phase=stats.phases.filter(function(item){return item.search===String(query);})[0];if(!phase){phase={search:String(query),raw:0,accepted:0,rejected:{}};stats.phases.push(phase);}phase.raw=Math.max(phase.raw,rawRows.length);phase.accepted=Math.max(phase.accepted,rows.length);Object.keys(rejected).forEach(function(key){phase.rejected[key]=Math.max(phase.rejected[key]||0,rejected[key]);});
-                    if (lastData.parser_pending) { if (rows.length) done(Object.assign({}, lastData, { Results:dedup(seasonRows.concat(rows)),torrent_search_raw_total:dedup(seasonRawRows).length })); return; }
+                    if (lastData.parser_pending) { if (rows.length) { if(seasonScoped){seasonRows=dedup(seasonRows.concat(rows));seasonRawRows=dedup(seasonRawRows.concat(rawRows));}done(Object.assign({}, lastData, { Results:dedup(seasonRows.concat(rows)),torrent_search_raw_total:dedup(seasonRawRows).length })); } return; }
                     clearTimeout(timer);
                     if(seasonScoped&&rawRows.length)seasonRawRows=dedup(seasonRawRows.concat(rawRows));
                     if(rows.length)seasonRows=dedup(seasonRows.concat(rows));
