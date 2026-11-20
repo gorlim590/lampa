@@ -131,7 +131,10 @@
             function rebuildSeasonQueries(){
                 localTitle=titleWithScript([movie.title,movie.name,params.search,params.search_one,params.search_two].concat(names),/[А-Яа-яЁёІЇЄҐ]/)||broadTitle(movie.title||movie.name||params.search);
                 originalTitle=titleWithScript([movie.original_title,movie.original_name,params.search_one,params.search_two].concat(names),/[a-z]/i)||broadTitle(movie.original_title||movie.original_name);
-                var updated=[];[localTitle,originalTitle].forEach(function(value){var key=normalize(value);if(value&&key&&!updated.some(function(item){return normalize(item)===key;}))updated.push(value);});
+                // The first request is usually the localized title and can already
+                // return rows. Reserve the first alias slot for the original title
+                // so a slow local endpoint cannot consume the English search budget.
+                var updated=[];[originalTitle,localTitle].forEach(function(value){var key=normalize(value);if(value&&key&&!updated.some(function(item){return normalize(item)===key;}))updated.push(value);});
                 seasonQueries=updated;seasonQueryIndex=Math.min(seasonQueryIndex,seasonQueries.length);
             }
             if(seasonScoped)rebuildSeasonQueries();

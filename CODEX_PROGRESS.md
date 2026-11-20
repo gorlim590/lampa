@@ -1,5 +1,11 @@
 # Stremio × Lampa — прогрес
 
+## Pirate Bay сезонний alias follow-up (2026-11-20)
+- Baseline `main` `af49abe`. На фізичному Google TV S03 показував лише 4 видимі результати; активний Jackett endpoint відповідав на широкий English запит релізами Pirate Bay, але локальний alias забирав перший fallback слот.
+- `providers/torrent-search.js` тепер ставить оригінальний англійський заголовок першим у сезонних alias-запитах; український/локалізований alias зберігається наступним. Ліміти викликів, сезонна перевірка й дедуплікація не змінені. Оновлено порядок у `tests/torrent-search.cjs`.
+- Перевірка: `node --check providers/torrent-search.js`; `node tests/torrent-search.cjs` — 43/43 PASS.
+- Фізичний UI досі працює зі старими опублікованими bytes; після merge треба перевірити оновлення GitHub Pages і повторно відкрити Torrent Cinema S03 на Google TV. До цього видимий Pirate Bay не підтверджено.
+
 ## Home без блокування Trakt (2026-11-18)
 - Baseline `main` `2fba0326775bff634e2a8511eb782754558bc5ec`. На Google TV офіційна Lampa показувала повноекранну помилку `Не вдалося завантажити категорії Trakt`, приховуючи Home, коли Trakt auth/network не повертав перші рядки.
 - Зроблено gate opt-in замість opt-out: Home більше не чекає на Trakt-категорії за замовчуванням; Trakt-плагіни та дані залишаються активними. Версію loader піднято для cache busting.
