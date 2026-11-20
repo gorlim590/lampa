@@ -62,12 +62,12 @@ test('season-aware search queries explicit season variants then one bounded broa
  });
  const result=await f.get(movie,{season:8,search:'The Show S08',search_one:'The Show Season 8',search_two:'The Show 8 сезон'});
  assert.deepEqual(Array.from(result.Results,r=>r.Title),['The Show (2026) S08E01 1080p','The Show S01-S03 Complete 1080p'],JSON.stringify(f.calls.map(p=>p.search)));
- assert.deepEqual(f.calls.map(p=>p.search),['The Show S08','Шоу','The Show']);assert(f.calls.length<=3);assert.equal(f.calls[1].clarification,true);assert.equal(f.calls[2].clarification,true);
+ assert.deepEqual(f.calls.map(p=>p.search),['The Show S08','The Show','Шоу']);assert(f.calls.length<=3);assert.equal(f.calls[1].clarification,true);assert.equal(f.calls[2].clarification,true);
 });
 
 test('season-aware fallback checks alternate naming forms within the existing three-call bound',async()=>{
  const movie={id:702,source:'tmdb',media_type:'tv',name:'Шоу',original_name:'The Show',first_air_date:'2012-01-01'},f=fixture((p,ok)=>ok({Results:p.search==='The Show'?[row('The Show S08E01 (2025) 1080p',{InfoHash:'a'.repeat(40)})]:[]}));
- const result=await f.get(movie,{season:8,search:'Шоу S08',search_one:'The Show Season 8',search_two:'The Show 8 сезон'});assert.equal(result.Results.length,1);assert.deepEqual(f.calls.map(p=>p.search),['Шоу S08','Шоу','The Show']);assert.equal(f.calls[2].clarification,true);assert.equal(result.Results[0].Title,'The Show S08E01 (2025) 1080p');
+ const result=await f.get(movie,{season:8,search:'Шоу S08',search_one:'The Show Season 8',search_two:'The Show 8 сезон'});assert.equal(result.Results.length,1);assert.deepEqual(f.calls.map(p=>p.search),['Шоу S08','The Show','Шоу']);assert.equal(f.calls[1].clarification,true);assert.equal(result.Results[0].Title,'The Show S08E01 (2025) 1080p');
 });
 
 test('selected season always queries localized and original titles, merges valid rows and deduplicates only matching hashes',async()=>{
@@ -78,22 +78,22 @@ test('selected season always queries localized and original titles, merges valid
   return ok({Results:[]});
  });
  const result=await f.get(movie,{season:3,search:'Володар перснів: Персні влади S03',search_one:'The Lord of the Rings: The Rings of Power S03',search_two:'The Lord of the Rings: The Rings of Power 3 сезон'});
- assert.deepEqual(f.calls.map(p=>p.search),['Володар перснів: Персні влади S03','Володар перснів: Персні влади','The Lord of the Rings: The Rings of Power']);
+ assert.deepEqual(f.calls.map(p=>p.search),['Володар перснів: Персні влади S03','The Lord of the Rings: The Rings of Power','Володар перснів: Персні влади']);
  assert.equal(f.calls.length,3);assert.equal(f.calls[1].clarification,true);assert.equal(f.calls[2].clarification,true);
- assert.deepEqual(Array.from(result.Results,r=>r.Title),['Володар перснів: Персні влади S03E01 2160p Ukr','The Lord of the Rings: The Rings of Power S03E02 1080p Eng','The Lord of the Rings: The Rings of Power S03E03 1080p Eng']);
+ assert.deepEqual(Array.from(result.Results,r=>r.Title),['Володар перснів: Персні влади S03E01 2160p Ukr','The Lord of the Rings: The Rings of Power S03E03 1080p Eng','The Lord of the Rings: The Rings of Power S03E02 1080p Eng']);
  assert.equal(result.torrent_search_raw_total,4);
 });
 
-test('a slow localized alias yields the last bounded call to the original English title',async()=>{
+test('the English alias runs before the localized fallback and survives its timeout',async()=>{
  const movie={id:881,source:'tmdb',media_type:'tv',name:'Володар перснів: Персні влади',original_name:'The Lord of the Rings: The Rings of Power'},f=fixture((p,ok)=>{
   if(p.search==='Володар перснів: Персні влади S03')return ok({Results:[row('Володар перснів: Персні влади S03E01 Ukr',{InfoHash:'5'.repeat(40)})]});
   if(p.search==='Володар перснів: Персні влади')return;
   if(p.search==='The Lord of the Rings: The Rings of Power')return ok({Results:[row('The Lord of the Rings: The Rings of Power S03E02 Eng',{InfoHash:'6'.repeat(40)})]});
   ok({Results:[]});
  });
- const pending=f.get(movie,{season:3,search:'Володар перснів: Персні влади S03'});assert.deepEqual(f.calls.map(p=>p.search),['Володар перснів: Персні влади S03','Володар перснів: Персні влади']);
+ const pending=f.get(movie,{season:3,search:'Володар перснів: Персні влади S03'});assert.deepEqual(f.calls.map(p=>p.search),['Володар перснів: Персні влади S03','The Lord of the Rings: The Rings of Power','Володар перснів: Персні влади']);
  const [id,timer]=Array.from(f.timers.entries())[0];f.timers.delete(id);f.advance(timer.ms);timer.fn();
- const result=await pending;assert.deepEqual(f.calls.map(p=>p.search),['Володар перснів: Персні влади S03','Володар перснів: Персні влади','The Lord of the Rings: The Rings of Power']);assert.equal(f.calls.length,3);assert.deepEqual(Array.from(result.Results,r=>r.Title),['Володар перснів: Персні влади S03E01 Ukr','The Lord of the Rings: The Rings of Power S03E02 Eng']);
+ const result=await pending;assert.deepEqual(f.calls.map(p=>p.search),['Володар перснів: Персні влади S03','The Lord of the Rings: The Rings of Power','Володар перснів: Персні влади']);assert.equal(f.calls.length,3);assert.deepEqual(Array.from(result.Results,r=>r.Title),['Володар перснів: Персні влади S03E01 Ukr','The Lord of the Rings: The Rings of Power S03E02 Eng']);
 });
 
 test('a season collection may return for display when it misses the selected season, but wrong single-season releases remain excluded',()=>{
