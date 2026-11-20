@@ -138,7 +138,7 @@
             function remaining() { return FALLBACK_MS - (Date.now() - fallbackStart); }
             function candidates() {
                 var season=coordinate(params.season),list=[];
-                if(season!==null&&seasonScoped){[params.search_one,params.search_two].forEach(function(value){if(value)list.push(String(value));});var padded=String(season).padStart(2,'0');names.forEach(function(name){list.push(name+' S'+padded);});}
+                if(season!==null&&seasonScoped){names.forEach(function(name){list.push(name);});[params.search_one,params.search_two].forEach(function(value){if(value)list.push(String(value));});var padded=String(season).padStart(2,'0');names.forEach(function(name){list.push(name+' S'+padded);});}
                 else list=names.slice();
                 var seen=Object.create(null);return list.filter(function(name){var key=normalize(name);if(!key||seen[key]||used[key])return false;seen[key]=true;return true;});
             }
