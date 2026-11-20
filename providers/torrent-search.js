@@ -93,16 +93,16 @@
         return /^[a-f0-9]{40}$|^[a-f0-9]{64}$/.test(value) ? value : '';
     }
     function releaseKey(row) {
-        if (row.parser_release_key) return row.parser_release_key;
+        if (/^(?:hash|url):/.test(row.parser_release_key || '')) return row.parser_release_key;
         var value = text(row.InfoHash || row.infoHash || row.info_hash), magnet = text(row.MagnetUri || row.magnet), fromMagnet = '';
         try { var m = /[?&]xt=urn:btih:([a-z0-9]+)/i.exec(decodeURIComponent(magnet)); if (m) fromMagnet = m[1]; } catch (e) { /* malformed magnet remains distinct */ }
         var hash = canonicalHash(value) || canonicalHash(fromMagnet); if (hash) return 'hash:' + hash;
         var url = row.Link || row.downloadUrl || row.DownloadUrl || magnet;
-        return url ? 'url:' + url : 'title:' + normalize(row.Title || row.title) + '|' + text(row.Size || row.size) + '|' + text(row.Tracker || row.indexer) + '|' + JSON.stringify([row.Quality || row.Resolution, row.AudioLanguages || row.audio_languages, row.AudioTracks || row.audio_tracks, row.SubtitleLanguages || row.subtitle_languages, row.VoiceoverStudio || row.voiceover_studio, row.VoiceoverType || row.voiceover_type, row.ReleaseGroup || row.release_group, row.Version || row.version]);
+        return /^https?:\/\//i.test(url) ? 'url:' + url : '';
     }
     function dedup(rows) {
         var used = Object.create(null), out = [];
-        rows.forEach(function (row) { var key = releaseKey(row); if (!used[key]) { used[key] = true; out.push(row); } }); return out;
+        rows.forEach(function (row) { var key = releaseKey(row); if (!key || !used[key]) { if(key)used[key] = true; out.push(row); } }); return out;
     }
     function dispatch(self, params, done, fail) {
         var providers = window.ParserProviders;
@@ -119,11 +119,22 @@
             if (stopped) return originalGet.apply(this, arguments);
             cancel();
             var mine = generation;
-            if (!params || (params.from_search || params.clarification) || (!target(params.movie)&&!seasonSearch(params))) {
+            var explicitSeasonScope = !!(params && coordinate(params.season) !== null && series(params.movie));
+            if (!params || (params.from_search || params.clarification) || (!target(params.movie)&&!seasonSearch(params)&&!explicitSeasonScope)) {
                 return dispatch(this, params, function () { if (mine === generation && typeof done === 'function') return done.apply(this, arguments); }, function () { if (mine === generation && typeof fail === 'function') return fail.apply(this, arguments); });
             }
-            var movie = params.movie, names = titles(movie, params), used = Object.create(null), calls = 0, ended = false, metadataRequest = null, timer = null, seasonCollectionQuery=false,seasonRows=[],seasonRawRows=[],seasonScoped=seasonSearch(params);
+            var movie = params.movie, names = titles(movie, params), used = Object.create(null), calls = 0, ended = false, metadataRequest = null, timer = null, seasonRows=[],seasonRawRows=[],seasonScoped=explicitSeasonScope||seasonSearch(params);
             var metadataTried = false, fallbackStart = 0, lastData = { Results: [] }, self = this;
+            function broadTitle(value) { return text(value).replace(/\s+(?:S\d{1,3}(?:E\d{1,4})?|Season\s*\d{1,3}|Сезон\s*\d{1,3}|\d{1,3}\s+сезон)$/iu,'').trim(); }
+            function titleWithScript(values, script) { for (var i=0;i<values.length;i++) { var value=broadTitle(values[i]); if(value&&script.test(value))return value; } return ''; }
+            var localTitle='',originalTitle='',seasonQueries=[],seasonQueryIndex=0;
+            function rebuildSeasonQueries(){
+                localTitle=titleWithScript([movie.title,movie.name,params.search,params.search_one,params.search_two].concat(names),/[А-Яа-яЁёІЇЄҐ]/)||broadTitle(movie.title||movie.name||params.search);
+                originalTitle=titleWithScript([movie.original_title,movie.original_name,params.search_one,params.search_two].concat(names),/[a-z]/i)||broadTitle(movie.original_title||movie.original_name);
+                var updated=[];[localTitle,originalTitle].forEach(function(value){var key=normalize(value);if(value&&key&&!updated.some(function(item){return normalize(item)===key;}))updated.push(value);});
+                seasonQueries=updated;seasonQueryIndex=Math.min(seasonQueryIndex,seasonQueries.length);
+            }
+            if(seasonScoped)rebuildSeasonQueries();
             var stats = { calls: 0, metadataRequests: 0, cancelled: false, started: Date.now(), search: text(params.search), season: coordinate(params.season), seasonScoped: seasonScoped, phases: [] }; window.LampaTorrentSearch.lastStats = stats;
             function alive() { return !ended && mine === generation; }
             function clean() { clearTimeout(timer); if (metadataRequest) metadataRequest.clear(); metadataRequest = null; }
@@ -136,13 +147,25 @@
                 if (error) { if (typeof fail === 'function') fail(error); } else done(data);
             }
             function remaining() { return FALLBACK_MS - (Date.now() - fallbackStart); }
+            function nextSeasonQuery() {
+                if(!seasonScoped)return false;
+                if(calls>=MAX_CALLS||(fallbackStart&&remaining()<=0))return false;
+                fallbackStart=fallbackStart||Date.now();
+                if(!metadataTried&&names.every(function(name){return !/[a-z]/i.test(name);}))return metadataThenNext();
+                metadataTried=true;
+                while(seasonQueryIndex<seasonQueries.length){
+                    var query=seasonQueries[seasonQueryIndex++],key=normalize(query);
+                    if(!key||used[key])continue;
+                    run(query,true,true);return true;
+                }
+                return false;
+            }
             function candidates() {
                 var season=coordinate(params.season),list=[];
                 if(season!==null&&seasonScoped){names.forEach(function(name){list.push(name);});[params.search_one,params.search_two].forEach(function(value){if(value)list.push(String(value));});var padded=String(season).padStart(2,'0');names.forEach(function(name){list.push(name+' S'+padded);});}
                 else list=names.slice();
                 var seen=Object.create(null);return list.filter(function(name){var key=normalize(name);if(!key||seen[key]||used[key])return false;seen[key]=true;return true;});
             }
-            function hasSeasonRelease(rows){var wanted=coordinate(params.season);if(wanted===null)return true;return rows.some(function(row){var raw=text(row.Title||row.Name||row.title||row.name),pack=/\bS\d{1,3}\s*[-–]\s*S?\d{1,3}\b|\bSeasons?\s*\d{1,3}\s*[-–]\s*(?:Seasons?\s*)?\d{1,3}\b|Сезони?\s*\d{1,3}\s*[-–]\s*(?:Сезони?\s*)?\d{1,3}\b|\b(?:complete\s+(?:series|show|collection)|all\s+seasons|full\s+series|collection|box[ .-]?set)\b|повн(?:ий|а)\s+(?:серіал|колекці)|усі\s+сезони/iu.test(raw);if(pack)return false;var m=/\bS(\d{1,3})(?:E\d{1,4}|\b)|\bSeason\s*(\d{1,3})|Сезон\s*(\d{1,3})|\b(\d{1,3})x\d{1,4}\b/iu.exec(raw),found=m?Number(m[1]||m[2]||m[3]||m[4]):coordinate(row.Season!=null?row.Season:row.season);return found===wanted;});}
             function next() {
                 if (!alive()) return;
                 if (calls >= MAX_CALLS || (fallbackStart && remaining() <= 0)) return finish(Object.assign({}, lastData, { Results: dedup(seasonRows) }));
@@ -156,15 +179,16 @@
             }
             function metadataThenNext() {
                 metadataTried = true;
-                if (cached(movie) || !/^(tmdb|cub)$/.test(movie.source || 'tmdb') || !/^\d+$/.test(text(movie.id)) || !L.Reguest || !L.TMDB || !L.TMDB.api || !L.TMDB.key) return next();
+                if (cached(movie) || !/^(tmdb|cub)$/.test(movie.source || 'tmdb') || !/^\d+$/.test(text(movie.id)) || !L.Reguest || !L.TMDB || !L.TMDB.api || !L.TMDB.key) return seasonScoped ? nextSeasonQuery() : next();
                 metadataRequest = new L.Reguest(); metadataRequest.timeout(Math.min(2000, remaining())); stats.metadataRequests++;
                 var settled = false;
                 function ready(data) {
                     if (settled || !alive()) return; settled = true;
                     if (data && text(data.id) === text(movie.id) && (series(movie) ? !!(data.name || data.original_name) : !!(data.title || data.original_title))) {
                         var safe = { translations: data.translations, alternative_titles: data.alternative_titles }; remember(movie, safe); names = titles(movie, params, safe);
+                        if(seasonScoped)rebuildSeasonQueries();
                     }
-                    next();
+                    if(seasonScoped)nextSeasonQuery();else next();
                 }
                 metadataRequest.silent(L.TMDB.api((series(movie) ? 'tv/' : 'movie/') + movie.id + '?append_to_response=translations,alternative_titles&api_key=' + encodeURIComponent(L.TMDB.key())), ready, function () { ready(); });
             }
@@ -175,18 +199,18 @@
                 if (fallback) timer = setTimeout(function () { if (!alive()) return; clearTransport(L.Parser); finish(Object.assign({}, lastData, { Results:seasonRows.length?dedup(seasonRows):[] })); }, Math.min(4000, remaining()));
                 dispatch(self, request, function (data) {
                     if (!alive()) return; lastData = data || { Results: [] };
-                    var rawRows=Array.isArray(lastData.Results)?lastData.Results:[],rejected={};if(seasonScoped&&rawRows.length)seasonRawRows=dedup(seasonRawRows.concat(rawRows));var rows = dedup(rawRows.filter(function (row) { var result=match(row, movie, Object.assign({}, params, params.params || {}), names);if(!result.eligible)(result.reasons||[]).forEach(function(reason){var key=String(reason).split(':')[0];rejected[key]=(rejected[key]||0)+1;});return result.eligible; }));var phase=stats.phases.filter(function(item){return item.search===String(query);})[0];if(!phase){phase={search:String(query),raw:0,accepted:0,rejected:{}};stats.phases.push(phase);}phase.raw=Math.max(phase.raw,rawRows.length);phase.accepted=Math.max(phase.accepted,rows.length);Object.keys(rejected).forEach(function(key){phase.rejected[key]=Math.max(phase.rejected[key]||0,rejected[key]);});
-                    if (lastData.parser_pending) { if (rows.length) { clearTimeout(timer); done(Object.assign({}, lastData, { Results:dedup(seasonRows.concat(rows)),torrent_search_raw_total:dedup(seasonRawRows).length })); } return; }
+                    var rawRows=Array.isArray(lastData.Results)?lastData.Results:[],rejected={},rows = dedup(rawRows.filter(function (row) { var result=match(row, movie, Object.assign({}, params, params.params || {}), names);if(!result.eligible)(result.reasons||[]).forEach(function(reason){var key=String(reason).split(':')[0];rejected[key]=(rejected[key]||0)+1;});return result.eligible; }));var phase=stats.phases.filter(function(item){return item.search===String(query);})[0];if(!phase){phase={search:String(query),raw:0,accepted:0,rejected:{}};stats.phases.push(phase);}phase.raw=Math.max(phase.raw,rawRows.length);phase.accepted=Math.max(phase.accepted,rows.length);Object.keys(rejected).forEach(function(key){phase.rejected[key]=Math.max(phase.rejected[key]||0,rejected[key]);});
+                    if (lastData.parser_pending) { if (rows.length) done(Object.assign({}, lastData, { Results:dedup(seasonRows.concat(rows)),torrent_search_raw_total:dedup(seasonRawRows).length })); return; }
                     clearTimeout(timer);
+                    if(seasonScoped&&rawRows.length)seasonRawRows=dedup(seasonRawRows.concat(rawRows));
                     if(rows.length)seasonRows=dedup(seasonRows.concat(rows));
-                    if(seasonScoped&&!seasonCollectionQuery){seasonCollectionQuery=true;fallbackStart=fallbackStart||Date.now();var broad=String(params.search||'').replace(/\s+(?:S\d{1,3}(?:E\d{1,4})?|Season\s*\d{1,3}|Сезон\s*\d{1,3}|\d{1,3}\s+сезон)$/iu,'').trim()||names[0];return run(broad,true,true);}
+                    if(seasonScoped){if(nextSeasonQuery())return;if(seasonRows.length)remember(movie,Object.assign({},cached(movie)||{},{aliases:names.map(function(title){return {title:title};})}));return finish(Object.assign({},lastData,{Results:dedup(seasonRows)}));}
                     if (rows.length) {
-                        if(seasonScoped&&!hasSeasonRelease(seasonRows)&&calls<MAX_CALLS)return next();
                         remember(movie, Object.assign({}, cached(movie) || {}, { aliases: names.map(function (title) { return { title: title }; }) })); return finish(Object.assign({}, lastData, { Results:dedup(seasonRows) }));
                     }
                     if(broadSeasonQuery){if(calls<MAX_CALLS)return next();return finish(Object.assign({},lastData,{Results:dedup(seasonRows)}));}
                     if (!fallback) { fallbackStart = Date.now(); next(); } else next();
-                }, function (error) { if (!alive()) return; clearTimeout(timer); if (!fallback) finish(null, error); else finish(Object.assign({}, lastData, { Results: [] })); });
+                }, function (error) { if (!alive()) return; clearTimeout(timer); if(seasonScoped&&nextSeasonQuery())return;if (!fallback) finish(null, error); else finish(Object.assign({}, lastData, { Results:dedup(seasonRows) })); });
             }
             run(params.search || names[0], false);
         };
